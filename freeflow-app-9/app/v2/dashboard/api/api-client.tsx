@@ -1006,7 +1006,7 @@ export default function ApiClient() {
 
                       <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{endpoint.description}</p>
 
-                      <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
                         <div className="text-center">
                           <p className="text-lg font-bold text-gray-900 dark:text-white">{formatNumber(endpoint.totalRequests)}</p>
                           <p className="text-xs text-gray-500">Requests</p>
@@ -1187,7 +1187,7 @@ export default function ApiClient() {
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
                       <div>
                         <p className="text-xs text-gray-500">Requests</p>
                         <p className="font-semibold">{formatNumber(key.totalRequests)}</p>
@@ -1290,7 +1290,7 @@ export default function ApiClient() {
                       {collection.isShared && <Users className="w-4 h-4 text-gray-400" />}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-lg font-bold">{collection.requests}</p>
                         <p className="text-xs text-gray-500">Requests</p>
@@ -1465,7 +1465,7 @@ export default function ApiClient() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <div className="text-center">
                         <p className={`text-lg font-bold ${monitor.uptime >= 99.9 ? 'text-green-600' : monitor.uptime >= 99 ? 'text-yellow-600' : 'text-red-600'}`}>{monitor.uptime}%</p>
                         <p className="text-xs text-gray-500">Uptime</p>
@@ -1577,7 +1577,7 @@ export default function ApiClient() {
                       ))}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div>
                         <p className="text-xs text-gray-500">Deliveries</p>
                         <p className="font-semibold">{formatNumber(webhook.totalDeliveries)}</p>
@@ -1704,7 +1704,7 @@ export default function ApiClient() {
                         <Progress value={(suite.passed / suite.tests) * 100} className="h-2" />
                       </div>
 
-                      <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
                         <div className="text-center">
                           <p className="text-lg font-bold text-gray-900 dark:text-white">{suite.tests}</p>
                           <p className="text-xs text-gray-500">Total</p>
@@ -1748,7 +1748,7 @@ export default function ApiClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
                         <p className="text-2xl font-bold text-green-600">{stats.passedTests}</p>
@@ -2092,7 +2092,7 @@ export default function ApiClient() {
             {selectedEndpoint && (
               <ScrollArea className="max-h-96">
                 <div className="space-y-4 pr-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Total Requests</p>
                       <p className="text-xl font-bold">{formatNumber(selectedEndpoint.totalRequests)}</p>
@@ -2161,7 +2161,7 @@ export default function ApiClient() {
             {selectedTestSuite && (
               <ScrollArea className="max-h-[500px]">
                 <div className="space-y-4 pr-4">
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                       <p className="text-xs text-gray-500">Passed</p>
                       <p className="text-2xl font-bold text-green-600">{selectedTestSuite.passed}</p>
@@ -2241,7 +2241,7 @@ export default function ApiClient() {
                   onChange={(e) => setEndpointForm({ ...endpointForm, name: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Method</Label>
                   <Select
@@ -2283,7 +2283,7 @@ export default function ApiClient() {
                   onChange={(e) => setEndpointForm({ ...endpointForm, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Rate Limit (req/hr)</Label>
                   <Input
@@ -2336,7 +2336,7 @@ export default function ApiClient() {
                   onChange={(e) => setApiKeyForm({ ...apiKeyForm, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Environment</Label>
                   <Select
@@ -3049,7 +3049,7 @@ export default function ApiClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-3">
                   <Label className="text-sm font-semibold">Read Permissions</Label>
                   <div className="space-y-2">
@@ -3102,7 +3102,7 @@ export default function ApiClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(stats.totalRequests)}</p>
                   <p className="text-xs text-gray-500">Total Requests</p>
@@ -3927,7 +3927,7 @@ echo $response;
               <DialogDescription>Filter request history by various criteria</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Method</Label>
                   <Select defaultValue="all">
@@ -3956,7 +3956,7 @@ echo $response;
               </div>
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input type="date" />
                   <Input type="date" />
                 </div>
@@ -4248,7 +4248,7 @@ echo $response;
                 <Label>Endpoint URL</Label>
                 <Input placeholder="https://api.example.com/health" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Check Interval</Label>
                   <Select defaultValue="60">
@@ -4305,7 +4305,7 @@ echo $response;
               <DialogDescription>Public status page for your API services</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {monitors.map(m => (
                   <div key={m.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
@@ -4451,7 +4451,7 @@ echo $response;
               <DialogDescription>Performance metrics and trends</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-green-600">99.9%</p>
                   <p className="text-xs text-gray-500">Avg Uptime</p>
@@ -4608,7 +4608,7 @@ echo $response;
               </div>
               <div className="space-y-2">
                 <Label>Events to Subscribe</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {['order.created', 'order.updated', 'user.created', 'payment.success'].map(event => (
                     <div key={event} className="flex items-center gap-2">
                       <Switch />
@@ -5100,7 +5100,7 @@ echo $response;
               <DialogDescription>API endpoint test coverage analysis</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                   <p className="text-3xl font-bold text-green-600">85%</p>
                   <p className="text-sm text-gray-500">Overall Coverage</p>
@@ -5220,7 +5220,7 @@ echo $response;
               <DialogDescription>Historical test results and trends</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                   <p className="text-2xl font-bold text-green-600">92%</p>
                   <p className="text-xs text-gray-500">Pass Rate</p>

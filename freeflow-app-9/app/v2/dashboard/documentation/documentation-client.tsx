@@ -887,7 +887,7 @@ export default function DocumentationClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-8 text-white">
@@ -1001,7 +1001,7 @@ export default function DocumentationClient() {
             </div>
 
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Page', desc: 'Create documentation', color: 'text-purple-500' },
                 { icon: FolderOpen, label: 'New Space', desc: 'Add new space', color: 'text-blue-500' },
@@ -1757,7 +1757,7 @@ export default function DocumentationClient() {
                         <CardDescription>Configure default settings for documentation spaces</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Space</Label>
                             <Select defaultValue="space1">
@@ -1848,7 +1848,7 @@ export default function DocumentationClient() {
                         <CardDescription>Customize the documentation editor experience</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Editor Mode</Label>
                             <Select defaultValue="wysiwyg">
@@ -2042,7 +2042,7 @@ export default function DocumentationClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Repository URL</Label>
                             <Input placeholder="github.com/org/repo" className="mt-1" />
@@ -2364,7 +2364,7 @@ export default function DocumentationClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="col-span-2">
                   <Label>Title *</Label>
                   <Input
@@ -2492,7 +2492,7 @@ export default function DocumentationClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="col-span-2">
                   <Label>Title *</Label>
                   <Input
@@ -2735,7 +2735,7 @@ export default function DocumentationClient() {
               {/* Export Format */}
               <div>
                 <Label className="text-sm font-medium">Export Format</Label>
-                <div className="grid grid-cols-3 gap-3 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-2">
                   {(['pdf', 'markdown', 'html'] as const).map((format) => (
                     <div
                       key={format}
@@ -2786,7 +2786,7 @@ export default function DocumentationClient() {
               {/* Page Range */}
               <div>
                 <Label className="text-sm font-medium">Pages to Export</Label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mt-2">
                   <div
                     onClick={() => setExportPdfOptions(prev => ({ ...prev, pageRange: 'all' }))}
                     className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${

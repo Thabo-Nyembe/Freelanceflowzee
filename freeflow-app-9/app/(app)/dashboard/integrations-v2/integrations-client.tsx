@@ -1889,7 +1889,7 @@ export default function IntegrationsClient() {
                       </div>
                     </div>
                     <div className="md:col-span-2 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <p className="text-xs text-muted-foreground">Billing Period</p>
                           <p className="font-semibold">Jan 1 - Jan 31, 2024</p>
@@ -1972,7 +1972,7 @@ export default function IntegrationsClient() {
                 {/* Workflow Info */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <h4 className="font-medium mb-4">Workflow Details</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Steps</p>
                       <p className="font-medium">{selectedZap.total_steps}</p>
@@ -1993,7 +1993,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedZap.total_steps}</p>
                     <p className="text-xs text-muted-foreground">Total Steps</p>
@@ -2090,7 +2090,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {/* Data In/Out */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <h4 className="font-medium mb-2">Input Data</h4>
                     <pre className="text-xs bg-gray-50 dark:bg-gray-800 p-3 rounded-lg overflow-x-auto">
@@ -2144,7 +2144,7 @@ export default function IntegrationsClient() {
 
                 {selectedApp.is_connected ? (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-muted-foreground">Connected Since</p>
                         <p className="font-medium">{selectedApp.connected_at ? formatDate(selectedApp.connected_at) : 'N/A'}</p>
@@ -2244,7 +2244,7 @@ export default function IntegrationsClient() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-xs text-muted-foreground">Total Deliveries</p>
                     <p className="font-medium">{formatNumber(selectedWebhook.total_deliveries)}</p>
@@ -2470,7 +2470,7 @@ export default function IntegrationsClient() {
                 Choose a pre-built workflow template to get started quickly
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 py-4">
               {[
                 { name: 'Lead to CRM', desc: 'Automatically add new leads to your CRM', icon: Users, color: 'text-blue-500' },
                 { name: 'Email Notifications', desc: 'Send emails when events occur', icon: Mail, color: 'text-green-500' },

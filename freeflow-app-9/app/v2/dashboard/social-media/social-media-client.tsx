@@ -789,7 +789,7 @@ export default function SocialMediaClient() {
                       </div>
 
                       {post.status === 'published' && (
-                        <div className="grid grid-cols-6 gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
                           <div className="text-center">
                             <p className="text-lg font-bold text-gray-900 dark:text-white">{formatNumber(post.likes)}</p>
                             <p className="text-xs text-gray-500">Likes</p>
@@ -1144,7 +1144,7 @@ export default function SocialMediaClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="text-center">
                         <p className="text-lg font-bold">{campaign.posts}</p>
                         <p className="text-xs text-gray-500">Posts</p>
@@ -1192,7 +1192,7 @@ export default function SocialMediaClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                       <div className="text-center">
                         <p className="text-lg font-bold text-gray-900 dark:text-white">{formatNumber(account.followers)}</p>
                         <p className="text-xs text-gray-500">Followers</p>
@@ -1267,7 +1267,7 @@ export default function SocialMediaClient() {
                         <CardDescription>General social media management settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Organization Name</Label>
                             <Input defaultValue="Acme Corp" className="mt-1" />
@@ -1285,7 +1285,7 @@ export default function SocialMediaClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Connected Accounts</p>
                             <p className="text-2xl font-bold">8</p>
@@ -1308,7 +1308,7 @@ export default function SocialMediaClient() {
                         <CardDescription>Manage team access and permissions</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 border rounded-lg text-center">
                             <p className="text-2xl font-bold text-blue-600">5</p>
                             <p className="text-sm text-gray-500">Admins</p>
@@ -1342,7 +1342,7 @@ export default function SocialMediaClient() {
                         <CardDescription>Manage media assets</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Images</p>
                             <p className="text-xl font-bold">2,450</p>
@@ -1727,7 +1727,7 @@ export default function SocialMediaClient() {
                         </div>
                         <div>
                           <Label>Quiet Hours</Label>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-2">
                             <Select defaultValue="22">
                               <SelectTrigger><SelectValue placeholder="From" /></SelectTrigger>
                               <SelectContent>
@@ -1798,7 +1798,7 @@ export default function SocialMediaClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleExportAnalytics}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
@@ -1954,7 +1954,7 @@ export default function SocialMediaClient() {
                   <p className="text-gray-900 dark:text-white">{selectedPost.content}</p>
 
                   {selectedPost.status === 'published' && (
-                    <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="text-center">
                         <p className="text-2xl font-bold">{formatNumber(selectedPost.likes)}</p>
                         <p className="text-sm text-gray-500">Likes</p>
@@ -2150,7 +2150,7 @@ export default function SocialMediaClient() {
               {selectedPost ? (
                 <>
                   {/* Post-specific analytics */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold text-violet-600">{formatNumber(selectedPost.views)}</p>
                       <p className="text-sm text-gray-500">Views</p>
@@ -2164,7 +2164,7 @@ export default function SocialMediaClient() {
                       <p className="text-sm text-gray-500">Comments</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold text-green-600">{formatNumber(selectedPost.shares)}</p>
                       <p className="text-sm text-gray-500">Shares</p>
@@ -2190,7 +2190,7 @@ export default function SocialMediaClient() {
                   </div>
                 </>
               ) : (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold text-violet-600">{formatNumber(stats.totalFollowers)}</p>
                     <p className="text-sm text-gray-500">Total Followers</p>
@@ -2223,7 +2223,7 @@ export default function SocialMediaClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <p className="text-gray-500">Select a platform to connect:</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {['Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube'].map(platform => (
                   <Button key={platform} variant="outline" className="h-16" onClick={() => {
                     toast.success(`${platform} account connected!`)
@@ -2390,7 +2390,7 @@ export default function SocialMediaClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <p className="text-gray-500">Choose a template:</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {['Instagram Post', 'Story', 'Facebook Cover', 'Twitter Header'].map(template => (
                   <div key={template} className="p-4 border rounded-lg text-center cursor-pointer hover:border-violet-500">
                     <Image className="w-8 h-8 mx-auto mb-2 text-gray-400" />
@@ -2455,7 +2455,7 @@ export default function SocialMediaClient() {
                   placeholder="Campaign objectives..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Start Date</Label>
                   <Input type="date" className="mt-1" />
@@ -2521,7 +2521,7 @@ export default function SocialMediaClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <Input placeholder="Search integrations..." />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {['Canva', 'Google Analytics', 'Slack', 'Shopify', 'Zapier', 'HubSpot'].map(tool => (
                   <div key={tool} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
@@ -2670,7 +2670,7 @@ export default function SocialMediaClient() {
               <DialogTitle>Post Analytics</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-pink-600">2.4K</p>
                   <p className="text-sm text-gray-500">Likes</p>

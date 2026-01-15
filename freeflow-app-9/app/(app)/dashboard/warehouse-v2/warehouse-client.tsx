@@ -1323,7 +1323,7 @@ export default function WarehouseClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -2092,7 +2092,7 @@ export default function WarehouseClient() {
                           <Progress value={utilization} className="h-2" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                           <div>
                             <p className="text-gray-500 dark:text-gray-400">Capacity</p>
                             <p className="font-medium text-gray-900 dark:text-white">{zone.capacity_units.toLocaleString()} units</p>
@@ -2741,7 +2741,7 @@ export default function WarehouseClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Location</p>
                   <p className="font-medium">{selectedItem.bin_location}</p>
@@ -2790,7 +2790,7 @@ export default function WarehouseClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="sku">SKU *</Label>
                 <Input
@@ -2821,7 +2821,7 @@ export default function WarehouseClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
@@ -2854,7 +2854,7 @@ export default function WarehouseClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="unitCost">Unit Cost ($)</Label>
                 <Input
@@ -2886,7 +2886,7 @@ export default function WarehouseClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="binLocation">Bin Location</Label>
                 <Input
@@ -3148,7 +3148,7 @@ export default function WarehouseClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Task Type *</Label>
                 <Select value={newTask.type} onValueChange={(value) => setNewTask({ ...newTask, type: value as TaskType })}>
@@ -3184,7 +3184,7 @@ export default function WarehouseClient() {
               <Label>Item SKU *</Label>
               <Input placeholder="Enter SKU" value={newTask.itemSku} onChange={(e) => setNewTask({ ...newTask, itemSku: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>From Location *</Label>
                 <Input placeholder="e.g., A-01-01-A" value={newTask.fromLocation} onChange={(e) => setNewTask({ ...newTask, fromLocation: e.target.value })} />
@@ -3194,7 +3194,7 @@ export default function WarehouseClient() {
                 <Input placeholder="e.g., B-02-03-C" value={newTask.toLocation} onChange={(e) => setNewTask({ ...newTask, toLocation: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Quantity</Label>
                 <Input type="number" placeholder="Enter quantity" value={newTask.quantity} onChange={(e) => setNewTask({ ...newTask, quantity: e.target.value })} />
@@ -3436,7 +3436,7 @@ export default function WarehouseClient() {
           </DialogHeader>
           {selectedEditItem && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>SKU</Label>
                   <Input defaultValue={selectedEditItem.sku} />
@@ -3450,7 +3450,7 @@ export default function WarehouseClient() {
                 <Label>Description</Label>
                 <Input defaultValue={selectedEditItem.description} />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Quantity On Hand</Label>
                   <Input type="number" defaultValue={selectedEditItem.quantity_on_hand} />
@@ -3464,7 +3464,7 @@ export default function WarehouseClient() {
                   <Input type="number" step="0.01" defaultValue={selectedEditItem.unit_cost} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Bin Location</Label>
                   <Input defaultValue={selectedEditItem.bin_location} />
@@ -3758,7 +3758,7 @@ export default function WarehouseClient() {
           </DialogHeader>
           {selectedZone && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                 {Array.from({ length: 16 }, (_, i) => {
                   const binCode = `${selectedZone.code}-${String(Math.floor(i/4)+1).padStart(2,'0')}-${String((i%4)+1).padStart(2,'0')}`
                   const utilization = Math.random() * 100
@@ -3807,7 +3807,7 @@ export default function WarehouseClient() {
           </DialogHeader>
           {selectedCycleCount && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-sm text-gray-500">Count Number</p>
                   <p className="font-medium">{selectedCycleCount.count_number}</p>
@@ -3832,7 +3832,7 @@ export default function WarehouseClient() {
                 </div>
                 <Progress value={(selectedCycleCount.counted_bins / selectedCycleCount.total_bins) * 100} />
               </div>
-              <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                 <div className="p-3 border rounded-lg">
                   <p className="text-2xl font-bold text-red-600">{selectedCycleCount.variance_items}</p>
                   <p className="text-sm text-gray-500">Variance Items</p>

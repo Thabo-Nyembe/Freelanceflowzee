@@ -1443,7 +1443,7 @@ export default function VideoStudioPage() {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <CardSkeleton />
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
@@ -1676,7 +1676,7 @@ export default function VideoStudioPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label htmlFor="resolution">Resolution</Label>
                       <Select value={newProject.resolution} onValueChange={(value) => setNewProject({...newProject, resolution: value})}>
@@ -2113,7 +2113,7 @@ export default function VideoStudioPage() {
                       <Play className="w-8 h-8 text-gray-400" />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <span className="text-gray-500">Duration:</span>
                         <p className="font-medium">{formatDuration(project.duration)}</p>
@@ -2911,7 +2911,7 @@ onClick={() => {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">Select a transition to apply between clips</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {['Fade', 'Dissolve', 'Wipe Left', 'Wipe Right', 'Slide Up', 'Slide Down', 'Zoom In', 'Zoom Out', '3D Flip'].map((transition) => (
                 <Button
                   key={transition}
@@ -2966,7 +2966,7 @@ onClick={() => {
                 <TabsTrigger value="stylize">Stylize</TabsTrigger>
                 <TabsTrigger value="time">Time</TabsTrigger>
               </TabsList>
-              <TabsContent value="color" className="grid grid-cols-3 gap-3 mt-4">
+              <TabsContent value="color" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                 {['Brightness', 'Contrast', 'Saturation', 'Exposure', 'Vibrance', 'Hue Shift'].map((effect) => (
                   <Button key={effect} variant={selectedEffect === effect ? 'default' : 'outline'} className="h-16"
                     onClick={() => setSelectedEffect(effect)}>
@@ -2974,25 +2974,25 @@ onClick={() => {
                   </Button>
                 ))}
               </TabsContent>
-              <TabsContent value="blur" className="grid grid-cols-3 gap-3 mt-4">
+              <TabsContent value="blur" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                 {['Gaussian Blur', 'Motion Blur', 'Lens Blur', 'Tilt Shift', 'Radial Blur', 'Box Blur'].map((effect) => (
                   <Button key={effect} variant={selectedEffect === effect ? 'default' : 'outline'} className="h-16"
                     onClick={() => setSelectedEffect(effect)}>{effect}</Button>
                 ))}
               </TabsContent>
-              <TabsContent value="distort" className="grid grid-cols-3 gap-3 mt-4">
+              <TabsContent value="distort" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                 {['Wave', 'Ripple', 'Twirl', 'Bulge', 'Pinch', 'Fisheye'].map((effect) => (
                   <Button key={effect} variant={selectedEffect === effect ? 'default' : 'outline'} className="h-16"
                     onClick={() => setSelectedEffect(effect)}>{effect}</Button>
                 ))}
               </TabsContent>
-              <TabsContent value="stylize" className="grid grid-cols-3 gap-3 mt-4">
+              <TabsContent value="stylize" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                 {['Glow', 'Sharpen', 'Vignette', 'Film Grain', 'Posterize', 'Emboss'].map((effect) => (
                   <Button key={effect} variant={selectedEffect === effect ? 'default' : 'outline'} className="h-16"
                     onClick={() => setSelectedEffect(effect)}>{effect}</Button>
                 ))}
               </TabsContent>
-              <TabsContent value="time" className="grid grid-cols-3 gap-3 mt-4">
+              <TabsContent value="time" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-4">
                 {['Slow Motion', 'Fast Forward', 'Reverse', 'Time Remap', 'Freeze Frame', 'Echo'].map((effect) => (
                   <Button key={effect} variant={selectedEffect === effect ? 'default' : 'outline'} className="h-16"
                     onClick={() => setSelectedEffect(effect)}>{effect}</Button>
@@ -3034,7 +3034,7 @@ onClick={() => {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Style</Label>
                 <Select value={newTextOverlay.style} onValueChange={(v) => setNewTextOverlay(prev => ({ ...prev, style: v }))}>
@@ -3092,7 +3092,7 @@ onClick={() => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="p-4 hover:border-green-300 cursor-pointer transition-colors" onClick={() => setIsUploadDialogOpen(true)}>
                 <div className="flex items-center gap-3">
                   <Upload className="w-8 h-8 text-green-600" />

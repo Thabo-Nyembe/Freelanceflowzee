@@ -163,7 +163,7 @@ function MarketingContentGenerator() {
 
           <div>
             <label className="text-sm font-medium mb-2 block">Platform</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
               {Object.entries(platformIcons).map(([key, icon]) => (
                 <Button
                   key={key}

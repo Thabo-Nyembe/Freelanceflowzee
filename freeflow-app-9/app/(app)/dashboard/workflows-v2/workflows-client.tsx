@@ -1016,7 +1016,7 @@ export default function WorkflowsClient() {
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-4 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pt-4 border-t">
                       <div className="text-center">
                         <p className="text-xl font-bold">{workflow.totalRuns.toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">Total Runs</p>
@@ -1301,7 +1301,7 @@ export default function WorkflowsClient() {
                     <p className="text-5xl font-bold text-orange-500">127h</p>
                     <p className="text-muted-foreground mt-2">Saved this month</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                     <div className="p-4 bg-muted/30 rounded-lg">
                       <p className="text-2xl font-bold">3,194</p>
                       <p className="text-xs text-muted-foreground">Tasks automated</p>
@@ -1378,7 +1378,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Timezone</Label>
                             <Select defaultValue="utc">
@@ -1443,7 +1443,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max Retry Attempts</Label>
                             <Input type="number" defaultValue="3" />
@@ -1666,7 +1666,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Error Count Threshold</Label>
                             <Input type="number" defaultValue="5" />
@@ -1797,7 +1797,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max Concurrent Runs</Label>
                             <Input type="number" defaultValue="10" />
@@ -1826,7 +1826,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Runs per Minute</Label>
                             <Input type="number" defaultValue="60" />
@@ -1854,7 +1854,7 @@ export default function WorkflowsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Run History Retention (days)</Label>
                             <Input type="number" defaultValue="30" />
@@ -2121,7 +2121,7 @@ export default function WorkflowsClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-muted/30 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold">{selectedWorkflow.totalRuns.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">Total Runs</p>
@@ -2207,7 +2207,7 @@ export default function WorkflowsClient() {
                 <span className="text-sm text-muted-foreground">{selectedRun.duration}</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Started</p>
                   <p className="font-medium">{new Date(selectedRun.startedAt).toLocaleString()}</p>
@@ -2238,7 +2238,7 @@ export default function WorkflowsClient() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm font-medium mb-2">Input Data</p>
                   <pre className="p-3 bg-muted rounded-lg text-xs overflow-x-auto">

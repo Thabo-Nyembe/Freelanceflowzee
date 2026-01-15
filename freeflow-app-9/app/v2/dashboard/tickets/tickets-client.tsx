@@ -1312,7 +1312,7 @@ export default function TicketsClient() {
                     <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={handleNewTicket}><Plus className="h-4 w-4 mr-2" />New Ticket</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-6 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{stats.total}</p>
                     <p className="text-xs text-orange-100">Total Tickets</p>
@@ -1341,7 +1341,7 @@ export default function TicketsClient() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-6 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mb-4">
                 {[
                   { name: 'New Ticket', icon: Plus, desc: 'Create ticket', color: 'orange' },
                   { name: 'Assign', icon: Users, desc: 'Bulk assign', color: 'blue' },
@@ -1555,7 +1555,7 @@ export default function TicketsClient() {
                         {/* Ticket Actions */}
                         <div className="pt-4 border-t dark:border-gray-700 space-y-2">
                           <h5 className="text-sm font-medium mb-3">Actions</h5>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {!selectedTicket.assignee && (
                               <Button size="sm" variant="outline" onClick={() => handleAssignTicket(selectedTicket.id)}>
                                 <UserPlus className="w-4 h-4 mr-1" />
@@ -1643,7 +1643,7 @@ export default function TicketsClient() {
               </Card>
 
               {/* Ticket Insights */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Priority Distribution</CardTitle></CardHeader>
                   <CardContent>
@@ -1686,7 +1686,7 @@ export default function TicketsClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Quick Stats</CardTitle></CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                       <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <p className="text-lg font-bold text-green-600">{stats.csatScore}%</p>
                         <p className="text-xs text-gray-500">CSAT</p>
@@ -1720,7 +1720,7 @@ export default function TicketsClient() {
                   </div>
                   <Button className="bg-white text-red-700 hover:bg-red-50" onClick={handleBulkAssign}><Users className="h-4 w-4 mr-2" />Bulk Assign</Button>
                 </div>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{allTickets.filter(t => !t.assignee).length}</p>
                     <p className="text-xs text-red-100">Unassigned</p>
@@ -1796,7 +1796,7 @@ export default function TicketsClient() {
                     <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={handleAddAgent}><UserPlus className="h-4 w-4 mr-2" />Add Agent</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{mockAgents.length}</p>
                     <p className="text-xs text-blue-100">Total Agents</p>
@@ -1821,7 +1821,7 @@ export default function TicketsClient() {
               </div>
 
               {/* Agent Status Cards */}
-              <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                 {[
                   { status: 'Online', count: mockAgents.filter(a => a.status === 'online').length, color: 'green' },
                   { status: 'Busy', count: mockAgents.filter(a => a.status === 'busy').length, color: 'yellow' },
@@ -1858,7 +1858,7 @@ export default function TicketsClient() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="text-2xl font-bold text-gray-900 dark:text-white">{agent.openTickets}</div>
                           <div className="text-xs text-gray-500">Open Tickets</div>
@@ -1896,7 +1896,7 @@ export default function TicketsClient() {
                     <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={handleFullReport}><BarChart className="h-4 w-4 mr-2" />Full Report</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-6 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{stats.total}</p>
                     <p className="text-xs text-purple-100">Total Volume</p>
@@ -1925,7 +1925,7 @@ export default function TicketsClient() {
               </div>
 
               {/* Performance KPIs */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'First Response Time', value: stats.avgResponseTime, target: '15 min', status: 'good' },
                   { label: 'Resolution Time', value: stats.avgResolutionTime, target: '4 hrs', status: 'warning' },
@@ -2150,7 +2150,7 @@ export default function TicketsClient() {
               </Card>
 
               {/* Analytics Insights */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                 <Card className="bg-white dark:bg-gray-800">
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Peak Hours</CardTitle></CardHeader>
                   <CardContent>
@@ -2251,7 +2251,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure default ticket behaviors</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Default Priority</label><Input defaultValue="Normal" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Auto-close after (days)</label><Input type="number" defaultValue="7" className="mt-1" /></div>
                         </div>
@@ -2282,7 +2282,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>SLA Policies</CardTitle><CardDescription>Configure service level agreements</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {[
                             { name: 'Urgent', response: '15 min', resolution: '4 hrs', color: 'red' },
                             { name: 'High', response: '1 hr', resolution: '8 hrs', color: 'orange' },
@@ -2318,7 +2318,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>Ticket Routing</CardTitle><CardDescription>Configure automatic ticket assignment</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Routing Method</label><Input defaultValue="Round Robin" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Max Tickets per Agent</label><Input type="number" defaultValue="20" className="mt-1" /></div>
                         </div>
@@ -2345,7 +2345,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connect with external tools and services</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'Slack', status: 'connected', icon: MessageSquare, desc: 'Team notifications' },
                             { name: 'Jira', status: 'connected', icon: Bug, desc: 'Issue tracking' },
@@ -2377,7 +2377,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure alert preferences</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <Card className="border"><CardContent className="p-4 text-center">
                             <Bell className="h-8 w-8 mx-auto mb-2 text-orange-600" />
                             <p className="font-medium">Email</p><p className="text-sm text-gray-500">Enabled</p>
@@ -2418,7 +2418,7 @@ export default function TicketsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and automation</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Ticket ID Prefix</label><Input defaultValue="TKT-" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Archive after (days)</label><Input type="number" defaultValue="90" className="mt-1" /></div>
                         </div>
@@ -2438,7 +2438,7 @@ export default function TicketsClient() {
                         </div>
                         <div className="space-y-3">
                           <h4 className="font-medium">Data Management</h4>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                             <Button variant="outline" className="justify-start" onClick={handleExportAllTickets}><Download className="w-4 h-4 mr-2" />Export All Tickets</Button>
                             <Button variant="outline" className="justify-start" onClick={handleExportAnalytics}><Download className="w-4 h-4 mr-2" />Export Analytics</Button>
                           </div>
@@ -2521,7 +2521,7 @@ export default function TicketsClient() {
                 rows={4}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="priority">Priority</Label>
                 <Select value={newTicket.priority} onValueChange={(v: TicketPriority) => setNewTicket({ ...newTicket, priority: v })}>
@@ -2553,7 +2553,7 @@ export default function TicketsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="customer_name">Customer Name</Label>
                 <Input
@@ -2649,7 +2649,7 @@ export default function TicketsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
               <Card className="bg-purple-50 dark:bg-purple-900/20">
                 <CardContent className="p-4 text-center">
                   <p className="text-2xl font-bold text-purple-600">{stats.newTickets}</p>
@@ -2723,7 +2723,7 @@ export default function TicketsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -2865,7 +2865,7 @@ export default function TicketsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="agent_name">Full Name *</Label>
                 <Input
@@ -2886,7 +2886,7 @@ export default function TicketsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label>Team</Label>
                 <Select value={newAgent.team} onValueChange={(v) => setNewAgent({ ...newAgent, team: v })}>

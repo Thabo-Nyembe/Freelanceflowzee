@@ -1185,7 +1185,7 @@ export default function ResourceLibraryClient() {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div className="flex items-center gap-2">
                       <Download className="h-4 w-4 text-gray-500" />
                       <span>{resource.downloads}</span>
@@ -1291,7 +1291,7 @@ export default function ResourceLibraryClient() {
                 onChange={(e) => setNewResourceData({ ...newResourceData, description: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="resource-category">Category</Label>
                 <select
@@ -1334,7 +1334,7 @@ export default function ResourceLibraryClient() {
                 onChange={(e) => setNewResourceData({ ...newResourceData, tags: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="resource-license">License</Label>
                 <select
@@ -1496,7 +1496,7 @@ export default function ResourceLibraryClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="default-view">Default View</Label>
                 <select
@@ -1679,7 +1679,7 @@ export default function ResourceLibraryClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="filter-price">Price Range</Label>
                 <select
@@ -1711,7 +1711,7 @@ export default function ResourceLibraryClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="filter-license">License Type</Label>
                 <select
@@ -1821,7 +1821,7 @@ export default function ResourceLibraryClient() {
               <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center">
                 <Database className="h-16 w-16 text-gray-400" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{selectedResource.title}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{selectedResource.description}</p>

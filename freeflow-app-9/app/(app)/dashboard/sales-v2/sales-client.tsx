@@ -1598,7 +1598,7 @@ Generated on: ${new Date().toLocaleString()}
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(account.annualRevenue)}</p><p className="text-xs text-gray-500">Revenue</p></div>
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{account.employees}</p><p className="text-xs text-gray-500">Employees</p></div>
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{account.deals}</p><p className="text-xs text-gray-500">Deals</p></div>
@@ -1752,7 +1752,7 @@ Generated on: ${new Date().toLocaleString()}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-4">
                       {[
                         { label: 'Quota', value: forecast.quota, color: 'text-purple-600' },
                         { label: 'Pipeline', value: forecast.pipeline, color: 'text-gray-600' },
@@ -1793,7 +1793,7 @@ Generated on: ${new Date().toLocaleString()}
                           {territory.industries?.map(i => <Badge key={i} variant="outline" className="text-xs">{i}</Badge>)}
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{territory.accounts}</p><p className="text-xs text-gray-500">Accounts</p></div>
                         <div><p className="text-xl font-bold text-blue-600">{formatCurrency(territory.pipelineValue)}</p><p className="text-xs text-gray-500">Pipeline</p></div>
                         <div><p className="text-xl font-bold text-green-600">{formatCurrency(territory.closedWon)}</p><p className="text-xs text-gray-500">Closed</p></div>
@@ -1876,7 +1876,7 @@ Generated on: ${new Date().toLocaleString()}
                       <div className="text-2xl font-bold">{formatCurrency(stats.totalPipeline)}</div>
                       <div className="text-xs opacity-80">Total Pipeline</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">{stats.winRate.toFixed(0)}%</div>
                         <div className="text-xs opacity-80">Win Rate</div>
@@ -1910,7 +1910,7 @@ Generated on: ${new Date().toLocaleString()}
                         <CardDescription>Configure your CRM profile and preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Organization Name</Label>
                             <Input defaultValue="FreeFlow Inc" />
@@ -1930,7 +1930,7 @@ Generated on: ${new Date().toLocaleString()}
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Currency</Label>
                             <Select defaultValue="usd">
@@ -1979,7 +1979,7 @@ Generated on: ${new Date().toLocaleString()}
                         <CardDescription>Configure sales commission calculations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Commission Rate</Label>
                             <Input defaultValue="8%" />
@@ -2110,7 +2110,7 @@ Generated on: ${new Date().toLocaleString()}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                             <div className="flex justify-between mb-2">
                               <span className="text-sm font-medium">Website Visit</span>
@@ -2523,7 +2523,7 @@ Generated on: ${new Date().toLocaleString()}
                   <Badge variant="outline">{selectedOpportunity.type.replace('_', ' ')}</Badge>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-3xl font-bold text-green-600">{formatCurrency(selectedOpportunity.amount)}</p>
                     <p className="text-sm text-gray-500">Deal Value</p>
@@ -2649,7 +2649,7 @@ Generated on: ${new Date().toLocaleString()}
             <DialogDescription>Add a new deal to your sales pipeline</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Deal Title *</Label>
                 <Input
@@ -2669,7 +2669,7 @@ Generated on: ${new Date().toLocaleString()}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="contact_name">Contact Name</Label>
                 <Input
@@ -2690,7 +2690,7 @@ Generated on: ${new Date().toLocaleString()}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="deal_value">Deal Value ($)</Label>
                 <Input
@@ -2730,7 +2730,7 @@ Generated on: ${new Date().toLocaleString()}
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="probability">Probability (%)</Label>
                 <Input
@@ -2783,7 +2783,7 @@ Generated on: ${new Date().toLocaleString()}
             <DialogDescription>Update deal information</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_title">Deal Title *</Label>
                 <Input
@@ -2801,7 +2801,7 @@ Generated on: ${new Date().toLocaleString()}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_contact_name">Contact Name</Label>
                 <Input
@@ -2820,7 +2820,7 @@ Generated on: ${new Date().toLocaleString()}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_deal_value">Deal Value ($)</Label>
                 <Input
@@ -2861,7 +2861,7 @@ Generated on: ${new Date().toLocaleString()}
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_probability">Probability (%)</Label>
                 <Input
@@ -3079,7 +3079,7 @@ Generated on: ${new Date().toLocaleString()}
               <Label>Client / Account *</Label>
               <Input placeholder="Client name" value={quoteForm.client} onChange={(e) => setQuoteForm({ ...quoteForm, client: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Discount (%)</Label>
                 <Input type="number" min={0} max={100} value={quoteForm.discount} onChange={(e) => setQuoteForm({ ...quoteForm, discount: Number(e.target.value) })} />
@@ -3119,7 +3119,7 @@ Generated on: ${new Date().toLocaleString()}
               <Label>Product Name *</Label>
               <Input placeholder="Enterprise Suite" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Product Code *</Label>
                 <Input placeholder="ENT-001" value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} />
@@ -3315,7 +3315,7 @@ Generated on: ${new Date().toLocaleString()}
             <DialogDescription>Add a new contact to your sales CRM</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>First Name *</Label>
                 <Input
@@ -3403,7 +3403,7 @@ Generated on: ${new Date().toLocaleString()}
                 onChange={(e) => setMeetingForm({ ...meetingForm, title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Date *</Label>
                 <Input

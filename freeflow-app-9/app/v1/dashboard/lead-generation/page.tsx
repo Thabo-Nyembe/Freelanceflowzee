@@ -300,7 +300,7 @@ export default function LeadGenerationPage() {
                 <div className={`w-3 h-3 rounded-full ${form.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                 <div>
                   <div className="text-2xl font-bold text-blue-500">{form.submissions}</div>
                   <div className="text-xs text-muted-foreground">Submissions</div>
@@ -350,7 +350,7 @@ export default function LeadGenerationPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mb-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-4 text-center">
                 <div>
                   <div className="text-xl font-bold text-blue-500">{page.stats.views}</div>
                   <div className="text-xs text-muted-foreground">Views</div>

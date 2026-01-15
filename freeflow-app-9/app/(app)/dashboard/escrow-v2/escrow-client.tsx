@@ -1265,7 +1265,7 @@ export default function EscrowClient() {
                   </h3>
                 </div>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                       <div className="text-3xl font-bold text-green-600">98.5%</div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Transactions Safe</p>
@@ -1580,7 +1580,7 @@ export default function EscrowClient() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                     <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <p className="text-xs text-gray-500 dark:text-gray-400">Available Balance</p>
                       <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(account.balance.available)}</p>
@@ -1776,7 +1776,7 @@ export default function EscrowClient() {
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Escrow Periods</h3>
                       <div className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Inspection Period</p>
                             <div className="flex items-center gap-2">
@@ -1854,7 +1854,7 @@ export default function EscrowClient() {
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Payment Methods</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {[
                           { name: 'Credit/Debit Cards', enabled: true, icon: CreditCard },
                           { name: 'Bank Transfers (ACH)', enabled: true, icon: Building },
@@ -1975,7 +1975,7 @@ export default function EscrowClient() {
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reporting Thresholds</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">CTR Threshold (USD)</p>
                           <div className="flex items-center gap-2">
@@ -1994,7 +1994,7 @@ export default function EscrowClient() {
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Compliance Status</h3>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                           <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
                           <p className="font-medium text-gray-900 dark:text-white">PCI DSS</p>
@@ -2208,7 +2208,7 @@ export default function EscrowClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Amount</p>
                     <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(selectedTransaction.amount)}</p>
@@ -2228,7 +2228,7 @@ export default function EscrowClient() {
                 </div>
 
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div>
                       <p className="text-gray-500 dark:text-gray-400">Status</p>
                       <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedTransaction.status)}`}>
@@ -2465,7 +2465,7 @@ export default function EscrowClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="project-title">Project Title *</Label>
                   <Input
@@ -2503,7 +2503,7 @@ export default function EscrowClient() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="client-name">Client Name *</Label>
                   <Input

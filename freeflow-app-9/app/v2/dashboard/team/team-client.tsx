@@ -1514,7 +1514,7 @@ export default function TeamClient() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center mb-4">
                     <div>
                       <div className="text-sm font-semibold">{member.projects}</div>
                       <div className="text-xs text-gray-500">Projects</div>

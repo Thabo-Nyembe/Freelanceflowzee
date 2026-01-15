@@ -465,7 +465,7 @@ const AIChatPanel = ({
               <p className="text-gray-500 text-sm max-w-xs mx-auto">
                 Describe what you want to build and watch the magic happen
               </p>
-              <div className="mt-6 grid grid-cols-2 gap-2 max-w-sm mx-auto">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-w-sm mx-auto">
                 {[
                   'Create a landing page',
                   'Build a todo app',

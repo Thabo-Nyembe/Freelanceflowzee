@@ -1454,7 +1454,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <CardDescription>Configure your feedback portal basics</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Portal Name</Label>
                             <Input defaultValue="Feedback Portal" />
@@ -1468,7 +1468,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>Portal Description</Label>
                           <Input defaultValue="Share your ideas and help us improve" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Language</Label>
                             <Select defaultValue="en">
@@ -1563,7 +1563,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <CardDescription>Customize your feedback portal appearance</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex gap-2">
@@ -1772,7 +1772,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <CardDescription>Configure how voting works on your portal</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Votes Per User</Label>
                             <Select defaultValue="unlimited">
@@ -1870,7 +1870,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Survey Frequency</Label>
                             <Select defaultValue="quarterly">
@@ -1971,7 +1971,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         </div>
                         <div className="space-y-2">
                           <Label>Events</Label>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {['idea.created', 'idea.voted', 'idea.status_changed', 'comment.created', 'nps.submitted'].map((event) => (
                               <div key={event} className="flex items-center gap-2">
                                 <Switch defaultChecked />
@@ -1993,7 +1993,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <CardDescription>Connect with external tools and services</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'Jira', connected: true, description: 'Sync ideas with Jira issues' },
                             { name: 'Linear', connected: false, description: 'Connect to Linear projects' },
@@ -2037,7 +2037,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Archive After</Label>
                             <Select defaultValue="12m">
@@ -2348,7 +2348,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium">Category</label>
                   <select
@@ -2430,7 +2430,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   onChange={(e) => setNewIdeaForm(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Category</Label>
                   <Select value={newIdeaForm.category} onValueChange={(val) => setNewIdeaForm(prev => ({ ...prev, category: val }))}>
@@ -2763,7 +2763,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Operator</Label>
                   <Select defaultValue="equals">
@@ -3486,7 +3486,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               </div>
               <div className="space-y-2">
                 <Label>Share via</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   <Button variant="outline" className="flex-1" onClick={() => {
                     const url = `https://twitter.com/intent/tweet?text=Check%20out%20this%20idea&url=${encodeURIComponent(`https://feedback.app/idea/${selectedIdea?.id || ''}`)}`
                     window.open(url, '_blank', 'width=600,height=400')

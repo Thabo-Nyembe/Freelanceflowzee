@@ -1416,7 +1416,7 @@ export default function PayrollClient() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 pt-3 border-t dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pt-3 border-t dark:border-gray-700">
                         <div className="text-center">
                           <div className="text-sm font-semibold text-gray-900 dark:text-white">
                             {formatCurrency(run.totalNet)}
@@ -1503,7 +1503,7 @@ export default function PayrollClient() {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-4 pt-3 border-t dark:border-gray-700">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pt-3 border-t dark:border-gray-700">
                             <div className="text-center">
                               <div className="text-sm font-semibold text-blue-600">{run.processed_count}/{run.total_employees}</div>
                               <div className="text-xs text-gray-500">Processed</div>
@@ -1778,7 +1778,7 @@ export default function PayrollClient() {
                           <span>{employee.email}</span>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-8 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-6 text-center">
                         <div>
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {employee.salary > 0 ? formatCurrency(employee.salary) : `$${employee.hourlyRate}/hr`}
@@ -2492,7 +2492,7 @@ export default function PayrollClient() {
                     {selectedPayRun.status.replace('_', ' ')}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div className="text-sm text-gray-500">Pay Date</div>
                     <div className="font-semibold">{selectedPayRun.payDate}</div>
@@ -2564,7 +2564,7 @@ export default function PayrollClient() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div className="text-sm text-gray-500">Annual Salary</div>
                     <div className="font-semibold">{selectedEmployee.salary > 0 ? formatCurrency(selectedEmployee.salary) : `$${selectedEmployee.hourlyRate}/hr`}</div>
@@ -2630,7 +2630,7 @@ export default function PayrollClient() {
                   onChange={(e) => setFormState({ ...formState, pay_date: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="total_employees">Employees</Label>
                   <Input

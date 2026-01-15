@@ -848,7 +848,7 @@ export default function OnboardingClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -2091,7 +2091,7 @@ export default function OnboardingClient() {
                 </p>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Views</p>
                     <p className="text-2xl font-bold">{selectedFlow.views.toLocaleString()}</p>
@@ -2206,7 +2206,7 @@ export default function OnboardingClient() {
                 </p>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedChecklist.usersStarted.toLocaleString()}</p>
                     <p className="text-sm text-gray-500">Users Started</p>
@@ -2390,7 +2390,7 @@ export default function OnboardingClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { value: '7d', label: 'Last 7 Days' },
                   { value: '30d', label: 'Last 30 Days' },

@@ -1044,7 +1044,7 @@ export default function ProjectsClient() {
                   onChange={(e) => setNewProjectDescription(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Due Date</label>
                   <Input

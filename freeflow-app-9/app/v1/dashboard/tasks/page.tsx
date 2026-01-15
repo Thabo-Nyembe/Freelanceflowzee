@@ -1273,7 +1273,7 @@ export default function TasksPage() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select
@@ -1403,7 +1403,7 @@ export default function TasksPage() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select

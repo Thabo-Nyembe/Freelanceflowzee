@@ -873,7 +873,7 @@ export default function PollsClient() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Total Forms', value: stats.totalForms, icon: ClipboardList, change: `${stats.activeForms} active` },
               { label: 'Total Responses', value: stats.totalResponses.toLocaleString(), icon: UserCheck, change: '+127 today' },
@@ -987,7 +987,7 @@ export default function PollsClient() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">{form.description}</p>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mb-4">
                       <div className="text-center p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
                         <div className="text-lg font-bold text-emerald-600">{form.responseCount}</div>
                         <div className="text-xs text-gray-500">Responses</div>
@@ -1389,7 +1389,7 @@ export default function PollsClient() {
                         <CardDescription>Configure your survey workspace settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Workspace Name</Label>
                             <Input defaultValue="My Survey Workspace" />
@@ -1413,7 +1413,7 @@ export default function PollsClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Time Zone</Label>
                             <Select defaultValue="utc">
@@ -1543,7 +1543,7 @@ export default function PollsClient() {
                           <Switch />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6 pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6 pt-4">
                           <div className="space-y-2">
                             <Label>Default Animation</Label>
                             <Select defaultValue="slide">
@@ -1768,7 +1768,7 @@ export default function PollsClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex gap-2">
@@ -1821,7 +1821,7 @@ export default function PollsClient() {
                         <CardDescription>Set default theme for new forms</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                           {mockThemes.map(theme => (
                             <button
                               key={theme.id}
@@ -1885,7 +1885,7 @@ export default function PollsClient() {
                           <Input placeholder="https://your-service.com/webhook" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Trigger Event</Label>
                             <Select defaultValue="submit">
@@ -2126,7 +2126,7 @@ export default function PollsClient() {
                           <Badge className="bg-emerald-600">Active</Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <p className="text-2xl font-bold text-emerald-600">{stats.totalForms}</p>
                             <p className="text-xs text-gray-500">Forms Created</p>
@@ -2301,7 +2301,7 @@ export default function PollsClient() {
               )}
 
               {/* Settings */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Status</Label>
                   <Select value={formData.status} onValueChange={(v: PollStatus) => setFormData(prev => ({ ...prev, status: v }))}>
@@ -2345,7 +2345,7 @@ export default function PollsClient() {
             <DialogTitle>Form Templates</DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)]">
-            <div className="grid grid-cols-3 gap-4 p-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-1">
               {templates.map(template => (
                 <div
                   key={template.id}
@@ -2387,7 +2387,7 @@ export default function PollsClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <Card>
                 <CardContent className="pt-4">
                   <div className="text-2xl font-bold text-emerald-600">1,847</div>

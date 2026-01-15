@@ -1034,7 +1034,7 @@ export default function ComplianceClient() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             <Card className="bg-white/10 border-white/20 p-4">
               <div className="flex items-center gap-3">
                 <Target className="w-5 h-5 text-green-200" />
@@ -1176,7 +1176,7 @@ export default function ComplianceClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {frameworks.map(framework => (
                 <Card key={framework.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedFramework(framework)}>
                   <div className="flex items-start justify-between mb-4">
@@ -1204,7 +1204,7 @@ export default function ComplianceClient() {
                   </div>
 
                   {/* Control Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                     <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-lg font-bold text-green-600">{framework.passedControls}</p>
                       <p className="text-xs text-gray-500">Passed</p>
@@ -1468,7 +1468,7 @@ export default function ComplianceClient() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-4">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Category</p>
                       <p className="font-medium capitalize">{risk.category}</p>
@@ -1629,7 +1629,7 @@ export default function ComplianceClient() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Auditor</p>
                       <p className="font-medium">{audit.auditor}</p>
@@ -1865,7 +1865,7 @@ export default function ComplianceClient() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1909,7 +1909,7 @@ export default function ComplianceClient() {
               <p className="text-sm text-gray-500">Supports PDF, DOC, XLS, PNG, JPG up to 50MB</p>
             </Card>
 
-            <div className="grid grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
               {mockControls.flatMap(c => c.evidence).slice(0, 4).map(evidence => (
                 <Card key={evidence.id} className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -2240,7 +2240,7 @@ export default function ComplianceClient() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">Integrate with your tools</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {[
                           { name: 'AWS', connected: true },
                           { name: 'Azure', connected: true },
@@ -2673,7 +2673,7 @@ export default function ComplianceClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Framework</Label>
                 <Select
@@ -2712,7 +2712,7 @@ export default function ComplianceClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="start-date">Start Date</Label>
                 <Input

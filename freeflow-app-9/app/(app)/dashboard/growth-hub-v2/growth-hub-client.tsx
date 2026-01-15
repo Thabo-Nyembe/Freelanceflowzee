@@ -2115,7 +2115,7 @@ export default function GrowthHubClient() {
           <ScrollArea className="max-h-[70vh]">
             {selectedFunnel && (
               <div className="space-y-6 p-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-muted/50 rounded-lg text-center">
                     <p className="text-3xl font-bold text-green-600">{selectedFunnel.totalConversion.toFixed(1)}%</p>
                     <p className="text-sm text-muted-foreground">Overall Conversion</p>
@@ -2190,7 +2190,7 @@ export default function GrowthHubClient() {
                   <Badge variant="outline">{selectedCohort.status}</Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="text-3xl font-bold">{selectedCohort.size.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">Total Users</p>
@@ -2246,7 +2246,7 @@ export default function GrowthHubClient() {
                   <p className="text-sm">{selectedExperiment.hypothesis}</p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-muted/50 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedExperiment.statisticalSignificance.toFixed(1)}%</p>
                     <p className="text-sm text-muted-foreground">Statistical Significance</p>
@@ -2272,7 +2272,7 @@ export default function GrowthHubClient() {
                         </div>
                         <Badge variant="outline">{variant.allocation}% allocation</Badge>
                       </div>
-                      <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm">
                         <div>
                           <p className="text-muted-foreground">Users</p>
                           <p className="font-bold">{variant.users.toLocaleString()}</p>

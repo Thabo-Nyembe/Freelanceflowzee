@@ -953,7 +953,7 @@ export default function AdvancedMicroFeaturesClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="item-type">Type</Label>
                 <Select
@@ -1197,7 +1197,7 @@ export default function AdvancedMicroFeaturesClient() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="settings-theme">Theme</Label>
                 <Select

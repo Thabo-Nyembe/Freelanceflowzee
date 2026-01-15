@@ -1605,7 +1605,7 @@ export default function OrdersClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-4">
                       <div className="text-center">
                         <p className="text-lg font-bold text-gray-900 dark:text-white">{customer.orders_count}</p>
                         <p className="text-xs text-gray-500">Orders</p>
@@ -1813,7 +1813,7 @@ export default function OrdersClient() {
                           </Label>
                           <Switch id="low-stock" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Order Number Prefix</Label>
                             <Input defaultValue="ORD-" />
@@ -1877,7 +1877,7 @@ export default function OrdersClient() {
                           </Label>
                           <Switch id="tracking-email" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Free Shipping Threshold</Label>
                             <Input defaultValue="$50.00" />
@@ -2198,7 +2198,7 @@ export default function OrdersClient() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h4 className="font-semibold mb-3">Customer</h4>
                       <div className="flex items-center gap-3 mb-3">
@@ -2256,7 +2256,7 @@ export default function OrdersClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h4 className="font-semibold mb-3">Payment</h4>
                       <div className="space-y-2 text-sm">

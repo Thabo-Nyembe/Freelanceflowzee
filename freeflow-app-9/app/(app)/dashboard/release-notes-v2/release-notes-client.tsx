@@ -522,7 +522,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center text-xs border-t pt-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 text-center text-xs border-t pt-3">
           <div>
             <div className="font-semibold text-gray-900">{formatNumber(release.metrics.downloads)}</div>
             <div className="text-gray-500">Downloads</div>
@@ -799,7 +799,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{mockReleases.length}</div>
               <div className="text-orange-100 text-sm">Total Releases</div>
@@ -1965,7 +1965,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label className="font-medium">Primary Color</Label>
                           <div className="flex gap-2">
@@ -2275,7 +2275,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="version">Version *</Label>
                 <Input
@@ -2325,7 +2325,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select

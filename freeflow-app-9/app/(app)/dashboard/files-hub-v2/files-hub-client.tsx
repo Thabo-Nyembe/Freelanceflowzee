@@ -2371,7 +2371,7 @@ export default function FilesHubClient() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <span className="text-sm text-gray-500">Size</span>
                     <p className="font-medium">{formatSize(selectedFile.size)}</p>

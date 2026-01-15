@@ -1176,7 +1176,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-5 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Reach</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{(campaign.reach / 1000).toFixed(0)}K</p>
@@ -1456,7 +1456,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Open Rate</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{sequence.openRate}%</p>
@@ -1669,7 +1669,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Enrolled</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{workflow.enrolled.toLocaleString()}</p>
@@ -1754,7 +1754,7 @@ export default function MarketingClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Revenue</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">${(mockAnalytics.revenue / 1000000).toFixed(2)}M</p>
@@ -1933,7 +1933,7 @@ export default function MarketingClient() {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-sm text-gray-500">Reach</p>
                       <p className="text-xl font-bold">{(selectedCampaign.reach / 1000).toFixed(0)}K</p>
@@ -1952,7 +1952,7 @@ export default function MarketingClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-semibold mb-3">Budget & Spend</h4>
                       <div className="space-y-2">
@@ -1984,7 +1984,7 @@ export default function MarketingClient() {
 
                   <div>
                     <h4 className="font-semibold mb-3">Campaign Details</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Start Date</span>
                         <span>{selectedCampaign.startDate}</span>
@@ -2050,7 +2050,7 @@ export default function MarketingClient() {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-3">
                       <h4 className="font-semibold">Contact Information</h4>
                       <div className="space-y-2 text-sm">
@@ -2097,7 +2097,7 @@ export default function MarketingClient() {
 
                   <div>
                     <h4 className="font-semibold mb-3">Activity Summary</h4>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                         <p className="text-2xl font-bold">{selectedLead.activities}</p>
                         <p className="text-xs text-gray-500">Total Activities</p>
@@ -2156,7 +2156,7 @@ export default function MarketingClient() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Campaign Type</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   {['Email', 'Social', 'PPC', 'Content', 'Event', 'Influencer'].map(type => (
                     <Button key={type} variant="outline" size="sm">{type}</Button>
                   ))}
@@ -2190,7 +2190,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">First Name</label>
                   <Input placeholder="John" />
@@ -2210,7 +2210,7 @@ export default function MarketingClient() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Lead Source</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                   {['Website', 'Referral', 'Social', 'Event'].map(source => (
                     <Button key={source} variant="outline" size="sm">{source}</Button>
                   ))}
@@ -2292,7 +2292,7 @@ export default function MarketingClient() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Template</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   {['Newsletter', 'Promotion', 'Welcome', 'Follow-up', 'Announcement', 'Custom'].map(template => (
                     <Button key={template} variant="outline" size="sm">{template}</Button>
                   ))}
@@ -2323,7 +2323,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'Campaign Performance', description: 'ROI, conversions, and engagement metrics', icon: Target },
                   { name: 'Lead Analytics', description: 'Lead sources, scoring, and pipeline', icon: Users },
@@ -2374,13 +2374,13 @@ export default function MarketingClient() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Platforms</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                   {['Twitter', 'LinkedIn', 'Facebook', 'Instagram'].map(platform => (
                     <Button key={platform} variant="outline" size="sm">{platform}</Button>
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Date</label>
                   <Input type="date" />

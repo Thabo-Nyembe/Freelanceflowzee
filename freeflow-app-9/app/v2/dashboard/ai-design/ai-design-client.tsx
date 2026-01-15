@@ -1140,7 +1140,7 @@ export default function AIDesignClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       {(['photorealistic', 'anime', 'digital_art', '3d_render', 'oil_painting', 'minimalist'] as StylePreset[]).map((style) => (
                         <button
                           key={style}
@@ -1166,7 +1166,7 @@ export default function AIDesignClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                       {(['1:1', '16:9', '9:16', '4:3', '3:4', '2:3', '3:2'] as AspectRatio[]).map((ratio) => (
                         <button
                           key={ratio}
@@ -1192,7 +1192,7 @@ export default function AIDesignClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       {([
                         { level: 'draft' as const, credits: 2 },
                         { level: 'standard' as const, credits: 3 },
@@ -1257,7 +1257,7 @@ export default function AIDesignClient() {
             </Card>
 
             {/* Gallery Stats */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { style: 'photorealistic', count: mockGenerations.filter(g => g.style === 'photorealistic').length, icon: Image, color: 'blue' },
                 { style: 'digital_art', count: mockGenerations.filter(g => g.style === 'digital_art').length, icon: Paintbrush, color: 'purple' },
@@ -1390,7 +1390,7 @@ export default function AIDesignClient() {
             </Card>
 
             {/* Style Categories */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { style: 'photorealistic', label: 'Photo', icon: Image, color: 'blue' },
                 { style: 'digital_art', label: 'Digital', icon: Paintbrush, color: 'purple' },
@@ -1943,7 +1943,7 @@ export default function AIDesignClient() {
                         </div>
                         <input type="checkbox" className="w-5 h-5" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t dark:border-gray-700">
                         <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => {
                           handleExportDesigns()
                         }}>
@@ -2065,7 +2065,7 @@ export default function AIDesignClient() {
                       <p className="text-gray-700 dark:text-gray-300">{selectedGeneration.negativePrompt}</p>
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h3 className="text-sm font-medium text-gray-500 mb-1">Style</h3>
                       <Badge className={getStyleColor(selectedGeneration.style)}>
@@ -2203,7 +2203,7 @@ export default function AIDesignClient() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 View and manage all your AI-generated images. Filter by style, date, or favorites.
               </p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {generations.slice(0, 6).map((gen) => (
                   <div
                     key={gen.id}
@@ -2299,7 +2299,7 @@ export default function AIDesignClient() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Customize your design style presets and create your own unique styles.
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {(['photorealistic', 'anime', 'digital_art', '3d_render', 'oil_painting', 'minimalist'] as StylePreset[]).map((style) => (
                   <button
                     key={style}

@@ -757,7 +757,7 @@ export default function VideoStudioClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'from-purple-500 to-pink-600' },
                 { icon: Upload, label: 'Import Media', desc: 'Upload files', color: 'from-blue-500 to-cyan-600' },
@@ -1814,7 +1814,7 @@ export default function VideoStudioClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Resolution</label>
                             <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
@@ -1832,7 +1832,7 @@ export default function VideoStudioClient() {
                             </select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Timeline Units</label>
                             <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
@@ -1893,7 +1893,7 @@ export default function VideoStudioClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {[
                             { label: '16:9 Landscape', icon: Monitor, selected: true },
                             { label: '9:16 Portrait', icon: Smartphone, selected: false },
@@ -2331,7 +2331,7 @@ export default function VideoStudioClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Duration</p>
                       <p className="font-medium">{formatDuration(selectedProject.duration)}</p>
@@ -2430,7 +2430,7 @@ export default function VideoStudioClient() {
                   {getAssetIcon(selectedAsset.type)}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                     <p className="text-xs text-gray-500">Type</p>
                     <p className="font-medium capitalize">{selectedAsset.type}</p>

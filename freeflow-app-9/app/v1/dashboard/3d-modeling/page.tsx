@@ -730,7 +730,7 @@ export default function ModelingStudioPage() {
                 {selectedObject && (
                   <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                     <h3 className="font-semibold mb-3">Object Properties</h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {/* Position */}
                       <div>
                         <label className="text-sm font-medium">Position</label>
@@ -832,7 +832,7 @@ export default function ModelingStudioPage() {
                     {/* Primitives */}
                     <div>
                       <h3 className="text-sm font-semibold mb-2">Add Primitives</h3>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         {PRIMITIVE_OBJECTS.map((primitive) => (
                           <button
                             key={primitive.id}
@@ -961,7 +961,7 @@ export default function ModelingStudioPage() {
                               <div className="text-xs text-muted-foreground capitalize">{material.type}</div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs">
                             <div>Roughness: {material.roughness}</div>
                             <div>Metallic: {material.metallic}</div>
                           </div>

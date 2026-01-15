@@ -678,7 +678,7 @@ export default function AdminPage() {
                   <p className="text-xs text-muted-foreground">Key performance indicators</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <div className="text-center p-2 bg-white rounded border">
                   <div className="text-xl font-bold text-purple-600">1.2K</div>
                   <div className="text-xs text-muted-foreground">Daily Active</div>
@@ -816,7 +816,7 @@ export default function AdminPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium">CPU Usage</span>
@@ -927,7 +927,7 @@ export default function AdminPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="p-4 border rounded-lg text-center">
                 <div className="text-2xl font-bold text-green-600">$47,392</div>
                 <div className="text-sm text-muted-foreground">Monthly Revenue</div>
@@ -994,7 +994,7 @@ export default function AdminPage() {
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Key Metrics */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="p-4 border rounded-lg text-center">
                 <div className="text-2xl font-bold text-blue-600">{analyticsData.pageViews.total.toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Page Views</div>
@@ -1039,7 +1039,7 @@ export default function AdminPage() {
             {/* Traffic Sources */}
             <div className="border rounded-lg p-4">
               <h4 className="font-medium mb-3">Traffic Sources</h4>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {analyticsData.trafficSources.map((source, index) => (
                   <div key={index} className="text-center p-3 bg-gray-50 rounded-lg">
                     <div className="text-xl font-bold text-blue-600">{source.percentage}%</div>

@@ -1763,7 +1763,7 @@ export default function CodeRepositoryClient() {
                 rows={4}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Source Branch</Label>
                 <Select value={prSourceBranch} onValueChange={setPRSourceBranch}>
@@ -2040,7 +2040,7 @@ export default function CodeRepositoryClient() {
             <DialogDescription>Compare changes between two branches</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Base Branch</Label>
                 <Select defaultValue="main">

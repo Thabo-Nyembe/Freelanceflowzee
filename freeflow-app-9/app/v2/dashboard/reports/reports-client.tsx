@@ -1467,7 +1467,7 @@ export default function ReportsClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {filteredReports.map(report => renderReportCard(report))}
                 </div>
               </div>
@@ -1594,13 +1594,13 @@ export default function ReportsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle>Chart Types</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {chartTypes.map(chart => (
                       <div
                         key={chart.type}
@@ -1852,7 +1852,7 @@ export default function ReportsClient() {
                       <div className="text-2xl font-bold">48</div>
                       <div className="text-xs opacity-80">Total Reports</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">125K</div>
                         <div className="text-xs opacity-80">Views</div>
@@ -1886,7 +1886,7 @@ export default function ReportsClient() {
                         <CardDescription>Configure default settings for new reports</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <Select defaultValue="dashboard">
@@ -1915,7 +1915,7 @@ export default function ReportsClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Timezone</Label>
                             <Select defaultValue="utc">
@@ -2053,7 +2053,7 @@ export default function ReportsClient() {
                         <CardDescription>Default settings for chart visualizations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Chart Type</Label>
                             <Select defaultValue="bar">
@@ -2548,7 +2548,7 @@ export default function ReportsClient() {
                   </DialogHeader>
 
                   {/* Stats Row */}
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedReport.views)}</p>
                       <p className="text-sm text-gray-500">Views</p>
@@ -2568,7 +2568,7 @@ export default function ReportsClient() {
                   </div>
 
                   {/* Details */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-medium mb-2">Data Source</h4>
                       <p className="text-gray-600">{selectedReport.dataSource}</p>
@@ -2633,7 +2633,7 @@ export default function ReportsClient() {
               <DialogTitle>Create New Report</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div
                   className="p-4 border rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer"
                   onClick={() => handleCreateReportContinue('dashboard')}
@@ -2715,7 +2715,7 @@ export default function ReportsClient() {
               {/* Report Type Selection */}
               <div className="space-y-2">
                 <Label>Report Type</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {[
                     { type: 'dashboard' as ReportType, icon: LayoutDashboard, label: 'Dashboard', color: 'purple' },
                     { type: 'chart' as ReportType, icon: BarChart3, label: 'Chart', color: 'blue' },
@@ -2846,7 +2846,7 @@ export default function ReportsClient() {
               </div>
 
               {/* Frequency Selection */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Frequency</Label>
                   <Select value={scheduleExportFrequency} onValueChange={setScheduleExportFrequency}>
@@ -2874,7 +2874,7 @@ export default function ReportsClient() {
               {/* Format Selection */}
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {[
                     { format: 'pdf' as const, label: 'PDF', icon: FileText },
                     { format: 'excel' as const, label: 'Excel', icon: Table2 },
@@ -2995,7 +2995,7 @@ export default function ReportsClient() {
                 <div className="space-y-4 pt-4 border-t">
                   <h4 className="font-medium text-gray-900 dark:text-white">Add New Data Source</h4>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="ds-name">Name *</Label>
                       <Input
@@ -3212,7 +3212,7 @@ export default function ReportsClient() {
               <p className="text-sm text-gray-500">Export all {reports.length} reports in your selected format.</p>
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {['pdf', 'excel', 'csv', 'json'].map((format) => (
                     <button
                       key={format}
@@ -3317,7 +3317,7 @@ export default function ReportsClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <p className="text-sm text-gray-500">Select a theme to apply to all your reports.</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {[
                   { id: 'default', name: 'Default', colors: ['#7c3aed', '#3b82f6', '#10b981'] },
                   { id: 'professional', name: 'Professional', colors: ['#1e40af', '#1e3a8a', '#0f766e'] },
@@ -3420,7 +3420,7 @@ export default function ReportsClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="conn-name">Connection Name *</Label>
                   <Input
@@ -3545,7 +3545,7 @@ export default function ReportsClient() {
                   <h4 className="font-medium">{selectedScheduledReport.reportName}</h4>
                   <p className="text-sm text-gray-500">{selectedScheduledReport.schedule}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Frequency</Label>
                     <Select defaultValue="daily">
@@ -3806,7 +3806,7 @@ export default function ReportsClient() {
               )}
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {['pdf', 'excel', 'csv', 'png'].map((format) => (
                     <button
                       key={format}

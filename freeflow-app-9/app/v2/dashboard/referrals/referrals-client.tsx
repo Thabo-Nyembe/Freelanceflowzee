@@ -1434,7 +1434,7 @@ export default function ReferralsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               <Button
                 variant="outline"
                 className="flex-col h-auto py-4"
@@ -1580,7 +1580,7 @@ export default function ReferralsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 rounded-lg bg-green-50 border border-green-200">
                 <p className="text-sm text-gray-600">Total Earned</p>
                 <p className="text-2xl font-bold text-green-600">${totalCommission.toLocaleString()}</p>
@@ -1754,7 +1754,7 @@ export default function ReferralsClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
               <Button
                 variant="outline"
                 size="sm"
@@ -1934,7 +1934,7 @@ export default function ReferralsClient() {
                   </Badge>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
                   <p className="text-sm text-gray-600">Referral Date</p>
                   <p className="font-semibold text-gray-900">

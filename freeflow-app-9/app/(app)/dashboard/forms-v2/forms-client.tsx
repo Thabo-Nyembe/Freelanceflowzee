@@ -466,7 +466,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white">
@@ -564,7 +564,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           onChange={(e) => setNewFormDescription(e.target.value)}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                         <button
                           onClick={() => {
                             setShowCreateDialog(false)
@@ -776,7 +776,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <CardTitle className="text-lg font-semibold">Performance Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl text-center">
                       <TrendingUp className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
                       <p className="text-2xl font-bold text-indigo-600">{stats.conversionRate.toFixed(1)}%</p>
@@ -902,7 +902,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <span className="ml-1">{form.status}</span>
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-3 gap-4 py-4 border-y dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-4 border-y dark:border-gray-700">
                         <div className="text-center">
                           <p className="text-2xl font-bold text-indigo-600">{form.total_submissions}</p>
                           <p className="text-xs text-gray-500">Responses</p>
@@ -1223,7 +1223,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Configure your forms workspace</p>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Workspace Name</Label>
                             <Input defaultValue="My Forms Workspace" className="mt-1" />
@@ -1273,7 +1273,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             }}>Browse Files</Button>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Primary Color</Label>
                             <div className="flex gap-2 mt-1">
@@ -1307,7 +1307,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Choose a default theme for new forms</p>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {formThemes.map(theme => (
                             <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md">
                               <div className="flex items-center gap-2 mb-3">
@@ -1367,7 +1367,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Enable or disable question types</p>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           {questionTypes.slice(0, 12).map(type => (
                             <div key={type.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <div className="flex items-center gap-3">
@@ -1630,7 +1630,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Learn how to integrate with Forms API</p>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {[
                             { title: 'Getting Started', icon: Code, desc: 'Quick start guide' },
                             { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
@@ -1874,7 +1874,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <p className="text-sm text-gray-500">Bulk data management</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => {
                             toast.promise(
                               fetch('/api/forms/export/all').then(res => {
@@ -2112,7 +2112,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   https://freeflow.io/form/{selectedForm?.id || 'abc123'}
                 </p>
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
                   <Link2 className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Link</span>
@@ -2185,7 +2185,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <DialogHeader>
               <DialogTitle>Choose Theme</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 py-4">
               {formThemes.map(theme => (
                 <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left">
                   <div className="flex items-center gap-2 mb-3">
@@ -2205,7 +2205,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <DialogHeader>
               <DialogTitle>{selectedForm?.title} - Analytics</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-4 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 py-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                 <p className="text-3xl font-bold text-blue-600">{selectedForm?.total_views || 0}</p>
                 <p className="text-sm text-gray-500">Views</p>

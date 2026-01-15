@@ -832,7 +832,7 @@ export default function CiCdClient() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1818,7 +1818,7 @@ export default function CiCdClient() {
                 <CardTitle>Usage This Month</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Minutes Used</p>
                     <div className="flex items-end gap-2">
@@ -1895,7 +1895,7 @@ export default function CiCdClient() {
                         <CardDescription>Configure your CI/CD preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Branch</Label>
                             <Input defaultValue="main" />
@@ -1973,7 +1973,7 @@ export default function CiCdClient() {
                         <CardDescription>Configure workflow permissions and behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Workflow Permissions</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -2060,7 +2060,7 @@ export default function CiCdClient() {
                         <CardDescription>Configure notification integrations</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { icon: Mail, label: 'Email', active: true },
                             { icon: Globe, label: 'Slack', active: true },
@@ -2230,7 +2230,7 @@ export default function CiCdClient() {
                         <CardDescription>Manage your CI/CD data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
                             <Download className="w-5 h-5" />
                             <span>Export Logs</span>
@@ -2338,7 +2338,7 @@ export default function CiCdClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Total Runs</p>
                     <p className="text-2xl font-bold">{selectedWorkflow.runs}</p>
@@ -2444,7 +2444,7 @@ export default function CiCdClient() {
                   <p className="text-gray-600">{selectedRun.commitMessage}</p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{formatDuration(selectedRun.duration)}</p>
                     <p className="text-sm text-gray-500">Duration</p>
@@ -2504,7 +2504,7 @@ export default function CiCdClient() {
                   onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Pipeline Type</Label>
                   <select
@@ -2534,7 +2534,7 @@ export default function CiCdClient() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="trigger_branch">Branch</Label>
                   <Input

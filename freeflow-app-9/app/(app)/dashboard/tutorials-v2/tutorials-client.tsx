@@ -1205,7 +1205,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{mockCourses.length * 45}</div>
               <div className="text-rose-100 text-sm">Total Courses</div>
@@ -1415,7 +1415,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-rose-100 rounded-lg"><Play className="w-5 h-5 text-rose-600" /></div><div><div className="text-2xl font-bold">{mockProgress.length}</div><div className="text-sm text-gray-500">In Progress</div></div></div></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-green-100 rounded-lg"><CheckCircle className="w-5 h-5 text-green-600" /></div><div><div className="text-2xl font-bold">12</div><div className="text-sm text-gray-500">Completed</div></div></div></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-blue-100 rounded-lg"><Clock className="w-5 h-5 text-blue-600" /></div><div><div className="text-2xl font-bold">156h</div><div className="text-sm text-gray-500">Total Watch Time</div></div></div></CardContent></Card>
@@ -1545,7 +1545,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-rose-600">{mockAchievements.filter(a => a.unlockedAt).length}</div><div className="text-sm text-gray-500">Unlocked</div></CardContent></Card>
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-amber-600">{mockAchievements.reduce((acc, a) => acc + (a.unlockedAt ? a.points : 0), 0)}</div><div className="text-sm text-gray-500">Total Points</div></CardContent></Card>
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-blue-600">{mockAchievements.filter(a => !a.unlockedAt).length}</div><div className="text-sm text-gray-500">In Progress</div></CardContent></Card>
@@ -1735,7 +1735,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                       <div className="text-2xl font-bold">156h</div>
                       <div className="text-xs opacity-80">Total Watch Time</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">12</div>
                         <div className="text-xs opacity-80">Completed</div>
@@ -1776,7 +1776,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                             <p className="text-xs text-gray-500">JPG, PNG. Max 2MB</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Display Name</Label>
                             <Input defaultValue="John Doe" />
@@ -1786,7 +1786,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                             <Input defaultValue="john@example.com" type="email" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Headline</Label>
                             <Input placeholder="Software Developer" />
@@ -1812,7 +1812,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <CardDescription>Configure your account preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Language</Label>
                             <Select defaultValue="en">
@@ -1956,7 +1956,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <CardDescription>Manage your subscription</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {mockSubscriptions.map(sub => (
                             <div key={sub.id} className={`p-4 border rounded-lg ${sub.isCurrent ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'dark:border-gray-700'}`}>
                               <div className="flex items-center justify-between mb-2">
@@ -2025,7 +2025,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <CardDescription>Customize your video experience</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Quality</Label>
                             <Select defaultValue="auto">
@@ -2090,7 +2090,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <CardDescription>Set and track your learning goals</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Daily Goal</Label>
                             <Select defaultValue="30">
@@ -2473,7 +2473,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                   <TabsContent value="overview" className="space-y-6">
                     <div>
                       <h3 className="font-semibold mb-3">What you&apos;ll learn</h3>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         {selectedCourse.whatYouLearn.map((item, i) => (<div key={i} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{item}</div>))}
                       </div>
                     </div>
@@ -2672,7 +2672,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             </div>
 
             {/* Quick filters */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
@@ -2781,7 +2781,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             {/* Sort options */}
             <div className="space-y-3">
               <Label>Sort By</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {[
                   { value: 'default', label: 'Default', icon: Grid3X3 },
                   { value: 'top-rated', label: 'Top Rated', icon: Star },

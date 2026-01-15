@@ -414,7 +414,7 @@ export default function CustomReportBuilderPage() {
                       {/* Widgets */}
                       <div>
                         <label className="text-sm text-gray-400 mb-2 block">Add Widgets</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                           {WIDGET_TYPES.slice(0, 6).map((widget) => {
                             const Icon = widget.icon === 'Hash' ? Hash :
                                         widget.icon === 'LineChart' ? LineChart :

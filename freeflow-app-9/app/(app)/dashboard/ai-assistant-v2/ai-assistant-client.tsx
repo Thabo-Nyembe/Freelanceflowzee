@@ -1438,7 +1438,7 @@ export default function AIAssistantClient() {
                         <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-8">
                           I'm your AI assistant powered by multiple models. Ask me anything or choose a suggestion below.
                         </p>
-                        <div className="grid grid-cols-2 gap-3 max-w-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 max-w-lg">
                           {[
                             { icon: <Code className="h-5 w-5" />, label: 'Write code', prompt: 'Help me write a function that...' },
                             { icon: <PenTool className="h-5 w-5" />, label: 'Create content', prompt: 'Write a blog post about...' },
@@ -2113,7 +2113,7 @@ export default function AIAssistantClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name
@@ -2165,7 +2165,7 @@ export default function AIAssistantClient() {
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 resize-none"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Temperature: {assistantForm.temperature}
@@ -2240,7 +2240,7 @@ export default function AIAssistantClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name

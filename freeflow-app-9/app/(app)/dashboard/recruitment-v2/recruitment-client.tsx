@@ -1420,7 +1420,7 @@ export default function RecruitmentClient() {
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <div className="text-center">
                           <div className="text-lg font-bold text-gray-900 dark:text-white">{job.applicationsCount}</div>
                           <div className="text-xs text-gray-500">Applications</div>
@@ -1829,7 +1829,7 @@ export default function RecruitmentClient() {
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-4">
                         <div>
                           <div className="text-xs text-gray-500 mb-1">Base Salary</div>
                           <div className="font-semibold text-gray-900 dark:text-white">
@@ -2064,7 +2064,7 @@ export default function RecruitmentClient() {
                 <Badge variant="outline">{selectedJob.type}</Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <div className="text-sm text-gray-500">Department</div>
                   <div className="font-medium">{selectedJob.department}</div>
@@ -2101,7 +2101,7 @@ export default function RecruitmentClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedJob.applicationsCount}</div>
                   <div className="text-xs text-gray-500">Applications</div>
@@ -2155,7 +2155,7 @@ export default function RecruitmentClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <div className="text-sm text-gray-500">Current Position</div>
                   <div className="font-medium">{selectedCandidate.currentTitle}</div>
@@ -2252,7 +2252,7 @@ export default function RecruitmentClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label htmlFor="job-title">Job Title *</Label>
                 <Input
@@ -2388,7 +2388,7 @@ export default function RecruitmentClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label htmlFor="edit-job-title">Job Title *</Label>
                 <Input
@@ -2526,7 +2526,7 @@ export default function RecruitmentClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label htmlFor="candidate-job">Job Position *</Label>
                 <Select value={newCandidateForm.job_id} onValueChange={(val) => setNewCandidateForm(prev => ({ ...prev, job_id: val }))}>

@@ -1244,7 +1244,7 @@ export default function CoursesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1434,7 +1434,7 @@ export default function CoursesClient() {
                     </DialogHeader>
                     <div className="space-y-6">
                       {/* Course Stats */}
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
                           <div className="text-2xl font-bold text-indigo-600">{formatNumber(course.stats.enrollments)}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">Enrollments</div>
@@ -1506,7 +1506,7 @@ export default function CoursesClient() {
                       {course.objectives.length > 0 && (
                         <div>
                           <div className="font-semibold mb-2 dark:text-white">What You'll Learn</div>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {course.objectives.map((obj, i) => (
                               <div key={i} className="flex items-start gap-2 text-sm">
                                 <span className="text-green-500">✓</span>
@@ -1839,7 +1839,7 @@ export default function CoursesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Platform Name</Label>
                             <Input defaultValue="FreeFlow Academy" />
@@ -1914,7 +1914,7 @@ export default function CoursesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Video Quality</Label>
                             <Select defaultValue="1080p">
@@ -1963,7 +1963,7 @@ export default function CoursesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Currency</Label>
                             <Select defaultValue="usd">
@@ -2051,7 +2051,7 @@ export default function CoursesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Refund Window (days)</Label>
                             <Input type="number" defaultValue="30" />
@@ -2120,7 +2120,7 @@ export default function CoursesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {['Classic', 'Modern', 'Professional', 'Minimal', 'Academic', 'Custom'].map(template => (
                             <div key={template} className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                               template === 'Modern' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
@@ -2573,7 +2573,7 @@ export default function CoursesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="course_name">Course Name *</Label>
                 <Input
@@ -2617,7 +2617,7 @@ export default function CoursesClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="level">Level</Label>
                 <Select
@@ -2647,7 +2647,7 @@ export default function CoursesClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="price">Price</Label>
                 <Input
@@ -2749,7 +2749,7 @@ export default function CoursesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_course_name">Course Name *</Label>
                 <Input
@@ -2793,7 +2793,7 @@ export default function CoursesClient() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_level">Level</Label>
                 <Select
@@ -2831,7 +2831,7 @@ export default function CoursesClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_price">Price</Label>
                 <Input
@@ -2977,7 +2977,7 @@ export default function CoursesClient() {
                 onChange={(e) => setLectureForm({ ...lectureForm, title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="lecture_type">Type</Label>
                 <Select

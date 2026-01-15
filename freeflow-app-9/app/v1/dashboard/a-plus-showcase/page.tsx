@@ -1188,7 +1188,7 @@ export default function APlusShowcasePage() {
               </TabsContent>
 
               <TabsContent value="details" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-gray-400">Category</Label>
                     <p className="text-white capitalize">{state.selectedComponent.category.replace('-', ' ')}</p>

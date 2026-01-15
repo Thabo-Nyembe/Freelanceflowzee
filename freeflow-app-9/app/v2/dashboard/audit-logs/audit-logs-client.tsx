@@ -1679,7 +1679,7 @@ export default function AuditLogsClient() {
                         <p className="text-sm text-gray-500">Compliance Score</p>
                       </div>
                       <Progress value={report.score} className="h-2" />
-                      <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                         <div>
                           <p className="text-2xl font-bold text-green-600">{report.passed_controls}</p>
                           <p className="text-xs text-gray-500">Passed</p>
@@ -2307,7 +2307,7 @@ export default function AuditLogsClient() {
                     <p className="text-gray-600 dark:text-gray-300">{selectedLog.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">User</p>
                       <p className="font-medium">{selectedLog.user_email || 'System'}</p>
@@ -2407,7 +2407,7 @@ export default function AuditLogsClient() {
                   placeholder="What does this rule monitor?"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="log_type">Log Type</Label>
                   <select
@@ -2501,7 +2501,7 @@ export default function AuditLogsClient() {
                   placeholder="What does this rule monitor?"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit_log_type">Log Type</Label>
                   <select
@@ -2610,7 +2610,7 @@ export default function AuditLogsClient() {
                   <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">status:failed</Badge>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="search_date_from">From Date</Label>
                   <Input id="search_date_from" type="date" />
@@ -2675,7 +2675,7 @@ export default function AuditLogsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Include Fields</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" defaultChecked className="rounded" />
                     <span className="text-sm">Timestamp</span>
@@ -3034,7 +3034,7 @@ export default function AuditLogsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Log Types to Forward</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <label className="flex items-center gap-2">
                     <input type="checkbox" defaultChecked className="rounded" />
                     <span className="text-sm">Security</span>

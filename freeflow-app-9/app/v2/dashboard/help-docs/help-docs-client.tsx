@@ -1094,7 +1094,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockCategories.length}</div>
                   <div className="text-sm text-blue-100">Categories</div>
@@ -1115,7 +1115,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Category', desc: 'Create category', color: 'blue' },
                 { icon: Layers, label: 'Reorder', desc: 'Change order', color: 'purple' },
@@ -1136,7 +1136,7 @@ export default function HelpDocsClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
               <div className="col-span-1">
                 <Card className="p-4">
                   <h3 className="font-semibold mb-4">Categories</h3>
@@ -1237,7 +1237,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{dbArticles.length || mockArticles.length}</div>
                   <div className="text-sm text-emerald-100">Total</div>
@@ -1262,7 +1262,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Article', color: 'emerald' },
                 { icon: Edit, label: 'Edit Draft', color: 'blue' },
@@ -1373,7 +1373,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockTickets.length}</div>
                   <div className="text-sm text-orange-100">Total</div>
@@ -1402,7 +1402,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Ticket', desc: 'Create ticket', color: 'orange' },
                 { icon: Users, label: 'Assign', desc: 'Bulk assign', color: 'blue' },
@@ -1445,7 +1445,7 @@ export default function HelpDocsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
               <Card className="p-4">
                 <div className="text-2xl font-bold text-blue-600">{mockTickets.filter(t => t.status === 'new').length}</div>
                 <div className="text-sm text-gray-500">New</div>
@@ -1515,7 +1515,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockCommunityPosts.length}</div>
                   <div className="text-sm text-purple-100">Posts</div>
@@ -1540,7 +1540,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Post', desc: 'Start discussion', color: 'purple' },
                 { icon: MessageCircle, label: 'Reply', desc: 'Respond to posts', color: 'blue' },
@@ -1567,7 +1567,7 @@ export default function HelpDocsClient() {
               <Button onClick={() => setShowNewPostDialog(true)}><Plus className="w-4 h-4 mr-2" />New Post</Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2 space-y-4">
                 {mockCommunityPosts.map(post => (
                   <Card key={post.id} className={`p-4 ${post.isPinned ? 'border-amber-300 dark:border-amber-700' : ''}`}>
@@ -1641,7 +1641,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{formatNumber(mockStats.totalViews)}</div>
                   <div className="text-sm text-cyan-100">Total Views</div>
@@ -1672,7 +1672,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'View Reports', desc: 'Detailed analytics', color: 'cyan' },
                 { icon: TrendingUp, label: 'Trends', desc: 'Performance trends', color: 'green' },
@@ -1694,7 +1694,7 @@ export default function HelpDocsClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card className="p-6">
                 <div className="text-3xl font-bold text-blue-600">{formatNumber(mockStats.totalViews)}</div>
                 <div className="text-sm text-gray-500">Total Views</div>
@@ -1715,7 +1715,7 @@ export default function HelpDocsClient() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Top Searches</h3>
                 <div className="space-y-3">
@@ -1768,7 +1768,7 @@ export default function HelpDocsClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">35</div>
                   <div className="text-sm text-red-100">Videos</div>
@@ -1793,7 +1793,7 @@ export default function HelpDocsClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { icon: Upload, label: 'Upload', desc: 'Add new video', color: 'red' },
                 { icon: Edit, label: 'Edit', desc: 'Modify videos', color: 'blue' },
@@ -1820,7 +1820,7 @@ export default function HelpDocsClient() {
               <Button onClick={() => setShowUploadVideoDialog(true)}><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {[
                 { title: 'Getting Started Tutorial', duration: '5:32', views: 12500, category: 'Beginner' },
                 { title: 'API Authentication Deep Dive', duration: '15:45', views: 8900, category: 'Advanced' },
@@ -1898,7 +1898,7 @@ export default function HelpDocsClient() {
                       <CardDescription>Configure basic help center settings</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Help Center Name</Label>
                           <Input defaultValue="Knowledge Base" placeholder="Your help center name" />
@@ -2076,7 +2076,7 @@ export default function HelpDocsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label>Default Language</Label>
                           <Select defaultValue="en">
@@ -2107,7 +2107,7 @@ export default function HelpDocsClient() {
                       </div>
                       <div className="space-y-4">
                         <Label>Enabled Languages</Label>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                           {['English', 'Spanish', 'French', 'German', 'Japanese', 'Chinese'].map(lang => (
                             <div key={lang} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <Switch defaultChecked={lang === 'English' || lang === 'Spanish'} />
@@ -2348,7 +2348,7 @@ export default function HelpDocsClient() {
       <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Contact Support</DialogTitle></DialogHeader>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
             {[
               { icon: Bot, title: 'AI Assistant', desc: 'Instant answers', color: 'blue' },
               { icon: MessageSquare, title: 'Live Chat', desc: 'Avg wait: 2 min', color: 'green' },
@@ -2475,7 +2475,7 @@ export default function HelpDocsClient() {
                 rows={6}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
@@ -2557,7 +2557,7 @@ export default function HelpDocsClient() {
                 rows={6}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
@@ -2616,7 +2616,7 @@ export default function HelpDocsClient() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             {/* Review Queue Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card className="p-4 text-center">
                 <div className="text-2xl font-bold text-yellow-600">{mockArticles.filter(a => a.status === 'draft').length}</div>
                 <div className="text-sm text-gray-500">Pending Review</div>
@@ -2724,7 +2724,7 @@ export default function HelpDocsClient() {
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Key Metrics */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -2825,7 +2825,7 @@ export default function HelpDocsClient() {
             </Card>
 
             {/* Content Overview */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="p-4">
                 <h3 className="font-semibold mb-4 text-gray-900 dark:text-white">Content by Status</h3>
                 <div className="space-y-3">

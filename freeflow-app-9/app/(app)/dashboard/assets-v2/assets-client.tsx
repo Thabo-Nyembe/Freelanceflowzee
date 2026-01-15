@@ -1649,7 +1649,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                       <div>
                         <h4 className="text-sm font-medium mb-3">Brand Colors</h4>
                         <div className="flex items-center gap-3">
@@ -2249,7 +2249,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                     {Object.keys(selectedAsset.metadata).length > 0 && (
                       <div>
                         <h4 className="text-sm font-medium mb-3">Metadata</h4>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           {Object.entries(selectedAsset.metadata).map(([key, value]) => (
                             <div key={key} className="p-3 rounded-lg bg-muted/50">
                               <p className="text-xs text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
@@ -2302,7 +2302,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   placeholder="Enter asset name"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Asset Type</Label>
                   <Select value={assetForm.asset_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, asset_type: v }))}>
@@ -2343,7 +2343,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   placeholder="brand, logo, marketing"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>License</Label>
                   <Select value={assetForm.license_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, license_type: v }))}>
@@ -2454,7 +2454,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   onChange={(e) => setAssetForm(prev => ({ ...prev, tags: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>License</Label>
                   <Select value={assetForm.license_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, license_type: v }))}>

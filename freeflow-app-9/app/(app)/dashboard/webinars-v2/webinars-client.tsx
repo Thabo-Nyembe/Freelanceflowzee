@@ -745,7 +745,7 @@ export default function WebinarsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -906,7 +906,7 @@ export default function WebinarsClient() {
                       <p className="text-white/80">Schedule and manage your virtual events</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{stats.totalWebinars}</p>
                       <p className="text-sm text-white/80">Total</p>
@@ -1119,7 +1119,7 @@ export default function WebinarsClient() {
                       <p className="text-white/80">Manage attendee registrations and approvals</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{stats.totalRegistrations.toLocaleString()}</p>
                       <p className="text-sm text-white/80">Total</p>
@@ -1310,7 +1310,7 @@ export default function WebinarsClient() {
                       <p className="text-white/80">Track performance and engagement metrics</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{stats.avgAttendanceRate.toFixed(0)}%</p>
                       <p className="text-sm text-white/80">Attendance Rate</p>
@@ -1489,7 +1489,7 @@ export default function WebinarsClient() {
                   <CardTitle className="text-lg">Engagement Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
                       <p className="text-3xl font-bold text-purple-600">85%</p>
                       <p className="text-sm text-gray-500">Avg Attendance Rate</p>
@@ -1527,7 +1527,7 @@ export default function WebinarsClient() {
                       <p className="text-white/80">Access and share webinar recordings</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockRecordings.length}</p>
                       <p className="text-sm text-white/80">Recordings</p>
@@ -1705,7 +1705,7 @@ export default function WebinarsClient() {
                       <p className="text-white/80">Manage automated email communications</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockTemplates.length}</p>
                       <p className="text-sm text-white/80">Templates</p>
@@ -1954,7 +1954,7 @@ export default function WebinarsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Timezone</Label>
                             <Input defaultValue="America/New_York" className="mt-1" />
@@ -1964,7 +1964,7 @@ export default function WebinarsClient() {
                             <Input type="number" defaultValue="60" className="mt-1" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Max Participants</Label>
                             <Input type="number" defaultValue="500" className="mt-1" />
@@ -2464,7 +2464,7 @@ export default function WebinarsClient() {
                 </p>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Scheduled</p>
                     <p className="text-lg font-bold">{formatDate(selectedWebinar.scheduledDate)}</p>
@@ -2608,7 +2608,7 @@ export default function WebinarsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="edit-type">Type</Label>
                     <select
@@ -2641,7 +2641,7 @@ export default function WebinarsClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="edit-duration">Duration (minutes)</Label>
                     <Input
@@ -2666,7 +2666,7 @@ export default function WebinarsClient() {
 
                 <div className="space-y-3">
                   <h4 className="font-medium">Features</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <span className="text-sm">Recording</span>
                       <Switch

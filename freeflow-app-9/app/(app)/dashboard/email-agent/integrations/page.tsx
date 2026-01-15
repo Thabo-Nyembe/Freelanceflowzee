@@ -462,7 +462,7 @@ export default function IntegrationsManagement() {
                       <div className="font-semibold">{stat.provider}</div>
                       <div className="text-lg font-bold">${stat.totalCost.toFixed(2)}</div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                       <div>
                         <div className="text-muted-foreground">Total Calls</div>
                         <div className="font-medium">{stat.totalCalls.toLocaleString()}</div>

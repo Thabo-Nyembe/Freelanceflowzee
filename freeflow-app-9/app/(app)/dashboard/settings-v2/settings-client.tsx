@@ -1564,7 +1564,7 @@ export default function SettingsClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <label className="text-sm font-medium mb-2 block">First Name</label>
                         <Input
@@ -1605,7 +1605,7 @@ export default function SettingsClient() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <label className="text-sm font-medium mb-2 block">Phone</label>
                         <Input
@@ -2359,7 +2359,7 @@ export default function SettingsClient() {
                       </div>
                       <Button variant="secondary" onClick={() => { window.open('/pricing', '_blank'); toast.success('Opening pricing page'); }}>Upgrade Plan</Button>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                         <p className="text-gray-500">Next billing date</p>
                         <p className="font-medium">{formatDate(billing.nextBillingDate)}</p>
@@ -2544,7 +2544,7 @@ export default function SettingsClient() {
                   <CardDescription>Choose your preferred color scheme</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {[
                       { value: 'light', label: 'Light', icon: Sun },
                       { value: 'dark', label: 'Dark', icon: Moon },
@@ -2985,7 +2985,7 @@ export default function SettingsClient() {
                     <CardDescription>Control your data and storage settings</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label>Data Retention Period</Label>
                         <Select

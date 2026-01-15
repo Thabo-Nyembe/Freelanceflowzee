@@ -2179,7 +2179,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: CloudUpload, label: 'Upload', desc: 'Add new files', color: 'text-pink-500', action: handleUploadMedia },
                 { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
@@ -2408,7 +2408,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Folder Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => { setActiveTab('folders'); toast.success('Folder tree view active') } },
@@ -2492,7 +2492,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Collections Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
                 { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => { setActiveTab('collections'); toast.success('Browsing all collections') } },
@@ -2576,7 +2576,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Upload Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: ImagePlus, label: 'Images', desc: 'Upload photos', color: 'text-blue-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'image' }); setShowUploadDialog(true) } },
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
@@ -2662,7 +2662,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Analytics Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => { setActiveTab('analytics') } },
                 { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
@@ -2775,7 +2775,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Additional Analytics */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle>Upload Trends</CardTitle>
@@ -2888,7 +2888,7 @@ export default function MediaLibraryClient({
                         <CardDescription>Basic media library settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Library Name</label>
                             <Input defaultValue="Main Media Library" />
@@ -3301,7 +3301,7 @@ export default function MediaLibraryClient({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <Card className="border-0 bg-gray-50 dark:bg-gray-800/50">
                       <CardContent className="p-4">
                         <p className="text-sm text-gray-500 mb-1">File Size</p>
@@ -3420,7 +3420,7 @@ export default function MediaLibraryClient({
             </DialogHeader>
             {selectedCollection && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-sm text-gray-500">Assets</p>
                     <p className="text-2xl font-bold">{selectedCollection.assetCount}</p>
@@ -3928,7 +3928,7 @@ export default function MediaLibraryClient({
               <DialogDescription>Access and manage your brand assets</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4 cursor-pointer hover:shadow-md" onClick={() => { setShowBrandKitDialog(false); setSearchQuery('logo'); toast.success('Filtering by logos') }}>
                   <Palette className="h-8 w-8 text-purple-500 mb-2" />
                   <h4 className="font-medium">Logos</h4>
@@ -4253,7 +4253,7 @@ export default function MediaLibraryClient({
               <DialogDescription>View performance trends over time</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="h-4 w-4 text-green-500" />
@@ -4296,7 +4296,7 @@ export default function MediaLibraryClient({
               <DialogDescription>Breakdown of assets by type</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 border rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <FileImage className="h-4 w-4 text-blue-500" />

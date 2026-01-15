@@ -1262,7 +1262,7 @@ export default function TeamHubClient() {
                       <p className="text-white/80">Manage your workspace members and permissions</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{stats.totalMembers}</p>
                       <p className="text-sm text-white/80">Total</p>
@@ -1939,7 +1939,7 @@ export default function TeamHubClient() {
                         <CardDescription>Configure basic workspace preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Workspace Name</Label>
                             <Input defaultValue="FreeFlow Team" className="mt-1" />
@@ -2342,7 +2342,7 @@ export default function TeamHubClient() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm">
                       <div className="flex items-center gap-2">
                         <Folder className="w-4 h-4 text-gray-400" />
                         <span>{selectedMember.department}</span>
@@ -2419,7 +2419,7 @@ export default function TeamHubClient() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-400" />
                     <span>{selectedChannel.memberCount} members</span>
@@ -2537,7 +2537,7 @@ export default function TeamHubClient() {
               <DialogDescription>Add a new member to your team</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="col-span-2">
                   <Label>Name *</Label>
                   <Input

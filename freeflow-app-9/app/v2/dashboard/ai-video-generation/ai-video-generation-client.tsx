@@ -1642,7 +1642,7 @@ export default function AiVideoGenerationClient() {
                 {/* Style */}
                 <div>
                   <Label className="text-white mb-2">Video Style</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                     {VIDEO_STYLES.map((style) => (
                       <button
                         key={style}
@@ -1663,7 +1663,7 @@ export default function AiVideoGenerationClient() {
                 {/* Format */}
                 <div>
                   <Label className="text-white mb-2">Video Format</Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {VIDEO_FORMATS.map((format) => (
                       <button
                         key={format}
@@ -1684,7 +1684,7 @@ export default function AiVideoGenerationClient() {
                 {/* Quality */}
                 <div>
                   <Label className="text-white mb-2">Quality</Label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                     {VIDEO_QUALITIES.map((quality) => (
                       <button
                         key={quality}
@@ -1787,7 +1787,7 @@ export default function AiVideoGenerationClient() {
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-slate-800 rounded-lg">
                     <p className="text-sm text-gray-400 mb-1">Status</p>
                     <Badge className={getStatusBadgeColor(state.selectedVideo.status)}>
@@ -1880,7 +1880,7 @@ export default function AiVideoGenerationClient() {
 
               {/* Tab 2: Analytics */}
               <TabsContent value="analytics" className="space-y-4 mt-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <LiquidGlassCard className="p-6 text-center">
                     <Eye className="w-8 h-8 mx-auto mb-2 text-cyan-400" />
                     <p className="text-sm text-gray-400 mb-1">Views</p>
@@ -1902,7 +1902,7 @@ export default function AiVideoGenerationClient() {
 
                 <div className="p-6 bg-slate-800 rounded-lg">
                   <h4 className="font-semibold text-white mb-4">Video Metadata</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div>
                       <p className="text-gray-400">Resolution</p>
                       <p className="text-white">{state.selectedVideo.metadata.width} x {state.selectedVideo.metadata.height}</p>
@@ -2099,7 +2099,7 @@ export default function AiVideoGenerationClient() {
             {/* Export Format */}
             <div>
               <Label className="text-white mb-3 block">Export Format</Label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                 {(['mp4', 'webm', 'mov', 'all'] as const).map((format) => (
                   <button
                     key={format}
@@ -2120,7 +2120,7 @@ export default function AiVideoGenerationClient() {
             {/* Export Quality */}
             <div>
               <Label className="text-white mb-3 block">Export Quality</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {([
                   { value: 'original', label: 'Original', desc: 'Full quality' },
                   { value: 'compressed', label: 'Compressed', desc: 'Smaller file' },
@@ -2225,7 +2225,7 @@ export default function AiVideoGenerationClient() {
             {/* Default Quality */}
             <div>
               <Label className="text-white mb-2 block">Default Quality</Label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                 {VIDEO_QUALITIES.map((quality) => (
                   <button
                     key={quality}

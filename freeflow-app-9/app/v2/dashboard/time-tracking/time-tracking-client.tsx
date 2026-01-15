@@ -1159,7 +1159,7 @@ export default function TimeTrackingClient() {
             </div>
 
             {reportsTab === 'overview' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -1272,7 +1272,7 @@ export default function TimeTrackingClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Tags Usage</CardTitle><Button onClick={() => setShowTagDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Tag</Button></CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {mockTags.map(tag => (
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
@@ -1554,7 +1554,7 @@ export default function TimeTrackingClient() {
             )}
 
             {teamTab === 'utilization' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Utilization</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -1575,7 +1575,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{mockTeam.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{mockTeam.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
@@ -2390,8 +2390,8 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
               <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={handleCreateManualEntry} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : 'Save Entry'}</Button></DialogFooter>
@@ -2404,7 +2404,7 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Project</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>From Date</Label><Input type="date" className="mt-1" /></div><div><Label>To Date</Label><Input type="date" className="mt-1" /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>From Date</Label><Input type="date" className="mt-1" /></div><div><Label>To Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Due Date</Label><Input type="date" className="mt-1" /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Generate Invoice</Button></DialogFooter>
@@ -2415,8 +2415,8 @@ export default function TimeTrackingClient() {
         <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add New Client</DialogTitle><DialogDescription>Create a new client for billing and project tracking</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" /></div><div><Label>Currency</Label><Select defaultValue="USD"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" /></div><div><Label>Currency</Label><Select defaultValue="USD"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
               <div><Label>Address</Label><Input placeholder="123 Business Ave, City, State ZIP" className="mt-1" /></div>
               <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" /></div>
               <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
@@ -2447,7 +2447,7 @@ export default function TimeTrackingClient() {
           <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>{selectedReport ? 'Edit Report' : 'Create New Report'}</DialogTitle><DialogDescription>{selectedReport ? `Editing: ${selectedReport.name}` : 'Build a custom report with your preferred filters'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" defaultValue={selectedReport?.name || ''} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Report Type</Label><Select defaultValue={selectedReport?.type}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
                 <div><Label>Date Range</Label><Select defaultValue={selectedReport?.dateRange}><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
               </div>
@@ -2475,7 +2475,7 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div><Label>Project Name</Label><Input placeholder="e.g., Website Redesign" className="mt-1" /></div>
               <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
                 <div><Label>Budget</Label><Input type="number" placeholder="20000" className="mt-1" /></div>
               </div>
@@ -2497,7 +2497,7 @@ export default function TimeTrackingClient() {
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Request Time Off</DialogTitle><DialogDescription>Submit a time off request for approval</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="vacation">Vacation</SelectItem><SelectItem value="sick">Sick Leave</SelectItem><SelectItem value="personal">Personal</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Start Date</Label><Input type="date" className="mt-1" /></div>
                 <div><Label>End Date</Label><Input type="date" className="mt-1" /></div>
               </div>
@@ -2512,7 +2512,7 @@ export default function TimeTrackingClient() {
         <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
           <DialogContent><DialogHeader><DialogTitle>Add Integration</DialogTitle><DialogDescription>Connect a third-party service</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[{name:'Google Calendar', icon:'📅', type:'calendar'},{name:'Asana', icon:'📋', type:'project'},{name:'QuickBooks', icon:'💰', type:'accounting'},{name:'Slack', icon:'💬', type:'communication'},{name:'Salesforce', icon:'☁️', type:'crm'},{name:'Jira', icon:'🎯', type:'project'}].map(app => (
                   <button key={app.name} className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left" onClick={async () => {
                     await apiPost('/api/integrations', { name: app.name, type: app.type }, { loading: `Connecting ${app.name}...`, success: `${app.name} connected successfully`, error: 'Connection failed' })
@@ -2547,7 +2547,7 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <h3 className="font-bold text-lg mb-4">Time Summary Report</h3>
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                   <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Total Hours</p><p className="text-2xl font-bold">164.5h</p></div>
                   <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Billable</p><p className="text-2xl font-bold text-green-600">142.0h</p></div>
                   <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Revenue</p><p className="text-2xl font-bold">$21,300</p></div>

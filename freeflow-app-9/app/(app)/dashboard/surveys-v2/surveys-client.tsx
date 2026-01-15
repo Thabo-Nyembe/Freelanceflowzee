@@ -1875,7 +1875,7 @@ export default function SurveysClient() {
                         <CardDescription>Configure default options for new surveys</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="defaultFont">Default Font</Label>
                             <select id="defaultFont" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
@@ -1983,7 +1983,7 @@ export default function SurveysClient() {
                             Upload
                           </Button>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="primaryColor">Primary Color</Label>
                             <div className="mt-1 flex items-center gap-2">
@@ -2326,7 +2326,7 @@ export default function SurveysClient() {
                             </div>
                           </div>
                           <div className="md:col-span-2 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <p className="text-xs text-muted-foreground">Next Billing</p>
                                 <p className="font-semibold">$29/mo on Feb 1</p>
@@ -2471,7 +2471,7 @@ export default function SurveysClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedSurvey.questions.length}</p>
                     <p className="text-xs text-muted-foreground">Questions</p>
@@ -2601,7 +2601,7 @@ export default function SurveysClient() {
                 </div>
 
                 {/* Metadata */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-xs text-muted-foreground">Device</p>
                     <p className="font-medium">{selectedResponse.metadata.device}</p>
@@ -2657,7 +2657,7 @@ export default function SurveysClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <Button
                   variant="outline"
                   className="flex items-center gap-2"
@@ -2845,7 +2845,7 @@ export default function SurveysClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Import Source</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {[
                     { id: 'file', label: 'Upload File', icon: FileUp },
                     { id: 'typeform', label: 'Typeform', icon: Layout },
@@ -3173,7 +3173,7 @@ export default function SurveysClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                   {(['csv', 'xlsx', 'pdf', 'json'] as const).map((format) => (
                     <button
                       key={format}
@@ -3192,7 +3192,7 @@ export default function SurveysClient() {
 
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                   {[
                     { id: 'all', label: 'All Time' },
                     { id: 'week', label: 'This Week' },
@@ -3261,7 +3261,7 @@ export default function SurveysClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Distribution Method</Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                   {[
                     { id: 'link', label: 'Link', icon: Link },
                     { id: 'email', label: 'Email', icon: Mail },
@@ -3499,7 +3499,7 @@ export default function SurveysClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Trigger</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {[
                     { id: 'new_response', label: 'New Response', icon: Users },
                     { id: 'completion', label: 'Survey Completed', icon: CheckCircle },
@@ -3524,7 +3524,7 @@ export default function SurveysClient() {
 
               <div className="space-y-2">
                 <Label>Action</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {[
                     { id: 'email', label: 'Send Email', icon: Mail },
                     { id: 'slack', label: 'Slack Message', icon: MessageSquare },
@@ -3647,7 +3647,7 @@ export default function SurveysClient() {
               </div>
 
               {/* Logic Actions */}
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-20"

@@ -1415,7 +1415,7 @@ export default function ArCollaborationClient() {
                   <div className="space-y-6">
                     <div>
                       <Label className="text-gray-300 mb-2">Select Environment</Label>
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                         {(['office', 'studio', 'conference'] as const).map((env) => (
                           <Button
                             key={env}
@@ -1511,7 +1511,7 @@ export default function ArCollaborationClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-gray-300">Environment</Label>
                     <Select value={sessionEnvironment} onValueChange={(value) => setSessionEnvironment(value as AREnvironment)}>
@@ -1623,7 +1623,7 @@ export default function ArCollaborationClient() {
 
                 {/* Tab Content */}
                 {viewSessionTab === 'overview' && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <span className="text-sm text-gray-400">Environment</span>
                       <p className="text-white font-medium">{getEnvironmentName(state.selectedSession.environment)}</p>

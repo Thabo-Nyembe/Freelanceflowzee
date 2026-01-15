@@ -1283,7 +1283,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         {expandedProducts.has(product.id) && (
                           <tr className="bg-gray-50/50 dark:bg-gray-700/30">
                             <td colSpan={6} className="py-3 px-4 pl-16">
-                              <div className="grid grid-cols-5 gap-4 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-sm">
                                 <div className="font-medium text-gray-500 dark:text-gray-400">Variant</div>
                                 <div className="font-medium text-gray-500 dark:text-gray-400">SKU</div>
                                 <div className="font-medium text-gray-500 dark:text-gray-400 text-right">Stock</div>
@@ -1293,7 +1293,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                               {product.variants.map((variant) => {
                                 const stockStatus = getVariantStockStatus(variant.quantity)
                                 return (
-                                  <div key={variant.id} className="grid grid-cols-5 gap-4 text-sm py-2 border-t dark:border-gray-600 mt-2">
+                                  <div key={variant.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-sm py-2 border-t dark:border-gray-600 mt-2">
                                     <div className="text-gray-900 dark:text-white">
                                       {[variant.option1, variant.option2, variant.option3].filter(Boolean).join(' / ') || 'Default'}
                                     </div>
@@ -1363,7 +1363,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         <MoreHorizontal className="w-5 h-5" />
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t dark:border-gray-700">
                       <div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">Products</div>
                         <div className="text-xl font-semibold text-gray-900 dark:text-white">{location.productCount}</div>
@@ -1694,7 +1694,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Costing Method</h3>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {[
                           { name: 'FIFO', desc: 'First In, First Out', active: true },
                           { name: 'LIFO', desc: 'Last In, First Out', active: false },
@@ -1899,7 +1899,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Demand Forecasting</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Forecast Period</p>
                           <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500">
@@ -2008,7 +2008,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Import/Export</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <button className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-left">
                           <Upload className="w-6 h-6 text-blue-600 mb-2" />
                           <p className="font-medium text-gray-900 dark:text-white">Import Inventory</p>
@@ -2091,7 +2091,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           </DialogHeader>
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Title</label>
                   <input
@@ -2123,7 +2123,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   placeholder="Enter product description"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Type</label>
                   <select
@@ -2163,7 +2163,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <div className="space-y-2">
                   {(selectedProduct?.variants || [{ id: 'new', sku: '', barcode: '', option1: null, option2: null, option3: null, price: 0, costPrice: 0, quantity: 0, weight: 0, weightUnit: 'kg' as const }]).map((variant, idx) => (
                     <div key={variant.id} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                      <div className="grid grid-cols-5 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-6">
                         <div>
                           <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">SKU</label>
                           <input
@@ -2242,7 +2242,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origin Location</label>
                 <select
@@ -2419,7 +2419,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 placeholder="Street address"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
                 <input
@@ -2480,7 +2480,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 placeholder="Company name"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                 <input
@@ -2511,7 +2511,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
                 <input
@@ -2774,7 +2774,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <option value="custom">Custom Size</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity per SKU</label>
                 <input

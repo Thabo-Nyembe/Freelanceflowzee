@@ -1457,7 +1457,7 @@ export default function VoiceCollaborationPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-gray-300">Room Type</Label>
                     <select
@@ -1566,7 +1566,7 @@ export default function VoiceCollaborationPage() {
                 {/* Tab Content */}
                 {viewRoomTab === 'overview' && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <span className="text-sm text-gray-400">Room Type</span>
                         <p className="text-white font-medium capitalize">{state.selectedRoom.type}</p>

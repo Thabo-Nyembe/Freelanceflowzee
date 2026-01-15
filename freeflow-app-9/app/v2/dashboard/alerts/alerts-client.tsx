@@ -979,7 +979,7 @@ export default function AlertsClient() {
 
           {/* On-Call Tab */}
           <TabsContent value="oncall" className="mt-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockOnCallSchedules.map(schedule => (
                 <Card key={schedule.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
@@ -1116,7 +1116,7 @@ export default function AlertsClient() {
 
           {/* Escalations Tab */}
           <TabsContent value="escalations" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockEscalationPolicies.map(policy => (
                 <Card key={policy.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
@@ -1317,7 +1317,7 @@ export default function AlertsClient() {
                         <CardDescription>Basic alert configuration</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Alert Priority</Label>
                             <Select defaultValue="high">
@@ -1384,7 +1384,7 @@ export default function AlertsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Incident Threshold</Label>
                             <Select defaultValue="critical">
@@ -1482,7 +1482,7 @@ export default function AlertsClient() {
                         <CardDescription>Configure notification behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Notification Urgency</Label>
                             <Select defaultValue="high">
@@ -1541,7 +1541,7 @@ export default function AlertsClient() {
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Start Time</Label>
                             <Input type="time" defaultValue="22:00" />
@@ -1651,7 +1651,7 @@ export default function AlertsClient() {
                         <CardDescription>Configure when to escalate</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Escalate After</Label>
                             <Select defaultValue="15">
@@ -1950,7 +1950,7 @@ export default function AlertsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Flap Detection Window</Label>
                             <Select defaultValue="10">
@@ -1992,7 +1992,7 @@ export default function AlertsClient() {
                         <CardDescription>Configure alert history retention</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Alert History</Label>
                             <Select defaultValue="90">
@@ -2038,7 +2038,7 @@ export default function AlertsClient() {
                         <CardDescription>Export alert data and reports</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Export Format</Label>
                             <Select defaultValue="csv">
@@ -2234,7 +2234,7 @@ export default function AlertsClient() {
                     <p className="text-gray-600 dark:text-gray-300">{selectedAlert.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-medium mb-2">Service</h4>
                       <p className="text-gray-600">{selectedAlert.service}</p>
@@ -2340,7 +2340,7 @@ export default function AlertsClient() {
                   onChange={(e) => setNewAlertForm(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Severity</Label>
                   <Select
@@ -2617,7 +2617,7 @@ export default function AlertsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Condition - When</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   <Select defaultValue="severity">
                     <SelectTrigger>
                       <SelectValue />

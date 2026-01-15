@@ -393,7 +393,7 @@ export default function CloudStoragePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <Button variant="outline" className="h-16 flex flex-col items-center justify-center gap-1">
                   <Upload className="h-5 w-5" />
                   <span className="text-xs">Upload Files</span>

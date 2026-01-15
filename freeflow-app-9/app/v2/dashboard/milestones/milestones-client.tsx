@@ -1538,7 +1538,7 @@ export default function MilestonesClient() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {report.metrics.map((metric, idx) => (
                           <div key={idx} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                             <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">{metric.label}</p>
@@ -1660,7 +1660,7 @@ export default function MilestonesClient() {
                         <CardDescription>Configure your milestone management preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -1714,7 +1714,7 @@ export default function MilestonesClient() {
                         <CardDescription>Configure milestone behavior and automation</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Priority</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -1790,7 +1790,7 @@ export default function MilestonesClient() {
                         <CardDescription>Choose where to receive notifications</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { icon: Mail, label: 'Email', active: true },
                             { icon: Bell, label: 'In-App', active: true },
@@ -1931,7 +1931,7 @@ export default function MilestonesClient() {
                         <CardDescription>Manage your milestone data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleExportReport}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
@@ -2034,7 +2034,7 @@ export default function MilestonesClient() {
                 <ScrollArea className="max-h-[60vh] pr-4">
                   <div className="space-y-6 py-4">
                     {/* Status and Progress */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                         <div className="flex items-center justify-between mb-4">
                           <span className="text-sm text-slate-600 dark:text-slate-400">Status</span>
@@ -2190,7 +2190,7 @@ export default function MilestonesClient() {
                   onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="type">Type</Label>
                   <select
@@ -2224,7 +2224,7 @@ export default function MilestonesClient() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="due_date">Due Date</Label>
                   <Input
@@ -2245,7 +2245,7 @@ export default function MilestonesClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="owner_name">Owner Name</Label>
                   <Input
@@ -2333,7 +2333,7 @@ export default function MilestonesClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-6 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => { handleExportReport(); setShowExportDialog(false); }}>
                   <FileText className="w-5 h-5" />
                   <span>CSV Format</span>

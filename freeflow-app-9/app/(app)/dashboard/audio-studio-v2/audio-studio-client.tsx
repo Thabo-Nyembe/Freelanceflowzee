@@ -1670,7 +1670,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                           </Label>
                           <Switch id="undo-history" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Auto-Save Interval (min)</Label>
                             <Input type="number" defaultValue="5" />
@@ -1720,7 +1720,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                         <CardDescription>Configure audio I/O settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Sample Rate</Label>
                             <Input defaultValue="48000 Hz" />
@@ -1730,7 +1730,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                             <Input defaultValue="256 samples" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Bit Depth</Label>
                             <Input defaultValue="24-bit" />
@@ -1817,7 +1817,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                           </Label>
                           <Switch id="metronome" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Click Volume</Label>
                             <Input type="number" defaultValue="-6" />
@@ -1959,7 +1959,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                           </Label>
                           <Switch id="gpu-accel" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Process Priority</Label>
                             <Input defaultValue="High" />
@@ -2086,7 +2086,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             <ScrollArea className="max-h-[60vh] pr-4">
               <div className="space-y-6">
                 {/* Track Settings */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Volume</label>
                     <div className="flex items-center gap-2">

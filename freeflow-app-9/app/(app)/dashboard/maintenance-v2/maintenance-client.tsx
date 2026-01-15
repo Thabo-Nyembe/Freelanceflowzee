@@ -1411,7 +1411,7 @@ export default function MaintenanceClient() {
                                   <Badge className={getTypeColor(order.type)}>{order.type}</Badge>
                                 </div>
                                 <p className="text-sm text-gray-600">{order.description}</p>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                   <div>
                                     <h4 className="font-semibold mb-1">Asset</h4>
                                     <p className="text-sm text-gray-600">{order.asset}</p>
@@ -1502,7 +1502,7 @@ export default function MaintenanceClient() {
                           </div>
                           <div className="text-right">
                             <Badge className={getAssetStatusColor(asset.status)}>{asset.status}</Badge>
-                            <div className="mt-2 grid grid-cols-2 gap-4 text-xs">
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-xs">
                               <div>
                                 <p className="text-gray-500">Uptime</p>
                                 <p className="font-semibold">{asset.uptime}%</p>
@@ -1541,7 +1541,7 @@ export default function MaintenanceClient() {
                         <Badge className={getTypeColor(schedule.type)}>{schedule.type}</Badge>
                         <Badge variant="outline">{schedule.frequency}</Badge>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                         <div>
                           <p className="text-xs text-gray-500">Last Run</p>
                           <p className="text-sm font-medium">{formatDate(schedule.lastRun)}</p>
@@ -2399,7 +2399,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Schedule a new maintenance window for your systems</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Title *</Label>
                 <Input
@@ -2545,7 +2545,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Create a recurring preventive maintenance schedule for your assets</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Select Asset *</Label>
                 <select
@@ -2702,7 +2702,7 @@ export default function MaintenanceClient() {
             </div>
 
             {/* Asset Stats */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <p className="text-lg font-bold text-green-700">{mockAssets.filter(a => a.status === 'operational').length}</p>
                 <p className="text-xs text-green-600">Operational</p>
@@ -2741,7 +2741,7 @@ export default function MaintenanceClient() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-xs">
                         <div>
                           <p className="text-gray-500">Uptime</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{asset.uptime}%</p>
@@ -2982,7 +2982,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Add a new spare part to inventory</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Part Name *</Label>
                 <Input placeholder="e.g., Air Filter 24x24" className="mt-1.5" />
@@ -3048,7 +3048,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Add a new team member to the maintenance team</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Full Name *</Label>
                 <Input placeholder="John Smith" className="mt-1.5" />
@@ -3256,7 +3256,7 @@ export default function MaintenanceClient() {
           <ScrollArea className="h-[500px] pr-4">
             <div className="space-y-6">
               {/* Summary Cards */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl">
                   <p className="text-2xl font-bold text-green-700">{stats.completed}</p>
                   <p className="text-sm text-green-600">Completed</p>

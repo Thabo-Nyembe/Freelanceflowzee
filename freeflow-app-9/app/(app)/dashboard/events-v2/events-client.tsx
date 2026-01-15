@@ -2347,7 +2347,7 @@ export default function EventsClient() {
 
               <p className="text-gray-600 dark:text-gray-400">{selectedEvent.description}</p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <div className="text-sm text-gray-500">Date & Time</div>
                   <div className="font-medium">{formatDate(selectedEvent.startDate)}</div>
@@ -2452,7 +2452,7 @@ export default function EventsClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="event_type">Event Type</Label>
                 <Select
@@ -2493,7 +2493,7 @@ export default function EventsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="start_date">Start Date *</Label>
                 <Input
@@ -2515,7 +2515,7 @@ export default function EventsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="location_type">Location Type</Label>
                 <Select
@@ -2638,7 +2638,7 @@ export default function EventsClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-event_type">Event Type</Label>
                 <Select
@@ -2679,7 +2679,7 @@ export default function EventsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-start_date">Start Date *</Label>
                 <Input
@@ -2701,7 +2701,7 @@ export default function EventsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-location_type">Location Type</Label>
                 <Select
@@ -3350,7 +3350,7 @@ export default function EventsClient() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400">{eventToPreview.description}</p>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-gray-400" />
                   <span>{formatDate(eventToPreview.startDate)} - {formatDate(eventToPreview.endDate)}</span>

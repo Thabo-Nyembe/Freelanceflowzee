@@ -399,7 +399,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
@@ -1089,7 +1089,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Help Desk Name</Label>
                             <Input defaultValue="FreeFlow Support" />
@@ -1160,7 +1160,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex gap-2">
@@ -1431,7 +1431,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Support Email Address</Label>
                             <Input defaultValue="support@freeflow.io" />
@@ -1543,7 +1543,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Support Phone Number</Label>
                             <Input placeholder="+1 (555) 000-0000" disabled />
@@ -2001,7 +2001,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                   placeholder="Detailed description of the issue..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Category</Label>
                   <select
@@ -2031,7 +2031,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Customer Name</Label>
                   <Input
@@ -2110,7 +2110,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                   <p className="text-muted-foreground">{mockCustomer.company}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Email</p>
                   <p className="font-medium">{mockCustomer.email}</p>
@@ -2176,7 +2176,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               </div>
 
               {/* Queue Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                   <p className="text-2xl font-bold text-blue-600">{myQueueTickets.filter(t => t.status === 'open').length}</p>
                   <p className="text-xs text-muted-foreground">Open</p>
@@ -2300,7 +2300,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               </div>
 
               {/* Macro Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
                   <p className="text-2xl font-bold text-purple-600">{mockMacros.length}</p>
                   <p className="text-xs text-muted-foreground">Total Macros</p>

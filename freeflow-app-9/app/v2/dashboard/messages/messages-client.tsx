@@ -2359,7 +2359,7 @@ export default function MessagesClient() {
                       <div className="text-2xl font-bold">{stats.totalMessages.toLocaleString()}</div>
                       <div className="text-xs opacity-80">Total Messages</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">{stats.totalChannels}</div>
                         <div className="text-xs opacity-80">Channels</div>
@@ -2393,7 +2393,7 @@ export default function MessagesClient() {
                         <CardDescription>Configure your workspace preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Workspace Name</Label>
                             <Input defaultValue="FreeFlow Team" />
@@ -2403,7 +2403,7 @@ export default function MessagesClient() {
                             <Input defaultValue="freeflow.slack.com" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Language</Label>
                             <Select defaultValue="en">
@@ -2459,7 +2459,7 @@ export default function MessagesClient() {
                         <CardDescription>Manage your profile information</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Display Name</Label>
                             <Input defaultValue={currentUser.displayName} />
@@ -2543,7 +2543,7 @@ export default function MessagesClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Start Time</Label>
                             <Select defaultValue="22">
@@ -3357,7 +3357,7 @@ export default function MessagesClient() {
             </div>
             <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-2">
               <p className="font-medium text-sm">Export Summary</p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                 <div className="text-gray-500">Messages:</div>
                 <div className="font-medium">{supabaseMessages?.length || 0}</div>
                 <div className="text-gray-500">Channels:</div>
@@ -3667,7 +3667,7 @@ export default function MessagesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="call-date">Date</Label>
                 <Input

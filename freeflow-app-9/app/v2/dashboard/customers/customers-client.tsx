@@ -825,7 +825,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -1117,7 +1117,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <Badge variant="outline">{account.type}</Badge>
                         </div>
                         <p className="text-gray-600 dark:text-gray-400">{account.industry}</p>
-                        <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-3 text-sm">
                           <div>
                             <div className="text-gray-500">Revenue</div>
                             <div className="font-semibold">{formatCurrency(account.annualRevenue)}</div>
@@ -1343,7 +1343,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         </div>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{campaign.description}</p>
-                      <div className="grid grid-cols-4 gap-4 text-center mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center mb-4">
                         <div>
                           <div className="text-lg font-bold">{campaign.numSent.toLocaleString()}</div>
                           <div className="text-xs text-gray-500">Sent</div>
@@ -1379,7 +1379,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <CardTitle>Q1 2024 Forecast Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mb-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Total Quota</div>
@@ -1409,7 +1409,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         <div className="font-medium">{forecast.ownerName}</div>
                         <div className="text-sm text-gray-500">{forecast.period}</div>
                       </div>
-                      <div className="grid grid-cols-4 gap-8 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-6 text-center">
                         <div>
                           <div className="font-semibold">{formatCurrency(forecast.quotaAmount)}</div>
                           <div className="text-xs text-gray-500">Quota</div>
@@ -1996,7 +1996,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         <CardDescription>Configure when to receive notifications</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center gap-2">
                             <Switch defaultChecked />
                             <Label className="font-normal">New Lead Assigned</Label>
@@ -2344,7 +2344,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-2">
                       <Label className="text-gray-500">Email</Label>
                       <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-gray-400" />{selectedContact.email}</div>
@@ -2400,7 +2400,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <DialogDescription>Create a new contact in your CRM</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input placeholder="John" value={newContactForm.firstName} onChange={(e) => setNewContactForm(prev => ({ ...prev, firstName: e.target.value }))} />
@@ -2449,7 +2449,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <DialogDescription>Update contact information</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input placeholder="John" value={editContactForm.firstName} onChange={(e) => setEditContactForm(prev => ({ ...prev, firstName: e.target.value }))} />
@@ -2475,7 +2475,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Label>Company</Label>
                 <Input placeholder="Acme Corporation" value={editContactForm.company} onChange={(e) => setEditContactForm(prev => ({ ...prev, company: e.target.value }))} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Segment</Label>
                   <Select value={editContactForm.segment} onValueChange={(value) => setEditContactForm(prev => ({ ...prev, segment: value as CustomerSegment }))}>
@@ -2747,7 +2747,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Date</Label>
                   <Input type="date" />
@@ -2846,7 +2846,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Date</Label>
                   <Input type="date" />
@@ -3218,7 +3218,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Label>Description</Label>
                 <Textarea placeholder="Task description..." rows={3} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Due Date</Label>
                   <Input type="date" />
@@ -3294,7 +3294,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Label>Campaign Name *</Label>
                 <Input placeholder="Enter campaign name..." />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Campaign Type</Label>
                   <Select defaultValue="email">
@@ -3325,7 +3325,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
                   <Input type="date" />
@@ -3335,7 +3335,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                   <Input type="date" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Budget</Label>
                   <Input type="number" placeholder="0.00" min={0} />

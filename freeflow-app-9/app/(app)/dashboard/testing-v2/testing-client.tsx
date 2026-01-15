@@ -1107,7 +1107,7 @@ export default function TestingClient() {
                           {selectedRun.status}
                         </span>
                       </div>
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                           <p className="text-xs text-gray-500 mb-1">Pass Rate</p>
                           <p className="text-xl font-bold text-green-600">
@@ -2050,7 +2050,7 @@ export default defineConfig({
                         ].map((env, i) => (
                           <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                             <Key className="h-4 w-4 text-gray-400" />
-                            <div className="flex-1 grid grid-cols-2 gap-4">
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                               <Input value={env.key} readOnly className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                               <Input type="password" value={env.value} className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                             </div>
@@ -2371,7 +2371,7 @@ export default defineConfig({
           </DialogHeader>
           {selectedSpec && (
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                   <p className="text-xs text-gray-500 mb-1">Duration</p>
                   <p className="font-semibold text-gray-900 dark:text-white">{formatDuration(selectedSpec.duration)}</p>
@@ -2531,7 +2531,7 @@ export default defineConfig({
                 className="mt-1.5 dark:bg-gray-900 dark:border-gray-700"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Suite Name</Label>
                 <Input
@@ -2556,7 +2556,7 @@ export default defineConfig({
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Browser</Label>
                 <select

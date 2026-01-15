@@ -1011,7 +1011,7 @@ export default function ProjectTemplatesClient() {
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm dark:text-gray-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm dark:text-gray-300">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         <span>{template.duration}</span>
@@ -1142,7 +1142,7 @@ export default function ProjectTemplatesClient() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="templateName">Template Name *</Label>
                 <Input
@@ -1181,7 +1181,7 @@ export default function ProjectTemplatesClient() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="templateType">Type</Label>
                 <select
@@ -1543,7 +1543,7 @@ export default function ProjectTemplatesClient() {
                 <FileText className="h-16 w-16 text-gray-400" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm text-gray-500">Category</Label>
                   <p className="font-medium capitalize">{selectedTemplate.category.replace('-', ' ')}</p>

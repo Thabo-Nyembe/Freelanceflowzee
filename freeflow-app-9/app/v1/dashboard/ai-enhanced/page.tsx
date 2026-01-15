@@ -1307,7 +1307,7 @@ export default function AIEnhancedPage() {
                         </div>
 
                         {/* Metrics */}
-                        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 pt-3 border-t border-gray-700">
                           <div>
                             <p className="text-xs text-gray-400">Usage</p>
                             <p className="text-sm font-semibold text-white">{formatNumber(tool.usageCount)}</p>
@@ -1367,7 +1367,7 @@ export default function AIEnhancedPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="type" className="text-white">Type *</Label>
                     <Select value={toolType} onValueChange={(value: AIToolType) => setToolType(value)}>
@@ -1417,7 +1417,7 @@ export default function AIEnhancedPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="model" className="text-white">AI Model *</Label>
                     <Input
@@ -1491,7 +1491,7 @@ export default function AIEnhancedPage() {
                     <p className="text-white">{state.selectedTool.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="text-sm font-medium text-gray-400 mb-2">Type</h4>
                       <Badge>{state.selectedTool.type}</Badge>
@@ -1502,7 +1502,7 @@ export default function AIEnhancedPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-slate-800 rounded-lg">
                       <p className="text-sm text-gray-400">AI Model</p>
                       <p className="text-white font-semibold">{state.selectedTool.model}</p>
@@ -1533,7 +1533,7 @@ export default function AIEnhancedPage() {
 
                 {/* Performance Tab */}
                 <TabsContent value="performance" className="space-y-4 pt-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-slate-800 rounded-lg">
                       <p className="text-sm text-gray-400">Total Usage</p>
                       <p className="text-2xl font-bold text-white">{formatNumber(state.selectedTool.usageCount)}</p>

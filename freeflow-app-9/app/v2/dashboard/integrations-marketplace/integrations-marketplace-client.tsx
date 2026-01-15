@@ -756,7 +756,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{apps.length * 62}</div>
               <div className="text-teal-100 text-sm">Total Apps</div>
@@ -887,7 +887,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
           {/* Installed Tab */}
           <TabsContent value="installed" className="space-y-6">
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -1086,7 +1086,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                         <CardDescription>Configure your marketplace preferences and display options</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <Select defaultValue="grid">
@@ -1155,7 +1155,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                         <CardDescription>Customize how apps are recommended to you</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Sort Order</Label>
                             <Select defaultValue="popular">
@@ -1211,7 +1211,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                         <CardDescription>Set your locale preferences for the marketplace</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Display Language</Label>
                             <Select defaultValue="en">
@@ -1482,7 +1482,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Start Time</Label>
                             <Input type="time" defaultValue="22:00" />
@@ -1602,7 +1602,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                         <CardDescription>Monitor your API usage and rate limits</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold text-teal-600">12,847</div>
                             <div className="text-sm text-gray-500">API Calls Today</div>
@@ -1797,7 +1797,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                         <CardDescription>Optimize integration performance</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Connection Timeout (seconds)</Label>
                             <Input type="number" defaultValue="30" />
@@ -1807,7 +1807,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                             <Input type="number" defaultValue="3" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Batch Size</Label>
                             <Select defaultValue="100">
@@ -1953,7 +1953,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               />
             </div>
             <ScrollArea className="h-[400px]">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {apps
                   .filter(app =>
                     browseSearchQuery === '' ||
@@ -2361,7 +2361,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       <div className="p-3 bg-gray-50 rounded-lg">
                         <div className="text-sm text-gray-500">Version</div>
                         <div className="font-semibold">{selectedApp.version}</div>
@@ -2533,7 +2533,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-gray-600">Access developer resources and documentation to build integrations with FreeFlow.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="cursor-pointer hover:border-teal-300" onClick={() => {
                 toast.info('Opening API Documentation...')
                 setShowDeveloperPortalDialog(false)
@@ -2895,7 +2895,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <div className="space-y-2">
               <Label>Events to Subscribe</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['app.installed', 'app.uninstalled', 'app.updated', 'sync.started', 'sync.completed', 'sync.failed'].map(event => (
                   <div key={event} className="flex items-center gap-2">
                     <input

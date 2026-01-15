@@ -1314,7 +1314,7 @@ export default function UpcomingBookingsPage() {
                 onChange={(e) => setEditForm({ ...editForm, service: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="edit-date">Date</Label>
                 <Input
@@ -1363,7 +1363,7 @@ export default function UpcomingBookingsPage() {
           </DialogHeader>
           {viewBooking && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Client</p>
                   <p className="font-semibold">{viewBooking.clientName}</p>
@@ -1373,7 +1373,7 @@ export default function UpcomingBookingsPage() {
                   <p className="font-semibold">{viewBooking.service}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Date</p>
                   <p className="font-semibold">{viewBooking.date}</p>
@@ -1383,7 +1383,7 @@ export default function UpcomingBookingsPage() {
                   <p className="font-semibold">{viewBooking.time}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Duration</p>
                   <p className="font-semibold">{viewBooking.duration}</p>
@@ -1393,7 +1393,7 @@ export default function UpcomingBookingsPage() {
                   <p className="font-semibold">${viewBooking.amount}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
                   <Badge variant={viewBooking.status === 'confirmed' ? 'default' : 'secondary'}>
@@ -1447,7 +1447,7 @@ export default function UpcomingBookingsPage() {
             {/* Business Hours */}
             <div className="space-y-3">
               <Label className="text-sm font-semibold">Business Hours</Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="start-time" className="text-xs text-gray-500">Start Time</Label>
                   <Input

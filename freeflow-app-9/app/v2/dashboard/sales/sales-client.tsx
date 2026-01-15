@@ -1303,7 +1303,7 @@ export default function SalesClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(account.annualRevenue)}</p><p className="text-xs text-gray-500">Revenue</p></div>
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{account.employees}</p><p className="text-xs text-gray-500">Employees</p></div>
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{account.deals}</p><p className="text-xs text-gray-500">Deals</p></div>
@@ -1478,7 +1478,7 @@ export default function SalesClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-4">
                       {[
                         { label: 'Quota', value: forecast.quota, color: 'text-purple-600' },
                         { label: 'Pipeline', value: forecast.pipeline, color: 'text-gray-600' },
@@ -1519,7 +1519,7 @@ export default function SalesClient() {
                           {territory.industries?.map(i => <Badge key={i} variant="outline" className="text-xs">{i}</Badge>)}
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div><p className="text-xl font-bold text-gray-900 dark:text-white">{territory.accounts}</p><p className="text-xs text-gray-500">Accounts</p></div>
                         <div><p className="text-xl font-bold text-blue-600">{formatCurrency(territory.pipelineValue)}</p><p className="text-xs text-gray-500">Pipeline</p></div>
                         <div><p className="text-xl font-bold text-green-600">{formatCurrency(territory.closedWon)}</p><p className="text-xs text-gray-500">Closed</p></div>
@@ -1611,7 +1611,7 @@ export default function SalesClient() {
                       <div className="text-2xl font-bold">{formatCurrency(stats.totalPipeline)}</div>
                       <div className="text-xs opacity-80">Total Pipeline</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">{stats.winRate.toFixed(0)}%</div>
                         <div className="text-xs opacity-80">Win Rate</div>
@@ -1645,7 +1645,7 @@ export default function SalesClient() {
                         <CardDescription>Configure your CRM profile and preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Organization Name</Label>
                             <Input defaultValue="FreeFlow Inc" />
@@ -1665,7 +1665,7 @@ export default function SalesClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Currency</Label>
                             <Select defaultValue="usd">
@@ -1714,7 +1714,7 @@ export default function SalesClient() {
                         <CardDescription>Configure sales commission calculations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Commission Rate</Label>
                             <Input defaultValue="8%" />
@@ -1858,7 +1858,7 @@ export default function SalesClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                             <div className="flex justify-between mb-2">
                               <span className="text-sm font-medium">Website Visit</span>
@@ -2320,7 +2320,7 @@ export default function SalesClient() {
                   <Badge variant="outline">{selectedOpportunity.type.replace('_', ' ')}</Badge>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-3xl font-bold text-green-600">{formatCurrency(selectedOpportunity.amount)}</p>
                     <p className="text-sm text-gray-500">Deal Value</p>
@@ -2453,7 +2453,7 @@ export default function SalesClient() {
             <DialogDescription>Add a new deal to your sales pipeline</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Deal Title *</Label>
                 <Input
@@ -2473,7 +2473,7 @@ export default function SalesClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="contact_name">Contact Name</Label>
                 <Input
@@ -2494,7 +2494,7 @@ export default function SalesClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="deal_value">Deal Value ($)</Label>
                 <Input
@@ -2534,7 +2534,7 @@ export default function SalesClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="probability">Probability (%)</Label>
                 <Input
@@ -2587,7 +2587,7 @@ export default function SalesClient() {
             <DialogDescription>Update deal information</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_title">Deal Title *</Label>
                 <Input
@@ -2605,7 +2605,7 @@ export default function SalesClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_contact_name">Contact Name</Label>
                 <Input
@@ -2624,7 +2624,7 @@ export default function SalesClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_deal_value">Deal Value ($)</Label>
                 <Input
@@ -2665,7 +2665,7 @@ export default function SalesClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_probability">Probability (%)</Label>
                 <Input
@@ -2882,7 +2882,7 @@ export default function SalesClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="call_type">Call Type</Label>
                 <Select defaultValue="outbound">
@@ -2964,7 +2964,7 @@ export default function SalesClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="email_cc">CC</Label>
                 <Input id="email_cc" type="email" placeholder="cc@example.com" />
@@ -3065,7 +3065,7 @@ export default function SalesClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="meeting_date">Date</Label>
                 <Input id="meeting_date" type="date" />
@@ -3191,7 +3191,7 @@ export default function SalesClient() {
             <DialogDescription>Build a professional quote for your customer</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="quote_account">Account</Label>
                 <Select>
@@ -3221,7 +3221,7 @@ export default function SalesClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="quote_valid">Valid Until</Label>
                 <Input id="quote_valid" type="date" defaultValue={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} />
@@ -3282,7 +3282,7 @@ export default function SalesClient() {
                 Add Line Item
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="quote_terms">Terms & Conditions</Label>
                 <Textarea id="quote_terms" placeholder="Enter terms and conditions..." rows={4} />
@@ -3425,7 +3425,7 @@ export default function SalesClient() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Opportunity</p>
                   <p className="font-medium">{selectedOpportunity?.name || 'N/A'}</p>

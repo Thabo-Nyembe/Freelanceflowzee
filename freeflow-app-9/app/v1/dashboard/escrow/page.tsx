@@ -2539,7 +2539,7 @@ Thank you for your business!
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-xs text-gray-500">Client Email</p>
                   <p className="text-sm font-medium">{viewingDeposit.clientEmail}</p>
@@ -2630,7 +2630,7 @@ Thank you for your business!
                 onChange={(e) => setEditForm({ ...editForm, projectTitle: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="edit-client">Client Name</Label>
                 <Input
@@ -2811,7 +2811,7 @@ Thank you for your business!
                 rows={2}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="ms-amount">Amount ($)</Label>
                 <Input

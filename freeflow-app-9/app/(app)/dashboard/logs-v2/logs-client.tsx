@@ -1379,7 +1379,7 @@ export default function LogsClient() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-6">
               {/* Left Sidebar - Facets */}
               <div className="space-y-4">
                 <Card className="p-4">
@@ -1533,7 +1533,7 @@ export default function LogsClient() {
 
                           {expandedLogs.includes(log.id) && (
                             <div className="px-10 pb-4 space-y-3">
-                              <div className="grid grid-cols-5 gap-4 text-xs">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-xs">
                                 <div>
                                   <span className="text-gray-500">Host</span>
                                   <p className="font-medium">{log.host}</p>
@@ -1660,7 +1660,7 @@ export default function LogsClient() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {mockStreams.map(stream => (
                   <Card key={stream.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -1903,7 +1903,7 @@ export default function LogsClient() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {mockArchives.map(archive => (
                   <Card key={archive.id} className="p-4">
                     <div className="flex items-start justify-between mb-4">
@@ -2036,7 +2036,7 @@ export default function LogsClient() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <Card className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm text-gray-500">Error Trend (24h)</h3>
@@ -2087,7 +2087,7 @@ export default function LogsClient() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                 <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
                   <div className="flex items-center gap-3">
                     <Shield className="w-8 h-8 text-green-600" />
@@ -2247,7 +2247,7 @@ export default function LogsClient() {
                           </Label>
                           <Switch id="pattern-detect" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Time Range</Label>
                             <Input defaultValue="15 minutes" />
@@ -2311,7 +2311,7 @@ export default function LogsClient() {
                           </Label>
                           <Switch id="compress" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Batch Size</Label>
                             <Input type="number" defaultValue="1000" />
@@ -2740,7 +2740,7 @@ export default function LogsClient() {
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="font-mono text-sm">{selectedLog.message}</p>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div>
                     <Label className="text-gray-500">Service</Label>
                     <p className="font-medium">{selectedLog.service}</p>
@@ -2786,7 +2786,7 @@ export default function LogsClient() {
                 onChange={(e) => setAlertForm({ ...alertForm, query: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Warning Threshold</Label>
                 <Input
@@ -2804,7 +2804,7 @@ export default function LogsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Aggregation</Label>
                 <Select value={alertForm.aggregation} onValueChange={(v: any) => setAlertForm({ ...alertForm, aggregation: v })}>
@@ -3000,7 +3000,7 @@ export default function LogsClient() {
                 onChange={(e) => setArchiveForm({ ...archiveForm, path: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Retention Days</Label>
                 <Input

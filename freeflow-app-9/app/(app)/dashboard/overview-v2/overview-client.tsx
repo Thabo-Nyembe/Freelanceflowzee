@@ -795,7 +795,7 @@ export default function OverviewClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Header */}
@@ -1120,7 +1120,7 @@ export default function OverviewClient() {
                       </div>
                       <Badge className={getStatusColor(service.status)}>{service.status}</Badge>
                     </div>
-                    <div className="grid grid-cols-5 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Uptime</p>
                         <p className="font-semibold text-lg text-gray-900 dark:text-white">{service.uptime_percent}%</p>
@@ -1361,7 +1361,7 @@ export default function OverviewClient() {
                         <CardDescription>Basic platform configuration</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Organization Name</Label>
                             <Input defaultValue="Kazi Platform" />
@@ -1380,7 +1380,7 @@ export default function OverviewClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Timezone</Label>
                             <Select defaultValue="utc">
@@ -1516,7 +1516,7 @@ export default function OverviewClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Collection Interval</Label>
                             <Select defaultValue="10">
@@ -1569,7 +1569,7 @@ export default function OverviewClient() {
                         <CardDescription>Configure how long metrics are stored</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-2 mb-3">
                               <Activity className="h-5 w-5 text-blue-600" />
@@ -1684,7 +1684,7 @@ export default function OverviewClient() {
                         <CardDescription>Configure alert behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Alert Cooldown</Label>
                             <Select defaultValue="5">
@@ -1786,7 +1786,7 @@ export default function OverviewClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Refresh Interval</Label>
                             <Select defaultValue="30">
@@ -1832,7 +1832,7 @@ export default function OverviewClient() {
                         <CardDescription>Configure default dashboard settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Time Range</Label>
                             <Select defaultValue="4h">
@@ -2039,7 +2039,7 @@ export default function OverviewClient() {
                         <CardDescription>Export dashboard data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Export Format</Label>
                             <Select defaultValue="json">
@@ -2183,7 +2183,7 @@ export default function OverviewClient() {
                   <p>{selectedAlert.message}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
                     <p className="text-xs text-gray-500">Service</p>
                     <p className="font-semibold">{selectedAlert.service}</p>
@@ -2245,7 +2245,7 @@ export default function OverviewClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Uptime</p>
                       <p className="text-2xl font-bold">{selectedService.uptime_percent}%</p>
@@ -2262,7 +2262,7 @@ export default function OverviewClient() {
 
                   <div>
                     <p className="text-sm font-medium mb-2">Latency Distribution</p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
                         <p className="text-xs text-gray-500">P50</p>
                         <p className="font-semibold">{selectedService.response_time_p50}ms</p>
@@ -2325,7 +2325,7 @@ export default function OverviewClient() {
                   <p>{selectedLog.message}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
                     <p className="text-xs text-gray-500">Service</p>
                     <p className="font-semibold">{selectedLog.service}</p>

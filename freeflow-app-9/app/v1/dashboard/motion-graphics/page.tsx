@@ -520,7 +520,7 @@ export default function MotionGraphicsPage() {
                           ))}
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                           <div>
                             <span className="text-gray-400 block">Duration</span>
                             <span className="text-white font-medium">{formatDuration(project.duration)}</span>
@@ -714,7 +714,7 @@ export default function MotionGraphicsPage() {
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm text-gray-400 block mb-2">Position</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                           <Input
                             type="number"
                             placeholder="X"
@@ -790,7 +790,7 @@ export default function MotionGraphicsPage() {
 
                       <p className="text-sm text-gray-400">{template.description}</p>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs">
                         <div>
                           <span className="text-gray-400 block">Duration</span>
                           <span className="text-white font-medium">{formatDuration(template.duration)}</span>

@@ -571,7 +571,7 @@ export default function UiShowcaseClient() {
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {['json', 'css', 'tsx'].map((format) => (
                   <button
                     key={format}
@@ -612,7 +612,7 @@ export default function UiShowcaseClient() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Select Components</label>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
                 {['Magnetic Button', 'Ripple Button', 'Morphing Button', 'Hover Card', '3D Shift Card', 'Texture Card', 'Spotlight Card', 'Dynamic Island', 'Bento Grid'].map((component) => (
                   <label key={component} className="flex items-center gap-2 cursor-pointer p-1">
                     <input
@@ -677,7 +677,7 @@ export default function UiShowcaseClient() {
           <div className="space-y-6 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {[
                   { value: 'light', label: 'Light', icon: '☀️' },
                   { value: 'dark', label: 'Dark', icon: '🌙' },

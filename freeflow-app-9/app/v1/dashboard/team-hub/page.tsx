@@ -1258,7 +1258,7 @@ export default function TeamHubPage() {
                 <CardDescription>Common team management actions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <Button
                     data-testid="team-chat-btn"
                     variant="outline"
@@ -1671,7 +1671,7 @@ export default function TeamHubPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Members</p>
                 <p className="text-2xl font-bold text-blue-600">{teamStats.totalMembers}</p>
@@ -1869,7 +1869,7 @@ export default function TeamHubPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
                 <p className="text-2xl font-bold text-green-600">{teamStats.onlineMembers}</p>
                 <p className="text-sm text-gray-600">Available Now</p>
@@ -2189,7 +2189,7 @@ export default function TeamHubPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
               <div className="p-2 rounded bg-green-50 dark:bg-green-900/20">
                 <p className="text-lg font-bold text-green-600">{teamStats.onlineMembers}</p>
                 <p className="text-xs">Online</p>
@@ -2281,7 +2281,7 @@ export default function TeamHubPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
                 <p className="text-2xl font-bold text-green-600">{teamStats.activeProjects}</p>
                 <p className="text-sm">Active</p>

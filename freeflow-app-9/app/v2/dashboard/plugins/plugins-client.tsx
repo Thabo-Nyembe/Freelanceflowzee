@@ -1596,7 +1596,7 @@ export default function PluginsClient() {
                   </div>
                 </div>
 
-                <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-4' : 'space-y-3'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'space-y-3'}>
                   {filteredPlugins.map(plugin =>
                     viewMode === 'grid'
                       ? renderPluginCard(plugin)
@@ -1878,7 +1878,7 @@ export default function PluginsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockCollections.map(collection => (
                 <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
                   setSelectedCollection(collection)
@@ -1960,13 +1960,13 @@ export default function PluginsClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle>Developer Tools</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => {
                       setSelectedDevTool('CLI Tools')
                       setShowDevToolDialog(true)
@@ -2441,7 +2441,7 @@ export default function PluginsClient() {
                   </DialogHeader>
 
                   {/* Stats Row */}
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <div className="flex items-center justify-center gap-1 text-yellow-500 mb-1">
                         <Star className="h-5 w-5 fill-current" />
@@ -2472,7 +2472,7 @@ export default function PluginsClient() {
                   {/* Features */}
                   <div>
                     <h3 className="font-semibold mb-2">Features</h3>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       {selectedPlugin.features.map((feature, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm">
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -2485,7 +2485,7 @@ export default function PluginsClient() {
                   {/* Technical Details */}
                   <div>
                     <h3 className="font-semibold mb-2">Technical Details</h3>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Version</p>
                         <p className="font-medium">{selectedPlugin.version}</p>
@@ -2680,7 +2680,7 @@ export default function PluginsClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="pluginVersion">Version</Label>
                   <Input
@@ -2701,7 +2701,7 @@ export default function PluginsClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="pluginCategory">Category</Label>
                   <select
@@ -2917,7 +2917,7 @@ export default function PluginsClient() {
               {selectedBulkPlugins.length > 0 && (
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <p className="text-sm font-medium mb-3">{selectedBulkPlugins.length} plugin(s) selected</p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                     <Button size="sm" variant="outline" className="gap-1" onClick={() => {
                       selectedBulkPlugins.forEach(id => {
                         const plugin = installedPlugins.find(p => p.id === id)
@@ -3236,7 +3236,7 @@ export default function PluginsClient() {
                 </div>
 
                 {selectedDevTool === 'Guides' && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     {['Getting Started', 'Building Your First Plugin', 'Testing Plugins', 'Publishing Guide'].map((guide, i) => (
                       <Button key={i} variant="outline" className="justify-start" onClick={() => {
                         window.open(`/docs/guides/${guide.toLowerCase().replace(/ /g, '-')}`, '_blank')
@@ -3250,7 +3250,7 @@ export default function PluginsClient() {
                 )}
 
                 {selectedDevTool === 'Support' && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     <Button variant="outline" className="justify-start" onClick={() => window.open('https://discord.com', '_blank')}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Discord Community

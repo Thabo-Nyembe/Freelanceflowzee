@@ -584,7 +584,7 @@ export default function EnhancedClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="item-type">Type</Label>
                 <Select
@@ -777,7 +777,7 @@ export default function EnhancedClient() {
                   }
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="theme">Theme</Label>
                   <Select
@@ -921,7 +921,7 @@ export default function EnhancedClient() {
                   Minimum confidence level for AI predictions
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="refresh-interval">Data Refresh</Label>
                   <Select
@@ -1051,7 +1051,7 @@ export default function EnhancedClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="prediction-timeframe">Prediction Timeframe</Label>
                 <Select
@@ -1372,7 +1372,7 @@ export default function EnhancedClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="expires">Link Expiration</Label>
                 <Select

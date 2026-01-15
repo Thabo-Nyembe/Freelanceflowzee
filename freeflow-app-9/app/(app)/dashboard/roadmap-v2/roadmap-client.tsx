@@ -1075,7 +1075,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
               </CardHeader>
               <CardContent>
                 {viewMode === 'kanban' ? (
-                  <div className="grid grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                     {(['backlog', 'planned', 'in_progress', 'review', 'released'] as InitiativeStatus[]).map((status) => (
                       <div key={status} className="space-y-3">
                         <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
@@ -1284,7 +1284,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                                 <span className="text-sm text-muted-foreground">{feature.theme}</span>
                               </div>
                             </div>
-                            <div className="grid grid-cols-4 gap-4 text-center">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
                               <div>
                                 <p className="text-lg font-bold">{feature.impactScore}</p>
                                 <p className="text-xs text-muted-foreground">Impact</p>
@@ -1581,7 +1581,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                         <CardDescription>Configure default roadmap behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="defaultView">Default View</Label>
                             <select id="defaultView" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
@@ -1623,7 +1623,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                         <CardDescription>Customize RICE scoring weights</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="reachWeight">Reach Weight</Label>
                             <Input id="reachWeight" type="number" className="mt-1" defaultValue="1.0" />
@@ -1970,7 +1970,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                     </div>
 
                     {/* Details */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-3 rounded-lg border">
                         <p className="text-xs text-muted-foreground">Theme</p>
                         <p className="font-medium">{selectedFeature.theme}</p>
@@ -2084,7 +2084,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="initiative-quarter">Target Quarter</Label>
                   <Select
@@ -2191,7 +2191,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Start Quarter</Label>
                   <Select

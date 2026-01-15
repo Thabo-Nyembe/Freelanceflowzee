@@ -524,7 +524,7 @@ export function UpgradesShowcaseClient() {
                 <CardDescription>Sparklines, Progress Rings, and Trend Indicators</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6">
                   <div className="space-y-4">
                     <h4 className="font-medium">Sparklines</h4>
                     <div className="space-y-3">

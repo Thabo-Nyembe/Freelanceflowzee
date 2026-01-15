@@ -1185,7 +1185,7 @@ export default function ProjectsOverviewPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="edit-budget">Budget ($)</Label>
                     <Input
@@ -1218,7 +1218,7 @@ export default function ProjectsOverviewPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="edit-start-date">Start Date</Label>
                     <Input
@@ -1240,7 +1240,7 @@ export default function ProjectsOverviewPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="edit-priority">Priority</Label>
                     <Select

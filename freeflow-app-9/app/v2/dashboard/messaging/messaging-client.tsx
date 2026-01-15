@@ -2249,7 +2249,7 @@ export default function MessagingClient() {
           <div className="space-y-4 pt-4">
             <div>
               <label className="text-sm font-medium">Channel type</label>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <button
                   type="button"
                   onClick={() => setNewChannelType('public')}

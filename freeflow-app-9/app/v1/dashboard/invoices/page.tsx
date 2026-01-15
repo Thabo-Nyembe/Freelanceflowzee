@@ -1368,7 +1368,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
             </DialogHeader>
             <div className="space-y-6 py-4">
               {/* Invoice Details */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="invoiceNumber">Invoice Number *</Label>
                   <Input
@@ -1390,7 +1390,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
               </div>
 
               {/* Client Details */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="clientName">Client Name *</Label>
                   <Input
@@ -1413,7 +1413,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="issueDate">Issue Date</Label>
                   <Input
@@ -1541,7 +1541,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
             </DialogHeader>
             <div className="space-y-6 py-4">
               {/* Same form fields as Create */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="editInvoiceNumber">Invoice Number *</Label>
                   <Input
@@ -1562,7 +1562,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="editClientName">Client Name *</Label>
                   <Input
@@ -1584,7 +1584,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="editIssueDate">Issue Date</Label>
                   <Input
@@ -1894,7 +1894,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
 
               <div className="p-6 space-y-6">
                 {/* Header Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Bill To</p>
                     <p className="font-semibold">{selectedInvoice.clientName}</p>
@@ -1919,7 +1919,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
                 <div>
                   <h3 className="font-semibold mb-4">Line Items</h3>
                   <div className="space-y-2 mb-4 border rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 font-semibold text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 font-semibold text-sm">
                       <span>Description</span>
                       <span className="text-right">Qty</span>
                       <span className="text-right">Price</span>
@@ -1928,7 +1928,7 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
                     {selectedInvoice.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="grid grid-cols-4 gap-4 p-4 border-t text-sm"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 border-t text-sm"
                       >
                         <span>{item.description}</span>
                         <span className="text-right">{item.quantity}</span>

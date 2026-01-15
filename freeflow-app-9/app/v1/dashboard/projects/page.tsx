@@ -1396,7 +1396,7 @@ export default function ClientZoneProjectsPage() {
                 className="min-h-[100px]"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="create-phase">Phase</Label>
                 <Input
@@ -1425,7 +1425,7 @@ export default function ClientZoneProjectsPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="create-dueDate">
                   <Calendar className="h-4 w-4 inline mr-1" />
@@ -1509,7 +1509,7 @@ export default function ClientZoneProjectsPage() {
                 className="min-h-[100px]"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="edit-phase">Phase</Label>
                 <Input
@@ -1538,7 +1538,7 @@ export default function ClientZoneProjectsPage() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="edit-dueDate">
                   <Calendar className="h-4 w-4 inline mr-1" />

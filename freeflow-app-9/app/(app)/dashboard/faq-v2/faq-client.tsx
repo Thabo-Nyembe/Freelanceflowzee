@@ -952,7 +952,7 @@ export default function FAQClient() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Total Articles', value: stats.totalArticles, icon: FileText, change: '+5 this week' },
               { label: 'Total Views', value: formatNumber(stats.totalViews), icon: Eye, change: '+12.3%' },
@@ -1051,7 +1051,7 @@ export default function FAQClient() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { status: 'published', count: articles.filter(a => a.status === 'published').length, icon: CheckCircle2, color: 'green' },
                 { status: 'draft', count: articles.filter(a => a.status === 'draft').length, icon: FileText, color: 'gray' },
@@ -1263,7 +1263,7 @@ export default function FAQClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <button onClick={handleOpenAddCollection} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                 <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                   <Plus className="w-5 h-5 text-white" />
@@ -1397,7 +1397,7 @@ export default function FAQClient() {
             </div>
 
             {/* Analytics Quick Stats */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { label: 'Views Today', value: '2.4K', change: '+12%', positive: true, icon: Eye },
                 { label: 'Avg Session', value: '4:32', change: '+8%', positive: true, icon: Clock },
@@ -1547,7 +1547,7 @@ export default function FAQClient() {
             </div>
 
             {/* Search Performance Cards */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { label: 'Zero Results', value: '8%', desc: 'Queries with no matches', icon: AlertCircle, color: 'text-red-500' },
                 { label: 'Top Result Clicks', value: '67%', desc: 'Click first result', icon: Target, color: 'text-green-500' },
@@ -1714,7 +1714,7 @@ export default function FAQClient() {
                         <Globe className="w-5 h-5 text-blue-600" />
                         Help Center Details
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Help Center Name</label>
                           <input
@@ -1784,7 +1784,7 @@ export default function FAQClient() {
                         <Headphones className="w-5 h-5 text-green-600" />
                         Support Contact
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Support Email</label>
                           <input
@@ -1814,7 +1814,7 @@ export default function FAQClient() {
                         <Palette className="w-5 h-5 text-pink-600" />
                         Theme & Colors
                       </h3>
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div>
                           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Color</label>
                           <div className="mt-2 flex items-center gap-3">
@@ -1860,7 +1860,7 @@ export default function FAQClient() {
                         <Image className="w-5 h-5 text-blue-600" />
                         Logo & Images
                       </h3>
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div>
                           <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">Logo</label>
                           <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
@@ -2017,7 +2017,7 @@ export default function FAQClient() {
                         <Link className="w-5 h-5 text-blue-600" />
                         Connected Integrations
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {[
                           { name: 'Live Chat', icon: MessageCircle, connected: true, desc: 'Intercom' },
                           { name: 'Email Support', icon: Mail, connected: true, desc: 'SendGrid' },
@@ -2179,7 +2179,7 @@ export default function FAQClient() {
                         <Download className="w-5 h-5 text-green-600" />
                         Data Management
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <button
                           onClick={handleExportArticles}
                           className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors"
@@ -2303,7 +2303,7 @@ export default function FAQClient() {
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)]">
             <div className="space-y-6 p-1">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="col-span-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                   <input
@@ -2609,7 +2609,7 @@ export default function FAQClient() {
                 className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Icon</label>
                 <div className="mt-1 flex gap-2 flex-wrap">

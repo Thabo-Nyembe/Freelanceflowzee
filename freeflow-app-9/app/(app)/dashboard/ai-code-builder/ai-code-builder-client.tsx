@@ -340,7 +340,7 @@ export default function AICodeBuilderClient() {
                     <DialogDescription>Start with a pre-built template</DialogDescription>
                   </DialogHeader>
                   <ScrollArea className="h-[400px] mt-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {templates.map(template => (
                         <TemplateCard
                           key={template.id}

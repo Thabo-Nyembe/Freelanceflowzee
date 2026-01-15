@@ -1055,7 +1055,7 @@ export default function EmailMarketingClient({
                     </div>
 
                     {campaign.status === 'sent' && (
-                      <div className="mt-4 pt-4 border-t grid grid-cols-6 gap-4">
+                      <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                         <div>
                           <p className="text-sm text-gray-500">Sent</p>
                           <p className="font-semibold">{campaign.stats.sent.toLocaleString()}</p>
@@ -1351,7 +1351,7 @@ export default function EmailMarketingClient({
                       )}
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
                       <div>
                         <p className="text-lg font-semibold">{automation.stats.enrolled.toLocaleString()}</p>
                         <p className="text-xs text-gray-500">Enrolled</p>
@@ -1516,7 +1516,7 @@ export default function EmailMarketingClient({
                       <span className="font-semibold text-green-600">92/100</span>
                     </div>
                     <Progress value={92} className="h-2" />
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Spam Rate</p>
                         <p className="font-semibold text-green-600">0.02%</p>
@@ -1767,7 +1767,7 @@ export default function EmailMarketingClient({
             <ScrollArea className="max-h-[60vh]">
               {selectedCampaign && (
                 <div className="space-y-6 p-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                       <p className="text-sm text-gray-500">From</p>
                       <p className="font-medium">{selectedCampaign.fromName}</p>
@@ -1780,7 +1780,7 @@ export default function EmailMarketingClient({
                   </div>
 
                   {selectedCampaign.status === 'sent' && (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       <Card className="border-0 bg-blue-50 dark:bg-blue-900/20">
                         <CardContent className="p-4 text-center">
                           <p className="text-3xl font-bold text-blue-600">{((selectedCampaign.stats.uniqueOpens / selectedCampaign.stats.delivered) * 100).toFixed(1)}%</p>
@@ -1868,7 +1868,7 @@ export default function EmailMarketingClient({
                   ))}
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-center">
                     <p className="text-2xl font-bold text-blue-600">{selectedSubscriber.openRate}%</p>
                     <p className="text-sm text-gray-500">Open Rate</p>
@@ -1930,7 +1930,7 @@ export default function EmailMarketingClient({
             </DialogHeader>
             {selectedAutomation && (
               <div className="space-y-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-center">
                     <p className="text-2xl font-bold">{selectedAutomation.stats.enrolled.toLocaleString()}</p>
                     <p className="text-sm text-gray-500">Total Enrolled</p>
@@ -2060,7 +2060,7 @@ export default function EmailMarketingClient({
               </div>
               <div>
                 <label className="text-sm font-medium">Campaign Type</label>
-                <div className="grid grid-cols-3 gap-2 mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mt-1">
                   {(['newsletter', 'promotional', 'announcement'] as const).map((type) => (
                     <Button
                       key={type}
@@ -2215,7 +2215,7 @@ export default function EmailMarketingClient({
               </div>
               <div>
                 <label className="text-sm font-medium">Condition Type</label>
-                <div className="grid grid-cols-3 gap-2 mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mt-1">
                   <Button variant="outline" size="sm">All Rules</Button>
                   <Button variant="outline" size="sm">Any Rule</Button>
                   <Button variant="outline" size="sm">None</Button>
@@ -2266,7 +2266,7 @@ export default function EmailMarketingClient({
               </div>
               <div>
                 <label className="text-sm font-medium">Trigger Type</label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                   {([
                     { value: 'signup', label: 'New Signup', icon: <UserPlus className="w-4 h-4" /> },
                     { value: 'purchase', label: 'Purchase', icon: <Target className="w-4 h-4" /> },
@@ -2326,7 +2326,7 @@ export default function EmailMarketingClient({
               </div>
               <div>
                 <label className="text-sm font-medium">Category</label>
-                <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mt-2">
                   {(['newsletter', 'promotional', 'welcome', 'transactional', 'event', 'holiday'] as const).map((category) => (
                     <Button
                       key={category}
@@ -2537,7 +2537,7 @@ export default function EmailMarketingClient({
             {selectedCampaign && selectedCampaign.status === 'sent' && (
               <ScrollArea className="h-[500px]">
                 <div className="space-y-6 p-2">
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <Card className="border-0 bg-blue-50 dark:bg-blue-900/20">
                       <CardContent className="p-4 text-center">
                         <p className="text-3xl font-bold text-blue-600">{selectedCampaign.stats.sent.toLocaleString()}</p>
@@ -2569,7 +2569,7 @@ export default function EmailMarketingClient({
                       <CardTitle>Performance Metrics</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span>Open Rate</span>
@@ -2678,7 +2678,7 @@ export default function EmailMarketingClient({
             </DialogHeader>
             {selectedAutomation && (
               <div className="space-y-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card className="border-0 bg-blue-50 dark:bg-blue-900/20">
                     <CardContent className="p-4 text-center">
                       <p className="text-2xl font-bold text-blue-600">{selectedAutomation.stats.enrolled.toLocaleString()}</p>

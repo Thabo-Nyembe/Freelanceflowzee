@@ -878,7 +878,7 @@ export default function OperationsClient() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
                 <div className="text-sm text-blue-600 mb-1">Total Members</div>
                 <div className="text-2xl font-bold text-blue-700">
@@ -1009,7 +1009,7 @@ export default function OperationsClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mb-3 text-xs">
                       <div className="bg-blue-50 rounded p-2 text-center">
                         <div className="text-blue-600 mb-0.5">Projects</div>
                         <div className="font-bold text-blue-700">{member.assignedProjects}</div>
@@ -1287,7 +1287,7 @@ export default function OperationsClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="item-priority">Priority</Label>
                 <Select
@@ -1534,7 +1534,7 @@ export default function OperationsClient() {
                 <Palette className="w-4 h-4" />
                 Appearance
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="settings-theme">Theme</Label>
                   <Select

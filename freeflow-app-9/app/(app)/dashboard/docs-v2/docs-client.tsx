@@ -598,7 +598,7 @@ export default function DocsClient() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4">
               <div className="text-2xl font-bold">{stats.totalDocs}</div>
               <div className="text-sm text-white/70">Published Docs</div>
@@ -2012,7 +2012,7 @@ export default function DocsClient() {
                     {selectedDoc.relatedDocs.length > 0 && (
                       <div>
                         <h4 className="font-medium mb-3">Related Documentation</h4>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           {selectedDoc.relatedDocs.map(relId => {
                             const relDoc = docs.find(d => d.id === relId)
                             if (!relDoc) return null

@@ -1578,7 +1578,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-sm text-gray-500">Configure password requirements</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Minimum Length</Label>
                             <Select defaultValue="12">
@@ -1663,7 +1663,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-sm text-gray-500">Control user session behavior</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Session Timeout</Label>
                             <Select defaultValue="30">
@@ -1712,7 +1712,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-sm text-gray-500">Brute force protection settings</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div>
                             <Label>Max Failed Attempts</Label>
                             <Select defaultValue="5">
@@ -1891,7 +1891,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Role for New Users</Label>
                             <Select defaultValue="standard">
@@ -2028,7 +2028,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-sm text-gray-500">Prevent API abuse</p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Requests per Minute</Label>
                             <Input type="number" defaultValue="1000" className="mt-1" />
@@ -2457,7 +2457,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Department</p>
                     <p className="font-medium">{selectedUser.department}</p>
@@ -2698,7 +2698,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>First Name</Label>
                   <Input
@@ -2718,7 +2718,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Department</Label>
                   <Input
@@ -2834,7 +2834,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Created After</Label>
                   <Input
@@ -2954,7 +2954,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </DialogHeader>
             <div className="space-y-4">
               <Input placeholder="Search applications..." className="w-full" />
-              <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 max-h-[400px] overflow-y-auto">
                 {[
                   { name: 'Microsoft 365', type: 'saml', description: 'Office suite and collaboration' },
                   { name: 'Dropbox', type: 'saml', description: 'Cloud storage and file sharing' },
@@ -3220,7 +3220,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </DialogHeader>
             {editingUser && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>First Name</Label>
                     <Input
@@ -3246,7 +3246,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                     className="mt-1"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Department</Label>
                     <Input

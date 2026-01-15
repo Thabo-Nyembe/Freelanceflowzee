@@ -1097,7 +1097,7 @@ export default function CertificationsClient() {
   ], [resetForm])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1194,7 +1194,7 @@ export default function CertificationsClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Manage and showcase your verified digital credentials. Share your achievements with blockchain-verified authenticity.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalCredentials}</div>
                     <div className="text-xs text-white/70">Total Credentials</div>
@@ -1306,7 +1306,7 @@ export default function CertificationsClient() {
                     </DialogHeader>
                     <div className="space-y-4">
                       <p className="text-gray-600 dark:text-gray-400">{credential.description}</p>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                           <div className="text-sm text-gray-500 dark:text-gray-400">Credential ID</div>
                           <div className="font-mono text-sm dark:text-white">{credential.credentialId}</div>
@@ -1372,7 +1372,7 @@ export default function CertificationsClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Earn badges by completing learning pathways, achievements, and skill assessments. Show off your accomplishments!
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalBadges}</div>
                     <div className="text-xs text-white/70">Badges Earned</div>
@@ -1752,7 +1752,7 @@ export default function CertificationsClient() {
                 <h3 className="font-semibold mb-4 dark:text-white">🔐 Verify Your Credentials</h3>
                 <div className="text-center py-8">
                   <div className="inline-block p-4 bg-gray-100 dark:bg-gray-700 rounded-xl mb-4">
-                    <div className="w-32 h-32 bg-white dark:bg-gray-600 rounded grid grid-cols-4 gap-1 p-2">
+                    <div className="w-32 h-32 bg-white dark:bg-gray-600 rounded grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 md:gap-6 p-2">
                       {[...Array(16)].map((_, i) => (
                         <div key={i} className={`${Math.random() > 0.5 ? 'bg-gray-900 dark:bg-white' : 'bg-transparent'}`} />
                       ))}
@@ -1873,7 +1873,7 @@ export default function CertificationsClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Configure your credential platform settings, verification preferences, notifications, privacy options, and account security.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalCredentials}</div>
                     <div className="text-xs text-white/70">Credentials</div>
@@ -1937,7 +1937,7 @@ export default function CertificationsClient() {
                       <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
                         <span>👤</span> Profile Settings
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Name</label>
                           <input type="text" defaultValue="John Doe" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
@@ -2269,7 +2269,7 @@ export default function CertificationsClient() {
                       <h3 className="text-lg font-semibold mb-4 dark:text-white flex items-center gap-2">
                         <span>📥</span> Data Export
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <button
                           className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600"
                           onClick={() => {
@@ -2443,7 +2443,7 @@ export default function CertificationsClient() {
             <DialogDescription>Enter the details for your new certification</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Certification Name *</Label>
                 <Input
@@ -2461,7 +2461,7 @@ export default function CertificationsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={certForm.certification_type} onValueChange={(v) => setCertForm({ ...certForm, certification_type: v as CertificationType })}>
@@ -2494,7 +2494,7 @@ export default function CertificationsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Issuing Organization</Label>
                 <Input
@@ -2512,7 +2512,7 @@ export default function CertificationsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Issue Date</Label>
                 <Input type="date" value={certForm.issue_date} onChange={(e) => setCertForm({ ...certForm, issue_date: e.target.value })} />
@@ -2522,7 +2522,7 @@ export default function CertificationsClient() {
                 <Input type="date" value={certForm.expiry_date} onChange={(e) => setCertForm({ ...certForm, expiry_date: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Level</Label>
                 <Input value={certForm.level} onChange={(e) => setCertForm({ ...certForm, level: e.target.value })} placeholder="Associate, Professional, etc." />
@@ -2555,7 +2555,7 @@ export default function CertificationsClient() {
             <DialogDescription>Update certification details</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Certification Name *</Label>
                 <Input value={certForm.certification_name} onChange={(e) => setCertForm({ ...certForm, certification_name: e.target.value })} />
@@ -2565,7 +2565,7 @@ export default function CertificationsClient() {
                 <Input value={certForm.certification_code} onChange={(e) => setCertForm({ ...certForm, certification_code: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={certForm.certification_type} onValueChange={(v) => setCertForm({ ...certForm, certification_type: v as CertificationType })}>
@@ -2598,7 +2598,7 @@ export default function CertificationsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Issuing Organization</Label>
                 <Input value={certForm.issuing_organization} onChange={(e) => setCertForm({ ...certForm, issuing_organization: e.target.value })} />
@@ -2608,7 +2608,7 @@ export default function CertificationsClient() {
                 <Input value={certForm.issuing_authority} onChange={(e) => setCertForm({ ...certForm, issuing_authority: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Issue Date</Label>
                 <Input type="date" value={certForm.issue_date} onChange={(e) => setCertForm({ ...certForm, issue_date: e.target.value })} />
@@ -2618,7 +2618,7 @@ export default function CertificationsClient() {
                 <Input type="date" value={certForm.expiry_date} onChange={(e) => setCertForm({ ...certForm, expiry_date: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Level</Label>
                 <Input value={certForm.level} onChange={(e) => setCertForm({ ...certForm, level: e.target.value })} />

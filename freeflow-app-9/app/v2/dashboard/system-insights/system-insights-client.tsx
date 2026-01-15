@@ -649,7 +649,7 @@ export default function SystemInsightsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-slate-700 via-gray-700 to-zinc-700 rounded-2xl p-8 text-white">
@@ -770,7 +770,7 @@ export default function SystemInsightsClient() {
                   <CardDescription>Real-time service status and dependencies</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     {mockServices.map(service => (
                       <div key={service.id} className={`p-3 rounded-lg border ${
                         service.status === 'healthy' ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' :
@@ -832,7 +832,7 @@ export default function SystemInsightsClient() {
                   <CardTitle>Key Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {mockMetrics.slice(0, 4).map(metric => (
                       <div key={metric.id} className={`p-4 rounded-lg ${
                         metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
@@ -988,7 +988,7 @@ export default function SystemInsightsClient() {
                         placeholder="Alert condition description"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label>Metric</Label>
                         <Input
@@ -1228,7 +1228,7 @@ export default function SystemInsightsClient() {
                     <CardDescription>{service.language}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div>
                         <div className="text-xs text-gray-500">Requests</div>
                         <div className="text-lg font-semibold">{(service.requestCount / 1000).toFixed(0)}K</div>
@@ -1419,7 +1419,7 @@ export default function SystemInsightsClient() {
                         <CardDescription>Basic configuration for your monitoring environment</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Environment Name</Label>
                             <Input
@@ -1444,7 +1444,7 @@ export default function SystemInsightsClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Timezone</Label>
                             <Select
@@ -1580,7 +1580,7 @@ export default function SystemInsightsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Metric Collection Interval</Label>
                             <Select defaultValue="10">
@@ -1632,7 +1632,7 @@ export default function SystemInsightsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Trace Sampling Rate</Label>
                             <Select defaultValue="10">
@@ -1690,7 +1690,7 @@ export default function SystemInsightsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Minimum Log Level</Label>
                             <Select defaultValue="info">
@@ -1811,7 +1811,7 @@ export default function SystemInsightsClient() {
                         <CardDescription>Configure alert severity and routing</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Critical Alert Cooldown</Label>
                             <Select defaultValue="5">
@@ -1909,7 +1909,7 @@ export default function SystemInsightsClient() {
                         <CardDescription>Configure how long data is retained</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-2 mb-3">
                               <Activity className="h-5 w-5 text-blue-600" />
@@ -2011,7 +2011,7 @@ export default function SystemInsightsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Archive Provider</Label>
                             <Select defaultValue="s3">
@@ -2322,7 +2322,7 @@ docker run -d --name kazi-agent \\
                         <CardDescription>Export monitoring data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Export Type</Label>
                             <Select defaultValue="metrics">
@@ -2352,7 +2352,7 @@ docker run -d --name kazi-agent \\
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Time Range</Label>
                             <Select defaultValue="7d">
@@ -2754,7 +2754,7 @@ docker run -d --name kazi-agent \\
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {mockMetrics.slice(0, 4).map(metric => (
                   <div key={metric.id} className={`p-4 rounded-lg border ${
                     metric.status === 'critical' ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20' :
@@ -3586,7 +3586,7 @@ kazi_apm.init(
               <DialogTitle>Agent Documentation</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                     toast.info('Opening Quick Start Guide')
                     setShowDocumentationDialog(false)

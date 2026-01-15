@@ -1559,7 +1559,7 @@ export function BadgesClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
@@ -1766,7 +1766,7 @@ export function BadgesClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
@@ -2099,7 +2099,7 @@ export function BadgesClient() {
             </div>
             <div className="space-y-2">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 <Button
                   variant={exportFormat === 'json' ? 'default' : 'outline'}
                   onClick={() => setExportFormat('json')}
@@ -2160,7 +2160,7 @@ export function BadgesClient() {
               Award a badge to multiple team members at once
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Select Badge */}
             <div className="space-y-2">
               <Label>Select Badge</Label>

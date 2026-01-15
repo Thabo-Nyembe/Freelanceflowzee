@@ -825,7 +825,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       </div>
                       {expandedLogs.has(log.id) && (
                         <div className="px-12 pb-3 space-y-2 text-xs">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             {log.traceId && (
                               <div>
                                 <span className="text-gray-500">trace_id: </span>
@@ -1206,7 +1206,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Log Retention Period</Label>
                             <Select defaultValue="30d">
@@ -1482,7 +1482,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Archive After (days)</Label>
                             <Input type="number" defaultValue="30" />
@@ -1850,7 +1850,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                   <p className="text-gray-100 font-mono">{selectedLog.message}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-3">
                     <h4 className="font-semibold text-gray-900 dark:text-white">Request Info</h4>
                     <div className="space-y-2 text-sm">
@@ -1986,7 +1986,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 placeholder="level:error AND service:api-gateway"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Range</label>
                 <Select defaultValue="1h">
@@ -2139,7 +2139,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Threshold</label>
                 <Input type="number" placeholder="100" />
@@ -2328,7 +2328,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Condition</label>
               <Input placeholder="level:critical AND service:*" className="font-mono" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Threshold</label>
                 <Input type="number" placeholder="10" />

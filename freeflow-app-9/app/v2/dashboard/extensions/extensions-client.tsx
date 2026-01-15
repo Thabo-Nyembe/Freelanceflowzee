@@ -1166,7 +1166,7 @@ export default function ExtensionsClient() {
                       </div>
                     </div>
                     <p className="text-muted-foreground mb-4">{ext.description}</p>
-                    <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-3 bg-muted/30 rounded-lg">
                         <p className="text-xl font-bold">{formatNumber(ext.installCount)}</p>
                         <p className="text-xs text-muted-foreground">Users</p>
@@ -1320,7 +1320,7 @@ export default function ExtensionsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View</Label>
                             <Select defaultValue="grid">
@@ -1420,7 +1420,7 @@ export default function ExtensionsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Language</Label>
                             <Select defaultValue="en">
@@ -1678,7 +1678,7 @@ export default function ExtensionsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{installedExtensions.length}</div>
                             <div className="text-sm text-gray-500">Active</div>
@@ -1906,7 +1906,7 @@ export default function ExtensionsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{mockExtensions.length}</div>
                             <div className="text-sm text-gray-500">Extensions</div>
@@ -2078,7 +2078,7 @@ export default function ExtensionsClient() {
                 <p className="text-muted-foreground">{selectedExtension.longDescription}</p>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/30 rounded-lg">
                     <p className="text-2xl font-bold">{formatNumber(selectedExtension.installCount)}</p>
                     <p className="text-xs text-muted-foreground">Total Users</p>
@@ -2103,7 +2103,7 @@ export default function ExtensionsClient() {
                 {/* Features */}
                 <div>
                   <h3 className="font-semibold mb-3">Features</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {selectedExtension.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -2205,7 +2205,7 @@ export default function ExtensionsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={browseCategory} onValueChange={setBrowseCategory}>
@@ -2592,7 +2592,7 @@ export default function ExtensionsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Extension Name *</Label>
                 <Input
@@ -2964,7 +2964,7 @@ export default function ExtensionsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="cursor-pointer hover:bg-muted/30" onClick={handleViewDocs}>
                 <CardContent className="p-4">
                   <Code className="w-8 h-8 text-purple-500 mb-2" />
@@ -3355,7 +3355,7 @@ export default function ExtensionsClient() {
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               <Button variant="outline" className="w-full" onClick={() => handleShareExtension('Email')}>
                 <Mail className="w-4 h-4 mr-2" />
                 Email

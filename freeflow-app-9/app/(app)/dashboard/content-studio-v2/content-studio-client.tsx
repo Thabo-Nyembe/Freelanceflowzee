@@ -1029,7 +1029,7 @@ export default function ContentStudioClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Header */}
@@ -1108,7 +1108,7 @@ export default function ContentStudioClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Monitor your content performance, track publishing activity, and manage your headless CMS from one central hub.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalEntries}</div>
                     <div className="text-xs text-white/70">Total Entries</div>
@@ -1603,7 +1603,7 @@ export default function ContentStudioClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Manage translations and localized content. Track completion progress and ensure global readiness.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockLocales.filter(l => l.status === 'active').length}</div>
                     <div className="text-xs text-white/70">Active Locales</div>
@@ -1736,7 +1736,7 @@ export default function ContentStudioClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Configure your content management system settings, API access, localization, webhooks, and security options.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.contentTypes}</div>
                     <div className="text-xs text-white/70">Content Types</div>
@@ -2175,7 +2175,7 @@ export default function ContentStudioClient() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <Button variant="outline" className="justify-start" onClick={() => setShowNewEntryDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Entry
@@ -2213,7 +2213,7 @@ export default function ContentStudioClient() {
                     <p className="text-gray-500 font-mono">/{selectedEntry.slug}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Created</p>
                       <p className="font-medium text-gray-900 dark:text-white">{formatDate(selectedEntry.created_at)}</p>
@@ -2295,7 +2295,7 @@ export default function ContentStudioClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Entries</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedContentType.entries_count}</p>
@@ -2371,7 +2371,7 @@ export default function ContentStudioClient() {
                   <p className="text-gray-500 font-mono text-sm">{selectedAsset.filename}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {selectedAsset.width && (
                     <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Dimensions</p>
@@ -2956,7 +2956,7 @@ export default function ContentStudioClient() {
               </div>
               <div className="space-y-2">
                 <Label>Events</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {['Entry.publish', 'Entry.unpublish', 'Entry.create', 'Entry.update', 'Asset.upload', 'Asset.delete'].map(event => (
                     <label key={event} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer">
                       <input

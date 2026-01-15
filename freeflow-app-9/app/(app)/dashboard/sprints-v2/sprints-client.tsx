@@ -1129,7 +1129,7 @@ export default function SprintsClient() {
                     </div>
 
                     {/* Task Stats */}
-                    <div className="grid grid-cols-5 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                       <div className="text-center">
                         <div className="text-xl font-bold text-slate-900 dark:text-white">{sprint.total_tasks}</div>
                         <div className="text-xs text-slate-500">Total</div>
@@ -1305,7 +1305,7 @@ export default function SprintsClient() {
                       </div>
 
                       {/* Task Stats */}
-                      <div className="grid grid-cols-5 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                         <div className="text-center">
                           <div className="text-xl font-bold text-slate-900 dark:text-white">{sprint.total_tasks}</div>
                           <div className="text-xs text-slate-500">Total</div>
@@ -1409,7 +1409,7 @@ export default function SprintsClient() {
               </div>
             </div>
             {activeSprint ? (
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 {(['todo', 'in_progress', 'review', 'done', 'blocked'] as TaskStatus[]).map((status) => (
                   <div key={status} className="space-y-3">
                     <div className="flex items-center justify-between px-2">
@@ -1648,7 +1648,7 @@ export default function SprintsClient() {
                   ))}
 
                   <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                       <div>
                         <div className="text-2xl font-bold text-teal-600">{Math.round(stats.avgVelocity)}</div>
                         <div className="text-sm text-slate-500">Avg Velocity</div>
@@ -1735,7 +1735,7 @@ export default function SprintsClient() {
                         <CardDescription>Configure your sprint workspace settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Project Name</Label>
                             <Input defaultValue="Platform Team" />
@@ -1748,7 +1748,7 @@ export default function SprintsClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Time Zone</Label>
                             <Select defaultValue="utc">
@@ -1845,7 +1845,7 @@ export default function SprintsClient() {
                         <CardDescription>Configure default sprint settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Sprint Duration</Label>
                             <Select defaultValue="2w">
@@ -2054,7 +2054,7 @@ export default function SprintsClient() {
                         <CardDescription>Manage team capacity and settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Capacity (hours/sprint)</Label>
                             <Input type="number" defaultValue="80" />
@@ -2141,7 +2141,7 @@ export default function SprintsClient() {
                           <Input placeholder="https://your-service.com/webhook" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center space-x-2">
                             <Switch id="wh-sprint" defaultChecked />
                             <Label htmlFor="wh-sprint">Sprint Events</Label>
@@ -2322,7 +2322,7 @@ export default function SprintsClient() {
                           <Badge className="bg-teal-600">Active</Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <p className="text-2xl font-bold text-teal-600">{stats.total}</p>
                             <p className="text-xs text-gray-500">Total Sprints</p>
@@ -2447,7 +2447,7 @@ export default function SprintsClient() {
                 <ScrollArea className="max-h-[60vh] pr-4">
                   <div className="space-y-6 py-4">
                     {/* Sprint Stats */}
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <div className="p-4 rounded-xl bg-teal-50 dark:bg-teal-900/20 text-center">
                         <div className="text-2xl font-bold text-teal-600">
                           {Math.round((selectedSprint.completed_story_points / selectedSprint.total_story_points) * 100)}%
@@ -2496,7 +2496,7 @@ export default function SprintsClient() {
                           <RotateCcw className="w-4 h-4" />
                           Retrospective
                         </h4>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                             <h5 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">What went well</h5>
                             <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
@@ -2638,7 +2638,7 @@ export default function SprintsClient() {
                   onChange={(e) => setNewSprintTeamName(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="sprint-start">Start Date</Label>
                   <Input
@@ -2753,7 +2753,7 @@ export default function SprintsClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="task-priority">Priority</Label>
                   <Select

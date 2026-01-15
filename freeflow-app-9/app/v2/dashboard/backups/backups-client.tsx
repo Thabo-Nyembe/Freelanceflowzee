@@ -1195,7 +1195,7 @@ export default function BackupsClient() {
                   <CardTitle>Recovery Objectives</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Target className="h-5 w-5 text-blue-600" />
@@ -1222,7 +1222,7 @@ export default function BackupsClient() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <Button variant="outline" className="h-20 flex-col" onClick={handleCreateBackup}>
                       <Play className="h-6 w-6 mb-2 text-green-600" />
                       Run Backup
@@ -1252,7 +1252,7 @@ export default function BackupsClient() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {mockRecoveryTests.map(test => (
                       <div key={test.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
@@ -1450,7 +1450,7 @@ export default function BackupsClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockVaults.map(vault => (
                 <Card key={vault.id} className="border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-300" onClick={() => setSelectedVault(vault)}>
                   <CardContent className="p-6">
@@ -1469,7 +1469,7 @@ export default function BackupsClient() {
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{vault.description}</p>
-                    <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-lg font-bold">{vault.recoveryPointCount}</p>
                         <p className="text-xs text-gray-500">Recovery Points</p>
@@ -1572,7 +1572,7 @@ export default function BackupsClient() {
 
           {/* Storage Tab */}
           <TabsContent value="storage" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockRepositories.map(repo => {
                 const usedPercent = (repo.used / repo.capacity) * 100
                 const StorageIcon = getStorageIcon(repo.type)
@@ -1601,7 +1601,7 @@ export default function BackupsClient() {
                         <span className="text-gray-500">{formatSize(repo.used)} of {formatSize(repo.capacity)}</span>
                         <span className={usedPercent > 80 ? 'text-red-600 font-medium' : 'text-green-600'}>{usedPercent.toFixed(1)}% used</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                         <div><span className="text-gray-500">Backups:</span> <span className="font-medium">{repo.backupCount}</span></div>
                         <div><span className="text-gray-500">Last Backup:</span> <span className="font-medium">{repo.lastBackup}</span></div>
                         {repo.encryptionKeyId && <div><span className="text-gray-500">Key:</span> <span className="font-medium">{repo.encryptionKeyId}</span></div>}
@@ -1615,7 +1615,7 @@ export default function BackupsClient() {
 
           {/* Policies Tab */}
           <TabsContent value="policies" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockPolicies.map(policy => (
                 <Card key={policy.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
@@ -1627,7 +1627,7 @@ export default function BackupsClient() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{policy.description}</p>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-gray-500">Frequency</p>
                         <p className="font-medium capitalize">{policy.frequency}</p>
@@ -2020,7 +2020,7 @@ export default function BackupsClient() {
                       </div>
                     </div>
                   </DialogHeader>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{formatSize(selectedJob.sizeBytes)}</p>
                       <p className="text-sm text-gray-500">Backup Size</p>
@@ -2074,7 +2074,7 @@ export default function BackupsClient() {
                       </div>
                     </div>
                   </DialogHeader>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{selectedVault.recoveryPointCount}</p>
                       <p className="text-sm text-gray-500">Recovery Points</p>
@@ -2119,7 +2119,7 @@ export default function BackupsClient() {
                       </div>
                     </div>
                   </DialogHeader>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{selectedCompliance.score}%</p>
                       <p className="text-sm text-gray-500">Score</p>

@@ -634,7 +634,7 @@ export default function SecurityAuditClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">82%</div>
                   <div className="text-sm text-blue-100">Security Score</div>
@@ -664,7 +664,7 @@ export default function SecurityAuditClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { icon: Scan, label: 'Run Scan', desc: 'Start scan', color: 'blue' },
                 { icon: Bug, label: 'Vulnerabilities', desc: 'View all', color: 'red' },
@@ -690,7 +690,7 @@ export default function SecurityAuditClient() {
                   <CardTitle>Security Posture Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                     <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-red-600 dark:text-red-400">Critical</span>
@@ -916,7 +916,7 @@ export default function SecurityAuditClient() {
                   <CardTitle>Risk Heatmap by Asset Type</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     {[
                       { type: 'Servers', risk: 78, vulns: 45 },
                       { type: 'Databases', risk: 65, vulns: 23 },
@@ -955,7 +955,7 @@ export default function SecurityAuditClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{vulnerabilityStats.total}</div>
                   <div className="text-sm text-red-100">Total</div>
@@ -1101,7 +1101,7 @@ export default function SecurityAuditClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockAudits.length}</div>
                   <div className="text-sm text-purple-100">Total Audits</div>
@@ -1125,7 +1125,7 @@ export default function SecurityAuditClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockAudits.map(audit => (
                 <Card
                   key={audit.id}
@@ -1143,7 +1143,7 @@ export default function SecurityAuditClient() {
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{audit.name}</h3>
                     <p className="text-sm text-gray-500 mb-4">{audit.auditCode}</p>
 
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mb-4 text-center">
                       <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded">
                         <p className="text-lg font-bold text-red-700">{audit.findings.critical}</p>
                         <p className="text-xs text-red-500">Critical</p>
@@ -1192,7 +1192,7 @@ export default function SecurityAuditClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockAssets.length}</div>
                   <div className="text-sm text-emerald-100">Total Assets</div>
@@ -1306,7 +1306,7 @@ export default function SecurityAuditClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">6</div>
                   <div className="text-sm text-amber-100">Frameworks</div>
@@ -1334,7 +1334,7 @@ export default function SecurityAuditClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 mb-6">
               {complianceFrameworks.map(framework => (
                 <Card key={framework.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
@@ -1440,7 +1440,7 @@ export default function SecurityAuditClient() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Organization Name</label>
                           <Input defaultValue="Acme Corporation" />
@@ -1814,7 +1814,7 @@ export default function SecurityAuditClient() {
                     <p className="text-gray-600 dark:text-gray-300">{selectedVulnerability.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-medium mb-2">Affected Asset</h4>
                       <p className="text-gray-600">{selectedVulnerability.affectedAsset}</p>
@@ -1897,7 +1897,7 @@ export default function SecurityAuditClient() {
               <DialogTitle>Launch New Security Scan</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                   <Bug className="h-8 w-8 text-red-600 mb-2" />
                   <h4 className="font-medium">Vulnerability Scan</h4>
@@ -2000,7 +2000,7 @@ export default function SecurityAuditClient() {
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-gray-500">Select the format and content for your export</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowExportDialog(false)
                   toast.success('Exporting PDF report...', { description: 'Your report will be downloaded shortly' })
@@ -2149,7 +2149,7 @@ export default function SecurityAuditClient() {
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-gray-500">Automatically discover and inventory assets in your infrastructure</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowDiscoverDialog(false)
                   toast.info('Network scan started', { description: 'Discovering assets on your network...' })
@@ -2210,7 +2210,7 @@ export default function SecurityAuditClient() {
                   <option>Endpoint</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">IP Address</label>
                   <Input placeholder="e.g., 192.168.1.100" />

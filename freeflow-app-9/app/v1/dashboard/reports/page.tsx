@@ -1859,7 +1859,7 @@ export default function ReportsPage() {
                       </div>
 
                       {/* Stats */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs">
                         <div>
                           <p className="text-muted-foreground">Data Points</p>
                           <p className="font-medium">{report.dataPoints.toLocaleString()}</p>
@@ -1975,7 +1975,7 @@ export default function ReportsPage() {
 
             {state.selectedReport && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-xs text-muted-foreground">Name</Label>
                     <p className="text-sm font-medium mt-1">{state.selectedReport.name}</p>

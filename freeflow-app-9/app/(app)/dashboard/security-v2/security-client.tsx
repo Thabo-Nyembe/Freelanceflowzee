@@ -1162,7 +1162,7 @@ export default function SecurityClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{stats.totalItems}</div>
                   <div className="text-sm text-red-100">Total Items</div>
@@ -1191,7 +1191,7 @@ export default function SecurityClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Add Login', color: 'red' },
                 { icon: Key, label: 'Add Key', color: 'blue' },
@@ -1310,7 +1310,7 @@ export default function SecurityClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{stats.securityScore}%</div>
                   <div className="text-sm text-orange-100">Score</div>
@@ -1441,7 +1441,7 @@ export default function SecurityClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{stats.activeDevices}</div>
                   <div className="text-sm text-teal-100">Total</div>
@@ -1537,7 +1537,7 @@ export default function SecurityClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockSecretKeys.length}</div>
                   <div className="text-sm text-purple-100">Total Keys</div>
@@ -1646,7 +1646,7 @@ export default function SecurityClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockActivityLog.length}</div>
                   <div className="text-sm text-gray-300">Total Events</div>
@@ -1766,7 +1766,7 @@ export default function SecurityClient() {
                       <CardDescription>Configure basic vault settings</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Vault Name</label>
                           <Input defaultValue="My Personal Vault" />
@@ -2194,7 +2194,7 @@ export default function SecurityClient() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-muted/30 rounded-lg">
                     <p className="text-xs text-muted-foreground">Created</p>
                     <p className="text-sm font-medium">{new Date(selectedItem.created).toLocaleDateString()}</p>
@@ -2269,7 +2269,7 @@ export default function SecurityClient() {
           </DialogHeader>
           {selectedDevice && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">Operating System</p>
                   <p className="font-medium">{selectedDevice.os}</p>

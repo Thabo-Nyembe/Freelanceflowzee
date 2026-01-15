@@ -747,7 +747,7 @@ export default function InvoicesPage() {
 
               <div className="p-6 space-y-6">
                 {/* Header Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Bill To</p>
                     <p className="font-semibold">{selectedInvoice.clientName}</p>
@@ -772,7 +772,7 @@ export default function InvoicesPage() {
                 <div>
                   <h3 className="font-semibold mb-4">Line Items</h3>
                   <div className="space-y-2 mb-4 border rounded-lg overflow-hidden">
-                    <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 font-semibold text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 font-semibold text-sm">
                       <span>Description</span>
                       <span className="text-right">Qty</span>
                       <span className="text-right">Price</span>
@@ -781,7 +781,7 @@ export default function InvoicesPage() {
                     {selectedInvoice.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="grid grid-cols-4 gap-4 p-4 border-t text-sm"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 border-t text-sm"
                       >
                         <span>{item.description}</span>
                         <span className="text-right">{item.quantity}</span>

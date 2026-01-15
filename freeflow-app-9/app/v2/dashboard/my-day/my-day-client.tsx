@@ -1569,7 +1569,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                         <RotateCcw className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mt-4">
                       <div className="text-center p-2 bg-white/10 rounded-lg">
                         <div className="text-xl font-bold">{pomodoroCount}</div>
                         <div className="text-xs opacity-80">Pomodoros</div>
@@ -2051,7 +2051,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                       <div className="text-3xl font-bold text-purple-600">{stats.focusMinutesToday}</div>
                       <div className="text-sm text-purple-600/80">Focus Minutes Today</div>
@@ -2080,7 +2080,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mb-2">
                         <Flame className="w-6 h-6 text-yellow-600" />
@@ -2329,7 +2329,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   onChange={(e) => setNewTaskDescription(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="task-priority">Priority</Label>
                   <Select value={newTaskPriority} onValueChange={(v) => setNewTaskPriority(v as TaskPriority)}>
@@ -2400,7 +2400,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   onChange={(e) => setMeetingTitle(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="meeting-date">Date</Label>
                   <Input
@@ -2473,7 +2473,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   onChange={(e) => setReminderText(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="reminder-date">Date</Label>
                   <Input
@@ -2936,7 +2936,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               <DialogDescription>Review your progress for today.</DialogDescription>
             </DialogHeader>
             <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                   <div className="text-3xl font-bold text-green-600">{completedToday.length}</div>
                   <div className="text-sm text-green-600/80">Completed</div>

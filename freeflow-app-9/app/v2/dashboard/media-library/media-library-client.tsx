@@ -1089,7 +1089,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: CloudUpload, label: 'Upload', desc: 'Add new files', color: 'text-pink-500', action: handleUploadMedia },
                 { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
@@ -1264,7 +1264,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Folder Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => setShowFolderTreeDialog(true) },
@@ -1348,7 +1348,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Collections Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
                 { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => setShowBrowseCollectionsDialog(true) },
@@ -1432,7 +1432,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Upload Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: ImagePlus, label: 'Images', desc: 'Upload photos', color: 'text-blue-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'image' }); setShowUploadDialog(true) } },
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
@@ -1518,7 +1518,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Analytics Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => setShowAnalyticsOverviewDialog(true) },
                 { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
@@ -1631,7 +1631,7 @@ export default function MediaLibraryClient({
             </div>
 
             {/* Additional Analytics */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle>Upload Trends</CardTitle>
@@ -1744,7 +1744,7 @@ export default function MediaLibraryClient({
                         <CardDescription>Basic media library settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Library Name</label>
                             <Input defaultValue="Main Media Library" />
@@ -2144,7 +2144,7 @@ export default function MediaLibraryClient({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <Card className="border-0 bg-gray-50 dark:bg-gray-800/50">
                       <CardContent className="p-4">
                         <p className="text-sm text-gray-500 mb-1">File Size</p>
@@ -2263,7 +2263,7 @@ export default function MediaLibraryClient({
             </DialogHeader>
             {selectedCollection && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-sm text-gray-500">Assets</p>
                     <p className="text-2xl font-bold">{selectedCollection.assetCount}</p>
@@ -2692,7 +2692,7 @@ export default function MediaLibraryClient({
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 mb-2" />
                   <p className="font-medium">Primary Colors</p>
@@ -2906,7 +2906,7 @@ export default function MediaLibraryClient({
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[50vh]">
-              <div className="grid grid-cols-2 gap-4 p-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-2">
                 {mockCollections.map((collection) => (
                   <Card key={collection.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setShowBrowseCollectionsDialog(false); setSelectedCollection(collection); }}>
                     <CardContent className="p-4">
@@ -3170,7 +3170,7 @@ export default function MediaLibraryClient({
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'Google Drive', icon: '🔵', connected: true },
                   { name: 'Dropbox', icon: '📦', connected: true },
@@ -3256,7 +3256,7 @@ export default function MediaLibraryClient({
                 Key metrics for your media library.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="p-4">
                 <p className="text-sm text-gray-500">Total Assets</p>
                 <p className="text-3xl font-bold">{stats.totalAssets}</p>
@@ -3303,7 +3303,7 @@ export default function MediaLibraryClient({
                   <p>Trend chart placeholder</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                   <p className="text-sm text-green-600">Most Viewed</p>
                   <p className="font-medium">Product Images</p>
@@ -3377,7 +3377,7 @@ export default function MediaLibraryClient({
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

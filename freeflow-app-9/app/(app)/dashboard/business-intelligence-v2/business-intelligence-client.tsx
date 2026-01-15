@@ -805,7 +805,7 @@ export function BusinessIntelligenceClient() {
             </div>
             <div className="space-y-2">
               <Label>Include Sections</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" defaultChecked className="rounded" />
                   Revenue Data
@@ -1006,7 +1006,7 @@ export function BusinessIntelligenceClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="minValue">Min Value</Label>
                 <Input
@@ -1071,7 +1071,7 @@ export function BusinessIntelligenceClient() {
               </Select>
             </div>
             {dateRange === 'custom' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
                   <Input type="date" />
@@ -1128,7 +1128,7 @@ export function BusinessIntelligenceClient() {
             </div>
             <div className="space-y-2">
               <Label>Include Metrics</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="checkbox" defaultChecked className="rounded" />
                   Revenue Trends

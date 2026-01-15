@@ -1455,7 +1455,7 @@ export default function GalleryClient() {
                         <CardDescription>Manage your public profile</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Display Name</Label>
                             <Input defaultValue="John Doe" />
@@ -1469,7 +1469,7 @@ export default function GalleryClient() {
                           <Label>Bio</Label>
                           <Input defaultValue="Photographer & Visual Artist" />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Location</Label>
                             <Input placeholder="City, Country" />
@@ -1554,7 +1554,7 @@ export default function GalleryClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max Upload Size</Label>
                             <Select defaultValue="50">
@@ -1605,7 +1605,7 @@ export default function GalleryClient() {
                         <CardDescription>Set defaults for new uploads</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default License</Label>
                             <Select defaultValue="unsplash">
@@ -1663,7 +1663,7 @@ export default function GalleryClient() {
                         <CardDescription>Configure download settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Resolution</Label>
                             <Select defaultValue="large">
@@ -1962,7 +1962,7 @@ export default function GalleryClient() {
                         <CardDescription>Download your data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Export Format</Label>
                             <Select defaultValue="zip">
@@ -2186,7 +2186,7 @@ export default function GalleryClient() {
                     {selectedPhoto.camera && (
                       <div>
                         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Camera Info</h4>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm">
                           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                             <Camera className="w-4 h-4" />
                             {selectedPhoto.camera}
@@ -2267,7 +2267,7 @@ export default function GalleryClient() {
 
                     {/* Stats */}
                     <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                      <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                         <div>
                           <div className="text-xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedPhoto.views)}</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Views</div>

@@ -776,7 +776,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Open Tickets', value: stats.openTickets, icon: Inbox, color: 'text-white' },
               { label: 'Resolved Today', value: stats.resolvedToday, icon: CheckCircle, color: 'text-emerald-200' },
@@ -1094,7 +1094,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {agents.map(agent => (
                 <Card key={agent.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedAgent(agent); setShowAgentDialog(true) }}>
                   <CardContent className="pt-6">
@@ -1113,7 +1113,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-emerald-600">{agent.activeTickets}</p>
                         <p className="text-xs text-gray-500">Active</p>
@@ -1286,7 +1286,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2">
                 <CardHeader>
                   <CardTitle>Ticket Volume</CardTitle>
@@ -1469,7 +1469,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Support Team Name</Label>
                             <Input defaultValue="Kazi Support" className="mt-1" />
@@ -1497,7 +1497,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Time Zone</Label>
                             <Select defaultValue="utc-5">
@@ -2034,7 +2034,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="grid grid-cols-3 gap-6 h-[70vh]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 h-[70vh]">
                 {/* Conversation */}
                 <div className="col-span-2 flex flex-col">
                   <h3 className="font-semibold mb-2">{selectedTicket.subject}</h3>
@@ -2231,12 +2231,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 {/* Agent Stats */}
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900 dark:text-white">Performance Metrics</h4>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-700">
                       <CardContent className="p-4 text-center">
                         <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{selectedAgent.activeTickets}</p>
@@ -2422,7 +2422,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-24"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Priority</Label>
                 <Select value={ticketForm.priority} onValueChange={(v) => setTicketForm({ ...ticketForm, priority: v })}>
@@ -2453,7 +2453,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Customer Name</Label>
                 <Input
@@ -2648,7 +2648,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>Support Reports</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card>
                 <CardContent className="pt-4">
                   <h4 className="font-medium mb-2">Ticket Summary</h4>
@@ -3094,7 +3094,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogHeader>
             <DialogTitle>Customer Insights</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card>
               <CardContent className="pt-4">
                 <h4 className="font-medium mb-2">Satisfaction Trends</h4>
@@ -3216,7 +3216,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <Card>
                   <CardContent className="pt-4 text-center">
                     <p className="text-2xl font-bold">{selectedCustomer.totalTickets}</p>
@@ -3339,7 +3339,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>First Response (min)</Label>
                 <Input
@@ -3395,7 +3395,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Label>Policy Name</Label>
                 <Input defaultValue={selectedSLA.name} className="mt-1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>First Response (min)</Label>
                   <Input type="number" defaultValue={selectedSLA.firstResponseTarget} className="mt-1" />
@@ -3978,7 +3978,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>Performance Report - {selectedAgent?.name}</DialogTitle>
           </DialogHeader>
           {selectedAgent && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card>
                 <CardContent className="pt-4">
                   <h4 className="font-medium mb-2">Weekly Stats</h4>
@@ -4320,7 +4320,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>Request PTO</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Start Date</Label>
                 <Input
@@ -4536,7 +4536,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <DialogTitle>{selectedSegment?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                 <p className="text-2xl font-bold">{selectedSegment?.count}</p>
                 <p className="text-sm text-gray-500">Customers</p>

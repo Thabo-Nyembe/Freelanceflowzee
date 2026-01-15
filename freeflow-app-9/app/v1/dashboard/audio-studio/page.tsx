@@ -177,7 +177,7 @@ export default function AudioStudioPage() {
         <div className="container mx-auto px-4 py-12 relative z-10">
           <div className="max-w-7xl mx-auto space-y-6">
             <CardSkeleton />
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <CardSkeleton />
               <CardSkeleton />
               <CardSkeleton />
@@ -430,7 +430,7 @@ export default function AudioStudioPage() {
                           </Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                           <div>
                             <span className="text-gray-400 block">Duration</span>
                             <span className="text-white font-medium">{formatDuration(project.duration)}</span>
@@ -767,7 +767,7 @@ export default function AudioStudioPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs">
                         <div>
                           <span className="text-gray-400 block">Tempo</span>
                           <span className="text-white font-medium">{template.tempo} BPM</span>

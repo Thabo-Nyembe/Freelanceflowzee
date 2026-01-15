@@ -2022,7 +2022,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-2xl font-bold">{selectedArticle?.views.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">Views</p>

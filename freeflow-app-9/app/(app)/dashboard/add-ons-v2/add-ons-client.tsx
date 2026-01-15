@@ -1660,7 +1660,7 @@ export default function AddOnsClient() {
                       <CardTitle>General Settings</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Marketplace Region</label>
                           <select className="w-full p-2 border rounded-lg dark:bg-gray-700">
@@ -2045,7 +2045,7 @@ export default function AddOnsClient() {
 
                 <div>
                   <h3 className="font-semibold mb-2">Features</h3>
-                  <ul className="grid grid-cols-2 gap-2">
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {selectedAddOn.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -2055,7 +2055,7 @@ export default function AddOnsClient() {
                   </ul>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                   <div>
                     <span className="text-gray-500">Version</span>
                     <p className="font-medium">{selectedAddOn.version}</p>
@@ -2266,7 +2266,7 @@ export default function AddOnsClient() {
                   onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, query: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Minimum Rating</label>
                   <select

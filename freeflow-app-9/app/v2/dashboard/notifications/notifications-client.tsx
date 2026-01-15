@@ -741,7 +741,7 @@ export default function NotificationsClient() {
 
           {/* Segments Tab */}
           <TabsContent value="segments" className="mt-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockSegments.map(segment => (
                 <Card key={segment.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
@@ -769,7 +769,7 @@ export default function NotificationsClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockTemplates.map(template => {
                 const ChannelIcon = getChannelIcon(template.channel)
                 return (
@@ -831,7 +831,7 @@ export default function NotificationsClient() {
                       <Badge variant="outline"><Zap className="h-3 w-3 mr-1" />Trigger: {automation.trigger.type}</Badge>
                       <Badge variant="outline">{automation.actions.length} actions</Badge>
                     </div>
-                    <div className="grid grid-cols-4 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
                       <div><p className="text-lg font-bold">{automation.stats.totalTriggered.toLocaleString()}</p><p className="text-xs text-gray-500">Triggered</p></div>
                       <div><p className="text-lg font-bold text-green-600">{automation.stats.totalCompleted.toLocaleString()}</p><p className="text-xs text-gray-500">Completed</p></div>
                       <div><p className="text-lg font-bold text-red-600">{automation.stats.totalFailed}</p><p className="text-xs text-gray-500">Failed</p></div>
@@ -869,7 +869,7 @@ export default function NotificationsClient() {
                       </div>
                       <Progress value={test.confidenceLevel} />
                     </div>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                       {test.variants.map(variant => (
                         <div key={variant.id} className={`p-4 rounded-lg ${test.winner === variant.id ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500' : 'bg-gray-50 dark:bg-gray-800'}`}>
                           <div className="flex items-center justify-between mb-3">
@@ -878,7 +878,7 @@ export default function NotificationsClient() {
                           </div>
                           <p className="text-sm font-medium mb-1">{variant.title}</p>
                           <p className="text-sm text-gray-500 mb-4">{variant.message}</p>
-                          <div className="grid grid-cols-3 gap-2 text-center">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                             <div><p className="font-bold">{variant.stats.sent.toLocaleString()}</p><p className="text-xs text-gray-500">Sent</p></div>
                             <div><p className="font-bold text-blue-600">{variant.stats.opened.toLocaleString()}</p><p className="text-xs text-gray-500">Opened</p></div>
                             <div><p className="font-bold text-green-600">{variant.stats.clicked.toLocaleString()}</p><p className="text-xs text-gray-500">Clicked</p></div>
@@ -1031,7 +1031,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>FCM Server Key</Label>
                             <Input type="password" placeholder="Enter server key" />
@@ -1041,7 +1041,7 @@ export default function NotificationsClient() {
                             <Input placeholder="Enter sender ID" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>iOS Certificate (.p12)</Label>
                             <div className="flex items-center gap-2">
@@ -1112,7 +1112,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Email Provider</Label>
                             <Select defaultValue="sendgrid">
@@ -1132,7 +1132,7 @@ export default function NotificationsClient() {
                             <Input type="password" placeholder="Enter API key" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>From Email</Label>
                             <Input placeholder="noreply@company.com" />
@@ -1142,7 +1142,7 @@ export default function NotificationsClient() {
                             <Input placeholder="Company Name" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Reply-To Email</Label>
                             <Input placeholder="support@company.com" />
@@ -1190,7 +1190,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Twilio Account SID</Label>
                             <Input placeholder="Enter Account SID" />
@@ -1200,7 +1200,7 @@ export default function NotificationsClient() {
                             <Input type="password" placeholder="Enter Auth Token" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>From Phone Number</Label>
                             <Input placeholder="+1234567890" />
@@ -1240,7 +1240,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Display Position</Label>
                             <Select defaultValue="top">
@@ -1314,7 +1314,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Timezone</Label>
                             <Select defaultValue="utc">
@@ -1367,7 +1367,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max per Hour</Label>
                             <Select defaultValue="3">
@@ -1441,7 +1441,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Start Time</Label>
                             <Input type="time" defaultValue="22:00" />
@@ -1481,7 +1481,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Channel</Label>
                             <Select defaultValue="push">
@@ -1509,7 +1509,7 @@ export default function NotificationsClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Retry Attempts</Label>
                             <Select defaultValue="3">
@@ -1622,7 +1622,7 @@ export default function NotificationsClient() {
                         <CardDescription>Export analytics data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Export Format</Label>
                             <Select defaultValue="csv">
@@ -1703,7 +1703,7 @@ export default function NotificationsClient() {
                         <CardDescription>Configure automated reports</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Report Frequency</Label>
                             <Select defaultValue="weekly">
@@ -1800,7 +1800,7 @@ export default function NotificationsClient() {
                         <CardDescription>Default settings for new users</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Push Notifications</Label>
                             <Select defaultValue="on">
@@ -2078,7 +2078,7 @@ export default function NotificationsClient() {
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Test Email</Label>
                             <Input placeholder="test@company.com" />
@@ -2147,7 +2147,7 @@ export default function NotificationsClient() {
                         <CardDescription>Configure data storage policies</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Notification History</Label>
                             <Select defaultValue="90">
@@ -2370,7 +2370,7 @@ export default function NotificationsClient() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" value={campaignForm.name} onChange={(e) => setCampaignForm(prev => ({ ...prev, name: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Channel</Label><Select value={campaignForm.channel} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, channel: v }))}><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
                 <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
               </div>

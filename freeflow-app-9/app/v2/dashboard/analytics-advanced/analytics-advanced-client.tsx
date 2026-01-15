@@ -920,7 +920,7 @@ export default function AnalyticsAdvancedClient() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['csv', 'xlsx', 'json', 'pdf'].map((format) => (
                   <Button
                     key={format}
@@ -1102,7 +1102,7 @@ export default function AnalyticsAdvancedClient() {
                 onChange={(e) => setNewGoalTarget(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="goal-start">Start Date</Label>
                 <Input

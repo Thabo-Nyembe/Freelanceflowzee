@@ -925,7 +925,7 @@ export default function ThirdPartyIntegrationsClient() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4">
               <div className="text-2xl font-bold">{stats.activeZaps}</div>
               <div className="text-sm text-white/70">Active Zaps</div>
@@ -1439,7 +1439,7 @@ export default function ThirdPartyIntegrationsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Timezone</Label>
                             <Select defaultValue="utc-5">
@@ -1497,7 +1497,7 @@ export default function ThirdPartyIntegrationsClient() {
                           <Label>Organization Name</Label>
                           <Input defaultValue="Kazi Technologies" className="mt-1" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Plan Type</Label>
                             <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2197,7 +2197,7 @@ export default function ThirdPartyIntegrationsClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card>
                     <CardContent className="p-4 text-center">
                       <div className="text-2xl font-bold">{selectedZap.runCount.toLocaleString()}</div>
@@ -2273,7 +2273,7 @@ export default function ThirdPartyIntegrationsClient() {
               </DialogHeader>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Card>
                     <CardContent className="p-4">
                       <div className="text-sm text-gray-500 mb-1">Status</div>
@@ -3054,7 +3054,7 @@ export default function ThirdPartyIntegrationsClient() {
           </DialogHeader>
           {showLogDetailDialog && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="text-sm text-gray-500">Zap</div>
                   <div className="font-medium">{showLogDetailDialog.zapName}</div>

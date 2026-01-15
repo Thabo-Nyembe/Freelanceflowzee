@@ -581,7 +581,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // In demo mode, continue with empty bookings instead of showing error
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1600px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
@@ -621,7 +621,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         <TabsTrigger value="invite">Send Invite Link</TabsTrigger>
                       </TabsList>
                       <TabsContent value="manual" className="mt-4 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-1">Service Type</label>
                             <select
@@ -648,7 +648,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                             </select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-1">Date</label>
                             <input
@@ -2189,7 +2189,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <TabsTrigger value="actions">Actions</TabsTrigger>
                 </TabsList>
                 <TabsContent value="details" className="mt-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                         <Calendar className="h-4 w-4" />
@@ -2380,7 +2380,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-1">Start Time</label>
                   <select
@@ -2570,7 +2570,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 <Label>Service Name</Label>
                 <Input placeholder="e.g., Strategy Session" className="mt-1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Duration (minutes)</Label>
                   <Input type="number" placeholder="60" className="mt-1" />
@@ -2584,7 +2584,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 <Label>Description</Label>
                 <Input placeholder="Brief description of the service" className="mt-1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Buffer Time (minutes)</Label>
                   <Input type="number" placeholder="15" className="mt-1" />
@@ -2627,7 +2627,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 <Label>Service Name</Label>
                 <Input defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.name || ''} className="mt-1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Duration (minutes)</Label>
                   <Input type="number" defaultValue={serviceTypes.find(s => s.id === selectedServiceId)?.duration || 60} className="mt-1" />

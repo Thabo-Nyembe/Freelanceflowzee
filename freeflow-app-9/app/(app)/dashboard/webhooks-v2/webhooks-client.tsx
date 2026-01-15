@@ -1470,7 +1470,7 @@ export default function WebhooksClient({
                     </div>
 
                     {/* Metrics */}
-                    <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm">
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Deliveries</div>
                         <div className="font-semibold text-gray-900 dark:text-white">{webhook.total_deliveries.toLocaleString()}</div>
@@ -1787,7 +1787,7 @@ export default function WebhooksClient({
                       <div className="text-2xl font-bold">{mockStats.successRate}%</div>
                       <div className="text-xs opacity-80">Success Rate</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">{mockStats.totalEndpoints}</div>
                         <div className="text-xs opacity-80">Endpoints</div>
@@ -1821,7 +1821,7 @@ export default function WebhooksClient({
                         <CardDescription>Configure default settings for new webhooks</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Timeout</Label>
                             <Select defaultValue="30">
@@ -1923,7 +1923,7 @@ export default function WebhooksClient({
                         <CardDescription>Configure automatic retry behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max Retry Attempts</Label>
                             <Select defaultValue="5">
@@ -1952,7 +1952,7 @@ export default function WebhooksClient({
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Initial Delay</Label>
                             <Select defaultValue="1000">
@@ -2001,7 +2001,7 @@ export default function WebhooksClient({
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Requests per Minute</Label>
                             <Input type="number" defaultValue="60" />
@@ -2491,7 +2491,7 @@ export default function WebhooksClient({
                   placeholder="What does this webhook do?"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Timeout (ms)</label>
                   <select
@@ -2521,7 +2521,7 @@ export default function WebhooksClient({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Events to Subscribe</label>
-                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 border dark:border-gray-600 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-40 overflow-y-auto p-3 border dark:border-gray-600 rounded-lg">
                   {mockEventTypes.map(event => (
                     <label key={event.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
@@ -2584,7 +2584,7 @@ export default function WebhooksClient({
           {selectedLog && (
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Status Code</div>
                     <div className={`text-xl font-bold ${selectedLog.statusCode && selectedLog.statusCode < 300 ? 'text-green-600' : 'text-red-600'}`}>
@@ -2897,7 +2897,7 @@ export default function WebhooksClient({
           {selectedEventType && (
             <div className="py-4 space-y-4">
               <p className="text-gray-600 dark:text-gray-400">{selectedEventType.description}</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedEventType.subscriberCount}</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">Subscribers</div>

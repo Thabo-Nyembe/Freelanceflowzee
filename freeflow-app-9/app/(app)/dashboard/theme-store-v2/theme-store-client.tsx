@@ -884,7 +884,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {[
               { label: 'Total Themes', value: stats.totalThemes, icon: Palette, trend: '+28 this month' },
               { label: 'Installed', value: stats.installed, icon: Download, trend: '2 updates available' },
@@ -1113,7 +1113,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 </div>
 
                 {/* Theme Grid */}
-                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-6' : 'space-y-4'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6' : 'space-y-4'}>
                   {filteredThemes.map(theme => (
                     <Card key={theme.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openThemeDetails(theme)}>
                       {/* Thumbnail */}
@@ -1378,7 +1378,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {collection.themes.map(themeId => {
                         const theme = themes.find(t => t.id === themeId)
                         if (!theme) return null
@@ -1445,7 +1445,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1641,7 +1641,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Framework</Label>
                             <Select defaultValue="nextjs">
@@ -1725,7 +1725,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Store Language</Label>
                             <Select defaultValue="en">
@@ -2312,7 +2312,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
                     <p className="text-gray-600">{selectedTheme.longDescription}</p>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <Card>
                         <CardContent className="pt-4">
                           <h4 className="font-medium mb-3">Theme Info</h4>
@@ -2361,7 +2361,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   </TabsContent>
 
                   <TabsContent value="features">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {selectedTheme.features.map((feature, i) => (
                         <div key={i} className="flex items-center gap-2 p-3 border rounded-lg">
                           <Check className="h-5 w-5 text-green-500" />

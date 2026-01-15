@@ -1495,7 +1495,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-5 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Reach</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{(campaign.reach / 1000).toFixed(0)}K</p>
@@ -1775,7 +1775,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Open Rate</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{sequence.openRate}%</p>
@@ -1988,7 +1988,7 @@ export default function MarketingClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div>
                           <p className="text-xs text-gray-500">Enrolled</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{workflow.enrolled.toLocaleString()}</p>
@@ -2073,7 +2073,7 @@ export default function MarketingClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Revenue</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">${(mockAnalytics.revenue / 1000000).toFixed(2)}M</p>
@@ -2252,7 +2252,7 @@ export default function MarketingClient() {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-sm text-gray-500">Reach</p>
                       <p className="text-xl font-bold">{(selectedCampaign.reach / 1000).toFixed(0)}K</p>
@@ -2271,7 +2271,7 @@ export default function MarketingClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-semibold mb-3">Budget & Spend</h4>
                       <div className="space-y-2">
@@ -2303,7 +2303,7 @@ export default function MarketingClient() {
 
                   <div>
                     <h4 className="font-semibold mb-3">Campaign Details</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Start Date</span>
                         <span>{selectedCampaign.startDate}</span>
@@ -2369,7 +2369,7 @@ export default function MarketingClient() {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-3">
                       <h4 className="font-semibold">Contact Information</h4>
                       <div className="space-y-2 text-sm">
@@ -2416,7 +2416,7 @@ export default function MarketingClient() {
 
                   <div>
                     <h4 className="font-semibold mb-3">Activity Summary</h4>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                         <p className="text-2xl font-bold">{selectedLead.activities}</p>
                         <p className="text-xs text-gray-500">Total Activities</p>
@@ -2472,7 +2472,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="campaign-name">Campaign Name</Label>
                   <Input
@@ -2512,7 +2512,7 @@ export default function MarketingClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="campaign-budget">Budget ($)</Label>
                   <Input
@@ -2592,7 +2592,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-name">Full Name</Label>
                   <Input
@@ -2613,7 +2613,7 @@ export default function MarketingClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-phone">Phone</Label>
                   <Input
@@ -2633,7 +2633,7 @@ export default function MarketingClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-title">Job Title</Label>
                   <Input
@@ -2653,7 +2653,7 @@ export default function MarketingClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-value">Estimated Value ($)</Label>
                   <Input
@@ -2803,7 +2803,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="sequence-name">Sequence Name</Label>
                   <Input
@@ -2897,7 +2897,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="content-title">Title</Label>
                   <Input
@@ -2928,7 +2928,7 @@ export default function MarketingClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="content-platform">Platform</Label>
                   <Select
@@ -3013,7 +3013,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="workflow-name">Workflow Name</Label>
                   <Input
@@ -3165,7 +3165,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[
                   { name: 'Welcome Email', category: 'Onboarding', uses: 245 },
                   { name: 'Newsletter', category: 'Updates', uses: 189 },
@@ -3283,7 +3283,7 @@ export default function MarketingClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Variant A</Label>
                   <Input placeholder="Control version" />
@@ -3794,7 +3794,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'Campaign Overview', widgets: 8, lastViewed: '2 hours ago' },
                   { name: 'Lead Pipeline', widgets: 6, lastViewed: '1 day ago' },
@@ -3888,7 +3888,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card>
                   <CardContent className="p-4">
                     <h4 className="font-medium mb-3">Top Locations</h4>
@@ -4053,7 +4053,7 @@ export default function MarketingClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'Campaign Performance', type: 'PDF', lastGenerated: '2 hours ago' },
                   { name: 'Lead Funnel Analysis', type: 'Excel', lastGenerated: '1 day ago' },
@@ -4110,7 +4110,7 @@ export default function MarketingClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input type="date" placeholder="Start date" />
                   <Input type="date" placeholder="End date" />
                 </div>

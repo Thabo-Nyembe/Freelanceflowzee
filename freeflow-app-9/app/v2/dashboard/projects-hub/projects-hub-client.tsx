@@ -798,7 +798,7 @@ export default function ProjectsHubClient() {
             </div>
 
             {viewType === 'board' && (
-              <div className="grid grid-cols-5 gap-4 overflow-x-auto pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 overflow-x-auto pb-4">
                 {statusColumns.map(column => (
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
@@ -915,7 +915,7 @@ export default function ProjectsHubClient() {
 
           {/* Sprints Tab */}
           <TabsContent value="sprints" className="mt-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockSprints.map(sprint => (
                 <Card key={sprint.id} className={`border-gray-200 dark:border-gray-700 ${sprint.status === 'active' ? 'ring-2 ring-blue-500' : ''}`}>
                   <CardHeader>
@@ -963,7 +963,7 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {mockReports.map(report => (
                     <div key={report.id} className="p-4 border rounded-lg hover:shadow-md cursor-pointer transition-shadow">
                       <div className="flex items-center justify-between mb-2">
@@ -1010,7 +1010,7 @@ export default function ProjectsHubClient() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Project Distribution</CardTitle></CardHeader>
                 <CardContent>
@@ -1033,7 +1033,7 @@ export default function ProjectsHubClient() {
                 <CardContent>
                   <div className="text-center mb-6"><p className="text-4xl font-bold">${(stats.totalSpent / 1000).toFixed(0)}K</p><p className="text-gray-500">of ${(stats.totalBudget / 1000).toFixed(0)}K spent</p></div>
                   <Progress value={(stats.totalSpent / stats.totalBudget) * 100} className="h-3 mb-4" />
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                     <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-2xl font-bold text-green-600">${((stats.totalBudget - stats.totalSpent) / 1000).toFixed(0)}K</p><p className="text-xs text-gray-500">Remaining</p></div>
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-2xl font-bold text-blue-600">{Math.round((stats.totalSpent / stats.totalBudget) * 100)}%</p><p className="text-xs text-gray-500">Utilized</p></div>
                   </div>
@@ -1112,7 +1112,7 @@ export default function ProjectsHubClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockTemplates.map(template => (
                 <Card key={template.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg cursor-pointer">
                   <CardContent className="pt-6">
@@ -1181,7 +1181,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View</Label>
                             <Select defaultValue="board">
@@ -1243,7 +1243,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Project Key Prefix</Label>
                             <Input defaultValue="PRJ" />
@@ -1263,7 +1263,7 @@ export default function ProjectsHubClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Story Point Scale</Label>
                             <Select defaultValue="fibonacci">
@@ -1317,7 +1317,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Timezone</Label>
                             <Select defaultValue="utc">
@@ -1347,7 +1347,7 @@ export default function ProjectsHubClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Week Start Day</Label>
                             <Select defaultValue="monday">
@@ -1623,7 +1623,7 @@ export default function ProjectsHubClient() {
                             </Button>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="text-2xl font-bold">24,567</div>
                             <div className="text-sm text-gray-500">API Calls (30 days)</div>
@@ -1738,7 +1738,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {[
                             { type: 'Text', description: 'Single or multi-line text', icon: FileText },
                             { type: 'Number', description: 'Numeric values', icon: Hash },
@@ -2000,7 +2000,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{mockProjects.length}</div>
                             <div className="text-sm text-gray-500">Projects</div>
@@ -2075,7 +2075,7 @@ export default function ProjectsHubClient() {
                   <div className="flex items-center gap-3"><div className={`p-2 rounded-lg ${getStatusColor(selectedProject.status)}`}><Briefcase className="h-5 w-5 text-white" /></div><div><DialogTitle className="text-xl">{selectedProject.name}</DialogTitle><p className="text-sm text-gray-500">{selectedProject.projectCode}</p></div></div>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-1">Status</p><Badge className={getStatusColor(selectedProject.status)}>{statusColumns.find(c => c.id === selectedProject.status)?.label}</Badge></CardContent></Card>
                     <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-1">Priority</p><Badge variant="outline"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(selectedProject.priority).color} mr-1`} />{getPriorityConfig(selectedProject.priority).label}</Badge></CardContent></Card>
                     <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-1">Budget</p><p className="text-xl font-bold">${selectedProject.budget?.toLocaleString() || 0}</p></CardContent></Card>
@@ -2096,8 +2096,8 @@ export default function ProjectsHubClient() {
             <div className="space-y-4 py-4">
               <div><Label>Project Name</Label><Input placeholder="Enter project name" className="mt-1" value={newProjectForm.title} onChange={(e) => setNewProjectForm(f => ({ ...f, title: e.target.value }))} /></div>
               <div><Label>Description</Label><Textarea placeholder="Describe the project..." className="mt-1" value={newProjectForm.description} onChange={(e) => setNewProjectForm(f => ({ ...f, description: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Budget</Label><Input type="number" placeholder="0" className="mt-1" value={newProjectForm.budget} onChange={(e) => setNewProjectForm(f => ({ ...f, budget: parseFloat(e.target.value) || 0 }))} /></div><div><Label>Priority</Label><Select value={newProjectForm.priority} onValueChange={(v) => setNewProjectForm(f => ({ ...f, priority: v as any }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select priority" /></SelectTrigger><SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Date</Label><Input type="date" className="mt-1" value={newProjectForm.start_date} onChange={(e) => setNewProjectForm(f => ({ ...f, start_date: e.target.value }))} /></div><div><Label>Due Date</Label><Input type="date" className="mt-1" value={newProjectForm.end_date} onChange={(e) => setNewProjectForm(f => ({ ...f, end_date: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Budget</Label><Input type="number" placeholder="0" className="mt-1" value={newProjectForm.budget} onChange={(e) => setNewProjectForm(f => ({ ...f, budget: parseFloat(e.target.value) || 0 }))} /></div><div><Label>Priority</Label><Select value={newProjectForm.priority} onValueChange={(v) => setNewProjectForm(f => ({ ...f, priority: v as any }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select priority" /></SelectTrigger><SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Date</Label><Input type="date" className="mt-1" value={newProjectForm.start_date} onChange={(e) => setNewProjectForm(f => ({ ...f, start_date: e.target.value }))} /></div><div><Label>Due Date</Label><Input type="date" className="mt-1" value={newProjectForm.end_date} onChange={(e) => setNewProjectForm(f => ({ ...f, end_date: e.target.value }))} /></div></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleSubmitNewProject} disabled={!newProjectForm.title}>Create Project</Button></DialogFooter>
           </DialogContent>
@@ -2114,7 +2114,7 @@ export default function ProjectsHubClient() {
                     <DialogTitle className="text-xl">{selectedIssue.key}: {selectedIssue.title}</DialogTitle>
                   </div>
                 </DialogHeader>
-                <div className="grid grid-cols-3 gap-6 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 mt-4">
                   {/* Main Content */}
                   <div className="col-span-2 space-y-6">
                     <Card>
@@ -2156,7 +2156,7 @@ export default function ProjectsHubClient() {
                       <Card>
                         <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Timer className="h-4 w-4" />Time Tracking</CardTitle></CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                               <p className="text-2xl font-bold text-blue-600">{selectedIssue.timeSpent || 0}h</p>
                               <p className="text-xs text-gray-500">Time Spent</p>
@@ -2329,7 +2329,7 @@ export default function ProjectsHubClient() {
               <DialogDescription>{selectedSprint?.goal}</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {['To Do', 'In Progress', 'Review', 'Done'].map((col, i) => (
                   <div key={col} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
                     <h4 className="font-medium mb-3 text-sm">{col}</h4>
@@ -2373,7 +2373,7 @@ export default function ProjectsHubClient() {
                 <Label>Description</Label>
                 <Textarea placeholder="Describe the item..." className="mt-1" value={backlogItemForm.description} onChange={(e) => setBacklogItemForm(f => ({ ...f, description: e.target.value }))} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Type</Label>
                   <Select value={backlogItemForm.type} onValueChange={(v: 'task') => setBacklogItemForm(f => ({ ...f, type: v }))}>
@@ -2606,7 +2606,7 @@ export default function ProjectsHubClient() {
               <DialogDescription>Connect a new service to your project</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'GitHub', icon: '🐙', desc: 'Connect your repositories' },
                   { name: 'GitLab', icon: '🦊', desc: 'Sync with GitLab projects' },
@@ -2882,7 +2882,7 @@ export default function ProjectsHubClient() {
                   <Label>Description</Label>
                   <Textarea className="mt-1" defaultValue={selectedProject.description} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Budget</Label>
                     <Input type="number" className="mt-1" defaultValue={selectedProject.budget} />
@@ -3000,7 +3000,7 @@ export default function ProjectsHubClient() {
                   <Label>Description</Label>
                   <Textarea className="mt-1" rows={4} defaultValue={selectedIssue.description} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Type</Label>
                     <Select defaultValue={selectedIssue.type}>
@@ -3024,7 +3024,7 @@ export default function ProjectsHubClient() {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Status</Label>
                     <Select defaultValue={selectedIssue.status}>

@@ -1637,7 +1637,7 @@ export default function ClientsPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="name">Full Name *</Label>
                         <Input
@@ -1657,7 +1657,7 @@ export default function ClientsPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="email">Email *</Label>
                         <Input
@@ -1678,7 +1678,7 @@ export default function ClientsPage() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="location">Location</Label>
                         <Input
@@ -2134,7 +2134,7 @@ export default function ClientsPage() {
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
               <TabsContent value="overview" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-xs text-muted-foreground">Full Name</Label>
                     <p className="font-medium">{state.selectedClient.name}</p>
@@ -2233,7 +2233,7 @@ export default function ClientsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Full Name</Label>
                 <Input
@@ -2251,7 +2251,7 @@ export default function ClientsPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-email">Email</Label>
                 <Input
@@ -2317,7 +2317,7 @@ export default function ClientsPage() {
             </DialogDescription>
           </DialogHeader>
           {state.selectedClient && (
-            <div className="grid grid-cols-3 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-4">
               <Card>
                 <CardContent className="p-4 text-center">
                   <Briefcase className="h-8 w-8 mx-auto mb-2 text-blue-500" />
@@ -2375,7 +2375,7 @@ export default function ClientsPage() {
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               <Button
                 variant="outline"
                 className="h-20 flex flex-col items-center justify-center gap-2"

@@ -2517,7 +2517,7 @@ export default function HelpCenterClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <Eye className="w-5 h-5 mx-auto mb-1 text-blue-500" />
                     <p className="text-2xl font-bold">{formatNumber(selectedArticle.views)}</p>
@@ -2657,7 +2657,7 @@ export default function HelpCenterClient() {
                 onChange={(e) => setNewArticleContent(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Type</label>
                 <select
@@ -2953,7 +2953,7 @@ export default function HelpCenterClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[
                 { code: 'en', name: 'English', articles: articles.length },
                 { code: 'es', name: 'Spanish', articles: articles.filter(a => a.translations.includes('es')).length },

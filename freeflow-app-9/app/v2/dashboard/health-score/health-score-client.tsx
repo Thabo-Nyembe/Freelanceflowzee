@@ -2097,7 +2097,7 @@ export default function HealthScoreClient() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Current</div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">{slo.current}%</div>
@@ -2208,7 +2208,7 @@ export default function HealthScoreClient() {
             </DialogHeader>
             {selectedService && (
               <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Apdex Score</div>
                     <div className={`text-2xl font-bold ${
@@ -2238,7 +2238,7 @@ export default function HealthScoreClient() {
 
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">Response Time</h4>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                       <div className="text-lg font-bold text-gray-900 dark:text-white">{selectedService.responseTime.p50}ms</div>
                       <div className="text-xs text-gray-500">p50</div>
@@ -2350,7 +2350,7 @@ export default function HealthScoreClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Network In</div>
                     <div className="text-lg font-bold text-gray-900 dark:text-white">{selectedHost.network.in} MB/s</div>
@@ -2412,7 +2412,7 @@ export default function HealthScoreClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div>
                     <span className="text-gray-500 dark:text-gray-400">Service:</span>
                     <span className="ml-2 text-gray-900 dark:text-white">{selectedIncident.service}</span>
@@ -2505,7 +2505,7 @@ export default function HealthScoreClient() {
                   placeholder="Enter customer name"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="account_type">Account Type</Label>
                   <select
@@ -2531,7 +2531,7 @@ export default function HealthScoreClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="category">Category</Label>
                   <select
@@ -2561,7 +2561,7 @@ export default function HealthScoreClient() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="product_usage">Product Usage</Label>
                   <Input
@@ -2585,7 +2585,7 @@ export default function HealthScoreClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="support_health">Support</Label>
                   <Input
@@ -2695,7 +2695,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Response Time</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">45ms</div>
@@ -3014,7 +3014,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Transactions</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">1.2M</div>
@@ -3326,7 +3326,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">24</div>
                   <div className="text-xs text-gray-500">Total Alerts</div>
@@ -3370,7 +3370,7 @@ export default function HealthScoreClient() {
                   <option>PostgreSQL Primary</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="slo_target">Target (%)</Label>
                   <Input id="slo_target" type="number" placeholder="99.9" />
@@ -3666,7 +3666,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     {mockHosts.filter(h => h.type === 'server').length}
@@ -3697,7 +3697,7 @@ export default function HealthScoreClient() {
                         </div>
                         <span className="text-xs text-gray-500">{host.region}</span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-xs">
                         <div>CPU: <span className={host.cpu > 80 ? 'text-red-500' : 'text-green-500'}>{host.cpu}%</span></div>
                         <div>Memory: <span className={host.memory > 80 ? 'text-red-500' : 'text-green-500'}>{host.memory}%</span></div>
                         <div>Disk: <span className={host.disk > 80 ? 'text-red-500' : 'text-green-500'}>{host.disk}%</span></div>
@@ -3730,7 +3730,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">Active Connections</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">142</div>
@@ -3797,7 +3797,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">12</div>
                   <div className="text-xs text-gray-500">EC2 Instances</div>
@@ -3850,7 +3850,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">48</div>
                   <div className="text-xs text-gray-500">Running Pods</div>
@@ -3910,7 +3910,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">Inbound Traffic</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">1.2 GB/s</div>
@@ -3972,7 +3972,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">2.4 TB</div>
                   <div className="text-xs text-gray-500">Total Storage</div>
@@ -4038,7 +4038,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <div className="text-xs text-gray-500 mb-1">Total vCPUs</div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">128</div>
@@ -4209,7 +4209,7 @@ export default function HealthScoreClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
                   <div className="text-2xl font-bold text-green-500">{mockSLOs.filter(s => s.status === 'met').length}</div>
                   <div className="text-xs text-gray-500">Meeting Target</div>
@@ -4333,7 +4333,7 @@ export default function HealthScoreClient() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Select a custom date range for your health report.
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="start_date">Start Date</Label>
                   <Input id="start_date" type="date" className="mt-1" />

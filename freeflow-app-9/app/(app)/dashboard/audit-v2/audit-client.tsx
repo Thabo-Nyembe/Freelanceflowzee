@@ -989,7 +989,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <p className="text-white/80">Real-time security information and event management</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{totalEvents.toLocaleString()}</p>
                       <p className="text-sm text-white/80">Total Events</p>
@@ -1194,7 +1194,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <p className="text-white/80">Configure and monitor security alerts</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
                       <p className="text-sm text-white/80">Active</p>
@@ -1363,7 +1363,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <p className="text-white/80">Quick access to your frequently used queries</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockSavedSearches.length}</p>
                       <p className="text-sm text-white/80">Total Searches</p>
@@ -1486,7 +1486,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <p className="text-white/80">Automated reporting and distribution</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockReports.length}</p>
                       <p className="text-sm text-white/80">Total Reports</p>
@@ -1611,7 +1611,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <p className="text-white/80">Monitor regulatory compliance and security posture</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{avgComplianceScore.toFixed(0)}%</p>
                       <p className="text-sm text-white/80">Overall Score</p>
@@ -1712,7 +1712,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         <p className="text-sm text-slate-400">Overall Compliance Score</p>
                       </div>
                       <Progress value={avgComplianceScore} className="h-3" />
-                      <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                         <div>
                           <div className="text-lg font-bold text-green-400">
                             {displayChecks.filter(c => c.status === 'passing').length}
@@ -1821,7 +1821,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         <CardDescription className="text-slate-400">Configure basic SIEM preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label className="text-slate-300">Default Time Range</Label>
                             <Input defaultValue="24h" className="mt-1 bg-slate-900 border-slate-600 text-white" />
@@ -2268,7 +2268,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             </DialogHeader>
             {selectedEvent && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="text-xs text-slate-500">Action</label>
                     <p className="text-white capitalize">{selectedEvent.action}</p>
@@ -2357,7 +2357,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                     {selectedAlert.query}
                   </pre>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="text-xs text-slate-500">Condition</label>
                     <p className="text-white">{selectedAlert.condition}</p>

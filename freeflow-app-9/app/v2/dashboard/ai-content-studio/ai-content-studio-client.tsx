@@ -949,7 +949,7 @@ export default function AiContentStudioClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="schedule-date">Date</Label>
                 <Input
@@ -1078,7 +1078,7 @@ export default function AiContentStudioClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card className="p-4 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <TrendingUp className="h-5 w-5 text-green-500" />
@@ -1342,7 +1342,7 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
 
           <div>
             <label className="text-sm font-medium mb-2 block">Platform</label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
               {Object.entries(platformIcons).map(([key, icon]) => (
                 <Button
                   key={key}

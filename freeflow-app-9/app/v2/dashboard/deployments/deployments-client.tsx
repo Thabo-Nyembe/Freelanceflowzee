@@ -937,7 +937,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={() => setShowCreateDialog(true)}><Rocket className="h-4 w-4 mr-2" />Deploy Now</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{stats.totalDeployments}</p>
                   <p className="text-sm text-purple-100">Total Deployments</p>
@@ -983,7 +983,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Pipeline Status */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { stage: 'Build', status: 'success', duration: '45s', icon: Box },
                 { stage: 'Test', status: 'success', duration: '1m 23s', icon: CheckCircle2 },
@@ -1105,7 +1105,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={() => setShowNewFunctionDialog(true)}><Plus className="h-4 w-4 mr-2" />New Function</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockFunctions.length}</p>
                   <p className="text-sm text-yellow-100">Functions</p>
@@ -1134,7 +1134,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Function Types */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { type: 'API Routes', count: 12, icon: Globe, color: 'blue', desc: 'RESTful endpoints' },
                 { type: 'Edge Functions', count: 8, icon: Network, color: 'cyan', desc: 'Low latency compute' },
@@ -1159,7 +1159,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Function Metrics Chart */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Invocations (Last 24h)</CardTitle></CardHeader>
                 <CardContent>
@@ -1240,7 +1240,7 @@ export default function DeploymentsClient() {
                         </div>
                         <p className="text-xs text-gray-500">{fn.region} • {fn.memory}MB</p>
                       </div>
-                      <div className="grid grid-cols-3 gap-8 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6 text-center">
                         <div><p className="font-medium">{fn.invocations.toLocaleString()}</p><p className="text-xs text-gray-500">invocations</p></div>
                         <div><p className="font-medium">{fn.avgDuration}ms</p><p className="text-xs text-gray-500">avg duration</p></div>
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
@@ -1287,7 +1287,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-white text-cyan-700 hover:bg-cyan-50" onClick={() => setShowEdgeConfigDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Config</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockEdgeConfigs.length}</p>
                   <p className="text-sm text-cyan-100">Configs</p>
@@ -1312,7 +1312,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Edge Regions */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {['US East', 'US West', 'Europe', 'Asia', 'Australia', 'South America'].map((region, i) => (
                 <Card key={region} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-4 text-center">
@@ -1325,7 +1325,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Edge Configs Grid */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockEdgeConfigs.map(config => (
                 <Card key={config.id} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-6">
@@ -1339,7 +1339,7 @@ export default function DeploymentsClient() {
                       </div>
                       <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{(config.reads / 1000).toFixed(0)}k</p><p className="text-xs text-gray-500">Reads</p></div>
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{config.writes}</p><p className="text-xs text-gray-500">Writes</p></div>
                     </div>
@@ -1367,7 +1367,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-white text-indigo-700 hover:bg-indigo-50" onClick={() => setShowUploadDialog(true)}><Upload className="h-4 w-4 mr-2" />Upload</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockBlobs.length}</p>
                   <p className="text-sm text-indigo-100">Files</p>
@@ -1392,7 +1392,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Storage Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { type: 'Images', count: 45, size: '1.2 GB', icon: FileCode, color: 'pink' },
                 { type: 'Documents', count: 23, size: '450 MB', icon: FileText, color: 'blue' },
@@ -1502,7 +1502,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-green-600 text-white hover:bg-green-700" onClick={() => setShowLiveTailDialog(true)}><Play className="h-4 w-4 mr-2" />Live Tail</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/10 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{buildLogs.length}</p>
                   <p className="text-sm text-gray-400">Total Logs</p>
@@ -1644,7 +1644,7 @@ export default function DeploymentsClient() {
             </Card>
 
             {/* Log Insights */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Error Frequency</CardTitle></CardHeader>
                 <CardContent>
@@ -1714,7 +1714,7 @@ export default function DeploymentsClient() {
                   <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowAnalyticsExportDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">24.5 GB</p>
                   <p className="text-sm text-blue-100">Bandwidth</p>
@@ -1743,7 +1743,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Performance Metrics */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { label: 'First Contentful Paint', value: '0.8s', change: '-12%', good: true, icon: Gauge },
                 { label: 'Largest Contentful Paint', value: '1.2s', change: '-8%', good: true, icon: Timer },
@@ -1766,7 +1766,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Charts Grid */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Deployments by Day</CardTitle></CardHeader>
                 <CardContent>
@@ -1805,7 +1805,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Team Analytics */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Top Deployers</CardTitle></CardHeader>
                 <CardContent>
@@ -1890,7 +1890,7 @@ export default function DeploymentsClient() {
                 </div>
                 <Button className="bg-white text-red-700 hover:bg-red-50" onClick={() => setShowSecurityAuditDialog(true)}><Shield className="h-4 w-4 mr-2" />Security Audit</Button>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockProtections.filter(p => p.enabled).length}</p>
                   <p className="text-sm text-red-100">Active Rules</p>
@@ -1915,7 +1915,7 @@ export default function DeploymentsClient() {
             </div>
 
             {/* Security Status Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[
                 { title: 'DDoS Protection', status: 'Active', icon: Shield, color: 'green' },
                 { title: 'SSL/TLS', status: 'A+ Grade', icon: Lock, color: 'green' },
@@ -2027,10 +2027,10 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5 text-purple-600" />Project Settings</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Project Name</Label><Input defaultValue="freeflow-app" className="mt-1" /></div><div><Label>Framework</Label><Select defaultValue="nextjs"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="nextjs">Next.js</SelectItem><SelectItem value="react">React</SelectItem><SelectItem value="vue">Vue</SelectItem><SelectItem value="nuxt">Nuxt.js</SelectItem><SelectItem value="astro">Astro</SelectItem><SelectItem value="remix">Remix</SelectItem></SelectContent></Select></div></div>
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Build Command</Label><Input defaultValue="npm run build" className="mt-1 font-mono" /></div><div><Label>Output Directory</Label><Input defaultValue=".next" className="mt-1 font-mono" /></div></div>
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Install Command</Label><Input defaultValue="npm install" className="mt-1 font-mono" /></div><div><Label>Node.js Version</Label><Select defaultValue="20"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="18">18.x</SelectItem><SelectItem value="20">20.x (LTS)</SelectItem><SelectItem value="22">22.x</SelectItem></SelectContent></Select></div></div>
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div><div><Label>Development Command</Label><Input defaultValue="npm run dev" className="mt-1 font-mono" /></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Project Name</Label><Input defaultValue="freeflow-app" className="mt-1" /></div><div><Label>Framework</Label><Select defaultValue="nextjs"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="nextjs">Next.js</SelectItem><SelectItem value="react">React</SelectItem><SelectItem value="vue">Vue</SelectItem><SelectItem value="nuxt">Nuxt.js</SelectItem><SelectItem value="astro">Astro</SelectItem><SelectItem value="remix">Remix</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Build Command</Label><Input defaultValue="npm run build" className="mt-1 font-mono" /></div><div><Label>Output Directory</Label><Input defaultValue=".next" className="mt-1 font-mono" /></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Install Command</Label><Input defaultValue="npm install" className="mt-1 font-mono" /></div><div><Label>Node.js Version</Label><Select defaultValue="20"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="18">18.x</SelectItem><SelectItem value="20">20.x (LTS)</SelectItem><SelectItem value="22">22.x</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div><div><Label>Development Command</Label><Input defaultValue="npm run dev" className="mt-1 font-mono" /></div></div>
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
@@ -2042,7 +2042,7 @@ export default function DeploymentsClient() {
                         <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch checked={settingsState.skewProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, skewProtection: checked })); toast.success(`Skew protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch checked={settingsState.serverlessFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, serverlessFunctions: checked })); toast.success(`Serverless functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch checked={settingsState.edgeFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, edgeFunctions: checked })); toast.success(`Edge functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Function Timeout</Label><Select defaultValue="60"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="10">10 seconds</SelectItem><SelectItem value="30">30 seconds</SelectItem><SelectItem value="60">60 seconds</SelectItem><SelectItem value="300">5 minutes</SelectItem></SelectContent></Select></div>
                           <div><Label>Function Memory</Label><Select defaultValue="1024"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="512">512 MB</SelectItem><SelectItem value="1024">1024 MB</SelectItem><SelectItem value="2048">2048 MB</SelectItem><SelectItem value="3008">3008 MB</SelectItem></SelectContent></Select></div>
                         </div>
@@ -2055,7 +2055,7 @@ export default function DeploymentsClient() {
                         <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch checked={settingsState.failedDeploymentAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, failedDeploymentAlerts: checked })); toast.success(`Failed deployment alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch checked={settingsState.productionPromotionAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionPromotionAlerts: checked })); toast.success(`Production promotion alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch checked={settingsState.weeklySummary} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, weeklySummary: checked })); toast.success(`Weekly summary ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Notification Email</Label><Input type="email" placeholder="team@company.com" className="mt-1" /></div>
                           <div><Label>Slack Channel</Label><Input placeholder="#deployments" className="mt-1" /></div>
                         </div>
@@ -2095,11 +2095,11 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-3"><GitBranch className="h-6 w-6" /><div><p className="font-medium">freeflow-app/freeflow</p><p className="text-sm text-gray-500">Connected to main</p></div></div>
                           <Badge className="bg-green-100 text-green-700">Connected</Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><Label>Git Provider</Label><Select defaultValue="github"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="github">GitHub</SelectItem><SelectItem value="gitlab">GitLab</SelectItem><SelectItem value="bitbucket">Bitbucket</SelectItem></SelectContent></Select></div>
                           <div><Label>Repository</Label><Input defaultValue="freeflow-app/freeflow" className="mt-1 font-mono" /></div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><Label>Production Branch</Label><Select defaultValue="main"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="main">main</SelectItem><SelectItem value="master">master</SelectItem><SelectItem value="production">production</SelectItem><SelectItem value="release">release</SelectItem></SelectContent></Select></div>
                           <div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div>
                         </div>
@@ -2546,7 +2546,7 @@ export default function DeploymentsClient() {
               <div><Label>Webhook Name</Label><Input placeholder="Slack Notifications" className="mt-1" /></div>
               <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" /></div>
               <div><Label>Events</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                   {['deployment.created', 'deployment.succeeded', 'deployment.failed', 'deployment.promoted', 'deployment.rolled_back', 'domain.added'].map(event => (
                     <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm font-mono">{event}</span></div>
                   ))}
@@ -2582,7 +2582,7 @@ export default function DeploymentsClient() {
         <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add Integration</DialogTitle><DialogDescription>Connect third-party services to your deployments</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {[{ name: 'GitHub', icon: GitBranch, color: 'gray' }, { name: 'Datadog', icon: Activity, color: 'purple' }, { name: 'Slack', icon: MessageSquare, color: 'pink' }, { name: 'Sentry', icon: AlertCircle, color: 'red' }, { name: 'PagerDuty', icon: Webhook, color: 'green' }, { name: 'Linear', icon: Layers, color: 'blue' }].map(int => (
                   <button key={int.name} className="p-4 border rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors text-center">
                     <int.icon className={`h-8 w-8 mx-auto text-${int.color}-600`} />
@@ -2604,7 +2604,7 @@ export default function DeploymentsClient() {
               <DialogDescription>Configure and queue a new deployment</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Deployment Name *</Label>
                   <Input placeholder="my-app-release" className="mt-1" value={deploymentForm.deployment_name} onChange={(e) => setDeploymentForm(prev => ({ ...prev, deployment_name: e.target.value }))} />
@@ -2614,7 +2614,7 @@ export default function DeploymentsClient() {
                   <Input placeholder="1.0.0" className="mt-1" value={deploymentForm.version} onChange={(e) => setDeploymentForm(prev => ({ ...prev, version: e.target.value }))} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Environment</Label>
                   <Select value={deploymentForm.environment} onValueChange={(v) => setDeploymentForm(prev => ({ ...prev, environment: v as DbDeployment['environment'] }))}>
@@ -2641,7 +2641,7 @@ export default function DeploymentsClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Branch</Label>
                   <Input placeholder="main" className="mt-1 font-mono" value={deploymentForm.branch} onChange={(e) => setDeploymentForm(prev => ({ ...prev, branch: e.target.value }))} />
@@ -3136,7 +3136,7 @@ export default function DeploymentsClient() {
               <DialogDescription>Detailed inspection of deployment configuration and metrics</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-sm text-gray-500">Environment</p>
                   <p className="font-semibold">{inspectedDeployment?.environment}</p>
@@ -3282,7 +3282,7 @@ export default function DeploymentsClient() {
               <DialogDescription>View configuration values</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-sm text-gray-500">Items</p>
                   <p className="font-semibold">{selectedEdgeConfig?.items}</p>
@@ -3595,7 +3595,7 @@ export default function DeploymentsClient() {
               <DialogDescription>Analyze patterns and trends in your logs</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold">{buildLogs.length}</p>
                   <p className="text-sm text-gray-500">Total Logs</p>
@@ -4454,7 +4454,7 @@ export default function DeploymentsClient() {
             </DialogHeader>
             <div className="space-y-6">
               {/* Key Metrics */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-4 text-center">
                     <p className="text-2xl font-bold text-blue-600">{selectedFunction?.invocations?.toLocaleString()}</p>
@@ -4505,7 +4505,7 @@ export default function DeploymentsClient() {
               </Card>
 
               {/* Error Rate & Duration Distribution */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <CardTitle className="text-sm">Error Rate</CardTitle>
@@ -4598,7 +4598,7 @@ export default function DeploymentsClient() {
               {/* Runtime Configuration */}
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">Runtime Configuration</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Runtime</Label>
                     <Select defaultValue={selectedFunction?.runtime}>
@@ -4635,7 +4635,7 @@ export default function DeploymentsClient() {
               {/* Memory & Timeout */}
               <div className="space-y-4">
                 <h4 className="font-medium text-sm">Resources</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Memory (MB)</Label>
                     <Select defaultValue={selectedFunction?.memory?.toString()}>

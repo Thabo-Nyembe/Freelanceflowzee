@@ -787,7 +787,7 @@ export default function AnalyticsPage() {
                 className="mt-6 pt-6 border-t"
               >
                 <h4 className="text-sm font-semibold text-gray-800 mb-3">Detailed Breakdown</h4>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="bg-blue-50 rounded-lg p-3">
                     <div className="text-xs text-blue-600 mb-1">Total Revenue</div>
                     <div className="text-lg font-bold text-blue-700">{formatCurrency(totalRevenue)}</div>
@@ -923,7 +923,7 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 text-xs">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 text-xs">
                       <div>
                         <div className="text-gray-600 mb-1">Conversions</div>
                         <div className="font-semibold text-gray-800">{formatNumber(source.conversions)}</div>

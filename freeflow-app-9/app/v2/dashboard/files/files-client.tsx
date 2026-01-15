@@ -1686,7 +1686,7 @@ export default function FilesClient() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Size</p>
                         <p className="text-sm font-semibold">{selectedFile.size}</p>
@@ -1716,7 +1716,7 @@ export default function FilesClient() {
                       <Badge variant="secondary">{selectedFile.project}</Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 py-3 border-y">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 py-3 border-y">
                       <div className="text-center">
                         <p className="text-2xl font-bold text-blue-600">
                           {selectedFile.views || 0}
@@ -1750,7 +1750,7 @@ export default function FilesClient() {
                       </Button>
 
                       {/* Secondary Actions */}
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1769,7 +1769,7 @@ export default function FilesClient() {
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1788,7 +1788,7 @@ export default function FilesClient() {
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         <Button
                           variant="outline"
                           size="sm"

@@ -1282,7 +1282,7 @@ export default function FilesPage() {
 
           {state.selectedFile && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>File Name</Label>
                   <p className="text-sm mt-1">{state.selectedFile.name}</p>

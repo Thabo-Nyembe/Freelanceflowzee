@@ -24,7 +24,7 @@ export default function APIKeysPage() {
   const { announce } = useAnnouncer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1600px] mx-auto">
         {/* Back Button */}
         <Button

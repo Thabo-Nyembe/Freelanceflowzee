@@ -1337,7 +1337,7 @@ export default function CalendarPage() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
                 <Input
@@ -1372,7 +1372,7 @@ export default function CalendarPage() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="date">Date *</Label>
                 <Input
@@ -1409,7 +1409,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="meetingType">Meeting Type</Label>
                 <Select value={formData.meetingType} onValueChange={(v) => handleFormChange('meetingType', v)}>
@@ -1464,7 +1464,7 @@ export default function CalendarPage() {
 
             <div className="space-y-2">
               <Label>Attendees</Label>
-              <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-40 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 p-3 border rounded-md max-h-40 overflow-y-auto">
                 {AVAILABLE_ATTENDEES.map((attendee) => (
                   <div key={attendee} className="flex items-center space-x-2">
                     <Checkbox
@@ -1520,7 +1520,7 @@ export default function CalendarPage() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-title">Title *</Label>
                 <Input
@@ -1555,7 +1555,7 @@ export default function CalendarPage() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-date">Date *</Label>
                 <Input
@@ -1592,7 +1592,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-meetingType">Meeting Type</Label>
                 <Select value={formData.meetingType} onValueChange={(v) => handleFormChange('meetingType', v)}>
@@ -1647,7 +1647,7 @@ export default function CalendarPage() {
 
             <div className="space-y-2">
               <Label>Attendees</Label>
-              <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-40 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 p-3 border rounded-md max-h-40 overflow-y-auto">
                 {AVAILABLE_ATTENDEES.map((attendee) => (
                   <div key={attendee} className="flex items-center space-x-2">
                     <Checkbox
@@ -1827,7 +1827,7 @@ export default function CalendarPage() {
                 <p className="text-gray-900">{selectedMeeting.description}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Date</p>
                   <p className="text-gray-900">{new Date(selectedMeeting.date).toLocaleDateString()}</p>

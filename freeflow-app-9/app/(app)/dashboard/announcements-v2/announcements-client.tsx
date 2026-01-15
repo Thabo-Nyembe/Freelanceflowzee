@@ -1063,7 +1063,7 @@ export default function AnnouncementsClient() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-6 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4">
               <div className="text-2xl font-bold">{stats.total}</div>
               <div className="text-sm text-white/70">Total</div>
@@ -1514,7 +1514,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View</Label>
                             <Select defaultValue="cards">
@@ -1576,7 +1576,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Status</Label>
                             <Select defaultValue="draft">
@@ -1644,7 +1644,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Timezone</Label>
                             <Select defaultValue="utc">
@@ -1748,7 +1748,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Schedule Time</Label>
                             <Select defaultValue="9am">
@@ -1803,7 +1803,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Rate Limit</Label>
                             <Select defaultValue="5">
@@ -2044,7 +2044,7 @@ export default function AnnouncementsClient() {
                             </Button>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="text-2xl font-bold">12,456</div>
                             <div className="text-sm text-gray-500">API Calls (30 days)</div>
@@ -2157,7 +2157,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex items-center gap-2">
@@ -2236,7 +2236,7 @@ export default function AnnouncementsClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{announcements.length}</div>
                             <div className="text-sm text-gray-500">Announcements</div>
@@ -2479,7 +2479,7 @@ export default function AnnouncementsClient() {
                   <Card>
                     <CardContent className="p-4">
                       <h4 className="font-medium mb-3">Performance</h4>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         <div className="text-center">
                           <div className="text-2xl font-bold">{formatNumber(selectedAnnouncement.metrics.views)}</div>
                           <div className="text-sm text-gray-500">Views</div>
@@ -2643,7 +2643,7 @@ export default function AnnouncementsClient() {
             </div>
 
             {/* Type and Priority */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select
@@ -2796,7 +2796,7 @@ export default function AnnouncementsClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Version</Label>
                 <Input
@@ -2884,7 +2884,7 @@ export default function AnnouncementsClient() {
             </div>
             <div className="space-y-2">
               <Label>Rule</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 <Select
                   value={newSegment.attribute}
                   onValueChange={(value) => setNewSegment(prev => ({ ...prev, attribute: value }))}
@@ -3001,7 +3001,7 @@ export default function AnnouncementsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Delivery Channels</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <div className="flex items-center gap-2 p-2 border rounded-lg">
                     <Switch defaultChecked />
                     <span className="text-sm">Email</span>
@@ -3090,7 +3090,7 @@ export default function AnnouncementsClient() {
             </div>
             <div className="space-y-2">
               <Label>Events</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['published', 'updated', 'archived', 'deleted'].map(event => (
                   <div key={event} className="flex items-center gap-2 p-2 border rounded-lg">
                     <Switch
@@ -3234,7 +3234,7 @@ export default function AnnouncementsClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Template Name</Label>
                 <Input
@@ -3298,7 +3298,7 @@ export default function AnnouncementsClient() {
           </DialogHeader>
           {selectedTemplate && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Template Name</Label>
                   <Input defaultValue={selectedTemplate.name} />
@@ -3581,7 +3581,7 @@ export default function AnnouncementsClient() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm text-gray-500">Share this announcement via:</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               <Button variant="outline" className="flex items-center gap-2" onClick={() => handleShareAnnouncement('link')}>
                 <Link2 className="h-4 w-4" />
                 Copy Link

@@ -1505,7 +1505,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         <CardDescription>General CRM settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Organization Name</Label>
                             <Input defaultValue="Acme Corp" className="mt-1" />
@@ -1523,7 +1523,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Total Clients</p>
                             <p className="text-2xl font-bold">1,234</p>
@@ -1568,7 +1568,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         <CardDescription>Sales team configuration</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 border rounded-lg text-center">
                             <p className="text-2xl font-bold text-indigo-600">12</p>
                             <p className="text-sm text-gray-500">Sales Reps</p>
@@ -1704,7 +1704,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Q4 Forecast</p>
                             <p className="text-xl font-bold text-indigo-600">$1.2M</p>
@@ -1979,7 +1979,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         </div>
                         <div>
                           <Label>Quiet Hours</Label>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-2">
                             <div>
                               <Label className="text-xs text-gray-500">From</Label>
                               <Select defaultValue="22">
@@ -2018,7 +2018,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         <CardDescription>Import and export data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
@@ -2364,7 +2364,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   onChange={(e) => setNewClientForm(prev => ({ ...prev, company: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium">Industry</label>
                   <select
@@ -2404,7 +2404,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               </div>
               <div className="border-t pt-4 mt-4">
                 <h4 className="font-medium mb-3">Primary Contact</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <label className="text-sm font-medium">Name *</label>
                     <Input
@@ -2424,7 +2424,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
                   <div>
                     <label className="text-sm font-medium">Email *</label>
                     <Input
@@ -2481,7 +2481,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   onChange={(e) => setEditClientForm(prev => ({ ...prev, company: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium">Industry</label>
                   <select
@@ -2531,7 +2531,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       onChange={(e) => setEditClientForm(prev => ({ ...prev, contactName: e.target.value }))}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <label className="text-sm font-medium">Email *</label>
                       <Input
@@ -2841,7 +2841,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <label className="text-sm font-medium">Description</label>
                 <Input placeholder="Task description..." className="mt-1" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium">Due Date</label>
                   <Input type="date" className="mt-1" />
@@ -3287,7 +3287,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               </div>
               <div>
                 <label className="text-sm font-medium">Date Range (Optional)</label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-1">
                   <Input type="date" placeholder="From" />
                   <Input type="date" placeholder="To" />
                 </div>
@@ -3660,7 +3660,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   placeholder="Enter meeting title"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Date</Label>
                   <Input

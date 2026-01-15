@@ -731,7 +731,7 @@ export default function PerformanceAnalyticsClient() {
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Health Map</h3>
                 </div>
-                <div className="p-6 grid grid-cols-2 gap-4">
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {mockServices.map((service) => (
                     <div
                       key={service.name}
@@ -1974,7 +1974,7 @@ export default function PerformanceAnalyticsClient() {
             </DialogHeader>
             {selectedTrace && (
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Service</p>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedTrace.service}</p>
@@ -2053,7 +2053,7 @@ export default function PerformanceAnalyticsClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Condition</Label>
                   <Select
@@ -2227,7 +2227,7 @@ export default function PerformanceAnalyticsClient() {
                   onChange={(e) => setNewSLOForm(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Metric</Label>
                   <Select
@@ -2297,7 +2297,7 @@ export default function PerformanceAnalyticsClient() {
               <DialogDescription>Connect external services for enhanced observability</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {mockIntegrations.map((integration) => (
                   <div key={integration.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors">
                     <div className="flex items-center justify-between mb-2">
@@ -2350,7 +2350,7 @@ export default function PerformanceAnalyticsClient() {
                   onChange={(e) => setTraceSearchForm(prev => ({ ...prev, traceId: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Service</Label>
                   <Select
@@ -2386,7 +2386,7 @@ export default function PerformanceAnalyticsClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Min Duration (ms)</Label>
                   <Input
@@ -2433,7 +2433,7 @@ export default function PerformanceAnalyticsClient() {
                   onChange={(e) => setLogsFilterForm(prev => ({ ...prev, searchQuery: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Log Level</Label>
                   <Select
@@ -2513,7 +2513,7 @@ export default function PerformanceAnalyticsClient() {
               <DialogDescription>Deep dive into your system performance</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">

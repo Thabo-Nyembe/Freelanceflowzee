@@ -1618,7 +1618,7 @@ export default function CrmClient() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-gray-500 mb-1">Contacts</p>
                         <p className="text-lg font-bold">{company.contacts}</p>
@@ -2514,7 +2514,7 @@ export default function CrmClient() {
                         </div>
                         <Switch />
                       </div>
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t dark:border-gray-700">
                         <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleExportCRM}>
                           <Download className="w-6 h-6" />
                           <span>Export All Data</span>
@@ -2580,7 +2580,7 @@ export default function CrmClient() {
             </DialogHeader>
             {selectedContact && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                       <Mail className="w-4 h-4" />
@@ -2613,7 +2613,7 @@ export default function CrmClient() {
 
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <h4 className="font-medium mb-3">Engagement Stats</h4>
-                  <div className="grid grid-cols-4 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
                     <div>
                       <div className="text-2xl font-bold text-indigo-600">{selectedContact.emailCount}</div>
                       <p className="text-xs text-gray-500">Emails</p>
@@ -2711,7 +2711,7 @@ export default function CrmClient() {
             </DialogHeader>
             {selectedDeal && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-xs text-gray-500">Deal Value</p>
                     <p className="text-2xl font-bold text-emerald-600">{formatCurrency(selectedDeal.value)}</p>
@@ -2781,7 +2781,7 @@ export default function CrmClient() {
               <DialogDescription>Create a new contact in your CRM</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="contact-name">Name *</Label>
                   <Input
@@ -2802,7 +2802,7 @@ export default function CrmClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="contact-phone">Phone</Label>
                   <Input
@@ -2822,7 +2822,7 @@ export default function CrmClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="contact-title">Job Title</Label>
                   <Input
@@ -2851,7 +2851,7 @@ export default function CrmClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="contact-status">Status</Label>
                   <Select
@@ -2890,7 +2890,7 @@ export default function CrmClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="contact-deal-value">Deal Value ($)</Label>
                   <Input
@@ -2948,7 +2948,7 @@ export default function CrmClient() {
               <DialogDescription>Update contact information</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-contact-name">Name *</Label>
                   <Input
@@ -2967,7 +2967,7 @@ export default function CrmClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-contact-phone">Phone</Label>
                   <Input
@@ -2985,7 +2985,7 @@ export default function CrmClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-contact-status">Status</Label>
                   <Select
@@ -3051,7 +3051,7 @@ export default function CrmClient() {
                   placeholder="Enterprise SaaS Implementation"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="deal-company">Company</Label>
                   <Input
@@ -3071,7 +3071,7 @@ export default function CrmClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="deal-value">Deal Value ($)</Label>
                   <Input
@@ -3102,7 +3102,7 @@ export default function CrmClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="deal-probability">Probability (%)</Label>
                   <Input
@@ -3167,7 +3167,7 @@ export default function CrmClient() {
                   onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-deal-value">Deal Value ($)</Label>
                   <Input
@@ -3197,7 +3197,7 @@ export default function CrmClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-deal-probability">Probability (%)</Label>
                   <Input

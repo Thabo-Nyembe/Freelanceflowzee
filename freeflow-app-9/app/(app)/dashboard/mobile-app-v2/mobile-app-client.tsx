@@ -636,7 +636,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Total Downloads', value: `${(stats.totalDownloads / 1000000).toFixed(1)}M`, icon: Download, trend: '+12.5%' },
               { label: 'Monthly Active', value: `${(stats.monthlyActiveUsers / 1000).toFixed(0)}K`, icon: Users, trend: '+8.3%' },
@@ -720,7 +720,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {/* Recent Builds */}
               <div className="col-span-2">
                 <Card>
@@ -961,7 +961,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                           {build.expiresAt && <span className="text-orange-600">Expires {build.expiresAt}</span>}
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-6 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 text-center">
                         <div>
                           <p className="text-lg font-semibold">{build.sessions.toLocaleString()}</p>
                           <p className="text-xs text-gray-500">Sessions</p>
@@ -1013,7 +1013,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1092,7 +1092,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       <p className="text-5xl font-bold">{stats.avgRating}</p>
                       <p className="text-sm text-gray-500">{stats.totalReviews.toLocaleString()} total reviews</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                       <div className="p-3 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold">{reviews.filter(r => !r.response).length}</p>
                         <p className="text-xs text-gray-500">Needs Response</p>
@@ -1168,7 +1168,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Downloads Over Time</CardTitle>
@@ -1196,7 +1196,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <CardTitle>Device Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {[
                       { label: 'Avg Session', value: `${stats.avgSessionLength}m`, icon: Clock },
                       { label: 'Crash-Free Rate', value: `${stats.crashFreeRate}%`, icon: Shield },
@@ -1262,7 +1262,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1298,7 +1298,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             {campaign.scheduledAt && <span className="text-blue-600">Scheduled: {campaign.scheduledAt}</span>}
                           </div>
                           {campaign.sent > 0 && (
-                            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4 pt-4 border-t">
                               <div>
                                 <p className="text-lg font-semibold">{campaign.sent.toLocaleString()}</p>
                                 <p className="text-xs text-gray-500">Sent</p>
@@ -1382,7 +1382,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1833,7 +1833,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'GitHub Actions', connected: true },
                             { name: 'Bitrise', connected: false },
@@ -2093,7 +2093,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   {selectedBuild.testFlightEnabled && <Badge variant="secondary">TestFlight</Badge>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-sm text-gray-500">Size</p>
                     <p className="text-lg font-semibold">{selectedBuild.size}</p>
@@ -2114,7 +2114,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   )}
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 border rounded-lg">
                     <p className="text-2xl font-bold">{selectedBuild.sessions.toLocaleString()}</p>
                     <p className="text-sm text-gray-500">Sessions</p>
@@ -2467,7 +2467,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
           </DialogHeader>
           <div className="space-y-6">
             {/* Key Metrics */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                 <Download className="h-6 w-6 mx-auto text-blue-600 dark:text-blue-400 mb-2" />
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{(stats.totalDownloads / 1000000).toFixed(1)}M</p>
@@ -2491,7 +2491,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             </div>
 
             {/* Platform Breakdown */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm flex items-center gap-2">
@@ -2556,7 +2556,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 <CardTitle className="text-sm">User Engagement</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 border rounded-lg">
                     <p className="text-xl font-bold">{stats.avgSessionLength}m</p>
                     <p className="text-xs text-gray-500">Avg Session</p>
@@ -2625,7 +2625,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 <Switch />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-xl font-bold text-purple-600">156</p>
                 <p className="text-xs text-gray-500">Active Testers</p>
@@ -2736,7 +2736,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-red-600">32</p>
                 <p className="text-sm text-red-700 dark:text-red-400">Total Crashes (7d)</p>

@@ -1201,7 +1201,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Track and manage all your outgoing shipments</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockAnalytics.totalShipments.toLocaleString()}</p>
                       <p className="text-sm text-white/80">Total Shipments</p>
@@ -1410,7 +1410,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Process and ship pending orders efficiently</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{pendingOrders.length}</p>
                       <p className="text-sm text-white/80">Pending</p>
@@ -1498,7 +1498,7 @@ export default function ShippingClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                           <div>
                             <p className="text-gray-500">Customer</p>
                             <p className="font-medium text-gray-900 dark:text-white">{order.customerName}</p>
@@ -1550,7 +1550,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Real-time visibility into all shipment locations</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockShipments.filter(s => s.status === 'in_transit').length}</p>
                       <p className="text-sm text-white/80">In Transit</p>
@@ -1671,7 +1671,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Create, print, and manage shipping labels</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockLabels.length}</p>
                       <p className="text-sm text-white/80">Total Labels</p>
@@ -1783,7 +1783,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Manage your shipping carrier accounts and rates</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockCarriers.length}</p>
                       <p className="text-sm text-white/80">Carriers</p>
@@ -1894,7 +1894,7 @@ export default function ShippingClient() {
                       <p className="text-white/80">Insights into your shipping performance</p>
                     </div>
                   </div>
-                  <div className="hidden md:grid grid-cols-3 gap-6 text-center">
+                  <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <p className="text-2xl font-bold">{mockAnalytics.onTimeRate}%</p>
                       <p className="text-sm text-white/80">On-Time Rate</p>
@@ -1948,7 +1948,7 @@ export default function ShippingClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Volume</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockAnalytics.totalShipments.toLocaleString()}</p>
@@ -2122,7 +2122,7 @@ export default function ShippingClient() {
                         <CardDescription>Configure basic shipping preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Weight Unit</Label>
                             <Input defaultValue="lb" className="mt-1" />
@@ -2132,7 +2132,7 @@ export default function ShippingClient() {
                             <Input defaultValue="in" className="mt-1" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Carrier</Label>
                             <Input defaultValue="FedEx" className="mt-1" />
@@ -2174,7 +2174,7 @@ export default function ShippingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Company Name</Label>
                             <Input defaultValue="FreeFlow Inc" className="mt-1" />
@@ -2188,7 +2188,7 @@ export default function ShippingClient() {
                           <Label>Street Address</Label>
                           <Input defaultValue="123 Shipping Lane" className="mt-1" />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div>
                             <Label>City</Label>
                             <Input defaultValue="Los Angeles" className="mt-1" />
@@ -2675,7 +2675,7 @@ export default function ShippingClient() {
               <DialogDescription>Fill in the shipment details below</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Recipient Name *</Label>
                   <Input
@@ -2704,7 +2704,7 @@ export default function ShippingClient() {
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label>City</Label>
                   <Input
@@ -2733,7 +2733,7 @@ export default function ShippingClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Carrier</Label>
                   <Input
@@ -2753,7 +2753,7 @@ export default function ShippingClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Weight (lbs)</Label>
                   <Input
@@ -2826,7 +2826,7 @@ export default function ShippingClient() {
                     {selectedShipment.signatureRequired && <Badge variant="outline">Signature Required</Badge>}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h4 className="font-semibold mb-2 flex items-center gap-2">
                         <Home className="w-4 h-4" />
@@ -2853,7 +2853,7 @@ export default function ShippingClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Weight</p>
                       <p className="text-lg font-bold">{selectedShipment.package.weight} {selectedShipment.package.weightUnit}</p>
@@ -2874,7 +2874,7 @@ export default function ShippingClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Carrier</span>
                       <span>{selectedShipment.carrier}</span>
@@ -4007,7 +4007,7 @@ export default function ShippingClient() {
               <DialogDescription>Compare rates across carriers</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Origin ZIP</Label>
                   <Input defaultValue="90001" className="mt-1" />
@@ -4017,7 +4017,7 @@ export default function ShippingClient() {
                   <Input placeholder="Enter ZIP..." className="mt-1" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Weight (lbs)</Label>
                   <Input type="number" defaultValue="2" className="mt-1" />
@@ -4242,7 +4242,7 @@ export default function ShippingClient() {
                     <span className="font-medium">{carrier.name}</span>
                     <Badge className="bg-green-100 text-green-700">95% On-Time</Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                     <div>
                       <p className="text-gray-500">Shipments</p>
                       <p className="font-medium">523</p>
@@ -4333,7 +4333,7 @@ export default function ShippingClient() {
               <DialogDescription>Analyze shipping costs</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-500">Total Spend</p>
                   <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.totalCost)}</p>

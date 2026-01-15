@@ -1348,7 +1348,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
   const isDataLoading = isAnalyticsLoading || dailyMetricsLoading || realtimeLoading || platformLoading
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Error Banner */}
         {analyticsError && (
@@ -1746,7 +1746,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Metric', desc: 'Create custom', color: 'text-indigo-500', action: () => setActiveTab('metrics') },
                 { icon: Target, label: 'New Funnel', desc: 'Track conversions', color: 'text-purple-500', action: () => setShowCreateFunnel(true) },
@@ -2124,7 +2124,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                   <CardTitle>{selectedFunnel.name} - Detailed View</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                     {selectedFunnel.steps.map((step, idx) => (
                       <div key={idx} className="text-center">
                         <div
@@ -2421,7 +2421,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                     <p className="text-sm text-gray-500">World map visualization</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   {[
                     { country: 'United States', percentage: 42 },
                     { country: 'United Kingdom', percentage: 18 },
@@ -2568,7 +2568,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 <CardDescription>Start with a pre-built dashboard template</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   {[
                     { name: 'Executive Overview', desc: 'High-level KPIs', icon: BarChart3, color: 'bg-blue-100 text-blue-600' },
                     { name: 'Marketing', desc: 'Campaign metrics', icon: TrendingUp, color: 'bg-green-100 text-green-600' },
@@ -2777,7 +2777,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                         <CardDescription>Basic analytics settings and preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Analytics Name</Label>
                             <Input defaultValue="Main Analytics" className="mt-1" />
@@ -3415,7 +3415,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                   <TabsTrigger value="correlations">Correlations</TabsTrigger>
                 </TabsList>
                 <TabsContent value="overview" className="mt-4 space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="text-sm text-gray-500 mb-1">Current Value</div>
                       <div className="text-2xl font-bold">{formatValue(selectedMetric.value, selectedMetric.type)}</div>

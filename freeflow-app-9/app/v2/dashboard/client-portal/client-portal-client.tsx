@@ -1386,7 +1386,7 @@ export default function ClientPortalClient() {
                         </div>
 
                         {/* Stats */}
-                        <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                           <div>
                             <p className="text-xl font-bold text-blue-500">{client.activeProjects}</p>
                             <p className="text-xs text-muted-foreground">Projects</p>
@@ -1622,7 +1622,7 @@ export default function ClientPortalClient() {
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label className="text-xs text-muted-foreground">Company</Label>
                       <p className="text-sm font-medium mt-1">{state.selectedClient.companyName}</p>

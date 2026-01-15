@@ -775,7 +775,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -918,7 +918,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
                     {campaign.status === 'sent' && (
                       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <div className="grid grid-cols-5 gap-4 text-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 text-center">
                           <div>
                             <div className="text-lg font-semibold text-gray-900 dark:text-white">{campaign.metrics.sent.toLocaleString()}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">Sent</div>
@@ -954,7 +954,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <ScrollArea className="max-h-[70vh]">
                     <div className="space-y-6 p-4">
                       {/* Campaign Details */}
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-white mb-3">Campaign Details</h4>
                           <div className="space-y-3 text-sm">
@@ -1006,7 +1006,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                       {campaign.abTest?.enabled && (
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-white mb-3">A/B Test Results</h4>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             {campaign.abTest.variants.map(variant => (
                               <div key={variant.id} className={`p-4 rounded-lg border ${variant.id === campaign.abTest?.winner ? 'border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700'}`}>
                                 <div className="flex items-center justify-between mb-2">
@@ -1027,7 +1027,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                       {campaign.status === 'sent' && (
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-white mb-3">Performance Metrics</h4>
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
                               <div className="text-2xl font-bold text-gray-900 dark:text-white">{campaign.metrics.sent.toLocaleString()}</div>
                               <div className="text-xs text-gray-500 dark:text-gray-400">Sent</div>
@@ -1046,7 +1046,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-4 gap-4 mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-4">
                             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
                               <div className="text-2xl font-bold text-amber-600">{campaign.metrics.converted.toLocaleString()}</div>
                               <div className="text-xs text-gray-500 dark:text-gray-400">Converted ({campaign.metrics.conversionRate}%)</div>
@@ -1119,7 +1119,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                         <div>
                           <div className="text-lg font-semibold text-gray-900 dark:text-white">{automation.stats.triggered.toLocaleString()}</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Triggered</div>
@@ -1177,7 +1177,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{series.description}</p>
                   </div>
-                  <div className="grid grid-cols-3 gap-6 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
                       <div className="text-lg font-semibold text-gray-900 dark:text-white">{series.enrolledCount.toLocaleString()}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">Enrolled</div>
@@ -1277,7 +1277,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Subscriber Overview</h3>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">32,450</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">Total Contacts</div>
@@ -1428,7 +1428,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Channel Performance</h3>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {['Email', 'Push', 'In-App', 'SMS'].map((channel, idx) => (
                   <div key={channel} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div className="text-2xl mb-2">{['📧', '🔔', '💬', '📱'][idx]}</div>
@@ -1512,7 +1512,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <CardDescription>Configure your broadcast workspace settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Organization Name</Label>
                             <Input defaultValue="My Company" />
@@ -1534,7 +1534,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Send Time</Label>
                             <Input type="time" defaultValue="10:00" />
@@ -1582,7 +1582,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <CardDescription>Customize your brand appearance</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Brand Color</Label>
                             <div className="flex gap-2">
@@ -1909,7 +1909,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Input placeholder="https://your-service.com/webhook" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center space-x-2">
                             <Switch id="webhook-sent" />
                             <Label htmlFor="webhook-sent">Email Sent</Label>
@@ -2115,7 +2115,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Badge className="bg-violet-600">Active</Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <p className="text-2xl font-bold text-violet-600">{stats.totalCampaigns}</p>
                             <p className="text-xs text-gray-500">Campaigns</p>
@@ -2238,7 +2238,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={formData.broadcast_type} onValueChange={(v) => setFormData({ ...formData, broadcast_type: v as BroadcastType })}>
@@ -2284,7 +2284,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 className="w-full min-h-[100px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Sender Name</Label>
                 <Input
@@ -2342,7 +2342,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Type</Label>
                 <Select value={formData.broadcast_type} onValueChange={(v) => setFormData({ ...formData, broadcast_type: v as BroadcastType })}>
@@ -2388,7 +2388,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 className="w-full min-h-[100px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Sender Name</Label>
                 <Input
@@ -2717,7 +2717,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="space-y-2">
               <Label>Events to Send</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                 {['Email Sent', 'Email Opened', 'Link Clicked', 'Unsubscribed', 'Bounced', 'Complained'].map((event) => (
                   <div key={event} className="flex items-center space-x-2">
                     <Switch id={`webhook-${event}`} />
@@ -2786,7 +2786,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <DialogTitle>Upgrade Your Plan</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[
                 { name: 'Pro', price: '$99', features: ['100K contacts', 'Unlimited campaigns', 'Basic automation'] },
                 { name: 'Business', price: '$249', features: ['500K contacts', 'Advanced automation', 'Priority support'] },

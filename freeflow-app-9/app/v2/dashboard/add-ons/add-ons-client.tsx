@@ -1537,7 +1537,7 @@ export default function AddOnsClient() {
                       <CardTitle>General Settings</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Marketplace Region</label>
                           <select className="w-full p-2 border rounded-lg dark:bg-gray-700">
@@ -1922,7 +1922,7 @@ export default function AddOnsClient() {
 
                 <div>
                   <h3 className="font-semibold mb-2">Features</h3>
-                  <ul className="grid grid-cols-2 gap-2">
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {selectedAddOn.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -1932,7 +1932,7 @@ export default function AddOnsClient() {
                   </ul>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                   <div>
                     <span className="text-gray-500">Version</span>
                     <p className="font-medium">{selectedAddOn.version}</p>
@@ -1996,7 +1996,7 @@ export default function AddOnsClient() {
               <p className="text-gray-600 dark:text-gray-400">
                 Explore our marketplace with {stats.totalAddOns} add-ons across multiple categories.
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
                   <div className="text-2xl font-bold text-orange-600">{stats.freeCount}</div>
                   <div className="text-sm text-gray-500">Free Add-Ons</div>
@@ -2283,7 +2283,7 @@ export default function AddOnsClient() {
               <p className="text-gray-600 dark:text-gray-400">
                 Hand-picked premium add-ons recommended by our team.
               </p>
-              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 max-h-80 overflow-y-auto">
                 {featuredAddOns.map((addOn) => {
                   const CategoryIcon = getCategoryIcon(addOn.category)
                   return (
@@ -2427,7 +2427,7 @@ export default function AddOnsClient() {
               <p className="text-gray-600 dark:text-gray-400">
                 Create and publish your own add-ons to the marketplace.
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <div className="p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 text-center">
                   <FileText className="w-8 h-8 mx-auto text-cyan-600 mb-2" />
                   <h4 className="font-medium text-sm">Documentation</h4>
@@ -2640,7 +2640,7 @@ export default function AddOnsClient() {
                     className="mt-1"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div>
                     <label className="text-sm font-medium">Category</label>
                     <select

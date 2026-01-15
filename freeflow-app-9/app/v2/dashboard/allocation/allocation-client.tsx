@@ -1302,7 +1302,7 @@ export default function AllocationClient() {
                         className="h-2"
                       />
 
-                      <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 pt-3 border-t">
                         <div>
                           <p className="text-xs text-gray-500">Allocated</p>
                           <p className="font-semibold">{resource.allocated_hours}h/week</p>
@@ -1583,7 +1583,7 @@ export default function AllocationClient() {
                           {project.priority}
                         </Badge>
                       </div>
-                      <div className="grid grid-cols-4 gap-4 text-sm mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm mb-3">
                         <div>
                           <p className="text-gray-500 text-xs">Team Size</p>
                           <p className="font-semibold">{project.team_size} members</p>
@@ -1732,7 +1732,7 @@ export default function AllocationClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500 mb-1">Weekly Billable</p>
                       <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalBillable)}</p>
@@ -2062,7 +2062,7 @@ export default function AllocationClient() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Hours/Week</p>
                       <p className="font-semibold">{selectedAllocation.hours_per_week}h</p>
@@ -2124,7 +2124,7 @@ export default function AllocationClient() {
               <DialogDescription>Assign a resource to a project</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="resource_name">Resource Name *</Label>
                   <Input
@@ -2153,7 +2153,7 @@ export default function AllocationClient() {
                   placeholder="Platform Redesign"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Allocation Type</Label>
                   <Select
@@ -2185,7 +2185,7 @@ export default function AllocationClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="hours_per_week">Hours/Week</Label>
                   <Input
@@ -2205,7 +2205,7 @@ export default function AllocationClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="start_date">Start Date</Label>
                   <Input
@@ -2254,7 +2254,7 @@ export default function AllocationClient() {
               <DialogDescription>Update allocation details</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit_resource_name">Resource Name *</Label>
                   <Input
@@ -2280,7 +2280,7 @@ export default function AllocationClient() {
                   onChange={(e) => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
@@ -2312,7 +2312,7 @@ export default function AllocationClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit_hours">Hours/Week</Label>
                   <Input
@@ -2332,7 +2332,7 @@ export default function AllocationClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit_start">Start Date</Label>
                   <Input
@@ -2400,7 +2400,7 @@ export default function AllocationClient() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="flex items-center gap-2 text-sm">
                       <Mail className="w-4 h-4 text-gray-400" />
                       {selectedResource.email}
@@ -2526,7 +2526,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold">{mockResources.reduce((acc, r) => acc + r.capacity_hours, 0)}h</p>
                   <p className="text-sm text-gray-500">Total Capacity</p>
@@ -2580,7 +2580,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Full Name</Label>
                   <Input placeholder="John Doe" />
@@ -2590,7 +2590,7 @@ export default function AllocationClient() {
                   <Input placeholder="Senior Developer" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <Input type="email" placeholder="john@company.com" />
@@ -2608,7 +2608,7 @@ export default function AllocationClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Hourly Rate ($)</Label>
                   <Input type="number" defaultValue={150} />
@@ -2645,7 +2645,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold">{mockResources.length}</p>
                   <p className="text-sm text-gray-500">Total Resources</p>
@@ -2916,7 +2916,7 @@ export default function AllocationClient() {
                 <Label>Project Name</Label>
                 <Input placeholder="Platform Redesign" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Project Code</Label>
                   <Input placeholder="PLAT-001" />
@@ -2926,7 +2926,7 @@ export default function AllocationClient() {
                   <Input placeholder="Client Name" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
                   <Input type="date" />
@@ -2936,7 +2936,7 @@ export default function AllocationClient() {
                   <Input type="date" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Budget Hours</Label>
                   <Input type="number" defaultValue={1000} />
@@ -3152,7 +3152,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalBillable)}</p>
                   <p className="text-sm text-gray-500">Weekly Billable</p>
@@ -3640,7 +3640,7 @@ export default function AllocationClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Hours per Week</Label>
                   <Input type="number" defaultValue={40} min={1} max={60} />
@@ -3658,7 +3658,7 @@ export default function AllocationClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
                   <Input type="date" />
@@ -3727,7 +3727,7 @@ export default function AllocationClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Hours</Label>
                   <Input
@@ -3928,7 +3928,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                   <TrendingUp className="w-6 h-6 mx-auto mb-2 text-green-600" />
                   <p className="text-2xl font-bold text-green-600">+12%</p>
@@ -3981,7 +3981,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                   <p className="text-sm text-gray-500 mb-1">Current Gap</p>
                   <p className="text-2xl font-bold text-orange-600">-45h/week</p>
@@ -4040,7 +4040,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                   <p className="text-2xl font-bold text-green-600">{mockResources.filter(r => r.utilization >= 70 && r.utilization <= 90).length}</p>
                   <p className="text-sm text-gray-500">Optimal (70-90%)</p>
@@ -4171,7 +4171,7 @@ export default function AllocationClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-xl font-bold text-green-600">+15%</p>
                   <p className="text-xs text-gray-500">Billable Hours</p>

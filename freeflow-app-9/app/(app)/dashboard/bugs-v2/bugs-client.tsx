@@ -1488,7 +1488,7 @@ export default function BugsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {boardColumns.map(column => (
                 <div key={column.id} className="space-y-4">
                   <div className={`flex items-center justify-between p-3 bg-white/80 dark:bg-gray-800/80 rounded-lg border-t-4 ${column.color}`}>
@@ -1606,7 +1606,7 @@ export default function BugsClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Analyze bug trends, resolution times, and team performance. Make data-driven decisions to improve quality.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.avgResolutionTime}d</div>
                     <div className="text-xs text-white/70">Avg Resolution</div>
@@ -1770,7 +1770,7 @@ export default function BugsClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Track team workload, bug assignments, and resolution performance. Manage team capacity and distribution.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">6</div>
                     <div className="text-xs text-white/70">Team Members</div>
@@ -1811,7 +1811,7 @@ export default function BugsClient() {
                         <p className="text-sm text-muted-foreground">{member.role}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                       <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
                         <p className="text-lg font-bold text-blue-600">{member.assigned}</p>
                         <p className="text-xs text-muted-foreground">Assigned</p>
@@ -1845,7 +1845,7 @@ export default function BugsClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Configure your bug tracking system, workflows, integrations, notifications, and team permissions.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockLabels.length}</div>
                     <div className="text-xs text-white/70">Labels</div>
@@ -2484,7 +2484,7 @@ export default function BugsClient() {
                 </div>
 
                 {/* Expected vs Actual */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <h4 className="font-medium text-green-700 dark:text-green-400 mb-1">Expected Behavior</h4>
                     <p className="text-sm">{selectedBug.expectedBehavior}</p>
@@ -2523,7 +2523,7 @@ export default function BugsClient() {
                 {selectedBug.attachments.length > 0 && (
                   <div>
                     <h4 className="font-medium mb-3">Attachments ({selectedBug.attachments.length})</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                       {selectedBug.attachments.map(att => (
                         <div key={att.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Paperclip className="w-5 h-5 text-muted-foreground" />
@@ -2563,7 +2563,7 @@ export default function BugsClient() {
                 )}
 
                 {/* Activity Info */}
-                <div className="grid grid-cols-4 gap-4 pt-4 border-t dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pt-4 border-t dark:border-gray-700">
                   <div>
                     <p className="text-xs text-muted-foreground">Created</p>
                     <p className="text-sm font-medium">{formatDateTime(selectedBug.createdAt)}</p>
@@ -2618,7 +2618,7 @@ export default function BugsClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Severity</Label>
                   <Select value={formData.severity} onValueChange={(v) => setFormData({ ...formData, severity: v })}>
@@ -2651,7 +2651,7 @@ export default function BugsClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Assignee Name</Label>
                   <Input
@@ -2678,7 +2678,7 @@ export default function BugsClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Expected Behavior</Label>
                   <Textarea
@@ -2740,7 +2740,7 @@ export default function BugsClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Status</Label>
                   <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
@@ -2778,7 +2778,7 @@ export default function BugsClient() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Assignee Name</Label>
                   <Input
@@ -2822,7 +2822,7 @@ export default function BugsClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-3">
                 <Label>Test Configuration</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <span className="text-sm">Unit Tests</span>
                     <Switch defaultChecked />
@@ -2855,7 +2855,7 @@ export default function BugsClient() {
               {testResults && (
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <h4 className="font-medium mb-3">Test Results</h4>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <div className="text-center p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                       <CheckCircle className="w-6 h-6 mx-auto mb-1 text-green-600" />
                       <p className="text-2xl font-bold text-green-700">{testResults.passed}</p>
@@ -3121,7 +3121,7 @@ export default function BugsClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Status</Label>
                   <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as BugStatus | 'all')}>
@@ -3191,7 +3191,7 @@ export default function BugsClient() {
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Date Created (From)</Label>
                   <Input type="date" onChange={() => toast.info('Date Filter', { description: 'Date filter applied' })} />

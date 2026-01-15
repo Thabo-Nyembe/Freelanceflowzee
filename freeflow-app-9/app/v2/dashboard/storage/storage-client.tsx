@@ -1751,7 +1751,7 @@ export default function StorageClient() {
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label className="text-xs text-muted-foreground">Name</Label>
                       <p className="text-sm font-medium mt-1">{state.selectedFile.name}</p>
@@ -2179,7 +2179,7 @@ export default function StorageClient() {
 
               <div className="p-3 bg-muted rounded-lg">
                 <h4 className="text-sm font-medium mb-2">Storage Summary</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs text-muted-foreground">
                   <span>Total Files:</span>
                   <span className="text-right font-medium">{stats.totalFiles}</span>
                   <span>Total Size:</span>

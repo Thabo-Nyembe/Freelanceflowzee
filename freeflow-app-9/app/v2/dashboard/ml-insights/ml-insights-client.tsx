@@ -1384,7 +1384,7 @@ export default function MlInsightsClient() {
                         </div>
 
                         {/* Metrics */}
-                        <div className="grid grid-cols-4 gap-3 pt-3 border-t border-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 pt-3 border-t border-gray-700">
                           <div>
                             <p className="text-xs text-gray-400">Accuracy</p>
                             <p className="text-sm font-semibold text-white">{(insight.metrics.accuracy * 100).toFixed(0)}%</p>
@@ -1454,7 +1454,7 @@ export default function MlInsightsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="type" className="text-white">Type *</Label>
                     <select
@@ -1500,7 +1500,7 @@ export default function MlInsightsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="confidence" className="text-white">Confidence Level</Label>
                     <select
@@ -1577,7 +1577,7 @@ export default function MlInsightsClient() {
                     <p className="text-white">{state.selectedInsight.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="text-sm font-medium text-gray-400 mb-2">Type</h4>
                       <Badge>{state.selectedInsight.type}</Badge>
@@ -1588,7 +1588,7 @@ export default function MlInsightsClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div>
                       <h4 className="text-sm font-medium text-gray-400 mb-2">Confidence</h4>
                       <Badge className={`bg-${getConfidenceColor(state.selectedInsight.confidence)}-500/20 text-${getConfidenceColor(state.selectedInsight.confidence)}-300 border-${getConfidenceColor(state.selectedInsight.confidence)}-500/30`}>
@@ -1611,7 +1611,7 @@ export default function MlInsightsClient() {
 
                   <div>
                     <h4 className="text-sm font-medium text-gray-400 mb-2">Impact Metrics</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-slate-800 rounded-lg">
                         <p className="text-sm text-gray-400">Affected Users</p>
                         <p className="text-2xl font-bold text-white">{formatNumber(state.selectedInsight.affectedUsers || 0)}</p>
@@ -1637,7 +1637,7 @@ export default function MlInsightsClient() {
                 <TabsContent value="model" className="space-y-4 pt-4">
                   <div>
                     <h4 className="text-sm font-medium text-gray-400 mb-2">Model Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-slate-800 rounded-lg">
                         <p className="text-sm text-gray-400">Model Name</p>
                         <p className="text-white font-semibold">{state.selectedInsight.modelName}</p>
@@ -1661,7 +1661,7 @@ export default function MlInsightsClient() {
 
                   <div>
                     <h4 className="text-sm font-medium text-gray-400 mb-2">Performance Metrics</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-slate-800 rounded-lg">
                         <p className="text-sm text-gray-400">Accuracy</p>
                         <p className="text-2xl font-bold text-white">{(state.selectedInsight.metrics.accuracy * 100).toFixed(1)}%</p>
@@ -1957,7 +1957,7 @@ export default function MlInsightsClient() {
                 {/* Current Settings Summary */}
                 <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                   <h4 className="text-sm font-medium text-purple-300 mb-2">Current Configuration</h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Auto Refresh:</span>
                       <span className="text-white">{autoRefreshEnabled ? `Every ${refreshInterval} min` : 'Disabled'}</span>

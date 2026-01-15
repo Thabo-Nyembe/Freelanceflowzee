@@ -706,7 +706,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Open Tickets', value: stats.openTickets, icon: Inbox, color: 'text-white' },
               { label: 'Resolved Today', value: stats.resolvedToday, icon: CheckCircle, color: 'text-emerald-200' },
@@ -1027,7 +1027,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {agents.map(agent => (
                 <Card key={agent.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedAgent(agent); setShowAgentDialog(true) }}>
                   <CardContent className="pt-6">
@@ -1046,7 +1046,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-3 bg-gray-50 rounded-lg">
                         <p className="text-2xl font-bold text-emerald-600">{agent.activeTickets}</p>
                         <p className="text-xs text-gray-500">Active</p>
@@ -1219,7 +1219,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2">
                 <CardHeader>
                   <CardTitle>Ticket Volume</CardTitle>
@@ -1402,7 +1402,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Support Team Name</Label>
                             <Input defaultValue="Kazi Support" className="mt-1" />
@@ -1430,7 +1430,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Time Zone</Label>
                             <Select defaultValue="utc-5">
@@ -1967,7 +1967,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="grid grid-cols-3 gap-6 h-[70vh]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 h-[70vh]">
                 {/* Conversation */}
                 <div className="col-span-2 flex flex-col">
                   <h3 className="font-semibold mb-2">{selectedTicket.subject}</h3>
@@ -2164,12 +2164,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 {/* Agent Stats */}
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900 dark:text-white">Performance Metrics</h4>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-blue-200 dark:border-blue-700">
                       <CardContent className="p-4 text-center">
                         <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{selectedAgent.activeTickets}</p>
@@ -2355,7 +2355,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-24"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Priority</Label>
                 <Select value={ticketForm.priority} onValueChange={(v) => setTicketForm({ ...ticketForm, priority: v })}>
@@ -2386,7 +2386,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Customer Name</Label>
                 <Input
@@ -2649,7 +2649,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </DialogHeader>
           <div className="space-y-4">
             {/* Queue Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="p-3 bg-blue-50 rounded-lg text-center">
                 <p className="text-2xl font-bold text-blue-600">{tickets.filter(t => t.status === 'new').length}</p>
                 <p className="text-xs text-blue-600">New</p>
@@ -2993,7 +2993,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-blue-600">{tickets.length}</p><p className="text-sm text-gray-500">Total Tickets</p></CardContent></Card>
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-green-600">{tickets.filter(t => t.status === 'solved').length}</p><p className="text-sm text-gray-500">Resolved</p></CardContent></Card>
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-amber-600">{tickets.filter(t => t.status === 'pending').length}</p><p className="text-sm text-gray-500">Pending</p></CardContent></Card>
@@ -3248,7 +3248,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {agents.map(agent => (
                 <Card key={agent.id}>
                   <CardContent className="pt-4">
@@ -3259,7 +3259,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <p className="text-sm text-gray-500 capitalize">{agent.role}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                       <div><span className="text-gray-500">Active:</span> {agent.activeTickets}</div>
                       <div><span className="text-gray-500">Resolved:</span> {agent.resolvedToday}</div>
                       <div><span className="text-gray-500">Avg Response:</span> {agent.avgResponseTime}m</div>
@@ -3644,7 +3644,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-blue-600">{customers.length}</p><p className="text-sm text-gray-500">Total Customers</p></CardContent></Card>
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-green-600">4.7</p><p className="text-sm text-gray-500">Avg Satisfaction</p></CardContent></Card>
               <Card><CardContent className="pt-6 text-center"><p className="text-3xl font-bold text-purple-600">{customers.filter(c => c.tier === 'enterprise').length}</p><p className="text-sm text-gray-500">Enterprise</p></CardContent></Card>
@@ -3915,7 +3915,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   {selectedCustomer.tags.includes('vip') && <Badge className="ml-2 bg-amber-500">VIP</Badge>}
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{selectedCustomer.totalTickets}</p><p className="text-sm text-gray-500">Total Tickets</p></CardContent></Card>
                 <Card><CardContent className="pt-4 text-center"><div className="flex items-center justify-center gap-1"><Star className="h-5 w-5 text-amber-500 fill-amber-500" /><span className="text-2xl font-bold">{selectedCustomer.satisfactionScore}</span></div><p className="text-sm text-gray-500">CSAT Score</p></CardContent></Card>
                 <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{selectedCustomer.lastContact}</p><p className="text-sm text-gray-500">Last Contact</p></CardContent></Card>
@@ -4370,7 +4370,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogHeader><DialogTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-blue-600" />Agent Full Report</DialogTitle></DialogHeader>
           {selectedAgent && (<div className="space-y-4">
             <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"><Avatar className="h-12 w-12"><AvatarFallback>{selectedAgent.name[0]}</AvatarFallback></Avatar><div><p className="font-medium text-lg">{selectedAgent.name}</p><p className="text-sm text-gray-500 capitalize">{selectedAgent.role} - {selectedAgent.email}</p></div></div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-blue-600">{selectedAgent.activeTickets}</p><p className="text-xs text-gray-500">Active</p></CardContent></Card>
               <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-green-600">{selectedAgent.resolvedToday}</p><p className="text-xs text-gray-500">Resolved</p></CardContent></Card>
               <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-amber-600">{selectedAgent.avgResponseTime}m</p><p className="text-xs text-gray-500">Avg Response</p></CardContent></Card>

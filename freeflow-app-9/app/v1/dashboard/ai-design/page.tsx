@@ -1387,7 +1387,7 @@ export default function AIDesignStudioPage() {
                     <CardDescription className="kazi-body">Powered by GPT-4 Vision, DALL-E 3, and Midjourney V6</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {aiTools.map((tool) => {
                         const IconComponent = tool.icon
                         const isActive = activeAITool === tool.id
@@ -1428,7 +1428,7 @@ export default function AIDesignStudioPage() {
                     <CardDescription className="kazi-body">One-click AI-powered design enhancements</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                       <Button variant="outline" className="flex flex-col h-auto py-4 gap-2" onClick={handleGenerateLogo} disabled={generationInProgress} data-testid="generate-logo-btn">
                         <Sparkles className="w-6 h-6" />
                         <span className="text-xs">Generate Logo</span>
@@ -1467,7 +1467,7 @@ export default function AIDesignStudioPage() {
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 mt-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-3">
                       <Button className="btn-kazi-primary kazi-ripple flex flex-col h-auto py-4 gap-2" onClick={handleBatchGenerate} disabled={generationInProgress} data-testid="batch-generate-btn">
                         <Layers className="w-6 h-6" />
                         <span className="text-xs">Batch Generate (10x)</span>
@@ -1497,7 +1497,7 @@ export default function AIDesignStudioPage() {
                     <CardDescription className="kazi-body">Professional templates optimized for AI customization</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {templates.map((template) => (
                         <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-all">
                           <CardContent className="p-4">
@@ -1602,7 +1602,7 @@ export default function AIDesignStudioPage() {
                     <CardTitle className="text-lg kazi-headline">Export Options</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       <Button variant="outline" size="sm" onClick={() => handleExportDesign('svg')} data-testid="export-svg-btn">SVG</Button>
                       <Button variant="outline" size="sm" onClick={() => handleExportDesign('png')} data-testid="export-png-btn">PNG</Button>
                       <Button variant="outline" size="sm" onClick={() => handleExportDesign('pdf')} data-testid="export-pdf-btn">PDF</Button>

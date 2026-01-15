@@ -1321,7 +1321,7 @@ export default function ResourcesClient() {
                       </div>
 
                       {/* Contact & Location */}
-                      <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm mb-4">
                         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                           <MapPin className="w-4 h-4" />
                           {resource.location.split(',')[0]}
@@ -2258,7 +2258,7 @@ export default function ResourcesClient() {
                 <ScrollArea className="max-h-[60vh] pr-4">
                   <div className="space-y-6 py-4">
                     {/* Contact Info */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                         <div className="flex items-center gap-3 mb-3">
                           <Mail className="w-4 h-4 text-slate-400" />
@@ -2284,7 +2284,7 @@ export default function ResourcesClient() {
                     </div>
 
                     {/* Capacity & Rate */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       <div className="p-4 rounded-xl bg-sky-50 dark:bg-sky-900/20 text-center">
                         <div className="text-2xl font-bold text-sky-600">{selectedResource.utilization}%</div>
                         <div className="text-sm text-slate-600 dark:text-slate-400">Utilization</div>
@@ -2382,7 +2382,7 @@ export default function ResourcesClient() {
               <DialogDescription>Add a new team member or contractor</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name *</Label>
                   <Input
@@ -2403,7 +2403,7 @@ export default function ResourcesClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
                   <Input
@@ -2423,7 +2423,7 @@ export default function ResourcesClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <select
@@ -2457,7 +2457,7 @@ export default function ResourcesClient() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Department</Label>
                   <select
@@ -2483,7 +2483,7 @@ export default function ResourcesClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="rate">Hourly Rate</Label>
                   <Input

@@ -994,7 +994,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <p className="text-sm text-gray-500 capitalize">{agent.role}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <span className="text-gray-500">Open Tickets</span>
                         <div className="font-semibold">{agent.openTickets}</div>
@@ -1221,7 +1221,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                       <div className="text-2xl font-bold">4.8/5.0</div>
                       <div className="text-xs opacity-80">CSAT Score</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">1.2h</div>
                         <div className="text-xs opacity-80">Avg Response</div>
@@ -1255,7 +1255,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <CardDescription>Configure your helpdesk profile and preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Helpdesk Name</Label>
                             <Input defaultValue="FreeFlow Support" />
@@ -1265,7 +1265,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <Input defaultValue="support@freeflow.app" type="email" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Language</Label>
                             <Select defaultValue="en">
@@ -1314,7 +1314,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <CardDescription>Configure ticket behavior and defaults</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Priority</Label>
                             <Select defaultValue="medium">
@@ -1384,7 +1384,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           </div>
                           <Badge className="bg-green-100 text-green-700">Connected</Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Email Parser Mode</Label>
                             <Select defaultValue="smart">
@@ -1431,7 +1431,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Widget Color</Label>
                             <div className="flex gap-2">
@@ -1962,7 +1962,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   onChange={(e) => setNewTicketForm({ ...newTicketForm, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Priority</Label>
                   <Select value={newTicketForm.priority} onValueChange={(value: TicketPriority) => setNewTicketForm({ ...newTicketForm, priority: value })}>
@@ -2407,7 +2407,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 />
                 <p className="text-xs text-gray-500">Use variables like {'{{customer.name}}'} for personalization</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Category</Label>
                   <Select value={newResponseForm.category} onValueChange={(value) => setNewResponseForm({ ...newResponseForm, category: value })}>
@@ -2474,7 +2474,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>First Response Time (hours)</Label>
                   <Input
@@ -2547,7 +2547,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                       <h4 className="font-medium">{rule.name}</h4>
                       <Switch defaultChecked={rule.enabled} />
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <span className="text-gray-500">Trigger:</span>
                         <p className="text-gray-700 dark:text-gray-300">{rule.trigger}</p>
@@ -2640,7 +2640,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   <DialogTitle className="text-xl">{selectedTicket.subject}</DialogTitle>
                 </DialogHeader>
 
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                   <div className="col-span-2 space-y-4">
                     <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
                       <p className="text-gray-700 dark:text-gray-300">{selectedTicket.description}</p>

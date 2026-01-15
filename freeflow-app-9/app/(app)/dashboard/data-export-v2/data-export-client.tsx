@@ -692,7 +692,7 @@ export default function DataExportClient() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             <Card className="bg-white/10 border-white/20 p-4">
               <div className="flex items-center gap-3">
                 <Server className="w-5 h-5 text-green-200" />
@@ -923,7 +923,7 @@ export default function DataExportClient() {
                   </div>
 
                   {/* Metrics Grid */}
-                  <div className="grid grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-4">
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{pipeline.metrics.totalRuns}</p>
                       <p className="text-xs text-gray-500">Total Runs</p>
@@ -1067,7 +1067,7 @@ export default function DataExportClient() {
                   </DialogHeader>
                   <div className="py-4">
                     <p className="text-sm text-gray-500 mb-4">Select a data source type to connect</p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {[
                         { type: 'postgresql', name: 'PostgreSQL', icon: '🐘' },
                         { type: 'mysql', name: 'MySQL', icon: '🐬' },
@@ -1096,7 +1096,7 @@ export default function DataExportClient() {
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {mockDataSources.map(source => (
                 <Card key={source.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="flex items-start justify-between mb-4">
@@ -1247,7 +1247,7 @@ export default function DataExportClient() {
                           onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label>Format</Label>
                           <Select value={formData.export_format} onValueChange={(v: any) => setFormData(f => ({ ...f, export_format: v }))}>
@@ -1500,7 +1500,7 @@ export default function DataExportClient() {
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[
                 { type: 'filter', name: 'Filter', icon: Filter, desc: 'Filter rows based on conditions' },
                 { type: 'map', name: 'Map/Transform', icon: ArrowRight, desc: 'Transform column values' },
@@ -1591,7 +1591,7 @@ export default function DataExportClient() {
 
             <Card>
               <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
-                <div className="grid grid-cols-6 gap-4 text-sm font-medium text-gray-500">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 text-sm font-medium text-gray-500">
                   <div>Source Column</div>
                   <div>Destination Column</div>
                   <div>Data Type</div>
@@ -1603,7 +1603,7 @@ export default function DataExportClient() {
               <ScrollArea className="h-[400px]">
                 {mockSchemaMappings.map((mapping, i) => (
                   <div key={i} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div className="grid grid-cols-6 gap-4 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 items-center">
                       <div className="flex items-center gap-2">
                         <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
                           {mapping.sourceColumn}
@@ -1699,7 +1699,7 @@ export default function DataExportClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1746,7 +1746,7 @@ export default function DataExportClient() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Pipeline Health</h3>
                 <div className="space-y-4">
@@ -1855,7 +1855,7 @@ export default function DataExportClient() {
                   </DialogHeader>
                   <div className="py-4">
                     <p className="text-sm text-gray-500 mb-4">Select a destination type to configure</p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {[
                         { type: 'snowflake', name: 'Snowflake', icon: '❄️' },
                         { type: 'bigquery', name: 'BigQuery', icon: '📊' },
@@ -1884,7 +1884,7 @@ export default function DataExportClient() {
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {mockDestinations.map(dest => (
                 <Card key={dest.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
@@ -1971,7 +1971,7 @@ export default function DataExportClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {mockIntegrations.map(integration => (
                   <div key={integration.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
                     <div className="flex items-center justify-between mb-3">
@@ -2226,7 +2226,7 @@ export default function DataExportClient() {
                 {settingsTab === 'billing' && (
                   <div className="space-y-6">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Usage & Billing</h4>
-                    <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
                       <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <p className="text-sm text-gray-500 mb-1">Current Plan</p>
                         <p className="text-xl font-bold text-gray-900 dark:text-white">Enterprise</p>
@@ -2474,7 +2474,7 @@ export default function DataExportClient() {
           </DialogHeader>
           {selectedJobDetails && (
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-sm text-gray-500">Status</p>
                   <Badge className={getJobStatusColor(selectedJobDetails.status)}>{selectedJobDetails.status}</Badge>
@@ -2593,7 +2593,7 @@ export default function DataExportClient() {
           </DialogHeader>
           {selectedDestination && (
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-sm text-gray-500">Platform</p>
                   <p className="text-xl font-bold capitalize">{selectedDestination.platform}</p>

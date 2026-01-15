@@ -1923,7 +1923,7 @@ export default function WorkflowBuilderClient() {
                 <Button variant="outline" onClick={handleFilter}><Filter className="w-4 h-4 mr-2" />Filter</Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                 {filteredWorkflows.map(workflow => (
                   <Card key={workflow.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => { setSelectedWorkflow(workflow); setShowWorkflowDialog(true) }}>
                     <CardContent className="p-6">
@@ -1952,7 +1952,7 @@ export default function WorkflowBuilderClient() {
                         ))}
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 text-center text-sm mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center text-sm mb-4">
                         <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
                           <p className="font-semibold">{workflow.executionCount.toLocaleString()}</p>
                           <p className="text-xs text-gray-500">Runs</p>
@@ -2157,7 +2157,7 @@ export default function WorkflowBuilderClient() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {filteredNodes.map(node => (
                   <Card key={node.type} className="hover:shadow-lg transition-shadow cursor-pointer">
                     <CardContent className="p-4">
@@ -2232,7 +2232,7 @@ export default function WorkflowBuilderClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockTemplates.map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardContent className="p-6">
@@ -3061,7 +3061,7 @@ export default function WorkflowBuilderClient() {
           <ScrollArea className="h-[60vh]">
             {selectedWorkflow && (
               <div className="space-y-6 p-4">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedWorkflow.executionCount.toLocaleString()}</p>
                     <p className="text-sm text-gray-500">Total Executions</p>
@@ -3085,7 +3085,7 @@ export default function WorkflowBuilderClient() {
                     <CardTitle className="text-lg">Workflow Details</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <Label className="text-gray-500">Status</Label>
                         <p><Badge className={getStatusColor(selectedWorkflow.status)}>{selectedWorkflow.status}</Badge></p>

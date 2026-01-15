@@ -1396,7 +1396,7 @@ export default function InvestorMetricsClient() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                         <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(investor.totalInvested, true)}</div>
                           <div className="text-xs text-gray-500">Invested</div>
@@ -1644,7 +1644,7 @@ export default function InvestorMetricsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <Label>Company Legal Name</Label>
                               <Input defaultValue="Kazi Technologies Inc." className="mt-1" />
@@ -1654,7 +1654,7 @@ export default function InvestorMetricsClient() {
                               <Input defaultValue="Kazi" className="mt-1" />
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <Label>State of Incorporation</Label>
                               <Select defaultValue="delaware">
@@ -1699,7 +1699,7 @@ export default function InvestorMetricsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <Label>Currency</Label>
                               <Select defaultValue="usd">
@@ -2309,7 +2309,7 @@ export default function InvestorMetricsClient() {
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Category</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as any }))}>
@@ -2334,7 +2334,7 @@ export default function InvestorMetricsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Current Value</Label>
                 <Input
@@ -2413,7 +2413,7 @@ export default function InvestorMetricsClient() {
                 {selectedInvestor.boardSeat && <Badge className="bg-yellow-100 text-yellow-700">Board Seat</Badge>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <div className="text-sm text-gray-500">Total Invested</div>
                   <div className="text-xl font-bold">{formatCurrency(selectedInvestor.totalInvested)}</div>
@@ -2575,7 +2575,7 @@ export default function InvestorMetricsClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Report Type</Label>
                 <Select
@@ -2626,7 +2626,7 @@ export default function InvestorMetricsClient() {
 
             <div className="space-y-2">
               <Label>Include Sections</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <span className="text-sm">Financial Overview</span>
                   <Switch
@@ -2722,7 +2722,7 @@ export default function InvestorMetricsClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Format</Label>
                 <Select

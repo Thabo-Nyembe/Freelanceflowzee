@@ -787,7 +787,7 @@ export default function ConnectorsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Header */}
@@ -1023,7 +1023,7 @@ export default function ConnectorsClient() {
                         </div>
                         <span className="font-medium text-gray-900 dark:text-white">{zap.name}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                         <div>
                           <p className="text-gray-500">Tasks</p>
                           <p className="font-semibold text-gray-900 dark:text-white">{formatNumber(zap.task_count)}</p>
@@ -1140,7 +1140,7 @@ export default function ConnectorsClient() {
                     </div>
 
                     {/* Metrics */}
-                    <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                       <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
                         <p className="text-xl font-bold text-gray-900 dark:text-white">{formatNumber(zap.task_count)}</p>
                         <p className="text-xs text-gray-500">Total Tasks</p>
@@ -1479,7 +1479,7 @@ export default function ConnectorsClient() {
                           </div>
                           <Switch id="dedup" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Retry Limit</Label>
                             <Input type="number" defaultValue="3" />
@@ -1543,7 +1543,7 @@ export default function ConnectorsClient() {
                           </Label>
                           <Switch id="error-pause" defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Polling Interval</Label>
                             <Input type="number" defaultValue="15" placeholder="Minutes" />
@@ -1562,7 +1562,7 @@ export default function ConnectorsClient() {
                         <CardDescription>Control parallel execution</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Max Concurrent Tasks</Label>
                             <Input type="number" defaultValue="10" />
@@ -1940,7 +1940,7 @@ export default function ConnectorsClient() {
                     <p className="text-gray-500">{selectedZap.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Total Tasks</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedZap.task_count)}</p>
@@ -2019,7 +2019,7 @@ export default function ConnectorsClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h3 className="font-semibold mb-3">Triggers ({selectedApp.triggers.length})</h3>
                       <div className="space-y-2">

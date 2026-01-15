@@ -448,7 +448,7 @@ export default function GrowthHubPage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="currentRevenue">Current Monthly Revenue ($) *</Label>
                     <Input
@@ -482,7 +482,7 @@ export default function GrowthHubPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="market">Market/Location</Label>
                     <Input

@@ -836,7 +836,7 @@ export default function TeamManagementPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                         <div>
                           <p className="text-gray-600">Completed Projects</p>
                           <p className="font-semibold text-lg">{member.completedProjects || 0}</p>
@@ -1146,7 +1146,7 @@ export default function TeamManagementPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Name</Label>
                     <Input
@@ -1177,7 +1177,7 @@ export default function TeamManagementPage() {
                     onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Level</Label>
                     <Select

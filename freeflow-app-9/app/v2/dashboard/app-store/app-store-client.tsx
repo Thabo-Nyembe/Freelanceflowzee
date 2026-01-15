@@ -2103,7 +2103,7 @@ export default function AppStoreClient() {
 
               <div className="space-y-6">
                 {/* Quick Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
@@ -2267,7 +2267,7 @@ export default function AppStoreClient() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               {['Productivity', 'Business', 'Creative', 'Finance', 'Developer', 'Analytics'].map((category) => (
                 <Button
                   key={category}
@@ -2505,7 +2505,7 @@ export default function AppStoreClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-2xl font-bold text-green-600">{apps.filter(a => a.status === 'installed').length}</p>
                 <p className="text-sm text-muted-foreground">Installed</p>

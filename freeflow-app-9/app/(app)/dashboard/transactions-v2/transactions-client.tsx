@@ -1638,7 +1638,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <CardDescription>Configure your business details for payments</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="businessName">Business Name</Label>
                             <input id="businessName" type="text" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" defaultValue="Acme Inc." />
@@ -1671,7 +1671,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <CardDescription>Set your default currency and regional preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label htmlFor="defaultCurrency">Default Currency</Label>
                             <select id="defaultCurrency" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
@@ -2111,7 +2111,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Customer</p>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedPayment.customer.name}</p>
@@ -2250,7 +2250,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
                   <input

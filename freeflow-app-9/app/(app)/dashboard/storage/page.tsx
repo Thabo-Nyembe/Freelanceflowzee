@@ -1430,7 +1430,7 @@ export default function StoragePage() {
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label className="text-xs text-muted-foreground">Name</Label>
                       <p className="text-sm font-medium mt-1">{state.selectedFile.name}</p>

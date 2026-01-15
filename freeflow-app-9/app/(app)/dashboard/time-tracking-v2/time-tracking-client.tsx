@@ -1489,7 +1489,7 @@ export default function TimeTrackingClient() {
             </div>
 
             {reportsTab === 'overview' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -1601,7 +1601,7 @@ export default function TimeTrackingClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Tags Usage</CardTitle><Button onClick={() => setShowTagDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Tag</Button></CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     {mockTags.map(tag => (
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
@@ -1833,7 +1833,7 @@ export default function TimeTrackingClient() {
             )}
 
             {teamTab === 'utilization' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Utilization</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -1854,7 +1854,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{mockTeam.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{mockTeam.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
@@ -2648,8 +2648,8 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
               <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null); setNewEntryForm({ description: '', projectId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true }) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
@@ -2707,7 +2707,7 @@ export default function TimeTrackingClient() {
             <div className="space-y-4 py-4">
               <div><Label>Client</Label><Select value={invoiceFormData.clientName} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, clientName: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Project</Label><Select value={invoiceFormData.projectId} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.filter(p => !invoiceFormData.clientName || p.client === invoiceFormData.clientName).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>From Date</Label><Input type="date" className="mt-1" value={invoiceFormData.fromDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, fromDate: e.target.value }))} /></div><div><Label>To Date</Label><Input type="date" className="mt-1" value={invoiceFormData.toDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, toDate: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>From Date</Label><Input type="date" className="mt-1" value={invoiceFormData.fromDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, fromDate: e.target.value }))} /></div><div><Label>To Date</Label><Input type="date" className="mt-1" value={invoiceFormData.toDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, toDate: e.target.value }))} /></div></div>
               <div><Label>Due Date</Label><Input type="date" className="mt-1" value={invoiceFormData.dueDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, dueDate: e.target.value }))} /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
@@ -2736,8 +2736,8 @@ export default function TimeTrackingClient() {
         }}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{selectedClient ? 'Edit Client' : 'Add New Client'}</DialogTitle><DialogDescription>{selectedClient ? 'Update client details' : 'Create a new client for billing and project tracking'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" value={clientFormData.name} onChange={(e) => setClientFormData(prev => ({ ...prev, name: e.target.value }))} /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" value={clientFormData.email} onChange={(e) => setClientFormData(prev => ({ ...prev, email: e.target.value }))} /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" value={clientFormData.phone} onChange={(e) => setClientFormData(prev => ({ ...prev, phone: e.target.value }))} /></div><div><Label>Currency</Label><Select value={clientFormData.currency} onValueChange={(value) => setClientFormData(prev => ({ ...prev, currency: value }))}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" value={clientFormData.name} onChange={(e) => setClientFormData(prev => ({ ...prev, name: e.target.value }))} /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" value={clientFormData.email} onChange={(e) => setClientFormData(prev => ({ ...prev, email: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" value={clientFormData.phone} onChange={(e) => setClientFormData(prev => ({ ...prev, phone: e.target.value }))} /></div><div><Label>Currency</Label><Select value={clientFormData.currency} onValueChange={(value) => setClientFormData(prev => ({ ...prev, currency: value }))}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
               <div><Label>Address</Label><Input placeholder="123 Business Ave, City, State ZIP" className="mt-1" value={clientFormData.address} onChange={(e) => setClientFormData(prev => ({ ...prev, address: e.target.value }))} /></div>
               <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" value={clientFormData.notes} onChange={(e) => setClientFormData(prev => ({ ...prev, notes: e.target.value }))} /></div>
               <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" value={clientFormData.hourlyRate} onChange={(e) => setClientFormData(prev => ({ ...prev, hourlyRate: e.target.value }))} /></div>
@@ -2805,7 +2805,7 @@ export default function TimeTrackingClient() {
           <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Create New Report</DialogTitle><DialogDescription>Build a custom report with your preferred filters</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" value={reportFormData.name} onChange={(e) => setReportFormData(prev => ({ ...prev, name: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Report Type</Label><Select value={reportFormData.type} onValueChange={(value) => setReportFormData(prev => ({ ...prev, type: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
                 <div><Label>Date Range</Label><Select value={reportFormData.dateRange} onValueChange={(value) => setReportFormData(prev => ({ ...prev, dateRange: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
               </div>
@@ -2868,7 +2868,7 @@ export default function TimeTrackingClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Hourly Rate ($)</Label><Input type="number" placeholder="0.00" className="mt-1" value={projectFormData.hourlyRate} onChange={(e) => setProjectFormData(prev => ({ ...prev, hourlyRate: e.target.value }))} /></div>
                 <div><Label>Budget ($)</Label><Input type="number" placeholder="0.00" className="mt-1" value={projectFormData.budget} onChange={(e) => setProjectFormData(prev => ({ ...prev, budget: e.target.value }))} /></div>
               </div>
@@ -2908,15 +2908,15 @@ export default function TimeTrackingClient() {
             </DialogHeader>
             {selectedInvoice && (
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div><Label className="text-gray-500">Client</Label><p className="font-medium">{selectedInvoice.client}</p></div>
                   <div><Label className="text-gray-500">Project</Label><p className="font-medium">{selectedInvoice.project}</p></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div><Label className="text-gray-500">Amount</Label><p className="font-bold text-2xl">${selectedInvoice.amount.toLocaleString()}</p></div>
                   <div><Label className="text-gray-500">Hours</Label><p className="font-medium text-lg">{selectedInvoice.hours}h</p></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div><Label className="text-gray-500">Due Date</Label><p className="font-medium">{selectedInvoice.dueDate}</p></div>
                   <div><Label className="text-gray-500">Status</Label><Badge className={getStatusColor(selectedInvoice.status)}>{selectedInvoice.status}</Badge></div>
                 </div>
@@ -2959,7 +2959,7 @@ export default function TimeTrackingClient() {
               <DialogTitle>Change Your Plan</DialogTitle>
               <DialogDescription>Select a plan that fits your team</DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-3 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-4">
               <Card className="cursor-pointer hover:border-amber-500 transition-colors" onClick={() => {
                 toast.promise(
                   fetch('/api/time-tracking/billing/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'starter' }) }).then(res => { if (!res.ok) throw new Error('Failed'); }),

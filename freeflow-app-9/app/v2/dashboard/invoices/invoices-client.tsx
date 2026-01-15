@@ -553,7 +553,7 @@ Best regards,
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
           <AlertCircle className="h-5 w-5" />
           Error: {error.message}
@@ -1024,7 +1024,7 @@ Best regards,
                         <CardDescription>Your business details that appear on invoices</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Business Name</Label>
                             <Input defaultValue="Your Company Name" />
@@ -1038,7 +1038,7 @@ Best regards,
                           <Label>Business Address</Label>
                           <Input placeholder="Street Address" />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>City</Label>
                             <Input placeholder="City" />
@@ -1052,7 +1052,7 @@ Best regards,
                             <Input placeholder="Postal code" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Email</Label>
                             <Input type="email" placeholder="billing@company.com" />
@@ -1071,7 +1071,7 @@ Best regards,
                         <CardDescription>Default settings for new invoices</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Currency</Label>
                             <Select defaultValue="USD">
@@ -1102,7 +1102,7 @@ Best regards,
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Invoice Number Prefix</Label>
                             <Input defaultValue="INV-" />
@@ -1132,7 +1132,7 @@ Best regards,
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Tax Rate</Label>
                             <div className="flex items-center gap-2">
@@ -1166,7 +1166,7 @@ Best regards,
                             <p className="text-xs text-gray-400">Recommended: 200x50px PNG or SVG</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex gap-2">
@@ -1191,7 +1191,7 @@ Best regards,
                         <CardDescription>Choose your default invoice template</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                           {invoiceTemplates.map(template => (
                             <button
                               key={template.id}
@@ -1362,7 +1362,7 @@ Best regards,
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Late Fee Type</Label>
                             <Select defaultValue="percentage">
@@ -1475,7 +1475,7 @@ Best regards,
                         </div>
                         <div className="space-y-2">
                           <Label>Events</Label>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {['invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'payment.received'].map((event) => (
                               <div key={event} className="flex items-center gap-2">
                                 <Switch defaultChecked />
@@ -1508,7 +1508,7 @@ Best regards,
                         <CardDescription>Sync invoices with your accounting tools</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {accountingApps.map((app) => (
                             <div key={app.id} className="p-4 rounded-lg border dark:border-gray-700">
                               <div className="flex items-center justify-between mb-2">
@@ -1575,7 +1575,7 @@ Best regards,
                         <CardDescription>Export and manage your invoice data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
                             toast.loading(`Exporting ${stats.total} invoices...`, { id: 'export-csv' })
                             try {
@@ -1870,7 +1870,7 @@ Best regards,
               {/* Template Selection */}
               <div>
                 <Label className="text-sm font-medium mb-3 block">Invoice Template</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {invoiceTemplates.map(template => (
                     <button
                       key={template.id}
@@ -1890,7 +1890,7 @@ Best regards,
               </div>
 
               {/* Client & Basic Info */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Client Name</Label>
                   <Input
@@ -1910,7 +1910,7 @@ Best regards,
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label>Invoice Title</Label>
                   <Input
@@ -2036,7 +2036,7 @@ Best regards,
               </div>
 
               {/* Smart Features */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Recurring */}
                 <Card>
                   <CardHeader className="pb-3">
@@ -2243,7 +2243,7 @@ Best regards,
               </Card>
 
               {/* Notes & Terms */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Notes to Client</Label>
                   <Textarea
@@ -2641,7 +2641,7 @@ Best regards,
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Min Amount</Label>
                 <Input type="number" placeholder="0" value={filterSettings.minAmount} onChange={(e) => setFilterSettings(prev => ({ ...prev, minAmount: e.target.value }))} />
@@ -2699,7 +2699,7 @@ Best regards,
                 </div>
                 <Badge className={getStatusColor(selectedInvoice.status)}>{selectedInvoice.status}</Badge>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card>
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground">Client</p>
@@ -2714,7 +2714,7 @@ Best regards,
                   </CardContent>
                 </Card>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                 <div>
                   <p className="text-muted-foreground">Issue Date</p>
                   <p className="font-medium">{selectedInvoice.issue_date ? new Date(selectedInvoice.issue_date).toLocaleDateString() : 'N/A'}</p>
@@ -2764,7 +2764,7 @@ Best regards,
           </DialogHeader>
           {selectedInvoice && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Invoice Title</Label>
                   <Input defaultValue={selectedInvoice.title || ''} id="edit-title" />
@@ -2774,7 +2774,7 @@ Best regards,
                   <Input defaultValue={selectedInvoice.client_name || ''} id="edit-client" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Client Email</Label>
                   <Input type="email" defaultValue={selectedInvoice.client_email || ''} id="edit-email" />
@@ -2784,7 +2784,7 @@ Best regards,
                   <Input type="date" defaultValue={selectedInvoice.due_date?.split('T')[0] || ''} id="edit-due-date" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Amount</Label>
                   <Input type="number" defaultValue={selectedInvoice.total_amount} id="edit-amount" />
@@ -3056,7 +3056,7 @@ Best regards,
             </div>
 
             {/* Client & Dates */}
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-6">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Bill To:</p>
                 <p className="font-medium">{newInvoice.client || 'Client Name'}</p>

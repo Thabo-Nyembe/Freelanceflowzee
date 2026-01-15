@@ -765,7 +765,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 rounded-2xl p-8 text-white">
@@ -838,7 +838,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               )}
             </div>
             <div className="text-right text-white">
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                 <div>
                   <div className="text-xs opacity-75">Income</div>
                   <div className="text-xl font-semibold">{formatCurrency(stats.income)}</div>
@@ -1201,7 +1201,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <ArrowDownRight className="h-6 w-6 text-green-600 mx-auto mb-2" />
                       <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.income)}</div>
@@ -1920,7 +1920,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         <CardTitle>Currency & Format</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Currency</label>
                             <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
@@ -2128,7 +2128,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <CardHeader>
                         <CardTitle>Import & Export</CardTitle>
                       </CardHeader>
-                      <CardContent className="grid grid-cols-2 gap-4">
+                      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <Button variant="outline" className="justify-start" onClick={() => {
                           toast.success('Ready to import CSV file')
                         }}>
@@ -2442,7 +2442,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     <p className="text-gray-500">{selectedTransaction.date.toLocaleDateString()}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Amount</p>
                     <p className={`font-semibold ${selectedTransaction.type === 'inflow' ? 'text-green-600' : ''}`}>
@@ -2580,7 +2580,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="budget-name">Budget Name *</Label>
                   <Input
@@ -2616,7 +2616,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Budget Type</Label>
                   <Select
@@ -2663,7 +2663,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="start-date">Start Date</Label>
                   <Input
@@ -2684,7 +2684,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="alert-threshold">Alert Threshold (%)</Label>
                   <Input
@@ -2770,7 +2770,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </DialogHeader>
             {selectedBudget && (
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <p className="text-sm text-gray-500 dark:text-gray-400">Total Budget</p>
                     <p className="text-2xl font-bold text-blue-600">{formatCurrency(selectedBudget.total_amount)}</p>
@@ -2797,7 +2797,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Progress value={selectedBudget.utilization_percent} className="h-3" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div>
                     <p className="text-gray-500">Type</p>
                     <p className="font-medium capitalize">{selectedBudget.budget_type}</p>
@@ -2967,7 +2967,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <Select
@@ -3009,7 +3009,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="txn-date">Date</Label>
                   <Input
@@ -3044,7 +3044,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="txn-vendor">Vendor/Payee</Label>
                   <Input
@@ -3283,7 +3283,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:border-blue-300 cursor-pointer transition-all">
                   <div className="flex items-center gap-3 mb-2">
                     <BarChart3 className="h-8 w-8 text-blue-600" />
@@ -3379,7 +3379,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
 
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <h4 className="font-semibold mb-2">Quick Summary - {monthNames[currentMonth.getMonth()]}</h4>
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                   <div>
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.income)}</p>
                     <p className="text-sm text-gray-500">Total Income</p>
@@ -3447,7 +3447,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="goal-target">Target Amount *</Label>
                   <div className="relative">

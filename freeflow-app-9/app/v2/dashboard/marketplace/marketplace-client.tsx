@@ -979,7 +979,7 @@ export default function MarketplaceClient() {
                   <p className="text-amber-100 text-sm">Handpicked by our expert team for exceptional quality</p>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">12</p>
                   <p className="text-sm text-amber-100">Featured Apps</p>
@@ -1088,7 +1088,7 @@ export default function MarketplaceClient() {
                       <Badge className="bg-violet-100 text-violet-700">Elite Partner</Badge>
                     </div>
                     <p className="text-gray-600 dark:text-gray-400 mb-4">Industry-leading provider of enterprise productivity and security solutions. Trusted by over 10,000 businesses worldwide.</p>
-                    <div className="grid grid-cols-5 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <div className="text-center"><p className="text-xl font-bold">15</p><p className="text-xs text-gray-500">Products</p></div>
                       <div className="text-center"><p className="text-xl font-bold">4.9</p><p className="text-xs text-gray-500">Avg Rating</p></div>
                       <div className="text-center"><p className="text-xl font-bold">45K</p><p className="text-xs text-gray-500">Customers</p></div>
@@ -1112,7 +1112,7 @@ export default function MarketplaceClient() {
                 <p className="text-sm text-gray-500">New apps gaining traction this month</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {[
                     { name: 'DataSync Pro', growth: '+245%', installs: '2.3K', category: 'Integration' },
                     { name: 'AI Writer', growth: '+189%', installs: '1.8K', category: 'AI Tools' },
@@ -1173,7 +1173,7 @@ export default function MarketplaceClient() {
                   <Plus className="h-4 w-4 mr-2" />Apply as Vendor
                 </Button>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockVendors.length}</p>
                   <p className="text-sm text-indigo-100">Total Vendors</p>
@@ -1202,7 +1202,7 @@ export default function MarketplaceClient() {
             </div>
 
             {/* Vendor Tiers */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { tier: 'Elite', icon: Crown, color: 'from-amber-500 to-orange-500', count: 2, perks: 'Priority placement, reduced fees' },
                 { tier: 'Gold', icon: Award, color: 'from-yellow-500 to-amber-500', count: 5, perks: 'Featured listings, analytics' },
@@ -1287,7 +1287,7 @@ export default function MarketplaceClient() {
             </Card>
 
             {/* Vendor Performance Leaderboard */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5 text-amber-500" />Top Sellers</CardTitle></CardHeader>
                 <CardContent>
@@ -1336,7 +1336,7 @@ export default function MarketplaceClient() {
                   <Button className="bg-white text-amber-700 hover:bg-amber-50" onClick={() => setShowRespondAllDialog(true)}><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockReviews.length}</p>
                   <p className="text-sm text-amber-100">Total Reviews</p>
@@ -1365,7 +1365,7 @@ export default function MarketplaceClient() {
             </div>
 
             {/* Rating Distribution */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[5, 4, 3, 2, 1].map(stars => {
                 const counts = [156, 89, 23, 8, 4]
                 const pct = [56, 32, 8, 3, 1]
@@ -1431,7 +1431,7 @@ export default function MarketplaceClient() {
                   <Button className="bg-white text-emerald-700 hover:bg-emerald-50" onClick={() => setShowGenerateReportDialog(true)}><FileText className="h-4 w-4 mr-2" />Generate Report</Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{mockOrders.length}</p>
                   <p className="text-sm text-emerald-100">Total Orders</p>
@@ -1567,7 +1567,7 @@ export default function MarketplaceClient() {
             </Card>
 
             {/* Order Insights */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Revenue by Day</CardTitle></CardHeader>
                 <CardContent>
@@ -1638,7 +1638,7 @@ export default function MarketplaceClient() {
                   <option>Last 90 Days</option>
                 </select>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/10 rounded-lg p-4">
                   <p className="text-violet-200 text-sm mb-1">Total Revenue</p>
                   <p className="text-2xl font-bold">$124,580</p>
@@ -1667,7 +1667,7 @@ export default function MarketplaceClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card><CardContent className="p-4"><div className="flex items-center gap-2"><PieChart className="h-5 w-5 text-violet-500" /><span className="text-sm">Conversion Rate</span></div><p className="text-2xl font-bold mt-2">3.2%</p><p className="text-xs text-green-600">+0.4% from last month</p></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Activity className="h-5 w-5 text-blue-500" /><span className="text-sm">Page Views</span></div><p className="text-2xl font-bold mt-2">45.2K</p><p className="text-xs text-green-600">+12% from last month</p></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-2"><Target className="h-5 w-5 text-green-500" /><span className="text-sm">Install Rate</span></div><p className="text-2xl font-bold mt-2">8.7%</p><p className="text-xs text-green-600">+1.2% from last month</p></CardContent></Card>
@@ -1675,7 +1675,7 @@ export default function MarketplaceClient() {
             </div>
 
             {/* Revenue & Trends */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1717,7 +1717,7 @@ export default function MarketplaceClient() {
             </div>
 
             {/* App Performance & User Behavior */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Top Performing Apps</CardTitle></CardHeader>
                 <CardContent>
@@ -1757,7 +1757,7 @@ export default function MarketplaceClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Retention Metrics</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                       <p className="text-2xl font-bold text-green-600">87%</p>
                       <p className="text-xs text-gray-500">Day 1 Retention</p>
@@ -1780,7 +1780,7 @@ export default function MarketplaceClient() {
             </div>
 
             {/* Recent Activity & Insights */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Recent Transactions</CardTitle></CardHeader>
                 <CardContent>
@@ -1863,7 +1863,7 @@ export default function MarketplaceClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle>Marketplace Settings</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Store Name</Label><Input defaultValue="My App Store" className="mt-1" /></div><div><Label>Default Currency</Label><Select defaultValue="usd"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="usd">USD</SelectItem><SelectItem value="eur">EUR</SelectItem><SelectItem value="gbp">GBP</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Store Name</Label><Input defaultValue="My App Store" className="mt-1" /></div><div><Label>Default Currency</Label><Select defaultValue="usd"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="usd">USD</SelectItem><SelectItem value="eur">EUR</SelectItem><SelectItem value="gbp">GBP</SelectItem></SelectContent></Select></div></div>
                         <div><Label>Store Description</Label><Textarea defaultValue="Enterprise app marketplace" className="mt-1" /></div>
                       </CardContent>
                     </Card>
@@ -2112,7 +2112,7 @@ export default function MarketplaceClient() {
                     <div className="text-right"><p className="text-3xl font-bold text-violet-600">{formatPrice(selectedProduct.price, selectedProduct.pricingModel)}</p>{selectedProduct.compareAtPrice && <p className="text-sm text-gray-400 line-through">${selectedProduct.compareAtPrice}/mo</p>}</div>
                   </div>
                   <p className="text-gray-600 dark:text-gray-400">{selectedProduct.description}</p>
-                  <div><h4 className="font-semibold mb-3">Features</h4><div className="grid grid-cols-2 gap-2">{selectedProduct.features.map((f, i) => <div key={i} className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span className="text-sm">{f}</span></div>)}</div></div>
+                  <div><h4 className="font-semibold mb-3">Features</h4><div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">{selectedProduct.features.map((f, i) => <div key={i} className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /><span className="text-sm">{f}</span></div>)}</div></div>
                   <div><h4 className="font-semibold mb-3">Tags</h4><div className="flex flex-wrap gap-2">{selectedProduct.tags.map(tag => <Badge key={tag} variant="outline">{tag}</Badge>)}</div></div>
                 </div>
                 <DialogFooter className="gap-2">
@@ -2166,7 +2166,7 @@ export default function MarketplaceClient() {
                     <div><p className="font-semibold">{selectedOrder.product.name}</p><p className="text-sm text-gray-500">{selectedOrder.product.vendor}</p></div>
                     <Badge className={getStatusColor(selectedOrder.status)}>{selectedOrder.status}</Badge>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div><Label className="text-gray-500">Customer</Label><p className="font-medium">{selectedOrder.customer.name}</p><p className="text-sm text-gray-500">{selectedOrder.customer.email}</p></div>
                     <div><Label className="text-gray-500">Amount</Label><p className="text-xl font-bold">${selectedOrder.amount}</p><p className="text-sm text-gray-500">{selectedOrder.paymentMethod}</p></div>
                     <div><Label className="text-gray-500">License</Label><p className="font-mono text-sm">{selectedOrder.license}</p></div>
@@ -2187,11 +2187,11 @@ export default function MarketplaceClient() {
           <DialogContent><DialogHeader><DialogTitle>Create Coupon</DialogTitle><DialogDescription>Create a new discount coupon for your marketplace</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Coupon Code</Label><Input placeholder="SUMMER25" className="mt-1 font-mono" value={marketplaceCouponForm.code} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Discount Type</Label><Select value={marketplaceCouponForm.discountType} onValueChange={(v) => setMarketplaceCouponForm(prev => ({ ...prev, discountType: v as 'percentage' | 'fixed' | 'free_trial' }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage Off</SelectItem><SelectItem value="fixed">Fixed Amount</SelectItem><SelectItem value="free_trial">Free Trial Days</SelectItem></SelectContent></Select></div>
                 <div><Label>Value</Label><Input type="number" placeholder="25" className="mt-1" value={marketplaceCouponForm.value} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, value: e.target.value }))} /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Usage Limit</Label><Input type="number" placeholder="100" className="mt-1" value={marketplaceCouponForm.usageLimit} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, usageLimit: e.target.value }))} /></div><div><Label>Min Purchase</Label><Input type="number" placeholder="0" className="mt-1" value={marketplaceCouponForm.minPurchase} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, minPurchase: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Usage Limit</Label><Input type="number" placeholder="100" className="mt-1" value={marketplaceCouponForm.usageLimit} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, usageLimit: e.target.value }))} /></div><div><Label>Min Purchase</Label><Input type="number" placeholder="0" className="mt-1" value={marketplaceCouponForm.minPurchase} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, minPurchase: e.target.value }))} /></div></div>
               <div><Label>Expires At</Label><Input type="date" className="mt-1" value={marketplaceCouponForm.expiresAt} onChange={(e) => setMarketplaceCouponForm(prev => ({ ...prev, expiresAt: e.target.value }))} /></div>
               <div><Label>Applicable Products</Label><Select value={marketplaceCouponForm.applicableProducts} onValueChange={(v) => setMarketplaceCouponForm(prev => ({ ...prev, applicableProducts: v }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select products" /></SelectTrigger><SelectContent><SelectItem value="all">All Products</SelectItem><SelectItem value="selected">Selected Products</SelectItem></SelectContent></Select></div>
             </div>
@@ -2206,11 +2206,11 @@ export default function MarketplaceClient() {
               <div><Label>Bundle Name</Label><Input placeholder="Productivity Suite" className="mt-1" /></div>
               <div><Label>Description</Label><Textarea placeholder="Describe what's included..." className="mt-1" /></div>
               <div><Label>Select Products</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                   {mockProducts.slice(0, 4).map(p => <div key={p.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm">{p.name}</span></div>)}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 toast.success('Bundle created successfully!', { description: 'Your product bundle is now available' })
@@ -2242,7 +2242,7 @@ export default function MarketplaceClient() {
             <div className="space-y-4 py-4">
               <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" value={webhookForm.url} onChange={(e) => setWebhookForm(prev => ({ ...prev, url: e.target.value }))} /></div>
               <div><Label>Events</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                   {['order.created', 'order.completed', 'order.refunded', 'review.created', 'review.flagged', 'install', 'uninstall'].map(event => (
                     <div key={event} className={`flex items-center gap-2 p-2 rounded cursor-pointer ${webhookForm.events.includes(event) ? 'bg-violet-100 dark:bg-violet-900/30' : 'bg-gray-50 dark:bg-gray-800'}`} onClick={() => toggleWebhookEvent(event)}><input type="checkbox" checked={webhookForm.events.includes(event)} readOnly /><span className="text-sm font-mono">{event}</span></div>
                   ))}
@@ -2262,7 +2262,7 @@ export default function MarketplaceClient() {
               <DialogDescription>Create a new product listing for the marketplace</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Product Name</Label><Input placeholder="My Awesome App" className="mt-1" /></div>
                 <div><Label>Category</Label>
                   <Select>
@@ -2279,7 +2279,7 @@ export default function MarketplaceClient() {
               </div>
               <div><Label>Short Description</Label><Input placeholder="Brief description of your product" className="mt-1" /></div>
               <div><Label>Full Description</Label><Textarea placeholder="Detailed description of features and benefits..." className="mt-1" rows={4} /></div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div><Label>Pricing Model</Label>
                   <Select>
                     <SelectTrigger className="mt-1"><SelectValue placeholder="Select pricing" /></SelectTrigger>
@@ -2495,7 +2495,7 @@ export default function MarketplaceClient() {
               <div className="bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 h-48 rounded-lg flex items-center justify-center">
                 <BarChart3 className="h-24 w-24 text-violet-300" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <h4 className="font-semibold">Key Features</h4>
                   <ul className="space-y-1 text-sm">
@@ -2546,7 +2546,7 @@ export default function MarketplaceClient() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                 <div><p className="text-xl font-bold">15</p><p className="text-xs text-gray-500">Products</p></div>
                 <div><p className="text-xl font-bold">45K</p><p className="text-xs text-gray-500">Customers</p></div>
                 <div><p className="text-xl font-bold">$2.3M</p><p className="text-xs text-gray-500">Revenue</p></div>
@@ -2779,7 +2779,7 @@ export default function MarketplaceClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>From Date</Label><Input type="date" className="mt-1" /></div>
                 <div><Label>To Date</Label><Input type="date" className="mt-1" /></div>
               </div>
@@ -2902,7 +2902,7 @@ export default function MarketplaceClient() {
                 </Select>
               </div>
               <div><Label>Amount Range</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-1">
                   <Input placeholder="Min $" type="number" />
                   <Input placeholder="Max $" type="number" />
                 </div>
@@ -3164,7 +3164,7 @@ export default function MarketplaceClient() {
               </div>
               <div className="space-y-2">
                 <Label>Columns to Include:</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Order ID</span></div>
                   <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Date</span></div>
                   <div className="flex items-center gap-2"><input type="checkbox" defaultChecked /><span className="text-sm">Customer</span></div>
@@ -3314,7 +3314,7 @@ export default function MarketplaceClient() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {mockProducts.filter(p => p.vendor.id === selectedVendorForStore.id || mockVendors.indexOf(selectedVendorForStore) < 2).slice(0, 4).map(product => (
                     <div key={product.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                       <div className="w-full h-24 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center mb-3">

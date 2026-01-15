@@ -752,7 +752,7 @@ export default function CustomerSuccessClient() {
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-6 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4">
               <div className="text-2xl font-bold">{formatCurrency(stats.totalARR)}</div>
               <div className="text-sm text-white/70">Total ARR</div>
@@ -836,7 +836,7 @@ export default function CustomerSuccessClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Add Customer', desc: 'New account', color: 'text-emerald-500' },
                 { icon: Phone, label: 'Schedule Call', desc: 'Book meeting', color: 'text-blue-500' },
@@ -961,7 +961,7 @@ export default function CustomerSuccessClient() {
                     </div>
 
                     {/* Quick Metrics */}
-                    <div className="grid grid-cols-4 gap-4 mt-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-4 pt-4 border-t">
                       <div>
                         <div className="text-xs text-gray-500">NPS</div>
                         <div className="font-semibold">{customer.nps}/10</div>
@@ -1265,7 +1265,7 @@ export default function CustomerSuccessClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500', action: () => createPlaybook() },
                 { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', action: () => window.open('/dashboard/templates?type=playbook', '_blank') },
@@ -1399,7 +1399,7 @@ export default function CustomerSuccessClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="text-2xl font-bold text-emerald-600">{csm.accounts}</div>
                         <div className="text-xs text-gray-500">Accounts</div>
@@ -1507,7 +1507,7 @@ export default function CustomerSuccessClient() {
                         <CardDescription>Basic CS platform settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default CSM Assignment</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -1575,7 +1575,7 @@ export default function CustomerSuccessClient() {
                         <CardDescription>Configure health score calculation</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { metric: 'Product Usage', weight: 30 },
                             { metric: 'NPS Score', weight: 20 },
@@ -1854,7 +1854,7 @@ export default function CustomerSuccessClient() {
 
                 <ScrollArea className="flex-1">
                   <TabsContent value="overview" className="p-4 space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <Card>
                         <CardContent className="p-4">
                           <div className="text-sm text-gray-500">ARR</div>
@@ -1883,7 +1883,7 @@ export default function CustomerSuccessClient() {
                       </Card>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                       <div>
                         <h4 className="font-medium mb-3">Key Contacts</h4>
                         <div className="space-y-2">
@@ -2116,7 +2116,7 @@ export default function CustomerSuccessClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Trigger Type</label>
                   <select
@@ -2145,7 +2145,7 @@ export default function CustomerSuccessClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Threshold Value</label>
                   <Input
@@ -2267,7 +2267,7 @@ export default function CustomerSuccessClient() {
               </select>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card className="p-4">
                 <div className="text-2xl font-bold text-emerald-600">{enrollments.filter(e => e.status === 'active').length}</div>
                 <div className="text-sm text-gray-500">Active</div>

@@ -2259,7 +2259,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <span className="text-muted-foreground">Type</span>
                         <span className="capitalize">{campaign.type}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-3 rounded-lg bg-muted/50">
                           <p className="text-xs text-muted-foreground">Leads</p>
                           <p className="text-lg font-bold">{campaign.leads}</p>
@@ -2470,7 +2470,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <CardDescription>Configure your lead generation preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Lead Owner</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -2554,7 +2554,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <CardDescription>Configure how leads are scored and prioritized</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Scoring Model</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -2601,7 +2601,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             <div className="p-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
                               <div className="flex items-center gap-2 mb-2">
                                 <Flame className="w-4 h-4 text-red-500" />
@@ -2666,7 +2666,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <CardDescription>Choose where to receive notifications</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { icon: Mail, label: 'Email', active: true },
                             { icon: MessageSquare, label: 'In-App', active: true },
@@ -2868,7 +2868,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <CardDescription>Manage your lead data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
                             <Download className="w-5 h-5" />
                             <span>Export All Leads</span>
@@ -3024,7 +3024,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     </div>
 
                     {/* Contact Info */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-3 rounded-lg border flex items-center gap-3">
                         <Mail className="w-5 h-5 text-muted-foreground" />
                         <div>
@@ -3060,7 +3060,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     {/* Engagement Metrics */}
                     <div>
                       <h4 className="font-semibold mb-3">Engagement</h4>
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         <div className="p-3 rounded-lg border text-center">
                           <p className="text-lg font-bold">{selectedLead.emailOpens}</p>
                           <p className="text-xs text-muted-foreground">Email Opens</p>
@@ -3236,7 +3236,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-name">Full Name *</Label>
                   <Input
@@ -3257,7 +3257,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-phone">Phone</Label>
                   <Input
@@ -3277,7 +3277,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-title">Job Title</Label>
                   <Input
@@ -3307,7 +3307,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="lead-score">Initial Score</Label>
                   <Input
@@ -3703,7 +3703,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-lead-name">Full Name *</Label>
                   <Input
@@ -3724,7 +3724,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-lead-phone">Phone</Label>
                   <Input
@@ -3744,7 +3744,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-lead-title">Job Title</Label>
                   <Input
@@ -3774,7 +3774,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-lead-score">Score</Label>
                   <Input
@@ -3849,7 +3849,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Select New Status</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {(['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] as LeadStatus[]).map((status) => (
                     <div
                       key={status}

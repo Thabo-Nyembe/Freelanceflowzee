@@ -1091,7 +1091,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 <TabsContent value="properties" className="mt-0 space-y-4">
                   <div>
                     <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Position</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       <div>
                         <label className="text-xs text-gray-500">X</label>
                         <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="0" />
@@ -1104,7 +1104,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                   </div>
                   <div>
                     <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Size</h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       <div>
                         <label className="text-xs text-gray-500">W</label>
                         <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="100" />
@@ -1161,7 +1161,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Components</h4>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         {components.slice(0, 6).map(comp => (
                           <button key={comp.id} className="flex flex-col items-center gap-1 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
                             <comp.icon className="h-6 w-6 text-gray-300" />
@@ -2445,7 +2445,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Canvas Type</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { id: 'whiteboard' as CanvasType, name: 'Whiteboard', icon: StickyNote, desc: 'Free-form collaboration' },
                   { id: 'wireframe' as CanvasType, name: 'Wireframe', icon: Monitor, desc: 'UI/UX mockups' },
@@ -2506,7 +2506,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
                   <Shapes className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedBoard?.elements_count}</div>
@@ -2586,7 +2586,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Board Type</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['Whiteboard', 'Wireframe', 'Prototype', 'Diagram'].map(type => (
                   <Button key={type} variant="outline" className="justify-start">
                     {type}
@@ -2613,7 +2613,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Input placeholder="Search templates..." />
-            <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-96 overflow-y-auto">
               {['iOS App', 'Dashboard', 'User Flow', 'Wireframe Kit', 'Mind Map', 'Presentation'].map(template => (
                 <div key={template} className="p-4 border rounded-lg hover:border-indigo-500 cursor-pointer transition-colors">
                   <div className="h-20 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg mb-2 flex items-center justify-center">
@@ -2643,7 +2643,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['PNG', 'SVG', 'PDF', 'JSON'].map(format => (
                   <Button key={format} variant="outline" className="justify-start">
                     {format}
@@ -2872,7 +2872,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Style</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {['Modern', 'Minimal', 'Playful', 'Corporate', 'Dark', 'Light'].map(style => (
                   <Button key={style} variant="outline" size="sm">{style}</Button>
                 ))}

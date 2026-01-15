@@ -1488,7 +1488,7 @@ export default function CommunityClient() {
 
           {/* Moderation Tab */}
           <TabsContent value="moderation" className="flex-1 p-4 m-0 overflow-auto">
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-8 h-8 text-yellow-500" />
@@ -1553,7 +1553,7 @@ export default function CommunityClient() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="flex-1 p-4 m-0 overflow-auto">
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
                 <div className="flex items-center gap-3">
                   <Users className="w-8 h-8 text-blue-500" />
@@ -1592,7 +1592,7 @@ export default function CommunityClient() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card>
                 <CardHeader><CardTitle>Member Growth</CardTitle></CardHeader>
                 <CardContent>
@@ -1625,7 +1625,7 @@ export default function CommunityClient() {
                     <Progress value={(serverBoost.boostCount / (serverBoost.nextLevel?.required || 1)) * 100} className="h-3" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <h4 className="font-medium mb-2">Current Perks</h4>
                     <div className="space-y-1">
@@ -1735,7 +1735,7 @@ export default function CommunityClient() {
                         <CardDescription>Configure your community server settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Server Name</Label>
                             <Input defaultValue="FreeFlow Community" />
@@ -1895,7 +1895,7 @@ export default function CommunityClient() {
                         <CardDescription>Set default actions for violations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>First Offense</Label>
                             <Select defaultValue="warn">
@@ -2361,7 +2361,7 @@ export default function CommunityClient() {
                           <Gem className="w-8 h-8 text-pink-500" />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <p className="text-2xl font-bold text-orange-600">{stats.totalMembers.toLocaleString()}</p>
                             <p className="text-xs text-gray-500">Members</p>
@@ -2532,7 +2532,7 @@ export default function CommunityClient() {
                   <p className="text-gray-500">@{selectedMember.username}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Status</p><p className="font-medium capitalize">{selectedMember.status}</p></div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Joined</p><p className="font-medium">{selectedMember.joinedAt.toLocaleDateString()}</p></div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Messages</p><p className="font-medium">{selectedMember.messageCount.toLocaleString()}</p></div>
@@ -2553,7 +2553,7 @@ export default function CommunityClient() {
           <DialogHeader><DialogTitle>Create Channel</DialogTitle><DialogDescription>Add a new channel to the server</DialogDescription></DialogHeader>
           <div className="space-y-4 py-4">
             <div><Label>Channel Type</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                 {[{ type: 'text', icon: <Hash />, label: 'Text' }, { type: 'voice', icon: <Volume2 />, label: 'Voice' }, { type: 'forum', icon: <MessageCircle />, label: 'Forum' }, { type: 'announcement', icon: <Megaphone />, label: 'Announcement' }].map(item => (
                   <button
                     key={item.type}
@@ -2625,7 +2625,7 @@ export default function CommunityClient() {
               />
             </div>
             <div><Label>Event Type</Label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 mt-2">
                 {[{ type: 'voice', icon: <Volume2 />, label: 'Voice' }, { type: 'stage', icon: <Radio />, label: 'Stage' }, { type: 'external', icon: <ExternalLink />, label: 'External' }].map(item => (
                   <button
                     key={item.type}
@@ -2637,7 +2637,7 @@ export default function CommunityClient() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Date & Time</Label>
                 <Input

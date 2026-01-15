@@ -1464,7 +1464,7 @@ export default function InvoicingClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Total Paid</p>
                         <p className="font-semibold text-green-600">{formatCurrency(client.totalPaid)}</p>
@@ -1841,7 +1841,7 @@ export default function InvoicingClient() {
                 <CardTitle>Collection Status</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
                     <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-600" />
                     <p className="text-2xl font-bold text-green-600">{formatNumber(report.totalPaid)}</p>
@@ -1931,7 +1931,7 @@ export default function InvoicingClient() {
                         <CardDescription>Your business details for invoices</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Business Name</Label>
                             <Input defaultValue="My Company LLC" className="mt-1" />
@@ -1945,7 +1945,7 @@ export default function InvoicingClient() {
                           <Label>Business Address</Label>
                           <Input defaultValue="123 Main St, City, State 12345" className="mt-1" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Email</Label>
                             <Input defaultValue="billing@company.com" className="mt-1" />
@@ -1966,7 +1966,7 @@ export default function InvoicingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Currency</Label>
                             <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -2003,7 +2003,7 @@ export default function InvoicingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           {['Professional', 'Modern', 'Classic'].map((template) => (
                             <div key={template} className="border-2 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors">
                               <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-700 rounded mb-3" />
@@ -2238,14 +2238,14 @@ export default function InvoicingClient() {
 
               <div className="space-y-6">
                 {/* Client & Dates */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div>
                     <h4 className="text-sm font-medium text-muted-foreground mb-2">Bill To</h4>
                     <p className="font-semibold">{selectedInvoice.client.company || selectedInvoice.client.name}</p>
                     <p className="text-sm text-muted-foreground">{selectedInvoice.client.email}</p>
                   </div>
                   <div className="text-right">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-muted-foreground">Issue Date</p>
                         <p className="font-medium">{new Date(selectedInvoice.issueDate).toLocaleDateString()}</p>
@@ -2404,7 +2404,7 @@ export default function InvoicingClient() {
 
               <div className="space-y-6">
                 {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-sm">
                       <Mail className="w-4 h-4 text-muted-foreground" />
@@ -2446,7 +2446,7 @@ export default function InvoicingClient() {
                 </div>
 
                 {/* Financial Summary */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedClient.totalPaid)}</p>
                     <p className="text-sm text-muted-foreground">Total Paid</p>
@@ -2495,7 +2495,7 @@ export default function InvoicingClient() {
             <p className="text-muted-foreground">
               Create professional invoices with custom branding and send them directly to your clients.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Client</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -2515,7 +2515,7 @@ export default function InvoicingClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Issue Date</Label>
                 <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
@@ -2581,7 +2581,7 @@ export default function InvoicingClient() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Amount</Label>
                 <Input type="number" placeholder="0.00" className="mt-1" />
@@ -2690,7 +2690,7 @@ export default function InvoicingClient() {
             <p className="text-muted-foreground">
               Generate and download comprehensive accounts receivable reports.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Report Type</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -2710,7 +2710,7 @@ export default function InvoicingClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Date From</Label>
                 <Input type="date" className="mt-1" />
@@ -2722,7 +2722,7 @@ export default function InvoicingClient() {
             </div>
             <div className="bg-muted/50 rounded-lg p-4">
               <h4 className="font-medium mb-2">Report Summary</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                 <div>
                   <span className="text-muted-foreground">Total Invoiced:</span>
                   <span className="ml-2 font-medium">{formatCurrency(stats.totalInvoiced)}</span>
@@ -2872,7 +2872,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalPaid)}</p>
                 <p className="text-sm text-green-600">Total Received</p>
@@ -2942,7 +2942,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Export Format</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -2984,7 +2984,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-muted rounded-lg text-center">
                 <p className="text-2xl font-bold">{invoices.length}</p>
                 <p className="text-sm text-muted-foreground">Total Invoices</p>
@@ -3018,7 +3018,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Client Name</Label>
                 <Input placeholder="Full name" className="mt-1" />
@@ -3252,7 +3252,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-muted rounded-lg text-center">
                 <p className="text-2xl font-bold">{clients.length}</p>
                 <p className="text-sm text-muted-foreground">Total Clients</p>
@@ -3460,7 +3460,7 @@ export default function InvoicingClient() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-muted-foreground">Export payment transactions to a file.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Format</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -3502,7 +3502,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalPaid)}</p>
                 <p className="text-sm text-green-600">Total Collected</p>
@@ -3569,7 +3569,7 @@ export default function InvoicingClient() {
               <Label>Description</Label>
               <Input placeholder="Expense description" className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Amount</Label>
                 <Input type="number" placeholder="0.00" className="mt-1" />
@@ -3767,7 +3767,7 @@ export default function InvoicingClient() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-muted-foreground">Export expense data to a file.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Format</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -3809,7 +3809,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-muted rounded-lg text-center">
                 <p className="text-2xl font-bold">{expenses.length}</p>
                 <p className="text-sm text-muted-foreground">Total Expenses</p>
@@ -3843,7 +3843,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-violet-600">{formatCurrency(stats.totalInvoiced)}</p>
                 <p className="text-sm text-violet-600">Total Revenue</p>
@@ -3944,7 +3944,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-blue-600">{formatCurrency(expenses.reduce((sum, e) => sum + e.amount, 0))}</p>
                 <p className="text-sm text-blue-600">Total Expenses</p>
@@ -3978,7 +3978,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                 <p className="text-xl font-bold text-green-600">{formatCurrency(stats.totalPaid)}</p>
                 <p className="text-xs text-green-600">Revenue</p>
@@ -4276,7 +4276,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Client</Label>
                 <select className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedInvoice?.client.id}>
@@ -4294,7 +4294,7 @@ export default function InvoicingClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Issue Date</Label>
                 <Input type="date" defaultValue={selectedInvoice?.issueDate} className="mt-1" />
@@ -4374,7 +4374,7 @@ export default function InvoicingClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Name</Label>
                 <Input defaultValue={selectedClient?.name} className="mt-1" />
@@ -4461,7 +4461,7 @@ export default function InvoicingClient() {
                 <option value="estimate">Estimate</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Issue Date</Label>
                 <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />

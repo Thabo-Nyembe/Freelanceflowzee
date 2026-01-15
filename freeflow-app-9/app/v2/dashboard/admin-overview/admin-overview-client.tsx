@@ -504,7 +504,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                   <div className="text-xs text-blue-600 mb-1">Revenue</div>
                   <div className="text-lg font-bold text-blue-700">
@@ -567,7 +567,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Pipeline</div>
                   <div className="text-lg font-bold text-green-700">
@@ -631,7 +631,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Paid</div>
                   <div className="text-lg font-bold text-green-700">
@@ -693,7 +693,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg p-3 border border-red-100 dark:border-red-800">
                   <div className="text-xs text-red-600 mb-1">Hot Leads</div>
                   <div className="text-lg font-bold text-red-700">
@@ -754,7 +754,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                   <div className="text-xs text-blue-600 mb-1">Team</div>
                   <div className="text-lg font-bold text-blue-700">
@@ -811,7 +811,7 @@ export default function AdminOverviewClient() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-4">
                 <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 rounded-lg p-3 border border-purple-100 dark:border-purple-800">
                   <div className="text-xs text-purple-600 mb-1">Workflows</div>
                   <div className="text-lg font-bold text-purple-700">
@@ -993,7 +993,7 @@ export default function AdminOverviewClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Export Format</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 <button className="px-4 py-3 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
                   CSV
                 </button>
@@ -1094,7 +1094,7 @@ export default function AdminOverviewClient() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Default View</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <button className="px-4 py-2 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
                   Overview
                 </button>

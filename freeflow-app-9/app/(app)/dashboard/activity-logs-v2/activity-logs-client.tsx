@@ -1317,7 +1317,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                       </div>
                       {expandedLogs.has(log.id) && (
                         <div className="px-12 pb-3 space-y-2 text-xs">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             {log.traceId && (
                               <div>
                                 <span className="text-gray-500">trace_id: </span>
@@ -1733,7 +1733,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Log Retention Period</Label>
                             <Select defaultValue="30d">
@@ -2011,7 +2011,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Archive After (days)</Label>
                             <Input type="number" defaultValue="30" />
@@ -2392,7 +2392,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                   <p className="text-gray-100 font-mono">{selectedLog.message}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-3">
                     <h4 className="font-semibold text-gray-900 dark:text-white">Request Info</h4>
                     <div className="space-y-2 text-sm">
@@ -2555,7 +2555,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Export Format</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {(['csv', 'json', 'txt'] as const).map((format) => (
                   <button
                     key={format}
@@ -2573,7 +2573,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Range</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <div>
                   <label className="text-xs text-gray-500">Start Date</label>
                   <input
@@ -2628,7 +2628,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Log Level</label>
                 <Select value={levelFilter} onValueChange={(v) => setLevelFilter(v as LogLevel | 'all')}>
@@ -2722,7 +2722,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
                 <input
@@ -2804,7 +2804,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 placeholder="e.g., High Error Rate Alert"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Log Level</label>
                 <Select value={alertLevel} onValueChange={(v) => setAlertLevel(v as LogLevel)}>
@@ -2868,7 +2868,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <div className="p-4 bg-gray-900 rounded-lg">
                 <p className="text-gray-100 font-mono">{selectedPattern.pattern}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <p className="text-sm text-gray-500">Total Occurrences</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedPattern.count.toLocaleString()}</p>

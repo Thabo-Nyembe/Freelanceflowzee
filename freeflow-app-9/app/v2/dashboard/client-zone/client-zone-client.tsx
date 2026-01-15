@@ -3310,7 +3310,7 @@ export default function ClientZoneClient() {
                     </div>
                     <Progress value={project.progress} className="h-2" />
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                     <div>
                       <span className="text-gray-600 dark:text-gray-400">Phase: </span>
                       <span className="font-medium">{project.phase}</span>
@@ -3821,7 +3821,7 @@ export default function ClientZoneClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Report Type</Label>
                 <Select value={reportType} onValueChange={(value: 'revenue' | 'clients' | 'projects') => setReportType(value)}>
@@ -3850,7 +3850,7 @@ export default function ClientZoneClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4">
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
                 <p className="text-2xl font-bold text-blue-600">{formatCurrency(24500)}</p>
                 <p className="text-sm text-gray-600">Total Revenue</p>
@@ -3893,7 +3893,7 @@ export default function ClientZoneClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[0, 1, 2].map((index) => (
                 <div
                   key={index}
@@ -4241,7 +4241,7 @@ export default function ClientZoneClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="client-budget">Budget (USD)</Label>
                 <Input
@@ -4263,7 +4263,7 @@ export default function ClientZoneClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="client-phase">Initial Phase</Label>
                 <Select
@@ -4337,7 +4337,7 @@ export default function ClientZoneClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-client-budget">Budget (USD)</Label>
                 <Input
@@ -4358,7 +4358,7 @@ export default function ClientZoneClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-client-phase">Current Phase</Label>
                 <Select

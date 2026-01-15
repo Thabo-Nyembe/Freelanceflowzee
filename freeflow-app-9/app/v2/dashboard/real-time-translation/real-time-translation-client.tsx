@@ -1200,7 +1200,7 @@ export default function RealTimeTranslationClient() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label className="text-gray-300">Source Language</Label>
                 <Select value={newTranslationSourceLang} onValueChange={setNewTranslationSourceLang}>
@@ -1952,7 +1952,7 @@ export default function RealTimeTranslationClient() {
               <p className="text-xs text-gray-500">PDF, DOCX, TXT, MD, HTML, SRT (max 50MB)</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label className="text-gray-300">Source Language</Label>
                 <Select defaultValue="auto">
@@ -2145,7 +2145,7 @@ export default function RealTimeTranslationClient() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="date-from" className="text-gray-300">From Date</Label>
                 <Input

@@ -568,7 +568,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -651,7 +651,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure your inbox display and behavior</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Default Inbox View</Label>
                           <Select defaultValue="all">
@@ -721,7 +721,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Configure messaging behavior and appearance</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Send Message With</Label>
                           <Select defaultValue="enter">
@@ -789,7 +789,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <CardDescription>Customize the chat interface look</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Theme</Label>
                           <Select defaultValue="system">
@@ -997,7 +997,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Notification Sound</Label>
                           <Select defaultValue="chime">
@@ -1043,7 +1043,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         </div>
                         <Switch />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label>Start Time</Label>
                           <Input type="time" defaultValue="18:00" />
@@ -1077,7 +1077,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <Label>Widget Position</Label>
                           <Select defaultValue="right">
@@ -1323,7 +1323,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label>Start Time</Label>
                           <Input type="time" defaultValue="09:00" />
@@ -1597,7 +1597,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
           {/* Stats Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center text-xs">
               <div>
                 <div className="font-bold text-cyan-600">{stats.openConversations}</div>
                 <div className="text-gray-500">Open</div>
@@ -1869,7 +1869,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   <CardTitle className="text-sm">Customer Overview</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center">
                     <div>
                       <div className="text-2xl font-bold text-cyan-600">
                         {selectedConversation.customer.totalConversations}
@@ -2138,7 +2138,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Do Not Disturb</CardTitle></CardHeader><CardContent className="space-y-4">
                   <div className="flex items-center justify-between"><div><p className="font-medium">Enable DND</p><p className="text-sm text-gray-500">Pause all notifications</p></div><Switch /></div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div><Label>Start Time</Label><Input type="time" defaultValue="18:00" className="mt-1" /></div>
                     <div><Label>End Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
                   </div>

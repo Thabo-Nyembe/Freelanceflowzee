@@ -766,7 +766,7 @@ export default function FeaturesClient() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-5 gap-4 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4">
               <div className="text-3xl font-bold">{stats.totalFeatures}</div>
               <div className="text-sm text-white/70">Total Features</div>
@@ -953,7 +953,7 @@ export default function FeaturesClient() {
 
             {/* Feature List/Grid/Kanban */}
             {viewMode === 'kanban' ? (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 {kanbanColumns.map(col => (
                   <div key={col.status} className="space-y-3">
                     <div className="flex items-center justify-between px-2">
@@ -1899,7 +1899,7 @@ export default function FeaturesClient() {
                       <p className="text-gray-600 dark:text-gray-400">{selectedFeature.description}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <h4 className="font-medium mb-2">Owner</h4>
                         <div className="flex items-center gap-2">
@@ -1920,7 +1920,7 @@ export default function FeaturesClient() {
 
                     <div>
                       <h4 className="font-medium mb-2">RICE Score</h4>
-                      <div className="grid grid-cols-5 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="text-2xl font-bold text-indigo-600">{selectedFeature.rice.reach}</div>
                           <div className="text-xs text-gray-500">Reach</div>
@@ -1969,7 +1969,7 @@ export default function FeaturesClient() {
                   <TabsContent value="rollout" className="p-4 space-y-6">
                     {selectedFeature.rollout ? (
                       <>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Card>
                             <CardContent className="p-4">
                               <div className="text-sm text-gray-500">Stage</div>
@@ -2152,7 +2152,7 @@ export default function FeaturesClient() {
             </div>
             <div className="space-y-2">
               <Label>Targeting Rule</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 <Select
                   value={segmentForm.attribute}
                   onValueChange={(value) => setSegmentForm(prev => ({ ...prev, attribute: value }))}
@@ -2248,7 +2248,7 @@ export default function FeaturesClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="control-name">Control Name</Label>
                 <Input

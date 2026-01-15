@@ -1527,7 +1527,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-2xl p-8 text-white">
@@ -1607,7 +1607,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-2">Start with a Trigger</label>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                               {nodeTypes.filter(n => n.category === 'triggers').map(node => (
                                 <button
                                   key={node.id}
@@ -1649,7 +1649,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           </div>
                         </TabsContent>
                         <TabsContent value="template" className="pr-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             {mockTemplates.slice(0, 6).map(template => (
                               <button key={template.id} className="p-4 border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-left relative">
                                 {template.isPremium && (
@@ -1828,7 +1828,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Monitor your automation performance with real-time metrics, track executions, and optimize your workflows for maximum efficiency.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.total}</div>
                     <div className="text-xs text-white/70">Total Scenarios</div>
@@ -2182,7 +2182,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Monitor all workflow executions in real-time. Track success rates, debug failures, and analyze performance metrics across your automations.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalExecutions}</div>
                     <div className="text-xs text-white/70">Total Executions</div>
@@ -2303,7 +2303,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Browse our library of pre-built automation templates. Start with community-proven workflows and customize them for your unique needs.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockTemplates.length}</div>
                     <div className="text-xs text-white/70">Templates</div>
@@ -2424,7 +2424,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Manage your connected apps and API integrations. Connect to over 400+ apps and services to power your automations.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockConnections.length}</div>
                     <div className="text-xs text-white/70">Connected</div>
@@ -2558,7 +2558,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Configure your automation platform settings, execution preferences, webhooks, integrations, notifications, and advanced options.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">5,240</div>
                     <div className="text-xs text-white/70">Operations Used</div>
@@ -2629,7 +2629,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <CardDescription>Configure basic automation preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Timezone</label>
                             <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -2691,7 +2691,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           </div>
                           <p className="text-sm text-white/80">10,000 operations/month • 5 GB data • 15 active scenarios</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Operations</span>
@@ -2758,7 +2758,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Timeout</label>
                             <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -2790,7 +2790,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <CardDescription>Control execution frequency</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Max Concurrent Executions</label>
                             <Input type="number" defaultValue="10" />
@@ -3101,7 +3101,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <CardDescription>Export your automation data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleExportScenarios}>
                             <FileText className="h-5 w-5 text-blue-600" />
                             <span>Export Scenarios</span>
@@ -3218,7 +3218,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <TabsTrigger value="versions">Versions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="overview" className="mt-4 space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                         <div className="text-2xl font-bold text-emerald-600">{selectedWorkflow.step_count}</div>
                         <p className="text-xs text-gray-500">Modules</p>
@@ -3334,7 +3334,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <p className="text-gray-500">{selectedExecution.startedAt.toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Duration</p>
                     <p className="text-xl font-bold">{formatDuration(selectedExecution.duration)}</p>
@@ -3401,7 +3401,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Badge key={tag} variant="outline">{tag}</Badge>
                   ))}
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold text-emerald-600">{selectedTemplate.nodes}</p>
                     <p className="text-xs text-gray-500">Modules</p>
@@ -4597,7 +4597,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {workflowToRun.description || 'No description'}
                   </p>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                     <div className="p-2 bg-white dark:bg-gray-800 rounded">
                       <div className="text-xs text-gray-500">Total Executions</div>
                       <div className="font-medium">{workflowToRun.total_executions}</div>
@@ -4726,7 +4726,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="text-sm text-blue-700 dark:text-blue-400">
                       <div className="font-medium mb-1">Workflow Stats</div>
-                      <div className="grid grid-cols-3 gap-4 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-2">
                         <div>
                           <div className="text-xs text-gray-500">Steps</div>
                           <div className="font-medium">{workflowToEdit.step_count}</div>
@@ -4779,7 +4779,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                 <div className="col-span-1 space-y-2">
                   <h4 className="font-medium text-sm">Available Modules</h4>
                   <ScrollArea className="h-[400px] border rounded-lg p-2">

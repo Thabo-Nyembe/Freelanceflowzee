@@ -1338,7 +1338,7 @@ export default function CampaignsClient() {
                           <Split className="w-4 h-4 text-amber-600" />
                           <span className="text-sm font-medium">A/B Test Results</span>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {campaign.abTest.variants.map(variant => (
                             <div
                               key={variant.id}
@@ -1551,7 +1551,7 @@ export default function CampaignsClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                 {mockTemplates.map(template => (
                   <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
                     <div className="h-40 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center relative">
@@ -1743,7 +1743,7 @@ export default function CampaignsClient() {
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <div className="space-y-6">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <Card className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm text-gray-500">Emails Sent (30d)</h3>
@@ -1778,7 +1778,7 @@ export default function CampaignsClient() {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Email Performance Over Time</h3>
                   <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1839,7 +1839,7 @@ export default function CampaignsClient() {
                 <Button variant="outline" onClick={() => setShowHealthCheckDialog(true)}><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
                   <div className="flex items-center justify-between mb-4">
                     <Shield className="w-8 h-8 text-green-600" />
@@ -1874,7 +1874,7 @@ export default function CampaignsClient() {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Delivery Metrics</h3>
                   <div className="space-y-4">
@@ -1975,7 +1975,7 @@ export default function CampaignsClient() {
                         <CardDescription>Configure your campaign defaults</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default From Name</Label>
                             <Input defaultValue="FreeFlow Marketing" />
@@ -1985,7 +1985,7 @@ export default function CampaignsClient() {
                             <Input defaultValue="hello@freeflow.com" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Reply-To Email</Label>
                             <Input defaultValue="support@freeflow.com" />
@@ -2025,7 +2025,7 @@ export default function CampaignsClient() {
                         <CardDescription>Customize your email appearance</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Brand Color</Label>
                             <div className="flex gap-2">
@@ -2051,7 +2051,7 @@ export default function CampaignsClient() {
                         <CardDescription>Configure email sending behavior</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Sending Rate Limit</Label>
                             <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
@@ -2161,7 +2161,7 @@ export default function CampaignsClient() {
                         <CardDescription>Choose how to receive notifications</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { icon: Mail, label: 'Email', active: true },
                             { icon: MessageSquare, label: 'In-App', active: true },
@@ -2346,7 +2346,7 @@ export default function CampaignsClient() {
                         <CardDescription>Manage your campaign data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button
                             variant="outline"
                             className="h-auto py-4 flex flex-col items-center gap-2"
@@ -2469,7 +2469,7 @@ export default function CampaignsClient() {
           <ScrollArea className="h-[60vh]">
             {selectedCampaign && (
               <div className="space-y-6">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{formatNumber(selectedCampaign.stats.sent)}</p>
                     <p className="text-sm text-gray-500">Sent</p>
@@ -2488,7 +2488,7 @@ export default function CampaignsClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Card className="p-4">
                     <h4 className="font-semibold mb-3">Campaign Details</h4>
                     <div className="space-y-2 text-sm">
@@ -2610,7 +2610,7 @@ export default function CampaignsClient() {
             <DialogDescription>Choose a campaign type and enter details</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <button
                 onClick={() => setNewCampaignForm(prev => ({ ...prev, type: 'email' }))}
                 className={`flex flex-col items-center gap-3 p-6 border-2 border-dashed rounded-xl transition-colors group ${newCampaignForm.type === 'email' ? 'border-rose-400 bg-rose-50 dark:bg-rose-900/20' : 'hover:border-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20'}`}
@@ -2644,7 +2644,7 @@ export default function CampaignsClient() {
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Budget</Label>
                 <Input
@@ -2757,7 +2757,7 @@ export default function CampaignsClient() {
           </DialogHeader>
           <div className="space-y-6 py-4">
             {/* Summary Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="p-4 bg-rose-50 dark:bg-rose-900/20 rounded-lg text-center">
                 <div className="text-2xl font-bold text-rose-600">{stats.totalSent.toLocaleString()}</div>
                 <div className="text-sm text-muted-foreground">Emails Sent</div>
@@ -3068,7 +3068,7 @@ export default function CampaignsClient() {
             </div>
             <div>
               <Label>Start From</Label>
-              <div className="grid grid-cols-3 gap-3 mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mt-2">
                 <div className="p-4 border rounded-lg cursor-pointer hover:border-emerald-500 text-center">
                   <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
                   <span className="text-sm">Blank</span>

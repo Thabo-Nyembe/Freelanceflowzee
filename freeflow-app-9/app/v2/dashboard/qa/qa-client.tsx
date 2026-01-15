@@ -965,7 +965,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
           {[
             { label: 'Create Test', icon: Plus, color: 'green', action: () => setShowCreateTest(true) },
             { label: 'Start Run', icon: PlayCircle, color: 'blue', action: () => setShowCreateRun(true) },
@@ -986,7 +986,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         </div>
 
         {/* Test Coverage Summary */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           <Card className="border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <h4 className="text-sm font-medium text-gray-500 mb-3">Test Type Distribution</h4>
@@ -1336,7 +1336,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Plus className="h-4 w-4 mr-2" />Create Run
                 </Button>
               </div>
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
@@ -1346,7 +1346,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </div>
 
             {/* Run Status Cards */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { status: 'Active', count: mockRuns.filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
                 { status: 'Completed', count: mockRuns.filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
@@ -1404,7 +1404,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                           <Progress value={progress} className="h-2" />
 
-                          <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 text-center text-xs">
                             <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
                               <p className="font-bold text-green-600">{run.passedCount}</p>
                               <p className="text-gray-500">Passed</p>
@@ -1507,7 +1507,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Plus className="h-4 w-4 mr-2" />Report Defect
                 </Button>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
@@ -1518,7 +1518,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </div>
 
             {/* Severity Distribution */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { severity: 'Critical', count: mockDefects.filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
                 { severity: 'Major', count: mockDefects.filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
@@ -1595,7 +1595,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </Card>
 
             {/* Defect Insights */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle className="text-sm">Defects by Component</CardTitle></CardHeader>
                 <CardContent>
@@ -1657,7 +1657,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{overallPassRate.toFixed(0)}%</p>
                   <p className="text-xs text-purple-100">Pass Rate</p>
@@ -1686,7 +1686,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </div>
 
             {/* Report Types */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { name: 'Summary', icon: FileText, desc: 'Overall test summary', color: 'blue' },
                 { name: 'Trends', icon: TrendingUp, desc: 'Historical trends', color: 'green' },
@@ -1748,7 +1748,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-sm">Test Coverage</CardTitle>
@@ -1979,7 +1979,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </Card>
 
             {/* Report Insights */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Most Viewed Reports</CardTitle></CardHeader>
                 <CardContent>
@@ -2058,11 +2058,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure your QA testing environment</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Project Name</label><Input defaultValue="FreeFlow QA Suite" className="mt-1" /></div>
                         <div><label className="text-sm font-medium">Default Test Owner</label><Input defaultValue="qa-team@company.com" className="mt-1" /></div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Default Priority</label>
                           <select className="w-full px-4 py-2 border rounded-md mt-1 bg-white dark:bg-gray-800">
                             <option>Medium</option><option>High</option><option>Low</option><option>Critical</option>
@@ -2137,7 +2137,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Automation Settings</CardTitle><CardDescription>Configure automated test execution</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Default Framework</label>
                           <select className="w-full px-4 py-2 border rounded-md mt-1 bg-white dark:bg-gray-800">
                             <option>Selenium</option><option>Cypress</option><option>Playwright</option><option>Puppeteer</option>
@@ -2180,7 +2180,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Configure advanced QA options</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Data Retention (days)</label><Input type="number" defaultValue="365" className="mt-1" /></div>
                         <div><label className="text-sm font-medium">Max Attachments Size (MB)</label><Input type="number" defaultValue="50" className="mt-1" /></div>
                       </div>
@@ -2298,7 +2298,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <p className="text-sm bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">{selectedTestCase.expectedResult}</p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="text-xs text-gray-500">Estimate</p>
                     <p className="font-medium">{selectedTestCase.estimate}</p>
@@ -2402,7 +2402,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <Progress value={(selectedRun.passedCount + selectedRun.failedCount + selectedRun.blockedCount) / selectedRun.totalCount * 100} className="h-3" />
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                     <p className="text-2xl font-bold text-green-600">{selectedRun.passedCount}</p>
                     <p className="text-sm text-gray-500">Passed</p>
@@ -2421,7 +2421,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div>
                     <p className="text-gray-500">Configuration</p>
                     <p className="font-medium">{selectedRun.config}</p>
@@ -2472,7 +2472,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="col-span-2">
                   <Label htmlFor="test_name">Test Name *</Label>
                   <Input
@@ -2761,7 +2761,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label htmlFor="start_date">Start Date</Label>
                   <Input
@@ -2811,7 +2811,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
                   toast.promise(
                     fetch('/api/qa?action=test_coverage_report').then(res => res.json()),
@@ -2879,7 +2879,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </div>
               <div className="border-t pt-4">
                 <Label>Quick Stats</Label>
-                <div className="grid grid-cols-4 gap-2 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 mt-2">
                   <div className="text-center p-2 bg-muted rounded-lg">
                     <p className="text-2xl font-bold text-green-600">{passedTests}</p>
                     <p className="text-xs text-muted-foreground">Passed</p>

@@ -594,7 +594,7 @@ export default function ReportingClient() {
             </Card>
 
             {/* Dashboard Quick Stats */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -851,7 +851,7 @@ export default function ReportingClient() {
             </Card>
 
             {/* Worksheet Stats */}
-            <div className="grid grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-6">
               {[
                 { type: 'bar', count: worksheets.filter(w => w.chart_type === 'bar').length, icon: BarChart3, color: 'indigo' },
                 { type: 'line', count: worksheets.filter(w => w.chart_type === 'line').length, icon: LineChart, color: 'blue' },
@@ -968,7 +968,7 @@ export default function ReportingClient() {
             </Card>
 
             {/* Connection Health */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card className="bg-white dark:bg-gray-800 border-l-4 border-l-green-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -1138,7 +1138,7 @@ export default function ReportingClient() {
             </Card>
 
             {/* Schedule Types Overview */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
               <Card className="bg-white dark:bg-gray-800">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -1694,7 +1694,7 @@ export default function ReportingClient() {
 
                 {/* Mock Dashboard Preview */}
                 <div className="h-96 bg-gray-100 dark:bg-gray-900 rounded-xl p-4">
-                  <div className="grid grid-cols-3 gap-4 h-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 h-full">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
                       <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Revenue</div>
                       <div className="text-3xl font-bold text-gray-900 dark:text-white">$124.5K</div>
@@ -1845,7 +1845,7 @@ export default function ReportingClient() {
               <DialogTitle>Create New Worksheet</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Worksheet Name</label>
                   <input
@@ -1872,7 +1872,7 @@ export default function ReportingClient() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chart Type</label>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6">
                   {chartTypes.map(chart => (
                     <button
                       key={chart.type}
@@ -1922,7 +1922,7 @@ export default function ReportingClient() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Select a data source type to create a new connection
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {DATA_SOURCE_TYPES.map(source => (
                   <button
                     key={source.type}
@@ -1977,7 +1977,7 @@ export default function ReportingClient() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Schedule</label>
                   <select
@@ -2046,7 +2046,7 @@ export default function ReportingClient() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Select a format to export your dashboard data
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <button
                   onClick={() => {
                     toast.success('Exporting as PDF...')

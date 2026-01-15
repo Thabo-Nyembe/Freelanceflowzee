@@ -1280,7 +1280,7 @@ export default function ReleasesClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{stats.totalReleases}</div>
                   <div className="text-sm text-indigo-100">Total</div>
@@ -1309,7 +1309,7 @@ export default function ReleasesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Release', desc: 'Create release', color: 'indigo', onClick: () => setShowCreateDialog(true) },
                 { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
@@ -1606,7 +1606,7 @@ export default function ReleasesClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{deployments.length > 0 ? deployments.length : 156}</div>
                   <div className="text-sm text-green-100">Total Deploys</div>
@@ -1700,7 +1700,7 @@ export default function ReleasesClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{formatNumber(mockStats.totalCommits)}</div>
                   <div className="text-sm text-blue-100">Total Commits</div>
@@ -1776,7 +1776,7 @@ export default function ReleasesClient() {
                   <RotateCcw className="w-4 h-4 mr-2" />Initiate Rollback
                 </Button>
               </div>
-              <div className="grid grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{rollbacks.length > 0 ? rollbacks.length : mockRollbacks.length}</div>
                   <div className="text-sm text-yellow-100">Total</div>
@@ -1900,7 +1900,7 @@ export default function ReleasesClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">24</div>
                   <div className="text-sm text-orange-100">Total Assets</div>
@@ -2006,7 +2006,7 @@ export default function ReleasesClient() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-6 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                   <div className="text-2xl font-bold">{mockStats.successRate}%</div>
                   <div className="text-sm text-purple-100">Success Rate</div>
@@ -2163,7 +2163,7 @@ export default function ReleasesClient() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Project Name</label>
                           <Input defaultValue="My Application" />
@@ -2618,7 +2618,7 @@ export default function ReleasesClient() {
                   {/* Metadata */}
                   <div>
                     <h3 className="font-semibold mb-2">Details</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Tag</span>
                         <code className="font-mono">{selectedRelease.tagName}</code>
@@ -2723,7 +2723,7 @@ export default function ReleasesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="version">Version *</Label>
                 <Input
@@ -2752,7 +2752,7 @@ export default function ReleasesClient() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="release_type">Release Type</Label>
                 <Select
@@ -2789,7 +2789,7 @@ export default function ReleasesClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="git_branch">Git Branch</Label>
                 <Input
@@ -2887,7 +2887,7 @@ export default function ReleasesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_version">Version *</Label>
                 <Input
@@ -2916,7 +2916,7 @@ export default function ReleasesClient() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit_release_type">Release Type</Label>
                 <Select

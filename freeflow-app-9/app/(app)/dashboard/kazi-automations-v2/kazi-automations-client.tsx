@@ -1122,7 +1122,7 @@ export default function KaziAutomationsClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Trigger Type</Label>
                   <Select
@@ -1214,7 +1214,7 @@ export default function KaziAutomationsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
                     <Select
@@ -1346,7 +1346,7 @@ export default function KaziAutomationsClient() {
                 </div>
 
                 {/* Stats display */}
-                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedAutomation.run_count}</p>
                     <p className="text-xs text-gray-500">Total Runs</p>
@@ -1420,7 +1420,7 @@ export default function KaziAutomationsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
                     <Select
@@ -1669,7 +1669,7 @@ export default function KaziAutomationsClient() {
 
             {selectedAutomation && (
               <div className="py-4 space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Name</Label>
                     <p className="font-medium">{selectedAutomation.name}</p>
@@ -1695,7 +1695,7 @@ export default function KaziAutomationsClient() {
                   <p className="text-gray-700 dark:text-gray-300">{selectedAutomation.description || 'No description'}</p>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedAutomation.run_count}</p>
                     <p className="text-xs text-gray-500">Total Runs</p>

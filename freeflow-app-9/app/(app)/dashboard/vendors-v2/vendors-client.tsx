@@ -709,7 +709,7 @@ export default function VendorsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Name *</Label>
                 <Input
@@ -730,7 +730,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
                 <Input
@@ -752,7 +752,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
                 <Select
@@ -802,7 +802,7 @@ export default function VendorsClient() {
                 placeholder="123 Business St"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input
@@ -822,7 +822,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="payment_terms">Payment Terms</Label>
                 <Input
@@ -898,7 +898,7 @@ export default function VendorsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Name *</Label>
                 <Input
@@ -919,7 +919,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-phone">Phone</Label>
                 <Input
@@ -941,7 +941,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-type">Type</Label>
                 <Select
@@ -991,7 +991,7 @@ export default function VendorsClient() {
                 placeholder="123 Business St"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-city">City</Label>
                 <Input
@@ -1011,7 +1011,7 @@ export default function VendorsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-payment_terms">Payment Terms</Label>
                 <Input
@@ -1108,7 +1108,7 @@ export default function VendorsClient() {
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label className="text-muted-foreground">Contact Person</Label>
                       <p className="font-medium">
@@ -1196,7 +1196,7 @@ export default function VendorsClient() {
                 </TabsContent>
 
                 <TabsContent value="business" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <Label className="text-muted-foreground">Total Orders</Label>
                       <p className="text-2xl font-bold">

@@ -1367,7 +1367,7 @@ export default function AiCodeCompletionClient() {
                   <Layers className="w-5 h-5 text-primary" />
                   Languages
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {PROGRAMMING_LANGUAGES.slice(0, 8).map((lang) => (
                     <motion.div
                       key={lang.id}
@@ -1698,7 +1698,7 @@ export default function AiCodeCompletionClient() {
               {/* Settings Summary */}
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-1">Current Configuration</p>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-xs text-muted-foreground">
                   <span>Model: {aiModel}</span>
                   <span>Max Tokens: {maxTokens}</span>
                   <span>Temperature: {temperature}</span>

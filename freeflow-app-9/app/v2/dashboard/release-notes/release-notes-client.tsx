@@ -548,7 +548,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center text-xs border-t pt-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 text-center text-xs border-t pt-3">
           <div>
             <div className="font-semibold text-gray-900">{formatNumber(release.metrics.downloads)}</div>
             <div className="text-gray-500">Downloads</div>
@@ -813,7 +813,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{mockReleases.length}</div>
               <div className="text-orange-100 text-sm">Total Releases</div>
@@ -1926,7 +1926,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <Label className="font-medium">Primary Color</Label>
                           <div className="flex gap-2">
@@ -2128,7 +2128,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="version">Version *</Label>
                 <Input
@@ -2178,7 +2178,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select
@@ -2718,7 +2718,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card>
                 <CardContent className="p-4 text-center">
                   <Download className="w-6 h-6 mx-auto text-blue-500 mb-2" />
@@ -2781,7 +2781,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Top Performing Release</CardTitle>
@@ -2796,7 +2796,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       <div className="text-sm text-gray-500">The AI Revolution Update</div>
                     </div>
                   </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-sm">
                     <div className="p-2 bg-green-50 rounded">
                       <div className="font-semibold text-green-700">125K</div>
                       <div className="text-gray-500">Downloads</div>
@@ -3077,7 +3077,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             </div>
             <div className="space-y-2">
               <Label>Sections to Include</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['Features', 'Improvements', 'Bug Fixes', 'Breaking Changes', 'Known Issues', 'Migration Guide'].map(section => (
                   <div key={section} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                     <Switch defaultChecked={['Features', 'Improvements', 'Bug Fixes'].includes(section)} />

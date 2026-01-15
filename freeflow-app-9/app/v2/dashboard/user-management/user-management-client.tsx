@@ -570,7 +570,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -964,7 +964,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Permissions</label>
-                        <div className="grid grid-cols-2 gap-2 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
                           {['users:read', 'users:write', 'users:delete', 'content:read', 'content:write', 'content:delete', 'analytics:read', 'settings:read', 'settings:write', 'billing:read', 'billing:write'].map(perm => (
                             <label key={perm} className="flex items-center gap-2">
                               <input
@@ -2162,7 +2162,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       <TabsTrigger value="permissions">Permissions</TabsTrigger>
                     </TabsList>
                     <TabsContent value="info" className="space-y-4 pt-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="text-sm text-gray-500">Department</label>
                           <p className="font-medium">{selectedUser.department || '-'}</p>
@@ -2794,7 +2794,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 </div>
                 <div className="space-y-2">
                   <Label>Permissions</Label>
-                  <div className="grid grid-cols-2 gap-2 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
                     {['users:read', 'users:write', 'users:delete', 'content:read', 'content:write', 'content:delete', 'analytics:read', 'settings:read', 'settings:write', 'billing:read', 'billing:write'].map(perm => (
                       <label key={perm} className="flex items-center gap-2">
                         <input

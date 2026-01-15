@@ -1117,7 +1117,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500', action: () => setShowCreateDialog(true) },
                 { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500', action: () => toast.success('AI Animation', { description: 'AI is generating your animation...' }) },
@@ -1479,7 +1479,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500', action: () => setShowAddEffectDialog(true) },
                 { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500', action: () => setShowEffectsLibraryDialog(true) },
@@ -1553,7 +1553,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Play, label: 'Start All', desc: 'Begin rendering', color: 'text-green-500', action: handleStartAllRenders },
                 { icon: Pause, label: 'Pause All', desc: 'Pause queue', color: 'text-amber-500', action: () => toast.info('All renders paused') },
@@ -1669,7 +1669,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500', action: () => setShowAnalyticsOverviewDialog(true) },
                 { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
@@ -1841,7 +1841,7 @@ export default function MotionGraphicsClient({
                         <CardDescription>Configure default settings for new projects</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Resolution</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -1914,7 +1914,7 @@ export default function MotionGraphicsClient({
                         <CardDescription>Configure default output settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Format</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -2315,7 +2315,7 @@ export default function MotionGraphicsClient({
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <Card className="border-0 bg-gray-50 dark:bg-gray-800/50">
                       <CardContent className="p-4 text-center">
                         <p className="text-2xl font-bold">{selectedAnimation.resolution}</p>
@@ -2342,7 +2342,7 @@ export default function MotionGraphicsClient({
                     </Card>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                       <Eye className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                       <p className="text-2xl font-bold">{selectedAnimation.views.toLocaleString()}</p>
@@ -2448,7 +2448,7 @@ export default function MotionGraphicsClient({
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Width</label>
                   <Input
@@ -2466,7 +2466,7 @@ export default function MotionGraphicsClient({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Frame Rate</label>
                   <select
@@ -2533,7 +2533,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Create a new motion graphics project</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { label: 'Blank Project', desc: 'Start from scratch', icon: Plus },
                   { label: 'From Template', desc: 'Use a template', icon: LayoutTemplate },
@@ -2653,7 +2653,7 @@ export default function MotionGraphicsClient({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input placeholder="Search assets..." className="pl-9" />
               </div>
-              <div className="grid grid-cols-4 gap-2 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 mb-4">
                 {['All', 'Images', 'Videos', 'Audio', 'Shapes', 'Text'].map((filter) => (
                   <Button
                     key={filter}
@@ -2667,7 +2667,7 @@ export default function MotionGraphicsClient({
                 ))}
               </div>
               <ScrollArea className="h-64 border rounded-lg p-3">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                     <div
                       key={i}
@@ -2722,7 +2722,7 @@ export default function MotionGraphicsClient({
                 ))}
               </div>
               <ScrollArea className="h-72">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {[
                     { name: 'Modern Intro', category: 'Intros', color: 'from-purple-500 to-pink-500' },
                     { name: 'Minimal Titles', category: 'Titles', color: 'from-blue-500 to-cyan-500' },
@@ -2776,7 +2776,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Choose a layer type to add to your composition</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { type: 'video', icon: FileVideo, label: 'Video', desc: 'Import video file' },
                   { type: 'image', icon: Image, label: 'Image', desc: 'Import image file' },
@@ -2826,7 +2826,7 @@ export default function MotionGraphicsClient({
                 <Input placeholder="Search effects..." className="pl-9" />
               </div>
               <ScrollArea className="h-64">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   {[
                     { name: 'Glow', category: 'Style' },
                     { name: 'Drop Shadow', category: 'Style' },
@@ -3160,7 +3160,7 @@ export default function MotionGraphicsClient({
                 <label className="block text-sm font-medium mb-2">Description</label>
                 <Input defaultValue="Dynamic 3D text reveal with particle effects" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Width</label>
                   <Input type="number" defaultValue={1920} />
@@ -3170,7 +3170,7 @@ export default function MotionGraphicsClient({
                   <Input type="number" defaultValue={1080} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Frame Rate</label>
                   <select className="w-full px-3 py-2 border rounded-lg">
@@ -3225,7 +3225,7 @@ export default function MotionGraphicsClient({
             </DialogHeader>
             <div className="py-4">
               <Input placeholder="Search effects..." className="mb-4" />
-              <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-96 overflow-y-auto">
                 {['Glow', 'Blur', 'Shadow', 'Reflection', 'Distortion', 'Noise', 'Vignette', 'Color Correction', 'Bloom'].map(effect => (
                   <Card key={effect} className="p-4 cursor-pointer hover:border-purple-500 transition-colors" onClick={() => {
                     toast.success(`Applied "${effect}" effect`)
@@ -3251,7 +3251,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Apply pre-built animation presets</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-h-96 overflow-y-auto">
                 {['Slide In', 'Fade In', 'Bounce', 'Elastic', 'Zoom', 'Rotate', 'Flip', 'Swing'].map(preset => (
                   <Card key={preset} className="p-4 cursor-pointer hover:border-blue-500 transition-colors" onClick={() => {
                     toast.success(`Applied "${preset}" motion preset`)
@@ -3278,7 +3278,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Typography animation styles</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-h-96 overflow-y-auto">
                 {['Typewriter', 'Letter by Letter', 'Word Reveal', 'Glitch Text', 'Neon', 'Handwritten', '3D Extrude', 'Kinetic'].map(preset => (
                   <Card key={preset} className="p-4 cursor-pointer hover:border-orange-500 transition-colors" onClick={() => {
                     toast.success(`Applied "${preset}" text preset`)
@@ -3305,7 +3305,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Animated shape templates</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-96 overflow-y-auto">
                 {['Circle Expand', 'Rectangle Wipe', 'Morphing Shapes', 'Polygon Spin', 'Star Burst', 'Wave Pattern', 'Spiral', 'Grid', 'Particles'].map(shape => (
                   <Card key={shape} className="p-4 cursor-pointer hover:border-pink-500 transition-colors" onClick={() => {
                     toast.success(`Applied "${shape}" shape preset`)
@@ -3451,7 +3451,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Key metrics for your animations</DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4">
                   <p className="text-sm text-gray-500">Total Views</p>
                   <p className="text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
@@ -3491,7 +3491,7 @@ export default function MotionGraphicsClient({
               <div className="h-48 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg flex items-center justify-center">
                 <p className="text-gray-500">Trend chart visualization</p>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-1" />
                   <p className="text-sm font-medium">Views Up</p>
@@ -3550,7 +3550,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Likes, shares, and interactions</DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4 text-center">
                   <Heart className="w-8 h-8 text-pink-500 mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.totalLikes.toLocaleString()}</p>
@@ -3609,7 +3609,7 @@ export default function MotionGraphicsClient({
               <DialogDescription>Render times and performance data</DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card className="p-4 text-center">
                   <p className="text-3xl font-bold text-amber-600">4.2s</p>
                   <p className="text-sm text-gray-500">Avg Render Time</p>

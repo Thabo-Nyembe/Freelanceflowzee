@@ -2132,7 +2132,7 @@ export default function HelpCenterClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <Eye className="w-5 h-5 mx-auto mb-1 text-blue-500" />
                     <p className="text-2xl font-bold">{formatNumber(selectedArticle.views)}</p>
@@ -2659,7 +2659,7 @@ export default function HelpCenterClient() {
           </DialogHeader>
           <div className="border rounded-lg p-4 min-h-[300px]">
             <p className="text-center text-muted-foreground">Drag articles between categories to reorganize</p>
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
               {categories.slice(0, 4).map(cat => (
                 <div key={cat.id} className="border rounded p-3">
                   <p className="font-medium mb-2">{cat.icon} {cat.name}</p>
@@ -3003,7 +3003,7 @@ export default function HelpCenterClient() {
             <DialogTitle>Reports</DialogTitle>
             <DialogDescription>Generate and view reports</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card className="cursor-pointer hover:border-primary">
               <CardContent className="p-4">
                 <BarChart3 className="w-8 h-8 mb-2 text-blue-500" />
@@ -3103,7 +3103,7 @@ export default function HelpCenterClient() {
                 <Label>Content</Label>
                 <Textarea defaultValue={selectedArticle.content} className="min-h-[200px]" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Status</Label>
                   <Select defaultValue={selectedArticle.status}>

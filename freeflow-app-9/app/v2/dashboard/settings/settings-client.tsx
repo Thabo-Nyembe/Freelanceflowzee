@@ -1375,7 +1375,7 @@ export default function SettingsClient() {
             <CardContent>
               <div className="space-y-6">
                 {/* Table Header */}
-                <div className="grid grid-cols-5 gap-4 pb-4 border-b">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 pb-4 border-b">
                   <div className="font-medium">Category</div>
                   <div className="text-center font-medium flex items-center justify-center gap-1">
                     <Mail className="h-4 w-4" /> Email
@@ -1393,7 +1393,7 @@ export default function SettingsClient() {
 
                 {/* Notification Rows */}
                 {notifications.map((notif) => (
-                  <div key={notif.id} className="grid grid-cols-5 gap-4 items-center py-2">
+                  <div key={notif.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 items-center py-2">
                     <div className="font-medium">{notif.category}</div>
                     <div className="flex justify-center">
                       <Switch
@@ -1446,7 +1446,7 @@ export default function SettingsClient() {
                 <CardDescription>Customize the look of your interface</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <button
                     onClick={() => handleSaveTheme('light')}
                     className={`p-4 rounded-lg border-2 transition-all ${

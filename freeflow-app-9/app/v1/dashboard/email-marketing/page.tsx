@@ -823,7 +823,7 @@ export default function EmailMarketingPage() {
               </div>
 
               <div className="border-t pt-4">
-                <div className="grid grid-cols-3 gap-3 text-center text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 text-center text-sm">
                   <div>
                     <div className="text-lg font-bold text-blue-500">{subscriber.engagement.emailsSent}</div>
                     <div className="text-xs text-muted-foreground">Sent</div>
@@ -1200,7 +1200,7 @@ export default function EmailMarketingPage() {
             </div>
 
             {/* Name Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium">First Name</label>
                 <input

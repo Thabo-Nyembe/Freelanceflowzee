@@ -1452,7 +1452,7 @@ export default function StockClient() {
                       <Progress value={warehouse.utilization} className="h-2" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Products</p>
                         <p className="font-semibold">{warehouse.productCount.toLocaleString()}</p>
@@ -1566,7 +1566,7 @@ export default function StockClient() {
                       <Progress value={(count.productsCounted / count.totalProducts) * 100} className="h-2" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Type</p>
                         <p className="font-semibold capitalize">{count.type}</p>
@@ -1953,7 +1953,7 @@ export default function StockClient() {
 
               <div className="space-y-6">
                 {/* Product Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">Product Details</h4>
                     <div className="space-y-2 text-sm">
@@ -1999,7 +1999,7 @@ export default function StockClient() {
                 </div>
 
                 {/* Stock Levels */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold">{selectedProduct.quantity.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">Total Qty</p>
@@ -2191,7 +2191,7 @@ export default function StockClient() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium mb-2 block">From Warehouse *</label>
                 <select
@@ -2403,7 +2403,7 @@ export default function StockClient() {
             <DialogDescription>Enter the details for the new product</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">SKU *</Label>
                 <Input placeholder="e.g., ELEC-001" />
@@ -2428,7 +2428,7 @@ export default function StockClient() {
               <Label className="text-sm font-medium mb-2 block">Description</Label>
               <Textarea placeholder="Product description..." rows={3} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Unit Cost *</Label>
                 <Input type="number" placeholder="0.00" step="0.01" />
@@ -2481,7 +2481,7 @@ export default function StockClient() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Quantity Received *</Label>
                 <Input type="number" placeholder="0" min="1" />
@@ -2728,7 +2728,7 @@ export default function StockClient() {
           </DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">SKU</Label>
                   <Input defaultValue={selectedProduct.sku} />
@@ -2748,7 +2748,7 @@ export default function StockClient() {
                 <Label className="text-sm font-medium mb-2 block">Product Name</Label>
                 <Input defaultValue={selectedProduct.name} />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Unit Cost</Label>
                   <Input type="number" defaultValue={selectedProduct.unitCost} step="0.01" />
@@ -2836,7 +2836,7 @@ export default function StockClient() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Quantity to Ship *</Label>
                 <Input type="number" placeholder="0" min="1" />
@@ -2892,7 +2892,7 @@ export default function StockClient() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Return Quantity *</Label>
                 <Input type="number" placeholder="0" min="1" />
@@ -2941,7 +2941,7 @@ export default function StockClient() {
             </div>
             <div>
               <Label className="text-sm font-medium mb-2 block">Date Range</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <Input type="date" />
                 <Input type="date" />
               </div>
@@ -3025,7 +3025,7 @@ export default function StockClient() {
             <DialogDescription>Create a new warehouse or storage location</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Location Code *</Label>
                 <Input placeholder="e.g., WH-004" />
@@ -3048,7 +3048,7 @@ export default function StockClient() {
               <Label className="text-sm font-medium mb-2 block">Address</Label>
               <Textarea placeholder="Full address..." rows={2} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium mb-2 block">Capacity (units)</Label>
                 <Input type="number" placeholder="0" />
@@ -3302,7 +3302,7 @@ export default function StockClient() {
           </DialogHeader>
           {selectedWarehouse && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">Code</p>
                   <p className="font-medium">{selectedWarehouse.code}</p>
@@ -3320,7 +3320,7 @@ export default function StockClient() {
                   <p className="font-medium">{selectedWarehouse.manager}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="text-center p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
                   <p className="text-2xl font-bold text-indigo-600">{selectedWarehouse.productCount}</p>
                   <p className="text-xs text-muted-foreground">Products</p>
@@ -3932,7 +3932,7 @@ export default function StockClient() {
             </div>
             <div>
               <Label className="text-sm font-medium mb-2 block">Quiet Hours</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">From</p>
                   <Input type="time" defaultValue="22:00" />
@@ -4088,7 +4088,7 @@ export default function StockClient() {
             <DialogDescription>Key inventory metrics at a glance</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg text-center">
                 <p className="text-2xl font-bold text-cyan-600">{formatNumber(analytics.totalValue)}</p>
                 <p className="text-xs text-muted-foreground">Total Inventory Value</p>
@@ -4136,7 +4136,7 @@ export default function StockClient() {
             <div className="h-40 bg-muted/50 rounded-lg flex items-center justify-center">
               <p className="text-muted-foreground text-sm">Trend chart visualization</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
               <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
                 <p className="text-green-600 font-medium">+12.5%</p>
                 <p className="text-xs text-muted-foreground">Inbound Growth</p>
@@ -4506,7 +4506,7 @@ export default function StockClient() {
           </DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">SKU</Label>
                   <Input defaultValue={selectedProduct.sku} />
@@ -4526,7 +4526,7 @@ export default function StockClient() {
                 <Label className="text-sm font-medium mb-2 block">Product Name</Label>
                 <Input defaultValue={selectedProduct.name} />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Unit Cost</Label>
                   <Input type="number" defaultValue={selectedProduct.unitCost} step="0.01" />
@@ -4616,7 +4616,7 @@ export default function StockClient() {
                 <p className="font-medium">{selectedProduct.name}</p>
                 <p className="text-sm text-muted-foreground">Available: {selectedProduct.availableQuantity}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label className="text-sm font-medium mb-2 block">From</Label>
                   <select className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-sm">

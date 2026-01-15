@@ -2460,7 +2460,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
           {selectedVuln && (
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-6 py-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">CVSS Score</div>
                     <div className={`text-2xl font-bold ${selectedVuln.cvssScore >= 9 ? 'text-red-600' : selectedVuln.cvssScore >= 7 ? 'text-orange-600' : selectedVuln.cvssScore >= 4 ? 'text-yellow-600' : 'text-blue-600'}`}>
@@ -2628,7 +2628,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-gray-900 dark:text-white">Type</Label>
                 <Select
@@ -2725,7 +2725,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-gray-900 dark:text-white">Severity</Label>
                 <Select

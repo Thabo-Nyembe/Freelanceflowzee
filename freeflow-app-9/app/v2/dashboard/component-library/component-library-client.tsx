@@ -467,7 +467,7 @@ export default function ComponentLibraryClient() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl p-8 text-white">
@@ -1856,7 +1856,7 @@ export default function App() {
                       </div>
                     </div>
                     <p className="text-gray-600">{selectedComponent.description}</p>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <Card><CardContent className="p-4 text-center"><Download className="h-5 w-5 mx-auto text-blue-500 mb-1" /><div className="font-bold">{(selectedComponent.metrics.downloads / 1000).toFixed(0)}K</div><div className="text-xs text-gray-500">Downloads</div></CardContent></Card>
                       <Card><CardContent className="p-4 text-center"><Heart className="h-5 w-5 mx-auto text-red-500 mb-1" /><div className="font-bold">{selectedComponent.metrics.stars}</div><div className="text-xs text-gray-500">Stars</div></CardContent></Card>
                       <Card><CardContent className="p-4 text-center"><Box className="h-5 w-5 mx-auto text-purple-500 mb-1" /><div className="font-bold">{selectedComponent.metrics.bundleSize}</div><div className="text-xs text-gray-500">Bundle</div></CardContent></Card>
@@ -1990,7 +1990,7 @@ export default function App() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input placeholder="Search components..." className="pl-10" />
               </div>
-              <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 max-h-[300px] overflow-y-auto">
                 {categories.map(cat => (
                   <div key={cat.id} className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all">
                     <div className="flex items-center gap-3">
@@ -2085,7 +2085,7 @@ export default function App() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all" onClick={() => {
                   setShowDocsDialog(false)
                   setActiveTab('docs')

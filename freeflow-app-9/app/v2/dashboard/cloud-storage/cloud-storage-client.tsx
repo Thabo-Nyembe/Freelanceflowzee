@@ -1814,7 +1814,7 @@ export default function CloudStorageClient() {
             </div>
 
             {/* Trash Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: RotateCcw, label: 'Restore All', desc: 'Recover all files', color: 'text-green-500', onClick: handleRestoreAll },
                 { icon: Trash2, label: 'Empty Trash', desc: 'Delete permanently', color: 'text-red-500', onClick: handleEmptyTrash },
@@ -2656,7 +2656,7 @@ export default function CloudStorageClient() {
             {/* Report Type Selection */}
             <div className="space-y-3">
               <Label className="text-sm font-medium">Report Type</Label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {[
                   { value: 'summary', label: 'Summary', desc: 'Quick overview' },
                   { value: 'detailed', label: 'Detailed', desc: 'Full file list' },
@@ -2698,7 +2698,7 @@ export default function CloudStorageClient() {
             {/* Report Preview */}
             <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 space-y-3">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Report Preview</p>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm">
                 <div>
                   <p className="text-gray-500">Storage Used</p>
                   <p className="font-semibold">{formatSize(mockQuota.used)}</p>

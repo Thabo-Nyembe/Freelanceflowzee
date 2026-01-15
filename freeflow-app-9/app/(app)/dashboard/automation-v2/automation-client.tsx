@@ -499,7 +499,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1688,7 +1688,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
                         <div className="space-y-2">
                           <Label>Events to Send</Label>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-2">
                             <div className="flex items-center gap-2">
                               <Switch defaultChecked />
                               <Label className="font-normal">Execution Started</Label>
@@ -2301,7 +2301,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <Card
                   className="p-4 cursor-pointer hover:border-orange-500 transition-colors"
                   onClick={() => {
@@ -2371,7 +2371,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </DialogHeader>
 
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {TEMPLATES.slice(0, 6).map(template => (
                   <Card
                     key={template.id}
@@ -2572,7 +2572,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
               <div className="space-y-2">
                 <h4 className="font-medium text-sm text-gray-600">Available to Connect</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {INTEGRATIONS.filter(i => !i.isConnected).slice(0, 4).map(integration => (
                     <Card
                       key={integration.id}

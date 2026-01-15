@@ -1277,7 +1277,7 @@ export default function KaziWorkflowsClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Trigger Type</Label>
                   <Select
@@ -1385,7 +1385,7 @@ export default function KaziWorkflowsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
                     <Select
@@ -1852,7 +1852,7 @@ export default function KaziWorkflowsClient() {
 
             {selectedExecution && (
               <div className="py-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                     <p className="text-xs text-gray-500 mb-1">Status</p>
                     <Badge className={executionStatusColors[selectedExecution.status]}>
@@ -1993,7 +1993,7 @@ export default function KaziWorkflowsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
                     <Select
@@ -2056,7 +2056,7 @@ export default function KaziWorkflowsClient() {
                 {selectedWorkflow.trigger_type === 'schedule' && (
                   <div className="space-y-2">
                     <Label>Schedule</Label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <Select defaultValue="daily">
                         <SelectTrigger>
                           <SelectValue placeholder="Frequency" />
@@ -2140,7 +2140,7 @@ export default function KaziWorkflowsClient() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedWorkflow.run_count}</p>
                     <p className="text-xs text-gray-500">Total Runs</p>

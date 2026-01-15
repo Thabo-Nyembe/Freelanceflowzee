@@ -859,7 +859,7 @@ export default function LearningClient() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Hours Learned', value: stats.totalLearningHours.toFixed(1), icon: Clock, change: '+4.2 this week' },
               { label: 'Completed', value: stats.coursesCompleted, icon: CheckCircle2, change: '+2 this month' },
@@ -1241,7 +1241,7 @@ export default function LearningClient() {
                     <Trophy className="w-5 h-5 text-amber-500" />
                     Your Badges
                   </h3>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                     {learningPaths.flatMap(p => p.milestones).filter(m => m.unlocked).map(m => (
                       <div
                         key={m.id}
@@ -1613,7 +1613,7 @@ export default function LearningClient() {
                         <CardDescription>Configure your learning experience</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Language</Label>
                             <Input defaultValue="English" className="mt-1" />
@@ -1703,7 +1703,7 @@ export default function LearningClient() {
                         <CardDescription>Set and track your learning objectives</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Weekly Hours Goal</Label>
                             <Input type="number" defaultValue="5" className="mt-1" />
@@ -2291,7 +2291,7 @@ export default function LearningClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Level</Label>
                 <Select value={newPathForm.level} onValueChange={(value: any) => setNewPathForm(prev => ({ ...prev, level: value }))}>

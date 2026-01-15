@@ -620,7 +620,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   // In demo mode, continue with empty documents instead of showing error
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
@@ -658,7 +658,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       <DialogTitle>Create New Document</DialogTitle>
                       <DialogDescription>Choose a document type to get started</DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-2 gap-3 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 py-4">
                       {[
                         { icon: <FileText className="h-6 w-6" />, label: 'Document', desc: 'Word processor', color: 'blue', type: 'document' as const },
                         { icon: <FileSpreadsheet className="h-6 w-6" />, label: 'Spreadsheet', desc: 'Data & calculations', color: 'green', type: 'spreadsheet' as const },
@@ -1827,7 +1827,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </div>
                           <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <p className="text-sm text-gray-500">Documents</p>
                             <p className="text-lg font-semibold text-gray-900 dark:text-white">4.2 GB</p>
@@ -2365,7 +2365,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     <TabsTrigger value="sharing">Sharing</TabsTrigger>
                   </TabsList>
                   <TabsContent value="details" className="mt-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-sm text-gray-500">Status</p>
                         <Badge className={`mt-1 ${getStatusColor(selectedDocument.status)}`}>{selectedDocument.status}</Badge>
@@ -3200,7 +3200,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {mockTemplates.filter(t => t.isPremium).map(template => (
                   <div key={template.id} className="p-4 border rounded-lg hover:border-amber-500 cursor-pointer transition-colors">
                     <span className="text-3xl">{template.icon}</span>
@@ -4153,7 +4153,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <li className="flex items-center gap-2"><Star className="h-4 w-4" /> Advanced analytics</li>
                 </ul>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <Button variant="outline" className="h-12" onClick={() => {
                   setSelectedPlan('monthly')
                   setShowCheckoutDialog(true)
@@ -4307,7 +4307,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <Label className="text-sm font-medium">Card Number</Label>
                   <Input placeholder="4242 4242 4242 4242" className="mt-1" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div>
                     <Label className="text-sm font-medium">Expiry</Label>
                     <Input placeholder="MM/YY" className="mt-1" />

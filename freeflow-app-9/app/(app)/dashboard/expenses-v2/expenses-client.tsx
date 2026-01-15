@@ -912,7 +912,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Total Expenses', value: `$${(stats.totalExpenses / 1000).toFixed(1)}K`, icon: DollarSign, trend: '+12.5%' },
               { label: 'Pending Approval', value: `$${(stats.pendingApproval / 1000).toFixed(1)}K`, icon: Clock, count: stats.pendingCount },
@@ -1172,7 +1172,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Receipts Tab */}
           <TabsContent value="receipts">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -1193,7 +1193,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
                   <div className="mt-6">
                     <h4 className="font-medium mb-4">Recent Uploads</h4>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       {[1, 2, 3, 4].map(i => (
                         <div key={i} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
                           <FileText className="h-8 w-8 text-gray-400" />
@@ -1220,7 +1220,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Mileage Tab */}
           <TabsContent value="mileage">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1292,7 +1292,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Per Diem Tab */}
           <TabsContent value="per-diem">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2">
                 <Card>
                   <CardHeader>
@@ -1319,7 +1319,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                           </div>
                           <Badge className={getStatusColor(pd.status)}>{pd.status}</Badge>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm">
                           <div>
                             <span className="text-gray-500">Daily Rate</span>
                             <p className="font-medium">${pd.dailyRate}</p>
@@ -1368,7 +1368,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Monthly Spending Trend</CardTitle>
@@ -1423,7 +1423,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <CardTitle>Processing Metrics</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 rounded-lg text-center">
                       <p className="text-3xl font-bold text-purple-600">2.3</p>
                       <p className="text-sm text-gray-500">Avg. Days to Approve</p>
@@ -1448,7 +1448,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
           {/* Policies Tab */}
           <TabsContent value="policies">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {policies.map(policy => (
                 <Card key={policy.id}>
                   <CardContent className="pt-6">
@@ -2574,7 +2574,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 onChange={(e) => setMileageForm(prev => ({ ...prev, date: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">Origin</label>
                 <Input
@@ -2651,7 +2651,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 onChange={(e) => setPerDiemForm(prev => ({ ...prev, location: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">Start Date</label>
                 <Input

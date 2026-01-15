@@ -848,7 +848,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-6 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-6">
                     {['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => {
                       const revenue = [8500, 9200, 10100, 11500, 12800, stats.mrr * 1.1][idx]
                       const max = 15000
@@ -2378,7 +2378,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                 onChange={(e) => setNewCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Type</label>
                 <select
@@ -2464,7 +2464,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                 onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, clientName: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (USD) *</label>
                 <Input
@@ -2693,7 +2693,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </div>
             <div>
               <Label className="text-sm font-medium">Events to Listen</Label>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['invoice.paid', 'invoice.payment_failed', 'subscription.created', 'subscription.updated', 'subscription.deleted', 'customer.created'].map(event => (
                   <label key={event} className="flex items-center gap-2 text-sm">
                     <input type="checkbox" className="rounded" defaultChecked={event.includes('invoice')} />
@@ -2738,7 +2738,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
               <Label className="text-sm font-medium">Tax Name *</Label>
               <Input placeholder="e.g., State Sales Tax" className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium">Percentage *</Label>
                 <Input type="number" placeholder="8.25" className="mt-1" />
@@ -3066,7 +3066,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </div>
             <div>
               <Label className="text-sm font-medium">Events to Listen</Label>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['invoice.paid', 'invoice.payment_failed', 'subscription.created', 'subscription.updated', 'subscription.deleted', 'customer.created'].map(event => (
                   <label key={event} className="flex items-center gap-2 text-sm">
                     <input
@@ -3142,7 +3142,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                 onChange={(e) => setEditTaxRateForm(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium">Percentage *</Label>
                 <Input
@@ -3321,7 +3321,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="text-sm font-medium">Start Date</Label>
                 <Input

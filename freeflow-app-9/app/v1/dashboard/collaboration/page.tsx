@@ -1424,7 +1424,7 @@ export default function CollaborationPage() {
                       <UserPlus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                     {['Sarah A.', 'Mike C.', 'Jessica D.', 'Robert K.', 'Emily M.', 'David L.', 'Lisa W.', 'Tom H.'].map((name, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-1">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
@@ -1455,7 +1455,7 @@ export default function CollaborationPage() {
             <CardContent>
               <div className="space-y-6">
                 {/* Team stats */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <LiquidGlassCard variant="gradient" hoverEffect={true}>
                     <div className="pt-6 pb-6">
                       <div className="text-center">
@@ -1857,7 +1857,7 @@ export default function CollaborationPage() {
                             <Badge variant="default" className="text-xs">Active</Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-3">Collaborative workspace for Q1 marketing initiatives</p>
-                          <div className="grid grid-cols-4 gap-4 mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-3">
                             <div>
                               <p className="text-xs text-gray-500">Collaborators</p>
                               <p className="font-semibold">8 members</p>
@@ -1921,7 +1921,7 @@ export default function CollaborationPage() {
                             <Badge variant="default" className="text-xs">Active</Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-3">New feature development and testing workspace</p>
-                          <div className="grid grid-cols-4 gap-4 mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-3">
                             <div>
                               <p className="text-xs text-gray-500">Collaborators</p>
                               <p className="font-semibold">12 members</p>
@@ -1985,7 +1985,7 @@ export default function CollaborationPage() {
                             <Badge variant="secondary" className="text-xs">Active</Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-3">UI/UX design system components and guidelines</p>
-                          <div className="grid grid-cols-4 gap-4 mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-3">
                             <div>
                               <p className="text-xs text-gray-500">Collaborators</p>
                               <p className="font-semibold">6 members</p>
@@ -2194,7 +2194,7 @@ export default function CollaborationPage() {
                     <h3 className="font-semibold">Meeting Controls</h3>
                     <Badge variant="default" className="text-xs">Live</Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                     <Button
                       data-testid="share-screen-btn"
                       size="sm"
@@ -2387,7 +2387,7 @@ export default function CollaborationPage() {
                       <Image className="h-5 w-5 text-blue-600" />
                       Supported Media Types
                     </h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                       <div className="p-4 border-2 rounded-lg text-center hover:bg-blue-50 transition-colors">
                         <Image className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                         <p className="text-sm font-medium">Images</p>
@@ -2463,7 +2463,7 @@ export default function CollaborationPage() {
                 {/* Example use cases */}
                 <div className="space-y-3">
                   <h3 className="font-semibold">Example Use Cases</h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <div className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                       <Image className="h-6 w-6 mb-2 text-blue-600" />
                       <p className="font-medium text-sm">Design Review</p>
@@ -2899,7 +2899,7 @@ export default function CollaborationPage() {
                 {/* Media gallery */}
                 <div className="space-y-3">
                   <h3 className="font-semibold">Recent Media</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {/* Media item 1 - Image */}
                     <Card>
                       <CardContent className="pt-6">
@@ -3185,7 +3185,7 @@ export default function CollaborationPage() {
                 </div>
 
                 {/* Media stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-blue-50 rounded-lg text-center">
                     <p className="text-2xl font-bold text-blue-600">156</p>
                     <p className="text-sm text-gray-600">Total Files</p>
@@ -3344,7 +3344,7 @@ export default function CollaborationPage() {
                 {/* Templates */}
                 <div className="space-y-3">
                   <h3 className="font-semibold">Templates</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                       <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 rounded mb-2"></div>
                       <p className="font-medium text-sm">Wireframe</p>
@@ -3429,7 +3429,7 @@ export default function CollaborationPage() {
                     <Users className="h-5 w-5 text-blue-600" />
                     Team Performance
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <Card>
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
@@ -3499,7 +3499,7 @@ export default function CollaborationPage() {
                     <Video className="h-5 w-5 text-green-600" />
                     Meeting Statistics
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <Card>
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
@@ -3569,7 +3569,7 @@ export default function CollaborationPage() {
                     <MessageCircle className="h-5 w-5 text-purple-600" />
                     Communication Insights
                   </h3>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <Card className="col-span-2">
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
@@ -3642,7 +3642,7 @@ export default function CollaborationPage() {
                     <Zap className="h-5 w-5 text-orange-600" />
                     Collaboration Metrics
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <Card>
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
@@ -3891,7 +3891,7 @@ export default function CollaborationPage() {
                 Documents
               </Button>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {mediaItems.map((item) => (
                 <div
                   key={item.id}
@@ -4079,7 +4079,7 @@ export default function CollaborationPage() {
             </div>
             <div className="space-y-2">
               <Label>Visibility</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 <Button
                   type="button"
                   variant={newWorkspaceType === 'private' ? 'default' : 'outline'}
@@ -4357,7 +4357,7 @@ export default function CollaborationPage() {
                 onChange={(e) => setMeetingTitle(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="meeting-time">Time</Label>
                 <Input

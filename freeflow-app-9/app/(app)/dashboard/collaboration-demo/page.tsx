@@ -634,7 +634,7 @@ Try moving your cursor around to see it synchronized across all connected users!
                       </div>
 
                       {/* Features list */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <h4 className="font-medium mb-2 flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-green-600" />

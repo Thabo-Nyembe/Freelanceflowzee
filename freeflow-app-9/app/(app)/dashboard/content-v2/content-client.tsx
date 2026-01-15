@@ -1015,7 +1015,7 @@ export default function ContentClient() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1538,7 +1538,7 @@ export default function ContentClient() {
                         <CardDescription>General settings for your content space</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Space Name</Label>
                             <Input defaultValue="Production Content" className="mt-1" />
@@ -1552,7 +1552,7 @@ export default function ContentClient() {
                           <Label>Description</Label>
                           <Input defaultValue="Main production content management space" className="mt-1" />
                         </div>
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Content Entries</p>
                             <p className="text-2xl font-bold">{stats.totalEntries}</p>
@@ -1575,7 +1575,7 @@ export default function ContentClient() {
                         <CardDescription>Backup and migrate content</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleExportContent}>
                             <Download className="w-5 h-5" />
                             <span>Export Content</span>
@@ -1685,7 +1685,7 @@ export default function ContentClient() {
             <DialogTitle>Create New Content</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Title *</Label>
                 <Input
@@ -1705,7 +1705,7 @@ export default function ContentClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Content Type</Label>
                 <Select
@@ -1757,7 +1757,7 @@ export default function ContentClient() {
                 rows={6}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Category</Label>
                 <Input
@@ -1811,7 +1811,7 @@ export default function ContentClient() {
             <DialogTitle>Edit Content</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Title *</Label>
                 <Input
@@ -1831,7 +1831,7 @@ export default function ContentClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Content Type</Label>
                 <Select
@@ -1885,7 +1885,7 @@ export default function ContentClient() {
                 rows={6}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Category</Label>
                 <Input

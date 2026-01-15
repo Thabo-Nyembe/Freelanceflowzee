@@ -1647,7 +1647,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View</Label>
                             <Select defaultValue="grid">
@@ -1708,7 +1708,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Language</Label>
                             <Select defaultValue="en">
@@ -1794,7 +1794,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Playback Speed</Label>
                             <Select defaultValue="1">
@@ -1868,7 +1868,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Completion Threshold</Label>
                             <Select defaultValue="90">
@@ -1923,7 +1923,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Quiz Attempts</Label>
                             <Select defaultValue="3">
@@ -2171,7 +2171,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             </Button>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="text-2xl font-bold">8,234</div>
                             <div className="text-sm text-gray-500">API Calls (30 days)</div>
@@ -2246,7 +2246,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Course Completion Points</Label>
                             <Select defaultValue="100">
@@ -2293,7 +2293,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Minimum Daily Activity</Label>
                             <Select defaultValue="5">
@@ -2383,7 +2383,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{mockStats.enrolledCourses}</div>
                             <div className="text-sm text-gray-500">Enrollments</div>
@@ -2651,7 +2651,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <DialogDescription>Add a new training course to the learning platform</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="course-title">Course Title *</Label>
                   <Input
@@ -2691,7 +2691,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="course-difficulty">Difficulty</Label>
                   <Select
@@ -2788,7 +2788,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <DialogDescription>Update the course details</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-course-title">Course Title *</Label>
                   <Input
@@ -2828,7 +2828,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-course-difficulty">Difficulty</Label>
                   <Select
@@ -3601,7 +3601,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   </div>
                   <Progress value={selectedEnrollment.progress} className="h-2" />
                 </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="text-gray-500">Time Spent</div>
                     <div className="font-medium">{selectedEnrollment.timeSpent}</div>

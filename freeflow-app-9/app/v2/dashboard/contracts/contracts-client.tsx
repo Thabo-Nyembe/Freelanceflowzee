@@ -704,7 +704,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                     </div>
                     <Progress value={stats.completionRate} className="h-2" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.avgCompletionTime}</div>
                       <p className="text-xs text-gray-500">Avg. Time to Sign</p>
@@ -779,7 +779,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-green-600">2.4h</div>
                       <p className="text-xs text-gray-500">Average Time to First View</p>
@@ -1393,7 +1393,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <CardDescription>General account configuration</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Organization Name</Label>
                             <Input defaultValue="Acme Corp Legal" className="mt-1" />
@@ -1410,7 +1410,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Total Envelopes</p>
                             <p className="text-2xl font-bold">2,456</p>
@@ -1433,7 +1433,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <CardDescription>Manage team members</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 border rounded-lg text-center">
                             <p className="text-2xl font-bold text-purple-600">8</p>
                             <p className="text-sm text-gray-500">Admins</p>
@@ -1653,7 +1653,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <CardDescription>Security standards</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                           <div className="flex items-center gap-2">
                             <CheckCircle className="w-5 h-5 text-green-600" />
                             <span>256-bit AES Encryption</span>
@@ -1931,7 +1931,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <CardDescription>Export and retention</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowExportDataDialog(true)}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
@@ -2079,7 +2079,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => {
                     toast.success('Sending envelope', {
                       description: `"${selectedEnvelope?.name}" will be sent to recipients`
@@ -2110,7 +2110,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div className="space-y-4">
                     <h4 className="font-semibold text-gray-900 dark:text-white">Envelope Details</h4>
                     <div className="space-y-3">
@@ -2274,7 +2274,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <button
                 onClick={() => handleCreateContract({ contract_type: 'service', title: 'New Service Agreement' })}
                 disabled={mutating}
@@ -2304,7 +2304,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <button
                 onClick={() => handleCreateContract({ contract_type: 'partnership', title: 'New Partnership Agreement' })}
                 disabled={mutating}

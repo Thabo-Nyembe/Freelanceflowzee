@@ -743,7 +743,7 @@ export default function ReportingPage() {
                       {/* Export Format */}
                       <div>
                         <label className="block text-sm font-medium mb-2">Default Export</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                           {exportFormats.map((format) => (
                             <button
                               key={format}
@@ -839,7 +839,7 @@ export default function ReportingPage() {
 
                     <div>
                       <label className="block text-sm font-medium mb-2">Export Format</label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                         {exportFormats.map((format) => (
                           <button
                             key={format}

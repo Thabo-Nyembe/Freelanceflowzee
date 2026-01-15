@@ -551,7 +551,7 @@ export default function WidgetLibraryClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1213,7 +1213,7 @@ export default function WidgetLibraryClient() {
                         <CardDescription>Configure your widget library preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <Select defaultValue={settings?.default_view_mode || 'grid'}>
@@ -1581,7 +1581,7 @@ export default function WidgetLibraryClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-purple-600">{selectedWidget.installs.toLocaleString()}</p>
                   <p className="text-xs text-gray-500">Installs</p>
@@ -1620,7 +1620,7 @@ export default function WidgetLibraryClient() {
 
               <div>
                 <h3 className="font-semibold mb-2">Compatibility</h3>
-                <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 text-sm">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-gray-500">React</p>
                     <p className="font-medium">{selectedWidget.compatibility.react}</p>
@@ -1745,7 +1745,7 @@ export default function WidgetLibraryClient() {
             <DialogDescription>Share your widget with the community</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Widget Name *</Label>
                 <Input
@@ -1771,7 +1771,7 @@ export default function WidgetLibraryClient() {
                 onChange={(e) => setNewWidgetForm(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
@@ -1829,7 +1829,7 @@ export default function WidgetLibraryClient() {
                 className="font-mono"
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Demo URL</Label>
                 <Input

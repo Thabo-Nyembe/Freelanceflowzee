@@ -1222,7 +1222,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
 
                 {/* Cash Position Summary */}
-                <div className="grid grid-cols-3 gap-4 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-6">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center">
                     <p className="text-sm text-gray-500 mb-1">Beginning Cash</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(72920.50)}</p>
@@ -1680,7 +1680,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   <div className="space-y-6">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Company Information</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Company Name</label>
                           <input type="text" defaultValue="Acme Corporation" className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900" />
@@ -1779,7 +1779,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </div>
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Default Accounts</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accounts Receivable</label>
                           <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">

@@ -1137,7 +1137,7 @@ export default function ApiKeysClient() {
   ], [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Header */}
@@ -1449,7 +1449,7 @@ export default function ApiKeysClient() {
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div>
                         <p className="text-xs text-gray-500">Total Requests</p>
                         <p className="font-semibold text-gray-900 dark:text-white">{formatNumber(key.total_requests)}</p>
@@ -1570,7 +1570,7 @@ export default function ApiKeysClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t dark:border-gray-700">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4 pt-4 border-t dark:border-gray-700">
                       <div className="text-center">
                         <p className="text-xl font-bold text-gray-900 dark:text-white">{formatNumber(app.total_logins)}</p>
                         <p className="text-xs text-gray-500">Total Logins</p>
@@ -1774,7 +1774,7 @@ export default function ApiKeysClient() {
                       ))}
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                       <div>
                         <p className="text-xs text-gray-500">Total Deliveries</p>
                         <p className="font-semibold text-gray-900 dark:text-white">{formatNumber(webhook.total_deliveries)}</p>
@@ -2010,7 +2010,7 @@ export default function ApiKeysClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Total Requests</p>
                       <p className="text-2xl font-bold">{formatNumber(selectedKey.total_requests)}</p>
@@ -2088,7 +2088,7 @@ export default function ApiKeysClient() {
                   {selectedLog.endpoint}
                 </code>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-xs text-gray-500">Response Time</p>
                     <p className="font-semibold">{selectedLog.response_time_ms}ms</p>
@@ -2143,7 +2143,7 @@ export default function ApiKeysClient() {
                 <Label htmlFor="keyDescription">Description</Label>
                 <Textarea id="keyDescription" placeholder="Describe the purpose of this key" value={newKeyDescription} onChange={(e) => setNewKeyDescription(e.target.value)} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Environment</Label>
                   <Select value={newKeyEnvironment} onValueChange={(v) => setNewKeyEnvironment(v as Environment)}>
@@ -2173,7 +2173,7 @@ export default function ApiKeysClient() {
               </div>
               <div className="space-y-2">
                 <Label>Scopes</Label>
-                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 border rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-32 overflow-y-auto p-2 border rounded-lg">
                   {mockScopes.map(scope => (
                     <div key={scope.id} className="flex items-center space-x-2">
                       <Checkbox id={scope.id} checked={selectedScopes.includes(scope.name)} onCheckedChange={(checked) => {
@@ -2380,7 +2380,7 @@ export default function ApiKeysClient() {
               </div>
               <div className="space-y-2">
                 <Label>Available Scopes</Label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-48 overflow-y-auto p-2 border rounded-lg">
                   {mockScopes.map(scope => (
                     <div key={scope.id} className="flex items-center space-x-2">
                       <Checkbox id={`perm-${scope.id}`} defaultChecked={keyToAction?.scopes.includes(scope.name)} />
@@ -2665,7 +2665,7 @@ export default function ApiKeysClient() {
                   </div>
                   <div className="space-y-2">
                     <Label>Token Expiration</Label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <Label className="text-xs text-gray-500">Access Token (seconds)</Label>
                         <Input type="number" defaultValue={selectedApp.access_token_expiration} />
@@ -2854,7 +2854,7 @@ console.log(user);`}</code>
               </div>
               <div className="space-y-2">
                 <Label>Events to Listen</Label>
-                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 border rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-32 overflow-y-auto p-2 border rounded-lg">
                   {['payment.created', 'payment.succeeded', 'payment.failed', 'user.created', 'user.updated', 'data.sync', 'security.alert'].map(event => (
                     <div key={event} className="flex items-center space-x-2">
                       <Checkbox id={event} checked={newWebhookEvents.includes(event)} onCheckedChange={(checked) => {
@@ -2991,7 +2991,7 @@ console.log(user);`}</code>
                       </Button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-2">
                       <Label>Retry Policy</Label>
                       <Select defaultValue={selectedWebhook.retry_policy}>
@@ -3091,7 +3091,7 @@ console.log(user);`}</code>
               <DialogDescription>Usage statistics and performance metrics</DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-6">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
                   <p className="text-3xl font-bold text-blue-700">{formatNumber(stats.totalRequests)}</p>
                   <p className="text-sm text-blue-600">Total Requests</p>

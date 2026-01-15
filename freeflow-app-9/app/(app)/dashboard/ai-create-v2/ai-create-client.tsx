@@ -960,7 +960,7 @@ export default function AICreateClient() {
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
                         Style Preset
                       </label>
-                      <div className="grid grid-cols-5 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2 md:gap-6">
                         {styles.map(style => (
                           <button
                             key={style.value}
@@ -1674,7 +1674,7 @@ export default function AICreateClient() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                       <div>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-500">Speed</span>
@@ -1719,7 +1719,7 @@ export default function AICreateClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Generations</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(mockUsageStats.totalGenerations)}</p>
@@ -2355,7 +2355,7 @@ export default function AICreateClient() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Views</p>
                       <p className="text-xl font-bold">{formatNumber(selectedGeneration.views)}</p>
@@ -2374,7 +2374,7 @@ export default function AICreateClient() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Seed</span>
                       <span className="font-mono">{selectedGeneration.seed}</span>
@@ -2679,7 +2679,7 @@ export default function AICreateClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[
                   { name: 'DALL-E 3', speed: 'Fast', quality: 'Excellent', cost: '$0.04/img', strengths: 'Text rendering, Accuracy' },
                   { name: 'Midjourney v6', speed: 'Medium', quality: 'Outstanding', cost: '$0.05/img', strengths: 'Artistic style, Aesthetics' },

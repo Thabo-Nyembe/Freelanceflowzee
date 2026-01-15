@@ -940,7 +940,7 @@ export default function PerformanceAnalyticsClient() {
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Health Map</h3>
                 </div>
-                <div className="p-6 grid grid-cols-2 gap-4">
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {mockServices.map((service) => (
                     <div
                       key={service.name}
@@ -2193,7 +2193,7 @@ export default function PerformanceAnalyticsClient() {
             </DialogHeader>
             {selectedTrace && (
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Service</p>
                     <p className="font-medium text-gray-900 dark:text-white">{selectedTrace.service}</p>
@@ -2260,7 +2260,7 @@ export default function PerformanceAnalyticsClient() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Metric</Label>
                   <Select value={newAlertMetric} onValueChange={setNewAlertMetric}>
@@ -2295,7 +2295,7 @@ export default function PerformanceAnalyticsClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Condition</Label>
                   <Select value={newAlertCondition} onValueChange={setNewAlertCondition}>
@@ -2368,7 +2368,7 @@ export default function PerformanceAnalyticsClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Export Format</Label>
                   <Select value={exportFormat} onValueChange={setExportFormat}>
@@ -2772,7 +2772,7 @@ export default function PerformanceAnalyticsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Include Metrics</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {['Latency P99', 'Error Rate', 'Throughput', 'CPU Usage', 'Memory Usage', 'Disk I/O'].map((metric) => (
                     <div key={metric} className="flex items-center gap-2">
                       <input
@@ -2838,7 +2838,7 @@ export default function PerformanceAnalyticsClient() {
                   onChange={(e) => setNewSLOName(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Target (%)</Label>
                   <Input

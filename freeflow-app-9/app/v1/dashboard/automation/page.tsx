@@ -490,7 +490,7 @@ export default function AutomationPage() {
           <CardSkeleton />
           <CardSkeleton />
         </div>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
           <CardSkeleton />
           <CardSkeleton />
         </div>
@@ -563,7 +563,7 @@ export default function AutomationPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
                 <div className="text-sm text-blue-600 mb-1">Active Workflows</div>
                 <div className="text-2xl font-bold text-blue-700">
@@ -853,7 +853,7 @@ export default function AutomationPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="text-sm text-blue-600 mb-1">Total Runs</div>
                   <div className="text-3xl font-bold text-blue-700">{formatNumber(selectedWorkflow.runsCount)}</div>

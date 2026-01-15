@@ -638,7 +638,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -2489,7 +2489,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="p-3 border rounded-lg dark:border-gray-700 text-center">
                       <div className="text-2xl font-bold text-purple-600">{selectedMember.performance}%</div>
                       <div className="text-xs text-gray-500">Performance</div>

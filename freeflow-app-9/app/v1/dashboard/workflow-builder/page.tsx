@@ -656,7 +656,7 @@ export default function WorkflowBuilderPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-600 dark:text-gray-400">Total Runs</p>
                         <p className="font-semibold text-gray-900 dark:text-gray-100">{workflow.totalRuns}</p>
@@ -782,7 +782,7 @@ export default function WorkflowBuilderPage() {
 
           {/* Builder Tab */}
           <TabsContent value="builder" className="space-y-6">
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
               {/* Components Panel */}
               <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
                 <CardHeader className="pb-3">

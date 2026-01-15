@@ -1643,7 +1643,7 @@ export default function StockClient() {
                       <Progress value={warehouse.utilization} className="h-2" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Products</p>
                         <p className="font-semibold">{warehouse.productCount.toLocaleString()}</p>
@@ -1757,7 +1757,7 @@ export default function StockClient() {
                       <Progress value={(count.productsCounted / count.totalProducts) * 100} className="h-2" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Type</p>
                         <p className="font-semibold capitalize">{count.type}</p>
@@ -2144,7 +2144,7 @@ export default function StockClient() {
 
               <div className="space-y-6">
                 {/* Product Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">Product Details</h4>
                     <div className="space-y-2 text-sm">
@@ -2190,7 +2190,7 @@ export default function StockClient() {
                 </div>
 
                 {/* Stock Levels */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold">{selectedProduct.quantity.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">Total Qty</p>
@@ -2317,7 +2317,7 @@ export default function StockClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="add-quantity">Quantity *</Label>
                 <Input
@@ -2347,7 +2347,7 @@ export default function StockClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="add-zone">Zone</Label>
                 <Input
@@ -2439,7 +2439,7 @@ export default function StockClient() {
                 onChange={(e) => setTransferForm(prev => ({ ...prev, quantity: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="transfer-from">From Warehouse *</Label>
                 <Select
@@ -2477,7 +2477,7 @@ export default function StockClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="transfer-from-zone">From Zone</Label>
                 <Input
@@ -2550,7 +2550,7 @@ export default function StockClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="count-type">Count Type *</Label>
                 <Select
@@ -2628,7 +2628,7 @@ export default function StockClient() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {(['csv', 'xlsx', 'pdf'] as const).map(format => (
                   <Button
                     key={format}
@@ -2713,7 +2713,7 @@ export default function StockClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="product-name">Product Name *</Label>
                 <Input
@@ -2733,7 +2733,7 @@ export default function StockClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="product-category">Category *</Label>
                 <Select
@@ -2772,7 +2772,7 @@ export default function StockClient() {
                 onChange={(e) => setNewProductForm(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="product-cost">Unit Cost *</Label>
                 <div className="relative">
@@ -2804,7 +2804,7 @@ export default function StockClient() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="product-reorder-point">Reorder Point</Label>
                 <Input
@@ -2900,7 +2900,7 @@ export default function StockClient() {
               </div>
 
               {/* Layout Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <Card>
                   <CardContent className="p-4 text-center">
                     <Layers className="w-6 h-6 mx-auto mb-2 text-indigo-600" />
@@ -3087,7 +3087,7 @@ export default function StockClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Product Name *</Label>
                 <Input
@@ -3105,7 +3105,7 @@ export default function StockClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-category">Category</Label>
                 <Select
@@ -3143,7 +3143,7 @@ export default function StockClient() {
                 rows={2}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-cost">Unit Cost ($)</Label>
                 <Input
@@ -3165,7 +3165,7 @@ export default function StockClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-reorder-point">Reorder Point</Label>
                 <Input
@@ -3286,7 +3286,7 @@ export default function StockClient() {
               </div>
 
               {/* Barcode Details */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-muted-foreground">Format</p>
                   <p className="font-medium">EAN-13</p>

@@ -671,7 +671,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
           <AlertCircle className="h-5 w-5" />
           Error: {error.message}
@@ -1131,7 +1131,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         <CardDescription>Your business details that appear on invoices</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Business Name</Label>
                             <Input defaultValue="Your Company Name" />
@@ -1145,7 +1145,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           <Label>Business Address</Label>
                           <Input placeholder="Street Address" />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>City</Label>
                             <Input placeholder="City" />
@@ -1159,7 +1159,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                             <Input placeholder="Postal code" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Email</Label>
                             <Input type="email" placeholder="billing@company.com" />
@@ -1178,7 +1178,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         <CardDescription>Default settings for new invoices</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Currency</Label>
                             <Select defaultValue="USD">
@@ -1209,7 +1209,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Invoice Number Prefix</Label>
                             <Input defaultValue="INV-" />
@@ -1239,7 +1239,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Tax Rate</Label>
                             <div className="flex items-center gap-2">
@@ -1273,7 +1273,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                             <p className="text-xs text-gray-400">Recommended: 200x50px PNG or SVG</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Primary Color</Label>
                             <div className="flex gap-2">
@@ -1298,7 +1298,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         <CardDescription>Choose your default invoice template</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                           {invoiceTemplates.map(template => (
                             <button
                               key={template.id}
@@ -1489,7 +1489,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Late Fee Type</Label>
                             <Select defaultValue="percentage">
@@ -1617,7 +1617,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         </div>
                         <div className="space-y-2">
                           <Label>Events</Label>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                             {['invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'payment.received'].map((event) => (
                               <div key={event} className="flex items-center gap-2">
                                 <Switch defaultChecked />
@@ -1657,7 +1657,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         <CardDescription>Sync invoices with your accounting tools</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'QuickBooks', connected: true, description: 'Sync invoices and payments' },
                             { name: 'Xero', connected: false, description: 'Two-way sync with Xero' },
@@ -1748,7 +1748,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                         <CardDescription>Export and manage your invoice data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => handleExportInvoices('csv')}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
@@ -2058,7 +2058,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
               {/* Template Selection */}
               <div>
                 <Label className="text-sm font-medium mb-3 block">Invoice Template</Label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {invoiceTemplates.map(template => (
                     <button
                       key={template.id}
@@ -2078,7 +2078,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
               </div>
 
               {/* Client & Basic Info */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Client Name</Label>
                   <Input
@@ -2098,7 +2098,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div>
                   <Label>Invoice Title</Label>
                   <Input
@@ -2224,7 +2224,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
               </div>
 
               {/* Smart Features */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Recurring */}
                 <Card>
                   <CardHeader className="pb-3">
@@ -2431,7 +2431,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
               </Card>
 
               {/* Notes & Terms */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Notes to Client</Label>
                   <Textarea
@@ -2637,7 +2637,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                 onChange={(e) => setFilterClient(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Min Amount</Label>
                 <Input
@@ -2657,7 +2657,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Due Date From</Label>
                 <Input
@@ -2724,7 +2724,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
           </DialogHeader>
           {editingInvoice && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Invoice Title</Label>
                   <Input
@@ -2748,7 +2748,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Client Name</Label>
                   <Input
@@ -2765,7 +2765,7 @@ Terms: ${newInvoice.terms || 'Standard terms apply'}
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Total Amount</Label>
                   <Input

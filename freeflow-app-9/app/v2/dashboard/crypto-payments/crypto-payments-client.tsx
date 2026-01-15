@@ -1674,7 +1674,7 @@ export default function CryptoPaymentsClient() {
 
                 {/* Tab Content */}
                 {viewTransactionTab === 'details' && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <span className="text-sm text-gray-400">Amount</span>
                       <p className="text-white font-medium">

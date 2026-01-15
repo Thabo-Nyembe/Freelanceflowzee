@@ -1664,7 +1664,7 @@ export default function RegistrationsClient() {
                       <Progress value={(event.registrationCount / event.capacity) * 100} className="h-2" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t">
                       <div>
                         <p className="text-xs text-muted-foreground">Revenue</p>
                         <p className="font-semibold text-green-600">{formatCurrency(event.revenue)}</p>
@@ -1989,7 +1989,7 @@ export default function RegistrationsClient() {
                 <CardTitle>Top Referral Sources</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   {analytics.topReferralSources.map((source, index) => (
                     <div key={index} className="text-center p-4 bg-muted/50 rounded-xl">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white mx-auto mb-2">
@@ -2354,7 +2354,7 @@ export default function RegistrationsClient() {
 
               <div className="space-y-6">
                 {/* Registration Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <div className="space-y-4">
                     <h4 className="font-semibold">Attendee Information</h4>
                     <div className="space-y-2 text-sm">
@@ -2402,7 +2402,7 @@ export default function RegistrationsClient() {
                 </div>
 
                 {/* Payment */}
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pt-4 border-t">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <p className="text-2xl font-bold">{formatCurrency(selectedRegistration.ticketPrice)}</p>
                     <p className="text-sm text-muted-foreground">Ticket Price</p>
@@ -2536,7 +2536,7 @@ export default function RegistrationsClient() {
             <DialogDescription>Register a new attendee for an event</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Full Name *</Label>
                 <Input
@@ -2555,7 +2555,7 @@ export default function RegistrationsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Phone</Label>
                 <Input
@@ -2581,7 +2581,7 @@ export default function RegistrationsClient() {
                 onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Ticket Type</Label>
                 <Select
@@ -2609,7 +2609,7 @@ export default function RegistrationsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select
@@ -2660,7 +2660,7 @@ export default function RegistrationsClient() {
             <DialogDescription>Update attendee registration details</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Full Name *</Label>
                 <Input
@@ -2677,7 +2677,7 @@ export default function RegistrationsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Phone</Label>
                 <Input
@@ -2700,7 +2700,7 @@ export default function RegistrationsClient() {
                 onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select
@@ -2783,7 +2783,7 @@ export default function RegistrationsClient() {
               <Label htmlFor="event-name">Event Name</Label>
               <Input id="event-name" placeholder="Enter event name" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="event-date">Event Date</Label>
                 <Input id="event-date" type="date" />
@@ -3103,7 +3103,7 @@ export default function RegistrationsClient() {
           </DialogHeader>
           {selectedEvent && (
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label className="text-muted-foreground">Event Type</Label>
                   <p className="font-medium capitalize">{selectedEvent.type}</p>

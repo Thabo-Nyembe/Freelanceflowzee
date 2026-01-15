@@ -586,7 +586,7 @@ export default function AiVideoStudioClient() {
                 disabled={isGenerating}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="gen-model">AI Model</Label>
                 <select
@@ -887,7 +887,7 @@ export default function AiVideoStudioClient() {
           </DialogHeader>
           <div className="py-4">
             <ScrollArea className="h-[350px]">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { name: 'Cinematic Nature', prompt: 'A breathtaking aerial shot of a mountain range at golden hour with dramatic clouds', icon: '🏔️' },
                   { name: 'Urban Timelapse', prompt: 'City skyline timelapse from day to night with lights turning on', icon: '🌃' },

@@ -972,7 +972,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500' },
                 { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500' },
@@ -1353,7 +1353,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500' },
                 { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500' },
@@ -1438,7 +1438,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Play, label: 'Start All', desc: 'Begin rendering', color: 'text-green-500' },
                 { icon: Pause, label: 'Pause All', desc: 'Pause queue', color: 'text-amber-500' },
@@ -1593,7 +1593,7 @@ export default function MotionGraphicsClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500' },
                 { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
@@ -1765,7 +1765,7 @@ export default function MotionGraphicsClient({
                         <CardDescription>Configure default settings for new projects</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Resolution</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -1838,7 +1838,7 @@ export default function MotionGraphicsClient({
                         <CardDescription>Configure default output settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Format</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -2236,7 +2236,7 @@ export default function MotionGraphicsClient({
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <Card className="border-0 bg-gray-50 dark:bg-gray-800/50">
                       <CardContent className="p-4 text-center">
                         <p className="text-2xl font-bold">{selectedAnimation.resolution}</p>
@@ -2263,7 +2263,7 @@ export default function MotionGraphicsClient({
                     </Card>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                     <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                       <Eye className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                       <p className="text-2xl font-bold">{selectedAnimation.views.toLocaleString()}</p>
@@ -2356,7 +2356,7 @@ export default function MotionGraphicsClient({
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Width</label>
                   <Input
@@ -2374,7 +2374,7 @@ export default function MotionGraphicsClient({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Frame Rate</label>
                   <select
@@ -2450,7 +2450,7 @@ export default function MotionGraphicsClient({
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Output Format</label>
                   <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
@@ -2509,7 +2509,7 @@ export default function MotionGraphicsClient({
                   Upload
                 </Button>
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 {['Videos', 'Images', 'Audio', 'Fonts'].map((category) => (
                   <div
                     key={category}
@@ -2560,7 +2560,7 @@ export default function MotionGraphicsClient({
                   <option value="transition">Transitions</option>
                 </select>
               </div>
-              <div className="grid grid-cols-3 gap-4 max-h-[400px] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-[400px] overflow-y-auto">
                 {mockPresets.map((preset) => (
                   <div
                     key={preset.id}

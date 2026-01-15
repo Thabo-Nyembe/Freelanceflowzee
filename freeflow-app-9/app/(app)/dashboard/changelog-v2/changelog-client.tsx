@@ -873,7 +873,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
           Error loading changelog: {error.message}
         </div>
@@ -912,7 +912,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                     <DialogTitle>Create New Release</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="version">Version *</Label>
                         <Input
@@ -964,7 +964,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         onChange={(e) => updateFormField('description', e.target.value)}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="release_status">Status</Label>
                         <Select
@@ -1484,7 +1484,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         </div>
                         <div className="text-sm text-gray-500">@{contributor.username}</div>
 
-                        <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-4 text-sm">
                           <div>
                             <div className="font-semibold text-gray-900 dark:text-white">{contributor.commits}</div>
                             <div className="text-xs text-gray-500">Commits</div>
@@ -1927,7 +1927,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         <CardDescription>Configure changelog repository</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Branch</Label>
                             <Select defaultValue="main">
@@ -2439,7 +2439,7 @@ Thanks to all contributors!`}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 border rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-2 h-2 bg-green-500 rounded-full" />
@@ -2574,7 +2574,7 @@ Thanks to all contributors!`}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-3 border rounded-lg text-center">
                             <p className="text-2xl font-bold text-green-600">12</p>
                             <p className="text-sm text-gray-500">Available rollback points</p>
@@ -2600,7 +2600,7 @@ Thanks to all contributors!`}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-3 border rounded-lg text-center">
                             <p className="text-xl font-bold">98.5%</p>
                             <p className="text-xs text-gray-500">Adoption Rate</p>
@@ -2678,7 +2678,7 @@ Thanks to all contributors!`}
               <DialogTitle>Edit Release {editingChangelog?.version}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-version">Version</Label>
                   <Input
@@ -2730,7 +2730,7 @@ Thanks to all contributors!`}
                   onChange={(e) => updateFormField('description', e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="edit-release_status">Status</Label>
                   <Select

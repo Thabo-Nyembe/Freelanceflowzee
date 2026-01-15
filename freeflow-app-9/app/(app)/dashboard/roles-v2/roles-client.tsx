@@ -963,7 +963,7 @@ export default function RolesClient() {
                     <Button onClick={handleCreateRole} className="bg-white text-purple-700 hover:bg-purple-50"><Plus className="h-4 w-4 mr-2" />New Role</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-6 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{stats.totalRoles}</p>
                     <p className="text-xs text-purple-100">Total Roles</p>
@@ -992,7 +992,7 @@ export default function RolesClient() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 {[
                   { name: 'Create Role', icon: Plus, desc: 'Add new role', color: 'purple' },
                   { name: 'Assign User', icon: UserPlus, desc: 'User to role', color: 'blue' },
@@ -1116,7 +1116,7 @@ export default function RolesClient() {
               </Card>
 
               {/* Role Insights */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                 <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Top Assigned Roles</CardTitle></CardHeader>
                   <CardContent>
@@ -1168,7 +1168,7 @@ export default function RolesClient() {
               </div>
 
               {/* Role Analytics Summary */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'Avg Users/Role', value: stats.totalRoles > 0 ? Math.round(stats.totalUsers / stats.totalRoles) : 0, trend: '+12%', color: 'purple' },
                   { label: 'Delegation Rate', value: `${combinedRoles.length > 0 ? Math.round((combinedRoles.filter(r => r.canDelegate).length / combinedRoles.length) * 100) : 0}%`, trend: '+5%', color: 'blue' },
@@ -1241,7 +1241,7 @@ export default function RolesClient() {
                     <Button onClick={handleCreateRole} className="bg-white text-indigo-700 hover:bg-indigo-50"><Plus className="h-4 w-4 mr-2" />Create Role</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{stats.systemRoles}</p>
                     <p className="text-xs text-indigo-100">System Roles</p>
@@ -1266,7 +1266,7 @@ export default function RolesClient() {
               </div>
 
               {/* Role Types Distribution */}
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 {[
                   { type: 'admin', count: combinedRoles.filter(r => r.type === 'admin').length, color: 'red', icon: Crown },
                   { type: 'manager', count: combinedRoles.filter(r => r.type === 'manager').length, color: 'orange', icon: Users },
@@ -1340,7 +1340,7 @@ export default function RolesClient() {
                         <Badge className={getAccessLevelColor(role.accessLevel)}>{role.accessLevel} access</Badge>
                         {role.canDelegate && <Badge variant="outline">Can Delegate</Badge>}
                       </div>
-                      <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                         <div className="text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <p className="text-lg font-bold text-gray-900 dark:text-white">{role.totalUsers}</p>
                           <p className="text-xs text-gray-500">Total Users</p>
@@ -1392,7 +1392,7 @@ export default function RolesClient() {
                     <Button onClick={handleCreateRole} className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{stats.totalPermissions}</p>
                     <p className="text-xs text-amber-100">Total</p>
@@ -1417,7 +1417,7 @@ export default function RolesClient() {
               </div>
 
               {/* Permission Categories */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {Object.entries(permissionsByCategory).slice(0, 4).map(([category, perms], i) => (
                   <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardContent className="p-4">
@@ -1499,7 +1499,7 @@ export default function RolesClient() {
                     <Button onClick={() => handleAssignRole('selected user')} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{mockUserAssignments.length}</p>
                     <p className="text-xs text-blue-100">Total</p>
@@ -1524,7 +1524,7 @@ export default function RolesClient() {
               </div>
 
               {/* Assignment Status Cards */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { status: 'Active', count: mockUserAssignments.filter(a => a.status === 'active').length, color: 'green', icon: UserCheck },
                   { status: 'Expired', count: mockUserAssignments.filter(a => a.status === 'expired').length, color: 'red', icon: UserX },
@@ -1613,7 +1613,7 @@ export default function RolesClient() {
                     <Button onClick={handleCreateRole} className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{mockPolicies.length}</p>
                     <p className="text-xs text-green-100">Total</p>
@@ -1638,7 +1638,7 @@ export default function RolesClient() {
               </div>
 
               {/* Policy Type Cards */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[
                   { type: 'Allow', desc: 'Grant access when conditions match', color: 'green', count: mockPolicies.filter(p => p.type === 'allow').length },
                   { type: 'Deny', desc: 'Block access explicitly', color: 'red', count: mockPolicies.filter(p => p.type === 'deny').length },
@@ -1736,7 +1736,7 @@ export default function RolesClient() {
                     <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => handleApplyFilter('Audit')}><Filter className="h-4 w-4 mr-2" />Filter</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{mockAuditLogs.length}</p>
                     <p className="text-xs text-slate-200">Total Events</p>
@@ -1761,7 +1761,7 @@ export default function RolesClient() {
               </div>
 
               {/* Audit Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'Role Changes', count: mockAuditLogs.filter(l => l.targetType === 'role').length, icon: Shield, color: 'purple' },
                   { label: 'User Changes', count: mockAuditLogs.filter(l => l.targetType === 'user').length, icon: Users, color: 'blue' },
@@ -1843,7 +1843,7 @@ export default function RolesClient() {
                     <Button onClick={handleCreateRole} className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
                     <p className="text-2xl font-bold">{mockUserGroups.length}</p>
                     <p className="text-xs text-rose-100">Total Groups</p>
@@ -1868,7 +1868,7 @@ export default function RolesClient() {
               </div>
 
               {/* Group Status Cards */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'Active Groups', count: mockUserGroups.filter(g => g.status === 'active').length, icon: CheckCircle, color: 'green' },
                   { label: 'Inactive Groups', count: mockUserGroups.filter(g => g.status === 'inactive').length, icon: AlertCircle, color: 'gray' },
@@ -1979,7 +1979,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure default role behaviors and inheritance</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Default Role</label><Input defaultValue="Standard User" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Role Hierarchy Depth</label><Input type="number" defaultValue="5" className="mt-1" /></div>
                         </div>
@@ -2014,7 +2014,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>Security Settings</CardTitle><CardDescription>Configure authentication and access security</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <Card className="border"><CardContent className="p-4 text-center">
                             <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
                             <p className="font-medium">MFA Enabled</p><p className="text-2xl font-bold text-green-600">89%</p>
@@ -2059,7 +2059,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>Permission Settings</CardTitle><CardDescription>Configure default permission behaviors</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Default Access Level</label><Input defaultValue="Read" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Permission Scope</label><Input defaultValue="Project" className="mt-1" /></div>
                         </div>
@@ -2090,7 +2090,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>Identity Integrations</CardTitle><CardDescription>Connect with identity providers and directories</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'Okta', status: 'connected', icon: '🔐', users: 1245 },
                             { name: 'Azure AD', status: 'connected', icon: '☁️', users: 890 },
@@ -2132,7 +2132,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure alerts and notification preferences</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <Card className="border"><CardContent className="p-4 text-center">
                             <Bell className="h-8 w-8 mx-auto mb-2 text-purple-600" />
                             <p className="font-medium">Email Alerts</p><p className="text-sm text-gray-500">Enabled</p>
@@ -2177,7 +2177,7 @@ export default function RolesClient() {
                     <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                       <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and data management</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div><label className="text-sm font-medium">Cache TTL (seconds)</label><Input type="number" defaultValue="300" className="mt-1" /></div>
                           <div><label className="text-sm font-medium">Max Roles per User</label><Input type="number" defaultValue="10" className="mt-1" /></div>
                         </div>
@@ -2193,7 +2193,7 @@ export default function RolesClient() {
                         </div>
                         <div className="space-y-3">
                           <h4 className="font-medium">Data Management</h4>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                             <Button variant="outline" className="justify-start" onClick={handleExportRoles}><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
                             <Button variant="outline" className="justify-start" onClick={handleExportAuditLogs}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
                             <Button variant="outline" className="justify-start" onClick={handleExportUserAssignments}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
@@ -2265,7 +2265,7 @@ export default function RolesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="role-name">Role Name *</Label>
                 <Input
@@ -2295,7 +2295,7 @@ export default function RolesClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Role Type</Label>
                 <Select
@@ -2405,7 +2405,7 @@ export default function RolesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-role-name">Role Name *</Label>
                 <Input
@@ -2433,7 +2433,7 @@ export default function RolesClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Role Type</Label>
                 <Select

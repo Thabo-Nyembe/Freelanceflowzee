@@ -660,7 +660,7 @@ export default function TemplatesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -839,7 +839,7 @@ export default function TemplatesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-violet-500', action: () => setIsCreateDialogOpen(true) },
                 { icon: Wand2, label: 'AI Generate', desc: 'Auto-create', color: 'text-purple-500', action: () => setIsAIGenerateOpen(true) },
@@ -1045,7 +1045,7 @@ export default function TemplatesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500', action: () => setIsCreateDialogOpen(true) },
                 { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.success(showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only') } },
@@ -1151,7 +1151,7 @@ export default function TemplatesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: FolderPlus, label: 'Create', desc: 'New collection', color: 'text-orange-500' },
                 { icon: Folder, label: 'Browse', desc: 'View all', color: 'text-amber-500' },
@@ -1238,7 +1238,7 @@ export default function TemplatesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: ImagePlus, label: 'Upload Logo', desc: 'Add logo', color: 'text-pink-500' },
                 { icon: Palette, label: 'Add Color', desc: 'Brand color', color: 'text-purple-500' },
@@ -1390,7 +1390,7 @@ export default function TemplatesClient() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-cyan-500' },
                 { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
@@ -1585,7 +1585,7 @@ export default function TemplatesClient() {
                         <CardDescription>Basic template settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Access Level</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -1701,7 +1701,7 @@ export default function TemplatesClient() {
                         <CardDescription>Default canvas preferences</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Zoom</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -1734,7 +1734,7 @@ export default function TemplatesClient() {
                         <CardDescription>Default export settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-2">Default Format</label>
                             <select className="w-full px-3 py-2 border rounded-lg">
@@ -2017,7 +2017,7 @@ export default function TemplatesClient() {
                 </div>
 
                 {/* Info Grid */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedTemplate.usageCount.toLocaleString()}</p>
                     <p className="text-sm text-gray-500">Uses</p>
@@ -2403,7 +2403,7 @@ export default function TemplatesClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { format: 'JSON', desc: 'Full data export', icon: FileText },
                   { format: 'HTML', desc: 'Web-ready', icon: Globe },
@@ -2471,7 +2471,7 @@ export default function TemplatesClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <button
                   className="p-4 border rounded-lg hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-colors text-left"
                   onClick={() => {
@@ -2537,7 +2537,7 @@ export default function TemplatesClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { cat: 'social_media', label: 'Social Media', icon: Instagram, color: 'pink' },
                   { cat: 'presentation', label: 'Presentations', icon: Presentation, color: 'blue' },

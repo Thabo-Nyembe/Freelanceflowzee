@@ -1101,7 +1101,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-4 gap-4 mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-3">
                             <div>
                               <p className="text-xs text-muted-foreground">Current ARR</p>
                               <p className="font-semibold">{formatCurrency(renewal.currentARR)}</p>
@@ -1290,7 +1290,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
           {/* Pipeline Tab */}
           <TabsContent value="pipeline" className="mt-6">
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {(['upcoming', 'in_progress', 'negotiating', 'at_risk', 'won'] as RenewalStatus[]).map((status) => {
                 const statusRenewals = renewals.filter(r => r.status === status)
                 const statusARR = statusRenewals.reduce((sum, r) => sum + r.currentARR, 0)
@@ -1425,7 +1425,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                           <span className="font-semibold">{forecast.month}</span>
                           <Badge variant="outline">{forecast.renewals} renewals</Badge>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm">
                           <div>
                             <p className="text-muted-foreground">ARR</p>
                             <p className="font-semibold">{formatCurrency(forecast.arr)}</p>
@@ -1462,7 +1462,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                   <div className="h-64 flex items-center justify-center bg-muted/50 rounded-lg mb-4">
                     <PieChart className="w-12 h-12 text-muted-foreground" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/10">
                       <p className="text-sm text-muted-foreground">Expansion Revenue</p>
                       <p className="text-xl font-bold text-green-600">{formatCurrency(stats.totalExpansion)}</p>
@@ -1588,7 +1588,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                         <CardDescription>Default settings for new renewals</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Renewal Period</Label>
                             <select className="w-full mt-1 px-3 py-2 border rounded-lg">
@@ -1620,7 +1620,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Healthy Threshold</Label>
                             <Input defaultValue="70" type="number" className="mt-1" />
@@ -1934,7 +1934,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                     {/* Team */}
                     <div>
                       <h4 className="font-semibold mb-3">Account Team</h4>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="flex items-center gap-3 p-3 rounded-lg border">
                           <Avatar>
                             <AvatarFallback>{selectedRenewal.csmName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
@@ -2051,7 +2051,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="customerName">Customer Name *</Label>
                   <Input
@@ -2072,7 +2072,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="currentARR">Current ARR *</Label>
                   <Input
@@ -2095,7 +2095,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="renewalDate">Renewal Date *</Label>
                   <Input
@@ -2170,7 +2170,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Select Playbook</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   {playbooks.map((playbook) => (
                     <div
                       key={playbook.id}
@@ -2264,7 +2264,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Export Format</Label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                   {(['csv', 'excel', 'pdf'] as const).map((format) => (
                     <div
                       key={format}

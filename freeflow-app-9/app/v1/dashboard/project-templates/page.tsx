@@ -525,7 +525,7 @@ export default function ProjectTemplatesPage() {
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm dark:text-gray-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm dark:text-gray-300">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         <span>{template.duration}</span>

@@ -1204,7 +1204,7 @@ export default function LogisticsClient() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 {[
                   { icon: Plus, label: 'Create Shipment', desc: 'New shipment', color: 'from-blue-500 to-cyan-600', action: () => setShowNewShipmentDialog(true) },
                   { icon: Package, label: 'Track Package', desc: 'Find shipment', color: 'from-purple-500 to-indigo-600', action: () => setShowTrackPackageDialog(true) },
@@ -1286,7 +1286,7 @@ export default function LogisticsClient() {
               </div>
 
               {/* Shipping Insights */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'Cost Savings', value: '$2,450', change: '+12%', desc: 'vs last month', icon: DollarSign, color: 'text-green-600', bgColor: 'bg-green-100' },
                   { label: 'Avg Transit Time', value: '2.8 days', change: '-0.4', desc: 'improvement', icon: Timer, color: 'text-blue-600', bgColor: 'bg-blue-100' },
@@ -1499,7 +1499,7 @@ export default function LogisticsClient() {
                                 </div>
 
                                 {/* Route */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                                     <p className="text-sm text-gray-500 mb-2">Origin</p>
                                     <p className="font-semibold text-gray-900 dark:text-white">{shipment.origin.name}</p>
@@ -1515,7 +1515,7 @@ export default function LogisticsClient() {
                                 </div>
 
                                 {/* Package Details */}
-                                <div className="grid grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                                     <Scale className="w-5 h-5 mx-auto text-gray-400 mb-1" />
                                     <p className="text-sm font-medium">{shipment.weight} lbs</p>
@@ -1702,7 +1702,7 @@ export default function LogisticsClient() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <p className="text-2xl font-bold text-gray-900 dark:text-white">{carrier.onTimeRate}%</p>
                           <p className="text-xs text-gray-500">On-Time Rate</p>
@@ -1817,7 +1817,7 @@ export default function LogisticsClient() {
                           <Progress value={(warehouse.usedCapacity / warehouse.capacity) * 100} className="h-2" />
                           <p className="text-xs text-gray-400 mt-1">{warehouse.usedCapacity.toLocaleString()} / {warehouse.capacity.toLocaleString()} sq ft</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <p className="text-lg font-bold text-gray-900 dark:text-white">{warehouse.ordersProcessed}</p>
                             <p className="text-xs text-gray-500">Orders/Day</p>
@@ -1929,7 +1929,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Company Name</label>
                               <Input defaultValue="FreeFlow Logistics" className="mt-1" />
@@ -1939,7 +1939,7 @@ export default function LogisticsClient() {
                               <Input defaultValue="FFL-2024-001" className="mt-1" readOnly />
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Email</label>
                               <Input defaultValue="logistics@freeflow.com" className="mt-1" />
@@ -1961,7 +1961,7 @@ export default function LogisticsClient() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <Input placeholder="Street Address" defaultValue="123 Industrial Blvd" />
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             <Input placeholder="City" defaultValue="Los Angeles" />
                             <Input placeholder="State" defaultValue="CA" />
                             <Input placeholder="ZIP Code" defaultValue="90001" />
@@ -1977,7 +1977,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                             <div>
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Currency</label>
                               <select className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
@@ -2068,7 +2068,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                             <div>
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Weight</label>
                               <Input defaultValue="1.0" className="mt-1" />
@@ -2205,7 +2205,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Exception Response Time (hours)</label>
                               <Input type="number" defaultValue="4" className="mt-1" />
@@ -2256,7 +2256,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <Button variant="outline" className="h-20 flex-col" onClick={handleExportAllData}>
                               <Download className="w-6 h-6 mb-2" />
                               Export All Data
@@ -2393,7 +2393,7 @@ export default function LogisticsClient() {
             <DialogDescription>Enter shipment details to create a new delivery</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">Recipient Name</label>
                 <Input
@@ -2419,7 +2419,7 @@ export default function LogisticsClient() {
                 placeholder="123 Main St"
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">City</label>
                 <Input
@@ -2445,7 +2445,7 @@ export default function LogisticsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">Carrier</label>
                 <select
@@ -2472,7 +2472,7 @@ export default function LogisticsClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">Weight (lbs)</label>
                 <Input
@@ -2692,7 +2692,7 @@ export default function LogisticsClient() {
               <label className="text-sm font-medium">Code</label>
               <Input defaultValue={selectedWarehouse?.code || ''} className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">City</label>
                 <Input defaultValue={selectedWarehouse?.city || ''} className="mt-1" />
@@ -2736,7 +2736,7 @@ export default function LogisticsClient() {
               <label className="text-sm font-medium">Address</label>
               <Input placeholder="Enter address..." className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">City</label>
                 <Input placeholder="City" className="mt-1" />

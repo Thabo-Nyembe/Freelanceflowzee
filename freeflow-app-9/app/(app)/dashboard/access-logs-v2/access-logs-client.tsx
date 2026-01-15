@@ -2154,7 +2154,7 @@ export default function AccessLogsClient() {
                   )}
 
                   {/* Location & Device */}
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h3 className="font-semibold mb-3 flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
@@ -2338,7 +2338,7 @@ export default function AccessLogsClient() {
             </div>
             <div className="space-y-2">
               <Label>Events to Send</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {['Error Logs', 'Security Alerts', 'User Actions', 'System Events'].map((event) => (
                   <div key={event} className="flex items-center gap-2">
                     <input type="checkbox" defaultChecked id={event.toLowerCase().replace(' ', '-')} />

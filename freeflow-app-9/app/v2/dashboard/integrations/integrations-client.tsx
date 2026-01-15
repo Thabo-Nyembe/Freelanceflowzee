@@ -2165,7 +2165,7 @@ export default function IntegrationsClient() {
                       </div>
                     </div>
                     <div className="md:col-span-2 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <p className="text-xs text-muted-foreground">Billing Period</p>
                           <p className="font-semibold">Jan 1 - Jan 31, 2024</p>
@@ -2248,7 +2248,7 @@ export default function IntegrationsClient() {
                 {/* Workflow Info */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <h4 className="font-medium mb-4">Workflow Details</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <p className="text-sm text-muted-foreground">Total Steps</p>
                       <p className="font-medium">{selectedZap.total_steps}</p>
@@ -2269,7 +2269,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                     <p className="text-2xl font-bold">{selectedZap.total_steps}</p>
                     <p className="text-xs text-muted-foreground">Total Steps</p>
@@ -2366,7 +2366,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {/* Data In/Out */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <h4 className="font-medium mb-2">Input Data</h4>
                     <pre className="text-xs bg-gray-50 dark:bg-gray-800 p-3 rounded-lg overflow-x-auto">
@@ -2415,7 +2415,7 @@ export default function IntegrationsClient() {
 
                 {selectedApp.is_connected ? (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-muted-foreground">Connected Since</p>
                         <p className="font-medium">{selectedApp.connected_at ? formatDate(selectedApp.connected_at) : 'N/A'}</p>
@@ -2508,7 +2508,7 @@ export default function IntegrationsClient() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-xs text-muted-foreground">Total Deliveries</p>
                     <p className="font-medium">{formatNumber(selectedWebhook.total_deliveries)}</p>
@@ -3215,7 +3215,7 @@ export default function IntegrationsClient() {
               </DialogTitle>
               <DialogDescription>Choose the plan that best fits your automation needs</DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4">
               {[
                 { name: 'Starter', price: '$19', tasks: '2,000', zaps: '5', features: ['Basic integrations', 'Email support', '7-day history'], current: false },
                 { name: 'Professional', price: '$49', tasks: '50,000', zaps: '20', features: ['All integrations', 'Priority support', '90-day history', 'API access'], current: true },

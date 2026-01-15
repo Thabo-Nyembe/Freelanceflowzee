@@ -1917,7 +1917,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure SEO tracking preferences</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Primary Domain</label><Input defaultValue="example.com" className="mt-1" /></div>
                         <div><label className="text-sm font-medium">Default Location</label><Input defaultValue="United States" className="mt-1" /></div>
                       </div>
@@ -1948,7 +1948,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>Crawling Settings</CardTitle><CardDescription>Configure site audit and crawling behavior</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">Crawl Frequency</label><Input defaultValue="Weekly" className="mt-1" /></div>
                         <div><label className="text-sm font-medium">Max Pages per Crawl</label><Input type="number" defaultValue="10000" className="mt-1" /></div>
                       </div>
@@ -1975,7 +1975,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>Tracking Settings</CardTitle><CardDescription>Configure rank tracking and keyword monitoring</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {[
                           { name: 'Desktop', desc: 'Google Desktop', enabled: true },
                           { name: 'Mobile', desc: 'Google Mobile', enabled: true },
@@ -2009,7 +2009,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>Integrations</CardTitle><CardDescription>Connect with SEO tools and services</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {[
                           { name: 'Google Search Console', status: 'connected', icon: '🔍' },
                           { name: 'Google Analytics', status: 'connected', icon: '📊' },
@@ -2040,7 +2040,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>Notification Settings</CardTitle><CardDescription>Configure SEO alerts and reports</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         <Card className="border"><CardContent className="p-4 text-center">
                           <Bell className="h-8 w-8 mx-auto mb-2 text-green-600" />
                           <p className="font-medium">Email Alerts</p><p className="text-sm text-gray-500">Enabled</p>
@@ -2081,7 +2081,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <Card>
                     <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and data management</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><label className="text-sm font-medium">API Rate Limit</label><Input type="number" defaultValue="1000" className="mt-1" /></div>
                         <div><label className="text-sm font-medium">Data Retention (days)</label><Input type="number" defaultValue="365" className="mt-1" /></div>
                       </div>
@@ -2097,7 +2097,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                       </div>
                       <div className="space-y-3">
                         <h4 className="font-medium">Data Management</h4>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                           <Button variant="outline" className="justify-start" onClick={() => handleExportData('Keywords')}><Download className="w-4 h-4 mr-2" />Export Keywords</Button>
                           <Button variant="outline" className="justify-start" onClick={() => handleExportData('Backlinks')}><Download className="w-4 h-4 mr-2" />Export Backlinks</Button>
                           <Button variant="outline" className="justify-start" onClick={() => handleExportData('Audit Report')}><Download className="w-4 h-4 mr-2" />Export Audit Report</Button>
@@ -2165,7 +2165,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             <ScrollArea className="max-h-[60vh] pr-4">
               <div className="space-y-6">
                 {/* Position History */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className={`text-3xl font-bold ${getPositionColor(selectedKeyword?.currentPosition ?? null)}`}>
                       {selectedKeyword?.currentPosition || '-'}
@@ -2187,7 +2187,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                 </div>
 
                 {/* Metrics */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-muted-foreground">Search Volume</span>

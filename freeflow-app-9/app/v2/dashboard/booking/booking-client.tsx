@@ -508,7 +508,7 @@ export default function BookingClient() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="bookingTitle">Booking Title *</Label>
                 <Input
@@ -535,7 +535,7 @@ export default function BookingClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="bookingDate">Date *</Label>
                 <Input
@@ -572,7 +572,7 @@ export default function BookingClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="clientName">Client Name *</Label>
                 <Input
@@ -645,7 +645,7 @@ export default function BookingClient() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="workingHoursStart">Working Hours Start</Label>
                 <Input
@@ -666,7 +666,7 @@ export default function BookingClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="bufferTime">Buffer Time (mins)</Label>
                 <select

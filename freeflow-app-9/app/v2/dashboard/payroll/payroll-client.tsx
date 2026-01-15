@@ -1344,7 +1344,7 @@ export default function PayrollClient() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 pt-3 border-t dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pt-3 border-t dark:border-gray-700">
                         <div className="text-center">
                           <div className="text-sm font-semibold text-gray-900 dark:text-white">
                             {formatCurrency(run.totalNet)}
@@ -1431,7 +1431,7 @@ export default function PayrollClient() {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-4 pt-3 border-t dark:border-gray-700">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pt-3 border-t dark:border-gray-700">
                             <div className="text-center">
                               <div className="text-sm font-semibold text-blue-600">{run.processed_count}/{run.total_employees}</div>
                               <div className="text-xs text-gray-500">Processed</div>
@@ -1662,7 +1662,7 @@ export default function PayrollClient() {
                           <span>{employee.email}</span>
                         </div>
                       </div>
-                      <div className="grid grid-cols-4 gap-8 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-6 text-center">
                         <div>
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {employee.salary > 0 ? formatCurrency(employee.salary) : `$${employee.hourlyRate}/hr`}
@@ -2244,7 +2244,7 @@ export default function PayrollClient() {
                     {selectedPayRun.status.replace('_', ' ')}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div className="text-sm text-gray-500">Pay Date</div>
                     <div className="font-semibold">{selectedPayRun.payDate}</div>
@@ -2316,7 +2316,7 @@ export default function PayrollClient() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div className="text-sm text-gray-500">Annual Salary</div>
                     <div className="font-semibold">{selectedEmployee.salary > 0 ? formatCurrency(selectedEmployee.salary) : `$${selectedEmployee.hourlyRate}/hr`}</div>
@@ -2382,7 +2382,7 @@ export default function PayrollClient() {
                   onChange={(e) => setFormState({ ...formState, pay_date: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="total_employees">Employees</Label>
                   <Input
@@ -2464,7 +2464,7 @@ export default function PayrollClient() {
               </div>
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input type="date" placeholder="Start Date" />
                   <Input type="date" placeholder="End Date" />
                 </div>
@@ -2582,7 +2582,7 @@ export default function PayrollClient() {
               </div>
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input type="date" placeholder="Start Date" />
                   <Input type="date" placeholder="End Date" />
                 </div>
@@ -2607,7 +2607,7 @@ export default function PayrollClient() {
               <DialogTitle>Add New Employee</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>First Name</Label>
                   <Input placeholder="John" />
@@ -2621,7 +2621,7 @@ export default function PayrollClient() {
                 <Label>Email</Label>
                 <Input type="email" placeholder="john.doe@company.com" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Department</Label>
                   <select className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-700">
@@ -2642,7 +2642,7 @@ export default function PayrollClient() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Salary</Label>
                   <Input type="number" placeholder="75000" />
@@ -3391,7 +3391,7 @@ export default function PayrollClient() {
                   <option value="hsa">HSA</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Employer Contribution</Label>
                   <Input type="number" placeholder="0" />
@@ -3673,7 +3673,7 @@ export default function PayrollClient() {
                 <Label>Date</Label>
                 <Input type="date" />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Regular Hours</Label>
                   <Input type="number" placeholder="8" />
@@ -3719,7 +3719,7 @@ export default function PayrollClient() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4">
                 <Button className="bg-green-500 text-white" onClick={() => {
                     const now = new Date().toLocaleTimeString()
                     toast.success(`Clocked in at ${now}`, { description: 'Have a productive day!' })
@@ -3874,7 +3874,7 @@ export default function PayrollClient() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input type="date" />
                   <Input type="date" />
                 </div>
@@ -4248,7 +4248,7 @@ export default function PayrollClient() {
             </DialogHeader>
             {selectedEmployee && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Name</Label>
                     <Input defaultValue={selectedEmployee.name} />
@@ -4258,7 +4258,7 @@ export default function PayrollClient() {
                     <Input defaultValue={selectedEmployee.email} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Department</Label>
                     <Input defaultValue={selectedEmployee.department} />
@@ -4268,7 +4268,7 @@ export default function PayrollClient() {
                     <Input defaultValue={selectedEmployee.role} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Salary</Label>
                     <Input type="number" defaultValue={selectedEmployee.salary} />

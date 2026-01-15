@@ -845,7 +845,7 @@ export default function ReportsClient() {
                   </div>
 
                   {dashboardsLoading ? (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {[1, 2, 3, 4, 5, 6].map(i => (
                         <ReportCardSkeleton key={i} />
                       ))}
@@ -858,7 +858,7 @@ export default function ReportsClient() {
                       actionLabel="Create Report"
                     />
                   ) : (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {filteredReports.map(report => renderReportCard(report))}
                     </div>
                   )}
@@ -1014,13 +1014,13 @@ export default function ReportsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="col-span-2 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle>Chart Types</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {chartTypes.map(chart => (
                       <div
                         key={chart.type}
@@ -1369,7 +1369,7 @@ export default function ReportsClient() {
                       <div className="text-2xl font-bold">{reports.length}</div>
                       <div className="text-xs opacity-80">Total Reports</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
                         <div className="text-lg font-semibold">{formatNumber(reports.reduce((sum, r) => sum + r.views, 0))}</div>
                         <div className="text-xs opacity-80">Views</div>
@@ -1396,7 +1396,7 @@ export default function ReportsClient() {
                         <CardDescription>Configure default settings for new reports</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <Select defaultValue="dashboard">
@@ -1668,7 +1668,7 @@ export default function ReportsClient() {
                   </DialogHeader>
 
                   {/* Stats Row */}
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedReport.views)}</p>
                       <p className="text-sm text-gray-500">Views</p>
@@ -1688,7 +1688,7 @@ export default function ReportsClient() {
                   </div>
 
                   {/* Details */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <h4 className="font-medium mb-2">Data Source</h4>
                       <p className="text-gray-600">{selectedReport.dataSource}</p>
@@ -1796,7 +1796,7 @@ export default function ReportsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Report Type</Label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {[
                     { type: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', color: 'purple' },
                     { type: 'chart', icon: BarChart3, label: 'Chart', color: 'blue' },

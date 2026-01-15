@@ -572,7 +572,7 @@ export default function PerformanceAnalyticsPage() {
                         {project.status}
                       </Badge>
                     </div>
-                    <div className="grid grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-600 dark:text-gray-400">Value</p>
                         <p className="font-semibold text-green-600 dark:text-green-400">${project.value.toLocaleString()}</p>

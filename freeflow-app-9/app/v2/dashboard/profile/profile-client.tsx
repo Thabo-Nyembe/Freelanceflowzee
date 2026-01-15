@@ -3065,7 +3065,7 @@ export default function ProfileClient() {
               <div className="space-y-4 py-4">
                 <div>
                   <Label>Select a Skill to Assess</Label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                     {mockSkills.slice(0, 6).map((skill) => (
                       <Button
                         key={skill.id}
@@ -3154,7 +3154,7 @@ export default function ProfileClient() {
               <div className="space-y-4 py-4">
                 <div>
                   <Label>Select Skills to Get Endorsed</Label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                     {mockSkills.slice(0, 6).map((skill) => (
                       <div key={skill.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
                         <Switch />
@@ -3201,7 +3201,7 @@ export default function ProfileClient() {
                 <DialogTitle className="flex items-center gap-2"><Award className="w-5 h-5 text-cyan-600" />Add Badge</DialogTitle>
                 <DialogDescription>Select a badge to display on your profile</DialogDescription>
               </DialogHeader>
-              <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 py-4">
                 {[
                   { name: 'Open to Work', icon: Target, color: 'from-green-500 to-emerald-600' },
                   { name: 'Hiring', icon: Briefcase, color: 'from-purple-500 to-indigo-600' },
@@ -3543,7 +3543,7 @@ export default function ProfileClient() {
                     onChange={(e) => setEventFormData(prev => ({ ...prev, description: e.target.value }))}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Date</Label>
                     <Input
@@ -3645,7 +3645,7 @@ export default function ProfileClient() {
                     onChange={(e) => setSchedulePostData(prev => ({ ...prev, content: e.target.value }))}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Date</Label>
                     <Input

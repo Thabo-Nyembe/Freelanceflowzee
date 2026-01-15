@@ -1014,7 +1014,7 @@ export default function EmployeesClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[{ type: 'Vacation', icon: Plane, available: 12, used: 3, total: 15, color: 'blue' }, { type: 'Sick Leave', icon: Heart, available: 8, used: 2, total: 10, color: 'red' }, { type: 'Personal', icon: Coffee, available: 3, used: 0, total: 3, color: 'purple' }, { type: 'Parental', icon: Home, available: 12, used: 0, total: 12, color: 'green' }].map(balance => (
                 <Card key={balance.type} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="pt-4">
@@ -1083,7 +1083,7 @@ export default function EmployeesClient() {
 
             {performanceTab === 'reviews' && (
               <>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                   <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-blue-600">{stats.avgPerformance}%</p><p className="text-sm text-gray-500 mt-2">Average Performance Score</p></CardContent></Card>
                   <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-green-600">{mockReviews.filter(r => r.status === 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Completed Reviews</p></CardContent></Card>
                   <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-amber-600">{mockReviews.filter(r => r.status !== 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Pending Reviews</p></CardContent></Card>
@@ -1097,7 +1097,7 @@ export default function EmployeesClient() {
                           <div className="flex items-center gap-3"><Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{review.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><div><p className="font-medium">{review.employeeName}</p><p className="text-sm text-gray-500">{review.period} • Reviewer: {review.reviewerName}</p></div></div>
                           <div className="text-right"><p className="text-2xl font-bold text-blue-600">{review.overallScore}/5</p><Badge className={getStatusColor(review.status)}>{review.status.replace('_', ' ')}</Badge></div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                           <div><p className="font-medium text-green-600 mb-1">Strengths</p><ul className="text-gray-500 space-y-1">{review.strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
                           <div><p className="font-medium text-orange-600 mb-1">Areas to Improve</p><ul className="text-gray-500 space-y-1">{review.improvements.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
                           <div><p className="font-medium text-blue-600 mb-1">Goals</p><ul className="text-gray-500 space-y-1">{review.goals.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
@@ -1134,7 +1134,7 @@ export default function EmployeesClient() {
             )}
 
             {performanceTab === 'metrics' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Metrics</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
@@ -1193,7 +1193,7 @@ export default function EmployeesClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <Card className="md:col-span-2">
                 <CardHeader><CardTitle>Onboarding Progress - Jordan Lee</CardTitle></CardHeader>
                 <CardContent>
@@ -1267,7 +1267,7 @@ export default function EmployeesClient() {
 
             {compensationTab === 'salary' && (
               <>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(stats.totalPayroll / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Annual Payroll</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg Salary</p></CardContent></Card>
@@ -1297,7 +1297,7 @@ export default function EmployeesClient() {
 
             {compensationTab === 'benefits' && (
               <>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${mockBenefits.reduce((sum, b) => sum + b.employerContribution, 0).toLocaleString()}</p><p className="text-sm text-gray-500">Monthly Employer Cost</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockBenefits.filter(b => b.enrollmentStatus === 'enrolled').length}/{mockBenefits.length}</p><p className="text-sm text-gray-500">Enrolled Benefits</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">95%</p><p className="text-sm text-gray-500">Enrollment Rate</p></CardContent></Card>
@@ -1332,11 +1332,11 @@ export default function EmployeesClient() {
             )}
 
             {compensationTab === 'equity' && (
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Equity Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity Pool</p></div>
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg per Employee</p></div>
                     </div>
@@ -1356,7 +1356,7 @@ export default function EmployeesClient() {
                     <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200">
                       <h4 className="font-medium mb-2">Standard 4-Year Vesting</h4>
                       <p className="text-sm text-gray-600 mb-3">1-year cliff, then monthly vesting over 36 months</p>
-                      <div className="grid grid-cols-4 gap-2 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6 text-center">
                         {[25, 50, 75, 100].map((pct, i) => (
                           <div key={i} className="p-2 bg-white dark:bg-gray-800 rounded"><p className="text-lg font-bold text-amber-600">{pct}%</p><p className="text-xs text-gray-500">Year {i + 1}</p></div>
                         ))}
@@ -1397,7 +1397,7 @@ export default function EmployeesClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockCourses.length}</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
               <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{mockCourses.filter(c => c.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
               <Card><CardContent className="p-4"><p className="text-2xl font-bold text-blue-600">{mockCourses.filter(c => c.status === 'in_progress').length}</p><p className="text-sm text-gray-500">In Progress</p></CardContent></Card>
@@ -1485,7 +1485,7 @@ export default function EmployeesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Company Name</Label>
                             <Input defaultValue="Acme Corp" />
@@ -1505,7 +1505,7 @@ export default function EmployeesClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Fiscal Year Start</Label>
                             <Select defaultValue="january">
@@ -1574,7 +1574,7 @@ export default function EmployeesClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Annual PTO Days</Label>
                             <Select defaultValue="20">
@@ -1615,7 +1615,7 @@ export default function EmployeesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Review Cycle</Label>
                             <Select defaultValue="quarterly">
@@ -1752,7 +1752,7 @@ export default function EmployeesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Digest Frequency</Label>
                             <Select defaultValue="daily">
@@ -2011,7 +2011,7 @@ export default function EmployeesClient() {
                             <Button variant="outline" size="sm" onClick={() => copyToClipboard('hr_live_xxxxxxxxxxxxxxxxxxxxxxx', 'API key copied to clipboard')}>Copy</Button>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="text-2xl font-bold">8,456</div>
                             <div className="text-sm text-gray-500">API Calls (30 days)</div>
@@ -2142,7 +2142,7 @@ export default function EmployeesClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <div className="text-2xl font-bold">{mockEmployees.length}</div>
                             <div className="text-sm text-gray-500">Employees</div>
@@ -2380,13 +2380,13 @@ export default function EmployeesClient() {
                     <Avatar className="h-20 w-20"><AvatarFallback className="bg-blue-100 text-blue-700 text-2xl">{selectedEmployee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
                     <div><h2 className="text-2xl font-bold">{selectedEmployee.name}</h2><p className="text-gray-500">{selectedEmployee.position}</p><Badge className={getDepartmentColor(selectedEmployee.department)}>{selectedEmployee.department}</Badge></div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Email</p><p className="font-medium">{selectedEmployee.email}</p></div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Location</p><p className="font-medium">{selectedEmployee.location}</p></div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Manager</p><p className="font-medium">{selectedEmployee.manager || 'N/A'}</p></div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Hire Date</p><p className="font-medium">{selectedEmployee.hireDate}</p></div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">{selectedEmployee.performanceScore > 0 ? `${selectedEmployee.performanceScore}%` : 'N/A'}</p><p className="text-sm text-gray-500">Performance</p></div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><p className="text-3xl font-bold text-purple-600">{selectedEmployee.projectsCount}</p><p className="text-sm text-gray-500">Projects</p></div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">{selectedEmployee.directReports}</p><p className="text-sm text-gray-500">Direct Reports</p></div>
@@ -2438,7 +2438,7 @@ export default function EmployeesClient() {
             <div className="space-y-4 py-4">
               <div><Label>Full Name</Label><Input placeholder="John Doe" className="mt-1" value={newEmployeeForm.name} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div><Label>Email</Label><Input type="email" placeholder="john@company.com" className="mt-1" value={newEmployeeForm.email} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, email: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Department</Label><Select value={newEmployeeForm.department} onValueChange={(value) => setNewEmployeeForm(prev => ({ ...prev, department: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="engineering">Engineering</SelectItem><SelectItem value="design">Design</SelectItem><SelectItem value="product">Product</SelectItem><SelectItem value="marketing">Marketing</SelectItem></SelectContent></Select></div><div><Label>Position</Label><Input placeholder="Software Engineer" className="mt-1" value={newEmployeeForm.position} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, position: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Department</Label><Select value={newEmployeeForm.department} onValueChange={(value) => setNewEmployeeForm(prev => ({ ...prev, department: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="engineering">Engineering</SelectItem><SelectItem value="design">Design</SelectItem><SelectItem value="product">Product</SelectItem><SelectItem value="marketing">Marketing</SelectItem></SelectContent></Select></div><div><Label>Position</Label><Input placeholder="Software Engineer" className="mt-1" value={newEmployeeForm.position} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, position: e.target.value }))} /></div></div>
               <div><Label>Start Date</Label><Input type="date" className="mt-1" value={newEmployeeForm.startDate} onChange={(e) => setNewEmployeeForm(prev => ({ ...prev, startDate: e.target.value }))} /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateEmployee} disabled={creating || !newEmployeeForm.name || !newEmployeeForm.email}>{creating ? 'Adding...' : 'Add Employee'}</Button></DialogFooter>
@@ -2479,7 +2479,7 @@ export default function EmployeesClient() {
               <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{mockEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Goal Title</Label><Input placeholder="Lead Q1 Feature Development" className="mt-1" /></div>
               <div><Label>Description</Label><Input placeholder="Describe the goal..." className="mt-1" /></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="performance">Performance</SelectItem><SelectItem value="development">Development</SelectItem><SelectItem value="team">Team</SelectItem><SelectItem value="company">Company</SelectItem></SelectContent></Select></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="performance">Performance</SelectItem><SelectItem value="development">Development</SelectItem><SelectItem value="team">Team</SelectItem><SelectItem value="company">Company</SelectItem></SelectContent></Select></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Key Results</Label>
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
@@ -2522,7 +2522,7 @@ export default function EmployeesClient() {
             <div className="space-y-4 py-4">
               <div><Label>Survey Title</Label><Input placeholder="Q1 2024 Employee Engagement" className="mt-1" /></div>
               <div><Label>Survey Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="engagement">Engagement Survey</SelectItem><SelectItem value="pulse">Pulse Check</SelectItem><SelectItem value="feedback">Feedback Survey</SelectItem><SelectItem value="exit">Exit Interview</SelectItem></SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Start Date</Label><Input type="date" className="mt-1" /></div><div><Label>Close Date</Label><Input type="date" className="mt-1" /></div></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Date</Label><Input type="date" className="mt-1" /></div><div><Label>Close Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
             </div>
@@ -2595,7 +2595,7 @@ export default function EmployeesClient() {
                   onChange={(e) => setEditEmployeeForm(prev => ({ ...prev, phone: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Department</Label>
                   <Select

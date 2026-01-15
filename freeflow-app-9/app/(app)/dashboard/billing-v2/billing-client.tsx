@@ -1225,7 +1225,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-6 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-6">
                     {['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => {
                       const revenue = [8500, 9200, 10100, 11500, 12800, stats.mrr * 1.1][idx]
                       const max = 15000
@@ -2875,7 +2875,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                 onChange={(e) => setNewCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Discount Type</label>
                 <select
@@ -2961,7 +2961,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                 onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, clientName: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (USD) *</label>
                 <Input

@@ -1025,7 +1025,7 @@ export default function UserManagementPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
@@ -1052,7 +1052,7 @@ export default function UserManagementPage() {
                 onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select
@@ -1169,7 +1169,7 @@ export default function UserManagementPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Card className="p-4">
                     <div className="text-sm text-muted-foreground mb-1">Department</div>
                     <div className="font-medium">{selectedUser.department || 'Not assigned'}</div>
@@ -1190,7 +1190,7 @@ export default function UserManagementPage() {
 
                 <div>
                   <h4 className="font-semibold mb-3">Activity Stats</h4>
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                     <div className="text-center p-3 bg-muted rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">{selectedUser.metadata.totalProjects}</div>
                       <div className="text-xs text-muted-foreground">Projects</div>
@@ -1274,7 +1274,7 @@ export default function UserManagementPage() {
                   <Label>Email</Label>
                   <div className="p-2 bg-muted rounded-md">{selectedInvitation.email}</div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Role</Label>
                     <Badge variant="outline">{selectedInvitation.role}</Badge>
@@ -1284,7 +1284,7 @@ export default function UserManagementPage() {
                     <Badge variant="secondary">{selectedInvitation.status || 'Pending'}</Badge>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Invited</Label>
                     <div className="text-sm">{formatLastActive(selectedInvitation.invitedAt)}</div>

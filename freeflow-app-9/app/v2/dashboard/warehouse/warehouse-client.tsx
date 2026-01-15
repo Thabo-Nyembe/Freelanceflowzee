@@ -922,7 +922,7 @@ export default function WarehouseClient() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1723,7 +1723,7 @@ export default function WarehouseClient() {
                           <Progress value={utilization} className="h-2" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                           <div>
                             <p className="text-gray-500 dark:text-gray-400">Capacity</p>
                             <p className="font-medium text-gray-900 dark:text-white">{zone.capacity_units.toLocaleString()} units</p>
@@ -2378,7 +2378,7 @@ export default function WarehouseClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Location</p>
                   <p className="font-medium">{selectedItem.bin_location}</p>
@@ -2470,7 +2470,7 @@ export default function WarehouseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="sku">SKU *</Label>
                 <Input
@@ -2490,7 +2490,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
@@ -2522,7 +2522,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="zone">Zone</Label>
                 <Select
@@ -2549,7 +2549,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="unitCost">Unit Cost ($)</Label>
                 <Input
@@ -2684,7 +2684,7 @@ export default function WarehouseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="poNumber">PO Number *</Label>
                 <Input
@@ -2704,7 +2704,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="carrier">Carrier</Label>
                 <Select
@@ -2889,7 +2889,7 @@ export default function WarehouseClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="fromLocation">From Location *</Label>
                 <Input
@@ -2965,7 +2965,7 @@ export default function WarehouseClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-3">
               <Label>What to Export</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {[
                   { label: 'Inventory', icon: Package },
                   { label: 'Tasks', icon: ClipboardList },
@@ -3075,7 +3075,7 @@ export default function WarehouseClient() {
             />
             <div className="space-y-2">
               <Label>Scan Mode</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 {[
                   { label: 'Receive Items', icon: ArrowDownLeft },
                   { label: 'Pick Items', icon: Package },
@@ -3116,7 +3116,7 @@ export default function WarehouseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="taskType">Task Type *</Label>
                 <Select
@@ -3174,7 +3174,7 @@ export default function WarehouseClient() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="taskFrom">From Location</Label>
                 <Input
@@ -3194,7 +3194,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="taskQty">Quantity</Label>
                 <Input
@@ -3258,7 +3258,7 @@ export default function WarehouseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="editSku">SKU *</Label>
                 <Input
@@ -3276,7 +3276,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="editCategory">Category</Label>
                 <Select
@@ -3307,7 +3307,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="editZone">Zone</Label>
                 <Select
@@ -3333,7 +3333,7 @@ export default function WarehouseClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label htmlFor="editUnitCost">Unit Cost ($)</Label>
                 <Input
@@ -3709,7 +3709,7 @@ export default function WarehouseClient() {
           </DialogHeader>
           {selectedZone && (
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedZone.bin_count}</p>
                   <p className="text-sm text-gray-500">Total Bins</p>

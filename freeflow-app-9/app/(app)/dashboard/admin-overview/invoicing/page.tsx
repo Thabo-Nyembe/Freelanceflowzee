@@ -590,7 +590,7 @@ export default function InvoicingPage() {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
                 <div className="text-sm text-blue-600 mb-1">Total Invoiced</div>
                 <div className="text-2xl font-bold text-blue-700">
@@ -710,7 +710,7 @@ export default function InvoicingPage() {
                             )}
                           </div>
 
-                          <div className="grid grid-cols-4 gap-4 text-sm mb-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm mb-3">
                             <div>
                               <div className="text-xs text-gray-600 mb-1">Client</div>
                               <div className="font-medium text-gray-800">{invoice.clientName}</div>
@@ -849,7 +849,7 @@ export default function InvoicingPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                 <div className="bg-blue-50 rounded-lg p-3">
                   <div className="text-sm text-blue-600 mb-1">Total Amount</div>
                   <div className="text-2xl font-bold text-blue-700">{formatCurrency(selectedInvoice.total)}</div>

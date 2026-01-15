@@ -2189,7 +2189,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-2xl font-bold">{selectedArticle?.views.toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">Views</p>
@@ -2326,7 +2326,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="article-space">Space *</Label>
                     <select
@@ -2360,7 +2360,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label htmlFor="article-level">Difficulty Level</Label>
                     <select
@@ -2626,7 +2626,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <Timer className="w-4 h-4 text-cyan-600" />
                     Reading Time Insights
                   </h4>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-xl font-bold">{stats.avgReadTime}m</p>
                       <p className="text-xs text-muted-foreground">Avg Read Time</p>

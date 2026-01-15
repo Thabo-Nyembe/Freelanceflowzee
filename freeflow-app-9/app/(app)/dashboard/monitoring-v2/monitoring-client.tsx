@@ -960,7 +960,7 @@ export default function MonitoringClient() {
                             </span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 text-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
                           <div>
                             <p className={`text-lg font-bold ${getMetricColor(host.cpu_usage, 80)}`}>
                               {host.cpu_usage}%
@@ -1009,7 +1009,7 @@ export default function MonitoringClient() {
                     <CardDescription>{service.type} • v{service.version}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-4">
                       <div className="text-center">
                         <p className="text-lg font-bold">{service.requests_per_sec}</p>
                         <p className="text-xs text-gray-500">req/s</p>
@@ -1342,7 +1342,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure your monitoring organization</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Organization Name</Label>
                             <Input defaultValue="Production Infrastructure" />
@@ -1352,7 +1352,7 @@ export default function MonitoringClient() {
                             <Input defaultValue="org-prod-12345" readOnly className="font-mono" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Region</Label>
                             <Select defaultValue="us-west-2">
@@ -1398,7 +1398,7 @@ export default function MonitoringClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Refresh Interval</Label>
                             <Select defaultValue="30">
@@ -1450,7 +1450,7 @@ export default function MonitoringClient() {
                         <CardDescription>Global agent settings and defaults</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Agent Version (Target)</Label>
                             <Select defaultValue="7.45.0">
@@ -1643,7 +1643,7 @@ export default function MonitoringClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>First Escalation</Label>
                             <Select defaultValue="15">
@@ -1689,7 +1689,7 @@ export default function MonitoringClient() {
                           </div>
                           <Switch />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Start Time</Label>
                             <Input type="time" defaultValue="22:00" />
@@ -1713,7 +1713,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure CPU usage alert thresholds</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label className="text-yellow-600">Warning</Label>
                             <div className="flex items-center gap-2">
@@ -1758,7 +1758,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure memory usage alert thresholds</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label className="text-yellow-600">Warning</Label>
                             <div className="flex items-center gap-2">
@@ -1790,7 +1790,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure disk usage alert thresholds</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label className="text-yellow-600">Warning</Label>
                             <div className="flex items-center gap-2">
@@ -1822,7 +1822,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure network alert thresholds</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Packet Loss Warning</Label>
                             <div className="flex items-center gap-2">
@@ -1852,7 +1852,7 @@ export default function MonitoringClient() {
                         <CardDescription>Connect cloud providers for enhanced monitoring</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           {[
                             { name: 'AWS', connected: true, description: 'EC2, RDS, S3, Lambda metrics' },
                             { name: 'Google Cloud', connected: false, description: 'GCE, Cloud SQL, GKE metrics' },
@@ -1968,7 +1968,7 @@ export default function MonitoringClient() {
                         <CardDescription>Configure data retention policies</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Metrics Retention</Label>
                             <Select defaultValue="15m">
@@ -1998,7 +1998,7 @@ export default function MonitoringClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Traces Retention</Label>
                             <Select defaultValue="15d">
@@ -2222,7 +2222,7 @@ export default function MonitoringClient() {
                   <Badge variant="outline">{selectedHost.os}</Badge>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="p-4 border rounded-lg text-center">
                     <Cpu className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                     <p className={`text-2xl font-bold ${getMetricColor(selectedHost.cpu_usage, 80)}`}>
@@ -2251,7 +2251,7 @@ export default function MonitoringClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-xs text-gray-500 mb-1">Region / AZ</p>
                     <p className="font-medium">{selectedHost.region} / {selectedHost.availability_zone}</p>
@@ -2361,7 +2361,7 @@ export default function MonitoringClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
                   <Input
@@ -2417,7 +2417,7 @@ export default function MonitoringClient() {
                   onChange={(e) => setAlertForm(prev => ({ ...prev, title: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="alert_type">Alert Type</Label>
                   <Select
@@ -2557,7 +2557,7 @@ export default function MonitoringClient() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Alert Thresholds</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   <div className="p-3 border rounded-lg">
                     <Label className="text-xs text-gray-500">CPU Warning</Label>
                     <Input type="number" defaultValue={70} className="mt-1" />
@@ -2652,7 +2652,7 @@ export default function MonitoringClient() {
                   <p className="text-sm">Select metrics and time range to visualize data</p>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 {[
                   { label: 'Current', value: '42%', color: 'text-green-600' },
                   { label: 'Average', value: '38%', color: 'text-blue-600' },

@@ -1789,7 +1789,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 text-sm mb-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-sm mb-3">
                         <div>
                           <p className="text-muted-foreground">Occurrences</p>
                           <p className="font-semibold text-red-600">{crash.occurrences}</p>
@@ -2204,7 +2204,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                         <CardDescription>General app settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Application Name</Label>
                             <Input defaultValue="MyApp Desktop" className="mt-1" />
@@ -2214,7 +2214,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                             <Input defaultValue="com.myapp.desktop" className="mt-1 font-mono" />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Current Version</Label>
                             <Input defaultValue="2.4.0" className="mt-1" />
@@ -2232,7 +2232,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Total Downloads</p>
                             <p className="text-2xl font-bold">234.5K</p>
@@ -2255,7 +2255,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                         <CardDescription>Default window settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Width</Label>
                             <Input type="number" defaultValue="1280" className="mt-1" />
@@ -2519,7 +2519,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Avg Full Update</p>
                             <p className="text-xl font-bold">85 MB</p>
@@ -2667,7 +2667,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                         <CardDescription>Apple platform settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Bundle ID</Label>
                             <Input defaultValue="com.myapp.desktop" className="mt-1 font-mono" />
@@ -2882,7 +2882,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="text-sm text-gray-500">Last 24h Crashes</p>
                             <p className="text-xl font-bold text-red-600">12</p>
@@ -3033,7 +3033,7 @@ Date: ${new Date().toISOString().split('T')[0]}
           </DialogHeader>
           <div className="space-y-6">
             <p className="text-muted-foreground">Select your platform to download the latest version (v2.5.0)</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {(['windows', 'macos', 'linux'] as Platform[]).map((platform) => (
                 <Card
                   key={platform}
@@ -3137,7 +3137,7 @@ Date: ${new Date().toISOString().split('T')[0]}
             <p className="text-muted-foreground">Export your desktop app data including builds, projects, and analytics.</p>
             <div className="space-y-3">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {(['json', 'csv', 'xml'] as const).map((format) => (
                   <Button
                     key={format}
@@ -3344,7 +3344,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Include Commits</Label>
                 <Select defaultValue="all">
@@ -3389,7 +3389,7 @@ Date: ${new Date().toISOString().split('T')[0]}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Build Type</Label>
                 <Select defaultValue="production">

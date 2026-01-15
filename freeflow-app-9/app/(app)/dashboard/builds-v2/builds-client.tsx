@@ -1345,7 +1345,7 @@ export default function BuildsClient() {
                           </Badge>
                         ))}
                       </div>
-                      <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 text-center">
                         <div>
                           <p className="text-lg font-bold text-gray-900 dark:text-white">{workflow.total_runs}</p>
                           <p className="text-xs text-gray-500">Total Runs</p>
@@ -1449,7 +1449,7 @@ export default function BuildsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <p className="text-2xl font-bold text-gray-900 dark:text-white">{env.total_deployments}</p>
                           <p className="text-xs text-gray-500">Deployments</p>
@@ -1694,7 +1694,7 @@ export default function BuildsClient() {
                           </p>
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm">
                         <div>
                           <p className="text-gray-500 text-xs">Total Jobs</p>
                           <p className="font-semibold">{runner.total_jobs_run.toLocaleString()}</p>
@@ -2073,7 +2073,7 @@ export default function BuildsClient() {
               <div className="space-y-6">
                 <p className="text-gray-600 dark:text-gray-300">{selectedWorkflow.description}</p>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-2xl font-bold">{selectedWorkflow.total_runs}</p>
                     <p className="text-sm text-gray-500">Total Runs</p>

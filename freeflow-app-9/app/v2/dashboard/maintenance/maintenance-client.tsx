@@ -1608,7 +1608,7 @@ export default function MaintenanceClient() {
                                   <Badge className={getTypeColor(order.type)}>{order.type}</Badge>
                                 </div>
                                 <p className="text-sm text-gray-600">{order.description}</p>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                   <div>
                                     <h4 className="font-semibold mb-1">Asset</h4>
                                     <p className="text-sm text-gray-600">{order.asset}</p>
@@ -1699,7 +1699,7 @@ export default function MaintenanceClient() {
                           </div>
                           <div className="text-right">
                             <Badge className={getAssetStatusColor(asset.status)}>{asset.status}</Badge>
-                            <div className="mt-2 grid grid-cols-2 gap-4 text-xs">
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-xs">
                               <div>
                                 <p className="text-gray-500">Uptime</p>
                                 <p className="font-semibold">{asset.uptime}%</p>
@@ -1738,7 +1738,7 @@ export default function MaintenanceClient() {
                         <Badge className={getTypeColor(schedule.type)}>{schedule.type}</Badge>
                         <Badge variant="outline">{schedule.frequency}</Badge>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4">
                         <div>
                           <p className="text-xs text-gray-500">Last Run</p>
                           <p className="text-sm font-medium">{formatDate(schedule.lastRun)}</p>
@@ -2575,7 +2575,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Schedule a new maintenance window for your systems</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Title *</Label>
                 <Input
@@ -2807,7 +2807,7 @@ export default function MaintenanceClient() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="grid grid-cols-3 gap-4 text-xs mb-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-xs mb-2">
                       <div>
                         <p className="text-gray-500">Uptime</p>
                         <p className="font-semibold">{asset.uptime}%</p>
@@ -2923,7 +2923,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Add a new part to the inventory system</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Part Name *</Label>
                 <Input
@@ -3054,7 +3054,7 @@ export default function MaintenanceClient() {
             <DialogDescription>Add a new technician to the maintenance team</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Full Name *</Label>
                 <Input
@@ -3162,7 +3162,7 @@ export default function MaintenanceClient() {
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                 <h4 className="font-semibold text-gray-900 dark:text-white">{selectedPart.name}</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">Part #: {selectedPart.partNumber}</p>
-                <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-3 text-sm">
                   <div>
                     <p className="text-gray-500">Current Stock</p>
                     <p className="font-semibold text-red-600">{selectedPart.quantity} units</p>

@@ -1509,7 +1509,7 @@ export default function PerformanceClient() {
                         <CardDescription>Configure performance monitoring settings</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default URL</Label>
                             <Input defaultValue="https://yoursite.com" />
@@ -1531,7 +1531,7 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default Device</Label>
                             <Select defaultValue="mobile">
@@ -1806,7 +1806,7 @@ export default function PerformanceClient() {
                         <CardDescription>Set performance thresholds</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>LCP Target (ms)</Label>
                             <Input type="number" defaultValue="2500" />
@@ -1819,7 +1819,7 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>CLS Target</Label>
                             <Input type="number" step="0.01" defaultValue="0.1" />
@@ -1832,7 +1832,7 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Total Blocking Time (ms)</Label>
                             <Input type="number" defaultValue="200" />
@@ -1854,7 +1854,7 @@ export default function PerformanceClient() {
                         <CardDescription>Limit resource sizes</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Total Page Size (KB)</Label>
                             <Input type="number" defaultValue="1500" />
@@ -1865,7 +1865,7 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>CSS (KB)</Label>
                             <Input type="number" defaultValue="100" />
@@ -1876,7 +1876,7 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Fonts (KB)</Label>
                             <Input type="number" defaultValue="100" />
@@ -1908,7 +1908,7 @@ export default function PerformanceClient() {
                           <Input placeholder="https://your-service.com/webhook" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="flex items-center space-x-2">
                             <Switch id="wh-complete" defaultChecked />
                             <Label htmlFor="wh-complete">Test Complete</Label>
@@ -2112,7 +2112,7 @@ export default function PerformanceClient() {
                           <Badge className="bg-emerald-600">Active</Badge>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                             <p className="text-2xl font-bold text-emerald-600">{mockHistoricalTests.length}</p>
                             <p className="text-xs text-gray-500">Tests Run</p>
@@ -2333,7 +2333,7 @@ export default function PerformanceClient() {
                 placeholder="e.g., JavaScript Bundle Size"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Metric Type

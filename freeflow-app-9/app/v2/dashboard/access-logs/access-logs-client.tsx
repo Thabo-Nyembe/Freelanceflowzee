@@ -2397,7 +2397,7 @@ export default function AccessLogsClient() {
                   )}
 
                   {/* Location & Device */}
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <div>
                       <h3 className="font-semibold mb-3 flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
@@ -2550,7 +2550,7 @@ export default function AccessLogsClient() {
             {/* Format Selection */}
             <div>
               <label className="text-sm font-medium mb-3 block">Export Format</label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {[
                   { value: 'csv', label: 'CSV', icon: FileText, description: 'Spreadsheet compatible' },
                   { value: 'json', label: 'JSON', icon: Code, description: 'Developer friendly' },
@@ -2576,7 +2576,7 @@ export default function AccessLogsClient() {
             {/* Date Range */}
             <div>
               <label className="text-sm font-medium mb-3 block">Date Range</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                 {[
                   { value: '24h', label: 'Last 24h' },
                   { value: '7d', label: 'Last 7 days' },
@@ -2656,7 +2656,7 @@ export default function AccessLogsClient() {
             {/* Audit Scope */}
             <div>
               <label className="text-sm font-medium mb-3 block">Audit Scope</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { value: 'full', label: 'Full Audit', icon: Shield, description: 'Complete security analysis' },
                   { value: 'security', label: 'Security Only', icon: ShieldAlert, description: 'Focus on threats' },
@@ -2683,7 +2683,7 @@ export default function AccessLogsClient() {
             {/* Audit Depth */}
             <div>
               <label className="text-sm font-medium mb-3 block">Audit Depth</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {[
                   { value: 'quick', label: 'Quick', time: '~30 sec' },
                   { value: 'standard', label: 'Standard', time: '~2 min' },
@@ -2716,7 +2716,7 @@ export default function AccessLogsClient() {
                   }`}>{auditResults.score}/100</span>
                 </div>
                 <Progress value={auditResults.score} className="h-3" />
-                <div className="grid grid-cols-3 gap-4 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pt-2">
                   <div className="text-center">
                     <div className="text-xl font-bold text-red-500">{auditResults.issues}</div>
                     <div className="text-xs text-gray-500">Issues</div>
@@ -2834,7 +2834,7 @@ export default function AccessLogsClient() {
             {/* Time Window */}
             <div>
               <label className="text-sm font-medium mb-3 block">Time Window</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                 {[
                   { value: '1m', label: '1 min' },
                   { value: '5m', label: '5 min' },
@@ -2926,7 +2926,7 @@ export default function AccessLogsClient() {
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Status</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {['all', 'success', 'failed', 'blocked', 'warning'].map(status => (
                   <button
                     key={status}
@@ -2944,7 +2944,7 @@ export default function AccessLogsClient() {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Level</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {['all', 'debug', 'info', 'warn', 'error', 'critical'].map(level => (
                   <button
                     key={level}
@@ -2962,7 +2962,7 @@ export default function AccessLogsClient() {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Access Type</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {['all', 'login', 'logout', 'api', 'admin', 'file', 'database'].map(type => (
                   <button
                     key={type}
@@ -3236,7 +3236,7 @@ export default function AccessLogsClient() {
           <div className="space-y-4 py-4">
             {selectedLog && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <h4 className="font-medium mb-2">Session Info</h4>
                     <div className="space-y-2 text-sm">

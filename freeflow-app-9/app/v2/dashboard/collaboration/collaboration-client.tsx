@@ -688,7 +688,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Create and collaborate on whiteboards, flowcharts, wireframes, and more. Real-time editing with your team across all board types.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalBoards}</div>
                     <div className="text-xs text-white/70">Total Boards</div>
@@ -786,7 +786,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Real-time messaging with your team. Share files, react with emojis, and stay connected across all your channels.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockChannels.length}</div>
                     <div className="text-xs text-white/70">Channels</div>
@@ -969,7 +969,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Host and join video meetings with your team. Record sessions, share screens, and collaborate in real-time with HD video and audio.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockMeetings.length}</div>
                     <div className="text-xs text-white/70">Total Meetings</div>
@@ -1020,7 +1020,7 @@ export default function CollaborationClient() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
               {mockMeetings.map(meeting => (
                 <Card key={meeting.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
@@ -1036,7 +1036,7 @@ export default function CollaborationClient() {
                       </div>
                       <Badge className={getMeetingStatusColor(meeting.status)}>{meeting.status === 'live' && <span className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />}{meeting.status}</Badge>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 text-sm">
                       <div><span className="text-gray-500">Date:</span> <span className="font-medium">{new Date(meeting.startTime).toLocaleDateString()}</span></div>
                       <div><span className="text-gray-500">Time:</span> <span className="font-medium">{new Date(meeting.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
                       <div><span className="text-gray-500">Duration:</span> <span className="font-medium">{meeting.duration} min</span></div>
@@ -1092,7 +1092,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Access and manage all your shared files in one place. Upload, download, and collaborate on documents, presentations, and media files.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.sharedFiles}</div>
                     <div className="text-xs text-white/70">Total Files</div>
@@ -1207,7 +1207,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Manage your teams and collaborate with members across departments. Create channels, share files, and coordinate projects effectively.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockTeams.length}</div>
                     <div className="text-xs text-white/70">Teams</div>
@@ -1258,7 +1258,7 @@ export default function CollaborationClient() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockTeams.map(team => (
                 <Card key={team.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
@@ -1273,7 +1273,7 @@ export default function CollaborationClient() {
                       <Badge className={team.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}>{team.plan}</Badge>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{team.description}</p>
-                    <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                       <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.memberCount}</p><p className="text-xs text-gray-500">Members</p></div>
                       <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.boardCount}</p><p className="text-xs text-gray-500">Boards</p></div>
                       <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{team.channelCount}</p><p className="text-xs text-gray-500">Channels</p></div>
@@ -1297,7 +1297,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Organize conversations by topic, project, or team. Create public or private channels to keep discussions focused and productive.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockChannels.length}</div>
                     <div className="text-xs text-white/70">Total Channels</div>
@@ -1390,7 +1390,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Track all activity across your workspace. See who's editing boards, posting messages, uploading files, and scheduling meetings in real-time.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockActivities.length}</div>
                     <div className="text-xs text-white/70">Activities Today</div>
@@ -1498,7 +1498,7 @@ export default function CollaborationClient() {
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Configure your workspace preferences, meeting defaults, notifications, integrations, automations, and appearance options.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockIntegrations.filter(i => i.status === 'connected').length}</div>
                     <div className="text-xs text-white/70">Connected Apps</div>
@@ -1636,7 +1636,7 @@ export default function CollaborationClient() {
                       <Button size="sm" onClick={() => setShowTemplateDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                         {mockTemplates.map(template => (
                           <div key={template.id} className="p-4 border rounded-lg hover:border-blue-500 cursor-pointer">
                             <div className="flex items-center gap-3 mb-2">
@@ -1666,7 +1666,7 @@ export default function CollaborationClient() {
 
                 {/* Notifications Settings */}
                 {settingsTab === 'notifications' && (
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -1704,7 +1704,7 @@ export default function CollaborationClient() {
                     <CardHeader><CardTitle>Do Not Disturb</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between"><div><p className="font-medium">Schedule DND</p><p className="text-sm text-gray-500">Auto-enable outside work hours</p></div><Switch /></div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div><Label>Start Time</Label><Input type="time" defaultValue="18:00" className="mt-1" /></div>
                         <div><Label>End Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
                       </div>
@@ -1808,7 +1808,7 @@ export default function CollaborationClient() {
 
                 {/* Privacy Settings */}
                 {settingsTab === 'privacy' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Presence & Status</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -1864,7 +1864,7 @@ export default function CollaborationClient() {
 
                 {/* Appearance Settings */}
                 {settingsTab === 'appearance' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Theme</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -1963,7 +1963,7 @@ export default function CollaborationClient() {
             <div className="space-y-4 py-4">
               <div><Label>Meeting Title</Label><Input placeholder="Sprint Planning" /></div>
               <div><Label>Description</Label><Textarea placeholder="Meeting agenda..." rows={2} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Date</Label><Input type="date" /></div>
                 <div><Label>Time</Label><Input type="time" /></div>
               </div>
@@ -2048,7 +2048,7 @@ export default function CollaborationClient() {
             <DialogHeader><DialogTitle>Add Integration</DialogTitle></DialogHeader>
             <div className="py-4">
               <Input placeholder="Search integrations..." className="mb-4" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { name: 'Google Calendar', type: 'calendar', description: 'Sync meetings and events' },
                   { name: 'Slack', type: 'communication', description: 'Send notifications to Slack' },
@@ -2329,7 +2329,7 @@ export default function CollaborationClient() {
             <div className="space-y-4 py-4">
               <div><Label>Meeting Title</Label><Input placeholder="Weekly Sync" /></div>
               <div><Label>Description</Label><Textarea placeholder="Meeting agenda..." rows={2} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Date</Label><Input type="date" /></div>
                 <div><Label>Time</Label><Input type="time" /></div>
               </div>
@@ -3030,7 +3030,7 @@ export default function CollaborationClient() {
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">Channel Details</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-gray-500">Type</p>
                       <p className="font-medium capitalize">{selectedChannel.type}</p>

@@ -487,7 +487,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   // The UI will show the full calendar interface with sample/mock data
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Premium Header */}
         <div className="relative overflow-hidden bg-gradient-to-r from-teal-600 via-cyan-600 to-sky-600 rounded-2xl p-8 text-white">
@@ -533,7 +533,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                           <label className="block text-sm font-medium mb-1">Event Title</label>
                           <Input placeholder="Add title" value={newEventForm.title} onChange={(e) => setNewEventForm(prev => ({ ...prev, title: e.target.value }))} />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <label className="block text-sm font-medium mb-1">Start</label>
                             <Input type="datetime-local" value={newEventForm.startTime} onChange={(e) => setNewEventForm(prev => ({ ...prev, startTime: e.target.value }))} />
@@ -1940,7 +1940,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <label className="block text-sm font-medium mb-1">Title</label>
                     <Input value={editForm.title} onChange={(e) => setEditForm(f => ({ ...f, title: e.target.value }))} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                       <label className="block text-sm font-medium mb-1">Start</label>
                       <Input type="datetime-local" value={editForm.startTime} onChange={(e) => setEditForm(f => ({ ...f, startTime: e.target.value }))} />
@@ -2109,7 +2109,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   <option>Board Room (20 people)</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Date</label>
                   <Input type="date" />
@@ -2190,7 +2190,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <label className="block text-sm font-medium mb-2">Event Title</label>
                 <Input placeholder="Enter event title" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Date</label>
                   <Input type="date" />
@@ -2235,7 +2235,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <label className="block text-sm font-medium mb-2">Reminder Title</label>
                 <Input placeholder="What do you want to be reminded about?" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Date</label>
                   <Input type="date" />
@@ -2521,7 +2521,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <label className="block text-sm font-medium mb-2">Reminder Title</label>
                 <Input placeholder="What do you need to remember?" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">Date</label>
                   <Input type="date" />

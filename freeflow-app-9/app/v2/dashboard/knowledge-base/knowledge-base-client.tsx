@@ -1471,7 +1471,7 @@ export default function KnowledgeBaseClient() {
                   </select>
                 </div>
 
-                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-4' : 'space-y-3'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6' : 'space-y-3'}>
                   {filteredPages.map(page => {
                     const TypeIcon = getPageTypeIcon(page.type)
                     return (
@@ -2557,7 +2557,7 @@ export default function KnowledgeBaseClient() {
           <div className="space-y-4 py-4">
             <div>
               <Label>Import Source</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
                 {[
                   { value: 'file', label: 'Local Files', icon: FileText },
                   { value: 'url', label: 'From URL', icon: Globe },
@@ -2688,7 +2688,7 @@ export default function KnowledgeBaseClient() {
                 onKeyDown={(e) => e.key === 'Enter' && handleAdvancedSearch()}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="advancedSearchSpace">Space</Label>
                 <select
@@ -2720,7 +2720,7 @@ export default function KnowledgeBaseClient() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="advancedSearchAuthor">Author</Label>
                 <Input
@@ -2730,7 +2730,7 @@ export default function KnowledgeBaseClient() {
                   placeholder="Author name..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <div>
                   <Label htmlFor="advancedSearchDateFrom">From Date</Label>
                   <Input

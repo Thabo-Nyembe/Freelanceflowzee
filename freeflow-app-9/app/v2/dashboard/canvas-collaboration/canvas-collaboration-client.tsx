@@ -1390,7 +1390,7 @@ export default function CanvasCollaborationClient() {
           <div className="my-2 w-8 h-px bg-gray-200" />
           
           {/* Color Palette */}
-          <div className="grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-6">
             {colors.slice(0, 8).map(color => (
               <button
                 key={color}
@@ -1516,7 +1516,7 @@ export default function CanvasCollaborationClient() {
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium mb-2 block">Dimensions</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                       <Input placeholder="1920" />
                       <Input placeholder="1080" />
                     </div>

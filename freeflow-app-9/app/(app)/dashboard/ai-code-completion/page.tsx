@@ -1032,7 +1032,7 @@ export default function AICodeCompletionPage() {
                   <Layers className="w-5 h-5 text-primary" />
                   Languages
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   {PROGRAMMING_LANGUAGES.slice(0, 8).map((lang) => (
                     <motion.div
                       key={lang.id}

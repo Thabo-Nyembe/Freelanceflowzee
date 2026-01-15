@@ -751,7 +751,7 @@ export default function ThreeDModelingClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1145,7 +1145,7 @@ export default function ThreeDModelingClient() {
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-xs text-gray-500 block mb-1">Position</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                       <Input placeholder="X" className="text-xs h-8" defaultValue="0.00" />
                       <Input placeholder="Y" className="text-xs h-8" defaultValue="0.00" />
                       <Input placeholder="Z" className="text-xs h-8" defaultValue="0.00" />
@@ -1153,7 +1153,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 block mb-1">Rotation</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                       <Input placeholder="X" className="text-xs h-8" defaultValue="0°" />
                       <Input placeholder="Y" className="text-xs h-8" defaultValue="0°" />
                       <Input placeholder="Z" className="text-xs h-8" defaultValue="0°" />
@@ -1161,7 +1161,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 block mb-1">Scale</label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                       <Input placeholder="X" className="text-xs h-8" defaultValue="1.00" />
                       <Input placeholder="Y" className="text-xs h-8" defaultValue="1.00" />
                       <Input placeholder="Z" className="text-xs h-8" defaultValue="1.00" />
@@ -1429,7 +1429,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Unit System</Label>
                             <Select defaultValue="metric">
@@ -1490,7 +1490,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Grid Size</Label>
                             <Input type="number" defaultValue="10" />
@@ -1529,7 +1529,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
                             <Select defaultValue="solid">
@@ -1586,7 +1586,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Field of View</Label>
                             <Input type="number" defaultValue="50" />
@@ -1654,7 +1654,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                           <div className="space-y-2">
                             <Label>Render Engine</Label>
                             <Select defaultValue="cycles">
@@ -1682,7 +1682,7 @@ export default function ThreeDModelingClient() {
                             </Select>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Samples</Label>
                             <Input type="number" defaultValue="128" />
@@ -1710,7 +1710,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Resolution X</Label>
                             <Input type="number" defaultValue="1920" />
@@ -1916,7 +1916,7 @@ export default function ThreeDModelingClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-2">
                             <Label>Memory Limit (GB)</Label>
                             <Input type="number" defaultValue="16" />
@@ -2078,7 +2078,7 @@ export default function ThreeDModelingClient() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-2xl font-bold text-purple-600">{formatNumber(selectedModel.polygon_count)}</p>
                   <p className="text-xs text-gray-500">Polygons</p>

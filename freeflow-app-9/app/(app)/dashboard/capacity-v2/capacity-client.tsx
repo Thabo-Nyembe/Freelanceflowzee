@@ -784,7 +784,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -968,7 +968,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             {/* Capacity Heatmap */}
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Capacity Forecast</h3>
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 {mockForecast.map(week => (
                   <div key={week.week} className="text-center">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{week.week}</div>
@@ -1094,7 +1094,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         </div>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                         <div className="p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
                           <div className="text-lg font-bold text-indigo-600">{member.allocatedHours}h</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Allocated</div>
@@ -1151,7 +1151,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
                             <div className="text-2xl font-bold text-indigo-600">${member.hourlyRate}</div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">Hourly Rate</div>
@@ -1286,7 +1286,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         }`}>{project.status.replace('_', ' ')}</span>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-4 mb-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                         <div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">Hours</div>
                           <div className="font-semibold text-gray-900 dark:text-white">{project.allocatedHours}/{project.totalHours}</div>
@@ -1527,7 +1527,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                       <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
                         <div className="text-xl font-bold text-gray-900 dark:text-white">{week.totalCapacity}h</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">Total Capacity</div>
@@ -1656,7 +1656,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <Label>Default Hours Per Day</Label>
                               <Select defaultValue="8">
@@ -1746,7 +1746,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div>
                               <Label>Warning Threshold</Label>
                               <div className="flex items-center gap-2 mt-1">
@@ -1783,7 +1783,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Hourly Rate</Label>
                             <div className="flex items-center gap-2 mt-1">
@@ -2329,7 +2329,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Date</Label>
                 <Input type="date" className="mt-1" value={newAllocation.startDate} onChange={(e) => setNewAllocation(prev => ({ ...prev, startDate: e.target.value }))} />
@@ -2442,7 +2442,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Date</Label>
                 <Input type="date" className="mt-1" value={newProject.startDate} onChange={(e) => setNewProject(prev => ({ ...prev, startDate: e.target.value }))} />
@@ -2452,7 +2452,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 <Input type="date" className="mt-1" value={newProject.endDate} onChange={(e) => setNewProject(prev => ({ ...prev, endDate: e.target.value }))} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Budget ($)</Label>
                 <Input type="number" className="mt-1" value={newProject.budget} onChange={(e) => setNewProject(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))} />
@@ -2655,7 +2655,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <Label>Hours Per Day</Label>
               <Input type="number" min={1} max={12} className="mt-1" defaultValue={4} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Date</Label>
                 <Input type="date" className="mt-1" />

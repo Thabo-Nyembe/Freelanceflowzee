@@ -1342,7 +1342,7 @@ export default function WhiteLabelClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label className="text-gray-300">Export Format</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {[
                   { value: 'css', label: 'CSS Variables', icon: Code, desc: 'CSS custom properties' },
                   { value: 'json', label: 'JSON', icon: FileText, desc: 'Theme configuration' },
@@ -1616,7 +1616,7 @@ export default function WhiteLabelClient() {
                 </h2>
                 <p className="text-gray-400 mb-4">{config.tagline || 'Your platform tagline'}</p>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div
                     className="p-4 rounded-lg"
                     style={{ backgroundColor: config.colors.dark.primary + '20' }}

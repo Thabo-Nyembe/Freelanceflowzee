@@ -1164,7 +1164,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{resource.name}</h3>
                   <p className="text-sm text-gray-500 mt-1 font-mono truncate">{resource.endpoint}</p>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div>
                       <p className="text-xs text-gray-500">Latency</p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">{resource.latency}ms</p>

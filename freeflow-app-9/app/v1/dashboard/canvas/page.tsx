@@ -1530,7 +1530,7 @@ export default function CanvasPage() {
             </div>
 
             {selectedTemplate === 'blank' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Width (px)</Label>
                   <Input
@@ -1592,7 +1592,7 @@ export default function CanvasPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label className="text-gray-400">Template</Label>
                     <p className="text-white capitalize">

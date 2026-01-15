@@ -718,7 +718,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             </div>
                           ))}
                         </div>
-                        <div className="grid grid-cols-3 gap-2 text-center text-xs border-t pt-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center text-xs border-t pt-3">
                           <div>
                             <p className="text-gray-500 dark:text-gray-400">Revenue</p>
                             <p className="font-semibold">{formatCurrency(product.revenue * 100)}</p>
@@ -1223,7 +1223,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-sm">MRR Breakdown</CardTitle>
@@ -1730,7 +1730,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                         </div>
                         <ToggleLeft className="w-6 h-6 text-gray-400 cursor-pointer" />
                       </div>
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t dark:border-gray-700">
                         <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => setShowExportDialog(true)}>
                           <Download className="w-6 h-6" />
                           <span>Export Catalog</span>
@@ -1844,7 +1844,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2">Features</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {selectedProduct.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm">
                         <CheckCircle className="w-4 h-4 text-green-500" />
@@ -1856,7 +1856,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2">Pricing</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {selectedProduct.prices.map((price) => (
                       <Card key={price.id}>
                         <CardContent className="p-4">
@@ -1877,7 +1877,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold">{formatCurrency(selectedProduct.revenue * 100)}</p>
                     <p className="text-xs text-gray-500">Total Revenue</p>
@@ -1939,7 +1939,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   <p className="text-2xl font-bold text-violet-600">{selectedCoupon.name}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Discount</p>
                     <p className="font-semibold text-xl">
@@ -2035,7 +2035,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   onChange={(e) => setQuickProductDescription(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
                   <select
@@ -2145,7 +2145,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       ))}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Pricing Type</label>
                       <select
@@ -2238,7 +2238,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             </DialogHeader>
             <div className="space-y-4 py-4">
               {/* Summary Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
                   <p className="text-2xl font-bold text-violet-600">{formatCurrency(totalRevenue * 100)}</p>
                   <p className="text-xs text-gray-500">Total Revenue</p>
@@ -2287,7 +2287,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               </div>
 
               {/* Quick Insights */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <ArrowUpRight className="w-4 h-4 text-green-500" />
@@ -2476,7 +2476,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   onChange={(e) => setNewTaxRate({ ...newTaxRate, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Percentage (%)</Label>
                   <Input
@@ -2550,7 +2550,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   onChange={(e) => setNewTaxRate({ ...newTaxRate, description: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Percentage (%)</Label>
                   <Input

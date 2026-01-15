@@ -726,7 +726,7 @@ function TaskDialog({ open, onOpenChange, task, onSave, isSaving }: TaskDialogPr
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Status */}
             <div className="space-y-2">
               <Label>Status</Label>
@@ -768,7 +768,7 @@ function TaskDialog({ open, onOpenChange, task, onSave, isSaving }: TaskDialogPr
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Category */}
             <div className="space-y-2">
               <Label>Category</Label>

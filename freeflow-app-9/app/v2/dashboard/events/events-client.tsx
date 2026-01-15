@@ -2454,7 +2454,7 @@ export default function EventsClient() {
 
               <p className="text-gray-600 dark:text-gray-400">{selectedEvent.description}</p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <div className="text-sm text-gray-500">Date & Time</div>
                   <div className="font-medium">{formatDate(selectedEvent.startDate)}</div>
@@ -2559,7 +2559,7 @@ export default function EventsClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="event_type">Event Type</Label>
                 <Select
@@ -2600,7 +2600,7 @@ export default function EventsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="start_date">Start Date *</Label>
                 <Input
@@ -2622,7 +2622,7 @@ export default function EventsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="location_type">Location Type</Label>
                 <Select
@@ -2745,7 +2745,7 @@ export default function EventsClient() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-event_type">Event Type</Label>
                 <Select
@@ -2786,7 +2786,7 @@ export default function EventsClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-start_date">Start Date *</Label>
                 <Input
@@ -2808,7 +2808,7 @@ export default function EventsClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label htmlFor="edit-location_type">Location Type</Label>
                 <Select
@@ -3224,7 +3224,7 @@ export default function EventsClient() {
               <div className="prose dark:prose-invert max-w-none">
                 <p>{selectedEvent.description}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <p className="text-gray-500 mb-1">Date & Time</p>
                   <p className="font-medium">{formatDate(selectedEvent.startDate)}</p>
@@ -3325,7 +3325,7 @@ export default function EventsClient() {
             </div>
             <div className="space-y-3">
               <Label>Share on Social Media</Label>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 <Button variant="outline" className="flex flex-col gap-1 h-auto py-3" onClick={() => { window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(selectedEvent?.title || '')}`, '_blank'); toast.success('Opening Twitter...'); }}>
                   <Globe className="w-4 h-4" />
                   <span className="text-xs">Twitter</span>
@@ -3371,7 +3371,7 @@ export default function EventsClient() {
               <Label>Description</Label>
               <Textarea defaultValue={selectedEvent?.description} className="mt-1" rows={4} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Date</Label>
                 <Input type="date" defaultValue={selectedEvent?.startDate} className="mt-1" />
@@ -3381,7 +3381,7 @@ export default function EventsClient() {
                 <Input type="date" defaultValue={selectedEvent?.endDate} className="mt-1" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Start Time</Label>
                 <Input type="time" defaultValue={selectedEvent?.startTime} className="mt-1" />

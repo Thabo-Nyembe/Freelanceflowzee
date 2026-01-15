@@ -970,7 +970,7 @@ export default function ComplianceClient() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             <Card className="bg-white/10 border-white/20 p-4">
               <div className="flex items-center gap-3">
                 <Target className="w-5 h-5 text-green-200" />
@@ -1112,7 +1112,7 @@ export default function ComplianceClient() {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               {mockFrameworks.map(framework => (
                 <Card key={framework.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedFramework(framework)}>
                   <div className="flex items-start justify-between mb-4">
@@ -1140,7 +1140,7 @@ export default function ComplianceClient() {
                   </div>
 
                   {/* Control Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4">
                     <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <p className="text-lg font-bold text-green-600">{framework.passedControls}</p>
                       <p className="text-xs text-gray-500">Passed</p>
@@ -1373,7 +1373,7 @@ export default function ComplianceClient() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-4">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Category</p>
                       <p className="font-medium capitalize">{risk.category}</p>
@@ -1505,7 +1505,7 @@ export default function ComplianceClient() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-4 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                     <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Auditor</p>
                       <p className="font-medium">{audit.auditor}</p>
@@ -1678,7 +1678,7 @@ export default function ComplianceClient() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1722,7 +1722,7 @@ export default function ComplianceClient() {
               <p className="text-sm text-gray-500">Supports PDF, DOC, XLS, PNG, JPG up to 50MB</p>
             </Card>
 
-            <div className="grid grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
               {mockControls.flatMap(c => c.evidence).slice(0, 4).map(evidence => (
                 <Card key={evidence.id} className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -2040,7 +2040,7 @@ export default function ComplianceClient() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">Integrate with your tools</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         {[
                           { name: 'AWS', connected: true },
                           { name: 'Azure', connected: true },
@@ -2340,7 +2340,7 @@ export default function ComplianceClient() {
             <DialogTitle>Create New Control</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Control ID *</Label>
                 <Input
@@ -2379,7 +2379,7 @@ export default function ComplianceClient() {
                 onChange={(e) => setNewControlForm(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={newControlForm.category} onValueChange={(v) => setNewControlForm(prev => ({ ...prev, category: v }))}>
@@ -2429,7 +2429,7 @@ export default function ComplianceClient() {
             <DialogTitle>Add Compliance Framework</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Framework Name *</Label>
                 <Input
@@ -2494,7 +2494,7 @@ export default function ComplianceClient() {
                 onChange={(e) => setNewRiskForm(prev => ({ ...prev, description: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={newRiskForm.category} onValueChange={(v: NewRiskForm['category']) => setNewRiskForm(prev => ({ ...prev, category: v }))}>
@@ -2566,7 +2566,7 @@ export default function ComplianceClient() {
                 onChange={(e) => setNewAuditForm(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Audit Type</Label>
                 <Select value={newAuditForm.type} onValueChange={(v: NewAuditForm['type']) => setNewAuditForm(prev => ({ ...prev, type: v }))}>
@@ -2592,7 +2592,7 @@ export default function ComplianceClient() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Start Date *</Label>
                 <Input
@@ -2633,7 +2633,7 @@ export default function ComplianceClient() {
             <DialogTitle>Create New Policy</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Policy Name *</Label>
                 <Input
@@ -2651,7 +2651,7 @@ export default function ComplianceClient() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Category *</Label>
                 <Select value={newPolicyForm.category} onValueChange={(v) => setNewPolicyForm(prev => ({ ...prev, category: v }))}>
@@ -2806,7 +2806,7 @@ export default function ComplianceClient() {
             </div>
             <div className="space-y-2">
               <Label>Date Range</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                 <Input type="date" />
                 <Input type="date" />
               </div>
@@ -3098,7 +3098,7 @@ export default function ComplianceClient() {
                 onChange={(e) => setMitigationFormActions(e.target.value)}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>Target Date</Label>
                 <Input type="date" value={mitigationFormTargetDate} onChange={(e) => setMitigationFormTargetDate(e.target.value)} />
@@ -3145,7 +3145,7 @@ export default function ComplianceClient() {
             <DialogTitle>Risk Heat Matrix</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-6 gap-1 text-center text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-1 md:gap-6 text-center text-xs">
               <div></div>
               <div className="font-medium p-2">Minimal</div>
               <div className="font-medium p-2">Minor</div>
@@ -3295,7 +3295,7 @@ export default function ComplianceClient() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-gray-600 dark:text-gray-400">Select a template to start your policy document.</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
               {[
                 { name: 'Information Security Policy', category: 'Security', icon: Shield },
                 { name: 'Data Privacy Policy', category: 'Privacy', icon: Lock },
@@ -3564,7 +3564,7 @@ export default function ComplianceClient() {
           {detailItem && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Type</p>
                     <p className="font-medium capitalize">{detailItem.type}</p>
@@ -3580,7 +3580,7 @@ export default function ComplianceClient() {
                 <div className="space-y-3">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium mb-2">Control Information</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Status</p>
                         <Badge className="mt-1 bg-green-100 text-green-700">Active</Badge>
@@ -3602,7 +3602,7 @@ export default function ComplianceClient() {
                 <div className="space-y-3">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium mb-2">Policy Details</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Status</p>
                         <Badge className="mt-1 bg-green-100 text-green-700">Published</Badge>
@@ -3628,7 +3628,7 @@ export default function ComplianceClient() {
                 <div className="space-y-3">
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-medium mb-2">Audit Information</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                       <div>
                         <p className="text-gray-500">Status</p>
                         <Badge className="mt-1 bg-blue-100 text-blue-700">In Progress</Badge>
@@ -3692,7 +3692,7 @@ export default function ComplianceClient() {
               <Label>Address</Label>
               <Input value={orgFormAddress} onChange={(e) => setOrgFormAddress(e.target.value)} placeholder="Enter address" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="space-y-2">
                 <Label>City</Label>
                 <Input value={orgFormCity} onChange={(e) => setOrgFormCity(e.target.value)} placeholder="City" />
@@ -3859,7 +3859,7 @@ export default function ComplianceClient() {
 
             <div className="p-4 border rounded-lg space-y-3">
               <h4 className="font-medium">Policy Summary</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                 <div>
                   <p className="text-gray-500">Current Status</p>
                   <Badge className="mt-1 bg-yellow-100 text-yellow-700">In Review</Badge>
@@ -3948,7 +3948,7 @@ export default function ComplianceClient() {
           {selectedPolicyForSettings && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                   <div>
                     <p className="text-gray-500">Version</p>
                     <p className="font-medium">v{selectedPolicyForSettings.version}</p>
@@ -4040,7 +4040,7 @@ export default function ComplianceClient() {
           {selectedVersionForView && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
                   <div>
                     <p className="text-gray-500">Version</p>
                     <p className="font-medium text-lg">v{selectedVersionForView.version}</p>

@@ -1067,7 +1067,7 @@ export default function ValueDashboardClient() {
           <div className="grid gap-4 py-4">
             <div className="space-y-3">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 <Button
                   variant={selectedExportFormat === 'pdf' ? 'default' : 'outline'}
                   className="h-20 flex flex-col"
@@ -1356,7 +1356,7 @@ export default function ValueDashboardClient() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Layout Style</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   <Button
                     variant="outline"
                     className="h-16 flex flex-col"

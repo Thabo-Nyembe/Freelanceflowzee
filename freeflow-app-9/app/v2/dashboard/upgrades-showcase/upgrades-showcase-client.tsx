@@ -540,7 +540,7 @@ export default function UpgradesShowcaseClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Export Format</Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                 {[
                   { value: 'csv', icon: FileSpreadsheet, label: 'CSV' },
                   { value: 'json', icon: FileText, label: 'JSON' },
@@ -728,7 +728,7 @@ export default function UpgradesShowcaseClient() {
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-gray-700 dark:text-gray-300">{selectedInsight?.description}</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
               <div>
                 <span className="text-gray-500">Priority</span>
                 <Badge className="ml-2" variant={selectedInsight?.priority === 'high' ? 'destructive' : 'secondary'}>
@@ -785,7 +785,7 @@ export default function UpgradesShowcaseClient() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
               <Button variant="outline">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Message
@@ -816,7 +816,7 @@ export default function UpgradesShowcaseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <Card className="p-4">
                 <div className="text-sm text-gray-500">Current</div>
                 <div className="text-2xl font-bold text-blue-600">{selectedPrediction?.current}%</div>
@@ -950,7 +950,7 @@ export default function UpgradesShowcaseClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {/* Header Row */}
               <div className="font-semibold text-gray-500">Feature</div>
               <div className="text-center">

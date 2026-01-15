@@ -761,7 +761,7 @@ export default function CollaborationClient() {
         </div>
 
         {/* Enhanced Upgrade Components */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
           <div className="col-span-1">
             <CollaborationIndicator collaborators={mockCollabCollaborators} maxVisible={3} isLive={true} />
           </div>
@@ -770,7 +770,7 @@ export default function CollaborationClient() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
           <AIInsightsPanel title="Collaboration Insights" insights={mockCollabAIInsights} />
           <PredictiveAnalytics predictions={mockCollabPredictions} />
           <ActivityFeed activities={mockCollabActivities} title="Team Activity" />
@@ -801,7 +801,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Create and collaborate on whiteboards, flowcharts, mind maps, and more. Work together in real-time with your team on any device.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{stats.totalBoards}</div>
                     <div className="text-xs text-white/70">Total Boards</div>
@@ -823,7 +823,7 @@ export default function CollaborationClient() {
             </div>
 
             {/* Board List/Grid */}
-            <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-4' : 'space-y-4'}>
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6' : 'space-y-4'}>
               {filteredBoards.map(board => (
                 <Card key={board.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedBoard(board)}>
                   <CardContent className="p-4">
@@ -894,7 +894,7 @@ export default function CollaborationClient() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {mockTemplates.slice(0, 3).map(template => (
                     <div key={template.id} className="p-4 border rounded-lg hover:border-blue-500 cursor-pointer transition-colors">
                       <div className="flex items-center gap-2 mb-2">
@@ -1042,7 +1042,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Host and join video meetings with your team. Record sessions, share screens, and collaborate in real-time with HD video and audio.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockMeetings.length}</div>
                     <div className="text-xs text-white/70">Total Meetings</div>
@@ -1120,7 +1120,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Access and manage all shared files across your teams. Upload, organize, and collaborate on documents, images, videos, and more.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockFiles.length}</div>
                     <div className="text-xs text-white/70">Total Files</div>
@@ -1205,7 +1205,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Manage your teams and collaborate with members across departments. Create channels, share files, and coordinate projects effectively.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockTeams.length}</div>
                     <div className="text-xs text-white/70">Teams</div>
@@ -1227,7 +1227,7 @@ export default function CollaborationClient() {
             </div>
 
             {/* Team Cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {mockTeams.map(team => (
                 <Card key={team.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
                   <CardContent className="p-6">
@@ -1241,7 +1241,7 @@ export default function CollaborationClient() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{team.description}</p>
-                    <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center">
                       <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="font-bold">{team.memberCount}</div>
                         <div className="text-xs text-gray-500">Members</div>
@@ -1364,7 +1364,7 @@ export default function CollaborationClient() {
                 <p className="text-white/80 mb-4 max-w-2xl">
                   Stay up to date with all team activities. Track board updates, messages, file uploads, meetings, and member activities.
                 </p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold">{mockActivities.length}</div>
                     <div className="text-xs text-white/70">Recent Activities</div>
@@ -1460,7 +1460,7 @@ export default function CollaborationClient() {
               <div className="col-span-9 space-y-6">
                 {/* General Settings */}
                 {settingsTab === 'general' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Workspace Settings</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -1602,7 +1602,7 @@ export default function CollaborationClient() {
 
                 {/* Privacy Settings */}
                 {settingsTab === 'privacy' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Presence & Status</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -1624,7 +1624,7 @@ export default function CollaborationClient() {
 
                 {/* Appearance Settings */}
                 {settingsTab === 'appearance' && (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>Theme</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -1670,7 +1670,7 @@ export default function CollaborationClient() {
             <div className="space-y-4 py-4">
               <div><Label>Title</Label><Input placeholder="Sprint Planning" /></div>
               <div><Label>Description</Label><Textarea placeholder="Meeting agenda..." rows={3} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Date</Label><Input type="date" /></div>
                 <div><Label>Time</Label><Input type="time" /></div>
               </div>
@@ -1699,7 +1699,7 @@ export default function CollaborationClient() {
         <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
           <DialogContent className="max-w-4xl">
             <DialogHeader><DialogTitle>Choose a Template</DialogTitle></DialogHeader>
-            <div className="grid grid-cols-3 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-4">
               {mockTemplates.map(template => (
                 <div key={template.id} className="p-4 border rounded-lg hover:border-blue-500 cursor-pointer transition-colors">
                   <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center">
@@ -1830,7 +1830,7 @@ export default function CollaborationClient() {
               </div>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <div className="text-2xl font-bold">{selectedBoard?.viewCount}</div>
                   <div className="text-xs text-gray-500">Views</div>
@@ -1898,7 +1898,7 @@ export default function CollaborationClient() {
               </div>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Date & Time</p>
                   <p className="font-medium">{selectedMeeting && new Date(selectedMeeting.startTime).toLocaleString()}</p>
@@ -2050,7 +2050,7 @@ export default function CollaborationClient() {
               <DialogDescription>Choose an action for this automation step</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { icon: Mail, label: 'Send Email', desc: 'Send an automated email' },
                   { icon: MessageSquare, label: 'Send Message', desc: 'Post to a channel' },

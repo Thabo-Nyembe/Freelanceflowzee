@@ -949,7 +949,7 @@ export default function PricingClient({
                       ))}
                     </div>
 
-                    <div className="pt-4 border-t grid grid-cols-2 gap-4 text-center text-sm">
+                    <div className="pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-center text-sm">
                       <div>
                         <p className="font-semibold">{plan.subscriberCount.toLocaleString()}</p>
                         <p className="text-gray-500">Subscribers</p>
@@ -1367,7 +1367,7 @@ export default function PricingClient({
                         <CardDescription>Your company billing details</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Business Name</Label>
                             <Input defaultValue="Acme Corporation" className="mt-1" />
@@ -1385,7 +1385,7 @@ export default function PricingClient({
                           <Label>Billing Address</Label>
                           <Input defaultValue="123 Business Ave, Suite 100" className="mt-1" />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div>
                             <Label>City</Label>
                             <Input defaultValue="San Francisco" className="mt-1" />
@@ -1408,7 +1408,7 @@ export default function PricingClient({
                         <CardDescription>Currency and localization</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Default Currency</Label>
                             <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
@@ -1543,7 +1543,7 @@ export default function PricingClient({
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Tax Behavior</Label>
                             <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
@@ -1570,7 +1570,7 @@ export default function PricingClient({
                         <CardDescription>Configure invoice creation</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div>
                             <Label>Invoice Prefix</Label>
                             <Input defaultValue="INV-" className="mt-1" />
@@ -1909,7 +1909,7 @@ export default function PricingClient({
                         <CardDescription>Export billing data</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => setShowExportInvoicesDialog(true)}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export Invoices</span>
@@ -2160,7 +2160,7 @@ export default function PricingClient({
             </DialogHeader>
             {selectedPlan && (
               <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-3xl font-bold text-violet-600">{formatCurrency(selectedPlan.prices.monthly)}</p>
                     <p className="text-sm text-gray-500">per month</p>
@@ -2177,7 +2177,7 @@ export default function PricingClient({
 
                 <div>
                   <h4 className="font-medium mb-3">Features</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                     {selectedPlan.features.map((feature) => (
                       <div key={feature.id} className="flex items-center gap-2 text-sm p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         {feature.included ? (
@@ -2194,7 +2194,7 @@ export default function PricingClient({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Revenue</p>
                     <p className="text-xl font-semibold">{formatCurrency(selectedPlan.revenue)}</p>
@@ -2240,7 +2240,7 @@ export default function PricingClient({
             </DialogHeader>
             {selectedSubscription && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-sm text-gray-500">Plan</p>
                     <p className="font-semibold">{selectedSubscription.planName}</p>
@@ -2323,7 +2323,7 @@ export default function PricingClient({
                   className="mt-1"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Monthly Price ($)</Label>
                   <Input
@@ -2376,7 +2376,7 @@ export default function PricingClient({
               <DialogDescription>Create a new discount code for your customers</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Coupon Code</Label>
                   <Input
@@ -2396,7 +2396,7 @@ export default function PricingClient({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Discount Type</Label>
                   <select
@@ -2420,7 +2420,7 @@ export default function PricingClient({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <Label>Duration</Label>
                   <select
@@ -2818,7 +2818,7 @@ export default function PricingClient({
             </DialogHeader>
             {selectedInvoice && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <p className="text-sm text-gray-500">Amount</p>
                     <p className="text-xl font-bold">{formatCurrency(selectedInvoice.amount)}</p>
@@ -3251,7 +3251,7 @@ export default function PricingClient({
                   <Label>Description</Label>
                   <Input defaultValue={selectedPlan.description} className="mt-1" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
                     <Label>Monthly Price ($)</Label>
                     <Input type="number" defaultValue={selectedPlan.prices.monthly} className="mt-1" />
@@ -3326,7 +3326,7 @@ export default function PricingClient({
             </DialogHeader>
             {selectedPlan && (
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                     <p className="text-sm text-green-600">Revenue</p>
                     <p className="text-2xl font-bold text-green-700">{formatCurrency(selectedPlan.revenue)}</p>

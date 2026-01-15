@@ -1068,7 +1068,7 @@ export default function EcommerceClient() {
                   rows={3}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="productPrice">Price *</Label>
                   <Input
@@ -1090,7 +1090,7 @@ export default function EcommerceClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="productCategory">Category</Label>
                   <Input
@@ -1158,7 +1158,7 @@ export default function EcommerceClient() {
                     rows={3}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label>Price</Label>
                     <Input
@@ -1313,7 +1313,7 @@ export default function EcommerceClient() {
                   <h4 className="font-medium">{selectedCustomer.name}</h4>
                   <p className="text-sm text-gray-500">{selectedCustomer.email}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-sm text-gray-500">Total Orders</p>
                     <p className="font-semibold text-lg">{selectedCustomer.totalOrders}</p>
@@ -1356,7 +1356,7 @@ export default function EcommerceClient() {
                   placeholder="SAVE20"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <Select
@@ -1383,7 +1383,7 @@ export default function EcommerceClient() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="usageLimit">Usage Limit</Label>
                   <Input
@@ -1524,7 +1524,7 @@ export default function EcommerceClient() {
               </div>
               <div className="space-y-2">
                 <Label>Price Range</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
                   <Input placeholder="Min" type="number" />
                   <Input placeholder="Max" type="number" />
                 </div>
