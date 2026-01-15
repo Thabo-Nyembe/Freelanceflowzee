@@ -14,7 +14,8 @@ import {
   useTaxInsights,
   useTaxDeductions,
   useDeductionBreakdown,
-  useTaxProfile
+  useTaxProfile,
+  useTaxFilings
 } from '@/lib/hooks/use-tax-intelligence'
 import {
   DollarSign,
@@ -31,7 +32,11 @@ import {
   BookOpen,
   Shield,
   X,
-  Download
+  Download,
+  Plus,
+  Clock,
+  Upload,
+  Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -40,6 +45,7 @@ export default function TaxIntelligenceClient() {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [filingDialogOpen, setFilingDialogOpen] = useState(false)
   const [taxProfileForm, setTaxProfileForm] = useState({
     primaryCountry: '',
     primaryState: '',
@@ -48,6 +54,16 @@ export default function TaxIntelligenceClient() {
     fiscalYearEnd: '',
     taxFilingFrequency: 'quarterly'
   })
+  const [filingForm, setFilingForm] = useState({
+    filing_type: 'quarterly',
+    tax_year: currentYear,
+    quarter: '',
+    due_date: '',
+    form_type: '',
+    jurisdiction: 'federal',
+    estimated_amount_owed: '',
+    notes: ''
+  })
   const router = useRouter()
 
   const { summary, isLoading: summaryLoading } = useTaxSummary(selectedYear)
@@ -55,6 +71,7 @@ export default function TaxIntelligenceClient() {
   const { deductions, totalDeductions, approveDeduction, rejectDeduction } = useTaxDeductions(selectedYear)
   const { categories: deductionCategories } = useDeductionBreakdown(selectedYear)
   const { profile, updateProfile } = useTaxProfile()
+  const { filings, isLoading: filingsLoading, createFiling, markAsComplete, deleteFiling } = useTaxFilings(selectedYear)
 
   const handleDismissInsight = async (insightId: string) => {
     await dismissInsight(insightId)
@@ -122,6 +139,53 @@ export default function TaxIntelligenceClient() {
     toast.info(`Opening lesson: ${lessonTitle}`, {
       description: 'Lesson content coming soon'
     })
+  }
+
+  const handleCreateFiling = async () => {
+    const toastId = toast.loading('Creating tax filing...')
+    try {
+      const { data, error } = await createFiling(filingForm)
+      if (error) throw error
+
+      toast.success('Filing created successfully', { id: toastId })
+      setFilingDialogOpen(false)
+      setFilingForm({
+        filing_type: 'quarterly',
+        tax_year: currentYear,
+        quarter: '',
+        due_date: '',
+        form_type: '',
+        jurisdiction: 'federal',
+        estimated_amount_owed: '',
+        notes: ''
+      })
+    } catch (error) {
+      toast.error('Failed to create filing', { id: toastId })
+    }
+  }
+
+  const handleMarkFilingComplete = async (filingId: string) => {
+    const toastId = toast.loading('Marking filing as complete...')
+    try {
+      const { error } = await markAsComplete(filingId)
+      if (error) throw error
+
+      toast.success('Filing marked as complete', { id: toastId })
+    } catch (error) {
+      toast.error('Failed to update filing', { id: toastId })
+    }
+  }
+
+  const handleDeleteFiling = async (filingId: string) => {
+    const toastId = toast.loading('Deleting filing...')
+    try {
+      const { error } = await deleteFiling(filingId)
+      if (error) throw error
+
+      toast.success('Filing deleted', { id: toastId })
+    } catch (error) {
+      toast.error('Failed to delete filing', { id: toastId })
+    }
   }
 
   return (
@@ -574,22 +638,247 @@ export default function TaxIntelligenceClient() {
           <TabsContent value="filings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Tax Filings & Deadlines</CardTitle>
-                <CardDescription>
-                  Track your filing obligations and deadlines
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Tax Filings & Deadlines</CardTitle>
+                    <CardDescription>
+                      Track your filing obligations and deadlines
+                    </CardDescription>
+                  </div>
+                  <Dialog open={filingDialogOpen} onOpenChange={setFilingDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Filing
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Create Tax Filing</DialogTitle>
+                        <DialogDescription>
+                          Add a new tax filing obligation or deadline
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Filing Type</Label>
+                            <Select
+                              value={filingForm.filing_type}
+                              onValueChange={(value) => setFilingForm({ ...filingForm, filing_type: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="annual">Annual</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="state">State</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Tax Year</Label>
+                            <Input
+                              type="number"
+                              value={filingForm.tax_year}
+                              onChange={(e) => setFilingForm({ ...filingForm, tax_year: parseInt(e.target.value) })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Quarter (if applicable)</Label>
+                            <Select
+                              value={filingForm.quarter}
+                              onValueChange={(value) => setFilingForm({ ...filingForm, quarter: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select quarter" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Q1">Q1 (Jan-Mar)</SelectItem>
+                                <SelectItem value="Q2">Q2 (Apr-Jun)</SelectItem>
+                                <SelectItem value="Q3">Q3 (Jul-Sep)</SelectItem>
+                                <SelectItem value="Q4">Q4 (Oct-Dec)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Due Date</Label>
+                            <Input
+                              type="date"
+                              value={filingForm.due_date}
+                              onChange={(e) => setFilingForm({ ...filingForm, due_date: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Form Type</Label>
+                            <Input
+                              placeholder="e.g., Form 1040, 1099-NEC"
+                              value={filingForm.form_type}
+                              onChange={(e) => setFilingForm({ ...filingForm, form_type: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Jurisdiction</Label>
+                            <Select
+                              value={filingForm.jurisdiction}
+                              onValueChange={(value) => setFilingForm({ ...filingForm, jurisdiction: value })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="federal">Federal</SelectItem>
+                                <SelectItem value="state">State</SelectItem>
+                                <SelectItem value="local">Local</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Estimated Amount Owed</Label>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            value={filingForm.estimated_amount_owed}
+                            onChange={(e) => setFilingForm({ ...filingForm, estimated_amount_owed: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Notes</Label>
+                          <Input
+                            placeholder="Additional details or reminders"
+                            value={filingForm.notes}
+                            onChange={(e) => setFilingForm({ ...filingForm, notes: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button variant="outline" onClick={() => setFilingDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateFiling}>
+                          Create Filing
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-gray-500">
-                  <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                  <p>No filings yet. They will appear here when available.</p>
-                  <Button className="mt-4" onClick={() => toast.info('Filing calendar and management features coming soon', {
-                    description: 'Create filings, track deadlines, and upload documents'
-                  })}>
-                    <Calendar className="h-4 w-4 mr-2" />
-                    View Filing Calendar
-                  </Button>
-                </div>
+                {filingsLoading ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Clock className="h-16 w-16 mx-auto mb-4 opacity-50 animate-spin" />
+                    <p>Loading filings...</p>
+                  </div>
+                ) : filings.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p>No filings yet. Create your first filing to get started.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filings.map((filing) => {
+                      const daysUntilDue = Math.ceil(
+                        (new Date(filing.due_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+                      )
+                      const isOverdue = daysUntilDue < 0
+                      const isUrgent = daysUntilDue >= 0 && daysUntilDue <= 7
+
+                      return (
+                        <div
+                          key={filing.id}
+                          className={`p-4 border rounded-lg ${
+                            filing.status === 'filed'
+                              ? 'border-green-500 bg-green-50 dark:bg-green-950'
+                              : isOverdue
+                              ? 'border-red-500 bg-red-50 dark:bg-red-950'
+                              : isUrgent
+                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-950'
+                              : 'border-gray-200 dark:border-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold">
+                                  {filing.form_type || filing.filing_type.charAt(0).toUpperCase() + filing.filing_type.slice(1)} Filing
+                                </h3>
+                                <Badge
+                                  variant={
+                                    filing.status === 'filed'
+                                      ? 'default'
+                                      : isOverdue
+                                      ? 'destructive'
+                                      : 'outline'
+                                  }
+                                >
+                                  {filing.status === 'filed' ? 'Filed' : filing.status}
+                                </Badge>
+                                {filing.quarter && <Badge variant="secondary">{filing.quarter}</Badge>}
+                              </div>
+                              <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>Due: {new Date(filing.due_date).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span>{filing.jurisdiction.charAt(0).toUpperCase() + filing.jurisdiction.slice(1)}</span>
+                                </div>
+                                {filing.estimated_amount_owed && (
+                                  <div className="flex items-center gap-2">
+                                    <DollarSign className="h-4 w-4" />
+                                    <span>Est: ${parseFloat(filing.estimated_amount_owed).toLocaleString()}</span>
+                                  </div>
+                                )}
+                                {daysUntilDue >= 0 && filing.status !== 'filed' && (
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    <span className={isUrgent ? 'font-semibold text-orange-600' : ''}>
+                                      {daysUntilDue} days remaining
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              {filing.notes && (
+                                <p className="text-sm text-gray-500 mt-2">{filing.notes}</p>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              {filing.status !== 'filed' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleMarkFilingComplete(filing.id)}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Mark Filed
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteFiling(filing.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

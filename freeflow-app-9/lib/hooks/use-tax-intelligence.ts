@@ -447,3 +447,104 @@ export function useTaxCalculations(startDate?: string, endDate?: string) {
 
   return { calculations, isLoading, refresh: fetch }
 }
+
+/**
+ * Hook to manage tax filings
+ */
+export function useTaxFilings(taxYear?: number, status?: string) {
+  const [filings, setFilings] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetchFilings = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (taxYear) params.append('year', taxYear.toString())
+      if (status) params.append('status', status)
+
+      const response = await fetch(`/api/tax/filings?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch filings')
+
+      const data = await response.json()
+      setFilings(data.data || [])
+    } catch (error) {
+      console.error('Error fetching filings:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [taxYear, status])
+
+  const createFiling = useCallback(async (filingData: any) => {
+    try {
+      const response = await fetch('/api/tax/filings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filingData)
+      })
+
+      if (!response.ok) throw new Error('Failed to create filing')
+
+      const data = await response.json()
+      fetchFilings()
+      return { data: data.data, error: null }
+    } catch (error) {
+      console.error('Error creating filing:', error)
+      return { data: null, error }
+    }
+  }, [fetchFilings])
+
+  const updateFiling = useCallback(async (filingId: string, updates: any) => {
+    try {
+      const response = await fetch(`/api/tax/filings/${filingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      })
+
+      if (!response.ok) throw new Error('Failed to update filing')
+
+      fetchFilings()
+      return { error: null }
+    } catch (error) {
+      console.error('Error updating filing:', error)
+      return { error }
+    }
+  }, [fetchFilings])
+
+  const deleteFiling = useCallback(async (filingId: string) => {
+    try {
+      const response = await fetch(`/api/tax/filings/${filingId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) throw new Error('Failed to delete filing')
+
+      fetchFilings()
+      return { error: null }
+    } catch (error) {
+      console.error('Error deleting filing:', error)
+      return { error }
+    }
+  }, [fetchFilings])
+
+  const markAsComplete = useCallback(async (filingId: string) => {
+    return updateFiling(filingId, {
+      status: 'filed',
+      filed_date: new Date().toISOString()
+    })
+  }, [updateFiling])
+
+  useEffect(() => {
+    fetchFilings()
+  }, [fetchFilings])
+
+  return {
+    filings,
+    isLoading,
+    refresh: fetchFilings,
+    createFiling,
+    updateFiling,
+    deleteFiling,
+    markAsComplete
+  }
+}
