@@ -1,9 +1,15 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
 import DashboardLayoutClient from "./dashboard-layout-client"
+import { Metadata } from 'next'
 
 // Force dynamic rendering to prevent SSG issues with client components
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Dashboard | KAZI',
+  description: 'KAZI Dashboard - Manage your freelance projects, clients, and analytics',
+}
 
 // Demo user for showcase mode - uses Alexandra Chen's real ID for database access
 const DEMO_USER = {

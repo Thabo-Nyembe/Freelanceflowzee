@@ -11,7 +11,11 @@ import { RouteProgress } from '@/components/ui/route-progress'
 import './globals.css'
 import { ErrorBoundary } from "react-error-boundary"
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // Critical for FCP optimization
+  preload: true,
+})
 
 export const metadata = {
   metadataBase: new URL('https://kazi.app'),
