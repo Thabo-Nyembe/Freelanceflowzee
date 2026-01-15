@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { toast } from 'sonner'
+import DeductionSuggestionWidget from '@/components/tax/deduction-suggestion-widget'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -2540,6 +2541,21 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 onChange={(e) => setNewExpenseForm(prev => ({ ...prev, notes: e.target.value }))}
               />
             </div>
+
+            {/* Tax Deduction Suggestion */}
+            {newExpenseForm.title && newExpenseForm.amount > 0 && (
+              <div className="border-t pt-4">
+                <DeductionSuggestionWidget
+                  description={newExpenseForm.title + (newExpenseForm.notes ? ' - ' + newExpenseForm.notes : '')}
+                  amount={newExpenseForm.amount}
+                  onSuggestionApplied={(suggestion) => {
+                    toast.success(`Deduction suggestion applied: ${suggestion.category}`)
+                    // You can store the suggestion category for later use
+                  }}
+                />
+              </div>
+            )}
+
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setShowNewExpenseDialog(false)}>
                 Cancel

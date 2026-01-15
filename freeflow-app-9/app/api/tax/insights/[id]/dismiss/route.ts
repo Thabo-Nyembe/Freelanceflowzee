@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+/**
+ * POST /api/tax/insights/[id]/dismiss
+ * Mark an insight as read/dismissed
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = await createClient()
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id } = params
+
+    // Update insight to mark as read
+    const { data: insight, error } = await supabase
+      .from('tax_insights')
+      .update({ is_read: true })
+      .eq('id', id)
+      .eq('user_id', user.id) // Ensure user owns this insight
+      .select()
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Insight not found or access denied' },
+          { status: 404 }
+        )
+      }
+      console.error('Tax insight dismiss error:', error)
+      return NextResponse.json(
+        { error: 'Failed to dismiss tax insight' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: insight
+    })
+  } catch (error) {
+    console.error('Tax insight dismiss error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

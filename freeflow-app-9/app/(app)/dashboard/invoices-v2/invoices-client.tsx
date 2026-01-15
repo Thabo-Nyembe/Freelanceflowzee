@@ -54,6 +54,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { useInvoices, type Invoice, type InvoiceStatus } from '@/lib/hooks/use-invoices'
 import { toast } from 'sonner'
+import TaxCalculationWidget from '@/components/tax/tax-calculation-widget'
 
 // Currency data
 const currencies = [
@@ -2222,6 +2223,26 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                   </div>
                 )}
               </div>
+
+              {/* Tax Intelligence Integration */}
+              {newInvoice.items.length > 0 && calculateSubtotal() > 0 && (
+                <div className="border-t pt-6">
+                  <Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-emerald-600" />
+                    Smart Tax Calculation
+                  </Label>
+                  <TaxCalculationWidget
+                    subtotal={calculateSubtotal()}
+                    transactionType="invoice"
+                    destinationCountry="US"
+                    onTaxCalculated={(taxAmount, taxRate, total) => {
+                      // Update invoice with calculated tax
+                      toast.success(`Tax calculated: ${getCurrencySymbol(newInvoice.currency)}${taxAmount.toFixed(2)} (${(taxRate * 100).toFixed(2)}%)`)
+                      // You can update line items or add a separate tax field here
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Smart Features */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">

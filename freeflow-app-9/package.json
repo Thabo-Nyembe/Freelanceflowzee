@@ -46,6 +46,7 @@
     "test:context7:responsive": "node scripts/context7-test-integration.js responsive",
     "test:context7:debug": "NODE_OPTIONS='--inspect' node scripts/context7-test-integration.js debug",
     "setup:env": "node scripts/setup-env.js",
+    "deploy:tax": "node scripts/run-migrations-pg.js",
     "clean": "rm -rf .next && rm -rf node_modules/.cache && rm -rf test-results && rm -rf playwright-report && rm -rf tsconfig.tsbuildinfo",
     "build:clean": "rm -rf .next && npm run build",
     "dev:clean": "rm -rf .next && npm run dev",

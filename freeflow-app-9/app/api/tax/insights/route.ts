@@ -1,0 +1,133 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+/**
+ * GET /api/tax/insights
+ * Get user's tax insights
+ * Optional query params:
+ *   - priority: filter by priority (urgent, high, medium, low)
+ *   - unread: true to get only unread insights
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const priority = searchParams.get('priority')
+    const unreadOnly = searchParams.get('unread') === 'true'
+
+    // Build query
+    let query = supabase
+      .from('tax_insights')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    // Add optional filters
+    if (priority) {
+      query = query.eq('priority', priority)
+    }
+
+    if (unreadOnly) {
+      query = query.eq('is_read', false)
+    }
+
+    const { data: insights, error } = await query
+
+    if (error) {
+      console.error('Tax insights fetch error:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch tax insights' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: insights || [],
+      count: insights?.length || 0
+    })
+  } catch (error) {
+    console.error('Tax insights GET error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/tax/insights
+ * Create a new tax insight (typically called by system/admin)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+
+    // Get authenticated user
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Parse request body
+    const body = await request.json()
+
+    // Validate required fields
+    if (!body.insight_type || !body.title || !body.description) {
+      return NextResponse.json(
+        { error: 'Missing required fields: insight_type, title, description' },
+        { status: 400 }
+      )
+    }
+
+    // Create insight
+    const { data: insight, error } = await supabase
+      .from('tax_insights')
+      .insert({
+        user_id: user.id,
+        insight_type: body.insight_type,
+        title: body.title,
+        description: body.description,
+        priority: body.priority || 'medium',
+        action_required: body.action_required || false,
+        action_link: body.action_link || null,
+        metadata: body.metadata || null
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Tax insight creation error:', error)
+      return NextResponse.json(
+        { error: 'Failed to create tax insight' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: insight
+    })
+  } catch (error) {
+    console.error('Tax insights POST error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

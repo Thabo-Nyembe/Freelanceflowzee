@@ -69,6 +69,9 @@ import { toast } from 'sonner'
 import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
 import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
 
+// TAX INTELLIGENCE
+import TaxSummaryDashboardWidget from '@/components/tax/tax-summary-dashboard-widget'
+
 // ONBOARDING
 import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
 import { NewUserChecklist } from '@/components/onboarding/new-user-checklist'
@@ -1129,6 +1132,11 @@ export default function DashboardPage() {
             </div>
           </LiquidGlassCard>
         </div>
+
+        {/* TAX INTELLIGENCE SUMMARY */}
+        <ScrollReveal animation="fade-up" delay={0.05}>
+          <TaxSummaryDashboardWidget />
+        </ScrollReveal>
 
         {/* AI INSIGHTS PANEL */}
         {showAIPanel && userId && (

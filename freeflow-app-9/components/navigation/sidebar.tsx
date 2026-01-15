@@ -23,7 +23,8 @@ import {
   Plug,
   Key,
   Workflow,
-  Crown
+  Crown,
+  Calculator
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -96,6 +97,13 @@ const sidebarItems: SidebarItem[] = [
     href: '/dashboard/financial-v2',
     icon: DollarSign,
     description: 'Secure payment protection'
+  },
+  {
+    name: 'Tax Intelligence',
+    href: '/dashboard/tax-intelligence-v2',
+    icon: Calculator,
+    description: 'Smart tax tracking & deduction suggestions',
+    badge: 'New'
   },
   {
     name: 'Files Hub',
