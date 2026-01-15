@@ -1,3 +1,10 @@
+/**
+ * KAZI - Supabase Server Client
+ *
+ * @copyright Copyright (c) 2025 KAZI. All rights reserved.
+ * @license Proprietary - All Rights Reserved
+ */
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 

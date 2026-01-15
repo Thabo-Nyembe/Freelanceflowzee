@@ -23,10 +23,11 @@ const footerNav = {
     { title: 'Partners', href: '/partners' },
   ],
   legal: [
-    { title: 'Privacy', href: '/privacy' },
-    { title: 'Terms', href: '/terms' },
+    { title: 'Privacy Policy', href: '/privacy' },
+    { title: 'Terms of Service', href: '/terms' },
+    { title: 'Cookie Policy', href: '/cookies' },
+    { title: 'DPA', href: '/dpa' },
     { title: 'Security', href: '/security' },
-    { title: 'Cookies', href: '/cookies' },
   ],
 }
 

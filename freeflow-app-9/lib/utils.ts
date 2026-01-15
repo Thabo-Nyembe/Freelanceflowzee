@@ -1,3 +1,10 @@
+/**
+ * KAZI - Utility Functions
+ *
+ * @copyright Copyright (c) 2025 KAZI. All rights reserved.
+ * @license Proprietary - All Rights Reserved
+ */
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

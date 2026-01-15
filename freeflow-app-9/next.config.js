@@ -1,3 +1,15 @@
+/**
+ * KAZI - Next.js Configuration
+ *
+ * @copyright Copyright (c) 2025 KAZI. All rights reserved.
+ * @license Proprietary - All Rights Reserved
+ *
+ * This software is proprietary to KAZI and may not be copied, modified,
+ * or distributed without express written permission from KAZI.
+ *
+ * For licensing inquiries: legal@kazi.com
+ */
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,

@@ -1,3 +1,15 @@
+/**
+ * KAZI - Root Layout Component
+ *
+ * @copyright Copyright (c) 2025 KAZI. All rights reserved.
+ * @license Proprietary - All Rights Reserved
+ *
+ * This software is proprietary to KAZI and may not be copied, modified,
+ * or distributed without express written permission from KAZI.
+ *
+ * For licensing inquiries: legal@kazi.com
+ */
+
 import React from 'react'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
