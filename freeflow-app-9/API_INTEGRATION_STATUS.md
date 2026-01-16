@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 135/286 pages integrated (47.2%)
+**Overall Progress:** 136/286 pages integrated (47.6%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 129/223 using Supabase hooks (57.8%) 🚧
-  - **Mock → Database:** 6/157 migrated (3.8%) 🎉 NEW!
+- **V2 Pages:** 130/223 using Supabase hooks (58.3%) 🚧
+  - **Mock → Database:** 7/157 migrated (4.5%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 135/286 pages integrated (47.2%)
+**Overall Progress:** 136/286 pages integrated (47.6%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 129/223 (57.8%) 🚧
+**V2 Pages (Supabase Hooks):** 130/223 (58.3%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 6 pages 🎉
-**Remaining:** 94 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 7 pages 🎉
+**Remaining:** 93 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -323,7 +323,7 @@ Based on detailed analysis of 21 sample pages:
 This category tracks pages migrated from mock/setTimeout data to real database integration,
 bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
-**Pages Migrated: 6/157 (3.8%)**
+**Pages Migrated: 7/157 (4.5%)**
 
 **Completed Migrations:**
 1. `help-center-v2` - ✅ **MIGRATED** (3,257 lines, +67 net) - Commit: `18da5532`
@@ -388,6 +388,22 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1 hour
    - **Complexity:** Medium-High (complex schema mapping with style/model enums, multiple field transformations)
 
+7. `deployments` (app/v2/dashboard) - ✅ **MIGRATED** (4,919 lines) - Commit: TBD
+   - **Pattern:** Manual Supabase → Hooks with complex schema mapping and mutation migrations (UI Deployment ↔ DB Deployment)
+   - **Tables:** deployments (via use-deployments hook)
+   - **Mapping:** Field name mapping (deployment_name → name, commit_hash → commit, commit_message → commitMessage, commit_author → author, started_at → createdAt, duration_seconds → duration, can_rollback → isProtected), default values for missing UI fields (authorAvatar, previewUrl, productionUrl, prNumber, prTitle, buildCache)
+   - **Write Operations:** Replaced ALL manual Supabase calls with mutation hooks:
+     - CREATE: useCreateDeployment() for handleCreateDeployment
+     - UPDATE: useUpdateDeployment() for handleStartDeployment, handleCompleteDeployment, handleRollbackDeployment, handleCancelDeployment
+     - DELETE: useDeleteDeployment() for handleDeleteDeployment
+   - **Impact:** Replaced 6 manual database functions with hook-based mutations, real database integration with filter support, schema mapping converts DB format to UI Deployment format
+   - **Kept as Mock:** BuildLogs, Domains, EnvVars, Functions, EdgeConfigs, Blobs, Protections, Webhooks, Integrations, UsageMetrics (competitive showcase features)
+   - **Cleanup:** Replaced mockDeployments with mappedDeployments in filteredDeployments and stats calculations
+   - **Fixes:** Fixed authentication bug (supabase.auth.getUser() called before supabase was defined), fixed 3 malformed toast messages
+   - **Note:** File has pre-existing template literal syntax errors in toast messages (lines 697, 731, 796, 811, 812, 814 - unrelated to migration, requires separate cleanup)
+   - **Migration Time:** ~1 hour
+   - **Complexity:** High (manual Supabase → hooks migration, 6 mutation functions migrated, complex schema mapping with field name transformations and default values)
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -403,7 +419,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 - audio-studio-v2 (NOTE: Schema mismatch - skip until resolved)
 - Estimated: 10-15 pages can be migrated quickly with existing hooks
 
-**Total Remaining:** 152 V2 pages with mock/setTimeout data need real database integration
+**Total Remaining:** 151 V2 pages with mock/setTimeout data need real database integration
 
 #### Available Hooks Infrastructure
 

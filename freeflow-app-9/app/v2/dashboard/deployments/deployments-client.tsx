@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useDeployments, Deployment as DBDeployment, useCreateDeployment, useUpdateDeployment, useDeleteDeployment } from '@/lib/hooks/use-deployments'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -339,38 +340,42 @@ const defaultDeploymentForm = {
 
 export default function DeploymentsClient() {
 
+  // Integrate useDeployments hook with filter support
+  const { data: dbDeploymentsData, isLoading, error: deploymentsError, refetch: fetchDeployments } = useDeployments()
+  const createDeploymentMutation = useCreateDeployment()
+  const updateDeploymentMutation = useUpdateDeployment()
+  const deleteDeploymentMutation = useDeleteDeployment()
+
+  // Map DB deployments to UI format
+  const mappedDeployments: Deployment[] = useMemo(() => {
+    if (!dbDeploymentsData) return []
+
+    return dbDeploymentsData.map((dbDep): Deployment => ({
+      id: dbDep.id,
+      name: dbDep.deployment_name,
+      status: dbDep.status as DeploymentStatus,
+      environment: dbDep.environment as DeploymentEnvironment,
+      branch: dbDep.branch || 'main',
+      commit: dbDep.commit_hash || '',
+      commitMessage: dbDep.commit_message || '',
+      author: dbDep.commit_author || 'Unknown',
+      authorAvatar: dbDep.commit_author ? dbDep.commit_author.substring(0, 1).toLowerCase() : 'u',
+      createdAt: dbDep.started_at || dbDep.created_at,
+      duration: dbDep.duration_seconds || 0,
+      previewUrl: dbDep.environment === 'preview' ? `https://app-${dbDep.commit_hash?.substring(0, 7)}.vercel.app` : '',
+      productionUrl: dbDep.environment === 'production' ? 'https://freeflow.app' : undefined,
+      prNumber: undefined,
+      prTitle: undefined,
+      buildCache: true,
+      isProtected: dbDep.can_rollback
+    }))
+  }, [dbDeploymentsData])
 
   // Database state
-  const [dbDeployments, setDbDeployments] = useState<DbDeployment[]>([])
-  const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deploymentForm, setDeploymentForm] = useState(defaultDeploymentForm)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedDbDeployment, setSelectedDbDeployment] = useState<DbDeployment | null>(null)
-
-  // Fetch deployments from Supabase
-  const fetchDeployments = useCallback(async () => {
-    try {
-      setLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('deployments')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbDeployments(data || [])
-    } catch (error: any) {
-      toast.error('Failed to load deployments')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchDeployments()
-  }, [fetchDeployments])
 
   // Create deployment
   const handleCreateDeployment = async () => {
@@ -381,12 +386,12 @@ export default function DeploymentsClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase.from('deployments').insert({
+      await createDeploymentMutation.mutateAsync({
         user_id: userData.user.id,
         deployment_name: deploymentForm.deployment_name,
         version: deploymentForm.version,
@@ -399,11 +404,23 @@ export default function DeploymentsClient() {
         deploy_type: deploymentForm.deploy_type || 'full',
         notes: deploymentForm.notes || null,
         duration_seconds: 0,
+        server_count: 0,
+        healthy_servers: 0,
+        unhealthy_servers: 0,
+        traffic_percentage: 0,
+        active_instances: 0,
+        health_check_count: 0,
+        request_count: 0,
+        error_count: 0,
+        error_rate: 0,
+        send_notifications: false,
+        notifications_sent: false,
+        requires_approval: false,
         can_rollback: true,
-      })
+        auto_rollback_enabled: false,
+      } as any)
 
-      if (error) throw error
-      toast.success('Deployment Created' v${deploymentForm.version} queued` })
+      toast.success(`Deployment Created: ${deploymentForm.deployment_name} v${deploymentForm.version} queued`)
       setShowCreateDialog(false)
       setDeploymentForm(defaultDeploymentForm)
       fetchDeployments()
@@ -415,17 +432,15 @@ export default function DeploymentsClient() {
   }
 
   // Start deployment (update status to in_progress)
-  const handleStartDeployment = async (deployment: DbDeployment) => {
+  const handleStartDeployment = async (deployment: DBDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('deployments')
-        .update({ status: 'in_progress', started_at: new Date().toISOString() })
-        .eq('id', deployment.id)
+      await updateDeploymentMutation.mutateAsync({
+        id: deployment.id,
+        status: 'in_progress',
+        started_at: new Date().toISOString(),
+      } as any)
 
-      if (error) throw error
-      toast.info('Deployment Started' is now deploying...` })
+      toast.info(`Deployment Started: ${deployment.deployment_name} is now deploying...`)
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to start deployment')
@@ -433,23 +448,18 @@ export default function DeploymentsClient() {
   }
 
   // Complete deployment
-  const handleCompleteDeployment = async (deployment: DbDeployment, success: boolean) => {
+  const handleCompleteDeployment = async (deployment: DBDeployment, success: boolean) => {
     try {
       const startTime = deployment.started_at ? new Date(deployment.started_at).getTime() : Date.now()
       const duration = Math.floor((Date.now() - startTime) / 1000)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('deployments')
-        .update({
-          status: success ? 'success' : 'failed',
-          completed_at: new Date().toISOString(),
-          duration_seconds: duration,
-        })
-        .eq('id', deployment.id)
+      await updateDeploymentMutation.mutateAsync({
+        id: deployment.id,
+        status: success ? 'success' : 'failed',
+        completed_at: new Date().toISOString(),
+        duration_seconds: duration,
+      } as any)
 
-      if (error) throw error
       toast[success ? 'success' : 'error'](
         success ? 'Deployment Successful' : 'Deployment Failed',
         { description: `${deployment.deployment_name} v${deployment.version}` }
@@ -461,22 +471,19 @@ export default function DeploymentsClient() {
   }
 
   // Rollback deployment
-  const handleRollbackDeployment = async (deployment: DbDeployment) => {
+  const handleRollbackDeployment = async (deployment: DBDeployment) => {
     if (!deployment.can_rollback) {
       toast.error('Cannot Rollback')
       return
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('deployments')
-        .update({ status: 'rolled_back' })
-        .eq('id', deployment.id)
+      await updateDeploymentMutation.mutateAsync({
+        id: deployment.id,
+        status: 'rolled_back',
+      } as any)
 
-      if (error) throw error
-      toast.success('Rollback Initiated'` })
+      toast.success(`Rollback Initiated: ${deployment.deployment_name}`)
       setShowRollbackDialog(false)
       fetchDeployments()
     } catch (error: any) {
@@ -485,17 +492,14 @@ export default function DeploymentsClient() {
   }
 
   // Cancel deployment
-  const handleCancelDeployment = async (deployment: DbDeployment) => {
+  const handleCancelDeployment = async (deployment: DBDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('deployments')
-        .update({ status: 'cancelled' })
-        .eq('id', deployment.id)
+      await updateDeploymentMutation.mutateAsync({
+        id: deployment.id,
+        status: 'cancelled',
+      } as any)
 
-      if (error) throw error
-      toast.info('Deployment Cancelled' has been cancelled` })
+      toast.info(`Deployment Cancelled: ${deployment.deployment_name} has been cancelled`)
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to cancel deployment')
@@ -505,10 +509,7 @@ export default function DeploymentsClient() {
   // Delete deployment
   const handleDeleteDeployment = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase.from('deployments').delete().eq('id', id)
-      if (error) throw error
+      await deleteDeploymentMutation.mutateAsync(id)
       toast.success('Deployment Deleted')
       fetchDeployments()
     } catch (error: any) {
@@ -751,20 +752,20 @@ export default function DeploymentsClient() {
   const [newEnvValue, setNewEnvValue] = useState('')
 
   const filteredDeployments = useMemo(() => {
-    return mockDeployments.filter(d => {
+    return mappedDeployments.filter(d => {
       const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            d.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            d.commitMessage.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesEnv = environmentFilter === 'all' || d.environment === environmentFilter
       return matchesSearch && matchesEnv
     })
-  }, [searchQuery, environmentFilter])
+  }, [searchQuery, environmentFilter, mappedDeployments])
 
   const stats = useMemo(() => {
-    const total = mockDeployments.length
-    const successful = mockDeployments.filter(d => d.status === 'success').length
-    const avgDuration = mockDeployments.reduce((sum, d) => sum + d.duration, 0) / total
-    const activeDeployments = mockDeployments.filter(d => d.status === 'in_progress' || d.status === 'queued').length
+    const total = mappedDeployments.length
+    const successful = mappedDeployments.filter(d => d.status === 'success').length
+    const avgDuration = total > 0 ? mappedDeployments.reduce((sum, d) => sum + d.duration, 0) / total : 0
+    const activeDeployments = mappedDeployments.filter(d => d.status === 'in_progress' || d.status === 'queued').length
     return {
       total,
       successful,
