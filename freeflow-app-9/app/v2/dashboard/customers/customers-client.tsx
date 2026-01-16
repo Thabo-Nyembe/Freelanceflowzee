@@ -44,7 +44,6 @@ import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment
 import { useTasks } from '@/lib/hooks/use-tasks'
 import { useCampaigns } from '@/lib/hooks/use-campaigns'
 import { useSalesDeals, usePipelineStages } from '@/lib/hooks/use-sales'
-import { createClient } from '@/lib/supabase/client'
 
 // ============================================================================
 // TYPES - SALESFORCE CRM LEVEL
@@ -2599,11 +2598,15 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 try {
                   toast.loading('Logging activity...', { id: 'log-activity' })
                   const supabase = createClient()
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) {
                     toast.error('Authentication required', { id: 'log-activity' })
                     return
                   }
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   await supabase.from('crm_activities').insert({
                     user_id: user.id,
                     contact_id: activityForm.contactId || null,
@@ -2686,12 +2689,16 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 try {
                   toast.loading('Sending email...', { id: 'send-email' })
                   const supabase = createClient()
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) {
                     toast.error('Authentication required', { id: 'send-email' })
                     return
                   }
                   // Log the email activity
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   await supabase.from('crm_activities').insert({
                     user_id: user.id,
                     contact_id: emailForm.to || null,
@@ -2785,12 +2792,16 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 try {
                   toast.loading('Scheduling call...', { id: 'schedule-call' })
                   const supabase = createClient()
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) {
                     toast.error('Authentication required', { id: 'schedule-call' })
                     return
                   }
                   const scheduledAt = new Date(`${scheduleCallForm.date}T${scheduleCallForm.time}`)
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   await supabase.from('crm_activities').insert({
                     user_id: user.id,
                     contact_id: scheduleCallForm.contactId,
@@ -2884,12 +2895,16 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 try {
                   toast.loading('Scheduling meeting...', { id: 'schedule-meeting' })
                   const supabase = createClient()
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) {
                     toast.error('Authentication required', { id: 'schedule-meeting' })
                     return
                   }
                   const scheduledAt = new Date(`${meetingForm.date}T${meetingForm.time}`)
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   await supabase.from('crm_activities').insert({
                     user_id: user.id,
                     activity_type: 'meeting',
@@ -2976,11 +2991,15 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 try {
                   toast.loading('Logging call...', { id: 'log-call' })
                   const supabase = createClient()
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) {
                     toast.error('Authentication required', { id: 'log-call' })
                     return
                   }
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   await supabase.from('crm_activities').insert({
                     user_id: user.id,
                     contact_id: callLogContactId || callLogForm.contactId || null,
