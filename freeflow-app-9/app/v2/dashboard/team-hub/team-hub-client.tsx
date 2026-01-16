@@ -781,8 +781,7 @@ export default function TeamHubClient() {
 
   // Handlers
   const handleSendMessage = (channelName: string) => {
-    toast.success('Message sent', {
-      description: `Message posted to #${channelName}`
+    toast.success('Message sent'`
     })
   }
 
@@ -791,15 +790,12 @@ export default function TeamHubClient() {
   }
 
   const handleSetReminder = () => {
-    toast.success('Reminder set', {
-      description: 'You will be notified at the scheduled time'
-    })
+    toast.success('Reminder set')
   }
 
   // Handle Email All
   const handleEmailAll = () => {
-    toast.success('Email ready', {
-      description: `Compose message to ${members.length} team members`
+    toast.success('Email ready' team members`
     })
   }
 
@@ -813,34 +809,25 @@ export default function TeamHubClient() {
       toast.dismiss('approve-toast')
 
       if (pendingApprovals.length === 0) {
-        toast.success('Approval queue is empty', {
-          description: 'All members have been approved'
-        })
+        toast.success('Approval queue is empty')
       } else {
-        toast.success(`Found ${pendingApprovals.length} pending approvals`, {
-          description: 'Ready to process'
-        })
+        toast.success(`Found ${pendingApprovals.length} pending approvals`)
       }
     } catch (error) {
-      toast.error('Failed to check approvals', {
-        description: 'An error occurred while checking the queue'
-      })
+      toast.error('Failed to check approvals')
     }
   }
 
   // Handle Roles
   const handleRoles = () => {
     setSettingsTab('members')
-    toast.success('Role management opened', {
-      description: 'You can now manage member roles'
-    })
+    toast.success('Role management opened')
   }
 
   // Handle Admins
   const handleAdmins = () => {
     const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
-    toast.success('Admin settings loaded', {
-      description: `${adminCount} admin(s) in your workspace`
+    toast.success('Admin settings loaded' admin(s) in your workspace`
     })
   }
 
@@ -879,49 +866,36 @@ export default function TeamHubClient() {
       URL.revokeObjectURL(url)
 
       toast.dismiss('export-toast')
-      toast.success('Team data exported', {
-        description: `Successfully exported ${members.length} members and ${channels.length} channels`
+      toast.success('Team data exported' members and ${channels.length} channels`
       })
     } catch (error) {
-      toast.error('Failed to export team data', {
-        description: 'An error occurred during export'
-      })
+      toast.error('Failed to export team data')
     }
   }
 
   // Handle Filter
   const handleFilter = () => {
-    toast.success('Filter options loaded', {
-      description: 'You can now apply filters to the team data'
-    })
+    toast.success('Filter options loaded')
   }
 
   // Handle Add Reaction
   const handleAddReaction = () => {
-    toast.success('Reaction added', {
-      description: 'Your emoji reaction was posted'
-    })
+    toast.success('Reaction added')
   }
 
   // Handle Open Thread
   const handleOpenThread = () => {
-    toast.success('Thread opened', {
-      description: 'View and reply to message thread'
-    })
+    toast.success('Thread opened')
   }
 
   // Handle Bookmark
   const handleBookmark = () => {
-    toast.success('Bookmarked', {
-      description: 'This item has been saved to your bookmarks'
-    })
+    toast.success('Bookmarked')
   }
 
   // Handle Load Options
   const handleLoadOptions = () => {
-    toast.success('Options loaded', {
-      description: 'Ready to perform message actions'
-    })
+    toast.success('Options loaded')
   }
 
   // Handle Create Channel
@@ -930,8 +904,7 @@ export default function TeamHubClient() {
       toast.error('Channel name is required')
       return
     }
-    toast.success('Channel created', {
-      description: `#${channelForm.name} has been created successfully`
+    toast.success('Channel created' has been created successfully`
     })
     setShowCreateChannelDialog(false)
     setChannelForm({ name: '', type: 'public', description: '', topic: '' })
@@ -944,8 +917,7 @@ export default function TeamHubClient() {
       return
     }
     const channel = channels.find(c => c.id === huddleForm.channelId)
-    toast.success('Huddle started', {
-      description: `Audio channel started in #${channel?.name || 'channel'}`
+    toast.success('Huddle started'`
     })
     setShowStartHuddleDialog(false)
     setHuddleForm({ channelId: '', participants: [] })
@@ -953,16 +925,14 @@ export default function TeamHubClient() {
 
   // Handle Join Huddle
   const handleJoinHuddle = (huddle: Huddle) => {
-    toast.success('Joining huddle', {
-      description: `Connecting to #${huddle.channelName}...`
+    toast.success('Joining huddle'...`
     })
   }
 
   // Handle Add App
   const handleAddApp = (appId: string) => {
     const app = apps.find(a => a.id === appId)
-    toast.success('App installed', {
-      description: `${app?.name} has been added to your workspace`
+    toast.success('App installed' has been added to your workspace`
     })
   }
 
@@ -972,8 +942,7 @@ export default function TeamHubClient() {
       toast.error('Workflow name is required')
       return
     }
-    toast.success('Workflow created', {
-      description: `${workflowForm.name} has been created successfully`
+    toast.success('Workflow created' has been created successfully`
     })
     setShowCreateWorkflowDialog(false)
     setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
@@ -983,27 +952,22 @@ export default function TeamHubClient() {
   const handleToggleWorkflow = (workflowId: string, enabled: boolean) => {
     setWorkflowToggles(prev => ({ ...prev, [workflowId]: enabled }))
     const workflow = workflows.find(w => w.id === workflowId)
-    toast.success(enabled ? 'Workflow enabled' : 'Workflow disabled', {
-      description: `${workflow?.name} is now ${enabled ? 'active' : 'inactive'}`
+    toast.success(enabled ? 'Workflow enabled' : 'Workflow disabled' is now ${enabled ? 'active' : 'inactive'}`
     })
   }
 
   // Handle Save Settings
   const handleSaveSettings = () => {
-    toast.success('Settings saved', {
-      description: 'Your workspace settings have been updated'
-    })
+    toast.success('Settings saved')
   }
 
   // Handle Integration Action
   const handleIntegrationAction = (integration: {name: string, status: string}) => {
     if (integration.status === 'connected') {
-      toast.success('Integration configured', {
-        description: `${integration.name} settings have been updated`
+      toast.success('Integration configured' settings have been updated`
       })
     } else {
-      toast.success('Integration connected', {
-        description: `${integration.name} has been connected to your workspace`
+      toast.success('Integration connected' has been connected to your workspace`
       })
     }
     setShowIntegrationDialog(false)
@@ -1014,9 +978,7 @@ export default function TeamHubClient() {
   const handleCopyApiToken = async () => {
     try {
       await navigator.clipboard.writeText('xoxb-example-api-token-12345')
-      toast.success('API token copied', {
-        description: 'Token has been copied to clipboard'
-      })
+      toast.success('API token copied')
     } catch (error) {
       toast.error('Failed to copy token')
     }
@@ -1024,9 +986,7 @@ export default function TeamHubClient() {
 
   // Handle Regenerate Token
   const handleRegenerateToken = () => {
-    toast.success('Token regenerated', {
-      description: 'A new API token has been generated'
-    })
+    toast.success('Token regenerated')
   }
 
   // Handle Export Workspace Data
@@ -1078,9 +1038,7 @@ export default function TeamHubClient() {
       URL.revokeObjectURL(url)
 
       toast.dismiss('export-workspace-toast')
-      toast.success('Workspace data exported', {
-        description: 'Full workspace data has been downloaded'
-      })
+      toast.success('Workspace data exported')
     } catch (error) {
       toast.error('Failed to export workspace data')
     }
@@ -1088,25 +1046,19 @@ export default function TeamHubClient() {
 
   // Handle Clear Cache
   const handleClearCache = () => {
-    toast.success('Cache cleared', {
-      description: 'All cached data has been cleared'
-    })
+    toast.success('Cache cleared')
     setShowClearCacheDialog(false)
   }
 
   // Handle Reset Workspace
   const handleResetWorkspace = () => {
-    toast.success('Workspace reset', {
-      description: 'All workspace settings have been reset to defaults'
-    })
+    toast.success('Workspace reset')
     setShowResetWorkspaceDialog(false)
   }
 
   // Handle Delete Workspace
   const handleDeleteWorkspace = () => {
-    toast.success('Workspace scheduled for deletion', {
-      description: 'Your workspace will be permanently deleted in 30 days'
-    })
+    toast.success('Workspace scheduled for deletion')
     setShowDeleteWorkspaceDialog(false)
   }
 
@@ -1116,8 +1068,7 @@ export default function TeamHubClient() {
       toast.error('Please enter a message')
       return
     }
-    toast.success('Message sent', {
-      description: `Your message has been sent to ${member.name}`
+    toast.success('Message sent'`
     })
     setShowMessageMemberDialog(false)
     setMessageMemberTarget(null)
@@ -1126,8 +1077,7 @@ export default function TeamHubClient() {
 
   // Handle Huddle Member
   const handleHuddleMember = (member: TeamMember) => {
-    toast.success('Huddle invitation sent', {
-      description: `Inviting ${member.name} to a huddle...`
+    toast.success('Huddle invitation sent' to a huddle...`
     })
     setShowHuddleMemberDialog(false)
     setMessageMemberTarget(null)
@@ -1135,30 +1085,26 @@ export default function TeamHubClient() {
 
   // Handle Open Channel
   const handleOpenChannel = (channel: Channel) => {
-    toast.success('Channel opened', {
-      description: `Now viewing #${channel.name}`
+    toast.success('Channel opened'`
     })
     setSelectedChannel(null)
   }
 
   // Handle Star Channel
   const handleStarChannel = (channel: Channel) => {
-    toast.success(channel.isStarred ? 'Channel unstarred' : 'Channel starred', {
-      description: `#${channel.name} has been ${channel.isStarred ? 'removed from' : 'added to'} your starred channels`
+    toast.success(channel.isStarred ? 'Channel unstarred' : 'Channel starred' has been ${channel.isStarred ? 'removed from' : 'added to'} your starred channels`
     })
   }
 
   // Handle Channel Settings
   const handleChannelSettings = (channel: Channel) => {
-    toast.success('Channel settings opened', {
-      description: `Managing settings for #${channel.name}`
+    toast.success('Channel settings opened'`
     })
   }
 
   // Handle Member Profile More Options
   const handleMemberProfileMore = (member: TeamMember) => {
-    toast.success('More options', {
-      description: `Additional actions for ${member.name}`
+    toast.success('More options'`
     })
   }
 
@@ -2510,7 +2456,7 @@ export default function TeamHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={teamHubAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your team question...') } })}
+            onAskQuestion={(q) => toast.info('Question Submitted' })}
           />
           <PredictiveAnalytics predictions={teamHubPredictions} />
         </div>

@@ -613,7 +613,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   // Create or update release note
   const handleSubmitReleaseNote = async () => {
     if (!formData.version.trim() || !formData.title.trim()) {
-      toast.error('Validation Error', { description: 'Version and title are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -630,24 +630,24 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (editingReleaseNote) {
         const result = await updateReleaseNote(editingReleaseNote.id, releaseData)
         if (result.success) {
-          toast.success('Release Note Updated', { description: `${formData.version} has been updated successfully` })
+          toast.success('Release Note Updated' has been updated successfully` })
           setShowCreateModal(false)
           resetForm()
         } else {
-          toast.error('Update Failed', { description: result.error || 'Failed to update release note' })
+          toast.error('Update Failed')
         }
       } else {
         const result = await createReleaseNote(releaseData)
         if (result.success) {
-          toast.success('Release Note Created', { description: `${formData.version} has been created successfully` })
+          toast.success('Release Note Created' has been created successfully` })
           setShowCreateModal(false)
           resetForm()
         } else {
-          toast.error('Creation Failed', { description: result.error || 'Failed to create release note' })
+          toast.error('Creation Failed')
         }
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -659,12 +659,12 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await publishReleaseNote(noteId)
       if (result.success) {
-        toast.success('Published', { description: `Release note ${noteVersion} is now live` })
+        toast.success('Published' is now live` })
       } else {
-        toast.error('Publish Failed', { description: result.error || 'Failed to publish release note' })
+        toast.error('Publish Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -676,12 +676,12 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await archiveReleaseNote(noteId)
       if (result.success) {
-        toast.success('Archived', { description: `Release note ${noteVersion} has been archived` })
+        toast.success('Archived' has been archived` })
       } else {
-        toast.error('Archive Failed', { description: result.error || 'Failed to archive release note' })
+        toast.error('Archive Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -692,12 +692,12 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await likeReleaseNote(noteId)
       if (result.success) {
-        toast.success('Liked', { description: 'You liked this release note' })
+        toast.success('Liked')
       } else {
-        toast.error('Like Failed', { description: result.error || 'Failed to like release note' })
+        toast.error('Like Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     }
   }
 
@@ -715,15 +715,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await deleteReleaseNote(deleteTargetId)
       if (result.success) {
-        toast.success('Deleted', { description: 'Release note has been deleted' })
+        toast.success('Deleted')
         setShowDeleteConfirm(false)
         setDeleteTargetId(null)
         setSelectedRelease(null)
       } else {
-        toast.error('Delete Failed', { description: result.error || 'Failed to delete release note' })
+        toast.error('Delete Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -733,16 +733,16 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const handleShareReleaseNote = (noteVersion: string) => {
     const shareUrl = `${window.location.origin}/releases/${noteVersion}`
     navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied', { description: `Share link for ${noteVersion} copied to clipboard` })
+    toast.success('Link Copied' copied to clipboard` })
   }
 
   // Subscribe to notifications
   const handleSubscribeNotes = () => {
     setSubscribed(!subscribed)
     if (!subscribed) {
-      toast.success('Subscribed', { description: 'You will receive updates for new release notes' })
+      toast.success('Subscribed')
     } else {
-      toast.info('Unsubscribed', { description: 'You will no longer receive release note updates' })
+      toast.info('Unsubscribed')
     }
   }
 
@@ -766,7 +766,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     a.download = 'release-notes-export.json'
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Release notes have been downloaded' })
+    toast.success('Exported')
   }
 
   return (
@@ -1852,7 +1852,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           <div className="flex items-center gap-2">
                             {template.isDefault && <Badge className="bg-orange-100 text-orange-700">Default</Badge>}
                             <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info(`Editing ${template.name} template`, { description: 'Template editor opening...' })
+                              toast.info(`Editing ${template.name} template`)
                               setShowCreateTemplateDialog(true)
                             }}><Settings className="h-4 w-4" /></Button>
                           </div>
@@ -2089,7 +2089,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             <AIInsightsPanel
               insights={mockReleaseNotesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2349,7 +2349,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     {selectedRelease.downloadUrl && (
                       <Button size="sm" className="bg-orange-600" onClick={() => {
                         window.open(selectedRelease.downloadUrl, '_blank')
-                        toast.success('Download Started', { description: `Downloading ${selectedRelease.version}` })
+                        toast.success('Download Started'` })
                       }}>
                         <Download className="w-4 h-4 mr-1" />
                         Download
@@ -2634,7 +2634,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Release Scheduled', { description: 'Your release has been scheduled for publication' })
+              toast.success('Release Scheduled')
               setShowScheduleDialog(false)
             }}>
               Schedule Release
@@ -2699,7 +2699,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Close
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Preview Link Generated', { description: 'Shareable preview link copied to clipboard' })
+              toast.success('Preview Link Generated')
             }}>
               <Share2 className="w-4 h-4 mr-2" />
               Share Preview
@@ -2836,7 +2836,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Close
             </Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Report Exported', { description: 'Analytics report downloaded as PDF' })
+              toast.success('Report Exported')
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Report
@@ -2897,7 +2897,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Feature Flag Updated', { description: `${selectedFeatureFlag?.name} settings saved` })
+              toast.success('Feature Flag Updated' settings saved` })
               setShowFeatureFlagDialog(false)
             }}>
               Save Changes
@@ -2955,7 +2955,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Webhook Added', { description: 'Your webhook has been configured' })
+              toast.success('Webhook Added')
               setShowWebhookDialog(false)
             }}>
               Add Webhook
@@ -3014,7 +3014,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Service Connected', { description: `${selectedService} has been connected successfully` })
+              toast.success('Service Connected' has been connected successfully` })
               setShowConnectServiceDialog(false)
             }}>
               Connect {selectedService}
@@ -3048,7 +3048,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button variant="destructive" onClick={() => {
-              toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Copy it now as it will not be shown again.' })
+              toast.success('API Key Regenerated')
               setShowRegenerateKeyDialog(false)
             }}>
               Regenerate Key
@@ -3099,7 +3099,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Template Created', { description: 'Your new release template is ready to use' })
+              toast.success('Template Created')
               setShowCreateTemplateDialog(false)
             }}>
               Create Template
@@ -3146,7 +3146,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Logo Uploaded', { description: 'Your logo has been updated' })
+              toast.success('Logo Uploaded')
               setShowUploadLogoDialog(false)
             }}>
               Upload Logo
@@ -3346,7 +3346,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+              toast.success('Cache Cleared')
               setShowClearCacheDialog(false)
             }}>
               Clear Cache
@@ -3380,7 +3380,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button variant="destructive" onClick={() => {
-              toast.success('All Releases Deleted', { description: 'All release notes have been permanently deleted' })
+              toast.success('All Releases Deleted')
               setShowDeleteAllReleasesDialog(false)
             }}>
               Delete All Releases
@@ -3425,7 +3425,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button variant="destructive" onClick={() => {
-              toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+              toast.success('Settings Reset')
               setShowResetSettingsDialog(false)
             }}>
               Reset Settings
@@ -3472,7 +3472,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button variant="destructive" onClick={() => {
-              toast.success('Release Notes Disabled', { description: 'Release notes feature has been disabled. You can re-enable it anytime.' })
+              toast.success('Release Notes Disabled')
               setShowDisableReleasesDialog(false)
             }}>
               Disable Release Notes

@@ -2272,7 +2272,7 @@ export default function BugsClient() {
             <AIInsightsPanel
               insights={mockBugsAIInsights}
               title="Bug Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

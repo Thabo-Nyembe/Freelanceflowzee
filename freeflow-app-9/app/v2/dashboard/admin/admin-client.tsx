@@ -412,7 +412,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       ))
       toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
     } catch (err) {
-      toast.error('Failed to toggle flag', { description: (err as Error).message })
+      toast.error('Failed to toggle flag')
     }
   }, [supabase, featureFlags])
 
@@ -521,11 +521,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('User created', { description: `${newUserForm.name} has been added` })
+      toast.success('User created' has been added` })
       setShowNewUserDialog(false)
       setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
     } catch (err) {
-      toast.error('Failed to create user', { description: (err as Error).message })
+      toast.error('Failed to create user')
     } finally {
       setIsLoading(false)
     }
@@ -558,12 +558,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         validation_rules: {},
         metadata: {}
       })
-      toast.success('Setting created', { description: `${newSettingForm.settingName} has been added` })
+      toast.success('Setting created' has been added` })
       setShowNewSettingDialog(false)
       setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
       refetch()
     } catch (err) {
-      toast.error('Failed to create setting', { description: (err as Error).message })
+      toast.error('Failed to create setting')
     } finally {
       setIsLoading(false)
     }
@@ -575,12 +575,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await updateSetting(selectedSetting.id, selectedSetting)
-      toast.success('Setting updated', { description: `${selectedSetting.setting_name} has been updated` })
+      toast.success('Setting updated' has been updated` })
       setShowEditSettingDialog(false)
       setSelectedSetting(null)
       refetch()
     } catch (err) {
-      toast.error('Failed to update setting', { description: (err as Error).message })
+      toast.error('Failed to update setting')
     } finally {
       setIsLoading(false)
     }
@@ -592,10 +592,10 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await deleteSetting(setting.id)
-      toast.success('Setting deleted', { description: `${setting.setting_name} has been removed` })
+      toast.success('Setting deleted' has been removed` })
       refetch()
     } catch (err) {
-      toast.error('Failed to delete setting', { description: (err as Error).message })
+      toast.error('Failed to delete setting')
     } finally {
       setIsLoading(false)
     }
@@ -620,11 +620,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Feature flag created', { description: `${newFlagForm.name} has been added` })
+      toast.success('Feature flag created' has been added` })
       setShowNewFlagDialog(false)
       setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
     } catch (err) {
-      toast.error('Failed to create flag', { description: (err as Error).message })
+      toast.error('Failed to create flag')
     } finally {
       setIsLoading(false)
     }
@@ -649,11 +649,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Job created', { description: `${newJobForm.name} has been scheduled` })
+      toast.success('Job created' has been scheduled` })
       setShowNewJobDialog(false)
       setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
     } catch (err) {
-      toast.error('Failed to create job', { description: (err as Error).message })
+      toast.error('Failed to create job')
     } finally {
       setIsLoading(false)
     }
@@ -672,9 +672,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Logs exported', { description: 'Download started' })
+      toast.success('Logs exported')
     } catch (err) {
-      toast.error('Failed to export logs', { description: (err as Error).message })
+      toast.error('Failed to export logs')
     } finally {
       setIsLoading(false)
     }
@@ -690,9 +690,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'clear_cache' })
       })
       if (!res.ok) throw new Error('Failed to clear cache')
-      toast.success('Cache cleared', { description: 'All cached data has been purged' })
+      toast.success('Cache cleared')
     } catch (err) {
-      toast.error('Failed to clear cache', { description: (err as Error).message })
+      toast.error('Failed to clear cache')
     } finally {
       setIsLoading(false)
     }
@@ -700,15 +700,15 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Run Diagnostics
   const handleRunDiagnostics = useCallback(async () => {
-    toast.info('Running diagnostics', { description: 'System health check in progress...' })
+    toast.info('Running diagnostics')
     setIsLoading(true)
     try {
       // Check database connectivity
       const { error: dbError } = await supabase.from('admin_settings').select('id').limit(1)
       if (dbError) throw new Error('Database connectivity issue')
-      toast.success('Diagnostics complete', { description: 'All systems operational' })
+      toast.success('Diagnostics complete')
     } catch (err) {
-      toast.error('Diagnostics failed', { description: (err as Error).message })
+      toast.error('Diagnostics failed')
     } finally {
       setIsLoading(false)
     }
@@ -717,7 +717,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   // Copy Setting Key to clipboard
   const handleCopySetting = useCallback((setting: AdminSetting) => {
     navigator.clipboard.writeText(setting.setting_key)
-    toast.success('Copied to clipboard', { description: setting.setting_key })
+    toast.success('Copied to clipboard')
   }, [])
 
   // Refresh system data
@@ -772,7 +772,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       })
       if (!res.ok) throw new Error('Failed')
       const data = await res.json()
-      toast.success(`${resource.name} is healthy`, { description: `Latency: ${data.resource?.latency || resource.latency}ms` })
+      toast.success(`${resource.name} is healthy`ms` })
     } catch {
       toast.error(`Failed to check ${resource.name}`)
     }
@@ -786,7 +786,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Export table data handler
   const handleExportTable = useCallback((table: DatabaseTable) => {
-    toast.success('Export started', { description: `Exporting ${table.name} data...` })
+    toast.success('Export started' data...` })
   }, [])
 
   // Stop job handler
@@ -815,7 +815,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'run_job', jobId: job.id, jobName: job.name })
       })
       if (!res.ok) throw new Error('Failed')
-      toast.success(`${job.name} started`, { description: 'Running in background' })
+      toast.success(`${job.name} started`)
     } catch {
       toast.error(`Failed to start ${job.name}`)
     }
@@ -842,7 +842,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   // Copy flag key handler
   const handleCopyFlagKey = useCallback((flag: FeatureFlag) => {
     navigator.clipboard.writeText(flag.key)
-    toast.success('Copied to clipboard', { description: flag.key })
+    toast.success('Copied to clipboard')
   }, [])
 
   // Delete flag handler
@@ -852,9 +852,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       const { error } = await supabase.from('feature_flags').delete().eq('id', flag.id)
       if (error) throw error
       setFeatureFlags(prev => prev.filter(f => f.id !== flag.id))
-      toast.success('Flag deleted', { description: `${flag.name} has been removed` })
+      toast.success('Flag deleted' has been removed` })
     } catch (err) {
-      toast.error('Failed to delete flag', { description: (err as Error).message })
+      toast.error('Failed to delete flag')
     }
   }, [supabase])
 
@@ -869,7 +869,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'rollback', deployId: deploy.id, version: deploy.version })
       })
       if (!res.ok) throw new Error('Failed')
-      toast.success('Rollback initiated', { description: `Rolling back to ${deploy.version}` })
+      toast.success('Rollback initiated'` })
     } catch {
       toast.error('Rollback failed')
     }
@@ -2076,7 +2076,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <AIInsightsPanel
               insights={mockAdminAIInsights}
               title="Admin Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2702,7 +2702,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowRunJobDialog(false)
-                  toast.success('Job started', { description: 'The job is now running in the background' })
+                  toast.success('Job started')
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
@@ -2833,7 +2833,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 onClick={() => {
                   setShowEditUserDialog(false)
                   setSelectedUser(null)
-                  toast.success('User updated', { description: 'Changes have been saved' })
+                  toast.success('User updated')
                 }}
                 className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
               >
@@ -2872,7 +2872,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 onClick={() => {
                   setShowResetPasswordDialog(false)
                   setSelectedUser(null)
-                  toast.success('Reset link sent', { description: 'Password reset email has been sent' })
+                  toast.success('Reset link sent')
                 }}
                 className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
               >
@@ -2893,7 +2893,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowUserActionsDialog(false)
-                  toast.success('MFA enabled', { description: 'User will be required to set up MFA on next login' })
+                  toast.success('MFA enabled')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >
@@ -2906,7 +2906,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowUserActionsDialog(false)
-                  toast.success('Sessions revoked', { description: 'User has been logged out everywhere' })
+                  toast.success('Sessions revoked')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >
@@ -2919,7 +2919,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowUserActionsDialog(false)
-                  toast.success('User suspended', { description: 'Account has been suspended' })
+                  toast.success('User suspended')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >
@@ -2988,7 +2988,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 onClick={() => {
                   setShowEditFlagDialog(false)
                   setSelectedFlag(null)
-                  toast.success('Flag updated', { description: 'Changes have been saved' })
+                  toast.success('Flag updated')
                 }}
                 className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
               >
@@ -3057,7 +3057,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowJobActionsDialog(false)
-                  toast.success('Schedule updated', { description: 'Job schedule has been modified' })
+                  toast.success('Schedule updated')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >
@@ -3070,7 +3070,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowJobActionsDialog(false)
-                  toast.success('Job duplicated', { description: 'A copy of this job has been created' })
+                  toast.success('Job duplicated')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >
@@ -3083,7 +3083,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button
                 onClick={() => {
                   setShowJobActionsDialog(false)
-                  toast.success('Job deleted', { description: 'Job has been removed' })
+                  toast.success('Job deleted')
                 }}
                 className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
               >

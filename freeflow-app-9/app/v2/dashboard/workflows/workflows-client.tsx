@@ -583,21 +583,16 @@ export default function WorkflowsClient() {
       })
 
       if (result.success) {
-        toast.success('Workflow created', {
-          description: `${newWorkflowName} has been created successfully`
+        toast.success('Workflow created' has been created successfully`
         })
         setShowCreateDialog(false)
         setNewWorkflowName('')
         setNewWorkflowDescription('')
       } else {
-        toast.error('Failed to create workflow', {
-          description: result.error || 'An error occurred'
-        })
+        toast.error('Failed to create workflow')
       }
     } catch (error) {
-      toast.error('Failed to create workflow', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to create workflow')
     } finally {
       setIsCreating(false)
     }
@@ -607,13 +602,10 @@ export default function WorkflowsClient() {
     // Activate workflow - sets status to 'active' and started_at timestamp
     const result = await startWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow activated', {
-        description: `${workflow.name} is now active and running`
+      toast.success('Workflow activated' is now active and running`
       })
     } else {
-      toast.error('Failed to activate workflow', {
-        description: result.error || 'An error occurred'
-      })
+      toast.error('Failed to activate workflow')
     }
   }
 
@@ -621,13 +613,10 @@ export default function WorkflowsClient() {
     // Pause workflow - sets status to 'paused'
     const result = await pauseWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow paused', {
-        description: `${workflow.name} has been paused`
+      toast.success('Workflow paused' has been paused`
       })
     } else {
-      toast.error('Failed to pause workflow', {
-        description: result.error || 'An error occurred'
-      })
+      toast.error('Failed to pause workflow')
     }
   }
 
@@ -635,13 +624,10 @@ export default function WorkflowsClient() {
     // Activate/Resume workflow
     const result = await updateWorkflow(workflow.id, { status: 'active' })
     if (result.success) {
-      toast.success('Workflow activated', {
-        description: `${workflow.name} is now active`
+      toast.success('Workflow activated' is now active`
       })
     } else {
-      toast.error('Failed to activate workflow', {
-        description: result.error || 'An error occurred'
-      })
+      toast.error('Failed to activate workflow')
     }
   }
 
@@ -672,13 +658,10 @@ export default function WorkflowsClient() {
     })
 
     if (result.success) {
-      toast.success('Workflow duplicated', {
-        description: `Copy of ${workflow.name} created`
+      toast.success('Workflow duplicated' created`
       })
     } else {
-      toast.error('Failed to duplicate workflow', {
-        description: result.error || 'An error occurred'
-      })
+      toast.error('Failed to duplicate workflow')
     }
   }
 
@@ -686,14 +669,11 @@ export default function WorkflowsClient() {
     // Delete workflow (soft delete in Supabase)
     const result = await deleteWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow deleted', {
-        description: `${workflow.name} has been removed`
+      toast.success('Workflow deleted' has been removed`
       })
       setSelectedWorkflow(null) // Close the dialog if open
     } else {
-      toast.error('Failed to delete workflow', {
-        description: result.error || 'An error occurred'
-      })
+      toast.error('Failed to delete workflow')
     }
   }
 
@@ -733,13 +713,10 @@ export default function WorkflowsClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Workflows exported', {
-        description: `${filteredWorkflows.length} workflow(s) downloaded successfully`
+      toast.success('Workflows exported' workflow(s) downloaded successfully`
       })
     } catch (error) {
-      toast.error('Export failed', {
-        description: error instanceof Error ? error.message : 'Failed to export workflows'
-      })
+      toast.error('Export failed')
     }
   }
 
@@ -1872,7 +1849,7 @@ export default function WorkflowsClient() {
                             <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
                             <Button variant="outline" size="icon" onClick={() => {
                               navigator.clipboard.writeText('wf_api_your_api_key_here')
-                              toast.success('API Key copied', { description: 'Your API key has been copied to the clipboard' })
+                              toast.success('API Key copied')
                             }}>
                               <Copy className="w-4 h-4" />
                             </Button>
@@ -2019,7 +1996,7 @@ export default function WorkflowsClient() {
             <AIInsightsPanel
               insights={mockWorkflowsAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2416,7 +2393,7 @@ export default function WorkflowsClient() {
               </Select>
               <Button variant="outline" size="icon" onClick={() => {
                 fetchWorkflows()
-                toast.success('Logs refreshed', { description: 'Workflow logs have been refreshed' })
+                toast.success('Logs refreshed')
               }}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
@@ -2483,13 +2460,10 @@ export default function WorkflowsClient() {
                 document.body.removeChild(link)
                 URL.revokeObjectURL(url)
 
-                toast.success('Logs exported successfully', {
-                  description: `${mockRuns.length} log entries exported`
+                toast.success('Logs exported successfully' log entries exported`
                 })
               } catch (error) {
-                toast.error('Export failed', {
-                  description: error instanceof Error ? error.message : 'Failed to export logs'
-                })
+                toast.error('Export failed')
               }
             }}>
               <Download className="w-4 h-4 mr-2" />

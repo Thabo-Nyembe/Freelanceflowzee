@@ -505,16 +505,12 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         }
       }
 
-      toast.success('Test suite completed', {
-        description: `Executed tests in "${suiteName}"`,
+      toast.success('Test suite completed'"`,
         id: 'run-suite'
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to run test suite', {
-        description: error.message || 'An error occurred',
-        id: 'run-suite'
-      })
+      toast.error('Failed to run test suite')
     } finally {
       setIsRunningAllTests(false)
     }
@@ -522,7 +518,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
   const handleCreateTestCase = useCallback(async () => {
     if (!newTestForm.test_name.trim()) {
-      toast.error('Validation Error', { description: 'Test name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -540,8 +536,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       })
 
       if (result?.success) {
-        toast.success('Test case created', {
-          description: `Test case "${newTestForm.test_name}" has been created`
+        toast.success('Test case created'" has been created`
         })
         setShowCreateTest(false)
         setNewTestForm({
@@ -559,9 +554,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         throw new Error(result?.message || 'Failed to create test case')
       }
     } catch (error: any) {
-      toast.error('Failed to create test case', {
-        description: error.message || 'An error occurred'
-      })
+      toast.error('Failed to create test case')
     } finally {
       setIsCreatingTest(false)
     }
@@ -569,7 +562,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
   const handleCreateTestRun = useCallback(async () => {
     if (!newRunForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Run name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -592,8 +585,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Test run created', {
-        description: `Test run "${newRunForm.name}" has been created`
+      toast.success('Test run created'" has been created`
       })
       setShowCreateRun(false)
       setNewRunForm({
@@ -603,9 +595,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         assigned_to: ''
       })
     } catch (error: any) {
-      toast.error('Failed to create test run', {
-        description: error.message || 'An error occurred'
-      })
+      toast.error('Failed to create test run')
     } finally {
       setIsCreatingRun(false)
     }
@@ -613,7 +603,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
   const handleReportDefect = useCallback(async () => {
     if (!newDefectForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Defect title is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -635,8 +625,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Defect reported', {
-        description: `Defect "${newDefectForm.title}" has been created`
+      toast.success('Defect reported'" has been created`
       })
       setShowReportDefect(false)
       setNewDefectForm({
@@ -646,9 +635,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         test_case_id: ''
       })
     } catch (error: any) {
-      toast.error('Failed to report defect', {
-        description: error.message || 'An error occurred'
-      })
+      toast.error('Failed to report defect')
     } finally {
       setIsCreatingDefect(false)
     }
@@ -656,7 +643,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
   const handleCreateMilestone = useCallback(async () => {
     if (!newMilestoneForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Milestone name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -678,8 +665,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Milestone created', {
-        description: `Milestone "${newMilestoneForm.name}" has been created`
+      toast.success('Milestone created'" has been created`
       })
       setShowCreateMilestone(false)
       setNewMilestoneForm({
@@ -689,9 +675,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         start_date: ''
       })
     } catch (error: any) {
-      toast.error('Failed to create milestone', {
-        description: error.message || 'An error occurred'
-      })
+      toast.error('Failed to create milestone')
     } finally {
       setIsCreatingMilestone(false)
     }
@@ -725,15 +709,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Test results have been downloaded',
-        id: 'export'
-      })
+      toast.success('Export complete')
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'An error occurred',
-        id: 'export'
-      })
+      toast.error('Export failed')
     } finally {
       setIsExporting(false)
     }
@@ -754,22 +732,15 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         for (const tc of failedTests) {
           await executeTest(tc.id)
         }
-        toast.success('Rerun complete', {
-          description: `Re-executed ${failedTests.length} failed tests`,
+        toast.success('Rerun complete' failed tests`,
           id: 'rerun'
         })
         refetch()
       } else {
-        toast.info('No failed tests', {
-          description: 'No failed tests to rerun',
-          id: 'rerun'
-        })
+        toast.info('No failed tests')
       }
     } catch (error: any) {
-      toast.error('Rerun failed', {
-        description: error.message || 'An error occurred',
-        id: 'rerun'
-      })
+      toast.error('Rerun failed')
     }
   }, [supabase, executeTest, refetch])
 
@@ -779,20 +750,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     try {
       const result = await executeTest(testCaseId)
       if (result?.success) {
-        toast.success('Test executed', {
-          description: 'Test execution completed successfully',
-          id: 'execute-test'
-        })
+        toast.success('Test executed')
         refetch()
         setSelectedTestCase(null)
       } else {
         throw new Error(result?.message || 'Failed to execute test')
       }
     } catch (error: any) {
-      toast.error('Execution failed', {
-        description: error.message || 'An error occurred',
-        id: 'execute-test'
-      })
+      toast.error('Execution failed')
     } finally {
       setIsExecutingTest(false)
     }
@@ -803,20 +768,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     try {
       const result = await deleteTestCase(testCaseId)
       if (result?.success) {
-        toast.success('Test case deleted', {
-          description: 'Test case has been removed',
-          id: 'delete-test'
-        })
+        toast.success('Test case deleted')
         refetch()
         setSelectedTestCase(null)
       } else {
         throw new Error(result?.message || 'Failed to delete test case')
       }
     } catch (error: any) {
-      toast.error('Delete failed', {
-        description: error.message || 'An error occurred',
-        id: 'delete-test'
-      })
+      toast.error('Delete failed')
     }
   }, [deleteTestCase, refetch])
 
@@ -834,15 +793,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       const failed = stats?.filter(t => t.status === 'failed').length || 0
       const avgPassRate = total > 0 ? stats!.reduce((sum, t) => sum + Number(t.pass_rate || 0), 0) / total : 0
 
-      toast.success('Report generated', {
-        description: `Total: ${total}, Passed: ${passed}, Failed: ${failed}, Pass Rate: ${avgPassRate.toFixed(1)}%`,
+      toast.success('Report generated', Passed: ${passed}, Failed: ${failed}, Pass Rate: ${avgPassRate.toFixed(1)}%`,
         id: 'report'
       })
     } catch (error: any) {
-      toast.error('Report generation failed', {
-        description: error.message || 'An error occurred',
-        id: 'report'
-      })
+      toast.error('Report generation failed')
     }
   }, [supabase])
 
@@ -862,22 +817,15 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         for (const tc of testCases) {
           await executeTest(tc.id)
         }
-        toast.success('All tests completed', {
-          description: `Executed ${testCases.length} tests`,
+        toast.success('All tests completed' tests`,
           id: 'run-all'
         })
         refetch()
       } else {
-        toast.info('No tests found', {
-          description: 'Create some test cases first',
-          id: 'run-all'
-        })
+        toast.info('No tests found')
       }
     } catch (error: any) {
-      toast.error('Test run failed', {
-        description: error.message || 'An error occurred',
-        id: 'run-all'
-      })
+      toast.error('Test run failed')
     } finally {
       setIsRunningAllTests(false)
     }
@@ -2210,7 +2158,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <AIInsightsPanel
               insights={mockQAAIInsights}
               title="QA Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

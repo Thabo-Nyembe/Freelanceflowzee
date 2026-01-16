@@ -939,8 +939,7 @@ export default function ShippingClient() {
           .update({ status: 'label_created', updated_at: new Date().toISOString() })
           .eq('tracking_number', shipment.trackingNumber)
       }
-      toast.success('Label ready', {
-        description: `Shipping label for ${shipment.trackingNumber} is ready to print`
+      toast.success('Label ready' is ready to print`
       })
       fetchShipments()
     } catch (error) {
@@ -959,8 +958,7 @@ export default function ShippingClient() {
         description: 'Customer viewed tracking information',
         location: shipment.destination.city || 'Unknown',
       })
-      toast.info('Tracking', {
-        description: `Opening tracking for ${shipment.trackingNumber}`
+      toast.info('Tracking'`
       })
     } catch (error) {
       console.error('Error:', error)
@@ -990,8 +988,7 @@ export default function ShippingClient() {
       const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
       if (error) throw error
 
-      toast.success('Batch shipment created', {
-        description: `${selectedOrders.length} orders queued for shipment`
+      toast.success('Batch shipment created' orders queued for shipment`
       })
       setSelectedOrders([])
       fetchShipments()
@@ -1011,8 +1008,7 @@ export default function ShippingClient() {
 
       if (error) throw error
 
-      toast.info('Shipment cancelled', {
-        description: `Shipment ${trackingNumber} has been cancelled`
+      toast.info('Shipment cancelled' has been cancelled`
       })
       fetchShipments()
     } catch (error) {
@@ -1039,9 +1035,7 @@ export default function ShippingClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Exporting shipments', {
-        description: 'Shipping report downloaded'
-      })
+      toast.success('Exporting shipments')
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to export shipments')
@@ -2551,7 +2545,7 @@ export default function ShippingClient() {
             <AIInsightsPanel
               insights={mockShippingAIInsights}
               title="Shipping Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

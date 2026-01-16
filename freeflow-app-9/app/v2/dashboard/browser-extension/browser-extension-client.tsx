@@ -183,45 +183,31 @@ const browserExtensionReducer = (
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_CAPTURES':
-      logger.info('Setting captures', { count: action.captures.length })
-      return { ...state, captures: action.captures, isLoading: false }
+    case 'SET_CAPTURES':      return { ...state, captures: action.captures, isLoading: false }
 
-    case 'ADD_CAPTURE':
-      logger.info('Adding capture', { title: action.capture.title })
-      return {
+    case 'ADD_CAPTURE':      return {
         ...state,
         captures: [action.capture, ...state.captures],
         isLoading: false
       }
 
-    case 'UPDATE_CAPTURE':
-      logger.info('Updating capture', { captureId: action.capture.id })
-      return {
+    case 'UPDATE_CAPTURE':      return {
         ...state,
         captures: state.captures.map(c => c.id === action.capture.id ? action.capture : c),
         selectedCapture: state.selectedCapture?.id === action.capture.id ? action.capture : state.selectedCapture
       }
 
-    case 'DELETE_CAPTURE':
-      logger.info('Deleting capture', { captureId: action.captureId })
-      return {
+    case 'DELETE_CAPTURE':      return {
         ...state,
         captures: state.captures.filter(c => c.id !== action.captureId),
         selectedCapture: state.selectedCapture?.id === action.captureId ? null : state.selectedCapture
       }
 
-    case 'SELECT_CAPTURE':
-      logger.info('Selecting capture', { title: action.capture?.title || null })
-      return { ...state, selectedCapture: action.capture }
+    case 'SELECT_CAPTURE':      return { ...state, selectedCapture: action.capture }
 
-    case 'SET_ACTIONS':
-      logger.info('Setting actions', { count: action.actions.length })
-      return { ...state, actions: action.actions }
+    case 'SET_ACTIONS':      return { ...state, actions: action.actions }
 
-    case 'SET_FEATURES':
-      logger.info('Setting features', { count: action.features.length })
-      return { ...state, features: action.features }
+    case 'SET_FEATURES':      return { ...state, features: action.features }
 
     case 'TOGGLE_FEATURE':
       logger.debug('Toggling feature', { featureId: action.featureId })
@@ -248,9 +234,7 @@ const browserExtensionReducer = (
       logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
-    case 'SET_INSTALLED':
-      logger.info('Installation status changed', { isInstalled: action.isInstalled })
-      return { ...state, isInstalled: action.isInstalled }
+    case 'SET_INSTALLED':      return { ...state, isInstalled: action.isInstalled }
 
     case 'SET_BROWSER':
       logger.debug('Browser changed', { browser: action.browser })
@@ -302,10 +286,7 @@ const generateMockCaptures = (): PageCapture[] => {
         scrollPosition: type === 'full-page' ? Math.floor(Math.random() * 5000) : undefined
       }
     })
-  }
-
-  logger.info('Generated mock captures', { count: captures.length })
-  return captures
+  }  return captures
 }
 
 const generateMockActions = (): QuickAction[] => {
@@ -372,10 +353,7 @@ const generateMockActions = (): QuickAction[] => {
       enabled: false,
       usageCount: Math.floor(Math.random() * 100)
     }
-  ]
-
-  logger.info('Generated mock actions', { count: actions.length })
-  return actions
+  ]  return actions
 }
 
 const generateMockFeatures = (): ExtensionFeature[] => {
@@ -436,10 +414,7 @@ const generateMockFeatures = (): ExtensionFeature[] => {
       enabled: false,
       settings: { model: 'gpt-4' }
     }
-  ]
-
-  logger.info('Generated mock features', { count: features.length })
-  return features
+  ]  return features
 }
 
 // ========================================
@@ -611,9 +586,7 @@ export default function BrowserExtensionClient() {
       label: 'New Item',
       icon: 'Plus',
       shortcut: 'N',
-      action: () => {
-        logger.info('Opening new item dialog')
-        setShowNewItemDialog(true)
+      action: () => {        setShowNewItemDialog(true)
       }
     },
     {
@@ -621,9 +594,7 @@ export default function BrowserExtensionClient() {
       label: 'Export',
       icon: 'Download',
       shortcut: 'E',
-      action: () => {
-        logger.info('Opening export dialog')
-        setShowExportDialog(true)
+      action: () => {        setShowExportDialog(true)
       }
     },
     {
@@ -631,9 +602,7 @@ export default function BrowserExtensionClient() {
       label: 'Settings',
       icon: 'Settings',
       shortcut: 'S',
-      action: () => {
-        logger.info('Opening quick settings dialog')
-        setShowQuickSettingsDialog(true)
+      action: () => {        setShowQuickSettingsDialog(true)
       }
     },
   ], [])
@@ -642,19 +611,13 @@ export default function BrowserExtensionClient() {
   const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
 
   // Load mock data
-  useEffect(() => {
-    logger.info('Loading mock data')
-
-    const mockCaptures = generateMockCaptures()
+  useEffect(() => {    const mockCaptures = generateMockCaptures()
     const mockActions = generateMockActions()
     const mockFeatures = generateMockFeatures()
 
     dispatch({ type: 'SET_CAPTURES', captures: mockCaptures })
     dispatch({ type: 'SET_ACTIONS', actions: mockActions })
-    dispatch({ type: 'SET_FEATURES', features: mockFeatures })
-
-    logger.info('Mock data loaded successfully')
-    announce('Browser extension page loaded', 'polite')
+    dispatch({ type: 'SET_FEATURES', features: mockFeatures })    announce('Browser extension page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
@@ -728,14 +691,9 @@ export default function BrowserExtensionClient() {
   // HANDLERS
   // ========================================
 
-  const handleInstallExtension = async () => {
-    logger.info('Installing extension', { browser: state.currentBrowser })
-
-    try {
+  const handleInstallExtension = async () => {    try {
       logger.debug('Starting installation')
-      toast.info('Installing extension...', {
-        description: 'Setting up browser integration'
-      })
+      toast.info('Installing extension...')
 
       // Create installation record in database
       if (userId) {
@@ -752,16 +710,10 @@ export default function BrowserExtensionClient() {
           total_actions: 0,
           storage_used: 0
         })
-        if (error) throw error
-        logger.info('Installation record created in database', { installationId: data?.id })
-      }
+        if (error) throw error      }
 
       dispatch({ type: 'SET_INSTALLED', isInstalled: true })
-      setShowInstallModal(false)
-
-      logger.info('Extension installed successfully', { browser: state.currentBrowser })
-      toast.success('Extension installed', {
-        description: `${state.currentBrowser} - Active and syncing - All features enabled`
+      setShowInstallModal(false)      toast.success('Extension installed' - Active and syncing - All features enabled`
       })
       announce('Extension installed', 'polite')
     } catch (error) {
@@ -775,14 +727,7 @@ export default function BrowserExtensionClient() {
     }
   }
 
-  const handleViewCapture = (capture: PageCapture) => {
-    logger.info('Opening capture view', {
-      captureId: capture.id,
-      title: capture.title,
-      type: capture.type
-    })
-
-    dispatch({ type: 'SELECT_CAPTURE', capture })
+  const handleViewCapture = (capture: PageCapture) => {    dispatch({ type: 'SELECT_CAPTURE', capture })
     setViewCaptureTab('details')
     setShowViewCaptureModal(true)
     announce(`Viewing capture ${capture.title}`, 'polite')
@@ -793,18 +738,11 @@ export default function BrowserExtensionClient() {
     if (!capture) {
       logger.warn('Capture deletion failed', { reason: 'Capture not found', captureId })
       return
-    }
-
-    logger.info('Deleting capture', { captureId, title: capture.title, fileSize: capture.fileSize })
-    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
+    }    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
   }
 
   const handleConfirmDeleteCapture = async () => {
-    if (!deleteCapture || !userId) return
-
-    logger.info('User confirmed deletion', { captureId: deleteCapture.id, userId })
-
-    try {
+    if (!deleteCapture || !userId) return    try {
       // Dynamic import for code splitting
       const { deleteCapture: deleteCaptureFromDB } = await import('@/lib/browser-extension-queries')
 
@@ -816,16 +754,7 @@ export default function BrowserExtensionClient() {
 
       dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
 
-      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
-
-      logger.info('Capture deleted from database', {
-        captureId: deleteCapture.id,
-        title: deleteCapture.title,
-        userId
-      })
-
-      toast.success('Capture deleted', {
-        description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
+      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)      toast.success('Capture deleted' - ${deleteCapture.type} - ${fileSizeMB} MB freed`
       })
       announce('Capture deleted', 'polite')
     } catch (error: any) {
@@ -834,9 +763,7 @@ export default function BrowserExtensionClient() {
         captureId: deleteCapture.id,
         userId
       })
-      toast.error('Failed to delete capture', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete capture')
       announce('Error deleting capture', 'assertive')
     } finally {
       setDeleteCapture(null)
@@ -845,15 +772,7 @@ export default function BrowserExtensionClient() {
 
   const handleToggleFeature = async (featureId: string) => {
     const feature = state.features.find(f => f.id === featureId)
-    if (!feature) return
-
-    logger.info('Toggling feature', {
-      featureId,
-      name: feature.name,
-      currentState: feature.enabled
-    })
-
-    dispatch({ type: 'TOGGLE_FEATURE', featureId })
+    if (!feature) return    dispatch({ type: 'TOGGLE_FEATURE', featureId })
 
     const newState = !feature.enabled
 
@@ -866,32 +785,21 @@ export default function BrowserExtensionClient() {
         const enabledFeatures = newState
           ? [...(installation.enabled_features || []), featureId]
           : (installation.enabled_features || []).filter((f: string) => f !== featureId)
-        await updateInstallation(installation.id, { enabled_features: enabledFeatures })
-        logger.info('Feature toggle persisted in database', { featureId, enabled: newState })
-      }
+        await updateInstallation(installation.id, { enabled_features: enabledFeatures })      }
     }
 
-    toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled`, {
-      description: `${feature.description} - ${newState ? 'Now active' : 'Disabled'}`
+    toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled` - ${newState ? 'Now active' : 'Disabled'}`
     })
     announce(newState ? `${feature.name} enabled` : `${feature.name} disabled`, 'polite')
   }
 
-  const handleCopyUrl = (url: string) => {
-    logger.info('Copying URL', { url })
-
-    navigator.clipboard.writeText(url)
-    toast.success('URL copied to clipboard', {
-      description: url.length > 50 ? url.substring(0, 50) + '...' : url
-    })
+  const handleCopyUrl = (url: string) => {    navigator.clipboard.writeText(url)
+    toast.success('URL copied to clipboard')
     announce('URL copied', 'polite')
   }
 
   // Handler for creating new capture item
-  const handleCreateNewItem = async () => {
-    logger.info('Creating new capture item', { form: newItemForm })
-
-    if (!newItemForm.title.trim()) {
+  const handleCreateNewItem = async () => {    if (!newItemForm.title.trim()) {
       toast.error('Title is required')
       return
     }
@@ -917,8 +825,7 @@ export default function BrowserExtensionClient() {
 
     dispatch({ type: 'ADD_CAPTURE', capture: newCapture })
 
-    toast.success('Capture created successfully', {
-      description: `${newCapture.title} - ${newCapture.type}`
+    toast.success('Capture created successfully' - ${newCapture.type}`
     })
 
     // Reset form and close dialog
@@ -928,10 +835,7 @@ export default function BrowserExtensionClient() {
   }
 
   // Handler for exporting data
-  const handleExportData = async () => {
-    logger.info('Exporting data', { form: exportForm })
-
-    // Filter captures based on date range
+  const handleExportData = async () => {    // Filter captures based on date range
     let capturesForExport = [...state.captures]
     const now = new Date()
 
@@ -999,8 +903,7 @@ export default function BrowserExtensionClient() {
       URL.revokeObjectURL(url)
     }
 
-    toast.success('Export completed', {
-      description: `${capturesForExport.length} captures exported as ${exportForm.format.toUpperCase()}`
+    toast.success('Export completed' captures exported as ${exportForm.format.toUpperCase()}`
     })
 
     setShowExportDialog(false)
@@ -1008,15 +911,10 @@ export default function BrowserExtensionClient() {
   }
 
   // Handler for saving quick settings
-  const handleSaveQuickSettings = () => {
-    logger.info('Saving quick settings', { settings: quickSettings })
-
-    // Here you would typically save to localStorage or backend
+  const handleSaveQuickSettings = () => {    // Here you would typically save to localStorage or backend
     localStorage.setItem('browserExtensionQuickSettings', JSON.stringify(quickSettings))
 
-    toast.success('Settings saved', {
-      description: 'Your preferences have been updated'
-    })
+    toast.success('Settings saved')
 
     setShowQuickSettingsDialog(false)
     announce('Settings saved', 'polite')

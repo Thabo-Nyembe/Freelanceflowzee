@@ -753,7 +753,7 @@ export default function CodeRepositoryClient() {
 
   const handleDownloadSource = () => {
     if (selectedRepo) {
-      toast.success('Download started!', { description: `${selectedRepo.name}.zip is downloading` })
+      toast.success('Download started!'.zip is downloading` })
     }
   }
 
@@ -768,7 +768,7 @@ export default function CodeRepositoryClient() {
     setRepositories(prev => prev.map(r =>
       r.id === repo.id ? { ...r, forks: r.forks + 1 } : r
     ))
-    toast.success('Repository forked!', { description: `${repo.name} has been forked to your account` })
+    toast.success('Repository forked!' has been forked to your account` })
   }
 
   const handleWatchRepository = (repo: Repository) => {
@@ -780,7 +780,7 @@ export default function CodeRepositoryClient() {
 
   const handleAddReviewer = () => {
     if (selectedPR) {
-      toast.success('Reviewer added!', { description: `Reviewer has been added to PR #${selectedPR.number}` })
+      toast.success('Reviewer added!'` })
       setAddReviewerDialogOpen(false)
     }
   }
@@ -792,7 +792,7 @@ export default function CodeRepositoryClient() {
         reviewers: p.reviewers.map(r => ({ ...r, status: 'approved' as const }))
       } : p
     ))
-    toast.success('PR approved!', { description: `You approved PR #${pr.number}` })
+    toast.success('PR approved!'` })
   }
 
   const handleRequestChanges = (pr: PullRequest) => {
@@ -802,7 +802,7 @@ export default function CodeRepositoryClient() {
         reviewers: p.reviewers.map(r => ({ ...r, status: 'changes_requested' as const }))
       } : p
     ))
-    toast.success('Changes requested', { description: `Review submitted for PR #${pr.number}` })
+    toast.success('Changes requested'` })
   }
 
   const handleClosePR = (pr: PullRequest) => {
@@ -814,16 +814,16 @@ export default function CodeRepositoryClient() {
 
   const handleRevertCommit = (commit: Commit) => {
     if (confirm(`Are you sure you want to revert commit ${commit.hash.substring(0, 7)}? This will create a new commit that undoes the changes.`)) {
-      toast.success('Commit reverted!', { description: `Created revert commit for ${commit.hash.substring(0, 7)}` })
+      toast.success('Commit reverted!'` })
     }
   }
 
   const handleCherryPick = (commit: Commit) => {
-    toast.success('Cherry-pick successful!', { description: `Commit ${commit.hash.substring(0, 7)} applied to current branch` })
+    toast.success('Cherry-pick successful!' applied to current branch` })
   }
 
   const handleCompare = () => {
-    toast.success('Comparison complete!', { description: 'Branch diff is ready to view' })
+    toast.success('Comparison complete!')
     setCompareDialogOpen(false)
   }
 
@@ -963,7 +963,7 @@ export default function CodeRepositoryClient() {
               />
             </div>
             <Button variant="outline" size="icon" onClick={() => {
-              toast.info('Filter options', { description: 'Filter by visibility, language, or status' })
+              toast.info('Filter options')
             }}>
               <Filter className="w-4 h-4" />
             </Button>
@@ -1094,7 +1094,7 @@ export default function CodeRepositoryClient() {
                         size="icon"
                         onClick={() => {
                           setSelectedRepo(repo)
-                          toast.info('Opening repository', { description: `${repo.name} opened in new tab` })
+                          toast.info('Opening repository' opened in new tab` })
                           window.open(`https://github.com/freeflow/${repo.name}`, '_blank')
                         }}
                       >
@@ -1245,7 +1245,7 @@ export default function CodeRepositoryClient() {
                           className="p-0 h-auto text-lg font-semibold"
                           onClick={() => {
                             setSelectedPR(pr)
-                            toast.info('PR Details', { description: `Viewing PR #${pr.number}: ${pr.title}` })
+                            toast.info('PR Details': ${pr.title}` })
                           }}
                         >
                           {pr.title}
@@ -1342,7 +1342,7 @@ export default function CodeRepositoryClient() {
                             setPullRequests(pullRequests.map(p =>
                               p.id === pr.id ? { ...p, status: 'open' as const } : p
                             ))
-                            toast.success('Ready for review!', { description: `PR #${pr.number} is now open for review` })
+                            toast.success('Ready for review!' is now open for review` })
                           }}
                         >
                           Ready for Review
@@ -1672,7 +1672,7 @@ export default function CodeRepositoryClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRepoSettingsDialogOpen(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Settings saved!', { description: 'Repository settings updated successfully' })
+              toast.success('Settings saved!')
               setRepoSettingsDialogOpen(false)
             }}>
               Save Changes
@@ -1990,35 +1990,35 @@ export default function CodeRepositoryClient() {
               <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.info('Opening folder', { description: 'Navigating to src/' })
+                    toast.info('Opening folder')
                   }}>
                   <Folder className="w-5 h-5 text-blue-500" />
                   <span>src</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.info('Opening folder', { description: 'Navigating to public/' })
+                    toast.info('Opening folder')
                   }}>
                   <Folder className="w-5 h-5 text-blue-500" />
                   <span>public</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.success('File loaded', { description: 'README.md is ready to view' })
+                    toast.success('File loaded')
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>README.md</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.success('File loaded', { description: 'package.json is ready to view' })
+                    toast.success('File loaded')
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>package.json</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.success('File loaded', { description: 'tsconfig.json is ready to view' })
+                    toast.success('File loaded')
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>tsconfig.json</span>

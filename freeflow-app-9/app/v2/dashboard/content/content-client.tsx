@@ -629,17 +629,14 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content created successfully', {
-          description: `"${contentForm.title}" has been created as a ${contentForm.status}`
+        toast.success('Content created successfully'" has been created as a ${contentForm.status}`
         })
         setContentForm(defaultContentForm)
         setIsCreateDialogOpen(false)
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to create content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to create content')
     } finally {
       setIsSubmitting(false)
     }
@@ -670,8 +667,7 @@ export default function ContentClient() {
       }, selectedEntry.id)
 
       if (result) {
-        toast.success('Content updated successfully', {
-          description: `"${contentForm.title}" has been updated`
+        toast.success('Content updated successfully'" has been updated`
         })
         setContentForm(defaultContentForm)
         setSelectedEntry(null)
@@ -679,9 +675,7 @@ export default function ContentClient() {
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to update content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to update content')
     } finally {
       setIsSubmitting(false)
     }
@@ -695,17 +689,14 @@ export default function ContentClient() {
       const result = await deleteContent(selectedEntry.id)
 
       if (result) {
-        toast.success('Content deleted', {
-          description: `"${selectedEntry.title}" has been moved to trash`
+        toast.success('Content deleted'" has been moved to trash`
         })
         setSelectedEntry(null)
         setIsDeleteDialogOpen(false)
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to delete content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to delete content')
     } finally {
       setIsSubmitting(false)
     }
@@ -721,15 +712,12 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content published', {
-          description: `"${entry.title}" is now live`
+        toast.success('Content published'" is now live`
         })
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to publish content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to publish content')
     } finally {
       setIsSubmitting(false)
     }
@@ -745,15 +733,12 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content scheduled', {
-          description: `"${entry.title}" will be published on ${new Date(scheduledDate).toLocaleDateString()}`
+        toast.success('Content scheduled'" will be published on ${new Date(scheduledDate).toLocaleDateString()}`
         })
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to schedule content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to schedule content')
     } finally {
       setIsSubmitting(false)
     }
@@ -768,15 +753,12 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.info('Content archived', {
-          description: `"${entry.title}" has been archived`
+        toast.info('Content archived'" has been archived`
         })
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to archive content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to archive content')
     } finally {
       setIsSubmitting(false)
     }
@@ -815,15 +797,12 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content duplicated', {
-          description: `Created a copy of "${entry.title}"`
+        toast.success('Content duplicated'"`
         })
         refetchContent()
       }
     } catch (error) {
-      toast.error('Failed to duplicate content', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to duplicate content')
     } finally {
       setIsSubmitting(false)
     }
@@ -832,9 +811,7 @@ export default function ContentClient() {
   // Asset handlers
   const handleUploadAsset = async () => {
     // In a real implementation, this would handle file upload
-    toast.info('Upload Asset', {
-      description: 'Asset upload functionality - connect to your storage solution'
-    })
+    toast.info('Upload Asset')
   }
 
   const handleCopyAssetUrl = (asset: Asset) => {
@@ -844,9 +821,7 @@ export default function ContentClient() {
 
   const handleDownloadAsset = (asset: Asset) => {
     window.open(asset.url, '_blank')
-    toast.success('Starting download', {
-      description: asset.filename
-    })
+    toast.success('Starting download')
   }
 
   const handleDeleteAsset = async (asset: Asset) => {
@@ -866,16 +841,13 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Asset deleted', {
-        description: `"${asset.title}" has been removed`
+      toast.success('Asset deleted'" has been removed`
       })
 
       setAssets(prev => prev.filter(a => a.id !== asset.id))
       setSelectedAsset(null)
     } catch (error) {
-      toast.error('Failed to delete asset', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to delete asset')
     }
   }
 
@@ -908,8 +880,7 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Webhook created', {
-        description: `"${webhookForm.name}" is now active`
+      toast.success('Webhook created'" is now active`
       })
 
       setWebhooks(prev => [{
@@ -928,9 +899,7 @@ export default function ContentClient() {
       setWebhookForm(defaultWebhookForm)
       setIsWebhookDialogOpen(false)
     } catch (error) {
-      toast.error('Failed to create webhook', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to create webhook')
     } finally {
       setIsSubmitting(false)
     }
@@ -949,17 +918,13 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success(webhook.isActive ? 'Webhook disabled' : 'Webhook enabled', {
-        description: webhook.name
-      })
+      toast.success(webhook.isActive ? 'Webhook disabled' : 'Webhook enabled')
 
       setWebhooks(prev => prev.map(w =>
         w.id === webhook.id ? { ...w, isActive: !w.isActive } : w
       ))
     } catch (error) {
-      toast.error('Failed to toggle webhook', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to toggle webhook')
     }
   }
 
@@ -982,13 +947,9 @@ export default function ContentClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Content has been exported to JSON'
-      })
+      toast.success('Export complete')
     } catch (error) {
-      toast.error('Export failed', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Export failed')
     }
   }
 
@@ -1020,8 +981,7 @@ export default function ContentClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Creating content type...', {
-      description: `Setting up "${contentTypeForm.name}"...`
+    toast.success('Creating content type...'"...`
     })
 
     try {
@@ -1041,15 +1001,12 @@ export default function ContentClient() {
         throw new Error(errorData.error || 'Failed to create content type')
       }
 
-      toast.success('Content Type Created', {
-        description: `"${contentTypeForm.name}" has been created. Configure fields in the builder.`
+      toast.success('Content Type Created'" has been created. Configure fields in the builder.`
       })
       setContentTypeForm({ name: '', apiId: '', description: '' })
       setIsCreateTypeDialogOpen(false)
     } catch (error) {
-      toast.error('Failed to create content type', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to create content type')
     } finally {
       setIsSubmitting(false)
     }
@@ -1069,8 +1026,7 @@ export default function ContentClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Adding locale...', {
-      description: `Setting up "${localeForm.name}"...`
+    toast.success('Adding locale...'"...`
     })
 
     try {
@@ -1090,15 +1046,12 @@ export default function ContentClient() {
         throw new Error(errorData.error || 'Failed to add locale')
       }
 
-      toast.success('Locale Added', {
-        description: `"${localeForm.name}" (${localeForm.code}) has been added`
+      toast.success('Locale Added'" (${localeForm.code}) has been added`
       })
       setLocaleForm({ code: '', name: '', fallback: 'en-US' })
       setIsAddLocaleDialogOpen(false)
     } catch (error) {
-      toast.error('Failed to add locale', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to add locale')
     } finally {
       setIsSubmitting(false)
     }
@@ -1117,8 +1070,7 @@ export default function ContentClient() {
         const text = await file.text()
         const data = JSON.parse(text)
 
-        toast.success('Import Started', {
-          description: `Importing ${data.entries?.length || 0} entries and ${data.assets?.length || 0} assets...`
+        toast.success('Import Started' entries and ${data.assets?.length || 0} assets...`
         })
 
         // Call the API to process the import
@@ -1138,15 +1090,11 @@ export default function ContentClient() {
         }
 
         const result = await response.json()
-        toast.success('Import Complete', {
-          description: result.message || 'Content has been successfully imported'
-        })
+        toast.success('Import Complete')
         setIsImportDialogOpen(false)
         refetchContent()
       } catch (error) {
-        toast.error('Import Failed', {
-          description: error instanceof Error ? error.message : 'Invalid JSON file format'
-        })
+        toast.error('Import Failed')
       }
     }
     input.click()
@@ -1155,9 +1103,7 @@ export default function ContentClient() {
   // Regenerate API keys handler
   const handleRegenerateKeys = async () => {
     setIsSubmitting(true)
-    toast.success('Regenerating API keys...', {
-      description: 'Please wait...'
-    })
+    toast.success('Regenerating API keys...')
 
     try {
       const response = await fetch('/api/content', {
@@ -1173,14 +1119,10 @@ export default function ContentClient() {
         throw new Error(errorData.error || 'Failed to regenerate API keys')
       }
 
-      toast.success('API Keys Regenerated', {
-        description: 'New API keys have been generated. Update your applications.'
-      })
+      toast.success('API Keys Regenerated')
       setIsRegenerateKeysDialogOpen(false)
     } catch (error) {
-      toast.error('Failed to regenerate API keys', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to regenerate API keys')
     } finally {
       setIsSubmitting(false)
     }
@@ -1830,7 +1772,7 @@ export default function ContentClient() {
             <AIInsightsPanel
               insights={mockContentAIInsights}
               title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2364,7 +2306,7 @@ export default function ContentClient() {
                 onClick={async () => {
                   if (!selectedContentType) return
                   setIsSubmitting(true)
-                  toast.success('Saving content type...', { description: 'Please wait...' })
+                  toast.success('Saving content type...')
 
                   try {
                     const response = await fetch('/api/content', {
@@ -2385,12 +2327,10 @@ export default function ContentClient() {
                       throw new Error(errorData.error || 'Failed to update content type')
                     }
 
-                    toast.success('Content Type Updated', { description: `"${selectedContentType?.name}" has been saved` })
+                    toast.success('Content Type Updated'" has been saved` })
                     setIsConfigureTypeDialogOpen(false)
                   } catch (error) {
-                    toast.error('Failed to update content type', {
-                      description: error instanceof Error ? error.message : 'An error occurred'
-                    })
+                    toast.error('Failed to update content type')
                   } finally {
                     setIsSubmitting(false)
                   }

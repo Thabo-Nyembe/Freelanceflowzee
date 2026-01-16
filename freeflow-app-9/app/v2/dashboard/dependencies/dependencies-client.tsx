@@ -508,8 +508,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     if (result) {
-      toast.success('Dependency added', {
-        description: `${dependencyForm.name} has been added to your project`
+      toast.success('Dependency added' has been added to your project`
       })
       setShowAddDependencyDialog(false)
       setDependencyForm({
@@ -520,15 +519,12 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
         license: 'MIT'
       })
     } else {
-      toast.error('Failed to add dependency', {
-        description: dependencyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to add dependency')
     }
   }
 
   const handleUpdateDependency = async (depId: string, depName: string, newVersion: string) => {
-    toast.info('Updating dependency', {
-      description: `Updating "${depName}" to ${newVersion}...`
+    toast.info('Updating dependency'" to ${newVersion}...`
     })
 
     const result = await dependencyMutation.mutate({
@@ -538,33 +534,26 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, depId)
 
     if (result) {
-      toast.success('Dependency updated', {
-        description: `${depName} has been updated to ${newVersion}`
+      toast.success('Dependency updated' has been updated to ${newVersion}`
       })
     } else {
-      toast.error('Failed to update dependency', {
-        description: dependencyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to update dependency')
     }
   }
 
   const handleDeleteDependency = async (depId: string, depName: string) => {
     const success = await dependencyMutation.remove(depId)
     if (success) {
-      toast.success('Dependency removed', {
-        description: `${depName} has been removed from your project`
+      toast.success('Dependency removed' has been removed from your project`
       })
     } else {
-      toast.error('Failed to remove dependency', {
-        description: dependencyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to remove dependency')
     }
   }
 
   const handleScanVulnerabilities = async () => {
     setIsScanning(true)
-    toast.info('Scanning dependencies', {
-      description: `Running ${scanType} security vulnerability scan...`
+    toast.info('Scanning dependencies' security vulnerability scan...`
     })
 
     // Simulate scan process
@@ -593,13 +582,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       if (error) throw error
 
       await refetchScans()
-      toast.success('Scan completed', {
-        description: `Found ${mockScanResult.vulnerabilities.critical + mockScanResult.vulnerabilities.high} critical/high vulnerabilities`
+      toast.success('Scan completed' critical/high vulnerabilities`
       })
     } catch (err) {
-      toast.error('Scan failed', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Scan failed')
     } finally {
       setIsScanning(false)
       setShowScanDialog(false)
@@ -608,14 +594,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
   const handleFixVulnerability = async (vulnId: string, vulnPackage: string, patchedVersion: string | null) => {
     if (!patchedVersion) {
-      toast.error('No fix available', {
-        description: 'There is no patched version available for this vulnerability'
-      })
+      toast.error('No fix available')
       return
     }
 
-    toast.info('Fixing vulnerability', {
-      description: `Updating ${vulnPackage} to ${patchedVersion}...`
+    toast.info('Fixing vulnerability' to ${patchedVersion}...`
     })
 
     const result = await vulnerabilityMutation.mutate({
@@ -625,14 +608,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, vulnId)
 
     if (result) {
-      toast.success('Vulnerability fixed', {
-        description: `${vulnPackage} has been updated to ${patchedVersion}`
+      toast.success('Vulnerability fixed' has been updated to ${patchedVersion}`
       })
       setShowVulnDialog(false)
     } else {
-      toast.error('Failed to fix vulnerability', {
-        description: vulnerabilityMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to fix vulnerability')
     }
   }
 
@@ -643,14 +623,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, vulnId)
 
     if (result) {
-      toast.success('Vulnerability ignored', {
-        description: `${vulnPackage} vulnerability has been marked as ignored`
+      toast.success('Vulnerability ignored' vulnerability has been marked as ignored`
       })
       setShowVulnDialog(false)
     } else {
-      toast.error('Failed to ignore vulnerability', {
-        description: vulnerabilityMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to ignore vulnerability')
     }
   }
 
@@ -669,8 +646,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     if (result) {
-      toast.success('Policy created', {
-        description: `${policyForm.name} security policy has been created`
+      toast.success('Policy created' security policy has been created`
       })
       setShowAddPolicyDialog(false)
       setPolicyForm({
@@ -681,42 +657,32 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
         enabled: true
       })
     } else {
-      toast.error('Failed to create policy', {
-        description: policyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to create policy')
     }
   }
 
   const handleUpdatePolicy = async (policyId: string, enabled: boolean) => {
     const result = await policyMutation.mutate({ enabled }, policyId)
     if (result) {
-      toast.success('Policy updated', {
-        description: `Security policy has been ${enabled ? 'enabled' : 'disabled'}`
+      toast.success('Policy updated'`
       })
     } else {
-      toast.error('Failed to update policy', {
-        description: policyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to update policy')
     }
   }
 
   const handleDeletePolicy = async (policyId: string, policyName: string) => {
     const success = await policyMutation.remove(policyId)
     if (success) {
-      toast.success('Policy deleted', {
-        description: `${policyName} has been removed`
+      toast.success('Policy deleted' has been removed`
       })
     } else {
-      toast.error('Failed to delete policy', {
-        description: policyMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to delete policy')
     }
   }
 
   const handleExportDependencies = async () => {
-    toast.info('Exporting dependencies', {
-      description: 'Generating dependency report...'
-    })
+    toast.info('Exporting dependencies')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -748,20 +714,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Dependencies report has been downloaded'
-      })
+      toast.success('Export complete')
     } catch (err) {
-      toast.error('Export failed', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Export failed')
     }
   }
 
   const handleGenerateSBOM = async () => {
-    toast.info('Generating SBOM', {
-      description: 'Creating Software Bill of Materials...'
-    })
+    toast.info('Generating SBOM')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -802,19 +762,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('SBOM generated', {
-        description: 'Software Bill of Materials has been downloaded'
-      })
+      toast.success('SBOM generated')
     } catch (err) {
-      toast.error('SBOM generation failed', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('SBOM generation failed')
     }
   }
 
   const handleCreatePR = async (packageName: string, targetVersion: string) => {
-    toast.info('Creating Pull Request', {
-      description: `Creating PR to update ${packageName} to ${targetVersion}...`
+    toast.info('Creating Pull Request' to ${targetVersion}...`
     })
 
     try {
@@ -835,20 +790,15 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
       if (error) throw error
 
-      toast.success('Pull Request created', {
-        description: `PR for ${packageName} update has been created`
+      toast.success('Pull Request created' update has been created`
       })
     } catch (err) {
-      toast.error('Failed to create PR', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to create PR')
     }
   }
 
   const handleClearCache = async () => {
-    toast.info('Clearing cache', {
-      description: 'Forcing re-scan of all dependencies...'
-    })
+    toast.info('Clearing cache')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -863,20 +813,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       if (error) throw error
 
       await refetchScans()
-      toast.success('Cache cleared', {
-        description: 'Vulnerability cache has been cleared. Run a new scan to refresh data.'
-      })
+      toast.success('Cache cleared')
     } catch (err) {
-      toast.error('Failed to clear cache', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to clear cache')
     }
   }
 
   const handleResetPolicies = async () => {
-    toast.info('Resetting policies', {
-      description: 'Restoring security policies to defaults...'
-    })
+    toast.info('Resetting policies')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -891,13 +835,9 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       if (error) throw error
 
       await refetchPolicies()
-      toast.success('Policies reset', {
-        description: 'Security policies have been restored to defaults'
-      })
+      toast.success('Policies reset')
     } catch (err) {
-      toast.error('Failed to reset policies', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to reset policies')
     }
   }
 
@@ -906,9 +846,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       return
     }
 
-    toast.info('Deleting history', {
-      description: 'Removing all historical scan data...'
-    })
+    toast.info('Deleting history')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -930,13 +868,9 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       if (exportsError) throw exportsError
 
       await refetchScans()
-      toast.success('History deleted', {
-        description: 'All scan history has been permanently removed'
-      })
+      toast.success('History deleted')
     } catch (err) {
-      toast.error('Failed to delete history', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to delete history')
     }
   }
 
@@ -2231,7 +2165,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             <AIInsightsPanel
               insights={mockDependenciesAIInsights}
               title="Dependencies Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

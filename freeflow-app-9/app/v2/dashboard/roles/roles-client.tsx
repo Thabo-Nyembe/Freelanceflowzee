@@ -631,11 +631,11 @@ export default function RolesClient() {
 
   const handleSubmitCreate = async () => {
     if (!formState.name.trim()) {
-      toast.error('Validation Error', { description: 'Role name is required' })
+      toast.error('Validation Error')
       return
     }
     if (!formState.role_code.trim()) {
-      toast.error('Validation Error', { description: 'Role code is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -681,14 +681,14 @@ export default function RolesClient() {
       })
       setEditDialogOpen(true)
     } else {
-      toast.info('Edit Role', { description: `Viewing "${role.name}" (mock data)` })
+      toast.info('Edit Role'" (mock data)` })
     }
   }
 
   const handleSubmitEdit = async () => {
     if (!editingRole) return
     if (!formState.name.trim()) {
-      toast.error('Validation Error', { description: 'Role name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -717,7 +717,7 @@ export default function RolesClient() {
 
   const handleDeleteRole = (roleId: string, roleName: string, isSystem: boolean) => {
     if (isSystem) {
-      toast.error('Cannot Delete', { description: 'System roles cannot be deleted' })
+      toast.error('Cannot Delete')
       return
     }
     setRoleToDelete(roleId)
@@ -747,7 +747,7 @@ export default function RolesClient() {
 
   const handleConfirmClone = async () => {
     if (!roleToClone || !cloneName.trim()) {
-      toast.error('Validation Error', { description: 'Clone name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -782,9 +782,9 @@ export default function RolesClient() {
   }
 
   const handleRefreshRoles = async () => {
-    toast.info('Refreshing', { description: 'Fetching latest roles...' })
+    toast.info('Refreshing')
     await fetchRoles()
-    toast.success('Refreshed', { description: 'Role data updated' })
+    toast.success('Refreshed')
   }
 
   const handleExportRoles = () => {
@@ -805,7 +805,7 @@ export default function RolesClient() {
     a.download = `roles-export-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Roles data exported successfully' })
+    toast.success('Exported')
   }
 
   return (
@@ -1514,7 +1514,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search users..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter panel', { description: 'Filter by role, status, or date' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter panel')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1631,7 +1631,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search policies..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter panel', { description: 'Filter by type, status, or conditions' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter panel')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1704,7 +1704,7 @@ export default function RolesClient() {
                       a.click(); URL.revokeObjectURL(url)
                       toast.success('Audit logs exported')
                     }}><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.info('Filter audit logs', { description: 'Filter by date, action, or user' })}><Filter className="h-4 w-4 mr-2" />Filter</Button>
+                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.info('Filter audit logs')}><Filter className="h-4 w-4 mr-2" />Filter</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
@@ -1870,7 +1870,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search groups..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.info('Filter groups', { description: 'Filter by status, role, or member count' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter groups')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -2196,7 +2196,7 @@ export default function RolesClient() {
               <AIInsightsPanel
                 insights={mockRolesAIInsights}
                 title="Role Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">
@@ -2618,7 +2618,7 @@ export default function RolesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Role Assigned', { description: `Users have been assigned the "${roleToAssign}" role` })
+                toast.success('Role Assigned'" role` })
                 setShowAssignRoleDialog(false)
               }}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
@@ -2677,7 +2677,7 @@ export default function RolesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Audit Logs Exported', { description: 'CSV file downloaded successfully' })
+                toast.success('Audit Logs Exported')
                 setShowExportAuditLogsDialog(false)
               }}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
@@ -2740,7 +2740,7 @@ export default function RolesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('User Assignments Exported', { description: 'Assignment data exported to CSV' })
+                toast.success('User Assignments Exported')
                 setShowExportAssignmentsDialog(false)
               }}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
@@ -2769,7 +2769,7 @@ export default function RolesClient() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                toast.success('Permissions Reset', { description: 'All permissions have been reset to defaults' })
+                toast.success('Permissions Reset')
                 setShowResetPermissionsDialog(false)
               }}
               className="bg-red-600 hover:bg-red-700 text-white"
@@ -2798,7 +2798,7 @@ export default function RolesClient() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                toast.success('Audit Logs Cleared', { description: 'All audit logs have been deleted' })
+                toast.success('Audit Logs Cleared')
                 setShowClearAuditLogsDialog(false)
               }}
               className="bg-red-600 hover:bg-red-700 text-white"
@@ -2848,7 +2848,7 @@ export default function RolesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Settings Saved', { description: 'Advanced settings have been updated successfully' })
+                toast.success('Settings Saved')
                 setShowSaveSettingsDialog(false)
               }}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"

@@ -821,7 +821,7 @@ export default function PollsClient() {
       a.href = url
       a.download = 'polls-export.csv'
       a.click()
-      toast.success('Export completed', { description: 'Polls exported to CSV' })
+      toast.success('Export completed')
     } catch {
       toast.error('Export failed')
     }
@@ -830,7 +830,7 @@ export default function PollsClient() {
   const handleShareForm = async (pollId: string) => {
     const url = `${window.location.origin}/polls/${pollId}`
     await navigator.clipboard.writeText(url)
-    toast.success('Link copied', { description: 'Poll share link copied to clipboard' })
+    toast.success('Link copied')
   }
 
   return (
@@ -2200,7 +2200,7 @@ export default function PollsClient() {
             <AIInsightsPanel
               insights={mockPollsAIInsights}
               title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2495,7 +2495,7 @@ export default function PollsClient() {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
               <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success('Export started', { description: 'Your export will be ready shortly' })
+                toast.success('Export started')
                 setShowExportDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />

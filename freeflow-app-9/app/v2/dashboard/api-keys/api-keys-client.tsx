@@ -975,33 +975,25 @@ export default function ApiKeysClient() {
 
   // Handlers
   const handleCreateApiKey = () => {
-    toast.info('Create API Key', {
-      description: 'Opening key generator...'
-    })
+    toast.info('Create API Key')
   }
 
   const handleRevokeKey = (keyName: string) => {
-    toast.success('Key revoked', {
-      description: `${keyName} has been revoked`
+    toast.success('Key revoked' has been revoked`
     })
   }
 
   const handleRegenerateKey = (keyName: string) => {
-    toast.success('Key regenerated', {
-      description: `New key created for ${keyName}`
+    toast.success('Key regenerated'`
     })
   }
 
   const handleCopyKey = (key: string) => {
-    toast.success('Copied to clipboard', {
-      description: 'API key copied successfully'
-    })
+    toast.success('Copied to clipboard')
   }
 
   const handleExportKeys = () => {
-    toast.info('Exporting keys', {
-      description: 'API key data will be downloaded'
-    })
+    toast.info('Exporting keys')
   }
 
   return (
@@ -1828,7 +1820,7 @@ export default function ApiKeysClient() {
             <AIInsightsPanel
               insights={mockApiKeysAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2075,7 +2067,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('API key generated successfully', { description: 'Your new key has been created. Copy it now - it won\'t be shown again.' })
+                  toast.success('API key generated successfully')
                   setGenerateKeyDialogOpen(false)
                   setNewKeyName('')
                   setNewKeyScopes([])
@@ -2142,7 +2134,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Export started', { description: `Your ${exportFormat.toUpperCase()} file will download shortly.` })
+                  toast.success('Export started' file will download shortly.` })
                   setExportDialogOpen(false)
                 }}>
                   Export
@@ -2187,7 +2179,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Keys rotated', { description: 'All selected keys have been rotated. Update your applications.' })
+                  toast.success('Keys rotated')
                   setRotateKeysDialogOpen(false)
                 }}>
                   Rotate Keys
@@ -2220,7 +2212,7 @@ export default function ApiKeysClient() {
                     Cancel
                   </Button>
                   <Button className="flex-1" onClick={() => {
-                    toast.success('Key rotated', { description: `${keyToRotate.name} has been rotated successfully.` })
+                    toast.success('Key rotated' has been rotated successfully.` })
                     setKeyToRotate(null)
                   }}>
                     Rotate Key
@@ -2257,7 +2249,7 @@ export default function ApiKeysClient() {
                     Cancel
                   </Button>
                   <Button variant="destructive" className="flex-1" onClick={() => {
-                    toast.success('Key revoked', { description: `${keyToRevoke.name} has been permanently revoked.` })
+                    toast.success('Key revoked' has been permanently revoked.` })
                     setKeyToRevoke(null)
                   }}>
                     Revoke Key
@@ -2346,7 +2338,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Expiration set', { description: `Keys will expire in ${expiryDays} days.` })
+                  toast.success('Expiration set' days.` })
                   setSetExpiryDialogOpen(false)
                 }}>
                   Apply
@@ -2810,7 +2802,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Application created', { description: 'Your new application has been created.' })
+                  toast.success('Application created')
                   setCreateAppDialogOpen(false)
                   setNewAppName('')
                 }}>
@@ -2956,7 +2948,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Webhook created', { description: 'Your new webhook endpoint has been created.' })
+                  toast.success('Webhook created')
                   setAddWebhookDialogOpen(false)
                   setNewWebhookName('')
                   setNewWebhookUrl('')
@@ -2997,7 +2989,7 @@ export default function ApiKeysClient() {
                     Cancel
                   </Button>
                   <Button className="flex-1" onClick={() => {
-                    toast.success('Test webhook sent', { description: 'Check your endpoint for the test payload.' })
+                    toast.success('Test webhook sent')
                     setTestWebhookDialogOpen(false)
                   }}>
                     Send Test

@@ -660,9 +660,7 @@ export default function AnnouncementsClient() {
   // Handlers - Real Supabase Operations
   const handleCreateAnnouncement = async () => {
     if (!newAnnouncement.title.trim() || !newAnnouncement.content.trim()) {
-      toast.error('Validation Error', {
-        description: 'Title and content are required'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -680,8 +678,7 @@ export default function AnnouncementsClient() {
         send_push: newAnnouncement.send_push
       })
 
-      toast.success('Announcement Created', {
-        description: `"${newAnnouncement.title}" has been saved as ${newAnnouncement.status}`
+      toast.success('Announcement Created'" has been saved as ${newAnnouncement.status}`
       })
 
       // Reset form and close dialog
@@ -699,9 +696,7 @@ export default function AnnouncementsClient() {
       })
       setShowCreateDialog(false)
     } catch (error) {
-      toast.error('Failed to create announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to create announcement')
     }
   }
 
@@ -711,14 +706,11 @@ export default function AnnouncementsClient() {
         status: 'published',
         published_at: new Date().toISOString()
       })
-      toast.success('Announcement Published', {
-        description: `"${title}" is now live`
+      toast.success('Announcement Published'" is now live`
       })
       setSelectedAnnouncement(null)
     } catch (error) {
-      toast.error('Failed to publish announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to publish announcement')
     }
   }
 
@@ -728,13 +720,10 @@ export default function AnnouncementsClient() {
         status: 'scheduled',
         scheduled_for: scheduledFor
       })
-      toast.success('Announcement Scheduled', {
-        description: `"${title}" has been scheduled`
+      toast.success('Announcement Scheduled'" has been scheduled`
       })
     } catch (error) {
-      toast.error('Failed to schedule announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to schedule announcement')
     }
   }
 
@@ -743,28 +732,22 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         status: 'archived'
       })
-      toast.info('Announcement Archived', {
-        description: `"${title}" moved to archive`
+      toast.info('Announcement Archived'" moved to archive`
       })
       setSelectedAnnouncement(null)
     } catch (error) {
-      toast.error('Failed to archive announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to archive announcement')
     }
   }
 
   const handleDeleteAnnouncement = async (id: string, title: string) => {
     try {
       await deleteAnnouncement(id)
-      toast.success('Announcement Deleted', {
-        description: `"${title}" has been permanently deleted`
+      toast.success('Announcement Deleted'" has been permanently deleted`
       })
       setSelectedAnnouncement(null)
     } catch (error) {
-      toast.error('Failed to delete announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to delete announcement')
     }
   }
 
@@ -773,26 +756,20 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         is_pinned: !isPinned
       })
-      toast.success(isPinned ? 'Announcement Unpinned' : 'Announcement Pinned', {
-        description: `"${title}" is ${isPinned ? 'no longer pinned' : 'now pinned'}`
+      toast.success(isPinned ? 'Announcement Unpinned' : 'Announcement Pinned'" is ${isPinned ? 'no longer pinned' : 'now pinned'}`
       })
     } catch (error) {
-      toast.error('Failed to update pin status', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to update pin status')
     }
   }
 
   // Handler for adding a new release
   const handleAddRelease = () => {
     if (!newRelease.version.trim() || !newRelease.title.trim()) {
-      toast.error('Validation Error', {
-        description: 'Version and title are required'
-      })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Release Added', {
-      description: `Version ${newRelease.version} has been added to the changelog`
+    toast.success('Release Added' has been added to the changelog`
     })
     setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
     setShowAddReleaseDialog(false)
@@ -801,13 +778,10 @@ export default function AnnouncementsClient() {
   // Handler for creating a new segment
   const handleCreateSegment = () => {
     if (!newSegment.name.trim()) {
-      toast.error('Validation Error', {
-        description: 'Segment name is required'
-      })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Segment Created', {
-      description: `"${newSegment.name}" segment has been created`
+    toast.success('Segment Created'" segment has been created`
     })
     setNewSegment({ name: '', description: '', attribute: 'plan', operator: '=', value: '' })
     setShowCreateSegmentDialog(false)
@@ -816,8 +790,7 @@ export default function AnnouncementsClient() {
   // Handler for editing a segment
   const handleEditSegment = () => {
     if (!selectedSegment) return
-    toast.success('Segment Updated', {
-      description: `"${selectedSegment.name}" has been updated`
+    toast.success('Segment Updated'" has been updated`
     })
     setShowEditSegmentDialog(false)
     setSelectedSegment(null)
@@ -826,8 +799,7 @@ export default function AnnouncementsClient() {
   // Handler for sending announcement to segment
   const handleSendToSegment = () => {
     if (!selectedSegment) return
-    toast.success('Announcement Sent', {
-      description: `Announcement sent to ${selectedSegment.userCount.toLocaleString()} users in "${selectedSegment.name}"`
+    toast.success('Announcement Sent' users in "${selectedSegment.name}"`
     })
     setShowSendToSegmentDialog(false)
     setSelectedSegment(null)
@@ -835,32 +807,24 @@ export default function AnnouncementsClient() {
 
   // Handler for Slack configuration
   const handleSlackConfig = () => {
-    toast.success('Slack Configuration Saved', {
-      description: 'Your Slack channel settings have been updated'
-    })
+    toast.success('Slack Configuration Saved')
     setShowSlackConfigDialog(false)
   }
 
   // Handler for adding webhook
   const handleAddWebhook = () => {
     if (!newWebhook.url.trim()) {
-      toast.error('Validation Error', {
-        description: 'Webhook URL is required'
-      })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Webhook Added', {
-      description: 'New webhook endpoint has been configured'
-    })
+    toast.success('Webhook Added')
     setNewWebhook({ url: '', events: [] })
     setShowAddWebhookDialog(false)
   }
 
   // Handler for deleting webhook
   const handleDeleteWebhook = () => {
-    toast.success('Webhook Deleted', {
-      description: 'Webhook has been removed'
-    })
+    toast.success('Webhook Deleted')
     setShowDeleteWebhookDialog(false)
     setSelectedWebhookIndex(null)
   }
@@ -868,8 +832,7 @@ export default function AnnouncementsClient() {
   // Handler for configuring integration
   const handleConfigureIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Updated', {
-      description: `${selectedIntegration.name} configuration has been saved`
+    toast.success('Integration Updated' configuration has been saved`
     })
     setShowIntegrationConfigDialog(false)
     setSelectedIntegration(null)
@@ -878,8 +841,7 @@ export default function AnnouncementsClient() {
   // Handler for connecting integration
   const handleConnectIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Connected', {
-      description: `${selectedIntegration.name} has been connected successfully`
+    toast.success('Integration Connected' has been connected successfully`
     })
     setShowConnectIntegrationDialog(false)
     setSelectedIntegration(null)
@@ -887,30 +849,24 @@ export default function AnnouncementsClient() {
 
   // Handler for regenerating API key
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated', {
-      description: 'Your new API key has been generated. Make sure to update your integrations.'
-    })
+    toast.success('API Key Regenerated')
     setShowRegenerateApiKeyDialog(false)
   }
 
   // Handler for copying to clipboard
   const handleCopyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied', {
-      description: `${label} copied to clipboard`
+    toast.success('Copied' copied to clipboard`
     })
   }
 
   // Handler for creating template
   const handleCreateTemplate = () => {
     if (!newTemplate.name.trim()) {
-      toast.error('Validation Error', {
-        description: 'Template name is required'
-      })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Template Created', {
-      description: `"${newTemplate.name}" template has been created`
+    toast.success('Template Created'" template has been created`
     })
     setNewTemplate({ name: '', type: 'feature', description: '' })
     setShowNewTemplateDialog(false)
@@ -919,8 +875,7 @@ export default function AnnouncementsClient() {
   // Handler for editing template
   const handleEditTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Updated', {
-      description: `"${selectedTemplate.name}" has been updated`
+    toast.success('Template Updated'" has been updated`
     })
     setShowEditTemplateDialog(false)
     setSelectedTemplate(null)
@@ -929,8 +884,7 @@ export default function AnnouncementsClient() {
   // Handler for deleting template
   const handleDeleteTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Deleted', {
-      description: `"${selectedTemplate.name}" has been deleted`
+    toast.success('Template Deleted'" has been deleted`
     })
     setShowDeleteTemplateDialog(false)
     setSelectedTemplate(null)
@@ -938,25 +892,19 @@ export default function AnnouncementsClient() {
 
   // Handler for exporting data
   const handleExportData = () => {
-    toast.success('Export Started', {
-      description: 'Your data export is being prepared. You will receive a download link shortly.'
-    })
+    toast.success('Export Started')
     setShowExportDataDialog(false)
   }
 
   // Handler for importing data
   const handleImportData = () => {
-    toast.success('Import Complete', {
-      description: 'Your data has been imported successfully'
-    })
+    toast.success('Import Complete')
     setShowImportDataDialog(false)
   }
 
   // Handler for clearing cache
   const handleClearCache = () => {
-    toast.success('Cache Cleared', {
-      description: 'All caches have been cleared successfully'
-    })
+    toast.success('Cache Cleared')
     setShowClearCacheDialog(false)
   }
 
@@ -967,13 +915,10 @@ export default function AnnouncementsClient() {
       for (const ann of publishedAnnouncements) {
         await updateAnnouncement(ann.id, { status: 'archived' })
       }
-      toast.success('All Announcements Archived', {
-        description: `${publishedAnnouncements.length} announcements have been archived`
+      toast.success('All Announcements Archived' announcements have been archived`
       })
     } catch (error) {
-      toast.error('Failed to archive announcements', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to archive announcements')
     }
     setShowArchiveAllDialog(false)
   }
@@ -984,22 +929,16 @@ export default function AnnouncementsClient() {
       for (const ann of announcements) {
         await deleteAnnouncement(ann.id)
       }
-      toast.success('All Data Deleted', {
-        description: 'All announcements and analytics have been permanently deleted'
-      })
+      toast.success('All Data Deleted')
     } catch (error) {
-      toast.error('Failed to delete data', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to delete data')
     }
     setShowDeleteAllDialog(false)
   }
 
   // Handler for resetting settings
   const handleResetSettings = () => {
-    toast.success('Settings Reset', {
-      description: 'All settings have been reset to defaults'
-    })
+    toast.success('Settings Reset')
     setShowResetSettingsDialog(false)
   }
 
@@ -1007,9 +946,7 @@ export default function AnnouncementsClient() {
   const handleEditAnnouncementSubmit = async () => {
     if (!selectedAnnouncement) return
     if (!editAnnouncementForm.title.trim() || !editAnnouncementForm.content.trim()) {
-      toast.error('Validation Error', {
-        description: 'Title and content are required'
-      })
+      toast.error('Validation Error')
       return
     }
     try {
@@ -1017,15 +954,12 @@ export default function AnnouncementsClient() {
         title: editAnnouncementForm.title,
         content: editAnnouncementForm.content
       })
-      toast.success('Announcement Updated', {
-        description: `"${editAnnouncementForm.title}" has been updated`
+      toast.success('Announcement Updated'" has been updated`
       })
       setShowEditAnnouncementDialog(false)
       setSelectedAnnouncement(null)
     } catch (error) {
-      toast.error('Failed to update announcement', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to update announcement')
     }
   }
 
@@ -1036,19 +970,13 @@ export default function AnnouncementsClient() {
 
     if (method === 'link') {
       navigator.clipboard.writeText(url)
-      toast.success('Link Copied', {
-        description: 'Announcement link has been copied to clipboard'
-      })
+      toast.success('Link Copied')
     } else if (method === 'email') {
       window.open(`mailto:?subject=${encodeURIComponent(selectedAnnouncement.title)}&body=${encodeURIComponent(url)}`)
-      toast.success('Email Opened', {
-        description: 'Email client opened with announcement link'
-      })
+      toast.success('Email Opened')
     } else {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(selectedAnnouncement.title)}&url=${encodeURIComponent(url)}`)
-      toast.success('Share Window Opened', {
-        description: 'Social sharing window opened'
-      })
+      toast.success('Share Window Opened')
     }
     setShowShareAnnouncementDialog(false)
   }
@@ -2406,7 +2334,7 @@ export default function AnnouncementsClient() {
             <AIInsightsPanel
               insights={announcementsAIInsights}
               title="Announcements Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
