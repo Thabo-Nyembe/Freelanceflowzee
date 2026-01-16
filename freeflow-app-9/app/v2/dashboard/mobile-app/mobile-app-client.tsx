@@ -321,7 +321,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   // CRUD Handlers
   const handleCreateBuild = async () => {
     if (!userId || !buildForm.version.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in version number' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -337,11 +337,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         min_os_version: buildForm.platform === 'ios' ? 'iOS 15.0' : 'Android 10'
       })
       if (error) throw error
-      toast.success('Build created', { description: `Build v${buildForm.version} is being processed` })
+      toast.success('Build created' is being processed` })
       setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
       setShowCreateBuildModal(false)
     } catch (err: any) {
-      toast.error('Failed to create build', { description: err.message })
+      toast.error('Failed to create build')
     } finally { setIsLoading(false) }
   }
 
@@ -350,14 +350,14 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
       if (error) throw error
-      toast.success('Submitted to store', { description: `Build submitted to ${platform} for review` })
+      toast.success('Submitted to store' for review` })
     } catch (err: any) {
-      toast.error('Submission failed', { description: err.message })
+      toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
 
   const handleDownloadBuild = async (buildId: string, buildVersion: string) => {
-    toast.success('Downloading build', { description: `Build v${buildVersion} download starting...` })
+    toast.success('Downloading build' download starting...` })
     // Log download event
     try {
       await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
@@ -369,17 +369,17 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_builds').delete().eq('id', buildId)
       if (error) throw error
-      toast.success('Build deleted', { description: `Build v${buildVersion} has been removed` })
+      toast.success('Build deleted' has been removed` })
       setSelectedBuild(null)
       setShowBuildDialog(false)
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
   const handleReplyToReview = async () => {
     if (!selectedReview || !responseText.trim()) {
-      toast.error('Missing response', { description: 'Please write a response' })
+      toast.error('Missing response')
       return
     }
     setIsLoading(true)
@@ -391,11 +391,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         responded_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Reply sent', { description: `Response sent to ${selectedReview.author}` })
+      toast.success('Reply sent'` })
       setResponseText('')
       setShowReviewDialog(false)
     } catch (err: any) {
-      toast.error('Reply failed', { description: err.message })
+      toast.error('Reply failed')
     } finally { setIsLoading(false) }
   }
 
@@ -409,15 +409,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         reported_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.info('Review reported', { description: 'Review has been flagged for moderation' })
+      toast.info('Review reported')
     } catch (err: any) {
-      toast.error('Report failed', { description: err.message })
+      toast.error('Report failed')
     } finally { setIsLoading(false) }
   }
 
   const handleCreateCampaign = async () => {
     if (!userId || !campaignForm.title.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in campaign title' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -431,11 +431,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'draft'
       })
       if (error) throw error
-      toast.success('Campaign created', { description: `"${campaignForm.title}" is ready to schedule` })
+      toast.success('Campaign created'" is ready to schedule` })
       setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
       setShowCreateCampaignModal(false)
     } catch (err: any) {
-      toast.error('Failed to create campaign', { description: err.message })
+      toast.error('Failed to create campaign')
     } finally { setIsLoading(false) }
   }
 
@@ -444,9 +444,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign sent', { description: `"${campaignTitle}" has been sent` })
+      toast.success('Campaign sent'" has been sent` })
     } catch (err: any) {
-      toast.error('Send failed', { description: err.message })
+      toast.error('Send failed')
     } finally { setIsLoading(false) }
   }
 
@@ -455,15 +455,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign deleted', { description: `"${campaignTitle}" has been removed` })
+      toast.success('Campaign deleted'" has been removed` })
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
   const handleCreateIap = async () => {
     if (!userId || !iapForm.productId.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in product ID' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -477,11 +477,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'pending'
       })
       if (error) throw error
-      toast.success('Product created', { description: `"${iapForm.name}" is pending approval` })
+      toast.success('Product created'" is pending approval` })
       setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
       setShowCreateIapModal(false)
     } catch (err: any) {
-      toast.error('Failed to create product', { description: err.message })
+      toast.error('Failed to create product')
     } finally { setIsLoading(false) }
   }
 
@@ -490,9 +490,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
       if (error) throw error
-      toast.success('Product deleted', { description: `"${iapName}" has been removed` })
+      toast.success('Product deleted'" has been removed` })
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
@@ -505,14 +505,14 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('Settings saved', { description: `${section} settings have been updated` })
+      toast.success('Settings saved' settings have been updated` })
     } catch (err: any) {
-      toast.error('Save failed', { description: err.message })
+      toast.error('Save failed')
     } finally { setIsLoading(false) }
   }
 
   const handleRefreshData = useCallback(() => {
-    toast.success('Data refreshed', { description: 'All mobile app data has been updated' })
+    toast.success('Data refreshed')
   }, [])
 
   // Edit Campaign Handler
@@ -541,11 +541,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         target_audience: campaignForm.targetAudience
       }).eq('id', selectedCampaign.id)
       if (error) throw error
-      toast.success('Campaign updated', { description: `"${campaignForm.title}" has been saved` })
+      toast.success('Campaign updated'" has been saved` })
       setShowEditCampaignDialog(false)
       setSelectedCampaign(null)
     } catch (err: any) {
-      toast.error('Update failed', { description: err.message })
+      toast.error('Update failed')
     } finally { setIsLoading(false) }
   }
 
@@ -575,11 +575,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         price: iapForm.price
       }).eq('id', selectedIap.id)
       if (error) throw error
-      toast.success('Product updated', { description: `"${iapForm.name}" has been saved` })
+      toast.success('Product updated'" has been saved` })
       setShowEditIapDialog(false)
       setSelectedIap(null)
     } catch (err: any) {
-      toast.error('Update failed', { description: err.message })
+      toast.error('Update failed')
     } finally { setIsLoading(false) }
   }
 
@@ -587,7 +587,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleCopyBundleId = async () => {
     try {
       await navigator.clipboard.writeText('com.freeflow.app')
-      toast.success('Copied!', { description: 'Bundle ID copied to clipboard' })
+      toast.success('Copied!')
     } catch {
       toast.error('Failed to copy')
     }
@@ -596,7 +596,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleCopyApiKey = async () => {
     try {
       await navigator.clipboard.writeText('asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-      toast.success('Copied!', { description: 'API key copied to clipboard' })
+      toast.success('Copied!')
     } catch {
       toast.error('Failed to copy')
     }
@@ -614,16 +614,16 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('API key regenerated', { description: 'New key has been generated. Update your integrations.' })
+      toast.success('API key regenerated')
     } catch (err: any) {
-      toast.error('Failed to regenerate', { description: err.message })
+      toast.error('Failed to regenerate')
     } finally { setIsLoading(false) }
   }
 
   // Test Webhook - Actually sends a test payload to the webhook URL
   const handleTestWebhook = async (webhookUrl: string) => {
     if (!webhookUrl.trim()) {
-      toast.error('Enter webhook URL', { description: 'Please enter a valid webhook URL first' })
+      toast.error('Enter webhook URL')
       return
     }
     setIsLoading(true)
@@ -674,13 +674,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         configured_at: new Date().toISOString()
       }, { onConflict: 'user_id,provider' })
       if (error) throw error
-      toast.success(`${selectedCiCd.name} ${selectedCiCd.connected ? 'configured' : 'connected'}`, {
-        description: selectedCiCd.connected ? 'Configuration saved' : 'Integration connected successfully'
-      })
+      toast.success(`${selectedCiCd.name} ${selectedCiCd.connected ? 'configured' : 'connected'}`)
       setShowCiCdConfigDialog(false)
       setSelectedCiCd(null)
     } catch (err: any) {
-      toast.error('Action failed', { description: err.message })
+      toast.error('Action failed')
     } finally { setIsLoading(false) }
   }
 
@@ -700,10 +698,10 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         created_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Group created', { description: `"${groupName}" is ready for testers` })
+      toast.success('Group created'" is ready for testers` })
       setShowCreateTesterGroupDialog(false)
     } catch (err: any) {
-      toast.error('Failed to create group', { description: err.message })
+      toast.error('Failed to create group')
     } finally { setIsLoading(false) }
   }
 
@@ -756,7 +754,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   // View Reports
   const handleViewReports = () => {
     setActiveTab('overview')
-    toast.info('Analytics reports', { description: 'Viewing detailed reports in Overview tab' })
+    toast.info('Analytics reports')
   }
 
   // Remove from App Store
@@ -770,10 +768,10 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('App removed from store', { description: 'Your app is no longer available for sale' })
+      toast.success('App removed from store')
       setShowRemoveAppDialog(false)
     } catch (err: any) {
-      toast.error('Failed to remove', { description: err.message })
+      toast.error('Failed to remove')
     } finally { setIsLoading(false) }
   }
 
@@ -783,10 +781,10 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_apps').delete().eq('user_id', userId)
       if (error) throw error
-      toast.success('App deleted', { description: 'Your app has been permanently deleted' })
+      toast.success('App deleted')
       setShowDeleteAppDialog(false)
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
@@ -806,10 +804,10 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         released_at: new Date().toISOString()
       }).eq('id', selectedBuild.id)
       if (error) throw error
-      toast.success('Released!', { description: `v${selectedBuild.version} is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
+      toast.success('Released!' is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
       setShowBuildDialog(false)
     } catch (err: any) {
-      toast.error('Release failed', { description: err.message })
+      toast.error('Release failed')
     } finally { setIsLoading(false) }
   }
 
@@ -839,10 +837,10 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('App name updated', { description: `Name changed to "${newName}"` })
+      toast.success('App name updated'"` })
       setShowEditAppNameDialog(false)
     } catch (err: any) {
-      toast.error('Update failed', { description: err.message })
+      toast.error('Update failed')
     } finally { setIsLoading(false) }
   }
 
@@ -2300,7 +2298,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <AIInsightsPanel
               insights={mockMobileAppAIInsights}
               title="Mobile App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3023,7 +3021,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button onClick={async () => {
                 await handleSaveSettings('metadata')
                 setShowUpdateMetadataDialog(false)
-                toast.success('Metadata updated', { description: 'App store listing will be updated with the next release.' })
+                toast.success('Metadata updated')
               }} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Metadata'}
               </Button>

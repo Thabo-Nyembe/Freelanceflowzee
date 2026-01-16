@@ -599,31 +599,31 @@ export default function ThreeDModelingClient() {
 
   // Viewport action handlers
   const handleUndo = useCallback(() => {
-    toast.success('Undo', { description: 'Last action undone' })
+    toast.success('Undo')
   }, [])
 
   const handleRedo = useCallback(() => {
-    toast.success('Redo', { description: 'Action redone' })
+    toast.success('Redo')
   }, [])
 
   const handleToggleGrid = useCallback(() => {
-    toast.success('Grid toggled', { description: 'Grid visibility changed' })
+    toast.success('Grid toggled')
   }, [])
 
   const handleMaximizeViewport = useCallback(() => {
-    toast.success('Viewport maximized', { description: 'Press Escape to exit fullscreen' })
+    toast.success('Viewport maximized')
   }, [])
 
   const handleZoomIn = useCallback(() => {
-    toast.success('Zoom in', { description: 'Viewport zoomed in' })
+    toast.success('Zoom in')
   }, [])
 
   const handleZoomOut = useCallback(() => {
-    toast.success('Zoom out', { description: 'Viewport zoomed out' })
+    toast.success('Zoom out')
   }, [])
 
   const handleResetView = useCallback(() => {
-    toast.success('View reset', { description: 'Viewport returned to default view' })
+    toast.success('View reset')
   }, [])
 
   // Quick actions with real functionality
@@ -739,15 +739,12 @@ export default function ThreeDModelingClient() {
 
   // Handlers
   const handleExportModel = (format: string) => {
-    toast.success('Exporting model', {
-      description: `Model will be exported as ${format}`
+    toast.success('Exporting model'`
     })
   }
 
   const handleSaveProject = () => {
-    toast.success('Project saved', {
-      description: 'All changes have been saved'
-    })
+    toast.success('Project saved')
   }
 
   return (
@@ -2028,7 +2025,7 @@ export default function ThreeDModelingClient() {
             <AIInsightsPanel
               insights={mock3DAIInsights}
               title="3D Modeling Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

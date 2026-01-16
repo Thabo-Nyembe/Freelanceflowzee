@@ -1086,8 +1086,7 @@ export default function AuditLogsClient() {
       description: `Investigating log ${logId}`,
       status: 'success'
     })
-    toast.info('Investigation started', {
-      description: `Opening investigation for log ${logId}...`
+    toast.info('Investigation started'...`
     })
   }
 
@@ -1098,8 +1097,7 @@ export default function AuditLogsClient() {
       description: `Resolved alert ${alertId}`,
       status: 'success'
     })
-    toast.success('Alert resolved', {
-      description: `Alert ${alertId} has been marked as resolved`
+    toast.success('Alert resolved' has been marked as resolved`
     })
   }
 
@@ -1110,9 +1108,7 @@ export default function AuditLogsClient() {
       description: 'Generated compliance report',
       status: 'success'
     })
-    toast.success('Generating report', {
-      description: 'Compliance report is being generated...'
-    })
+    toast.success('Generating report')
   }
 
   const handleRefresh = () => {
@@ -1264,7 +1260,7 @@ export default function AuditLogsClient() {
                 { icon: Search, label: 'Search Logs', color: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600', action: () => setShowSearchDialog(true) },
                 { icon: Bell, label: 'New Alert', color: 'bg-red-100 dark:bg-red-900/30 text-red-600', action: () => setShowCreateRuleDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-green-100 dark:bg-green-900/30 text-green-600', action: () => setShowExportDialog(true) },
-                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', action: () => { toast.success('Filter saved', { description: 'Current filter has been saved to your saved filters' }) } },
+                { icon: Filter, label: 'Save Filter', color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', action: () => { toast.success('Filter saved') } },
                 { icon: ShieldCheck, label: 'Compliance', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600', action: () => setActiveTab('compliance') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600', action: () => setActiveTab('analytics') },
                 { icon: Archive, label: 'Archive', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600', action: () => setShowArchiveDialog(true) },
@@ -1421,7 +1417,7 @@ export default function AuditLogsClient() {
                     />
                     <Button className="bg-indigo-600" onClick={() => {
                       if (searchQuery) {
-                        toast.success('Search executed', { description: `Searching for: ${searchQuery}` })
+                        toast.success('Search executed'` })
                         setActiveTab('events')
                       } else {
                         toast.error('Please enter a search query')
@@ -1641,13 +1637,13 @@ export default function AuditLogsClient() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Refreshing compliance data', { description: 'Fetching latest compliance status...' })
+                  toast.success('Refreshing compliance data')
                 }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
                 <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => {
-                  toast.success('Exporting all compliance reports', { description: 'Your download will begin shortly...' })
+                  toast.success('Exporting all compliance reports')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export All
@@ -1720,7 +1716,7 @@ export default function AuditLogsClient() {
                     className={`px-4 py-2 ${analyticsDateRange === '7d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                     onClick={() => {
                       setAnalyticsDateRange('7d')
-                      toast.success('Date range updated', { description: 'Showing last 7 days' })
+                      toast.success('Date range updated')
                     }}
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
@@ -1730,7 +1726,7 @@ export default function AuditLogsClient() {
                     className={`px-4 py-2 ${analyticsDateRange === '30d' ? 'bg-white text-blue-600' : 'bg-white/20 hover:bg-white/30'} rounded-lg backdrop-blur-sm transition-colors`}
                     onClick={() => {
                       setAnalyticsDateRange('30d')
-                      toast.success('Date range updated', { description: 'Showing last 30 days' })
+                      toast.success('Date range updated')
                     }}
                   >
                     <Calendar className="w-4 h-4 inline mr-2" />
@@ -1739,7 +1735,7 @@ export default function AuditLogsClient() {
                   <button
                     className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-white/90 transition-colors"
                     onClick={() => {
-                      toast.success('Exporting analytics report', { description: 'Your download will begin shortly...' })
+                      toast.success('Exporting analytics report')
                     }}
                   >
                     <Download className="w-4 h-4 inline mr-2" />
@@ -2247,7 +2243,7 @@ export default function AuditLogsClient() {
             <AIInsightsPanel
               insights={mockAuditAIInsights}
               title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2356,7 +2352,7 @@ export default function AuditLogsClient() {
                     <Button variant="outline" className="flex-1" onClick={() => {
                       if (selectedLog) {
                         navigator.clipboard.writeText(selectedLog.id)
-                        toast.success('Copied to clipboard', { description: `Log ID: ${selectedLog.id}` })
+                        toast.success('Copied to clipboard'` })
                       }
                     }}>
                       <Copy className="w-4 h-4 mr-2" />
@@ -2728,7 +2724,7 @@ export default function AuditLogsClient() {
                   setSearchQuery(query.toLowerCase().replace(/ /g, '_'))
                   setShowSavedQueriesDialog(false)
                   setActiveTab('events')
-                  toast.success('Query loaded', { description: query })
+                  toast.success('Query loaded')
                 }}>
                   <span className="text-sm font-medium">{query}</span>
                   <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -2780,7 +2776,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button onClick={() => {
                 setShowArchiveDialog(false)
-                toast.success('Archive started', { description: 'Logs are being archived to cold storage' })
+                toast.success('Archive started')
               }}>
                 <Archive className="w-4 h-4 mr-2" />
                 Archive
@@ -2859,7 +2855,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button variant="destructive" onClick={() => {
                 setShowClearLogsDialog(false)
-                toast.success('Debug logs cleared', { description: 'All debug-level logs have been removed' })
+                toast.success('Debug logs cleared')
               }}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear Logs
@@ -2893,7 +2889,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button variant="destructive" onClick={() => {
                 setShowResetConfigDialog(false)
-                toast.success('Configuration reset', { description: 'All settings have been restored to defaults' })
+                toast.success('Configuration reset')
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reset
@@ -2995,7 +2991,7 @@ export default function AuditLogsClient() {
               <Button onClick={() => {
                 const report = mockComplianceReports.find(r => r.id === showComplianceReportDialog)
                 setShowComplianceReportDialog(null)
-                toast.success('Downloading report', { description: `${report?.framework} compliance report will be downloaded` })
+                toast.success('Downloading report' compliance report will be downloaded` })
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Download
@@ -3060,7 +3056,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button onClick={() => {
                 setShowSIEMDialog(null)
-                toast.success('Integration saved', { description: `${showSIEMDialog} integration has been configured` })
+                toast.success('Integration saved' integration has been configured` })
               }}>
                 Save Configuration
               </Button>

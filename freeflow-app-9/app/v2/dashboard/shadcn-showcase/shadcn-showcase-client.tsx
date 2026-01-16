@@ -82,7 +82,6 @@ import {
   Info
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -148,7 +147,6 @@ const shadcnShowcaseActivities = [
 ]
 
 export default function ShadcnShowcaseClient() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -203,10 +201,7 @@ export default function ShadcnShowcaseClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'export-data', format: 'json' })
       })
-      if (!res.ok) throw new Error('Failed')
-      logger.info('New item created', { name: newItemName, type: newItemType, description: newItemDescription })
-      toast.success('Item created successfully', {
-        description: `"${newItemName}" has been added to your collection`
+      if (!res.ok) throw new Error('Failed')      toast.success('Item created successfully'" has been added to your collection`
       })
       setNewItemDialogOpen(false)
       setNewItemName('')
@@ -235,10 +230,7 @@ export default function ShadcnShowcaseClient() {
         includeMetadata,
         timestamp: new Date().toISOString(),
         records: exportScope === 'all' ? 150 : 50
-      }
-      logger.info('Data exported', exportData)
-      toast.success('Export completed', {
-        description: `Exported ${exportData.records} records as ${exportFormat.toUpperCase()}`
+      }      toast.success('Export completed' records as ${exportFormat.toUpperCase()}`
       })
       setExportDialogOpen(false)
     } catch (err) {
@@ -267,11 +259,7 @@ export default function ShadcnShowcaseClient() {
         darkModeEnabled,
         autoSaveEnabled,
         refreshInterval
-      }
-      logger.info('Settings saved', settings)
-      toast.success('Settings saved', {
-        description: 'Your preferences have been updated successfully'
-      })
+      }      toast.success('Settings saved')
       setSettingsDialogOpen(false)
     } catch (err) {
       toast.error('Failed to save settings')
@@ -280,7 +268,6 @@ export default function ShadcnShowcaseClient() {
     }
   }
 
-  // A+++ LOAD SHADCN SHOWCASE DATA
   React.useEffect(() => {
     const loadShadcnShowcaseData = async () => {
       if (!userId) {
@@ -315,18 +302,9 @@ export default function ShadcnShowcaseClient() {
 
   const handleFormSubmit = (data: any) => {
     const fieldCount = Object.keys(data).length
-    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length
+    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
 
-    logger.info('Form submitted successfully', {
-      fieldCount,
-      filledFields,
-      formData: data
-    })
-
-    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
-
-    toast.success('Form submitted successfully', {
-      description: `${filledFields}/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
+    toast.success('Form submitted successfully'/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
     })
   }
 
@@ -335,7 +313,6 @@ export default function ShadcnShowcaseClient() {
     setTimeout(() => setIsLoading(false), 2000)
   }
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -362,7 +339,6 @@ export default function ShadcnShowcaseClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -703,33 +679,21 @@ export default function ShadcnShowcaseClient() {
                     <h3 className="text-lg font-semibold mb-3">Toast Notifications</h3>
                     <Separator className="mb-4" />
                     <div className="flex flex-wrap gap-2">
-                      <Button onClick={() => {
-                        logger.info('Success toast triggered', { type: 'success', component: 'shadcn-showcase' })
-                        toast.success('Operation completed successfully', {
-                          description: 'Shadcn UI components - Success notification demo - All systems operational'
-                        })
+                      <Button onClick={() => {                        toast.success('Operation completed successfully')
                       }}>
                         Success Toast
                       </Button>
                       <Button onClick={() => {
                         logger.warn('Error toast triggered', { type: 'error', component: 'shadcn-showcase' })
-                        toast.error('An error occurred', {
-                          description: 'Shadcn UI components - Error notification demo - Please check your inputs'
-                        })
+                        toast.error('An error occurred')
                       }}>
                         Error Toast
                       </Button>
-                      <Button onClick={() => {
-                        logger.info('Info toast triggered', { type: 'info', component: 'shadcn-showcase' })
-                        toast.info('Important information', {
-                          description: 'Shadcn UI components - Info notification demo - Review the documentation for details'
-                        })
+                      <Button onClick={() => {                        toast.info('Important information')
                       }}>
                         Info Toast
                       </Button>
-                      <Button onClick={() => {
-                        logger.info('Default toast triggered', { type: 'default', component: 'shadcn-showcase' })
-                        toast('Default notification', {
+                      <Button onClick={() => {                        toast('Default notification', {
                           description: 'Shadcn UI components - Standard notification demo'
                         })
                       }}>

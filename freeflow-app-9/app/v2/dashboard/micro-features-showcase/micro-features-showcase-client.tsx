@@ -32,7 +32,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 
-// A++++ DYNAMIC IMPORTS - Lazy load heavy showcase components
 const ContextualTooltip = dynamic(
   () => import('@/components/ui/enhanced-contextual-tooltips').then(mod => mod.ContextualTooltip),
   { loading: () => <div className="h-10 w-full bg-gray-100 animate-pulse rounded" />, ssr: false }
@@ -120,7 +119,6 @@ const KeyboardShortcutsDialog = dynamic(
   { loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded" />, ssr: false }
 )
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -157,7 +155,6 @@ const microFeaturesShowcaseActivities = [
 ]
 
 export default function MicroFeaturesShowcaseClient() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -355,9 +352,7 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Ran ${selectedAnimationType} animation with ${animationDuration}ms duration using ${animationEasing} easing`,
           error: 'Failed to run animation demo'
         }
-      )
-      logger.info('Animation demo executed', { type: selectedAnimationType, duration: animationDuration, easing: animationEasing })
-      setShowAnimationDemoDialog(false)
+      )      setShowAnimationDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -384,9 +379,7 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Demonstrated ${selectedButtonStyle} button style with ${buttonColor} color (${buttonSize} size)`,
           error: 'Failed to run button demo'
         }
-      )
-      logger.info('Button demo executed', { style: selectedButtonStyle, color: buttonColor, size: buttonSize })
-      setShowButtonDemoDialog(false)
+      )      setShowButtonDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -413,9 +406,7 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Tooltip displayed at ${tooltipPosition} position with ${tooltipTrigger} trigger`,
           error: 'Failed to run tooltip demo'
         }
-      )
-      logger.info('Tooltip demo executed', { position: tooltipPosition, trigger: tooltipTrigger })
-      setShowTooltipDemoDialog(false)
+      )      setShowTooltipDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -449,9 +440,7 @@ export default function MicroFeaturesShowcaseClient() {
           success: `"${configName}" saved with ${configGlobalAnimations ? 'animations enabled' : 'animations disabled'}`,
           error: 'Failed to save configuration'
         }
-      )
-      logger.info('Configuration saved', { name: configName, globalAnimations: configGlobalAnimations, reducedMotion: configReducedMotion })
-      setShowConfigureDialog(false)
+      )      setShowConfigureDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -492,9 +481,7 @@ export default function MicroFeaturesShowcaseClient() {
           success: `${enabledFeatures.length} features enabled: ${enabledFeatures.slice(0, 3).join(', ')}${enabledFeatures.length > 3 ? '...' : ''}`,
           error: 'Failed to update feature toggles'
         }
-      )
-      logger.info('Feature toggles updated', { enabledCount: enabledFeatures.length, features: enabledFeatures })
-      setShowFeatureToggleDialog(false)
+      )      setShowFeatureToggleDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -502,35 +489,19 @@ export default function MicroFeaturesShowcaseClient() {
 
   // Handler for magnetic button click
   const handleMagneticButtonClick = useCallback(() => {
-    toast.success('Magnetic Button Activated', {
-      description: 'Experience the magnetic pull effect as you hover near the button'
-    })
-    logger.info('Magnetic button clicked')
-  }, [])
+    toast.success('Magnetic Button Activated')  }, [])
 
   // Handler for ripple button click
   const handleRippleButtonClick = useCallback(() => {
-    toast.success('Ripple Effect Triggered', {
-      description: 'Watch the ripple animation spread from the click point'
-    })
-    logger.info('Ripple button clicked')
-  }, [])
+    toast.success('Ripple Effect Triggered')  }, [])
 
   // Handler for neon button click
   const handleNeonButtonClick = useCallback(() => {
-    toast.success('Neon Glow Activated', {
-      description: 'The neon glow effect illuminates on interaction'
-    })
-    logger.info('Neon button clicked')
-  }, [])
+    toast.success('Neon Glow Activated')  }, [])
 
   // Handler for tooltip button click
   const handleTooltipButtonClick = useCallback(() => {
-    toast.info('Tooltip Interaction', {
-      description: 'Contextual tooltips provide helpful information on hover'
-    })
-    logger.info('Tooltip button clicked')
-  }, [])
+    toast.info('Tooltip Interaction')  }, [])
 
   // Quick actions with real dialog functionality
   const microFeaturesShowcaseQuickActions = useMemo(() => [
@@ -540,9 +511,7 @@ export default function MicroFeaturesShowcaseClient() {
   ], [])
 
   React.useEffect(() => {
-    if (userId) {
-      logger.info('Micro Features Showcase loaded', { userId })
-      announce('Micro features showcase loaded', 'polite')
+    if (userId) {      announce('Micro features showcase loaded', 'polite')
     }
   }, [userId, announce])
 
@@ -550,7 +519,6 @@ export default function MicroFeaturesShowcaseClient() {
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
 
-  // A++++ PERFORMANCE HOOKS
   // useTransition for non-blocking demo actions
   const [isPending, startTransition] = useTransition()
 
@@ -564,7 +532,6 @@ export default function MicroFeaturesShowcaseClient() {
     { title: 'Micro Features Showcase', href: '/dashboard/micro-features-showcase' }
   ], [])
 
-  // A+++ LOAD MICRO FEATURES DATA
   React.useEffect(() => {
     const loadMicroFeaturesData = async () => {
       try {
@@ -587,27 +554,17 @@ export default function MicroFeaturesShowcaseClient() {
     loadMicroFeaturesData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A++++ STABLE CALLBACK - Demo handler with useTransition for non-blocking UI
   const handleDemoAction = useCallback((feature: string) => {
-    startTransition(() => {
-      logger.info('Demo action triggered', {
-        feature,
-        component: 'micro-features-showcase',
-        timestamp: new Date().toISOString()
-      })
-
-      const featureType = feature.toLowerCase().includes('animation') ? 'Animation' :
+    startTransition(() => {      const featureType = feature.toLowerCase().includes('animation') ? 'Animation' :
                          feature.toLowerCase().includes('button') ? 'Button' :
                          feature.toLowerCase().includes('tooltip') ? 'Tooltip' :
                          feature.toLowerCase().includes('form') ? 'Form' : 'Component'
 
-      toast.success(`Demo: ${feature}`, {
-        description: `${featureType} feature demonstration activated - Micro features showcase - Interactive preview enabled`
+      toast.success(`Demo: ${feature}` feature demonstration activated - Micro features showcase - Interactive preview enabled`
       })
     })
   }, [])
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <ErrorBoundary>
@@ -629,7 +586,6 @@ export default function MicroFeaturesShowcaseClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <ErrorBoundary>
@@ -722,9 +678,7 @@ export default function MicroFeaturesShowcaseClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      toast.info('Button Styles Preview', {
-                        description: 'All button styles are currently displayed above'
-                      })
+                      toast.info('Button Styles Preview')
                     }}
                   >
                     Preview All
@@ -741,9 +695,7 @@ export default function MicroFeaturesShowcaseClient() {
                       setFeatureMagneticButtons(true)
                       setFeatureRippleEffect(true)
                       setFeatureNeonGlow(true)
-                      toast.success('All Button Effects Reset', {
-                        description: 'All button effects have been enabled'
-                      })
+                      toast.success('All Button Effects Reset')
                     }}
                   >
                     Reset Defaults
@@ -768,9 +720,7 @@ export default function MicroFeaturesShowcaseClient() {
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        toast.info('Feature Tooltip', {
-                          description: 'Feature tooltips display detailed information about specific features'
-                        })
+                        toast.info('Feature Tooltip')
                       }}
                     >
                       Feature Info
@@ -780,9 +730,7 @@ export default function MicroFeaturesShowcaseClient() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        toast.info('Help Tooltip', {
-                          description: 'Help tooltips guide users through complex interactions'
-                        })
+                        toast.info('Help Tooltip')
                       }}
                     >
                       Help Guide
@@ -800,8 +748,7 @@ export default function MicroFeaturesShowcaseClient() {
                     variant="outline"
                     onClick={() => {
                       setFeatureContextualTooltips(!featureContextualTooltips)
-                      toast.success(featureContextualTooltips ? 'Tooltips Disabled' : 'Tooltips Enabled', {
-                        description: `Contextual tooltips are now ${featureContextualTooltips ? 'disabled' : 'enabled'}`
+                      toast.success(featureContextualTooltips ? 'Tooltips Disabled' : 'Tooltips Enabled'`
                       })
                     }}
                   >
@@ -816,9 +763,7 @@ export default function MicroFeaturesShowcaseClient() {
                   <Button
                     variant="link"
                     onClick={() => {
-                      toast.info('Tooltip Documentation', {
-                        description: 'Learn more about configuring and customizing tooltips'
-                      })
+                      toast.info('Tooltip Documentation')
                     }}
                   >
                     View Docs

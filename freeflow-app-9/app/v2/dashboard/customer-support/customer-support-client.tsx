@@ -537,7 +537,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.success('Agent assigned', { description: 'Ticket assigned successfully' })
+      toast.success('Agent assigned')
       fetchTickets()
     } catch (error) {
       console.error('Error assigning agent:', error)
@@ -563,7 +563,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.success('Ticket resolved', { description: 'Support ticket has been marked as resolved' })
+      toast.success('Ticket resolved')
       setShowTicketDialog(false)
       fetchTickets()
     } catch (error) {
@@ -587,7 +587,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.info('Ticket escalated', { description: 'Ticket has been escalated to senior support' })
+      toast.info('Ticket escalated')
       fetchTickets()
     } catch (error) {
       console.error('Error escalating ticket:', error)
@@ -673,7 +673,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       a.download = `support-tickets-${new Date().toISOString().split('T')[0]}.csv`
       a.click()
 
-      toast.success('Export started', { description: 'Support data is being exported' })
+      toast.success('Export started')
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export tickets')
@@ -2313,7 +2313,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockSupportAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your support question...') } })}
+          onAskQuestion={(q) => toast.info('Question Submitted' })}
         />
         <PredictiveAnalytics predictions={mockSupportPredictions} />
       </div>
@@ -3105,11 +3105,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <h4 className="font-medium">{team.name}</h4>
                   <p className="text-sm text-gray-500">{team.members} members - Lead: {team.lead}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info(`Manage ${team.name}`, { description: `${team.members} members - Lead: ${team.lead}` })}>Manage</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info(`Manage ${team.name}` members - Lead: ${team.lead}` })}>Manage</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => {
-              toast.info('Team creation available in Teams Settings', { description: 'Click on Settings > Teams to create a new team' })
+              toast.info('Team creation available in Teams Settings')
             }}>
               <Users className="h-4 w-4 mr-2" />
               Create New Team
@@ -3346,7 +3346,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTrainingDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.info('Opening training portal...', { description: 'Visit training.kazi.io for full access' })
+              toast.info('Opening training portal...')
               setShowTrainingDialog(false)
             }}>Manage Training</Button>
           </DialogFooter>
@@ -3569,7 +3569,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <p className="font-medium">{segment.name}</p>
                   <p className="text-sm text-gray-600">{segment.count} customers</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info(`Viewing ${segment.name}`, { description: `Showing ${segment.count} customers in this segment` })}>View</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info(`Viewing ${segment.name}` customers in this segment` })}>View</Button>
               </div>
             ))}
           </div>
@@ -3627,7 +3627,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.info('VIP management available in Customer Settings', { description: 'Configure VIP tiers and benefits in Settings' })
+              toast.info('VIP management available in Customer Settings')
               setShowVIPDialog(false)
             }}>Manage VIP List</Button>
           </DialogFooter>
@@ -4192,7 +4192,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowRegenerateAPIKeyDialog(false)}>Cancel</Button><Button onClick={() => {
             if (confirm('Are you sure you want to regenerate the API key? Any applications using the old key will stop working.')) {
-              toast.success('API key regenerated successfully', { description: 'Please update your applications with the new key' })
+              toast.success('API key regenerated successfully')
               setShowRegenerateAPIKeyDialog(false)
             }
           }} variant="destructive">Regenerate Key</Button></DialogFooter>

@@ -462,10 +462,10 @@ export default function SettingsClient() {
         }, { onConflict: 'user_id' })
 
       if (error) throw error
-      toast.success('Profile saved', { description: 'Your profile has been updated' })
+      toast.success('Profile saved')
       setSaveMessage('Profile saved successfully!')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to save profile' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
       setTimeout(() => setSaveMessage(''), 3000)
@@ -491,9 +491,9 @@ export default function SettingsClient() {
             updated_at: new Date().toISOString()
           }, { onConflict: 'id' })
       }
-      toast.success('Notifications saved', { description: 'Your notification preferences have been updated' })
+      toast.success('Notifications saved')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to save notifications' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
     }
@@ -514,9 +514,9 @@ export default function SettingsClient() {
         }, { onConflict: 'user_id' })
 
       if (error) throw error
-      toast.success('Security settings saved', { description: 'Your security preferences have been updated' })
+      toast.success('Security settings saved')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to save security settings' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
     }
@@ -534,24 +534,24 @@ export default function SettingsClient() {
           theme: newTheme,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
-      toast.success('Theme updated', { description: `Theme set to ${newTheme}` })
+      toast.success('Theme updated'` })
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update theme' })
+      toast.error('Error')
     }
   }
 
   // Change password
   const handleChangePassword = async () => {
     if (!newPassword || !confirmPassword) {
-      toast.error('Missing fields', { description: 'Please fill in all password fields' })
+      toast.error('Missing fields')
       return
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Password mismatch', { description: 'New passwords do not match' })
+      toast.error('Password mismatch')
       return
     }
     if (newPassword.length < 8) {
-      toast.error('Weak password', { description: 'Password must be at least 8 characters' })
+      toast.error('Weak password')
       return
     }
 
@@ -559,12 +559,12 @@ export default function SettingsClient() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) throw error
-      toast.success('Password changed', { description: 'Your password has been updated successfully' })
+      toast.success('Password changed')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to change password' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
     }
@@ -593,11 +593,10 @@ export default function SettingsClient() {
         }, { onConflict: 'id' })
 
       toast.success(
-        newStatus === 'connected' ? 'Connected' : 'Disconnected',
-        { description: `${integration.name} ${newStatus === 'connected' ? 'connected' : 'disconnected'} successfully` }
+        newStatus === 'connected' ? 'Connected' : 'Disconnected' ${newStatus === 'connected' ? 'connected' : 'disconnected'} successfully` }
       )
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update integration' })
+      toast.error('Error')
     }
   }
 
@@ -612,15 +611,15 @@ export default function SettingsClient() {
         .delete()
         .eq('id', session.id)
 
-      toast.success('Session revoked', { description: `Session on ${session.device} has been terminated` })
+      toast.success('Session revoked' has been terminated` })
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to revoke session' })
+      toast.error('Error')
     }
   }
 
   // Delete account
   const handleDeleteAccount = async () => {
-    toast.error('Account deletion', { description: 'Please contact support to delete your account' })
+    toast.error('Account deletion')
   }
 
   // Toggle notification preference
@@ -691,7 +690,7 @@ export default function SettingsClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Settings exported', { description: 'Your settings have been downloaded as JSON' })
+    toast.success('Settings exported')
   }
 
   // Download invoice as file
@@ -718,7 +717,7 @@ export default function SettingsClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Invoice downloaded', { description: `${invoice.id} has been downloaded` })
+    toast.success('Invoice downloaded' has been downloaded` })
   }
 
   // Handle avatar upload
@@ -731,7 +730,7 @@ export default function SettingsClient() {
       if (!file) return
 
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File too large', { description: 'Please select an image under 5MB' })
+        toast.error('File too large')
         return
       }
 
@@ -740,7 +739,7 @@ export default function SettingsClient() {
       setProfile(prev => ({ ...prev, avatar: previewUrl }))
 
       // In a real app, upload to server/storage here
-      toast.success('Photo uploaded', { description: 'Your profile picture has been updated' })
+      toast.success('Photo uploaded')
     }
     input.click()
   }
@@ -748,7 +747,7 @@ export default function SettingsClient() {
   // Remove avatar
   const handleRemoveAvatar = () => {
     setProfile(prev => ({ ...prev, avatar: '' }))
-    toast.success('Photo removed', { description: 'Your profile picture has been removed' })
+    toast.success('Photo removed')
   }
 
   // Sync integration
@@ -768,36 +767,36 @@ export default function SettingsClient() {
       }
     }
 
-    toast.success('Synced', { description: `${integration.name} has been synced` })
+    toast.success('Synced' has been synced` })
   }
 
   // Open upgrade dialog / redirect
   const handleUpgradePlan = () => {
     // Store intent in localStorage for the billing page
     localStorage.setItem('billing_intent', JSON.stringify({ action: 'upgrade', currentPlan: billing.plan }))
-    toast.success('Upgrade options', { description: 'Redirecting to upgrade page...' })
+    toast.success('Upgrade options')
     // In a real app, would use router.push('/billing/upgrade')
   }
 
   // Open payment method update
   const handleUpdatePaymentMethod = () => {
     localStorage.setItem('billing_intent', JSON.stringify({ action: 'update_payment', cardLast4: billing.cardLast4 }))
-    toast.success('Payment methods', { description: 'Opening payment method editor...' })
+    toast.success('Payment methods')
   }
 
   // Send verification email
   const handleSendVerificationEmail = async () => {
     if (!userId) {
-      toast.error('Not authenticated', { description: 'Please log in to verify your email' })
+      toast.error('Not authenticated')
       return
     }
 
     try {
       const { error } = await supabase.auth.resend({ type: 'signup', email: profile.email })
       if (error) throw error
-      toast.success('Verification email sent', { description: `Check ${profile.email} for the verification link` })
+      toast.success('Verification email sent' for the verification link` })
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to send verification email' })
+      toast.error('Error')
     }
   }
 
@@ -809,7 +808,7 @@ export default function SettingsClient() {
         const securityTab = document.querySelector('[value="security"]') as HTMLElement
         if (securityTab) {
           securityTab.click()
-          toast.success('Security settings opened', { description: `Review: ${insight.title}` })
+          toast.success('Security settings opened'` })
         }
         break
       case 'Usage':
@@ -817,7 +816,7 @@ export default function SettingsClient() {
         const billingTab = document.querySelector('[value="billing"]') as HTMLElement
         if (billingTab) {
           billingTab.click()
-          toast.info('Billing & usage opened', { description: 'Review your usage and consider upgrading' })
+          toast.info('Billing & usage opened')
         }
         break
       default:
@@ -826,11 +825,11 @@ export default function SettingsClient() {
           // For warnings, show sessions and prompt review
           const sessionsTab = document.querySelector('[value="security"]') as HTMLElement
           if (sessionsTab) sessionsTab.click()
-          toast.warning('Action required', { description: insight.title })
+          toast.warning('Action required')
         } else if (insight.type === 'info') {
-          toast.info('Insight noted', { description: insight.title })
+          toast.info('Insight noted')
         } else {
-          toast.success('Action completed', { description: insight.title })
+          toast.success('Action completed')
         }
     }
   }

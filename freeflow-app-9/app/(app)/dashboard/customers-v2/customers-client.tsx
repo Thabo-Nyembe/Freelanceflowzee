@@ -605,11 +605,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       if (result) {
         setShowAddContact(false)
         setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '', company: '', notes: '' })
-        toast.success('Contact Created', { description: `${newContactForm.firstName} ${newContactForm.lastName} has been added to your CRM` })
+        toast.success('Contact Created' ${newContactForm.lastName} has been added to your CRM` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to create contact' })
+      toast.error('Error')
       console.error('Failed to create contact:', err)
     }
   }
@@ -659,11 +659,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       if (result) {
         setShowEditDialog(false)
         setEditingCustomer(null)
-        toast.success('Contact Updated', { description: `${editContactForm.firstName} ${editContactForm.lastName} has been updated` })
+        toast.success('Contact Updated' ${editContactForm.lastName} has been updated` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update contact' })
+      toast.error('Error')
       console.error('Failed to update contact:', err)
     }
   }
@@ -679,14 +679,14 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     try {
       const success = await deleteCustomer(customerToDelete)
       if (success) {
-        toast.success('Contact Deleted', { description: 'The contact has been removed from your CRM' })
+        toast.success('Contact Deleted')
         setShowDeleteDialog(false)
         setCustomerToDelete(null)
         setSelectedContact(null)
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to delete contact' })
+      toast.error('Error')
       console.error('Failed to delete contact:', err)
     }
   }
@@ -700,11 +700,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         : 'active'
       const result = await updateCustomer(customerId, { status: clientStatus })
       if (result) {
-        toast.success('Status Updated', { description: `Contact status changed to ${newStatus}` })
+        toast.success('Status Updated'` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update status' })
+      toast.error('Error')
     }
   }
 
@@ -723,11 +723,11 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       }
       const result = await updateCustomer(customerId, { status: statusMap[newSegment] })
       if (result) {
-        toast.success('Segment Updated', { description: `Contact moved to ${newSegment} segment` })
+        toast.success('Segment Updated' segment` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update segment' })
+      toast.error('Error')
     }
   }
 
@@ -838,22 +838,22 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Client data exported to CSV file' })
+    toast.success('Export Complete')
   }
 
   const handleCreateOpportunity = () => {
     setShowAddOpportunity(true)
-    toast.success('Opportunity Form Opened', { description: 'Enter opportunity details' })
+    toast.success('Opportunity Form Opened')
   }
 
   const handleConvertLead = (contact: Contact) => {
     // In real app, this would call an API to convert the lead
-    toast.success('Lead Converted', { description: `${contact.firstName} ${contact.lastName} converted to customer` })
+    toast.success('Lead Converted' ${contact.lastName} converted to customer` })
   }
 
   const handleSendEmail = (contact: Contact) => {
     window.location.href = `mailto:${contact.email}`
-    toast.success('Opening Email Client', { description: `Composing email to ${contact.email}` })
+    toast.success('Opening Email Client'` })
   }
 
   const handleLogActivity = (contactId?: string) => {
@@ -923,22 +923,22 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const handleCopyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success(`${label} Copied`, { description: text })
+      toast.success(`${label} Copied`)
     } catch {
-      toast.error('Failed to copy', { description: 'Please copy manually' })
+      toast.error('Failed to copy')
     }
   }
 
   // Handle phone call
   const handleCall = (phone: string, name?: string) => {
     window.location.href = `tel:${phone}`
-    toast.success('Initiating Call', { description: name ? `Calling ${name}` : `Calling ${phone}` })
+    toast.success('Initiating Call'` : `Calling ${phone}` })
   }
 
   // Handle opening calendar
   const handleScheduleMeeting = (contactName?: string) => {
     // Open calendar link or modal
-    toast.success('Calendar Opened', { description: contactName ? `Schedule meeting with ${contactName}` : 'Select time slot for meeting' })
+    toast.success('Calendar Opened'` : 'Select time slot for meeting' })
   }
 
   return (
@@ -1057,10 +1057,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(client) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.email) { window.location.href = `mailto:${client.email}`; toast.success('Opening Email', { description: `Composing email to ${client.email}` }) } else { toast.error('No email address available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.email) { window.location.href = `mailto:${client.email}`; toast.success('Opening Email'` }) } else { toast.error('No email address available') } }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.phone) { window.location.href = `tel:${client.phone}`; toast.success('Initiating Call', { description: `Calling ${client.name}` }) } else { toast.error('No phone number available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.phone) { window.location.href = `tel:${client.phone}`; toast.success('Initiating Call'` }) } else { toast.error('No phone number available') } }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(client.id) }}>
@@ -2087,7 +2087,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <div className="text-sm text-gray-500">Team notifications</div>
                             </div>
                           </div>
-                          <Button size="sm" onClick={() => { window.open('https://slack.com/oauth/authorize', '_blank'); toast.success('Connecting to Slack', { description: 'Redirecting to Slack authorization' }) }}>Connect</Button>
+                          <Button size="sm" onClick={() => { window.open('https://slack.com/oauth/authorize', '_blank'); toast.success('Connecting to Slack') }}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2098,7 +2098,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <div className="text-sm text-gray-500">Workflow automation</div>
                             </div>
                           </div>
-                          <Button size="sm" onClick={() => { window.open('https://zapier.com/app/editor', '_blank'); toast.success('Connecting to Zapier', { description: 'Redirecting to Zapier authorization' }) }}>Connect</Button>
+                          <Button size="sm" onClick={() => { window.open('https://zapier.com/app/editor', '_blank'); toast.success('Connecting to Zapier') }}>Connect</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2109,7 +2109,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <div className="text-sm text-gray-500">Social selling integration</div>
                             </div>
                           </div>
-                          <Button size="sm" onClick={() => { window.open('https://www.linkedin.com/oauth/v2/authorization', '_blank'); toast.success('Connecting to LinkedIn', { description: 'Redirecting to LinkedIn authorization' }) }}>Connect</Button>
+                          <Button size="sm" onClick={() => { window.open('https://www.linkedin.com/oauth/v2/authorization', '_blank'); toast.success('Connecting to LinkedIn') }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2131,7 +2131,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             </div>
                             <Button size="sm" variant="outline" onClick={() => {
                               if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
-                                toast.success('API Key Regenerated', { description: 'New API key generated - update your integrations' })
+                                toast.success('API Key Regenerated')
                               }
                             }}>
                               <RefreshCw className="h-4 w-4 mr-2" />
@@ -2258,7 +2258,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             input.onchange = (e) => {
                               const file = (e.target as HTMLInputElement).files?.[0]
                               if (file) {
-                                toast.success('File Selected', { description: `Ready to import ${file.name}` })
+                                toast.success('File Selected'` })
                               }
                             }
                             input.click()
@@ -2288,7 +2288,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => {
                             if (confirm('WARNING: This will permanently delete ALL contacts. This action cannot be undone. Are you sure?')) {
                               if (confirm('Final confirmation: Delete all contacts?')) {
-                                toast.success('All Contacts Deleted', { description: 'All contacts have been permanently removed' })
+                                toast.success('All Contacts Deleted')
                               }
                             }
                           }}>
@@ -2304,7 +2304,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           </div>
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => {
                             if (confirm('WARNING: This will permanently clear all activity history. Are you sure?')) {
-                              toast.success('History Cleared', { description: 'All activity history has been removed' })
+                              toast.success('History Cleared')
                             }
                           }}>
                             <Archive className="h-4 w-4 mr-2" />
@@ -2320,7 +2320,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           <Button variant="destructive" onClick={() => {
                             if (confirm('WARNING: This will reset ALL CRM settings to defaults. Are you sure?')) {
                               if (confirm('Final confirmation: Reset all CRM settings?')) {
-                                toast.success('Factory Reset Complete', { description: 'All CRM settings have been reset to defaults' })
+                                toast.success('Factory Reset Complete')
                               }
                             }
                           }}>
@@ -2343,7 +2343,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <AIInsightsPanel
               insights={mockCustomersAIInsights}
               title="Customer Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2434,8 +2434,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1" onClick={() => { window.location.href = `mailto:${selectedContact.email}`; toast.success('Opening Email', { description: `Composing email to ${selectedContact.email}` }) }}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
-                    <Button variant="outline" onClick={() => { window.location.href = `tel:${selectedContact.phone}`; toast.success('Initiating Call', { description: `Calling ${selectedContact.firstName} ${selectedContact.lastName}` }) }}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
+                    <Button className="flex-1" onClick={() => { window.location.href = `mailto:${selectedContact.email}`; toast.success('Opening Email'` }) }}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
+                    <Button variant="outline" onClick={() => { window.location.href = `tel:${selectedContact.phone}`; toast.success('Initiating Call' ${selectedContact.lastName}` }) }}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
                     <Button variant="outline" onClick={() => handleScheduleMeeting(`${selectedContact.firstName} ${selectedContact.lastName}`)}><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
                   </div>
                 </div>
@@ -2686,7 +2686,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setTasks(prev => [newTask, ...prev])
                 setShowAddTaskDialog(false)
                 setNewTaskForm({ subject: '', description: '', dueDate: '', priority: 'medium', contactId: '' })
-                toast.success('Task Created', { description: `"${newTask.subject}" has been added to your workflow` })
+                toast.success('Task Created'" has been added to your workflow` })
               }}>Create Task</Button>
             </DialogFooter>
           </DialogContent>
@@ -2711,7 +2711,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   })
                   setShowTaskOptionsDialog(false)
                   setShowAddTaskDialog(true)
-                  toast.success('Editing Task', { description: 'Update task details below' })
+                  toast.success('Editing Task')
                 }
               }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Task
@@ -2722,7 +2722,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     t.id === selectedTask.id ? { ...t, ownerName: 'New Assignee', ownerId: 'u2' } : t
                   ))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Reassigned', { description: `"${selectedTask.subject}" has been reassigned` })
+                  toast.success('Task Reassigned'" has been reassigned` })
                 }
               }}>
                 <Users className="h-4 w-4 mr-2" />Reassign Task
@@ -2733,7 +2733,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     t.id === selectedTask.id ? { ...t, status: 'completed', completedDate: new Date().toISOString().split('T')[0] } : t
                   ))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Completed', { description: `"${selectedTask.subject}" marked as complete` })
+                  toast.success('Task Completed'" marked as complete` })
                 }
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark Complete
@@ -2742,7 +2742,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 if (selectedTask) {
                   setTasks(prev => prev.filter(t => t.id !== selectedTask.id))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Deleted', { description: `"${selectedTask.subject}" has been removed` })
+                  toast.success('Task Deleted'" has been removed` })
                   setSelectedTask(null)
                 }
               }}>
@@ -2880,7 +2880,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setCampaigns(prev => [newCampaign, ...prev])
                 setShowAddCampaignDialog(false)
                 setNewCampaignForm({ name: '', type: 'email', status: 'planned', startDate: '', endDate: '', budget: 0, expectedRevenue: 0, description: '' })
-                toast.success('Campaign Created', { description: `"${newCampaign.name}" has been created` })
+                toast.success('Campaign Created'" has been created` })
               }}>Create Campaign</Button>
             </DialogFooter>
           </DialogContent>
@@ -2958,7 +2958,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setPipelineStages(prev => [...prev.slice(0, -2), newStage, ...prev.slice(-2)])
                 setShowAddStageDialog(false)
                 setNewStageForm({ name: '', probability: 50, color: 'blue' })
-                toast.success('Stage Added', { description: `"${newStage.name}" has been added to your pipeline` })
+                toast.success('Stage Added'" has been added to your pipeline` })
               }}>Add Stage</Button>
             </DialogFooter>
           </DialogContent>
@@ -2979,7 +2979,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     setPipelineStages(prev => prev.map(s =>
                       s.id === selectedStage.id ? { ...s, name: newName.trim() } : s
                     ))
-                    toast.success('Stage Updated', { description: `Stage renamed to "${newName.trim()}"` })
+                    toast.success('Stage Updated'"` })
                   }
                 }
                 setShowStageOptionsDialog(false)
@@ -2994,7 +2994,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     setPipelineStages(prev => prev.map(s =>
                       s.id === selectedStage.id ? { ...s, probability: prob } : s
                     ))
-                    toast.success('Probability Updated', { description: `Stage probability set to ${prob}%` })
+                    toast.success('Probability Updated'%` })
                   }
                 }
                 setShowStageOptionsDialog(false)
@@ -3012,9 +3012,9 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       newStages[currentIndex - 1] = temp
                       return newStages
                     })
-                    toast.success('Stage Reordered', { description: `"${selectedStage.name}" moved up in pipeline` })
+                    toast.success('Stage Reordered'" moved up in pipeline` })
                   } else {
-                    toast.info('Already First', { description: 'This stage is already at the top' })
+                    toast.info('Already First')
                   }
                 }
                 setShowStageOptionsDialog(false)
@@ -3024,12 +3024,12 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <Button variant="destructive" className="w-full justify-start" onClick={() => {
                 if (selectedStage) {
                   if (pipelineStages.length <= 2) {
-                    toast.error('Cannot Delete', { description: 'Must have at least 2 pipeline stages' })
+                    toast.error('Cannot Delete')
                     setShowStageOptionsDialog(false)
                     return
                   }
                   setPipelineStages(prev => prev.filter(s => s.id !== selectedStage.id))
-                  toast.success('Stage Deleted', { description: `"${selectedStage.name}" has been removed` })
+                  toast.success('Stage Deleted'" has been removed` })
                   setSelectedStage(null)
                 }
                 setShowStageOptionsDialog(false)
@@ -3142,7 +3142,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setLeadScoringRules(prev => [...prev, newRule])
                 setShowLeadScoringRuleDialog(false)
                 setNewRuleForm({ name: '', field: '', operator: 'equals', value: '', points: 10, isActive: true })
-                toast.success('Scoring Rule Created', { description: `"${newRule.name}" will add ${newRule.points} points` })
+                toast.success('Scoring Rule Created'" will add ${newRule.points} points` })
               }}>Create Rule</Button>
             </DialogFooter>
           </DialogContent>
@@ -3197,7 +3197,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   window.location.href = `mailto:${emailRecipient.email}`
                 }
                 setShowEmailDialog(false)
-                toast.success('Email Sent', { description: 'Your email has been sent successfully' })
+                toast.success('Email Sent')
               }}>
                 <Mail className="h-4 w-4 mr-2" />Send Email
               </Button>
@@ -3226,7 +3226,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   input.onchange = async (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.success('File Selected', { description: `Ready to import ${file.name}` })
+                      toast.success('File Selected'` })
                       // Parse file and import customers
                       if (file.name.endsWith('.csv')) {
                         const text = await file.text()
@@ -3266,14 +3266,14 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
                           if (imported > 0) {
                             refetch()
-                            toast.success('Import Complete', { description: `Successfully imported ${imported} customers` })
+                            toast.success('Import Complete' customers` })
                             setShowImportDialog(false)
                           } else {
-                            toast.error('Import Failed', { description: 'No valid records found in file' })
+                            toast.error('Import Failed')
                           }
                         }
                       } else {
-                        toast.info('Excel Support', { description: 'Excel files will be supported in future update. Please use CSV for now.' })
+                        toast.info('Excel Support')
                       }
                     }
                   }
@@ -3299,7 +3299,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   a.download = 'customers-import-template.csv'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Template Downloaded', { description: 'CSV template downloaded - fill it with your data' })
+                  toast.success('Template Downloaded')
                 }}>
                   Download sample CSV template
                 </a>
@@ -3313,7 +3313,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 input.type = 'file'
                 input.accept = '.csv,.xlsx,.xls'
                 input.click()
-                toast.info('Select a File', { description: 'Choose a CSV or Excel file to import' })
+                toast.info('Select a File')
               }}>
                 <Upload className="h-4 w-4 mr-2" />Select File to Import
               </Button>

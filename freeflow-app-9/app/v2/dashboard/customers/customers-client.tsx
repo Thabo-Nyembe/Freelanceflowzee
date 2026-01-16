@@ -644,11 +644,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
       if (result) {
         setShowAddContact(false)
         setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '', company: '', notes: '' })
-        toast.success('Contact Created', { description: `${newContactForm.firstName} ${newContactForm.lastName} has been added to your CRM` })
+        toast.success('Contact Created' ${newContactForm.lastName} has been added to your CRM` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to create contact' })
+      toast.error('Error')
       console.error('Failed to create contact:', err)
     }
   }
@@ -693,11 +693,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
       if (result) {
         setShowEditDialog(false)
         setEditingCustomer(null)
-        toast.success('Contact Updated', { description: `${editContactForm.firstName} ${editContactForm.lastName} has been updated` })
+        toast.success('Contact Updated' ${editContactForm.lastName} has been updated` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update contact' })
+      toast.error('Error')
       console.error('Failed to update contact:', err)
     }
   }
@@ -713,14 +713,14 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     try {
       const success = await deleteCustomer(customerToDelete)
       if (success) {
-        toast.success('Contact Deleted', { description: 'The contact has been removed from your CRM' })
+        toast.success('Contact Deleted')
         setShowDeleteDialog(false)
         setCustomerToDelete(null)
         setSelectedContact(null)
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to delete contact' })
+      toast.error('Error')
       console.error('Failed to delete contact:', err)
     }
   }
@@ -730,11 +730,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     try {
       const result = await updateCustomer({ id: customerId, status: newStatus })
       if (result) {
-        toast.success('Status Updated', { description: `Contact status changed to ${newStatus}` })
+        toast.success('Status Updated'` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update status' })
+      toast.error('Error')
     }
   }
 
@@ -743,11 +743,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     try {
       const result = await updateCustomer({ id: customerId, segment: newSegment })
       if (result) {
-        toast.success('Segment Updated', { description: `Contact moved to ${newSegment} segment` })
+        toast.success('Segment Updated' segment` })
         refetch()
       }
     } catch (err) {
-      toast.error('Error', { description: 'Failed to update segment' })
+      toast.error('Error')
     }
   }
 
@@ -855,7 +855,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Customer data exported to CSV file' })
+    toast.success('Export Complete')
   }
 
   const handleCreateOpportunity = () => {
@@ -864,8 +864,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleConvertLead = (contact: Contact) => {
-    toast.success('Lead converted', {
-      description: `${contact.firstName} ${contact.lastName} converted to customer`
+    toast.success('Lead converted' ${contact.lastName} converted to customer`
     })
   }
 
@@ -2127,7 +2126,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('crm_api_key_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API Key Copied', { description: 'The API key has been copied to your clipboard' }) }}>
+                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('crm_api_key_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API Key Copied') }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2296,7 +2295,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <AIInsightsPanel
               insights={mockCustomersAIInsights}
               title="Customer Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3188,7 +3187,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Import completed', { description: 'Contacts have been imported successfully' })
+                toast.success('Import completed')
                 setShowImportDialog(false)
               }}>
                 <Upload className="h-4 w-4 mr-2" />Start Import
@@ -3268,7 +3267,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Task created successfully', { description: 'New task has been added to your list' })
+                toast.success('Task created successfully')
                 setShowAddTaskDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Create Task
@@ -3353,7 +3352,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Campaign created successfully', { description: 'Your new campaign is ready to launch' })
+                toast.success('Campaign created successfully')
                 setShowAddCampaignDialog(false)
               }}>
                 <Megaphone className="h-4 w-4 mr-2" />Create Campaign
@@ -3417,7 +3416,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Stage added successfully', { description: 'New stage has been added to your pipeline' })
+                toast.success('Stage added successfully')
                 setShowAddStageDialog(false)
               }}>
                 <Layers className="h-4 w-4 mr-2" />Add Stage
@@ -3485,7 +3484,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddScoringRuleDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Scoring rule added', { description: 'Lead scoring will now apply this rule' })
+                toast.success('Scoring rule added')
                 setShowAddScoringRuleDialog(false)
               }}>
                 <Target className="h-4 w-4 mr-2" />Add Rule
@@ -3524,7 +3523,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Slack connected successfully', { description: 'You will now receive CRM notifications in Slack' })
+                toast.success('Slack connected successfully')
                 setShowConnectSlackDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Slack
@@ -3563,7 +3562,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectZapierDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Zapier connected successfully', { description: 'Automations are now enabled' })
+                toast.success('Zapier connected successfully')
                 setShowConnectZapierDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Zapier
@@ -3595,7 +3594,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 </ul>
               </div>
               <div className="text-center py-4">
-                <Button variant="outline" size="lg" className="gap-2" onClick={() => toast.info('LinkedIn OAuth', { description: 'Opening LinkedIn authentication window...' })}>
+                <Button variant="outline" size="lg" className="gap-2" onClick={() => toast.info('LinkedIn OAuth')}>
                   <ExternalLink className="h-4 w-4" />
                   Sign in with LinkedIn
                 </Button>
@@ -3604,7 +3603,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectLinkedInDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('LinkedIn connected successfully', { description: 'Your LinkedIn data is now synced' })
+                toast.success('LinkedIn connected successfully')
                 setShowConnectLinkedInDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Complete Setup
@@ -3676,7 +3675,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Data exported successfully', { description: 'Your CRM data has been downloaded' })
+                toast.success('Data exported successfully')
                 setShowExportAllDataDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export Data
@@ -3726,7 +3725,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.success('Data imported successfully', { description: 'Your CRM has been updated with imported data' })
+                toast.success('Data imported successfully')
                 setShowImportDataDialog(false)
               }}>
                 <Upload className="h-4 w-4 mr-2" />Import Data
@@ -3762,7 +3761,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowDeleteAllContactsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to delete ALL contacts? This action cannot be undone.')) {
-                  toast.success('All contacts deleted', { description: 'Your CRM contacts have been removed' })
+                  toast.success('All contacts deleted')
                   setShowDeleteAllContactsDialog(false)
                 }
               }}>
@@ -3799,7 +3798,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to clear all activity history? This action cannot be undone.')) {
-                  toast.success('Activity history cleared', { description: 'All activity records have been removed' })
+                  toast.success('Activity history cleared')
                   setShowClearHistoryDialog(false)
                 }
               }}>
@@ -3841,7 +3840,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to factory reset the CRM? ALL data will be permanently deleted.')) {
-                  toast.success('Factory reset complete', { description: 'CRM has been reset to default settings' })
+                  toast.success('Factory reset complete')
                   setShowFactoryResetDialog(false)
                 }
               }}>
