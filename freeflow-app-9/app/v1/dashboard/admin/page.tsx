@@ -40,14 +40,12 @@ import {
   Database
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 export default function AdminPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -173,8 +171,7 @@ export default function AdminPage() {
       })
       sessionStorage.clear()
       const freedMB = ((freedBytes / 1024 / 1024) || 0.1).toFixed(1)
-      toast.success('Cache Cleared', {
-        description: `System cache has been cleared. Memory freed: ${freedMB}MB`
+      toast.success('Cache Cleared'MB`
       })
       announce('Cache cleared successfully', 'polite')
     } catch (error) {
@@ -205,8 +202,7 @@ export default function AdminPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Backup Created', {
-        description: `Backup file: backup_${timestamp}.json (${(blob.size / 1024).toFixed(1)} KB)`
+      toast.success('Backup Created'.json (${(blob.size / 1024).toFixed(1)} KB)`
       })
       announce('Backup created successfully', 'polite')
     } catch (error) {
@@ -229,9 +225,7 @@ export default function AdminPage() {
           })
         }
       }
-      toast.success('Test Notification Sent', {
-        description: 'Check your browser notifications'
-      })
+      toast.success('Test Notification Sent')
       announce('Test notification sent', 'polite')
     } catch (error) {
       toast.error('Failed to send test notification')
@@ -254,13 +248,10 @@ export default function AdminPage() {
       const responseTime = Math.round(endTime - startTime)
       const allPassed = Object.values(checks).every(Boolean)
       if (allPassed) {
-        toast.success('Health Check Passed', {
-          description: `All systems operational. Response time: ${responseTime}ms`
+        toast.success('Health Check Passed'ms`
         })
       } else {
-        toast.warning('Health Check Warning', {
-          description: 'Some subsystems may have issues'
-        })
+        toast.warning('Health Check Warning')
       }
       announce('Health check completed successfully', 'polite')
     } catch (error) {
@@ -291,9 +282,7 @@ export default function AdminPage() {
         }
       }
 
-      toast.success('Configuration Saved', {
-        description: 'Platform settings have been updated'
-      })
+      toast.success('Configuration Saved')
       announce('Configuration saved successfully', 'polite')
       setIsConfigDialogOpen(false)
     } catch (error) {
@@ -301,7 +290,6 @@ export default function AdminPage() {
     }
   }, [announce, userId, platformConfig])
 
-  // A+++ LOAD ADMIN DATA
   useEffect(() => {
     const loadAdminData = async () => {
       try {
@@ -337,7 +325,6 @@ export default function AdminPage() {
     loadAdminData()
   }, [userId, announce])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="p-6 space-y-6 kazi-bg-light min-h-screen">
@@ -357,7 +344,6 @@ export default function AdminPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="p-6 space-y-6 kazi-bg-light min-h-screen">
