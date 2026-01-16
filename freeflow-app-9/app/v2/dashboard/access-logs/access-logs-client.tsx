@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -473,7 +472,7 @@ interface DbAccessLog {
 }
 
 export default function AccessLogsClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -531,6 +530,8 @@ export default function AccessLogsClient() {
   const fetchLogs = useCallback(async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -605,11 +606,13 @@ export default function AccessLogsClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create access log
   const createAccessLog = useCallback(async (logData: Partial<DbAccessLog>) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .insert([{
@@ -638,7 +641,7 @@ export default function AccessLogsClient() {
       toast.error('Failed to create access log')
       return null
     }
-  }, [supabase, fetchLogs])
+  }, [ fetchLogs])
 
   // Block IP address
   const blockIP = useCallback(async (ip: string) => {
@@ -660,6 +663,8 @@ export default function AccessLogsClient() {
   // Export logs
   const exportLogs = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -680,7 +685,7 @@ export default function AccessLogsClient() {
       console.error('Export error:', err)
       toast.error('Failed to export logs')
     }
-  }, [supabase])
+  }, [])
 
   // Clear/archive old logs
   const clearLogs = useCallback(async () => {
@@ -688,6 +693,8 @@ export default function AccessLogsClient() {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('access_logs')
         .delete()
@@ -700,7 +707,7 @@ export default function AccessLogsClient() {
       console.error('Clear logs error:', err)
       toast.error('Failed to clear logs')
     }
-  }, [supabase, fetchLogs])
+  }, [ fetchLogs])
 
   // Initial fetch
   useEffect(() => {

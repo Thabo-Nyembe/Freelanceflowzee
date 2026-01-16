@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import {
   DollarSign,
   CreditCard,
@@ -363,7 +362,7 @@ const mockTransactionsActivities = [
 // Quick actions are now defined inside the component to use state setters
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('last-7-days')
   const [searchQuery, setSearchQuery] = useState('')
@@ -535,6 +534,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('clients').insert({
         name: customerForm.name,
         email: customerForm.email,

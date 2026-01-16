@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useCertifications, type Certification, type CertificationType, type CertificationStatus } from '@/lib/hooks/use-certifications'
 
 // Enhanced & Competitive Upgrade Components
@@ -690,7 +689,7 @@ export default function CertificationsClient() {
   })
 
   // Supabase client and hooks
-  const supabase = createClient()
+
   const {
     certifications: dbCertifications,
     loading: certificationsLoading,
@@ -856,6 +855,8 @@ export default function CertificationsClient() {
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in')
