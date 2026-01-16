@@ -1,8 +1,14 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import {
+  useAnalyticsConversionFunnels,
+  useAnalyticsDashboards,
+  useAnalyticsReports,
+  useAnalyticsMetrics,
+} from '@/lib/hooks/use-analytics-extended'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -139,7 +145,6 @@ const mockActivities = analyticsActivities
 const mockQuickActions = analyticsQuickActions
 
 export default function AnalyticsClient() {
-  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -208,11 +213,32 @@ export default function AnalyticsClient() {
   const [showDeleteMetric, setShowDeleteMetric] = useState(false)
   const [selectedMetricForAction, setSelectedMetricForAction] = useState<string | null>(null)
 
-  // Database state
-  const [dbFunnels, setDbFunnels] = useState<any[]>([])
-  const [dbReports, setDbReports] = useState<any[]>([])
-  const [dbDashboards, setDbDashboards] = useState<any[]>([])
-  const [dbMetrics, setDbMetrics] = useState<any[]>([])
+  // Database hooks - Extended analytics hooks
+  const { data: dbFunnels = [], isLoading: funnelsLoading, refresh: refreshFunnels } = useAnalyticsConversionFunnels(userId || undefined)
+  const { data: dbReports = [], isLoading: reportsLoading, refresh: refreshReports } = useAnalyticsReports(userId || undefined)
+  const { data: dbDashboards = [], isLoading: dashboardsLoading, refresh: refreshDashboards } = useAnalyticsDashboards(userId || undefined)
+  const { data: dbMetrics = [], isLoading: metricsLoading, refresh: refreshMetrics } = useAnalyticsMetrics(userId || undefined)
+
+  // Mutation hooks for CRUD operations
+  const funnelsMutation = useSupabaseMutation({
+    table: 'analytics_conversion_funnels',
+    onSuccess: () => refreshFunnels()
+  })
+  const reportsMutation = useSupabaseMutation({
+    table: 'analytics_reports',
+    onSuccess: () => refreshReports()
+  })
+  const dashboardsMutation = useSupabaseMutation({
+    table: 'analytics_dashboards',
+    onSuccess: () => refreshDashboards()
+  })
+  const metricsMutation = useSupabaseMutation({
+    table: 'analytics_metrics',
+    onSuccess: () => refreshMetrics()
+  })
+  const alertsMutation = useSupabaseMutation({
+    table: 'analytics_alerts'
+  })
 
   // Form state for creating funnel
   const [funnelForm, setFunnelForm] = useState({
@@ -291,75 +317,7 @@ export default function AnalyticsClient() {
     fetchUserId()
   }, [getUserId])
 
-  // Fetch data from Supabase
-  const fetchFunnels = useCallback(async () => {
-    if (!userId) return
-    try {
-      const { data, error } = await supabase
-        .from('analytics_conversion_funnels')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setDbFunnels(data || [])
-    } catch (err) {
-      console.error('Error fetching funnels:', err)
-    }
-  }, [userId, supabase])
-
-  const fetchReports = useCallback(async () => {
-    if (!userId) return
-    try {
-      const { data, error } = await supabase
-        .from('analytics_reports')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setDbReports(data || [])
-    } catch (err) {
-      console.error('Error fetching reports:', err)
-    }
-  }, [userId, supabase])
-
-  const fetchDashboards = useCallback(async () => {
-    if (!userId) return
-    try {
-      const { data, error } = await supabase
-        .from('analytics_dashboards')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setDbDashboards(data || [])
-    } catch (err) {
-      console.error('Error fetching dashboards:', err)
-    }
-  }, [userId, supabase])
-
-  const fetchMetrics = useCallback(async () => {
-    if (!userId) return
-    try {
-      const { data, error } = await supabase
-        .from('analytics_metrics')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      setDbMetrics(data || [])
-    } catch (err) {
-      console.error('Error fetching metrics:', err)
-    }
-  }, [userId, supabase])
-
-  useEffect(() => {
-    if (userId) {
-      fetchFunnels()
-      fetchReports()
-      fetchDashboards()
-      fetchMetrics()
-    }
-  }, [userId, fetchFunnels, fetchReports, fetchDashboards, fetchMetrics])
+  // Hooks automatically fetch data when userId changes - no manual fetch needed
 
   // Filter metrics with advanced filtering
   const filteredMetrics = useMemo(() => {
@@ -409,23 +367,17 @@ export default function AnalyticsClient() {
     }
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('analytics_conversion_funnels')
-        .insert({
-          user_id: userId,
-          name: funnelForm.name,
-          description: funnelForm.description,
-          steps: funnelForm.steps,
-          status: 'active',
-          total_conversion: 0
-        })
-        .select()
-        .single()
-      if (error) throw error
-      toast.success('Funnel created'" has been created` })
+      await funnelsMutation.create({
+        user_id: userId,
+        name: funnelForm.name,
+        description: funnelForm.description,
+        steps: funnelForm.steps,
+        status: 'active',
+        total_conversion: 0
+      })
+      toast.success('Funnel created')
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnel(false)
-      fetchFunnels()
     } catch (err: any) {
       toast.error('Error creating funnel')
     } finally {
@@ -437,14 +389,8 @@ export default function AnalyticsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_conversion_funnels')
-        .delete()
-        .eq('id', funnelId)
-        .eq('user_id', userId)
-      if (error) throw error
+      await funnelsMutation.remove(funnelId, true)
       toast.success('Funnel deleted')
-      fetchFunnels()
     } catch (err: any) {
       toast.error('Error deleting funnel')
     } finally {
@@ -464,25 +410,19 @@ export default function AnalyticsClient() {
     setIsLoading(true)
     try {
       const recipients = reportForm.recipients.split(',').map(r => r.trim()).filter(Boolean)
-      const { data, error } = await supabase
-        .from('analytics_reports')
-        .insert({
-          user_id: userId,
-          name: reportForm.name,
-          type: reportForm.type,
-          frequency: reportForm.type === 'scheduled' ? reportForm.frequency : null,
-          format: reportForm.format,
-          recipients,
-          status: 'active',
-          last_run: new Date().toISOString()
-        })
-        .select()
-        .single()
-      if (error) throw error
-      toast.success('Report created'" has been created` })
+      await reportsMutation.create({
+        user_id: userId,
+        name: reportForm.name,
+        type: reportForm.type,
+        frequency: reportForm.type === 'scheduled' ? reportForm.frequency : null,
+        format: reportForm.format,
+        recipients,
+        status: 'active',
+        last_run: new Date().toISOString()
+      })
+      toast.success('Report created')
       setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
       setShowCreateReport(false)
-      fetchReports()
     } catch (err: any) {
       toast.error('Error creating report')
     } finally {
@@ -494,14 +434,8 @@ export default function AnalyticsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_reports')
-        .update({ last_run: new Date().toISOString() })
-        .eq('id', reportId)
-        .eq('user_id', userId)
-      if (error) throw error
-      toast.success('Report running'" is being generated` })
-      fetchReports()
+      await reportsMutation.update(reportId, { last_run: new Date().toISOString() })
+      toast.success('Report running')
     } catch (err: any) {
       toast.error('Error running report')
     } finally {
@@ -513,14 +447,8 @@ export default function AnalyticsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_reports')
-        .delete()
-        .eq('id', reportId)
-        .eq('user_id', userId)
-      if (error) throw error
+      await reportsMutation.remove(reportId, true)
       toast.success('Report deleted')
-      fetchReports()
     } catch (err: any) {
       toast.error('Error deleting report')
     } finally {
@@ -539,24 +467,18 @@ export default function AnalyticsClient() {
     }
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('analytics_dashboards')
-        .insert({
-          user_id: userId,
-          name: dashboardForm.name,
-          description: dashboardForm.description,
-          is_default: dashboardForm.is_default,
-          widgets: [],
-          shared_with: [],
-          last_viewed: new Date().toISOString()
-        })
-        .select()
-        .single()
-      if (error) throw error
-      toast.success('Dashboard created'" has been created` })
+      await dashboardsMutation.create({
+        user_id: userId,
+        name: dashboardForm.name,
+        description: dashboardForm.description,
+        is_default: dashboardForm.is_default,
+        widgets: [],
+        shared_with: [],
+        last_viewed: new Date().toISOString()
+      })
+      toast.success('Dashboard created')
       setDashboardForm({ name: '', description: '', is_default: false })
       setShowCreateDashboard(false)
-      fetchDashboards()
     } catch (err: any) {
       toast.error('Error creating dashboard')
     } finally {
@@ -568,14 +490,8 @@ export default function AnalyticsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_dashboards')
-        .delete()
-        .eq('id', dashboardId)
-        .eq('user_id', userId)
-      if (error) throw error
+      await dashboardsMutation.remove(dashboardId, true)
       toast.success('Dashboard deleted')
-      fetchDashboards()
     } catch (err: any) {
       toast.error('Error deleting dashboard')
     } finally {
@@ -596,22 +512,16 @@ export default function AnalyticsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('analytics_dashboards')
-        .insert({
-          user_id: userId,
-          name: `${dashboard.name} (Copy)`,
-          description: dashboard.description,
-          is_default: false,
-          widgets: dashboard.widgets || [],
-          shared_with: [],
-          last_viewed: new Date().toISOString()
-        })
-        .select()
-        .single()
-      if (error) throw error
-      toast.success('Dashboard duplicated'" has been duplicated` })
-      fetchDashboards()
+      await dashboardsMutation.create({
+        user_id: userId,
+        name: `${dashboard.name} (Copy)`,
+        description: dashboard.description,
+        is_default: false,
+        widgets: dashboard.widgets || [],
+        shared_with: [],
+        last_viewed: new Date().toISOString()
+      })
+      toast.success('Dashboard duplicated')
     } catch (err: any) {
       toast.error('Error duplicating dashboard')
     } finally {
@@ -785,9 +695,10 @@ Add this code to the <head> section of your HTML.`)
       (activeFilters.maxValue ? 1 : 0)
 
     setShowFilterDialog(false)
-    toast.success('Filters applied' filter${filterCount > 1 ? 's' : ''} active`
-        : 'Showing all data'
-    })
+    toast.success(filterCount > 0
+      ? `Filters applied - ${filterCount} filter${filterCount > 1 ? 's' : ''} active`
+      : 'Showing all data'
+    )
   }
 
   // Clear all filters
@@ -821,8 +732,7 @@ Add this code to the <head> section of your HTML.`)
     }
     setTimeRange('custom')
     setShowCustomDateRange(false)
-    toast.success('Date range applied' to ${customDateRange.endDate}`
-    })
+    toast.success(`Date range applied: ${customDateRange.startDate} to ${customDateRange.endDate}`)
   }
 
   // Handle compare date range
@@ -833,8 +743,7 @@ Add this code to the <head> section of your HTML.`)
     }
     setCompareMode(true)
     setShowCompareDialog(false)
-    toast.success('Compare mode enabled' to ${compareDateRange.endDate}`
-    })
+    toast.success(`Compare mode enabled: ${compareDateRange.startDate} to ${compareDateRange.endDate}`)
   }
 
   // Export report as PDF
@@ -896,30 +805,26 @@ Report generated by Kazi Analytics
     setIsLoading(true)
     try {
       if (userId) {
-        const { error } = await supabase
-          .from('analytics_reports')
-          .insert({
-            user_id: userId,
-            name: customReportForm.name,
-            type: customReportForm.schedule === 'none' ? 'one-time' : 'scheduled',
-            frequency: customReportForm.schedule === 'none' ? null : customReportForm.schedule,
-            format: 'pdf',
-            recipients: [],
-            status: 'active',
-            last_run: new Date().toISOString(),
-            config: {
-              description: customReportForm.description,
-              metrics: customReportForm.metrics,
-              dateRange: timeRange === 'custom' ? customDateRange : timeRange
-            }
-          })
-        if (error) throw error
+        await reportsMutation.create({
+          user_id: userId,
+          name: customReportForm.name,
+          type: customReportForm.schedule === 'none' ? 'one-time' : 'scheduled',
+          frequency: customReportForm.schedule === 'none' ? null : customReportForm.schedule,
+          format: 'pdf',
+          recipients: [],
+          status: 'active',
+          last_run: new Date().toISOString(),
+          config: {
+            description: customReportForm.description,
+            metrics: customReportForm.metrics,
+            dateRange: timeRange === 'custom' ? customDateRange : timeRange
+          }
+        })
       }
 
-      toast.success('Report saved'" has been saved` })
+      toast.success('Report saved')
       setCustomReportForm({ name: '', description: '', metrics: [], schedule: 'none' })
       setShowSaveReportDialog(false)
-      fetchReports()
     } catch (err: any) {
       toast.error('Error saving report')
     } finally {
@@ -954,19 +859,16 @@ Report generated by Kazi Analytics
     if (!userId || !selectedMetric) return
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_alerts')
-        .insert({
-          user_id: userId,
-          metric_name: selectedMetric.name,
-          metric_type: selectedMetric.type,
-          threshold_type: 'above',
-          threshold_value: selectedMetric.value * 1.2,
-          is_active: true,
-          notification_channels: ['email', 'in_app']
-        })
-      if (error) throw error
-      toast.success('Alert created'"` })
+      await alertsMutation.create({
+        user_id: userId,
+        metric_name: selectedMetric.name,
+        metric_type: selectedMetric.type,
+        threshold_type: 'above',
+        threshold_value: selectedMetric.value * 1.2,
+        is_active: true,
+        notification_channels: ['email', 'in_app']
+      })
+      toast.success('Alert created')
     } catch (err: any) {
       toast.error('Error creating alert')
     } finally {
@@ -986,24 +888,20 @@ Report generated by Kazi Analytics
     }
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_metrics')
-        .insert({
-          user_id: userId,
-          name: metricForm.name,
-          category: metricForm.category,
-          type: metricForm.type,
-          value: 0,
-          previous_value: 0,
-          change_percent: 0,
-          status: 'stable',
-          alert_threshold: metricForm.alertThreshold ? parseFloat(metricForm.alertThreshold) : null
-        })
-      if (error) throw error
-      toast.success('Metric added'" has been added` })
+      await metricsMutation.create({
+        user_id: userId,
+        name: metricForm.name,
+        category: metricForm.category,
+        type: metricForm.type,
+        value: 0,
+        previous_value: 0,
+        change_percent: 0,
+        status: 'stable',
+        alert_threshold: metricForm.alertThreshold ? parseFloat(metricForm.alertThreshold) : null
+      })
+      toast.success('Metric added')
       setMetricForm({ name: '', category: 'users', type: 'count', alertThreshold: '' })
       setShowAddMetric(false)
-      fetchMetrics()
     } catch (err: any) {
       toast.error('Error adding metric')
     } finally {
@@ -1022,7 +920,7 @@ Report generated by Kazi Analytics
       return
     }
     setIsLoading(true)
-    toast.success('Creating cohort...'"` })
+    toast.success(`Creating cohort "${cohortForm.name}"...`)
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1037,7 +935,7 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to create cohort')
-      toast.success('Cohort created'" has been created` })
+      toast.success(`Cohort "${cohortForm.name}" has been created`)
       setCohortForm({ name: '', type: 'retention', description: '' })
       setShowCreateCohort(false)
     } catch (err: any) {
@@ -1057,21 +955,15 @@ Report generated by Kazi Analytics
     setIsLoading(true)
     try {
       const recipients = editReportForm.recipients.split(',').map(r => r.trim()).filter(Boolean)
-      const { error } = await supabase
-        .from('analytics_reports')
-        .update({
-          name: editReportForm.name,
-          type: editReportForm.type,
-          frequency: editReportForm.type === 'scheduled' ? editReportForm.frequency : null,
-          format: editReportForm.format,
-          recipients
-        })
-        .eq('id', showEditReport)
-        .eq('user_id', userId)
-      if (error) throw error
-      toast.success('Report updated'" has been updated` })
+      await reportsMutation.update(showEditReport!, {
+        name: editReportForm.name,
+        type: editReportForm.type,
+        frequency: editReportForm.type === 'scheduled' ? editReportForm.frequency : null,
+        format: editReportForm.format,
+        recipients
+      })
+      toast.success('Report updated')
       setShowEditReport(null)
-      fetchReports()
     } catch (err: any) {
       toast.error('Error updating report')
     } finally {
@@ -1083,7 +975,7 @@ Report generated by Kazi Analytics
   const handleConnectIntegration = async (integrationName: string, connected: boolean) => {
     setIsLoading(true)
     const action = connected ? 'disconnect' : 'connect'
-    toast.success(`${connected ? 'Disconnecting' : 'Connecting'}...` ${integrationName}` })
+    toast.success(`${connected ? 'Disconnecting' : 'Connecting'} ${integrationName}...`)
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1098,9 +990,9 @@ Report generated by Kazi Analytics
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || `Failed to ${action} integration`)
       if (connected) {
-        toast.success('Disconnected' has been disconnected` })
+        toast.success(`${integrationName} has been disconnected`)
       } else {
-        toast.success('Connected' has been connected` })
+        toast.success(`${integrationName} has been connected`)
       }
       setShowConnectIntegration(null)
     } catch (err: any) {
@@ -1141,7 +1033,7 @@ Report generated by Kazi Analytics
       return
     }
     setIsLoading(true)
-    toast.success('Configuring schema...'"` })
+    toast.success(`Configuring schema "${eventSchemaForm.eventName}"...`)
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1156,7 +1048,7 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to configure event schema')
-      toast.success('Schema configured'" has been configured` })
+      toast.success(`Schema "${eventSchemaForm.eventName}" has been configured`)
       setEventSchemaForm({ eventName: '', properties: '', description: '' })
       setShowConfigureEventSchema(false)
     } catch (err: any) {
@@ -1171,17 +1063,21 @@ Report generated by Kazi Analytics
     if (!userId) return
     setIsLoading(true)
     try {
-      // Delete all user's analytics data
+      // Bulk delete all user's analytics data
+      // Note: Using direct Supabase client for bulk operations (mutation hooks only support delete by ID)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('analytics_metrics').delete().eq('user_id', userId)
       await supabase.from('analytics_reports').delete().eq('user_id', userId)
       await supabase.from('analytics_dashboards').delete().eq('user_id', userId)
       await supabase.from('analytics_conversion_funnels').delete().eq('user_id', userId)
       toast.success('Data reset')
       setShowResetData(false)
-      fetchMetrics()
-      fetchReports()
-      fetchDashboards()
-      fetchFunnels()
+      // Refresh all data from hooks
+      refreshMetrics()
+      refreshReports()
+      refreshDashboards()
+      refreshFunnels()
     } catch (err: any) {
       toast.error('Error resetting data')
     } finally {
@@ -1251,26 +1147,22 @@ Report generated by Kazi Analytics
     const newName = duplicateMetricName.trim() || `${originalMetric.name} (Copy)`
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_metrics')
-        .insert({
-          user_id: userId,
-          name: newName,
-          category: originalMetric.category,
-          type: originalMetric.type,
-          value: originalMetric.value,
-          previous_value: originalMetric.previousValue,
-          change_percent: originalMetric.changePercent,
-          status: originalMetric.status,
-          alert_threshold: originalMetric.alertThreshold || null
-        })
-      if (error) throw error
-      toast.success('Metric duplicated'" has been created` })
+      await metricsMutation.create({
+        user_id: userId,
+        name: newName,
+        category: originalMetric.category,
+        type: originalMetric.type,
+        value: originalMetric.value,
+        previous_value: originalMetric.previousValue,
+        change_percent: originalMetric.changePercent,
+        status: originalMetric.status,
+        alert_threshold: originalMetric.alertThreshold || null
+      })
+      toast.success('Metric duplicated')
       setDuplicateMetricName('')
       setShowDuplicateMetric(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
-      fetchMetrics()
     } catch (err: any) {
       toast.error('Error duplicating metric')
     } finally {
@@ -1299,19 +1191,16 @@ Report generated by Kazi Analytics
       if (alertForm.notifyEmail) notificationChannels.push('email')
       if (alertForm.notifyInApp) notificationChannels.push('in_app')
 
-      const { error } = await supabase
-        .from('analytics_alerts')
-        .insert({
-          user_id: userId,
-          metric_name: metric.name,
-          metric_type: metric.type,
-          threshold_type: alertForm.thresholdType,
-          threshold_value: parseFloat(alertForm.thresholdValue),
-          is_active: true,
-          notification_channels: notificationChannels
-        })
-      if (error) throw error
-      toast.success('Alert created'" when value goes ${alertForm.thresholdType} ${alertForm.thresholdValue}` })
+      await alertsMutation.create({
+        user_id: userId,
+        metric_name: metric.name,
+        metric_type: metric.type,
+        threshold_type: alertForm.thresholdType,
+        threshold_value: parseFloat(alertForm.thresholdValue),
+        is_active: true,
+        notification_channels: notificationChannels
+      })
+      toast.success('Alert created')
       setAlertForm({ thresholdType: 'above', thresholdValue: '', notifyEmail: true, notifyInApp: true })
       setShowSetAlertDialog(false)
       setSelectedMetricForAction(null)
@@ -1344,11 +1233,11 @@ Report generated by Kazi Analytics
         const subject = encodeURIComponent(`Check out this metric: ${metric.name}`)
         const body = encodeURIComponent(`I wanted to share this analytics metric with you:\n\nMetric: ${metric.name}\nCurrent Value: ${formatValue(metric.value, metric.type)}\nChange: ${metric.changePercent >= 0 ? '+' : ''}${metric.changePercent.toFixed(1)}%\n\nView the full analytics here: ${shareLink}`)
         window.open(`mailto:${emails.join(',')}?subject=${subject}&body=${body}`)
-        toast.success('Email opened'" with ${emails.length} recipient(s)` })
+        toast.success(`Email opened with ${emails.length} recipient(s)`)
       } else {
         // Copy link to clipboard
         await navigator.clipboard.writeText(shareLink)
-        toast.success('Link copied'" copied to clipboard` })
+        toast.success('Link copied to clipboard')
       }
       setShareEmails('')
       setShowShareMetric(false)
@@ -1370,17 +1259,11 @@ Report generated by Kazi Analytics
     const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
     setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('analytics_metrics')
-        .delete()
-        .eq('id', selectedMetricForAction)
-        .eq('user_id', userId)
-      if (error) throw error
-      toast.success('Metric deleted'" has been removed` })
+      await metricsMutation.remove(selectedMetricForAction!, true)
+      toast.success('Metric deleted')
       setShowDeleteMetric(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
-      fetchMetrics()
     } catch (err: any) {
       toast.error('Error deleting metric')
     } finally {
@@ -4313,7 +4196,7 @@ Report generated by Kazi Analytics
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted' })}
+            onAskQuestion={(q) => toast.info('Question Submitted')}
           />
           <PredictiveAnalytics predictions={mockPredictions} />
         </div>
