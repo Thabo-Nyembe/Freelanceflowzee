@@ -164,36 +164,21 @@ const cryptoPaymentReducer = (
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_TRANSACTIONS':
-      logger.info('Setting transactions', { count: action.transactions.length })
-      return { ...state, transactions: action.transactions, isLoading: false }
+    case 'SET_TRANSACTIONS':      return { ...state, transactions: action.transactions, isLoading: false }
 
-    case 'ADD_TRANSACTION':
-      logger.info('Transaction added', {
-        transactionId: action.transaction.id,
-        currency: action.transaction.currency,
-        amount: action.transaction.amount
-      })
-      return {
+    case 'ADD_TRANSACTION':      return {
         ...state,
         transactions: [action.transaction, ...state.transactions],
         isLoading: false
       }
 
-    case 'UPDATE_TRANSACTION':
-      logger.info('Transaction updated', {
-        transactionId: action.transaction.id,
-        status: action.transaction.status
-      })
-      return {
+    case 'UPDATE_TRANSACTION':      return {
         ...state,
         transactions: state.transactions.map(t => t.id === action.transaction.id ? action.transaction : t),
         selectedTransaction: state.selectedTransaction?.id === action.transaction.id ? action.transaction : state.selectedTransaction
       }
 
-    case 'DELETE_TRANSACTION':
-      logger.info('Transaction deleted', { transactionId: action.transactionId })
-      return {
+    case 'DELETE_TRANSACTION':      return {
         ...state,
         transactions: state.transactions.filter(t => t.id !== action.transactionId),
         selectedTransaction: state.selectedTransaction?.id === action.transactionId ? null : state.selectedTransaction
@@ -203,31 +188,20 @@ const cryptoPaymentReducer = (
       logger.debug('Transaction selected', { transactionId: action.transaction?.id || 'null' })
       return { ...state, selectedTransaction: action.transaction }
 
-    case 'SET_WALLETS':
-      logger.info('Setting wallets', { count: action.wallets.length })
-      return { ...state, wallets: action.wallets }
+    case 'SET_WALLETS':      return { ...state, wallets: action.wallets }
 
-    case 'ADD_WALLET':
-      logger.info('Wallet added', {
-        walletName: action.wallet.name,
-        currency: action.wallet.currency
-      })
-      return {
+    case 'ADD_WALLET':      return {
         ...state,
         wallets: [action.wallet, ...state.wallets]
       }
 
-    case 'UPDATE_WALLET':
-      logger.info('Wallet updated', { walletId: action.wallet.id })
-      return {
+    case 'UPDATE_WALLET':      return {
         ...state,
         wallets: state.wallets.map(w => w.id === action.wallet.id ? action.wallet : w),
         selectedWallet: state.selectedWallet?.id === action.wallet.id ? action.wallet : state.selectedWallet
       }
 
-    case 'DELETE_WALLET':
-      logger.info('Wallet deleted', { walletId: action.walletId })
-      return {
+    case 'DELETE_WALLET':      return {
         ...state,
         wallets: state.wallets.filter(w => w.id !== action.walletId),
         selectedWallet: state.selectedWallet?.id === action.walletId ? null : state.selectedWallet
@@ -315,10 +289,7 @@ const generateMockTransactions = (): CryptoTransaction[] => {
       completedAt: status === 'completed' ? new Date(Date.now() - Math.random() * 20 * 24 * 60 * 60 * 1000).toISOString() : undefined,
       expiresAt: status === 'pending' ? new Date(Date.now() + Math.random() * 24 * 60 * 60 * 1000).toISOString() : undefined
     })
-  }
-
-  logger.info('Mock transactions generated', { count: transactions.length })
-  return transactions
+  }  return transactions
 }
 
 const generateMockWallets = (): CryptoWallet[] => {
@@ -343,10 +314,7 @@ const generateMockWallets = (): CryptoWallet[] => {
       network: currency === 'BTC' ? 'Bitcoin' : currency === 'SOL' ? 'Solana' : 'Ethereum',
       createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString()
     }
-  })
-
-  logger.info('Mock wallets generated', { count: wallets.length })
-  return wallets
+  })  return wallets
 }
 
 // ========================================
@@ -451,20 +419,11 @@ export default function CryptoPaymentsPage() {
   const [refundTransaction, setRefundTransaction] = useState<CryptoTransaction | null>(null)
 
   // Load mock data
-  useEffect(() => {
-    logger.info('Loading initial data')
-
-    const mockTransactions = generateMockTransactions()
+  useEffect(() => {    const mockTransactions = generateMockTransactions()
     const mockWallets = generateMockWallets()
 
     dispatch({ type: 'SET_TRANSACTIONS', transactions: mockTransactions })
-    dispatch({ type: 'SET_WALLETS', wallets: mockWallets })
-
-    logger.info('Initial data loaded', {
-      transactionCount: mockTransactions.length,
-      walletCount: mockWallets.length
-    })
-    announce('Crypto payments page loaded', 'polite')
+    dispatch({ type: 'SET_WALLETS', wallets: mockWallets })    announce('Crypto payments page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
@@ -549,15 +508,7 @@ export default function CryptoPaymentsPage() {
   // HANDLERS
   // ========================================
 
-  const handleCreatePayment = async () => {
-    logger.info('Creating crypto payment', {
-      amount: paymentAmount,
-      currency: paymentCurrency,
-      hasDescription: !!paymentDescription.trim(),
-      hasEmail: !!customerEmail
-    })
-
-    if (paymentAmount <= 0) {
+  const handleCreatePayment = async () => {    if (paymentAmount <= 0) {
       logger.warn('Payment validation failed', { reason: 'Invalid amount', amount: paymentAmount })
       toast.error('Please enter a valid amount')
       announce('Invalid payment amount', 'assertive')
@@ -601,9 +552,7 @@ export default function CryptoPaymentsPage() {
         })
         if (createdTx?.id) {
           transactionId = createdTx.id
-        }
-        logger.info('Transaction created in database', { transactionId })
-      }
+        }      }
 
       const newTransaction: CryptoTransaction = {
         id: transactionId,
@@ -627,25 +576,13 @@ export default function CryptoPaymentsPage() {
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
       }
 
-      dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })
-
-      logger.info('Crypto payment created', {
-        transactionId: newTransaction.id,
-        amount: cryptoAmount,
-        currency: paymentCurrency,
-        usdValue: paymentAmount,
-        network,
-        fee
-      })
-
-      // Reset form
+      dispatch({ type: 'ADD_TRANSACTION', transaction: newTransaction })      // Reset form
       setPaymentAmount(100)
       setPaymentDescription('')
       setCustomerEmail('')
       setShowCreatePaymentModal(false)
 
-      toast.success('Payment created', {
-        description: `${formatCryptoAmount(cryptoAmount, paymentCurrency)} - ${formatUSD(paymentAmount)} - ${network} network - Fee: ${formatUSD(fee)} - Expires in 30m - ${requiredConfirmations} confirmations required`
+      toast.success('Payment created' - ${formatUSD(paymentAmount)} - ${network} network - Fee: ${formatUSD(fee)} - Expires in 30m - ${requiredConfirmations} confirmations required`
       })
       announce('Payment created', 'polite')
     } catch (error) {
@@ -656,25 +593,13 @@ export default function CryptoPaymentsPage() {
     }
   }
 
-  const handleViewTransaction = (transaction: CryptoTransaction) => {
-    logger.info('Opening transaction view', {
-      transactionId: transaction.id,
-      description: transaction.description,
-      status: transaction.status,
-      amount: transaction.amount,
-      currency: transaction.currency
-    })
-
-    dispatch({ type: 'SELECT_TRANSACTION', transaction })
+  const handleViewTransaction = (transaction: CryptoTransaction) => {    dispatch({ type: 'SELECT_TRANSACTION', transaction })
     setViewTransactionTab('details')
     setShowViewTransactionModal(true)
     announce(`Viewing transaction ${transaction.id}`, 'polite')
   }
 
-  const handleCancelTransaction = (transactionId: string) => {
-    logger.info('Cancelling transaction', { transactionId })
-
-    const transaction = state.transactions.find(t => t.id === transactionId)
+  const handleCancelTransaction = (transactionId: string) => {    const transaction = state.transactions.find(t => t.id === transactionId)
     if (!transaction) {
       logger.warn('Transaction not found', { transactionId })
       return
@@ -699,9 +624,7 @@ export default function CryptoPaymentsPage() {
       // Cancel transaction in database
       if (userId) {
         const { cancelTransaction: cancelTransactionDB } = await import('@/lib/crypto-payment-queries')
-        await cancelTransactionDB(cancelTransaction.id)
-        logger.info('Transaction cancelled in database', { transactionId: cancelTransaction.id })
-      }
+        await cancelTransactionDB(cancelTransaction.id)      }
 
       const updatedTransaction: CryptoTransaction = {
         ...cancelTransaction,
@@ -709,31 +632,18 @@ export default function CryptoPaymentsPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-
-      logger.info('Transaction cancelled', {
-        transactionId: cancelTransaction.id,
-        amount: cancelTransaction.amount,
-        currency: cancelTransaction.currency,
-        previousStatus: 'pending'
-      })
-
-      toast.success('Transaction cancelled', {
-        description: `${cancelTransaction.id} - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })      toast.success('Transaction cancelled' - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
       })
       announce('Transaction cancelled', 'polite')
     } catch (error: any) {
       logger.error('Failed to cancel transaction', { error: error.message })
-      toast.error('Failed to cancel transaction', { description: error.message })
+      toast.error('Failed to cancel transaction')
     } finally {
       setCancelTransaction(null)
     }
   }
 
-  const handleRefundTransaction = (transactionId: string) => {
-    logger.info('Refunding transaction', { transactionId })
-
-    const transaction = state.transactions.find(t => t.id === transactionId)
+  const handleRefundTransaction = (transactionId: string) => {    const transaction = state.transactions.find(t => t.id === transactionId)
     if (!transaction) {
       logger.warn('Transaction not found', { transactionId })
       return
@@ -758,9 +668,7 @@ export default function CryptoPaymentsPage() {
       // Refund transaction in database
       if (userId) {
         const { refundTransaction: refundTransactionDB } = await import('@/lib/crypto-payment-queries')
-        await refundTransactionDB(refundTransaction.id)
-        logger.info('Transaction refunded in database', { transactionId: refundTransaction.id })
-      }
+        await refundTransactionDB(refundTransaction.id)      }
 
       const updatedTransaction: CryptoTransaction = {
         ...refundTransaction,
@@ -768,37 +676,20 @@ export default function CryptoPaymentsPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-
-      logger.info('Transaction refunded', {
-        transactionId: refundTransaction.id,
-        amount: refundTransaction.amount,
-        currency: refundTransaction.currency,
-        usdAmount: refundTransaction.usdAmount,
-        customerEmail: refundTransaction.metadata.customerEmail
-      })
-
-      toast.success('Transaction refunded', {
-        description: `${formatCryptoAmount(refundTransaction.amount, refundTransaction.currency)} - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })      toast.success('Transaction refunded' - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
       })
       announce('Transaction refunded', 'polite')
     } catch (error: any) {
       logger.error('Failed to refund transaction', { error: error.message })
-      toast.error('Failed to refund transaction', { description: error.message })
+      toast.error('Failed to refund transaction')
     } finally {
       setRefundTransaction(null)
     }
   }
 
-  const handleCopyAddress = (address: string) => {
-    logger.info('Copying address to clipboard', {
-      address: address.substring(0, 10) + '...'
-    })
+  const handleCopyAddress = (address: string) => {    navigator.clipboard.writeText(address)
 
-    navigator.clipboard.writeText(address)
-
-    toast.success('Address copied', {
-      description: `${address.substring(0, 20)}... - Ready to paste`
+    toast.success('Address copied'... - Ready to paste`
     })
     announce('Address copied', 'polite')
   }

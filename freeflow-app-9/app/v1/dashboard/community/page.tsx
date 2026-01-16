@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import CommunityHub from "@/components/hubs/community-hub"
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -19,26 +18,19 @@ export default function CommunityPage() {
   // REAL USER AUTH
   const { userId, loading: userLoading } = useCurrentUser()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
-  // A+++ LOAD USER DATA
   useEffect(() => {
     const loadUserData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading community page', { userId })
-
-        setIsLoading(false)
+        setError(null)        setIsLoading(false)
         announce('Community hub loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load community hub'
@@ -53,7 +45,6 @@ export default function CommunityPage() {
     loadUserData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
@@ -62,7 +53,6 @@ export default function CommunityPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
