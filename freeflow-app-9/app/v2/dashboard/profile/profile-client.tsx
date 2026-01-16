@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
 import {
@@ -674,7 +673,7 @@ interface ProfileSettings {
 }
 
 export default function ProfileClient() {
-  const supabase = createClient()
+
   const { user } = useAuth()
 
   // UI State
@@ -829,7 +828,7 @@ export default function ProfileClient() {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+  }, [user?.id, ])
 
   useEffect(() => {
     fetchProfileData()
@@ -841,6 +840,8 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_profiles')
         .update({
@@ -873,6 +874,8 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('skills').insert({
         user_id: user.id,
         name: skillName,
@@ -898,6 +901,8 @@ export default function ProfileClient() {
   // Delete skill
   const handleDeleteSkill = async (skillId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('skills').delete().eq('id', skillId)
       if (error) throw error
 
@@ -913,6 +918,8 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('experience').insert({
         user_id: user.id,
         company: exp.company || '',
@@ -937,6 +944,8 @@ export default function ProfileClient() {
   // Delete experience
   const handleDeleteExperience = async (expId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('experience').delete().eq('id', expId)
       if (error) throw error
 
@@ -953,6 +962,8 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('profile_settings')
         .update({ ...updates, updated_at: new Date().toISOString() })
