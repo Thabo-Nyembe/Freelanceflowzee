@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Wrench, CheckCircle, AlertCircle, Server,
@@ -589,7 +588,7 @@ const initialFormState: MaintenanceFormState = {
 }
 
 export default function MaintenanceClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null)
@@ -657,9 +656,13 @@ export default function MaintenanceClient() {
   // Fetch maintenance windows from Supabase
   const fetchMaintenanceWindows = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('maintenance_windows')
         .select('*')
@@ -675,7 +678,7 @@ export default function MaintenanceClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchMaintenanceWindows()
@@ -730,12 +733,16 @@ export default function MaintenanceClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create maintenance windows')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('maintenance_windows').insert({
         user_id: user.id,
         title: formState.title,
@@ -777,6 +784,8 @@ export default function MaintenanceClient() {
       if (newStatus === 'in-progress') updateData.actual_start = new Date().toISOString()
       if (newStatus === 'completed') updateData.actual_end = new Date().toISOString()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('maintenance_windows')
         .update(updateData)
@@ -795,6 +804,8 @@ export default function MaintenanceClient() {
   // Delete maintenance window
   const handleDeleteWindow = async (windowId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('maintenance_windows')
         .update({ deleted_at: new Date().toISOString() })
@@ -817,6 +828,8 @@ export default function MaintenanceClient() {
       const currentAssigned = window?.assigned_to || []
       const newAssigned = techName ? [...currentAssigned, techName] : currentAssigned
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('maintenance_windows')
         .update({ assigned_to: newAssigned, updated_at: new Date().toISOString() })
@@ -851,6 +864,8 @@ export default function MaintenanceClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to schedule preventive maintenance')
@@ -859,6 +874,8 @@ export default function MaintenanceClient() {
 
       const selectedAsset = mockAssets.find(a => a.id === schedulePMForm.assetId)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('maintenance_windows').insert({
         user_id: user.id,
         title: `Preventive Maintenance - ${selectedAsset?.name || 'Asset'}`,
@@ -903,6 +920,8 @@ export default function MaintenanceClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to take action')
@@ -910,6 +929,8 @@ export default function MaintenanceClient() {
       }
 
       // Create a work order based on the insight
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('maintenance_windows').insert({
         user_id: user.id,
         title: `Action: ${selectedInsight.title}`,
@@ -1115,6 +1136,8 @@ export default function MaintenanceClient() {
   const handleDeleteAllData = async () => {
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in')
@@ -1122,6 +1145,8 @@ export default function MaintenanceClient() {
       }
 
       // Soft delete all maintenance windows
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('maintenance_windows')
         .update({ deleted_at: new Date().toISOString() })
