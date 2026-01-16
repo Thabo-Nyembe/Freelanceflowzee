@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (3/301 pages migrated - 1.0%) 🎉 THIRD MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (4/301 pages migrated - 1.3%) 🎉 FOURTH MILESTONE!
 
 ---
 
@@ -80,7 +80,7 @@
 
 **Goal:** Migrate all 301 pages with mock/setTimeout data to real database integration
 
-**Current Progress:** 3/301 pages migrated (1.0%) 🎉 **THIRD MILESTONE ACHIEVED!**
+**Current Progress:** 4/301 pages migrated (1.3%) 🎉 **FOURTH MILESTONE ACHIEVED!**
 
 ### Completed Migrations
 
@@ -182,7 +182,7 @@ const courses = (dbCourses || []) as Course[]
 3. Fix any duplicate imports/calls
 4. Leverage hook-based filtering when available
 
-#### 3. add-ons-v2 ✅ (Commit: TBD)
+#### 3. add-ons-v2 ✅ (Commit: 4a0f07ec)
 **File:** `app/(app)/dashboard/add-ons-v2/add-ons-client.tsx` (2,402 lines)
 **Migration Date:** January 16, 2026
 **Complexity:** Medium (schema mapping required, but straightforward conversion)
@@ -244,6 +244,82 @@ const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
 4. Sync mapped data to local state via useEffect
 5. Replace mutation handlers with hook mutations
 
+#### 4. 3d-modeling-v2 ✅ (Commit: TBD)
+**File:** `app/(app)/dashboard/3d-modeling-v2/3d-modeling-client.tsx` (2,570 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium (schema mapping required, straightforward byte-to-MB conversion)
+
+**Before:** Mock data with no hooks
+```typescript
+const [models, setModels] = useState<Model3D[]>(mockModels)
+// No hooks imported, all mock data
+```
+
+**After:** Hook integration with schema mapping
+```typescript
+const { models: dbModels, stats: dbStats, isLoading, refetch } = use3DModels([], {
+  status: statusFilter !== 'all' ? statusFilter : undefined
+})
+const { createModel, updateModel, deleteModel } = use3DModelMutations()
+
+// Map database ThreeDModels to UI Model3D format
+const mappedModels: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D => ({
+  id: dbModel.id,
+  name: dbModel.title,  // DB: title → UI: name
+  description: dbModel.description || '',
+  status: dbModel.status as ModelStatus,
+  format: dbModel.file_format as FileFormat,
+  polygon_count: dbModel.polygon_count,
+  vertex_count: dbModel.vertex_count,
+  texture_count: dbModel.texture_count,
+  material_count: dbModel.material_count,
+  file_size_mb: dbModel.file_size / (1024 * 1024),  // Convert bytes → MB
+  render_quality: dbModel.render_quality as RenderQuality,
+  last_render_time_sec: dbModel.last_render_time,
+  thumbnail_url: dbModel.thumbnail_url,
+  created_at: dbModel.created_at,
+  updated_at: dbModel.updated_at,
+  downloads: dbModel.downloads,
+  views: dbModel.views,
+  tags: dbModel.tags
+})), [dbModels])
+```
+
+**Tables Integrated:**
+- `three_d_models` - 3D model metadata, file info, stats, render settings
+
+**Schema Mapping Performed:**
+- Database fields → UI fields conversion
+- `title` → `name`
+- `file_size` (bytes) → `file_size_mb` (converted to megabytes)
+- `file_format` → `format`
+- `render_quality` → `render_quality` (with type assertion)
+
+**Write Operations Available:**
+- `createModel` - Mutation hook for creating new 3D models
+- `updateModel` - Mutation hook for updating model metadata
+- `deleteModel` - Mutation hook for soft-deleting models
+
+**Dependencies Updated:**
+- Stats calculation now depends on `[models]` instead of `[]`
+- Filtered models now uses `models` instead of `mockModels`
+- Export handler now exports `models` instead of `mockModels`
+
+**Impact:**
+- ✅ Real database integration with filter support (status)
+- ✅ Real-time updates via Supabase subscriptions
+- ✅ Automatic byte-to-MB conversion for file sizes
+- ✅ Schema mapping maintains UI compatibility
+- ✅ Mutation hooks ready for write operations
+- ✅ Kept mock data for materials, textures, render settings (will be migrated later)
+
+**Pattern Reinforced (schema mapping with unit conversion):**
+1. Import hooks with DB types (ThreeDModel)
+2. Call hooks with filter options
+3. Map DB schema to UI schema with useMemo, including unit conversions
+4. Sync mapped data to local state via useEffect
+5. Update all dependencies to use mapped data instead of mock data
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -253,7 +329,7 @@ const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 298 pages need mock data → database migration
+**Remaining:** 297 pages need mock data → database migration
 
 ---
 

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiPost, downloadAsJson } from '@/lib/button-handlers'
+import { use3DModels, use3DModelMutations, type ThreeDModel } from '@/lib/hooks/use-3d-models'
 import {
   Box,
   Layers,
@@ -356,6 +357,45 @@ export default function ThreeDModelingClient() {
   const [viewportMode, setViewportMode] = useState<'solid' | 'wireframe' | 'material'>('solid')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Database integration
+  const { models: dbModels, stats: dbStats, isLoading, refetch } = use3DModels([], {
+    status: statusFilter !== 'all' ? statusFilter : undefined
+  })
+  const { createModel, updateModel, deleteModel } = use3DModelMutations()
+
+  // Map database models to UI format
+  const mappedModels: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D => ({
+    id: dbModel.id,
+    name: dbModel.title,
+    description: dbModel.description || '',
+    status: dbModel.status as ModelStatus,
+    format: dbModel.file_format as FileFormat,
+    polygon_count: dbModel.polygon_count,
+    vertex_count: dbModel.vertex_count,
+    texture_count: dbModel.texture_count,
+    material_count: dbModel.material_count,
+    file_size_mb: dbModel.file_size / (1024 * 1024), // Convert bytes to MB
+    render_quality: dbModel.render_quality as RenderQuality,
+    last_render_time_sec: dbModel.last_render_time,
+    thumbnail_url: dbModel.thumbnail_url,
+    created_at: dbModel.created_at,
+    updated_at: dbModel.updated_at,
+    downloads: dbModel.downloads,
+    views: dbModel.views,
+    tags: dbModel.tags
+  })), [dbModels])
+
+  // Use mapped models or fallback to mock data
+  const [models, setModels] = useState<Model3D[]>(mockModels)
+
+  useEffect(() => {
+    if (mappedModels.length > 0) {
+      setModels(mappedModels)
+    } else if (!isLoading) {
+      setModels(mockModels)
+    }
+  }, [mappedModels, isLoading])
+
   // Dialog states for buttons
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showNewMaterialDialog, setShowNewMaterialDialog] = useState(false)
@@ -418,14 +458,14 @@ export default function ThreeDModelingClient() {
 
   const handleExportModels = useCallback(() => {
     const exportData = {
-      models: mockModels,
+      models: models,
       materials: mockMaterials,
       textures: mockTextures,
       exportedAt: new Date().toISOString(),
       format: 'FBX, OBJ, GLTF'
     }
     downloadAsJson(exportData, `3d-models-export-${Date.now()}.json`)
-  }, [])
+  }, [models])
 
   // Import model handler
   const handleImportModel = useCallback(async () => {
@@ -635,26 +675,26 @@ export default function ThreeDModelingClient() {
 
   // Stats calculation
   const stats = useMemo(() => {
-    const totalModels = mockModels.length
-    const totalPolygons = mockModels.reduce((sum, m) => sum + m.polygon_count, 0)
-    const totalVertices = mockModels.reduce((sum, m) => sum + m.vertex_count, 0)
-    const totalDownloads = mockModels.reduce((sum, m) => sum + m.downloads, 0)
-    const publishedCount = mockModels.filter(m => m.status === 'published').length
-    const renderingCount = mockModels.filter(m => m.status === 'rendering').length
-    const avgRenderTime = mockModels.filter(m => m.last_render_time_sec > 0).reduce((sum, m) => sum + m.last_render_time_sec, 0) / mockModels.filter(m => m.last_render_time_sec > 0).length || 0
+    const totalModels = models.length
+    const totalPolygons = models.reduce((sum, m) => sum + m.polygon_count, 0)
+    const totalVertices = models.reduce((sum, m) => sum + m.vertex_count, 0)
+    const totalDownloads = models.reduce((sum, m) => sum + m.downloads, 0)
+    const publishedCount = models.filter(m => m.status === 'published').length
+    const renderingCount = models.filter(m => m.status === 'rendering').length
+    const avgRenderTime = models.filter(m => m.last_render_time_sec > 0).reduce((sum, m) => sum + m.last_render_time_sec, 0) / models.filter(m => m.last_render_time_sec > 0).length || 0
 
     return { totalModels, totalPolygons, totalVertices, totalDownloads, publishedCount, renderingCount, avgRenderTime }
-  }, [])
+  }, [models])
 
   // Filtered models
   const filteredModels = useMemo(() => {
-    return mockModels.filter(model => {
+    return models.filter(model => {
       const matchesSearch = model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || model.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [models, searchQuery, statusFilter])
 
   // Helper functions
   const getStatusBadge = (status: ModelStatus) => {
