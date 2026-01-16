@@ -70,7 +70,6 @@ import {
   Info
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -108,7 +107,6 @@ const columns = [
 ]
 
 export default function ShadcnShowcasePage() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -119,7 +117,6 @@ export default function ShadcnShowcasePage() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [sliderValue, setSliderValue] = React.useState([50])
 
-  // A+++ LOAD SHADCN SHOWCASE DATA
   React.useEffect(() => {
     const loadShadcnShowcaseData = async () => {
       if (!userId) {
@@ -154,18 +151,9 @@ export default function ShadcnShowcasePage() {
 
   const handleFormSubmit = (data: any) => {
     const fieldCount = Object.keys(data).length
-    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length
+    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
 
-    logger.info('Form submitted successfully', {
-      fieldCount,
-      filledFields,
-      formData: data
-    })
-
-    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
-
-    toast.success('Form submitted successfully', {
-      description: `${filledFields}/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
+    toast.success('Form submitted successfully'/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
     })
   }
 
@@ -174,7 +162,6 @@ export default function ShadcnShowcasePage() {
     setTimeout(() => setIsLoading(false), 2000)
   }
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -190,7 +177,6 @@ export default function ShadcnShowcasePage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -531,33 +517,21 @@ export default function ShadcnShowcasePage() {
                     <h3 className="text-lg font-semibold mb-3">Toast Notifications</h3>
                     <Separator className="mb-4" />
                     <div className="flex flex-wrap gap-2">
-                      <Button onClick={() => {
-                        logger.info('Success toast triggered', { type: 'success', component: 'shadcn-showcase' })
-                        toast.success('Operation completed successfully', {
-                          description: 'Shadcn UI components - Success notification demo - All systems operational'
-                        })
+                      <Button onClick={() => {                        toast.success('Operation completed successfully')
                       }}>
                         Success Toast
                       </Button>
                       <Button onClick={() => {
                         logger.warn('Error toast triggered', { type: 'error', component: 'shadcn-showcase' })
-                        toast.error('An error occurred', {
-                          description: 'Shadcn UI components - Error notification demo - Please check your inputs'
-                        })
+                        toast.error('An error occurred')
                       }}>
                         Error Toast
                       </Button>
-                      <Button onClick={() => {
-                        logger.info('Info toast triggered', { type: 'info', component: 'shadcn-showcase' })
-                        toast.info('Important information', {
-                          description: 'Shadcn UI components - Info notification demo - Review the documentation for details'
-                        })
+                      <Button onClick={() => {                        toast.info('Important information')
                       }}>
                         Info Toast
                       </Button>
-                      <Button onClick={() => {
-                        logger.info('Default toast triggered', { type: 'default', component: 'shadcn-showcase' })
-                        toast('Default notification', {
+                      <Button onClick={() => {                        toast('Default notification', {
                           description: 'Shadcn UI components - Standard notification demo'
                         })
                       }}>
