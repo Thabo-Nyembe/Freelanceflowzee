@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import {
   MessageSquare,
   Send,
@@ -338,7 +337,7 @@ const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉'
 
 export default function MessagingClient() {
   // Supabase client
-  const supabase = createClient()
+
 
   // Supabase hooks for real data
   const { conversations, loading: conversationsLoading, refetch: refetchConversations } = useConversations({ type: 'channel' })
@@ -391,13 +390,15 @@ export default function MessagingClient() {
   // Get current user on mount
   useEffect(() => {
     const getCurrentUser = async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setCurrentUserId(user.id)
       }
     }
     getCurrentUser()
-  }, [supabase])
+  }, [])
 
   const currentChannelMessages = useMemo(() => {
     if (!selectedChannel) return []
@@ -676,6 +677,8 @@ export default function MessagingClient() {
 
     setIsSearching(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('direct_messages')
         .select('*')
