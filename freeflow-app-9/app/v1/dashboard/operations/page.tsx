@@ -106,7 +106,6 @@ export default function OperationsPage() {
   useEffect(() => {
     const loadOperations = async () => {
       if (!userId) {
-        logger.info('Waiting for user authentication')
         setIsLoading(false)
         return
       }
@@ -114,7 +113,6 @@ export default function OperationsPage() {
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading operations data', { userId })
 
         const { getTeamMembers } = await import('@/lib/admin-overview-queries')
 
@@ -124,12 +122,7 @@ export default function OperationsPage() {
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
-        toast.success(`Operations loaded - ${teamResult.data?.length || 0} team members`, { description: 'Operation completed successfully' })
-        logger.info('Operations loaded', {
-          success: true,
-          memberCount: teamResult.data?.length || 0,
-          roleCount: 0
-        })
+        toast.success('Operations loaded')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load operations'
         setError(errorMessage)
@@ -146,14 +139,12 @@ export default function OperationsPage() {
   // Button 1: Invite User
   const handleInviteUser = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to invite users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Inviting new user', { userId })
-
       const newUser = {
         email: 'newuser@company.com',
         role: 'member' as UserRole,
@@ -168,8 +159,7 @@ export default function OperationsPage() {
         invited_by: userId
       })
 
-      toast.success(`Invitation email sent to ${newUser.email} successfully`, { description: 'Operation completed successfully' })
-      logger.info('User invited', { success: true, email: newUser.email })
+      toast.success('Invitation email sent')
       announce('User invitation sent', 'polite')
 
       // Reload team members
@@ -187,14 +177,12 @@ export default function OperationsPage() {
   // Button 2: Edit User
   const handleEditUser = async (targetUserId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Editing user', { targetUserId })
-
       // Note: Using getUserById and updating profile
       // Future: Create updateUser function in user-management-queries
       const { getUserById } = await import('@/lib/user-management-queries')
@@ -213,8 +201,7 @@ export default function OperationsPage() {
 
       if (!response.ok) throw new Error('Failed to edit user')
 
-      toast.success('User information has been updated successfully', { description: 'Operation completed successfully' })
-      logger.info('User edited', { success: true, targetUserId })
+      toast.success('User information updated')
       announce('User updated successfully', 'polite')
 
       // Reload team members
@@ -238,20 +225,17 @@ export default function OperationsPage() {
     if (!deleteUser) return
 
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       setDeleteUser(null)
       return
     }
 
     try {
-      logger.info('Deleting user', { targetUserId: deleteUser.id, userId })
-
       const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
       await deleteUserQuery(deleteUser.id)
 
-      toast.success(`${deleteUser.name} has been permanently removed from the team`, { description: 'Operation completed successfully' })
-      logger.info('User deleted', { success: true, targetUserId: deleteUser.id })
+      toast.success('User removed from team')
       announce('User deleted successfully', 'polite')
 
       // Reload team members
@@ -271,19 +255,16 @@ export default function OperationsPage() {
   // Button 4: Deactivate User
   const handleDeactivateUser = async (targetUserId: string, userName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to deactivate users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Deactivating user', { targetUserId, userId })
-
       const { deactivateUser } = await import('@/lib/user-management-queries')
       await deactivateUser(targetUserId)
 
-      toast.success(`${userName} has been deactivated and will no longer have access`, { description: 'Operation completed successfully' })
-      logger.info('User deactivated', { success: true, targetUserId })
+      toast.success('User deactivated')
       announce('User deactivated successfully', 'polite')
 
       // Reload team members
@@ -301,19 +282,16 @@ export default function OperationsPage() {
   // Button 5: Change Role
   const handleChangeRole = async (targetUserId: string, userName: string, newRole: UserRole) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to change roles' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Changing user role', { targetUserId, newRole, userId })
-
       const { updateUserRole } = await import('@/lib/user-management-queries')
       await updateUserRole(targetUserId, newRole)
 
-      toast.success(`${userName} has been assigned the ${newRole} role`, { description: 'Operation completed successfully' })
-      logger.info('User role changed', { success: true, targetUserId, newRole })
+      toast.success('User role updated')
       announce(`User role changed to ${newRole}`, 'polite')
 
       // Reload team members
@@ -331,14 +309,12 @@ export default function OperationsPage() {
   // Button 6: Set Permissions
   const handleSetPermissions = async (roleId: string, roleName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to set permissions' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Setting permissions', { roleId, userId })
-
       // Using team-management-queries for role permissions
       const { updateRolePermission } = await import('@/lib/team-management-queries')
 
@@ -348,8 +324,7 @@ export default function OperationsPage() {
         is_active: true
       })
 
-      toast.success(`Permissions for ${roleName} role have been updated successfully`, { description: 'Operation completed successfully' })
-      logger.info('Permissions set', { success: true, roleId })
+      toast.success('Permissions updated')
       announce('Permissions updated successfully', 'polite')
 
       // Reload roles (if needed)
@@ -365,7 +340,7 @@ export default function OperationsPage() {
   // Button 7: View Activity Log
   const handleViewActivityLog = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to view activity' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
@@ -373,17 +348,15 @@ export default function OperationsPage() {
     const willShow = !showActivityLog
 
     try {
-      logger.info('Opening activity log', { userId })
-
       if (willShow) {
         // Load activity data when opening
         const { getRecentActivity } = await import('@/lib/user-management-queries')
         const activity = await getRecentActivity(50)
         setActivityData(activity || [])
 
-        toast.success(`Showing ${activity?.length || 0} recent activities`, { description: 'Operation completed successfully' })
+        toast.success(`Showing ${activity?.length || 0} recent activities`)
       } else {
-        toast.success('Activity log hidden', { description: 'Operation completed successfully' })
+        toast.success('Activity log hidden')
       }
 
       setShowActivityLog(willShow)
@@ -399,25 +372,19 @@ export default function OperationsPage() {
   // Button 8: Refresh Operations
   const handleRefreshOperations = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to refresh operations' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Refreshing operations data', { userId })
-
       // Use getAllUsers from user-management-queries
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
 
       setTeamMembers(users || [])
 
-      toast.success(`Reloaded ${users?.length || 0} team members successfully`, { description: 'Operation completed successfully' })
-      logger.info('Operations refresh completed', {
-        success: true,
-        memberCount: users?.length || 0
-      })
+      toast.success('Operations refreshed')
       announce('Operations refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
