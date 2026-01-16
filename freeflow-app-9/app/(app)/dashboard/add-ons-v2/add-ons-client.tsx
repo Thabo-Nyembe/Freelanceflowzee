@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiPost, apiDelete, downloadAsJson } from '@/lib/button-handlers'
+import { useAddOns, type AddOn as DBAddOn } from '@/lib/hooks/use-add-ons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -465,7 +466,64 @@ export default function AddOnsClient() {
     }
     return {}
   })
+
+  // Database integration
+  const { addOns: dbAddOns, stats: dbStats, isLoading, error, fetchAddOns, installAddOn: dbInstallAddOn, uninstallAddOn: dbUninstallAddOn, disableAddOn: dbDisableAddOn } = useAddOns([], {
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    category: categoryFilter !== 'all' ? categoryFilter : undefined,
+    searchQuery: searchQuery || undefined
+  })
+
+  // Map database AddOns to UI format
+  const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
+    id: dbAddOn.id,
+    name: dbAddOn.name,
+    description: dbAddOn.description || '',
+    shortDescription: dbAddOn.description?.substring(0, 100) || '',
+    version: dbAddOn.version,
+    author: dbAddOn.provider || 'Unknown',
+    authorUrl: undefined,
+    icon: dbAddOn.icon_url || undefined,
+    category: dbAddOn.category as AddOnCategory,
+    status: dbAddOn.status as AddOnStatus,
+    pricingType: dbAddOn.pricing_type as PricingType,
+    price: dbAddOn.price,
+    currency: dbAddOn.currency,
+    rating: dbAddOn.rating,
+    reviewCount: dbAddOn.reviews_count,
+    downloadCount: dbAddOn.downloads,
+    installedCount: dbAddOn.subscribers,
+    lastUpdated: dbAddOn.last_updated,
+    createdAt: dbAddOn.created_at,
+    size: `${(dbAddOn.size_bytes / 1048576).toFixed(1)} MB`,
+    permissions: 'standard' as PermissionLevel,
+    features: dbAddOn.features,
+    tags: dbAddOn.tags,
+    screenshots: dbAddOn.screenshot_urls,
+    changelog: undefined,
+    isFeatured: false,
+    isVerified: true,
+    hasFreeTrial: dbAddOn.has_trial,
+    trialDays: dbAddOn.trial_days,
+    requiredVersion: undefined
+  })), [dbAddOns])
+
   const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
+
+  // Fetch initial data
+  useEffect(() => {
+    fetchAddOns()
+  }, [fetchAddOns])
+
+  // Sync database data to local state
+  useEffect(() => {
+    if (mappedAddOns.length > 0) {
+      setAddOns(mappedAddOns)
+    } else if (!isLoading && !error) {
+      // Keep mock data as fallback when no database data
+      setAddOns(mockAddOns)
+    }
+  }, [mappedAddOns, isLoading, error])
   const [showFilterDialog, setShowFilterDialog] = useState(false)
   const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
   const [showCategoryRequestDialog, setShowCategoryRequestDialog] = useState(false)
@@ -509,30 +567,29 @@ export default function AddOnsClient() {
 
   // Real handlers with actual functionality
   const handleInstallAddOn = useCallback(async (addOn: AddOn) => {
-    const result = await apiPost(`/api/add-ons/${addOn.id}/install`, { addOnId: addOn.id }, {
-      loading: `Installing ${addOn.name}...`,
-      success: `${addOn.name} installed successfully!`,
-      error: `Failed to install ${addOn.name}`
-    })
-    if (result.success) {
-      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'installed' as AddOnStatus } : a))
-    }
-  }, [])
+    await toast.promise(
+      dbInstallAddOn(addOn.id),
+      {
+        loading: `Installing ${addOn.name}...`,
+        success: `${addOn.name} installed successfully!`,
+        error: `Failed to install ${addOn.name}`
+      }
+    )
+  }, [dbInstallAddOn])
 
   const handleUninstallAddOn = useCallback(async (addOn: AddOn) => {
     if (!confirm(`Are you sure you want to uninstall "${addOn.name}"? This action cannot be undone.`)) {
       return
     }
-    const result = await apiDelete(`/api/add-ons/${addOn.id}`, {
-      loading: `Uninstalling ${addOn.name}...`,
-      success: `${addOn.name} uninstalled successfully!`,
-      error: `Failed to uninstall ${addOn.name}`
-    })
-    if (result.success) {
-      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'available' as AddOnStatus } : a))
-      setShowAddOnDialog(false)
-    }
-  }, [])
+    await toast.promise(
+      dbUninstallAddOn(addOn.id).then(() => setShowAddOnDialog(false)),
+      {
+        loading: `Uninstalling ${addOn.name}...`,
+        success: `${addOn.name} uninstalled successfully!`,
+        error: `Failed to uninstall ${addOn.name}`
+      }
+    )
+  }, [dbUninstallAddOn])
 
   const handleUpdateAddOn = useCallback(async (addOn: AddOn) => {
     const result = await apiPost(`/api/add-ons/${addOn.id}/update`, { addOnId: addOn.id }, {
@@ -546,15 +603,15 @@ export default function AddOnsClient() {
   }, [])
 
   const handleDisableAddOn = useCallback(async (addOn: AddOn) => {
-    const result = await apiPost(`/api/add-ons/${addOn.id}/disable`, { addOnId: addOn.id }, {
-      loading: `Disabling ${addOn.name}...`,
-      success: `${addOn.name} disabled!`,
-      error: `Failed to disable ${addOn.name}`
-    })
-    if (result.success) {
-      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'disabled' as AddOnStatus } : a))
-    }
-  }, [])
+    await toast.promise(
+      dbDisableAddOn(addOn.id),
+      {
+        loading: `Disabling ${addOn.name}...`,
+        success: `${addOn.name} disabled!`,
+        error: `Failed to disable ${addOn.name}`
+      }
+    )
+  }, [dbDisableAddOn])
 
   const handleEnableAddOn = useCallback(async (addOn: AddOn) => {
     const result = await apiPost(`/api/add-ons/${addOn.id}/enable`, { addOnId: addOn.id }, {

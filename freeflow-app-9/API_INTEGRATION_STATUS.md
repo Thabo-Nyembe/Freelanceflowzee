@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 131/286 pages integrated (45.8%)
+**Overall Progress:** 132/286 pages integrated (46.2%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 125/223 using Supabase hooks (56.1%) 🚧
-  - **Mock → Database:** 2/157 migrated (1.3%) 🎉 NEW!
+- **V2 Pages:** 126/223 using Supabase hooks (56.5%) 🚧
+  - **Mock → Database:** 3/157 migrated (1.9%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 131/286 pages integrated (45.8%)
+**Overall Progress:** 132/286 pages integrated (46.2%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 125/223 (56.1%) 🚧
+**V2 Pages (Supabase Hooks):** 126/223 (56.5%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 2 pages 🎉
-**Remaining:** 98 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 3 pages 🎉
+**Remaining:** 97 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -323,7 +323,7 @@ Based on detailed analysis of 21 sample pages:
 This category tracks pages migrated from mock/setTimeout data to real database integration,
 bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
-**Pages Migrated: 2/157 (1.3%)**
+**Pages Migrated: 3/157 (1.9%)**
 
 **Completed Migrations:**
 1. `help-center-v2` - ✅ **MIGRATED** (3,257 lines, +67 net) - Commit: `18da5532`
@@ -343,6 +343,16 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Fixes:** 11 handler fixes (6 duplicate createClient(), 5 mangled toast messages, simplified filtering)
    - **Migration Time:** ~1.5 hours
    - **Complexity:** Medium (hooks already in place, mainly data source switch + cleanup)
+
+3. `add-ons-v2` - ✅ **MIGRATED** (2,402 lines, +68 net) - Commit: TBD
+   - **Pattern:** Hook integration with schema mapping (UI AddOn ↔ DB AddOn)
+   - **Tables:** add_ons
+   - **Mapping:** Database fields (provider, icon_url, reviews_count, downloads, size_bytes) → UI fields (author, icon, reviewCount, downloadCount, size)
+   - **Write Operations:** 3 handlers migrated (handleInstallAddOn, handleUninstallAddOn, handleDisableAddOn)
+   - **Impact:** Real database integration with filter support (status, category, search), real-time updates
+   - **Kept as Mock:** AI insights, collaborators, predictions, activities (competitive upgrade features)
+   - **Migration Time:** ~1.5 hours
+   - **Complexity:** Medium (schema mapping required, but straightforward field-to-field conversion)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)

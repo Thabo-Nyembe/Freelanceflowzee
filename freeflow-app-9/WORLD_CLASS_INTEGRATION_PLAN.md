@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (2/301 pages migrated - 0.7%) 🎉 SECOND MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (3/301 pages migrated - 1.0%) 🎉 THIRD MILESTONE!
 
 ---
 
@@ -80,7 +80,7 @@
 
 **Goal:** Migrate all 301 pages with mock/setTimeout data to real database integration
 
-**Current Progress:** 2/301 pages migrated (0.7%) 🎉 **SECOND MILESTONE ACHIEVED!**
+**Current Progress:** 3/301 pages migrated (1.0%) 🎉 **THIRD MILESTONE ACHIEVED!**
 
 ### Completed Migrations
 
@@ -182,6 +182,68 @@ const courses = (dbCourses || []) as Course[]
 3. Fix any duplicate imports/calls
 4. Leverage hook-based filtering when available
 
+#### 3. add-ons-v2 ✅ (Commit: TBD)
+**File:** `app/(app)/dashboard/add-ons-v2/add-ons-client.tsx` (2,402 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium (schema mapping required, but straightforward conversion)
+
+**Before:** Mock data with no hooks
+```typescript
+const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
+// No hooks imported, all mock data
+```
+
+**After:** Hook integration with schema mapping
+```typescript
+const { addOns: dbAddOns, stats: dbStats, isLoading, error, fetchAddOns, installAddOn: dbInstallAddOn, uninstallAddOn: dbUninstallAddOn, disableAddOn: dbDisableAddOn } = useAddOns([], {
+  status: statusFilter !== 'all' ? statusFilter : undefined,
+  category: categoryFilter !== 'all' ? categoryFilter : undefined,
+  searchQuery: searchQuery || undefined
+})
+
+// Map database AddOns to UI format
+const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
+  id: dbAddOn.id,
+  name: dbAddOn.name,
+  description: dbAddOn.description || '',
+  author: dbAddOn.provider || 'Unknown',
+  icon: dbAddOn.icon_url || undefined,
+  category: dbAddOn.category as AddOnCategory,
+  status: dbAddOn.status as AddOnStatus,
+  // ... more field mappings
+})), [dbAddOns])
+```
+
+**Tables Integrated:**
+- `add_ons` - Add-on metadata, pricing, status, ratings
+
+**Schema Mapping Performed:**
+- Database fields → UI fields conversion
+- `provider` → `author`
+- `icon_url` → `icon`
+- `reviews_count` → `reviewCount`
+- `downloads` → `downloadCount`
+- `size_bytes` → `size` (formatted as MB string)
+
+**Write Operations Migrated:**
+- `handleInstallAddOn` - Uses dbInstallAddOn with toast.promise
+- `handleUninstallAddOn` - Uses dbUninstallAddOn with confirmation
+- `handleDisableAddOn` - Uses dbDisableAddOn with toast.promise
+
+**Impact:**
+- ✅ Real database integration with filter support (status, category, search)
+- ✅ Real-time updates via Supabase subscriptions
+- ✅ Schema mapping maintains UI compatibility
+- ✅ Kept mock data for competitive upgrade features (AI insights, collaborators, predictions, activities)
+- ✅ Clean mutation handlers with toast feedback
+
+**New Pattern Established (for pages with schema differences):**
+1. Import hook with DB types (type AddOn as DBAddOn)
+2. Call hook with filter options
+3. Map DB schema to UI schema with useMemo
+4. Sync mapped data to local state via useEffect
+5. Replace mutation handlers with hook mutations
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -191,7 +253,7 @@ const courses = (dbCourses || []) as Course[]
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 299 pages need mock data → database migration
+**Remaining:** 298 pages need mock data → database migration
 
 ---
 
