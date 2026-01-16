@@ -57,11 +57,9 @@ interface PrivacySetting {
 // ============================================================================
 
 export default function SettingsPage() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -81,7 +79,6 @@ export default function SettingsPage() {
   // PRIVACY SETTINGS
   const [privacySettings, setPrivacySettings] = useState<PrivacySetting[]>([])
 
-  // A+++ LOAD SETTINGS DATA
   useEffect(() => {
     const loadSettingsData = async () => {
       try {
@@ -223,11 +220,7 @@ export default function SettingsPage() {
         }
 
         setIsLoading(false)
-        announce('Settings loaded successfully', 'polite')
-        logger.info('Settings data loaded', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name
-        })
-      } catch (err) {
+        announce('Settings loaded successfully', 'polite')      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load settings')
         setIsLoading(false)
         announce('Error loading settings', 'assertive')
@@ -243,17 +236,7 @@ export default function SettingsPage() {
   // ============================================================================
 
   const handleSaveSettings = async () => {
-    setIsSaving(true)
-
-    logger.info('Settings save initiated', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name,
-      email,
-      phone,
-      language,
-      timezone
-    })
-
-    const savePromise = new Promise(async (resolve, reject) => {
+    setIsSaving(true)    const savePromise = new Promise(async (resolve, reject) => {
       try {
         const response = await fetch('/api/user/update-settings', {
           method: 'POST',
@@ -282,11 +265,7 @@ export default function SettingsPage() {
 
         const result = await response.json()
 
-        if (result.success) {
-          logger.info('Settings saved successfully', {
-            clientName: KAZI_CLIENT_DATA.clientInfo.name
-          })
-          resolve(result)
+        if (result.success) {          resolve(result)
         } else {
           reject(new Error('Settings update failed'))
         }
@@ -316,13 +295,7 @@ export default function SettingsPage() {
           ? { ...setting, enabled: !setting.enabled }
           : setting
       )
-    )
-
-    logger.info('Notification setting toggled', {
-      settingId,
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-  }
+    )  }
 
   // ============================================================================
   // HANDLER 3: TOGGLE PRIVACY SETTING
@@ -335,27 +308,14 @@ export default function SettingsPage() {
           ? { ...setting, enabled: !setting.enabled }
           : setting
       )
-    )
-
-    logger.info('Privacy setting toggled', {
-      settingId,
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-  }
+    )  }
 
   // ============================================================================
   // HANDLER 4: EXPORT DATA
   // ============================================================================
 
   const handleExportData = async (format: 'json' | 'csv') => {
-    setIsExporting(true)
-
-    logger.info('Data export initiated', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name,
-      format
-    })
-
-    const exportPromise = new Promise(async (resolve, reject) => {
+    setIsExporting(true)    const exportPromise = new Promise(async (resolve, reject) => {
       try {
         const response = await fetch('/api/user/export-data', {
           method: 'POST',
@@ -373,13 +333,7 @@ export default function SettingsPage() {
 
         const result = await response.json()
 
-        if (result.success) {
-          logger.info('Data exported successfully', {
-            clientName: KAZI_CLIENT_DATA.clientInfo.name,
-            format
-          })
-
-          // Create download
+        if (result.success) {          // Create download
           const dataStr = format === 'json'
             ? JSON.stringify(result.data, null, 2)
             : result.data
@@ -418,12 +372,7 @@ export default function SettingsPage() {
   // HANDLER 5: CHANGE PASSWORD
   // ============================================================================
 
-  const handleChangePassword = async () => {
-    logger.info('Password change initiated', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.success('Sending verification email...')
+  const handleChangePassword = async () => {    toast.success('Sending verification email...')
 
     try {
       const response = await fetch('/api/settings', {
@@ -444,11 +393,7 @@ export default function SettingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Verification email sent! Check your inbox to continue.')
-        logger.info('Password change email sent', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name
-        })
-      } else {
+        toast.success('Verification email sent! Check your inbox to continue.')      } else {
         throw new Error(result.error || 'Failed to send verification email')
       }
     } catch (error: any) {
@@ -461,12 +406,7 @@ export default function SettingsPage() {
   // HANDLER 6: DEACTIVATE ACCOUNT
   // ============================================================================
 
-  const handleDeactivateAccount = async () => {
-    logger.info('Account deactivation initiated', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.success('Processing deactivation request...')
+  const handleDeactivateAccount = async () => {    toast.success('Processing deactivation request...')
 
     try {
       const response = await fetch('/api/advanced-settings', {
@@ -487,11 +427,7 @@ export default function SettingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Deactivation email sent. Check your inbox to confirm.')
-        logger.info('Deactivation email sent', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name
-        })
-      } else {
+        toast.success('Deactivation email sent. Check your inbox to confirm.')      } else {
         throw new Error(result.error || 'Failed to send deactivation email')
       }
     } catch (error: any) {
@@ -504,12 +440,7 @@ export default function SettingsPage() {
   // HANDLER 7: DELETE ACCOUNT
   // ============================================================================
 
-  const handleDeleteAccount = async () => {
-    logger.info('Account deletion initiated', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.success('Processing deletion request...')
+  const handleDeleteAccount = async () => {    toast.success('Processing deletion request...')
 
     try {
       const response = await fetch('/api/advanced-settings', {
@@ -530,11 +461,7 @@ export default function SettingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('Verification email sent. Confirm deletion within 24 hours.')
-        logger.info('Deletion verification email sent', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name
-        })
-      } else {
+        toast.success('Verification email sent. Confirm deletion within 24 hours.')      } else {
         throw new Error(result.error || 'Failed to send deletion verification email')
       }
     } catch (error: any) {
@@ -576,12 +503,7 @@ export default function SettingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success(allEnabled ? 'All notifications disabled!' : 'All notifications enabled!')
-        logger.info('All notifications toggled', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          allEnabled: !allEnabled
-        })
-      } else {
+        toast.success(allEnabled ? 'All notifications disabled!' : 'All notifications enabled!')      } else {
         // Revert on failure
         setNotificationSettings(notificationSettings)
         throw new Error(result.error || 'Failed to update notifications')
