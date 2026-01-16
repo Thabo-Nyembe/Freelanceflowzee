@@ -7,9 +7,9 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 155/286 pages integrated (54.2%)
+**Overall Progress:** 157/286 pages integrated (54.9%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 92/223 using Supabase hooks (41.3%) 🚧
+- **V2 Pages:** 94/223 using Supabase hooks (42.2%) 🚧
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated
 
@@ -51,13 +51,13 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 155/286 pages integrated (54.2%)
+**Overall Progress:** 157/286 pages integrated (54.9%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 92/223 (41.3%) 🚧
-**Remaining:** 131 V2 pages need Supabase hook integration
+**V2 Pages (Supabase Hooks):** 94/223 (42.2%) 🚧
+**Remaining:** 129 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -159,8 +159,8 @@
 - **Unique to app/(app):** 9 pages
 
 **Integration Status:**
-- **Hook-Integrated:** 92/223 pages (41.3%) ✅
-- **Not Integrated:** 131/223 pages (58.7%) ⏳
+- **Hook-Integrated:** 94/223 pages (42.2%) ✅
+- **Not Integrated:** 129/223 pages (57.8%) ⏳
 - **Infrastructure:** 500+ Supabase hooks available in `lib/hooks/`
 
 #### File Locations
@@ -230,10 +230,10 @@ Based on detailed analysis of 21 sample pages:
 - ✅ Real data from database
 - ⚠️ Mock data only for competitive upgrade features (AI insights, predictions)
 
-**Category B: Manual Supabase (2 pages analyzed)**
-- `analytics` - 23 manual `.from()` calls, 4,335 LOC
-- `crm` - Uses `useSupabaseQuery`/`Mutation` helpers, 4,098 LOC
-- ⚠️ Database-integrated but needs hook migration for consistency
+**Category B: Manual Supabase → Migrated (2 pages) ✅**
+- `analytics` - ✅ **MIGRATED** (4,335 → 4,218 LOC, -117 lines) - Now uses extended hooks
+- `crm` - ✅ **MIGRATED** (4,098 → 4,082 LOC, -16 lines) - Now uses extended hooks
+- Both pages now use dedicated Supabase hooks for consistency with V2 architecture
 
 **Category C: To Be Verified (2 pages analyzed)**
 - `projects-hub` - Hook available, needs verification
