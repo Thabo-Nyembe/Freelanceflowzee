@@ -97,18 +97,13 @@ export default function AutomationPage() {
   // Load automation data
   useEffect(() => {
     const loadAutomation = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading automation data', { userId })
-
-        const { getWorkflows } = await import('@/lib/automation-queries')
+        setError(null)        const { getWorkflows } = await import('@/lib/automation-queries')
         const workflowsResult = await getWorkflows(userId)
 
         setWorkflows(workflowsResult || [])
@@ -117,18 +112,12 @@ export default function AutomationPage() {
 
         setIsLoading(false)
         announce('Automation data loaded successfully', 'polite')
-        toast.success('Automation loaded', {
-          description: `${workflowsResult?.length || 0} workflows loaded`
-        })
-        logger.info('Automation loaded', {
-          success: true,
-          workflowCount: workflowsResult?.length || 0
-        })
-      } catch (err) {
+        toast.success('Automation loaded' workflows loaded`
+        })      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load automation'
         setError(errorMessage)
         setIsLoading(false)
-        toast.error('Failed to load automation', { description: errorMessage })
+        toast.error('Failed to load automation')
         announce('Error loading automation', 'assertive')
         logger.error('Automation load failed', { error: err })
       }
@@ -144,10 +133,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Creating new workflow', { userId })
-
-      const { createWorkflow } = await import('@/lib/automation-queries')
+    try {      const { createWorkflow } = await import('@/lib/automation-queries')
 
       const newWorkflowId = await createWorkflow({
         name: 'New Workflow',
@@ -156,9 +142,7 @@ export default function AutomationPage() {
         userId
       })
 
-      toast.success('Workflow Created', { description: 'New workflow has been created as draft' })
-      logger.info('Workflow created', { success: true, workflowId: newWorkflowId })
-      announce('Workflow created successfully', 'polite')
+      toast.success('Workflow Created')      announce('Workflow created successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -166,7 +150,7 @@ export default function AutomationPage() {
       setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Create failed'
-      toast.error('Create Failed', { description: message })
+      toast.error('Create Failed')
       logger.error('Create workflow failed', { error: message })
       announce('Failed to create workflow', 'assertive')
     }
@@ -179,18 +163,13 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Editing workflow', { workflowId, userId })
-
-      const { updateWorkflow } = await import('@/lib/automation-queries')
+    try {      const { updateWorkflow } = await import('@/lib/automation-queries')
 
       await updateWorkflow(workflowId, {
         description: 'Updated workflow configuration'
       })
 
-      toast.success('Workflow Updated', { description: 'Configuration has been updated successfully' })
-      logger.info('Workflow edited', { success: true, workflowId })
-      announce('Workflow updated successfully', 'polite')
+      toast.success('Workflow Updated')      announce('Workflow updated successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -198,7 +177,7 @@ export default function AutomationPage() {
       setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
+      toast.error('Edit Failed')
       logger.error('Edit workflow failed', { error: message })
       announce('Failed to edit workflow', 'assertive')
     }
@@ -216,15 +195,10 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Deleting workflow', { workflowId: deleteWorkflow.id, userId })
-
-      const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
+    try {      const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
       await deleteWorkflowQuery(deleteWorkflow.id)
 
-      toast.success('Workflow Deleted', { description: `"${deleteWorkflow.name}" has been permanently removed` })
-      logger.info('Workflow deleted', { success: true, workflowId: deleteWorkflow.id })
-      announce('Workflow deleted successfully', 'polite')
+      toast.success('Workflow Deleted'" has been permanently removed` })      announce('Workflow deleted successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -232,7 +206,7 @@ export default function AutomationPage() {
       setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
+      toast.error('Delete Failed')
       logger.error('Delete workflow failed', { error: message })
       announce('Failed to delete workflow', 'assertive')
     } finally {
@@ -247,23 +221,18 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Enabling workflow', { workflowId, userId })
-
-      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
+    try {      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
 
       await updateWorkflow(workflowId, { status: 'active' })
 
-      toast.success('Workflow Enabled', { description: `"${workflowName}" is now active and will run automatically` })
-      logger.info('Workflow enabled', { success: true, workflowId })
-      announce('Workflow enabled successfully', 'polite')
+      toast.success('Workflow Enabled'" is now active and will run automatically` })      announce('Workflow enabled successfully', 'polite')
 
       // Reload workflows
       const workflowsResult = await getWorkflows(userId)
       setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Enable failed'
-      toast.error('Enable Failed', { description: message })
+      toast.error('Enable Failed')
       logger.error('Enable workflow failed', { error: message })
       announce('Failed to enable workflow', 'assertive')
     }
@@ -276,23 +245,18 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Disabling workflow', { workflowId, userId })
-
-      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
+    try {      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
 
       await updateWorkflow(workflowId, { status: 'paused' })
 
-      toast.success('Workflow Disabled', { description: `"${workflowName}" has been paused and will not run` })
-      logger.info('Workflow disabled', { success: true, workflowId })
-      announce('Workflow disabled successfully', 'polite')
+      toast.success('Workflow Disabled'" has been paused and will not run` })      announce('Workflow disabled successfully', 'polite')
 
       // Reload workflows
       const workflowsResult = await getWorkflows(userId)
       setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Disable failed'
-      toast.error('Disable Failed', { description: message })
+      toast.error('Disable Failed')
       logger.error('Disable workflow failed', { error: message })
       announce('Failed to disable workflow', 'assertive')
     }
@@ -307,10 +271,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Testing workflow', { workflowId })
-
-      // Workflow execution requires backend API for processing actions and conditions
+    try {      // Workflow execution requires backend API for processing actions and conditions
       const response = await fetch(`/api/admin/automation/workflows/${workflowId}/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -319,15 +280,13 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test workflow')
       const result = await response.json()
 
-      toast.success('Workflow Test Complete', { description: `"${workflowName}" test run completed successfully` })
-      logger.info('Workflow tested', { success: true, workflowId, result })
-      announce('Workflow test completed', 'polite')
+      toast.success('Workflow Test Complete'" test run completed successfully` })      announce('Workflow test completed', 'polite')
 
       // Optimistic update - ideally reload from database
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, runsCount: w.runsCount + 1 } : w))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Test failed'
-      toast.error('Test Failed', { description: message })
+      toast.error('Test Failed')
       logger.error('Test workflow failed', { error: message })
       announce('Workflow test failed', 'assertive')
     }
@@ -342,10 +301,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Connecting integration', { integrationId })
-
-      // OAuth and API integration requires backend API for secure credential management
+    try {      // OAuth and API integration requires backend API for secure credential management
       const response = await fetch('/api/admin/automation/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -355,9 +311,7 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to connect integration')
       const result = await response.json()
 
-      toast.success('Integration Connected', { description: `${integrationName} has been connected successfully` })
-      logger.info('Integration connected', { success: true, integrationId, result })
-      announce('Integration connected successfully', 'polite')
+      toast.success('Integration Connected' has been connected successfully` })      announce('Integration connected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === integrationId ? {
@@ -367,7 +321,7 @@ export default function AutomationPage() {
       } : i))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Connect failed'
-      toast.error('Connect Failed', { description: message })
+      toast.error('Connect Failed')
       logger.error('Connect integration failed', { error: message })
       announce('Failed to connect integration', 'assertive')
     }
@@ -387,10 +341,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Disconnecting integration', { integrationId: disconnectIntegration.id })
-
-      // OAuth token revocation requires backend API for secure credential management
+    try {      // OAuth token revocation requires backend API for secure credential management
       const response = await fetch(`/api/admin/automation/integrations/${disconnectIntegration.id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
@@ -398,9 +349,7 @@ export default function AutomationPage() {
 
       if (!response.ok) throw new Error('Failed to disconnect integration')
 
-      toast.success('Integration Disconnected', { description: `${disconnectIntegration.name} has been disconnected` })
-      logger.info('Integration disconnected', { success: true, integrationId: disconnectIntegration.id })
-      announce('Integration disconnected successfully', 'polite')
+      toast.success('Integration Disconnected' has been disconnected` })      announce('Integration disconnected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === disconnectIntegration.id ? {
@@ -411,7 +360,7 @@ export default function AutomationPage() {
       } : i))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Disconnect failed'
-      toast.error('Disconnect Failed', { description: message })
+      toast.error('Disconnect Failed')
       logger.error('Disconnect integration failed', { error: message })
       announce('Failed to disconnect integration', 'assertive')
     } finally {
@@ -428,10 +377,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Testing webhook')
-
-      // Webhook testing requires backend API for HTTP request sending and validation
+    try {      // Webhook testing requires backend API for HTTP request sending and validation
       const response = await fetch('/api/admin/automation/webhooks/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -441,12 +387,10 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test webhook')
       const result = await response.json()
 
-      toast.success('Webhook Test Successful', { description: 'Test webhook was sent and received successfully' })
-      logger.info('Webhook tested', { success: true, result })
-      announce('Webhook test successful', 'polite')
+      toast.success('Webhook Test Successful')      announce('Webhook test successful', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Test failed'
-      toast.error('Webhook Test Failed', { description: message })
+      toast.error('Webhook Test Failed')
       logger.error('Test webhook failed', { error: message })
       announce('Webhook test failed', 'assertive')
     }
@@ -459,22 +403,17 @@ export default function AutomationPage() {
       return
     }
 
-    try {
-      logger.info('Refreshing automation data', { userId })
-
-      const { getWorkflows } = await import('@/lib/automation-queries')
+    try {      const { getWorkflows } = await import('@/lib/automation-queries')
       const workflowsResult = await getWorkflows(userId)
       setWorkflows(workflowsResult || [])
 
       // Note: Integrations would be loaded from integration queries when available
       setIntegrations([])
 
-      toast.success('Automation Refreshed', { description: `All workflows and integrations have been reloaded (${workflowsResult?.length || 0} workflows)` })
-      logger.info('Automation refresh completed', { success: true, workflowCount: workflowsResult?.length || 0 })
-      announce('Automation refreshed successfully', 'polite')
+      toast.success('Automation Refreshed' workflows)` })      announce('Automation refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
-      toast.error('Refresh Failed', { description: message })
+      toast.error('Refresh Failed')
       logger.error('Automation refresh failed', { error: message })
       announce('Failed to refresh automation', 'assertive')
     }
