@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import {
   ClipboardList,
   Plus,
@@ -539,7 +538,7 @@ interface DbPoll {
 // ============================================================================
 
 export default function PollsClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('forms')
   const [forms, setForms] = useState<Form[]>(mockForms)
   const [templates] = useState<FormTemplate[]>(mockTemplates)
@@ -653,9 +652,13 @@ export default function PollsClient() {
   const fetchPolls = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('polls')
         .select('*')
@@ -670,7 +673,7 @@ export default function PollsClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create poll
   const handleCreatePoll = async () => {
@@ -680,12 +683,16 @@ export default function PollsClient() {
     }
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create polls')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('polls').insert({
         user_id: user.id,
         question: formData.question,
@@ -715,6 +722,8 @@ export default function PollsClient() {
   // Update poll status
   const handleUpdatePollStatus = async (pollId: string, newStatus: PollStatus) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('polls')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -734,6 +743,8 @@ export default function PollsClient() {
   const handleDeletePoll = async (pollId: string) => {
     toast.promise(
       (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { error } = await supabase
           .from('polls')
           .delete()
@@ -755,9 +766,13 @@ export default function PollsClient() {
     setIsSaving(true)
     toast.promise(
       (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Please sign in to duplicate polls')
 
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { error } = await supabase.from('polls').insert({
           user_id: user.id,
           question: `${poll.question} (Copy)`,
