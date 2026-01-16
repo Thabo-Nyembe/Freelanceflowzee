@@ -161,17 +161,12 @@ export default function AICodeCompletionPage() {
   // Load data from Supabase
   useEffect(() => {
     const loadAICodeData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
-        setIsLoading(true)
-        logger.info('Loading AI Code Completion data from Supabase', { userId, language: selectedLanguage })
-
-        // Load completions, snippets, and stats
+        setIsLoading(true)        // Load completions, snippets, and stats
         const [completionsResult, snippetsResult, statsResult] = await Promise.all([
           getCodeCompletions(userId, { language: selectedLanguage as ProgrammingLanguage }),
           getCodeSnippets(userId, { language: selectedLanguage as ProgrammingLanguage }),
@@ -188,16 +183,7 @@ export default function AICodeCompletionPage() {
             createdAt: s.created_at
           }))
           setSnippets(uiSnippets)
-        }
-
-        logger.info('AI Code data loaded', {
-          completions: completionsResult.data?.length || 0,
-          snippets: snippetsResult.data?.length || 0,
-          userId,
-          language: selectedLanguage
-        })
-
-        toast.success(`AI Code Completion loaded - ${completionsResult.data?.length || 0} completions, ${snippetsResult.data?.length || 0} snippets`)
+        }        toast.success(`AI Code Completion loaded - ${completionsResult.data?.length || 0} completions, ${snippetsResult.data?.length || 0} snippets`)
         announce('AI Code Completion loaded successfully', 'polite')
 
         setIsLoading(false)
@@ -260,9 +246,7 @@ export default function AICodeCompletionPage() {
           await updateCodeStats(userId, {
             total_completions: 1,
             total_tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4)
-          })
-          logger.info('Code completion saved to database', { completionId: completionData?.id })
-        }
+          })        }
 
         setCompletion(mockCompletion)
         setSuggestions(completionSuggestions)
@@ -332,15 +316,7 @@ export default function AICodeCompletionPage() {
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      logger.info('Code downloaded successfully', {
-        language: selectedLanguage,
-        contentLength: code.length,
-        filename,
-        fileSize: blob.size
-      })
-      toast.success(`Code downloaded: ${filename}`)
+      URL.revokeObjectURL(url)      toast.success(`Code downloaded: ${filename}`)
     } catch (err) {
       toast.error('Download failed')
     }
@@ -353,15 +329,7 @@ export default function AICodeCompletionPage() {
     try {
       if (navigator.clipboard) {
         navigator.clipboard.writeText(shareUrl)
-      }
-
-      logger.info('Code share link generated', {
-        language: selectedLanguage,
-        codeLength: code.length,
-        shareId,
-        shareUrl
-      })
-      toast.success(`Share link copied - ${code.length} characters shared`)
+      }      toast.success(`Share link copied - ${code.length} characters shared`)
     } catch (err) {
       toast.error('Failed to generate share link')
     }
@@ -418,17 +386,7 @@ export default function AICodeCompletionPage() {
             createdAt: data?.created_at || new Date().toISOString()
           }
 
-          setSnippets([...snippets, newSnippet])
-
-          logger.info('Snippet saved successfully', {
-            snippetId: newSnippet.id,
-            name: trimmedName,
-            language: selectedLanguage,
-            codeLength: code.length,
-            totalSnippets: snippets.length + 1
-          })
-
-          announce('Snippet saved successfully', 'polite')
+          setSnippets([...snippets, newSnippet])          announce('Snippet saved successfully', 'polite')
           resolve({ name: trimmedName, total: snippets.length + 1 })
         } catch (error) {
           logger.error('Exception saving snippet', { error })
@@ -459,20 +417,10 @@ export default function AICodeCompletionPage() {
         if (userId) {
           try {
             const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
-            await incrementSnippetUsage(snippetId)
-            logger.info('Snippet usage tracked in database', { snippetId })
-          } catch (error: any) {
+            await incrementSnippetUsage(snippetId)          } catch (error: any) {
             logger.error('Failed to track snippet usage', { error: error.message })
           }
-        }
-
-        logger.info('Snippet loaded successfully', {
-          snippetId,
-          snippetName: snippet.name,
-          language: snippet.language,
-          codeLength: snippet.code.length
-        })
-        return { name: snippet.name, codeLength: snippet.code.length }
+        }        return { name: snippet.name, codeLength: snippet.code.length }
       })(),
       {
         loading: 'Loading snippet...',
@@ -496,13 +444,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const applied = data?.optimizationsApplied ?? Math.floor(Math.random() * 3) + 1
-        logger.info('Code optimization completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          optimizationsApplied: applied,
-          types: optimizationTypes.slice(0, applied)
-        })
+        const applied = data?.optimizationsApplied ?? Math.floor(Math.random() * 3) + 1        })
         return { applied, codeLength: code.length }
       })(),
       {
@@ -527,13 +469,7 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : null
-        logger.info('Code refactoring completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          improvements: data?.improvements?.length ?? improvements.length
-        })
-        return { improvements: data?.improvements?.length ?? improvements.length }
+        const data = response.ok ? await response.json() : null        return { improvements: data?.improvements?.length ?? improvements.length }
       })(),
       {
         loading: 'Refactoring code...',
@@ -557,14 +493,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage, type: 'comments' })
         })
         const data = response.ok ? await response.json() : null
-        const count = data?.commentCount ?? commentCount
-        logger.info('AI documentation generated', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          commentsAdded: count,
-          docType: 'inline+JSDoc'
-        })
-        return { commentCount: count }
+        const count = data?.commentCount ?? commentCount        return { commentCount: count }
       })(),
       {
         loading: 'Adding documentation...',
@@ -588,13 +517,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const types = data?.docTypes ?? docTypes
-        logger.info('Documentation generated', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          documentTypes: types
-        })
-        return { docTypes: types }
+        const types = data?.docTypes ?? docTypes        return { docTypes: types }
       })(),
       {
         loading: 'Generating documentation...',
@@ -618,13 +541,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const count = data?.rulesApplied ?? rulesApplied.length
-        logger.info('Code formatted successfully', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          rulesApplied: count
-        })
-        return { rulesApplied: count }
+        const count = data?.rulesApplied ?? rulesApplied.length        return { rulesApplied: count }
       })(),
       {
         loading: 'Formatting code...',
@@ -647,13 +564,7 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : checks
-        logger.info('Code validation completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          checks: data
-        })
-        return data
+        const data = response.ok ? await response.json() : checks        return data
       })(),
       {
         loading: 'Validating code...',
@@ -679,14 +590,7 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const count = data?.testCount ?? testCount
-        const coverage = data?.coveragePercent ?? coveragePercent
-        logger.info('Unit tests generated', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          testsGenerated: count,
-          estimatedCoverage: coverage
-        })
-        return { testCount: count, coveragePercent: coverage }
+        const coverage = data?.coveragePercent ?? coveragePercent        return { testCount: count, coveragePercent: coverage }
       })(),
       {
         loading: 'Generating tests...',
@@ -721,13 +625,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code: codeInput, bugs, language: selectedLanguage })
         })
         if (response.ok) await response.json()
-        setBugs([])
-        logger.info('Auto-fix bugs completed', {
-          language: selectedLanguage,
-          bugsFixed,
-          codeLength: codeInput.length
-        })
-        return { bugsFixed }
+        setBugs([])        return { bugsFixed }
       })(),
       {
         loading: 'Auto-fixing bugs...',
@@ -751,14 +649,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const score = data?.score ?? Math.floor(Math.random() * 20) + 80
-        logger.info('Code review completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          categories: reviewCategories,
-          overallScore: score
-        })
-        return { score, categories: reviewCategories.length }
+        const score = data?.score ?? Math.floor(Math.random() * 20) + 80        return { score, categories: reviewCategories.length }
       })(),
       {
         loading: 'Reviewing code...',
@@ -782,14 +673,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const issuesFound = data?.issuesFound ?? Math.floor(Math.random() * 2)
-        logger.info('Security scan completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          vulnerabilitiesScanned: vulnerabilities.length,
-          issuesFound
-        })
-        return { issuesFound, scanned: vulnerabilities.length }
+        const issuesFound = data?.issuesFound ?? Math.floor(Math.random() * 2)        return { issuesFound, scanned: vulnerabilities.length }
       })(),
       {
         loading: 'Scanning for vulnerabilities...',
@@ -813,15 +697,7 @@ export default function AICodeCompletionPage() {
         const data = response.ok ? await response.json() : null
         const timeComplexity = data?.timeComplexity ?? 'O(n log n)'
         const spaceComplexity = data?.spaceComplexity ?? 'O(n)'
-        const bottlenecks = data?.bottlenecks ?? Math.floor(Math.random() * 3)
-        logger.info('Performance profile completed', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          timeComplexity,
-          spaceComplexity,
-          bottlenecksFound: bottlenecks
-        })
-        return { timeComplexity, spaceComplexity, bottlenecks }
+        const bottlenecks = data?.bottlenecks ?? Math.floor(Math.random() * 3)        return { timeComplexity, spaceComplexity, bottlenecks }
       })(),
       {
         loading: 'Analyzing performance...',
@@ -847,14 +723,7 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const interfaces = data?.interfacesAdded ?? interfacesAdded
-        const types = data?.typesAdded ?? typesAdded
-        logger.info('Type definitions added', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          interfacesAdded: interfaces,
-          typesAdded: types
-        })
-        return { interfacesAdded: interfaces, typesAdded: types }
+        const types = data?.typesAdded ?? typesAdded        return { interfacesAdded: interfaces, typesAdded: types }
       })(),
       {
         loading: 'Adding type definitions...',
@@ -875,13 +744,7 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage, format })
         })
-        const data = response.ok ? await response.json() : null
-        logger.info('Code export initiated', {
-          language: selectedLanguage,
-          format,
-          codeLength: code.length
-        })
-        return { format, codeLength: code.length, url: data?.url }
+        const data = response.ok ? await response.json() : null        return { format, codeLength: code.length, url: data?.url }
       })(),
       {
         loading: `Exporting as ${format.toUpperCase()}...`,
@@ -918,16 +781,7 @@ export default function AICodeCompletionPage() {
           }
           if (ext && langMap[ext]) {
             setSelectedLanguage(langMap[ext])
-          }
-
-          logger.info('Code file imported successfully', {
-            fileName: file.name,
-            fileSize: file.size,
-            codeLength: text.length,
-            language: langMap[ext || ''] || 'unknown'
-          })
-
-          return { fileName: file.name, codeLength: text.length, fileSize: file.size }
+          }          return { fileName: file.name, codeLength: text.length, fileSize: file.size }
         })(),
         {
           loading: 'Importing code file...',
@@ -936,10 +790,7 @@ export default function AICodeCompletionPage() {
         }
       )
     }
-    input.click()
-
-    logger.info('Import code dialog opened', {})
-  }
+    input.click()  }
 
   const handleDiffCode = () => {
     if (!originalCode) {
@@ -970,14 +821,7 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const additions = data?.additions ?? Math.floor(Math.random() * 20) + 5
-        const deletions = data?.deletions ?? Math.floor(Math.random() * 15) + 3
-        logger.info('Code diff generated', {
-          originalLength: originalCode.length,
-          currentLength: codeInput.length,
-          additions,
-          deletions
-        })
-        return { additions, deletions }
+        const deletions = data?.deletions ?? Math.floor(Math.random() * 15) + 3        return { additions, deletions }
       })(),
       {
         loading: 'Generating diff...',
@@ -999,13 +843,7 @@ export default function AICodeCompletionPage() {
             action: 'manual_save'
           }
           setVersionHistory([newVersion, ...versionHistory].slice(0, 10)) // Keep last 10
-        }
-
-        logger.info('Version history accessed', {
-          totalVersions: versionHistory.length,
-          currentCodeLength: codeInput.length
-        })
-        return { totalVersions: versionHistory.length }
+        }        return { totalVersions: versionHistory.length }
       })(),
       {
         loading: 'Loading version history...',
@@ -1030,15 +868,7 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : null
-        logger.info('AI code explanation generated', {
-          language: selectedLanguage,
-          codeLength: code.length,
-          linesAnalyzed: data?.lines ?? lines,
-          functionsFound: data?.functions ?? functions,
-          patternsDetected: data?.patterns ?? patterns
-        })
-        return { lines: data?.lines ?? lines, functions: data?.functions ?? functions, patterns: data?.patterns?.length ?? patterns.length }
+        const data = response.ok ? await response.json() : null        return { lines: data?.lines ?? lines, functions: data?.functions ?? functions, patterns: data?.patterns?.length ?? patterns.length }
       })(),
       {
         loading: 'Analyzing code...',
