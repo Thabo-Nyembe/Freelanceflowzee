@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useDataExports, useCreateDataExport, useUpdateDataExport, useDeleteDataExport } from '@/lib/hooks/use-data-exports'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -446,7 +447,16 @@ interface DataExport {
 }
 
 export default function DataExportClient() {
-  const supabase = createClient()
+  // Auth
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Hooks for data exports
+  const { data: dbExports = [], isLoading: exportsLoading, error: exportsError, refresh: refreshExports } = useDataExports()
+  const createMutation = useCreateDataExport()
+  const updateMutation = useUpdateDataExport()
+  const deleteMutation = useDeleteDataExport()
+
   const [activeTab, setActiveTab] = useState('pipelines')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null)
@@ -567,9 +577,7 @@ export default function DataExportClient() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [selectedLogPipeline, setSelectedLogPipeline] = useState<string>('all')
 
-  // Supabase state
-  const [dataExports, setDataExports] = useState<DataExport[]>([])
-  const [loading, setLoading] = useState(false)
+  // Form state
   const [formData, setFormData] = useState({
     export_name: '',
     description: '',
@@ -578,28 +586,14 @@ export default function DataExportClient() {
     data_source: 'users' as const,
   })
 
-  // Fetch data exports from Supabase
-  const fetchDataExports = useCallback(async () => {
-    setLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('data_exports')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDataExports(data || [])
-    } catch (error: any) {
-      toast.error('Failed to load exports')
-    } finally {
-      setLoading(false)
-    }
-  }, [supabase])
-
+  // Fetch user ID on mount
   useEffect(() => {
-    fetchDataExports()
-  }, [fetchDataExports])
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
 
   const getSourceStatusColor = (status: DataSource['status']) => {
     switch (status) {
@@ -655,12 +649,13 @@ export default function DataExportClient() {
       toast.error('Export name required')
       return
     }
+    if (!userId) {
+      toast.error('You must be logged in to create an export')
+      return
+    }
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { error } = await supabase.from('data_exports').insert({
-        user_id: user.id,
+      await createMutation.mutate({
+        user_id: userId,
         export_name: formData.export_name,
         description: formData.description || null,
         export_format: formData.export_format,
@@ -668,10 +663,9 @@ export default function DataExportClient() {
         data_source: formData.data_source,
         status: 'pending',
       })
-      if (error) throw error
-      toast.success('Export created')
+      toast.success('Export created successfully')
       setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
-      fetchDataExports()
+      refreshExports()
     } catch (error: any) {
       toast.error('Failed to create export')
     }
@@ -679,13 +673,13 @@ export default function DataExportClient() {
 
   const handleRunExport = async (exportId: string, exportName: string) => {
     try {
-      const { error } = await supabase
-        .from('data_exports')
-        .update({ status: 'in_progress', started_at: new Date().toISOString() })
-        .eq('id', exportId)
-      if (error) throw error
-      toast.success('Export started' is now running` })
-      fetchDataExports()
+      await updateMutation.mutate({
+        id: exportId,
+        status: 'in_progress',
+        started_at: new Date().toISOString()
+      })
+      toast.success(`Export started - "${exportName}" is now running`)
+      refreshExports()
     } catch (error: any) {
       toast.error('Failed to start export')
     }
@@ -694,13 +688,13 @@ export default function DataExportClient() {
   const handleScheduleExport = async (exportId: string, exportName: string) => {
     try {
       const scheduledAt = new Date(Date.now() + 3600000).toISOString() // 1 hour from now
-      const { error } = await supabase
-        .from('data_exports')
-        .update({ status: 'scheduled', scheduled_at: scheduledAt })
-        .eq('id', exportId)
-      if (error) throw error
-      toast.success('Export scheduled' scheduled for 1 hour` })
-      fetchDataExports()
+      await updateMutation.mutate({
+        id: exportId,
+        status: 'scheduled',
+        scheduled_at: scheduledAt
+      })
+      toast.success(`Export scheduled - "${exportName}" scheduled for 1 hour`)
+      refreshExports()
     } catch (error: any) {
       toast.error('Failed to schedule export')
     }
@@ -708,16 +702,15 @@ export default function DataExportClient() {
 
   const handleDownloadExport = async (exportId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('data_exports')
-        .select('download_url, export_name')
-        .eq('id', exportId)
-        .single()
-      if (error) throw error
-      if (data?.download_url) {
-        window.open(data.download_url, '_blank')
+      const exportData = dbExports.find(exp => exp.id === exportId)
+      if (!exportData) throw new Error('Export not found')
+
+      if (exportData.download_url) {
+        window.open(exportData.download_url, '_blank')
+        toast.success('Downloading export')
+      } else {
+        toast.error('Download URL not available')
       }
-      toast.success('Downloading export')
     } catch (error: any) {
       toast.error('Download failed')
     }
@@ -725,13 +718,13 @@ export default function DataExportClient() {
 
   const handleDeleteExport = async (exportId: string, exportName: string) => {
     try {
-      const { error } = await supabase
-        .from('data_exports')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', exportId)
-      if (error) throw error
-      toast.success('Export deleted' has been removed` })
-      fetchDataExports()
+      // Soft delete using update (sets deleted_at timestamp)
+      await updateMutation.mutate({
+        id: exportId,
+        deleted_at: new Date().toISOString()
+      })
+      toast.success(`Export deleted - "${exportName}" has been removed`)
+      refreshExports()
     } catch (error: any) {
       toast.error('Failed to delete export')
     }
@@ -739,13 +732,12 @@ export default function DataExportClient() {
 
   const handleCancelExport = async (exportId: string, exportName: string) => {
     try {
-      const { error } = await supabase
-        .from('data_exports')
-        .update({ status: 'cancelled' })
-        .eq('id', exportId)
-      if (error) throw error
-      toast.success('Export cancelled')
-      fetchDataExports()
+      await updateMutation.mutate({
+        id: exportId,
+        status: 'cancelled'
+      })
+      toast.success(`Export cancelled - "${exportName}"`)
+      refreshExports()
     } catch (error: any) {
       toast.error('Failed to cancel export')
     }
@@ -1281,7 +1273,7 @@ export default function DataExportClient() {
           if (!res.ok) throw new Error('Failed to refresh monitoring data')
         }
         // Trigger data refetch
-        fetchDataExports()
+        refreshExports()
         return { success: true }
       }),
       {
@@ -2213,7 +2205,7 @@ export default function DataExportClient() {
                 { icon: Plus, label: 'New Pipeline', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowNewPipelineQuickDialog(true) },
                 { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowRunAllSyncsDialog(true) },
                 { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowPauseAllDialog(true) },
-                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Sync started'); fetchDataExports(); } },
+                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Sync started'); refreshExports(); } },
                 { icon: GitBranch, label: 'Clone', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowCloneDialog(true) },
                 { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowExportPipelinesDialog(true) },
                 { icon: History, label: 'History', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowPipelineHistoryDialog(true) },
@@ -2245,7 +2237,7 @@ export default function DataExportClient() {
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => { fetchDataExports(); }}>
+                <Button variant="outline" size="sm" onClick={() => { refreshExports(); }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
@@ -2612,7 +2604,7 @@ export default function DataExportClient() {
               </div>
               <ScrollArea className="h-[400px]">
                 {/* Real Supabase data */}
-                {dataExports.map(exp => (
+                {dbExports.map(exp => (
                   <div key={exp.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="grid grid-cols-7 gap-4 items-center">
                       <div>
