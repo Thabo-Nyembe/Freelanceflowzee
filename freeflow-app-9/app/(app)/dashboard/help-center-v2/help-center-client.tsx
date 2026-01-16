@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -73,6 +73,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { useHelpArticles, useHelpCategories, useHelpDocs, useHelpFeedback } from '@/lib/hooks/use-help-extended'
+import { useAuthUserId } from '@/lib/hooks/use-auth-helpers'
 
 // ============================================================================
 // TYPE DEFINITIONS - Intercom Guide Level Knowledge Base
@@ -799,14 +802,28 @@ const mockHelpCenterActivities = [
 // ============================================================================
 
 export default function HelpCenterClient() {
-  const [activeTab, setActiveTab] = useState('articles')
-  const [articles, setArticles] = useState<Article[]>(mockArticles)
-  const [categories, setCategories] = useState<Category[]>(mockCategories)
-  const [collections, setCollections] = useState<Collection[]>(mockCollections)
+  // State that's used by hooks
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  // Hooks for real-time database data
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+  const { data: articlesData, isLoading: articlesLoading, refresh: refreshArticles } = useHelpArticles(selectedCategory || undefined)
+  const { data: categoriesData, isLoading: categoriesLoading, refresh: refreshCategories } = useHelpCategories()
+  const { data: collectionsData, isLoading: collectionsLoading, refresh: refreshCollections } = useHelpDocs()
+
+  // Local state for UI operations (synced with hook data via useEffect)
+  const [articles, setArticles] = useState<Article[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
+
+  // Mock data kept for now (will be migrated with dedicated hooks later)
   const [analytics] = useState<Analytics>(mockAnalytics)
   const [feedback, setFeedback] = useState<Feedback[]>(mockFeedback)
+
+  // UI state
+  const [activeTab, setActiveTab] = useState('articles')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -862,6 +879,34 @@ export default function HelpCenterClient() {
   const [scheduleArticleId, setScheduleArticleId] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
+
+  // Sync hook data to local state
+  useEffect(() => {
+    if (articlesData) {
+      setArticles(articlesData as any as Article[])
+    }
+  }, [articlesData])
+
+  useEffect(() => {
+    if (categoriesData) {
+      setCategories(categoriesData as any as Category[])
+    }
+  }, [categoriesData])
+
+  useEffect(() => {
+    if (collectionsData) {
+      setCollections(collectionsData as any as Collection[])
+    }
+  }, [collectionsData])
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
@@ -939,38 +984,38 @@ export default function HelpCenterClient() {
       return
     }
 
-    const newArticle: Article = {
-      id: `art-${Date.now()}`,
-      title: newArticleTitle,
-      slug: newArticleTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      excerpt: newArticleExcerpt,
-      content: newArticleContent,
-      type: newArticleType,
-      status: 'draft',
-      format: 'text',
-      categoryId: newArticleCategoryId,
-      author: { id: 'auth-1', name: 'Current User', avatar: '/avatars/user.jpg', role: 'Content Creator' },
-      language: 'en',
-      translations: [],
-      audience: newArticleAudience,
-      tags: newArticleTags.split(',').map(t => t.trim()).filter(t => t),
-      views: 0,
-      helpfulCount: 0,
-      notHelpfulCount: 0,
-      avgRating: 0,
-      readTime: Math.max(1, Math.ceil(newArticleContent.split(' ').length / 200)),
-      relatedArticles: [],
-      version: 1,
-      publishedAt: '',
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      featured: false,
-      pinned: false
-    }
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
-    setArticles(prev => [newArticle, ...prev])
-    setShowCreateArticleDialog(false)
-    toast.success(`Article "${newArticleTitle}" created as draft`)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const newArticle = {
+        title: newArticleTitle,
+        slug: newArticleTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        excerpt: newArticleExcerpt,
+        content: newArticleContent,
+        article_type: newArticleType,
+        category_id: newArticleCategoryId,
+        tags: newArticleTags.split(',').map(t => t.trim()).filter(t => t),
+        is_published: false,
+        user_id: user.id,
+      }
+
+      const { error } = await supabase
+        .from('help_articles')
+        .insert(newArticle)
+
+      if (error) throw error
+
+      setShowCreateArticleDialog(false)
+      toast.success(`Article "${newArticleTitle}" created as draft`)
+      refreshArticles()  // Refresh data from database
+    } catch (error) {
+      console.error('Error creating article:', error)
+      toast.error('Failed to create article')
+    }
   }
 
   const handlePublishArticle = async (articleTitle: string) => {
@@ -987,10 +1032,7 @@ export default function HelpCenterClient() {
         body: JSON.stringify({ articleId: article.id })
       }).then(async (res) => {
         if (!res.ok) throw new Error('Failed to publish')
-        // Update local state
-        setArticles(prev => prev.map(a =>
-          a.id === article.id ? { ...a, status: 'published' as ArticleStatus, publishedAt: new Date().toISOString() } : a
-        ))
+        refreshArticles()  // Refresh data from database
         return res.json()
       }),
       {
@@ -1015,22 +1057,35 @@ export default function HelpCenterClient() {
       return
     }
 
-    const newCategory: Category = {
-      id: `cat-${Date.now()}`,
-      name: newCategoryName,
-      slug: newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      description: newCategoryDescription,
-      icon: newCategoryIcon || '📁',
-      color: 'from-blue-500 to-purple-500',
-      articleCount: 0,
-      subcategories: [],
-      order: categories.length + 1,
-      visibility: 'public'
-    }
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
-    setCategories(prev => [...prev, newCategory])
-    setShowCreateCategoryDialog(false)
-    toast.success(`Category "${newCategoryName}" created successfully`)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const newCategory = {
+        name: newCategoryName,
+        slug: newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        description: newCategoryDescription,
+        icon: newCategoryIcon || '📁',
+        order_index: categories.length + 1,
+        user_id: user.id,
+      }
+
+      const { error } = await supabase
+        .from('help_categories')
+        .insert(newCategory)
+
+      if (error) throw error
+
+      setShowCreateCategoryDialog(false)
+      toast.success(`Category "${newCategoryName}" created successfully`)
+      refreshCategories()  // Refresh data from database
+    } catch (error) {
+      console.error('Error creating category:', error)
+      toast.error('Failed to create category')
+    }
   }
 
   // Search handlers with real state updates
@@ -1179,21 +1234,33 @@ export default function HelpCenterClient() {
       return
     }
 
-    const newCollection: Collection = {
-      id: `col-${Date.now()}`,
-      name: newCollectionName,
-      description: newCollectionDescription,
-      icon: newCollectionIcon || '📚',
-      color: 'from-purple-500 to-pink-500',
-      articleIds: [],
-      views: 0,
-      audience: newCollectionAudience,
-      order: collections.length + 1
-    }
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
-    setCollections(prev => [...prev, newCollection])
-    setShowNewCollectionDialog(false)
-    toast.success(`Collection "${newCollectionName}" created successfully`)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const newCollection = {
+        title: newCollectionName,
+        content: newCollectionDescription,
+        category_id: null, // Could be set if there's a selected category
+        user_id: user.id,
+      }
+
+      const { error } = await supabase
+        .from('help_docs')
+        .insert(newCollection)
+
+      if (error) throw error
+
+      setShowNewCollectionDialog(false)
+      toast.success(`Collection "${newCollectionName}" created successfully`)
+      refreshCollections()  // Refresh data from database
+    } catch (error) {
+      console.error('Error creating collection:', error)
+      toast.error('Failed to create collection')
+    }
   }
 
   // Feedback filter handlers - actually filter feedback
