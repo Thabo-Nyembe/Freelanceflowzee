@@ -450,39 +450,16 @@ export default function WorkflowsClient() {
     fetchWorkflows()
   }, [fetchWorkflows])
 
-  // Stats calculations - use real data from Supabase when available, fallback to mock
+  // Stats calculations from database
   const stats = useMemo(() => {
-    // Use real data if available
-    if (dbWorkflows.length > 0) {
-      const totalWorkflows = dbWorkflows.length
-      const activeWorkflows = dbWorkflows.filter(w => w.status === 'active').length
-      const totalRuns = mockRuns.length // Keep mock for runs until run tracking is implemented
-      const successfulRuns = mockRuns.filter(r => r.status === 'success').length
-      const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0
-      const errorWorkflows = dbWorkflows.filter(w => w.status === 'failed').length
-      const connectedApps = mockApps.filter(a => a.status === 'connected').length
-      const tasksSaved = dbWorkflows.reduce((acc, w) => acc + (w.total_steps || 0), 0)
-
-      return {
-        totalWorkflows,
-        activeWorkflows,
-        totalRuns,
-        successRate,
-        errorWorkflows,
-        connectedApps,
-        tasksSaved
-      }
-    }
-
-    // Fallback to mock data
-    const totalWorkflows = mockWorkflows.length
-    const activeWorkflows = mockWorkflows.filter(w => w.status === 'active').length
-    const totalRuns = mockRuns.length
+    const totalWorkflows = (dbWorkflows || []).length
+    const activeWorkflows = (dbWorkflows || []).filter(w => w.status === 'active').length
+    const totalRuns = mockRuns.length // Keep mock for runs until run tracking is implemented
     const successfulRuns = mockRuns.filter(r => r.status === 'success').length
     const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0
-    const errorWorkflows = mockWorkflows.filter(w => w.status === 'error').length
+    const errorWorkflows = (dbWorkflows || []).filter(w => w.status === 'failed').length
     const connectedApps = mockApps.filter(a => a.status === 'connected').length
-    const tasksSaved = mockWorkflows.reduce((acc, w) => acc + w.totalRuns, 0)
+    const tasksSaved = (dbWorkflows || []).reduce((acc, w) => acc + (w.total_steps || 0), 0)
 
     return {
       totalWorkflows,
@@ -495,10 +472,10 @@ export default function WorkflowsClient() {
     }
   }, [dbWorkflows])
 
-  // Filtered workflows - combine database workflows with mock for display
+  // Filtered workflows from database
   const filteredWorkflows = useMemo(() => {
     // Convert DB workflows to display format
-    const displayWorkflows: Workflow[] = dbWorkflows.map(dbw => ({
+    const displayWorkflows: Workflow[] = (dbWorkflows || []).map(dbw => ({
       id: dbw.id,
       name: dbw.name,
       description: dbw.description || '',
@@ -526,10 +503,7 @@ export default function WorkflowsClient() {
       tags: dbw.tags || []
     }))
 
-    // Combine with mock data if no DB workflows
-    const workflowsToFilter = displayWorkflows.length > 0 ? displayWorkflows : mockWorkflows
-
-    return workflowsToFilter.filter(workflow => {
+    return displayWorkflows.filter(workflow => {
       const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
