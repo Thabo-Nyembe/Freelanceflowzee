@@ -849,6 +849,27 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
   - Removed setTimeout artificial delays
   - Removed useMockData flags from hook calls
 
+#### **Batch #11: Lib Utility Files Mock Cleanup (9 files) - Commit: f8a895f5**
+- **Lib Utilities (9 files, ~537 lines removed):**
+  - **reports-utils.tsx** (3 MOCK constants - updated batch #9 → #11)
+  - **files-hub-utils.tsx** (3 MOCK constants - updated batch #9 → #11)
+  - **ml-insights-utils.tsx** (2 MOCK constants - updated batch #9 → #11)
+  - **invoice-utils.tsx** (4 MOCK constants - updated batch #9 → #11)
+  - **real-time-translation-utils.ts** (154 lines - 6 MOCK constants including MOCK_TRANSLATION_RESULTS, MOCK_LIVE_SESSIONS, MOCK_DOCUMENTS)
+  - **report-builder-utils.ts** (61 lines - 2 MOCK constants including MOCK_METRICS, MOCK_CHART_DATA)
+  - **reporting-utils.ts** (55 lines - 1 MOCK constant: MOCK_REPORTS with 3 comprehensive reports)
+  - **motion-graphics-utils.ts** (83 lines - 3 MOCK constants including MOCK_MOTION_PROJECTS, MOCK_MOTION_ASSETS)
+  - **ai-voice-synthesis-utils.ts** (130 lines - 3 MOCK constants including MOCK_VOICES, MOCK_RECENT_SYNTHESES)
+- **Lines Removed:** 537 lines (99 insertions - mostly migration comments)
+- **MOCK Constants Migrated:** 27 constants
+- **Patterns Applied:**
+  - Empty array initialization: `export const MOCK_X = []`
+  - Zero value objects for stats: `{ totalTranslations: 0, ... }`
+  - Migration comments: `// MIGRATED: Batch #11 - Removed mock data, using database hooks`
+  - Updated logger metadata to BATCH_11_COMPLETE where applicable
+  - Updated batch headers from #9 to #11 for previously migrated files
+- **Note:** Some files (reports-utils, files-hub-utils, ml-insights-utils, invoice-utils) had been partially migrated in batch #9, so this batch primarily updated their batch numbers and ensured consistency
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
