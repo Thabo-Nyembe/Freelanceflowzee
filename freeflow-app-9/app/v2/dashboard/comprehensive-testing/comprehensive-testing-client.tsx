@@ -63,7 +63,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -368,7 +367,6 @@ const comprehensiveTestingActivities = [
 // Quick actions will be defined inside component to access dialog state setters
 
 export default function ComprehensiveTestingClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -409,11 +407,11 @@ export default function ComprehensiveTestingClient() {
   // Handler for creating new test item
   const handleCreateNewItem = () => {
     if (!newItemName.trim()) {
-      toast.error('Validation Error', { description: 'Item name is required' })
+      toast.error('Validation Error')
       return
     }
     if (!newItemCategory) {
-      toast.error('Validation Error', { description: 'Please select a category' })
+      toast.error('Validation Error')
       return
     }
 
@@ -430,7 +428,7 @@ export default function ComprehensiveTestingClient() {
     }
 
     setTests(prev => [...prev, newTest])
-    toast.success('Test Item Created', { description: `${newItemName} has been added to the test suite` })
+    toast.success('Test Item Created' has been added to the test suite` })
 
     // Reset form
     setNewItemName('')
@@ -481,7 +479,7 @@ export default function ComprehensiveTestingClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: `${dataToExport.length} test results exported as ${exportFormat.toUpperCase()}` })
+    toast.success('Export Complete' test results exported as ${exportFormat.toUpperCase()}` })
     setShowExportDialog(false)
   }
 
@@ -495,7 +493,7 @@ export default function ComprehensiveTestingClient() {
     }
     localStorage.setItem('comprehensive-testing-settings', JSON.stringify(settings))
 
-    toast.success('Settings Saved', { description: 'Your testing preferences have been updated' })
+    toast.success('Settings Saved')
     setShowSettingsDialog(false)
   }
 
@@ -514,7 +512,6 @@ export default function ComprehensiveTestingClient() {
     }
   }, [])
 
-  // A+++ LOAD COMPREHENSIVE TESTING DATA
   React.useEffect(() => {
     const loadComprehensiveTestingData = async () => {
       try {
@@ -613,7 +610,6 @@ export default function ComprehensiveTestingClient() {
     setIsRunningTests(false)
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -642,7 +638,6 @@ export default function ComprehensiveTestingClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">

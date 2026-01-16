@@ -56,7 +56,6 @@ import {
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -406,7 +405,6 @@ const featureTestingActivities = [
 // Quick actions will be defined inside component to access state setters
 
 export default function FeatureTestingClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -452,7 +450,6 @@ export default function FeatureTestingClient() {
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ], [])
 
-  // A+++ LOAD FEATURE TESTING DATA
   React.useEffect(() => {
     const loadFeatureTestingData = async () => {
       try {
@@ -547,7 +544,7 @@ export default function FeatureTestingClient() {
   // Handler for creating a new test
   const handleCreateTest = useCallback(() => {
     if (!newTestName.trim() || !newTestPath.trim() || !newTestCategory.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in name, path, and category' })
+      toast.error('Missing required fields')
       return
     }
 
@@ -561,7 +558,7 @@ export default function FeatureTestingClient() {
     }
 
     setTests(prev => [...prev, newTest])
-    toast.success('Test Created', { description: `Added "${newTestName}" to ${newTestCategory}` })
+    toast.success('Test Created'" to ${newTestCategory}` })
 
     // Reset form
     setNewTestName('')
@@ -667,7 +664,7 @@ export default function FeatureTestingClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: `Downloaded ${filteredTests.length} test results as ${exportFormat.toUpperCase()}` })
+    toast.success('Export Complete' test results as ${exportFormat.toUpperCase()}` })
     setShowExportDialog(false)
   }, [tests, testResults, groupedTests, exportFormat, includePassedTests, includeFailedTests, includeWarningTests, includePendingTests])
 
@@ -683,8 +680,7 @@ export default function FeatureTestingClient() {
     }
 
     localStorage.setItem('featureTestingSettings', JSON.stringify(settings))
-    toast.success('Settings Saved', {
-      description: `Timeout: ${testTimeout}ms, Parallel: ${parallelTests ? 'Yes' : 'No'}, Notifications: ${notifyOnComplete ? 'On' : 'Off'}`
+    toast.success('Settings Saved'ms, Parallel: ${parallelTests ? 'Yes' : 'No'}, Notifications: ${notifyOnComplete ? 'On' : 'Off'}`
     })
     setShowSettingsDialog(false)
   }, [autoRunTests, testTimeout, parallelTests, notifyOnComplete, verboseLogging])
@@ -712,7 +708,6 @@ export default function FeatureTestingClient() {
     return Array.from(categories)
   }, [tests])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -741,7 +736,6 @@ export default function FeatureTestingClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
