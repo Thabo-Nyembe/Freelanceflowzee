@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -659,7 +658,7 @@ const initialFormState: MilestoneFormState = {
 }
 
 export default function MilestonesClient() {
-  const supabase = createClient()
+
 
   // Core state
   const [activeTab, setActiveTab] = useState('milestones')
@@ -695,9 +694,13 @@ export default function MilestonesClient() {
   // Fetch milestones from Supabase
   const fetchMilestones = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('milestones')
         .select('*')
@@ -712,7 +715,7 @@ export default function MilestonesClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchMilestones()
@@ -727,6 +730,8 @@ export default function MilestonesClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create milestones')
@@ -737,6 +742,8 @@ export default function MilestonesClient() {
       const dueDate = formState.due_date ? new Date(formState.due_date) : null
       const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('milestones').insert({
         user_id: user.id,
         milestone_code: milestoneCode,
@@ -781,6 +788,8 @@ export default function MilestonesClient() {
       const updateData: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() }
       if (progress !== undefined) updateData.progress = progress
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('milestones')
         .update(updateData)
@@ -799,6 +808,8 @@ export default function MilestonesClient() {
   // Update milestone progress (available for future use)
   const _handleUpdateProgress = async (milestoneId: string, progress: number) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('milestones')
         .update({
@@ -820,6 +831,8 @@ export default function MilestonesClient() {
   // Delete/Archive milestone (available for future use)
   const _handleArchiveMilestone = async (milestoneId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('milestones')
         .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -837,6 +850,8 @@ export default function MilestonesClient() {
   // Delete milestone permanently (available for future use)
   const _handleDeleteMilestone = async (milestoneId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('milestones')
         .delete()

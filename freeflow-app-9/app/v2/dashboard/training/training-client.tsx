@@ -5,7 +5,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTrainingPrograms, useTrainingMutations, TrainingProgram } from '@/lib/hooks/use-training'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -547,7 +546,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     enrollTrainee, isEnrolling,
     updateEnrollment, isUpdatingEnrollment
   } = useTrainingMutations()
-  const supabase = createClient()
+
 
   // UI state
   const [activeTab, setActiveTab] = useState('catalog')
@@ -728,6 +727,8 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
     try {
       // For the mock courses, we'll create a direct enrollment
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -735,6 +736,8 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       }
 
       // Insert enrollment directly
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('training_enrollments')
         .insert({
@@ -772,6 +775,8 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleBookmarkCourse = useCallback(async (course: Course) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -790,7 +795,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     } catch (error) {
       toast.error('Error')
     }
-  }, [supabase])
+  }, [])
 
   const handleCreateTrainingPath = useCallback(() => {
     setShowCreateCourseDialog(true)
