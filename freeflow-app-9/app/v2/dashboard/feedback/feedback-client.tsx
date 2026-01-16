@@ -3,7 +3,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -468,7 +467,7 @@ interface FeedbackClientProps {
 }
 
 export default function FeedbackClient({ initialFeedback }: FeedbackClientProps) {
-  const supabase = createClient()
+
   const { user } = useAuth()
 
   // UI State
@@ -538,6 +537,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -552,7 +553,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+  }, [user?.id, ])
 
   useEffect(() => {
     fetchFeedback()
@@ -572,6 +573,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('feedback').insert({
         user_id: user.id,
         title: formData.title,
@@ -606,6 +609,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ upvotes_count: currentVotes + 1, updated_at: new Date().toISOString() })
@@ -624,6 +629,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Delete feedback
   const handleDeleteFeedback = async (feedbackId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('feedback').delete().eq('id', feedbackId)
       if (error) throw error
 
@@ -638,6 +645,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Update feedback status
   const handleUpdateStatus = async (feedbackId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -656,6 +665,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Export feedback
   const handleExportFeedback = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -690,6 +701,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('feedback').insert({
         user_id: user.id,
         title: newIdeaForm.title,
@@ -721,6 +734,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({
@@ -766,12 +781,16 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         const combinedVotes = (primary?.upvotes_count || 0) + (duplicate?.upvotes_count || 0)
 
         // Update primary with combined votes
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('feedback')
           .update({ upvotes_count: combinedVotes, updated_at: new Date().toISOString() })
           .eq('id', mergeForm.primaryId)
 
         // Mark duplicate as merged/declined
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('feedback')
           .update({ status: 'declined', admin_response: `Merged into feedback #${mergeForm.primaryId}`, updated_at: new Date().toISOString() })
@@ -807,6 +826,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
       const updatedDescription = `${existing?.description || ''}\n\n---\nComment: ${commentForm.text}`
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ description: updatedDescription, updated_at: new Date().toISOString() })
