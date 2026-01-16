@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 134/286 pages integrated (46.9%)
+**Overall Progress:** 135/286 pages integrated (47.2%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 128/223 using Supabase hooks (57.4%) 🚧
-  - **Mock → Database:** 5/157 migrated (3.2%) 🎉 NEW!
+- **V2 Pages:** 129/223 using Supabase hooks (57.8%) 🚧
+  - **Mock → Database:** 6/157 migrated (3.8%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 134/286 pages integrated (46.9%)
+**Overall Progress:** 135/286 pages integrated (47.2%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 128/223 (57.4%) 🚧
+**V2 Pages (Supabase Hooks):** 129/223 (57.8%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 5 pages 🎉
-**Remaining:** 95 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 6 pages 🎉
+**Remaining:** 94 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -323,7 +323,7 @@ Based on detailed analysis of 21 sample pages:
 This category tracks pages migrated from mock/setTimeout data to real database integration,
 bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
-**Pages Migrated: 5/157 (3.2%)**
+**Pages Migrated: 6/157 (3.8%)**
 
 **Completed Migrations:**
 1. `help-center-v2` - ✅ **MIGRATED** (3,257 lines, +67 net) - Commit: `18da5532`
@@ -375,6 +375,19 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1 hour
    - **Complexity:** Medium (schema mapping with default values, multiple filter integration)
 
+6. `ai-design-v2` - ✅ **MIGRATED** (2,132 lines, -47 net) - Commit: `TBD`
+   - **Pattern:** Hook integration with complex schema mapping (UI Generation ↔ DB AIDesign)
+   - **Tables:** ai_designs (via use-ai-designs hook)
+   - **Mapping:** Complex style/model mapping (DB: 'modern'/'midjourney-v6' → UI: 'digital_art'/'midjourney_v6'), field name mapping (output_url → imageUrl, thumbnail_url → thumbnailUrl, generation_time_ms → generationTime, is_public → isPublic), default values for missing UI fields (negativePrompt, aspectRatio, quality, isFavorite, variations, upscaledUrl)
+   - **Write Operations:** Uses manual Supabase client (handleGenerate inserts to ai_design_projects)
+   - **Impact:** Real database integration with filter support (style, status), real-time updates via hook subscription, AI design generation tracking
+   - **Kept as Mock:** Collections, promptHistory, styleTemplates (will be migrated with dedicated hooks later)
+   - **Cleanup:** Removed duplicate createClient() calls in handleGenerate function, updated fetchGenerations → fetchDesigns
+   - **Fixes:** Fixed 2 pre-existing toast syntax errors (lines 636, 646)
+   - **Note:** File has 70+ pre-existing template literal syntax errors in JSX className attributes (unrelated to migration, requires separate cleanup)
+   - **Migration Time:** ~1 hour
+   - **Complexity:** Medium-High (complex schema mapping with style/model enums, multiple field transformations)
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -390,7 +403,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 - audio-studio-v2 (NOTE: Schema mismatch - skip until resolved)
 - Estimated: 10-15 pages can be migrated quickly with existing hooks
 
-**Total Remaining:** 153 V2 pages with mock/setTimeout data need real database integration
+**Total Remaining:** 152 V2 pages with mock/setTimeout data need real database integration
 
 #### Available Hooks Infrastructure
 

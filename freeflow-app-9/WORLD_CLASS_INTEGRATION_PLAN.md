@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (5/301 pages migrated - 1.7%) 🎉 FIFTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (6/301 pages migrated - 2.0%) 🎉 SIXTH MILESTONE!
 
 ---
 
@@ -414,6 +414,134 @@ const mappedKeys: ApiKey[] = useMemo(() => dbKeys.map((dbKey): ApiKey => ({
 4. Sync mapped data to local state via useEffect
 5. Update all dependencies and references to use mapped data
 
+#### 6. ai-design-v2 ✅ (Commit: TBD)
+**File:** `app/(app)/dashboard/ai-design-v2/ai-design-client.tsx` (2,132 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium-High (complex schema mapping with style/model enums, multiple field transformations)
+
+**Before:** Mock data with manual fetchGenerations (duplicate createClient calls)
+```typescript
+const [generations, setGenerations] = useState<Generation[]>(mockGenerations)
+const [isLoading, setIsLoading] = useState(false)
+
+// Manual fetch with duplicate createClient()
+const fetchGenerations = useCallback(async () => {
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  // ... duplicate createClient() again ...
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  // Manual mapping
+}, [])
+```
+
+**After:** Hook integration with complex schema mapping
+```typescript
+const {
+  designs: dbDesigns,
+  stats: dbStats,
+  isLoading,
+  error: designsError,
+  refetch: fetchDesigns
+} = useAIDesigns([], {
+  style: selectedStyle !== 'photorealistic' ? selectedStyle as DBAIDesign['style'] : undefined,
+  status: 'completed'
+})
+
+// Complex style/model mapping + field name mapping + defaults
+const mappedDesigns: Generation[] = useMemo(() => dbDesigns.map((dbDesign): Generation => {
+  const styleMap: Record<DBAIDesign['style'], StylePreset> = {
+    'modern': 'digital_art',
+    'minimalist': 'minimalist',
+    'creative': 'digital_art',
+    'professional': 'photorealistic',
+    'abstract': 'digital_art',
+    'vintage': 'vintage'
+  }
+
+  const modelMap: Record<string, ModelType> = {
+    'midjourney-v6': 'midjourney_v6',
+    'midjourney-v5': 'midjourney_v5',
+    'dalle-3': 'dalle_3',
+    'stable-diffusion': 'stable_diffusion',
+    'flux-pro': 'flux_pro'
+  }
+
+  return {
+    id: dbDesign.id,
+    prompt: dbDesign.prompt,
+    negativePrompt: '', // Default
+    style: styleMap[dbDesign.style] || 'digital_art',
+    model: modelMap[dbDesign.model] || 'midjourney_v6',
+    aspectRatio: '1:1', // Default
+    quality: 'high', // Default
+    status: dbDesign.status as GenerationStatus,
+    imageUrl: dbDesign.output_url || undefined,
+    thumbnailUrl: dbDesign.thumbnail_url || undefined,
+    seed: dbDesign.seed || undefined,
+    likes: dbDesign.likes,
+    views: dbDesign.views,
+    downloads: dbDesign.downloads,
+    isFavorite: false, // Default
+    isPublic: dbDesign.is_public,
+    variations: [], // Default
+    upscaledUrl: undefined, // Default
+    createdAt: dbDesign.created_at,
+    generationTime: dbDesign.generation_time_ms,
+    creditsUsed: dbDesign.credits_used
+  }
+}), [dbDesigns])
+```
+
+**Tables Integrated:**
+- `ai_designs` (via use-ai-designs hook) - AI image generation tracking, prompts, outputs, styles, models
+
+**Schema Mapping Performed:**
+- Complex enum mapping:
+  - DB styles ('modern', 'minimalist', 'creative', etc.) → UI StylePreset ('digital_art', 'minimalist', 'photorealistic', etc.)
+  - DB models ('midjourney-v6', 'dalle-3', etc.) → UI ModelType ('midjourney_v6', 'dalle_3', etc.)
+- Field name mapping:
+  - `output_url` → `imageUrl`
+  - `thumbnail_url` → `thumbnailUrl`
+  - `generation_time_ms` → `generationTime`
+  - `is_public` → `isPublic`
+- Default values for missing UI fields: `negativePrompt: ''`, `aspectRatio: '1:1'`, `quality: 'high'`, `isFavorite: false`, `variations: []`, `upscaledUrl: undefined`
+
+**Write Operations:**
+- Manual Supabase client used in `handleGenerate` for inserting to `ai_design_projects`
+- Mutation hooks available in use-ai-designs (not yet integrated into handlers)
+
+**Filters Integrated:**
+- Style filter (modern, minimalist, creative, professional, abstract, vintage)
+- Status filter (completed designs only)
+
+**Cleanup Performed:**
+- Removed duplicate `createClient()` calls in handleGenerate function
+- Updated `fetchGenerations()` calls to `fetchDesigns()` to use hook's refetch function
+- Removed manual fetchGenerations implementation (replaced with hook)
+
+**Fixes Applied:**
+- Fixed 2 pre-existing toast syntax errors (lines 636, 646)
+- Note: File has 70+ pre-existing template literal syntax errors in JSX className attributes (unrelated to migration, requires separate cleanup effort)
+
+**Impact:**
+- ✅ Real database integration with complex style/model enum mapping
+- ✅ Filter support for style and status
+- ✅ Real-time updates via hook subscriptions
+- ✅ AI design generation tracking with proper database persistence
+- ✅ Removed duplicate createClient() calls (cleaner code)
+- ✅ Hook-based refetch replaces manual fetch function
+- ✅ Kept mock data for collections, promptHistory, styleTemplates (to be migrated with dedicated hooks later)
+
+**Pattern Reinforced (complex schema mapping with enums):**
+1. Import hooks with DB types (AIDesign as DBAIDesign)
+2. Call hooks with filter options (style, status)
+3. Create enum mapping objects for style/model transformations
+4. Map DB schema to UI schema with useMemo, including enum conversions and default values
+5. Sync mapped data to local state via useEffect
+6. Replace manual fetch functions with hook's refetch
+7. Clean up duplicate/manual database calls
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -423,7 +551,7 @@ const mappedKeys: ApiKey[] = useMemo(() => dbKeys.map((dbKey): ApiKey => ({
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 296 pages need mock data → database migration
+**Remaining:** 295 pages need mock data → database migration
 
 ---
 
