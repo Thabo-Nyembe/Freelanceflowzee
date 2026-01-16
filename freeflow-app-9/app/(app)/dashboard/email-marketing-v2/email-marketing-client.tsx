@@ -867,7 +867,7 @@ export default function EmailMarketingClient({
       icon: 'chart',
       action: () => {
         setActiveTab('analytics')
-        toast.success('Analytics loaded', { description: `Open Rate: ${stats.openRate.toFixed(1)}%, Click Rate: ${stats.clickRate.toFixed(1)}%` })
+        toast.success('Analytics loaded'%, Click Rate: ${stats.clickRate.toFixed(1)}%` })
       },
       variant: 'default' as const
     },
@@ -877,7 +877,7 @@ export default function EmailMarketingClient({
       icon: 'users',
       action: () => {
         setActiveTab('subscribers')
-        toast.success('Subscriber lists loaded', { description: `${mockLists.length} lists, ${stats.totalLists.toLocaleString()} total subscribers` })
+        toast.success('Subscriber lists loaded' lists, ${stats.totalLists.toLocaleString()} total subscribers` })
       },
       variant: 'outline' as const
     },
@@ -935,33 +935,26 @@ export default function EmailMarketingClient({
 
   // Handlers
   const handleCreateCampaign = () => {
-    toast.info('Create Campaign', {
-      description: 'Opening email campaign builder...'
-    })
+    toast.info('Create Campaign')
   }
 
   const handleSendCampaign = (campaignName: string) => {
-    toast.success('Sending campaign', {
-      description: `"${campaignName}" is being sent...`
+    toast.success('Sending campaign'" is being sent...`
     })
   }
 
   const handleScheduleCampaign = (campaignName: string) => {
-    toast.success('Campaign scheduled', {
-      description: `"${campaignName}" has been scheduled`
+    toast.success('Campaign scheduled'" has been scheduled`
     })
   }
 
   const handleDuplicateCampaign = (campaignName: string) => {
-    toast.success('Campaign duplicated', {
-      description: `Copy of "${campaignName}" created`
+    toast.success('Campaign duplicated'" created`
     })
   }
 
   const handleExportSubscribers = () => {
-    toast.success('Exporting subscribers', {
-      description: 'Subscriber list will be downloaded'
-    })
+    toast.success('Exporting subscribers')
   }
 
   return (
@@ -1242,7 +1235,7 @@ export default function EmailMarketingClient({
                       <CardTitle>Recent Subscribers</CardTitle>
                       <Button variant="outline" size="sm" onClick={() => {
                         setShowAllSubscribersDialog(true)
-                        toast.success('All subscribers loaded', { description: `Showing ${stats.totalLists.toLocaleString()} subscribers across all lists` })
+                        toast.success('All subscribers loaded' subscribers across all lists` })
                       }}>View All</Button>
                     </div>
                   </CardHeader>
@@ -1792,7 +1785,7 @@ export default function EmailMarketingClient({
             <AIInsightsPanel
               insights={mockEmailAIInsights}
               title="Email Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2096,7 +2089,7 @@ export default function EmailMarketingClient({
                   <Button variant="outline" onClick={() => setShowAutomationEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
                   <Button variant="outline" onClick={() => {
                     setShowAnalyticsDialog(true)
-                    toast.success('Analytics loaded', { description: `${selectedAutomation.stats.converted} conversions from "${selectedAutomation.name}"` })
+                    toast.success('Analytics loaded' conversions from "${selectedAutomation.name}"` })
                   }}><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
                 </div>
               </div>

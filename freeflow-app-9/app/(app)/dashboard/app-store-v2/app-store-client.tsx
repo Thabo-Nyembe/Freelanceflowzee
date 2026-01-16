@@ -803,9 +803,7 @@ export default function AppStoreClient() {
       setReviewRating(5)
       await fetchApps()
     } catch (error: any) {
-      toast.error('Failed to submit review', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to submit review')
     } finally {
       setLoading(false)
     }
@@ -860,14 +858,11 @@ export default function AppStoreClient() {
           version: app.version
         })
 
-      toast.success('App installed successfully', {
-        description: `"${app.name}" has been installed`
+      toast.success('App installed successfully'" has been installed`
       })
       await fetchApps()
     } catch (error: any) {
-      toast.error('Failed to install app', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to install app')
     } finally {
       setLoading(false)
     }
@@ -894,14 +889,11 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('App uninstalled', {
-        description: `"${app.name}" has been removed`
+      toast.success('App uninstalled'" has been removed`
       })
       await fetchApps()
     } catch (error: any) {
-      toast.error('Failed to uninstall', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to uninstall')
     } finally {
       setLoading(false)
     }
@@ -922,15 +914,12 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('App updated', {
-        description: `"${update.appName}" updated to v${update.newVersion}`
+      toast.success('App updated'" updated to v${update.newVersion}`
       })
       setUpdates(prev => prev.filter(u => u.id !== update.id))
       await fetchApps()
     } catch (error: any) {
-      toast.error('Update failed', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Update failed')
     } finally {
       setLoading(false)
     }
@@ -956,14 +945,11 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Rating submitted', {
-        description: `Thank you for rating "${app.name}"`
+      toast.success('Rating submitted'"`
       })
       await fetchApps()
     } catch (error: any) {
-      toast.error('Failed to submit rating', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to submit rating')
     } finally {
       setLoading(false)
     }
@@ -991,14 +977,11 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Trial started', {
-        description: `${app.trialDays}-day trial for "${app.name}" has begun`
+      toast.success('Trial started'-day trial for "${app.name}" has begun`
       })
       await fetchApps()
     } catch (error: any) {
-      toast.error('Failed to start trial', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to start trial')
     } finally {
       setLoading(false)
     }
@@ -1019,13 +1002,10 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Added to wishlist', {
-        description: `"${app.name}" added to your wishlist`
+      toast.success('Added to wishlist'" added to your wishlist`
       })
     } catch (error: any) {
-      toast.error('Failed to add to wishlist', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to add to wishlist')
     }
   }
 
@@ -1040,15 +1020,12 @@ export default function AppStoreClient() {
           .eq('plugin_id', update.appId)
           .eq('user_id', userId)
       }
-      toast.success('All apps updated', {
-        description: `${updates.length} apps have been updated`
+      toast.success('All apps updated' apps have been updated`
       })
       setUpdates([])
       await fetchApps()
     } catch (error: any) {
-      toast.error('Update failed', {
-        description: error.message || 'Some updates may have failed'
-      })
+      toast.error('Update failed')
     } finally {
       setLoading(false)
     }
@@ -1060,9 +1037,7 @@ export default function AppStoreClient() {
     if (userId) {
       const success = await updateFilesViewMode(userId, mode)
       if (success) {
-        toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view set as default`, {
-          description: 'Your preference has been saved'
-        })
+        toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view set as default`)
       } else {
         toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view selected`)
       }
@@ -1076,27 +1051,16 @@ export default function AppStoreClient() {
     // Navigate based on insight type or show details
     if (insight.type === 'recommendation') {
       setActiveTab('discover')
-      toast.info(insight.title || 'Recommendation', {
-        description: insight.description || 'Exploring recommended apps'
-      })
+      toast.info(insight.title || 'Recommendation')
     } else if (insight.type === 'alert') {
       setActiveTab('installed')
-      toast.warning(insight.title || 'Alert', {
-        description: insight.description || 'Review your installed apps'
-      })
+      toast.warning(insight.title || 'Alert')
     } else if (insight.type === 'update') {
       setActiveTab('updates')
-      toast.info(insight.title || 'Updates Available', {
-        description: insight.description || 'Check available updates'
-      })
+      toast.info(insight.title || 'Updates Available')
     } else {
       // Default: show insight details in a toast with action
-      toast.info(insight.title || 'AI Insight', {
-        description: insight.description || 'View insight details',
-        action: {
-          label: 'View Apps',
-          onClick: () => setActiveTab('discover')
-        }
+      toast.info(insight.title || 'AI Insight'
       })
     }
   }

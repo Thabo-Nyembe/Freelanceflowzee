@@ -778,7 +778,7 @@ const mockRegistrationsQuickActionsBase = [
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('File selected', { description: `${file.name} ready for import. API integration required.` })
+        toast.success('File selected' ready for import. API integration required.` })
       }
     }
     input.click()
@@ -921,17 +921,14 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration created successfully', {
-        description: `${formData.registrant_name} has been registered`
+      toast.success('Registration created successfully' has been registered`
       })
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error creating registration:', error)
-      toast.error('Failed to create registration', {
-        description: error.message
-      })
+      toast.error('Failed to create registration')
     } finally {
       setIsSaving(false)
     }
@@ -968,8 +965,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration updated successfully', {
-        description: `${formData.registrant_name}'s registration has been updated`
+      toast.success('Registration updated successfully''s registration has been updated`
       })
       setShowEditDialog(false)
       setRegistrationToEdit(null)
@@ -977,9 +973,7 @@ export default function RegistrationsClient() {
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error updating registration:', error)
-      toast.error('Failed to update registration', {
-        description: error.message
-      })
+      toast.error('Failed to update registration')
     } finally {
       setIsSaving(false)
     }
@@ -1005,17 +999,14 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration deleted', {
-        description: `${registrationToDelete.registrant_name}'s registration has been removed`
+      toast.success('Registration deleted''s registration has been removed`
       })
       setShowDeleteDialog(false)
       setRegistrationToDelete(null)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error deleting registration:', error)
-      toast.error('Failed to delete registration', {
-        description: error.message
-      })
+      toast.error('Failed to delete registration')
     } finally {
       setIsSaving(false)
     }
@@ -1057,16 +1048,13 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Event created successfully', {
-        description: `${eventFormData.name} has been created`
+      toast.success('Event created successfully' has been created`
       })
       setShowNewEventDialog(false)
       setEventFormData(initialEventFormData)
     } catch (error: any) {
       console.error('Error creating event:', error)
-      toast.error('Failed to create event', {
-        description: error.message
-      })
+      toast.error('Failed to create event')
     } finally {
       setIsSaving(false)
     }
@@ -1096,13 +1084,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Check-in complete', {
-        description: `${registration.registrant_name} has been checked in`
+      toast.success('Check-in complete' has been checked in`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error checking in:', error)
-      toast.error('Check-in failed', { description: error.message })
+      toast.error('Check-in failed')
     }
   }
 
@@ -1124,13 +1111,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration confirmed', {
-        description: `${registration.registrant_name} has been confirmed`
+      toast.success('Registration confirmed' has been confirmed`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error confirming:', error)
-      toast.error('Confirmation failed', { description: error.message })
+      toast.error('Confirmation failed')
     }
   }
 
@@ -1151,13 +1137,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.info('Registration cancelled', {
-        description: `${registration.registrant_name}'s registration has been cancelled`
+      toast.info('Registration cancelled''s registration has been cancelled`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error cancelling:', error)
-      toast.error('Cancellation failed', { description: error.message })
+      toast.error('Cancellation failed')
     }
   }
 
@@ -1250,9 +1235,7 @@ export default function RegistrationsClient() {
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Registrations exported to CSV'
-      })
+      toast.success('Export complete')
     } catch (error) {
       toast.error('Export failed')
     }
@@ -1780,12 +1763,12 @@ export default function RegistrationsClient() {
                       try {
                         if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
                           await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                          toast.success('Camera access granted', { description: 'QR scanner ready. Point at a registration QR code.' })
+                          toast.success('Camera access granted')
                         } else {
-                          toast.info('Camera not available', { description: 'Use manual entry below' })
+                          toast.info('Camera not available')
                         }
                       } catch (error) {
-                        toast.error('Camera access denied', { description: 'Please allow camera access or use manual entry' })
+                        toast.error('Camera access denied')
                       }
                     }}>
                       <QrCode className="w-4 h-4 mr-2" />
@@ -1945,7 +1928,7 @@ export default function RegistrationsClient() {
                       if (pendingEmails) {
                         window.location.href = `mailto:${pendingEmails}?subject=${encodeURIComponent('Reminder: Your Upcoming Event')}`
                       } else {
-                        toast.info('No confirmed attendees', { description: 'No attendees to send reminders to' })
+                        toast.info('No confirmed attendees')
                       }
                     }}>
                       <Send className="w-4 h-4 mr-2" />
@@ -2395,11 +2378,11 @@ export default function RegistrationsClient() {
                               caches.keys().then(names => {
                                 names.forEach(name => caches.delete(name))
                               })
-                              toast.success('Cache cleared', { description: 'Browser cache has been cleared' })
+                              toast.success('Cache cleared')
                             } else {
                               localStorage.clear()
                               sessionStorage.clear()
-                              toast.success('Storage cleared', { description: 'Local and session storage cleared' })
+                              toast.success('Storage cleared')
                             }
                           }}>Clear</Button>
                         </div>
@@ -2418,7 +2401,7 @@ export default function RegistrationsClient() {
             <AIInsightsPanel
               insights={mockRegistrationsAIInsights}
               title="Registration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2594,8 +2577,7 @@ export default function RegistrationsClient() {
                           return
                         }
                         // For demo data, just show success
-                        toast.success('Attendee checked in', {
-                          description: `${selectedRegistration.attendee.firstName} ${selectedRegistration.attendee.lastName} checked in at ${new Date().toLocaleTimeString()}`
+                        toast.success('Attendee checked in' ${selectedRegistration.attendee.lastName} checked in at ${new Date().toLocaleTimeString()}`
                         })
                         setShowRegistrationDialog(false)
                       } catch (error) {
@@ -3042,7 +3024,7 @@ export default function RegistrationsClient() {
                 toast.error('Please fill in template name and subject')
                 return
               }
-              toast.success('Template created', { description: `"${templateForm.name}" is now available for use` })
+              toast.success('Template created'" is now available for use` })
               setTemplateForm({ name: '', subject: '', body: '' })
               setShowTemplateEditorDialog(false)
             }}>

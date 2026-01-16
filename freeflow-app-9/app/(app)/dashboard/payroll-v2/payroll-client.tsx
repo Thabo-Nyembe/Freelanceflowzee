@@ -1004,21 +1004,15 @@ export default function PayrollClient() {
   }
 
   const handleExportPayroll = () => {
-    toast.success('Export started', {
-      description: 'Payroll data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleProcessPayments = () => {
-    toast.success('Processing payments', {
-      description: 'Payroll payments are being processed'
-    })
+    toast.success('Processing payments')
   }
 
   const handleGeneratePayslips = () => {
-    toast.success('Generating payslips', {
-      description: 'Payslips are being generated'
-    })
+    toast.success('Generating payslips')
   }
 
   const handleRefresh = async () => {
@@ -1043,15 +1037,11 @@ export default function PayrollClient() {
           description: `Total amount: ${formatCurrency(data.total_amount_pending)}`
         })
       } else {
-        toast.info('No pay runs pending approval', {
-          description: 'All pay runs have been processed'
-        })
+        toast.info('No pay runs pending approval')
       }
     } catch (error) {
       console.error('Error loading approval queue:', error)
-      toast.error('Failed to load approval queue', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to load approval queue')
     }
   }
 
@@ -1066,14 +1056,11 @@ export default function PayrollClient() {
       }
 
       const analytics = data.analytics
-      toast.success('Payroll analytics loaded', {
-        description: `YTD: ${formatCurrency(analytics.total_payroll_ytd)} | ${analytics.pay_runs_completed} completed runs`
+      toast.success('Payroll analytics loaded' | ${analytics.pay_runs_completed} completed runs`
       })
     } catch (error) {
       console.error('Error loading analytics:', error)
-      toast.error('Failed to load analytics', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to load analytics')
     }
   }
 
@@ -2451,7 +2438,7 @@ export default function PayrollClient() {
             <AIInsightsPanel
               insights={payrollAIInsights}
               title="Payroll Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

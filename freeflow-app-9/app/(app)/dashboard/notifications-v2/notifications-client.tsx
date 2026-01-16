@@ -513,7 +513,7 @@ export default function NotificationsClient() {
         category: 'campaign',
         data: { segment: campaignForm.segment, campaign_name: campaignForm.name }
       })
-      toast.success('Campaign sent', { description: `"${campaignForm.name}" delivered successfully` })
+      toast.success('Campaign sent'" delivered successfully` })
       setShowCreateCampaign(false)
       setCampaignForm({ name: '', channel: '', segment: '', title: '', message: '', scheduled: false })
     } catch (err) {
@@ -534,7 +534,7 @@ export default function NotificationsClient() {
         channel: (notification.channel || 'in_app') as NotificationChannelV2,
         category: notification.category || 'general'
       })
-      toast.success('Notification sent', { description: `"${notification.title}" delivered successfully` })
+      toast.success('Notification sent'" delivered successfully` })
     } catch (err) {
       toast.error('Failed to send notification')
     } finally {
@@ -636,7 +636,7 @@ export default function NotificationsClient() {
       a.download = `notifications-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Notification data exported successfully' })
+      toast.success('Export complete')
     } catch (err) {
       toast.error('Export failed')
     }
@@ -956,7 +956,7 @@ export default function NotificationsClient() {
                       {!segment.isDefault && (
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete segment "${segment.name}"?`)) {
-                            toast.success('Segment Deleted', { description: `"${segment.name}" has been removed` })
+                            toast.success('Segment Deleted'" has been removed` })
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -974,7 +974,7 @@ export default function NotificationsClient() {
             <div className="flex justify-end mb-4">
               <Button onClick={() => {
                 setShowTemplateDialog(true)
-                toast.success('Create Template', { description: 'Template builder opened' })
+                toast.success('Create Template')
               }}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
@@ -1003,21 +1003,21 @@ export default function NotificationsClient() {
                         <Button variant="default" size="sm" className="flex-1" onClick={() => {
                           setCampaignForm(prev => ({ ...prev, title: template.title, message: template.message }))
                           setShowCreateCampaign(true)
-                          toast.success('Template Selected', { description: `Using "${template.name}" for new campaign` })
+                          toast.success('Template Selected'" for new campaign` })
                         }}>
                           <Send className="h-4 w-4 mr-1" />Use Template
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => {
                           setSelectedTemplate({ name: template.name, type: template.channel })
                           setShowEditTemplateDialog(true)
-                          toast.info('Opening editor...', { description: `Editing "${template.name}"` })
+                          toast.info('Opening editor...'"` })
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setPreviewTemplate(template)
                           setShowPreviewTemplateDialog(true)
-                          toast.info('Loading preview...', { description: `Previewing "${template.name}"` })
+                          toast.info('Loading preview...'"` })
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -1040,7 +1040,7 @@ export default function NotificationsClient() {
                         {!template.isDefault && (
                           <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                             if (confirm(`Delete template "${template.name}"?`)) {
-                              toast.success('Template Deleted', { description: `"${template.name}" has been removed` })
+                              toast.success('Template Deleted'" has been removed` })
                             }
                           }}>
                             <Trash2 className="h-4 w-4" />
@@ -1104,7 +1104,7 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedAutomation({ name: automation.name })
                           setShowEditAutomationDialog(true)
-                          toast.info('Opening workflow editor...', { description: `Editing "${automation.name}"` })
+                          toast.info('Opening workflow editor...'"` })
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1128,7 +1128,7 @@ export default function NotificationsClient() {
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete automation "${automation.name}"?`)) {
-                            toast.success('Automation Deleted', { description: `"${automation.name}" has been removed` })
+                            toast.success('Automation Deleted'" has been removed` })
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -1149,7 +1149,7 @@ export default function NotificationsClient() {
                       <Button variant="outline" size="sm" onClick={() => {
                         setSelectedAutomationForAnalytics(automation)
                         setShowAutomationAnalyticsDialog(true)
-                        toast.info('Loading analytics...', { description: `Opening detailed analytics for "${automation.name}"` })
+                        toast.info('Loading analytics...'"` })
                       }}>
                         <BarChart3 className="h-4 w-4 mr-1" />Analytics
                       </Button>
@@ -1164,7 +1164,7 @@ export default function NotificationsClient() {
                       <Button variant="outline" size="sm" onClick={() => {
                         setSelectedAutomationForHistory(automation)
                         setShowAutomationHistoryDialog(true)
-                        toast.info('Loading history...', { description: `Viewing execution history for "${automation.name}"` })
+                        toast.info('Loading history...'"` })
                       }}>
                         <RefreshCw className="h-4 w-4 mr-1" />History
                       </Button>
@@ -1211,7 +1211,7 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedTestForDetails(test)
                           setShowTestDetailsDialog(true)
-                          toast.info('Loading details...', { description: `Opening detailed report for "${test.name}"` })
+                          toast.info('Loading details...'"` })
                         }}>
                           <BarChart3 className="h-4 w-4" />
                         </Button>
@@ -1241,7 +1241,7 @@ export default function NotificationsClient() {
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete A/B test "${test.name}"?`)) {
-                            toast.success('Test Deleted', { description: `"${test.name}" has been removed` })
+                            toast.success('Test Deleted'" has been removed` })
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -1270,7 +1270,7 @@ export default function NotificationsClient() {
                                     ? { ...t, winner: variant.id, status: 'completed' as const, endDate: new Date().toISOString() }
                                     : t
                                 ))
-                                toast.success('Winner Selected', { description: `"${variant.name}" declared as winner for "${test.name}"` })
+                                toast.success('Winner Selected'" declared as winner for "${test.name}"` })
                               }}>
                                 Declare Winner
                               </Button>
@@ -1293,7 +1293,7 @@ export default function NotificationsClient() {
                           if (winningVariant) {
                             setCampaignForm(prev => ({ ...prev, title: winningVariant.title, message: winningVariant.message }))
                             setShowCreateCampaign(true)
-                            toast.success('Apply Winner', { description: `Using winning variant "${winningVariant.name}" for new campaign` })
+                            toast.success('Apply Winner'" for new campaign` })
                           }
                         }}>
                           <Send className="h-4 w-4 mr-1" />Apply Winner to Campaign
@@ -1313,7 +1313,7 @@ export default function NotificationsClient() {
                           a.download = `ab-test-${test.name.toLowerCase().replace(/\s+/g, '-')}-results.csv`
                           a.click()
                           URL.revokeObjectURL(url)
-                          toast.success('Export Results', { description: `Results for "${test.name}" downloaded as CSV` })
+                          toast.success('Export Results'" downloaded as CSV` })
                         }}>
                           <Download className="h-4 w-4 mr-1" />Export Results
                         </Button>
@@ -1362,13 +1362,13 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedWebhookForLogs(webhook)
                           setShowWebhookLogsDialog(true)
-                          toast.info('Loading logs...', { description: `Opening delivery logs for "${webhook.name}"` })
+                          toast.info('Loading logs...'"` })
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setShowWebhookDialog(true)
-                          toast.success('Edit Webhook', { description: `Editing "${webhook.name}"` })
+                          toast.success('Edit Webhook'"` })
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1387,7 +1387,7 @@ export default function NotificationsClient() {
                         )}
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete webhook "${webhook.name}"?`)) {
-                            toast.success('Webhook Deleted', { description: `"${webhook.name}" has been removed` })
+                            toast.success('Webhook Deleted'" has been removed` })
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -2802,7 +2802,7 @@ export default function NotificationsClient() {
             <AIInsightsPanel
               insights={notificationsAIInsights}
               title="Notification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2952,7 +2952,7 @@ export default function NotificationsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateAutomation(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Automation Created', { description: 'Your automation has been saved as a draft' })
+                toast.success('Automation Created')
                 setShowCreateAutomation(false)
               }}>
                 <Workflow className="h-4 w-4 mr-2" />Create Automation
@@ -3016,15 +3016,15 @@ export default function NotificationsClient() {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{name}}')
-                    toast.info('Variable copied', { description: '{{name}} copied to clipboard' })
+                    toast.info('Variable copied'} copied to clipboard' })
                   }}>{`{{name}}`}</Badge>
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{email}}')
-                    toast.info('Variable copied', { description: '{{email}} copied to clipboard' })
+                    toast.info('Variable copied'} copied to clipboard' })
                   }}>{`{{email}}`}</Badge>
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{app_name}}')
-                    toast.info('Variable copied', { description: '{{app_name}} copied to clipboard' })
+                    toast.info('Variable copied'} copied to clipboard' })
                   }}>{`{{app_name}}`}</Badge>
                 </div>
               </div>
@@ -3032,7 +3032,7 @@ export default function NotificationsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Template Created', { description: 'Your template has been saved' })
+                toast.success('Template Created')
                 setShowTemplateDialog(false)
               }}>
                 <Layers className="h-4 w-4 mr-2" />Save Template
@@ -3079,7 +3079,7 @@ export default function NotificationsClient() {
                     const input = document.getElementById('webhook-secret-input') as HTMLInputElement
                     if (input) input.value = newSecret
                     navigator.clipboard.writeText(newSecret)
-                    toast.success('Secret Generated', { description: 'New webhook secret generated and copied to clipboard' })
+                    toast.success('Secret Generated')
                   }}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
@@ -3099,7 +3099,7 @@ export default function NotificationsClient() {
                 const urlInput = document.querySelector('input[placeholder="https://api.example.com/webhooks"]') as HTMLInputElement
                 const url = urlInput?.value
                 if (!url) {
-                  toast.error('Missing URL', { description: 'Please enter a webhook endpoint URL' })
+                  toast.error('Missing URL')
                   return
                 }
                 toast.loading('Sending test payload...', { id: 'test-webhook-dialog' })
@@ -3117,7 +3117,7 @@ export default function NotificationsClient() {
                 <TestTube className="h-4 w-4 mr-2" />Test
               </Button>
               <Button onClick={() => {
-                toast.success('Webhook Saved', { description: 'Your webhook configuration has been saved' })
+                toast.success('Webhook Saved')
                 setShowWebhookDialog(false)
               }}>
                 <Webhook className="h-4 w-4 mr-2" />Save Webhook
@@ -3160,7 +3160,7 @@ export default function NotificationsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCategoryEditor(null)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success(showCategoryEditor === 'new' ? 'Category Created' : 'Category Updated', { description: 'Category settings saved' })
+                toast.success(showCategoryEditor === 'new' ? 'Category Created' : 'Category Updated')
                 setShowCategoryEditor(null)
               }}>
                 Save Category
@@ -3296,7 +3296,7 @@ export default function NotificationsClient() {
                     toast.error('Please enter a value for the rule')
                     return
                   }
-                  toast.success('Rule added', { description: `${property} ${operator} "${value}"` })
+                  toast.success('Rule added' ${operator} "${value}"` })
                   if (valueInput) valueInput.value = ''
                 }}>
                   <Plus className="h-4 w-4 mr-1" />Add Rule
@@ -3309,8 +3309,7 @@ export default function NotificationsClient() {
                 setSelectedSegment(null)
               }}>Cancel</Button>
               <Button onClick={() => {
-                toast.success(selectedSegment ? 'Segment updated' : 'Segment created', {
-                  description: selectedSegment ? `"${selectedSegment.name}" has been updated` : 'New segment has been created'
+                toast.success(selectedSegment ? 'Segment updated' : 'Segment created'" has been updated` : 'New segment has been created'
                 })
                 setShowSegmentDialog(false)
                 setSelectedSegment(null)
@@ -3350,7 +3349,7 @@ export default function NotificationsClient() {
                   a.download = `segment-${selectedSegment?.name?.toLowerCase().replace(/\s+/g, '-') || 'users'}-export.csv`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Users exported to CSV', { description: `${users.length} users exported` })
+                  toast.success('Users exported to CSV' users exported` })
                 }}>
                   <Download className="h-4 w-4 mr-2" />Export
                 </Button>
@@ -3420,7 +3419,7 @@ export default function NotificationsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowABTestDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('A/B Test created', { description: 'Test will start sending to users' })
+                toast.success('A/B Test created')
                 setShowABTestDialog(false)
               }}>Start Test</Button>
             </DialogFooter>

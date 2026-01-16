@@ -804,8 +804,7 @@ export default function TeamHubClient() {
   }
 
   const handleSendMessage = (channelName: string) => {
-    toast.success('Message sent', {
-      description: `Message posted to #${channelName}`
+    toast.success('Message sent'`
     })
   }
 
@@ -814,9 +813,7 @@ export default function TeamHubClient() {
   }
 
   const handleSetReminder = () => {
-    toast.success('Reminder set', {
-      description: 'You will be notified at the scheduled time'
-    })
+    toast.success('Reminder set')
   }
 
   const handleOpenNotifications = () => {
@@ -857,9 +854,9 @@ export default function TeamHubClient() {
         body: JSON.stringify({ settings: settingsState })
       })
       if (!response.ok) throw new Error('Failed to save settings')
-      toast.success('Settings saved', { description: 'Workspace settings updated' })
+      toast.success('Settings saved')
     } catch (error) {
-      toast.error('Failed to save settings', { description: 'Please try again' })
+      toast.error('Failed to save settings')
     } finally {
       setShowSaveSettingsDialog(false)
     }
@@ -995,7 +992,7 @@ export default function TeamHubClient() {
                 { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => setSettingsTab('members') },
                 { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => {
                   const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
-                  toast.info('Admin Users', { description: `${adminCount} admin users in workspace` })
+                  toast.info('Admin Users' admin users in workspace` })
                 }},
                 { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => {
                   const csvContent = 'Name,Email,Role,Department,Status\n' +
@@ -1007,7 +1004,7 @@ export default function TeamHubClient() {
                   a.download = 'team-members.csv'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Team data exported', { description: 'CSV file downloaded' })
+                  toast.success('Team data exported')
                 }},
                 { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => setStatusFilter(statusFilter === 'all' ? 'online' : 'all') },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-500', onClick: () => setSettingsTab('members') }
@@ -1309,9 +1306,9 @@ export default function TeamHubClient() {
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStartThread(message)}><MessageCircle className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
                                   setSavedItems(prev => [...prev, { id: `saved-${Date.now()}`, type: 'message', title: message.content.substring(0, 30), time: new Date().toLocaleTimeString() }])
-                                  toast.success('Message saved', { description: 'Added to your bookmarks' })
+                                  toast.success('Message saved')
                                 }}><Bookmark className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied!', { description: 'Message copied to clipboard' }) }}><MoreVertical className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied!') }}><MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>
                           </div>
@@ -1435,7 +1432,7 @@ export default function TeamHubClient() {
 
                     <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => {
                       setShowHuddleDialog(true)
-                      toast.success('Joined huddle', { description: `Connected to #${huddle.channelName}` })
+                      toast.success('Joined huddle'` })
                     }}>
                       Join Huddle
                     </Button>
@@ -1534,7 +1531,7 @@ export default function TeamHubClient() {
                         setApps(prev => prev.map(a =>
                           a.id === app.id ? { ...a, isInstalled: true, isEnabled: true } : a
                         ))
-                        toast.success(`${app.name} added`, { description: 'App installed successfully' })
+                        toast.success(`${app.name} added`)
                       }}>Add</Button>
                     </div>
                   ))}
@@ -1836,7 +1833,7 @@ export default function TeamHubClient() {
                               if (integration.status === 'connected') {
                                 setShowAddAppDialog(true)
                               } else {
-                                toast.success('Connected', { description: `${integration.name} connected successfully` })
+                                toast.success('Connected' connected successfully` })
                               }
                             }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
@@ -1864,7 +1861,7 @@ export default function TeamHubClient() {
                             <Input type="password" value={apiToken} readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
                               navigator.clipboard.writeText(apiToken)
-                              toast.success('Copied!', { description: 'API token copied to clipboard' })
+                              toast.success('Copied!')
                             }}>
                               <Copy className="w-4 h-4" />
                             </Button>
@@ -1878,7 +1875,7 @@ export default function TeamHubClient() {
                           if (confirm('Are you sure you want to regenerate the API token? Existing integrations will stop working.')) {
                             const newToken = `xoxb-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
                             setApiToken(newToken)
-                            toast.success('Token regenerated', { description: 'New API token generated successfully' })
+                            toast.success('Token regenerated')
                           }
                         }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
@@ -2018,7 +2015,7 @@ export default function TeamHubClient() {
                             a.download = 'workspace-export.json'
                             a.click()
                             URL.revokeObjectURL(url)
-                            toast.success('Export complete', { description: 'Workspace data downloaded' })
+                            toast.success('Export complete')
                           }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Workspace Data
@@ -2027,7 +2024,7 @@ export default function TeamHubClient() {
                             if (confirm('Clear all cached data? This action cannot be undone.')) {
                               localStorage.clear()
                               sessionStorage.clear()
-                              toast.success('Cache cleared', { description: 'All cached data has been removed' })
+                              toast.success('Cache cleared')
                             }
                           }}>
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -2060,7 +2057,7 @@ export default function TeamHubClient() {
                               setSettingsTab('general')
                               // Clear any cached settings
                               localStorage.removeItem('team-hub-settings')
-                              toast.success('Workspace reset', { description: 'All settings restored to defaults' })
+                              toast.success('Workspace reset')
                             }
                           }}>
                             Reset
@@ -2071,7 +2068,7 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete Workspace</p>
                             <p className="text-sm text-red-600/70">Permanently delete workspace</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => { if (confirm('DANGER: This will permanently delete the workspace and all data. Type "DELETE" to confirm.')) { toast.error('Deletion cancelled', { description: 'Please contact support to delete workspace' }) } }}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => { if (confirm('DANGER: This will permanently delete the workspace and all data. Type "DELETE" to confirm.')) { toast.error('Deletion cancelled') } }}>
                             Delete
                           </Button>
                         </div>
@@ -2176,7 +2173,7 @@ export default function TeamHubClient() {
                       <Headphones className="w-4 h-4 mr-2" />
                       Huddle
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(selectedMember.email); toast.success('Copied!', { description: 'Email copied to clipboard' }) }}>
+                    <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(selectedMember.email); toast.success('Copied!') }}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2242,7 +2239,7 @@ export default function TeamHubClient() {
 
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1" onClick={() => {
-                    toast.success('Opening channel', { description: `Navigating to #${selectedChannel.name}` })
+                    toast.success('Opening channel'` })
                     setSelectedChannel(null)
                   }}>Open Channel</Button>
                   <Button variant="outline" size="icon" onClick={() => {
@@ -2251,13 +2248,12 @@ export default function TeamHubClient() {
                       ch.id === selectedChannel.id ? { ...ch, isStarred: newStarredState } : ch
                     ))
                     setSelectedChannel({ ...selectedChannel, isStarred: newStarredState })
-                    toast.success(newStarredState ? 'Channel starred' : 'Channel unstarred', {
-                      description: `#${selectedChannel.name} has been ${newStarredState ? 'added to' : 'removed from'} your starred channels`
+                    toast.success(newStarredState ? 'Channel starred' : 'Channel unstarred' has been ${newStarredState ? 'added to' : 'removed from'} your starred channels`
                     })
                   }}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`#${selectedChannel.name}`); toast.success('Copied!', { description: 'Channel name copied' }) }}>
+                  <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`#${selectedChannel.name}`); toast.success('Copied!') }}>
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2307,7 +2303,7 @@ export default function TeamHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={teamHubAIInsights}
-            onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
+            onAskQuestion={(q) => toast.info('Question submitted')}
           />
           <PredictiveAnalytics predictions={teamHubPredictions} />
         </div>
@@ -2509,7 +2505,7 @@ export default function TeamHubClient() {
                   setChannels(prev => [...prev, newChannel])
                   setShowCreateChannelDialog(false)
                   setChannelForm({ name: '', description: '', isPrivate: false })
-                  toast.success('Channel created', { description: `#${newChannel.name} is ready to use` })
+                  toast.success('Channel created' is ready to use` })
                 }}
               >Create Channel</Button>
             </div>
@@ -2589,7 +2585,7 @@ export default function TeamHubClient() {
                 setHuddles(prev => [...prev, newHuddle])
                 setShowHuddleDialog(false)
                 setHuddleForm({ channelId: '', enableVideo: false, recordHuddle: false })
-                toast.success('Huddle started', { description: `Connected to #${selectedChannel?.name || 'general'}` })
+                toast.success('Huddle started'` })
               }}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Start Huddle
@@ -2680,8 +2676,7 @@ export default function TeamHubClient() {
                         setApps(prev => prev.map(a =>
                           a.id === app.id ? { ...a, isInstalled: newInstalledState } : a
                         ))
-                        toast.success(newInstalledState ? 'App installed' : 'App removed', {
-                          description: `${app.name} has been ${newInstalledState ? 'added to' : 'removed from'} your workspace`
+                        toast.success(newInstalledState ? 'App installed' : 'App removed' has been ${newInstalledState ? 'added to' : 'removed from'} your workspace`
                         })
                       }}>
                         {app.isInstalled ? 'Installed' : 'Add'}
@@ -2771,7 +2766,7 @@ export default function TeamHubClient() {
                   setWorkflows(prev => [...prev, newWorkflow])
                   setShowWorkflowBuilderDialog(false)
                   setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
-                  toast.success('Workflow created', { description: 'Add steps to complete your workflow' })
+                  toast.success('Workflow created')
                 }}
               >
                 Create Workflow
@@ -2816,7 +2811,7 @@ export default function TeamHubClient() {
                       }
                       setShowReactionsDialog(false)
                       setSelectedMessageForReaction(null)
-                      toast.success('Reaction added', { description: `You reacted with ${emoji}` })
+                      toast.success('Reaction added'` })
                     }}
                   >
                     {emoji}
@@ -2912,7 +2907,7 @@ export default function TeamHubClient() {
                     setShowThreadDialog(false)
                     setSelectedMessageForThread(null)
                     setReplyContent('')
-                    toast.success('Reply sent', { description: 'Your message has been posted to the thread' })
+                    toast.success('Reply sent')
                   }
                 }}
               >

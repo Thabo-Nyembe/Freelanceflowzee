@@ -603,7 +603,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Sending broadcast', { description: `"${broadcastTitle}" is being sent...` })
+      toast.success('Sending broadcast'" is being sent...` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -626,7 +626,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast scheduled', { description: `"${broadcastTitle}" has been scheduled` })
+      toast.success('Broadcast scheduled'" has been scheduled` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -648,7 +648,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.info('Broadcast paused', { description: `"${broadcastTitle}" delivery paused` })
+      toast.info('Broadcast paused'" delivery paused` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -681,7 +681,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast duplicated', { description: `Copy of "${broadcast.title}" created` })
+      toast.success('Broadcast duplicated'" created` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -761,7 +761,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Process import
   const processImport = () => {
-    toast.success('Contacts imported successfully', { description: 'Your contact list has been updated' })
+    toast.success('Contacts imported successfully')
     setShowImportDialog(false)
   }
 
@@ -783,7 +783,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save automation
   const saveAutomation = () => {
-    toast.success('Automation created', { description: 'Your automation workflow is now active' })
+    toast.success('Automation created')
     setShowAutomationDialog(false)
   }
 
@@ -794,7 +794,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save series
   const saveSeries = () => {
-    toast.success('Series created', { description: 'Your email series is ready to enroll users' })
+    toast.success('Series created')
     setShowSeriesDialog(false)
   }
 
@@ -805,7 +805,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save template
   const saveTemplate = () => {
-    toast.success('Template saved', { description: 'Your template is now available for use' })
+    toast.success('Template saved')
     setShowTemplateDialog(false)
   }
 
@@ -816,7 +816,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save segment
   const saveSegment = () => {
-    toast.success('Segment created', { description: 'Your audience segment has been saved' })
+    toast.success('Segment created')
     setShowSegmentDialog(false)
   }
 
@@ -827,7 +827,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save event
   const saveEvent = () => {
-    toast.success('Event defined', { description: 'Event tracking is now configured' })
+    toast.success('Event defined')
     setShowEventDialog(false)
   }
 
@@ -844,7 +844,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Save webhook
   const saveWebhook = () => {
-    toast.success('Webhook endpoint added', { description: 'Events will be sent to your endpoint' })
+    toast.success('Webhook endpoint added')
     setShowWebhookDialog(false)
   }
 
@@ -861,7 +861,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Confirm regenerate API key
   const confirmRegenerateApiKey = () => {
-    toast.success('API key regenerated', { description: 'Your old key is no longer valid' })
+    toast.success('API key regenerated')
     setShowApiKeyDialog(false)
   }
 
@@ -887,7 +887,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Confirm purge contacts
   const confirmPurgeContacts = () => {
-    toast.success('All contacts purged', { description: 'Your contact list has been cleared' })
+    toast.success('All contacts purged')
     setShowPurgeDialog(false)
   }
 
@@ -898,7 +898,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Confirm delete all campaigns
   const confirmDeleteAllCampaigns = () => {
-    toast.success('All campaigns deleted', { description: 'Campaign history has been cleared' })
+    toast.success('All campaigns deleted')
     setShowDeleteCampaignsDialog(false)
   }
 
@@ -909,7 +909,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Confirm close account
   const confirmCloseAccount = () => {
-    toast.error('Account closure initiated', { description: 'You will receive a confirmation email' })
+    toast.error('Account closure initiated')
     setShowCloseAccountDialog(false)
   }
 
@@ -918,28 +918,28 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     if (isConnected) {
       toast.info(`Opening ${appName} configuration`)
     } else {
-      toast.success(`Connecting to ${appName}...`, { description: 'Follow the authorization flow' })
+      toast.success(`Connecting to ${appName}...`)
     }
   }
 
   // Handle export all data
   const handleExportAllData = () => {
-    toast.success('Data export started', { description: 'You will receive an email when ready' })
+    toast.success('Data export started')
   }
 
   // Handle save general settings
   const _handleSaveGeneralSettings = () => {
-    toast.success('Settings saved', { description: 'Your broadcast settings have been updated' })
+    toast.success('Settings saved')
   }
 
   // Handle save email settings
   const _handleSaveEmailSettings = () => {
-    toast.success('Email settings saved', { description: 'Your default email settings have been updated' })
+    toast.success('Email settings saved')
   }
 
   // Handle save notification settings
   const _handleSaveNotificationSettings = () => {
-    toast.success('Notification settings saved', { description: 'Your alert preferences have been updated' })
+    toast.success('Notification settings saved')
   }
 
   // Initial fetch
@@ -1393,7 +1393,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.info('Opening automation editor', { description: `Editing "${automation.name}"` })
+                            toast.info('Opening automation editor'"` })
                           }}
                         >
                           Edit
@@ -1403,7 +1403,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           size="sm"
                           onClick={() => {
                             const action = automation.status === 'active' ? 'paused' : 'activated'
-                            toast.success(`Automation ${action}`, { description: `${automation.name} is now ${action}` })
+                            toast.success(`Automation ${action}` is now ${action}` })
                           }}
                         >
                           {automation.status === 'active' ? 'Pause' : 'Activate'}
@@ -1412,7 +1412,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success('Automation duplicated', { description: `Copy of "${automation.name}" created` })
+                            toast.success('Automation duplicated'" created` })
                           }}
                         >
                           Duplicate
@@ -1496,7 +1496,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info('Opening series editor', { description: `Editing steps for "${series.name}"` })
+                      toast.info('Opening series editor'"` })
                     }}
                   >
                     Edit Steps
@@ -1506,7 +1506,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     size="sm"
                     onClick={() => {
                       const action = series.status === 'active' ? 'paused' : 'activated'
-                      toast.success(`Series ${action}`, { description: `${series.name} is now ${action}` })
+                      toast.success(`Series ${action}` is now ${action}` })
                     }}
                   >
                     {series.status === 'active' ? 'Pause' : 'Activate'}
@@ -1515,7 +1515,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info('Opening enrollment settings', { description: `Configure enrollment rules for "${series.name}"` })
+                      toast.info('Opening enrollment settings'"` })
                     }}
                   >
                     Enrollment Settings
@@ -1532,7 +1532,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 <div
                   key={template.id}
                   onClick={() => {
-                    toast.info('Opening template preview', { description: `Previewing "${template.name}"` })
+                    toast.info('Opening template preview'"` })
                   }}
                   className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all"
                 >
@@ -2500,7 +2500,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <AIInsightsPanel
               insights={broadcastsAIInsights}
               title="Broadcast Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2810,7 +2810,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   const file = e.target.files?.[0]
                   if (file) {
                     setImportedFile(file)
-                    toast.success('File selected', { description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
+                    toast.success('File selected' (${(file.size / 1024).toFixed(1)} KB)` })
                   }
                 }}
               />
@@ -3144,7 +3144,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   size="sm"
                   onClick={() => {
                     setSegmentConditions([...segmentConditions, { field: '', operator: 'equals', value: '' }])
-                    toast.success('Condition added', { description: `${segmentConditions.length + 1} conditions total` })
+                    toast.success('Condition added' conditions total` })
                   }}
                 >
                   + Add Condition
@@ -3234,7 +3234,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   size="sm"
                   onClick={() => {
                     setEventProperties([...eventProperties, { name: '', type: 'string' }])
-                    toast.success('Property added', { description: `${eventProperties.length + 1} properties total` })
+                    toast.success('Property added' properties total` })
                   }}
                 >
                   + Add Property

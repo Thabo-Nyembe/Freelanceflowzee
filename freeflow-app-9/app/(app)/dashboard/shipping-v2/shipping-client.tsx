@@ -978,8 +978,7 @@ export default function ShippingClient() {
           .update({ status: 'label_created', updated_at: new Date().toISOString() })
           .eq('tracking_number', shipment.trackingNumber)
       }
-      toast.success('Label ready', {
-        description: `Shipping label for ${shipment.trackingNumber} is ready to print`
+      toast.success('Label ready' is ready to print`
       })
       fetchShipments()
     } catch (error) {
@@ -998,8 +997,7 @@ export default function ShippingClient() {
         description: 'Customer viewed tracking information',
         location: shipment.destination.city || 'Unknown',
       })
-      toast.info('Tracking', {
-        description: `Opening tracking for ${shipment.trackingNumber}`
+      toast.info('Tracking'`
       })
     } catch (error) {
       console.error('Error:', error)
@@ -1029,8 +1027,7 @@ export default function ShippingClient() {
       const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
       if (error) throw error
 
-      toast.success('Batch shipment created', {
-        description: `${selectedOrders.length} orders queued for shipment`
+      toast.success('Batch shipment created' orders queued for shipment`
       })
       setSelectedOrders([])
       fetchShipments()
@@ -1050,8 +1047,7 @@ export default function ShippingClient() {
 
       if (error) throw error
 
-      toast.info('Shipment cancelled', {
-        description: `Shipment ${trackingNumber} has been cancelled`
+      toast.info('Shipment cancelled' has been cancelled`
       })
       fetchShipments()
     } catch (error) {
@@ -1078,9 +1074,7 @@ export default function ShippingClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Exporting shipments', {
-        description: 'Shipping report downloaded'
-      })
+      toast.success('Exporting shipments')
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to export shipments')
@@ -2635,7 +2629,7 @@ export default function ShippingClient() {
             <AIInsightsPanel
               insights={mockShippingAIInsights}
               title="Shipping Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2933,7 +2927,7 @@ export default function ShippingClient() {
                         a.download = `shipment-${selectedShipment.id}.json`
                         a.click()
                         URL.revokeObjectURL(url)
-                        toast.success('Shipment downloaded', { description: `${selectedShipment.id} details saved` })
+                        toast.success('Shipment downloaded' details saved` })
                       }
                     }}>
                       <Download className="w-4 h-4 mr-2" />
@@ -2973,8 +2967,7 @@ export default function ShippingClient() {
                     fileInput.onchange = async (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0]
                       if (file) {
-                        toast.success('File selected', {
-                          description: `${file.name} ready for import`
+                        toast.success('File selected' ready for import`
                         })
                         // Process file would go here
                       }
@@ -3294,7 +3287,7 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowPriorityFirstDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 setPendingOrders(prev => [...prev].sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0)))
-                toast.success('Priority orders sorted', { description: 'Priority orders moved to top' })
+                toast.success('Priority orders sorted')
                 setShowPriorityFirstDialog(false)
               }}>Sort Priority First</Button>
             </div>
@@ -3321,9 +3314,9 @@ export default function ShippingClient() {
                   o.customer.toLowerCase().includes('search') || o.id.toLowerCase().includes('search')
                 )
                 if (searchResults.length > 0) {
-                  toast.success('Orders found', { description: `${searchResults.length} matching orders` })
+                  toast.success('Orders found' matching orders` })
                 } else {
-                  toast.info('No orders found', { description: 'Try a different search term' })
+                  toast.info('No orders found')
                 }
                 setShowFindOrderDialog(false)
               }}>Search</Button>
@@ -3394,8 +3387,7 @@ export default function ShippingClient() {
 
                     if (shipments && shipments.length > 0) {
                       const shipment = shipments[0]
-                      toast.success('Shipment found', {
-                        description: `Status: ${shipment.status} - ${shipment.recipient_name || 'Unknown recipient'}`
+                      toast.success('Shipment found' - ${shipment.recipient_name || 'Unknown recipient'}`
                       })
                       // Log tracking view
                       await supabase.from('shipment_tracking').insert({
@@ -3408,13 +3400,10 @@ export default function ShippingClient() {
                       // Check mock data
                       const mockShipment = mockShipments.find(s => s.trackingNumber === trackingInput.trim())
                       if (mockShipment) {
-                        toast.success('Shipment found', {
-                          description: `Status: ${mockShipment.status.replace('_', ' ')} - ${mockShipment.destination.name}`
+                        toast.success('Shipment found' - ${mockShipment.destination.name}`
                         })
                       } else {
-                        toast.info('No shipment found', {
-                          description: 'Try a different tracking number'
-                        })
+                        toast.info('No shipment found')
                       }
                     }
                   } catch (error) {
@@ -3654,7 +3643,7 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowBatchPrintDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 window.print()
-                toast.success('Labels sent to printer', { description: `${mockLabels.length} labels queued` })
+                toast.success('Labels sent to printer' labels queued` })
                 setShowBatchPrintDialog(false)
               }}>Print All</Button>
             </div>
@@ -3686,7 +3675,7 @@ export default function ShippingClient() {
                 a.download = `shipping-labels-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Labels downloaded', { description: `${mockLabels.length} labels exported` })
+                toast.success('Labels downloaded' labels exported` })
                 setShowDownloadAllLabelsDialog(false)
               }}>Download</Button>
             </div>
@@ -3762,9 +3751,9 @@ export default function ShippingClient() {
               <Button onClick={() => {
                 const foundLabel = mockLabels.find(l => l.trackingNumber.includes('TRK'))
                 if (foundLabel) {
-                  toast.success('Label found', { description: `${foundLabel.carrier} - ${foundLabel.trackingNumber}` })
+                  toast.success('Label found' - ${foundLabel.trackingNumber}` })
                 } else {
-                  toast.info('Label not found', { description: 'Try a different tracking number' })
+                  toast.info('Label not found')
                 }
                 setShowFindLabelDialog(false)
               }}>Search</Button>
@@ -3890,7 +3879,7 @@ export default function ShippingClient() {
                   a.download = `label-${selectedLabel.trackingNumber}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Label downloaded', { description: selectedLabel.trackingNumber })
+                  toast.success('Label downloaded')
                 }
                 setShowDownloadLabelDialog(false)
               }}>Download</Button>
@@ -3919,7 +3908,7 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowPrintLabelDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 window.print()
-                toast.success('Label sent to printer', { description: selectedLabel?.trackingNumber || 'Label printed' })
+                toast.success('Label sent to printer')
                 setShowPrintLabelDialog(false)
               }}>Print</Button>
             </div>
@@ -4042,8 +4031,7 @@ export default function ShippingClient() {
                     }))
                   ).sort((a, b) => parseFloat(a.rate) - parseFloat(b.rate))
 
-                  toast.success('Rates retrieved', {
-                    description: `Best rate: ${rates[0].carrier} ${rates[0].service} - $${rates[0].rate}`
+                  toast.success('Rates retrieved' ${rates[0].service} - $${rates[0].rate}`
                   })
                   setShowCompareRatesDialog(false)
                 }}
@@ -4126,8 +4114,7 @@ export default function ShippingClient() {
                           }, { onConflict: 'user_id,carrier_code' })
 
                         if (error) throw error
-                        toast.success('API key updated', {
-                          description: `${carrier.name} credentials have been updated`
+                        toast.success('API key updated' credentials have been updated`
                         })
                       } catch (error) {
                         console.error('Error updating API key:', error)
@@ -4299,7 +4286,7 @@ export default function ShippingClient() {
                 a.download = `shipping-report-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Report generated', { description: 'Download started' })
+                toast.success('Report generated')
                 setShowReportsDialog(false)
               }}>Generate</Button>
             </div>

@@ -781,7 +781,7 @@ export default function ResourcesClient() {
           allocated: resource.allocated_hours + 8,
           capacity: resource.capacity_hours
         })
-        toast.success('Resource assigned', { description: `${resourceName} assigned to ${projectName}` })
+        toast.success('Resource assigned' assigned to ${projectName}` })
         refetch()
       }
     } catch (error) {
@@ -793,7 +793,7 @@ export default function ResourcesClient() {
   const handleDeleteResource = async (id: string, name: string) => {
     try {
       await deleteResource(id)
-      toast.success('Resource removed', { description: `${name} has been removed` })
+      toast.success('Resource removed' has been removed` })
       refetch()
     } catch (error) {
       toast.error('Failed to remove resource')
@@ -810,7 +810,7 @@ export default function ResourcesClient() {
           allocated: hours,
           capacity: resource.capacity_hours
         })
-        toast.success('Capacity updated', { description: `${resourceName}'s allocation updated` })
+        toast.success('Capacity updated''s allocation updated` })
         refetch()
       }
     } catch (error) {
@@ -2204,7 +2204,7 @@ export default function ResourcesClient() {
             <AIInsightsPanel
               insights={mockResourcesAIInsights}
               title="Resource Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

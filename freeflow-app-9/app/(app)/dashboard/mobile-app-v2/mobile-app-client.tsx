@@ -326,7 +326,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   // CRUD Handlers
   const handleCreateBuild = async () => {
     if (!userId || !buildForm.version.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in version number' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -342,11 +342,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         min_os_version: buildForm.platform === 'ios' ? 'iOS 15.0' : 'Android 10'
       })
       if (error) throw error
-      toast.success('Build created', { description: `Build v${buildForm.version} is being processed` })
+      toast.success('Build created' is being processed` })
       setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
       setShowCreateBuildModal(false)
     } catch (err: any) {
-      toast.error('Failed to create build', { description: err.message })
+      toast.error('Failed to create build')
     } finally { setIsLoading(false) }
   }
 
@@ -355,9 +355,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
       if (error) throw error
-      toast.success('Submitted to store', { description: `Build submitted to ${platform} for review` })
+      toast.success('Submitted to store' for review` })
     } catch (err: any) {
-      toast.error('Submission failed', { description: err.message })
+      toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
 
@@ -391,17 +391,17 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_builds').delete().eq('id', buildId)
       if (error) throw error
-      toast.success('Build deleted', { description: `Build v${buildVersion} has been removed` })
+      toast.success('Build deleted' has been removed` })
       setSelectedBuild(null)
       setShowBuildDialog(false)
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
   const handleReplyToReview = async () => {
     if (!selectedReview || !responseText.trim()) {
-      toast.error('Missing response', { description: 'Please write a response' })
+      toast.error('Missing response')
       return
     }
     setIsLoading(true)
@@ -413,11 +413,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         responded_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Reply sent', { description: `Response sent to ${selectedReview.author}` })
+      toast.success('Reply sent'` })
       setResponseText('')
       setShowReviewDialog(false)
     } catch (err: any) {
-      toast.error('Reply failed', { description: err.message })
+      toast.error('Reply failed')
     } finally { setIsLoading(false) }
   }
 
@@ -431,15 +431,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         reported_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.info('Review reported', { description: 'Review has been flagged for moderation' })
+      toast.info('Review reported')
     } catch (err: any) {
-      toast.error('Report failed', { description: err.message })
+      toast.error('Report failed')
     } finally { setIsLoading(false) }
   }
 
   const handleCreateCampaign = async () => {
     if (!userId || !campaignForm.title.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in campaign title' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -453,11 +453,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'draft'
       })
       if (error) throw error
-      toast.success('Campaign created', { description: `"${campaignForm.title}" is ready to schedule` })
+      toast.success('Campaign created'" is ready to schedule` })
       setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
       setShowCreateCampaignModal(false)
     } catch (err: any) {
-      toast.error('Failed to create campaign', { description: err.message })
+      toast.error('Failed to create campaign')
     } finally { setIsLoading(false) }
   }
 
@@ -466,9 +466,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign sent', { description: `"${campaignTitle}" has been sent` })
+      toast.success('Campaign sent'" has been sent` })
     } catch (err: any) {
-      toast.error('Send failed', { description: err.message })
+      toast.error('Send failed')
     } finally { setIsLoading(false) }
   }
 
@@ -477,15 +477,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign deleted', { description: `"${campaignTitle}" has been removed` })
+      toast.success('Campaign deleted'" has been removed` })
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
   const handleCreateIap = async () => {
     if (!userId || !iapForm.productId.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in product ID' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -499,11 +499,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'pending'
       })
       if (error) throw error
-      toast.success('Product created', { description: `"${iapForm.name}" is pending approval` })
+      toast.success('Product created'" is pending approval` })
       setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
       setShowCreateIapModal(false)
     } catch (err: any) {
-      toast.error('Failed to create product', { description: err.message })
+      toast.error('Failed to create product')
     } finally { setIsLoading(false) }
   }
 
@@ -512,9 +512,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     try {
       const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
       if (error) throw error
-      toast.success('Product deleted', { description: `"${iapName}" has been removed` })
+      toast.success('Product deleted'" has been removed` })
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
 
@@ -527,9 +527,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('Settings saved', { description: `${section} settings have been updated` })
+      toast.success('Settings saved' settings have been updated` })
     } catch (err: any) {
-      toast.error('Save failed', { description: err.message })
+      toast.error('Save failed')
     } finally { setIsLoading(false) }
   }
 
@@ -549,7 +549,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   // Quick Action Handlers
   const handleQueueBuild = async () => {
     if (!userId || !queueBuildForm.version.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in version number' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -564,17 +564,17 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         queued_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Build Queued', { description: `${queueBuildForm.platform.toUpperCase()} build v${queueBuildForm.version} has been queued for processing` })
+      toast.success('Build Queued' build v${queueBuildForm.version} has been queued for processing` })
       setQueueBuildForm({ version: '', platform: 'ios', buildType: 'debug', branch: 'main' })
       setShowQueueBuildDialog(false)
     } catch (err: any) {
-      toast.error('Failed to queue build', { description: err.message })
+      toast.error('Failed to queue build')
     } finally { setIsLoading(false) }
   }
 
   const handleSubmitForReview = async () => {
     if (!userId || !submitReviewForm.buildId || !submitReviewForm.releaseNotes.trim()) {
-      toast.error('Missing required fields', { description: 'Please select a build and provide release notes' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -586,11 +586,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         submitted_at: new Date().toISOString()
       }).eq('id', submitReviewForm.buildId)
       if (error) throw error
-      toast.success('Submitted for Review', { description: 'Your app has been submitted to the App Store for review' })
+      toast.success('Submitted for Review')
       setSubmitReviewForm({ buildId: '', releaseNotes: '', targetAudience: 'all' })
       setShowSubmitReviewDialog(false)
     } catch (err: any) {
-      toast.error('Submission failed', { description: err.message })
+      toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
 
@@ -1541,7 +1541,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <Label className="text-gray-900 dark:text-white font-medium">Bundle ID</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">com.freeflow.app</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('com.freeflow.app'); toast.success('Copied to clipboard', { description: 'Bundle ID has been copied' }); }}>
+                          <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('com.freeflow.app'); toast.success('Copied to clipboard'); }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1804,7 +1804,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">App Store Connect API Key</Label>
-                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); toast.success('Copied to clipboard', { description: 'API key has been copied' }); }}>
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); toast.success('Copied to clipboard'); }}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -2043,7 +2043,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <AIInsightsPanel
               insights={mockMobileAppAIInsights}
               title="Mobile App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2775,7 +2775,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button variant="outline" onClick={() => setShowCrashReportsDialog(false)}>Close</Button>
               <Button onClick={() => {
                 window.open('https://console.firebase.google.com/crashlytics', '_blank')
-                toast.info('Opening Crashlytics dashboard...', { description: 'Redirecting to Firebase Console' })
+                toast.info('Opening Crashlytics dashboard...')
               }}>View in Crashlytics</Button>
             </DialogFooter>
           </div>

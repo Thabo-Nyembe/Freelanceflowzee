@@ -449,7 +449,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   // Handlers - Real CRUD Operations
   const handleCreateRole = async () => {
     if (!newRole.role_name || !newRole.display_name) {
-      toast.error('Validation Error', { description: 'Role name and display name are required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -474,12 +474,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         priority: 1
       })
       if (error) throw error
-      toast.success('Role Created', { description: `${newRole.display_name} has been created` })
+      toast.success('Role Created' has been created` })
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error creating role', { description: err.message })
+      toast.error('Error creating role')
     } finally {
       setIsLoading(false)
     }
@@ -497,7 +497,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
       const currentPermissions = roleData?.permissions || []
       if (currentPermissions.includes(permission)) {
-        toast.info('Already assigned', { description: `${permission} is already assigned to ${roleName}` })
+        toast.info('Already assigned' is already assigned to ${roleName}` })
         return
       }
 
@@ -505,10 +505,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: [...currentPermissions, permission]
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission assigned', { description: `${permission} added to ${roleName}` })
+      toast.success('Permission assigned' added to ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error assigning permission', { description: err.message })
+      toast.error('Error assigning permission')
     } finally {
       setIsLoading(false)
     }
@@ -531,10 +531,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: updatedPermissions
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission revoked', { description: `${permission} removed from ${roleName}` })
+      toast.success('Permission revoked' removed from ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error revoking permission', { description: err.message })
+      toast.error('Error revoking permission')
     } finally {
       setIsLoading(false)
     }
@@ -547,11 +547,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         deleted_at: new Date().toISOString()
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Role deleted', { description: `${roleName} has been deleted` })
+      toast.success('Role deleted' has been deleted` })
       setSelectedRole(null)
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error deleting role', { description: err.message })
+      toast.error('Error deleting role')
     } finally {
       setIsLoading(false)
     }
@@ -569,9 +569,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.download = `permissions-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Permission matrix downloaded' })
+      toast.success('Export complete')
     } catch (err: any) {
-      toast.error('Export failed', { description: err.message })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -588,11 +588,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const unusedRoles = roles?.filter(r => r.current_users === 0) || []
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
-      toast.success('Audit complete', {
-        description: `Found ${unusedRoles.length} unused roles and ${expiredAssignments.length} expired assignments`
+      toast.success('Audit complete' unused roles and ${expiredAssignments.length} expired assignments`
       })
     } catch (err: any) {
-      toast.error('Audit failed', { description: err.message })
+      toast.error('Audit failed')
     } finally {
       setIsLoading(false)
     }
@@ -600,7 +599,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   const handleCreateUser = async () => {
     if (!newUser.email || !newUser.firstName || !newUser.lastName) {
-      toast.error('Validation Error', { description: 'Email, first name, and last name are required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -609,11 +608,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      toast.success('User invited', { description: `Invitation sent to ${newUser.email}` })
+      toast.success('User invited'` })
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
     } catch (err: any) {
-      toast.error('Error creating user', { description: err.message })
+      toast.error('Error creating user')
     } finally {
       setIsLoading(false)
     }
@@ -621,7 +620,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   const handleCreateGroup = async () => {
     if (!newGroup.name) {
-      toast.error('Validation Error', { description: 'Group name is required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -630,11 +629,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (!user) throw new Error('Not authenticated')
 
       // Groups would need their own table - showing pattern
-      toast.success('Group created', { description: `${newGroup.name} has been created` })
+      toast.success('Group created' has been created` })
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
     } catch (err: any) {
-      toast.error('Error creating group', { description: err.message })
+      toast.error('Error creating group')
     } finally {
       setIsLoading(false)
     }
@@ -657,10 +656,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         assigned_by_id: user.id
       })
       if (error) throw error
-      toast.success('User assigned', { description: 'User has been assigned to the role' })
+      toast.success('User assigned')
       refetchAssignments?.()
     } catch (err: any) {
-      toast.error('Error assigning user', { description: err.message })
+      toast.error('Error assigning user')
     } finally {
       setIsLoading(false)
     }
@@ -677,9 +676,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Audit logs exported', { description: 'Downloaded audit-logs.json' })
+      toast.success('Audit logs exported')
     } catch (err: any) {
-      toast.error('Export failed', { description: err.message })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -691,9 +690,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       // Simulate token regeneration - in production this would be an API call
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Token regenerated', { description: 'New SCIM token has been generated. Copy it before leaving.' })
+      toast.success('Token regenerated')
     } catch (err: any) {
-      toast.error('Failed to regenerate token', { description: err.message })
+      toast.error('Failed to regenerate token')
     } finally {
       setIsLoading(false)
     }
@@ -705,10 +704,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       const { error } = await supabase.from('roles').update({ permissions: [] }).neq('role_type', 'system')
       if (error) throw error
-      toast.success('Permissions reset', { description: 'All custom permissions have been reset to defaults' })
+      toast.success('Permissions reset')
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Reset failed', { description: err.message })
+      toast.error('Reset failed')
     } finally {
       setIsLoading(false)
     }
@@ -720,9 +719,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       // In production, this would call an API to invalidate all sessions
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Sessions revoked', { description: 'All sessions have been revoked. Users must re-authenticate.' })
+      toast.success('Sessions revoked')
     } catch (err: any) {
-      toast.error('Failed to revoke sessions', { description: err.message })
+      toast.error('Failed to revoke sessions')
     } finally {
       setIsLoading(false)
     }
@@ -734,9 +733,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       // In production, this would call an API to delete all keys
       await new Promise(r => setTimeout(r, 500))
-      toast.success('API keys deleted', { description: 'All API keys have been deleted' })
+      toast.success('API keys deleted')
     } catch (err: any) {
-      toast.error('Failed to delete API keys', { description: err.message })
+      toast.error('Failed to delete API keys')
     } finally {
       setIsLoading(false)
     }
@@ -755,9 +754,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.download = `permissions-full-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Data exported', { description: 'Full data export downloaded' })
+      toast.success('Data exported')
     } catch (err: any) {
-      toast.error('Export failed', { description: err.message })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -768,9 +767,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) throw error
-      toast.success('Password reset sent', { description: `Reset email sent to ${email}` })
+      toast.success('Password reset sent'` })
     } catch (err: any) {
-      toast.error('Failed to send reset', { description: err.message })
+      toast.error('Failed to send reset')
     } finally {
       setIsLoading(false)
     }
@@ -782,9 +781,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       // In production, this would update user status
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Account locked', { description: `${userName}'s account has been locked` })
+      toast.success('Account locked''s account has been locked` })
     } catch (err: any) {
-      toast.error('Failed to lock account', { description: err.message })
+      toast.error('Failed to lock account')
     } finally {
       setIsLoading(false)
     }
@@ -800,9 +799,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       ([key, value]) => value !== 'all' && value !== ''
     ).length
 
-    toast.success('Filters applied', {
-      description: activeFilterCount > 0
-        ? `${activeFilterCount} filter(s) applied to user list`
+    toast.success('Filters applied' filter(s) applied to user list`
         : 'All filters cleared'
     })
     setShowAdvancedFilters(false)
@@ -811,17 +808,17 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   // Handler for creating a policy
   const handleCreatePolicy = async () => {
     if (!newPolicy.name) {
-      toast.error('Validation Error', { description: 'Policy name is required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Policy created', { description: `${newPolicy.name} has been created successfully` })
+      toast.success('Policy created' has been created successfully` })
       setShowCreatePolicy(false)
       setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
     } catch (err: any) {
-      toast.error('Error creating policy', { description: err.message })
+      toast.error('Error creating policy')
     } finally {
       setIsLoading(false)
     }
@@ -832,10 +829,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Application added', { description: `${appName} has been added to your organization` })
+      toast.success('Application added' has been added to your organization` })
       setShowApplicationCatalog(false)
     } catch (err: any) {
-      toast.error('Error adding application', { description: err.message })
+      toast.error('Error adding application')
     } finally {
       setIsLoading(false)
     }
@@ -844,7 +841,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   // Handler for adding attribute mapping
   const handleAddAttributeMapping = () => {
     if (!newMapping.source || !newMapping.target) {
-      toast.error('Validation Error', { description: 'Both source and target attributes are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -853,15 +850,14 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       m => m.source === newMapping.source && m.target === newMapping.target
     )
     if (isDuplicate) {
-      toast.error('Duplicate Mapping', { description: 'This attribute mapping already exists' })
+      toast.error('Duplicate Mapping')
       return
     }
 
     // Add the new mapping to saved mappings
     setSavedAttributeMappings(prev => [...prev, { ...newMapping }])
 
-    toast.success('Mapping added', {
-      description: `${newMapping.source} -> ${newMapping.target} mapping created (${savedAttributeMappings.length + 1} total)`
+    toast.success('Mapping added' -> ${newMapping.target} mapping created (${savedAttributeMappings.length + 1} total)`
     })
     setShowAttributeMapping(false)
     setNewMapping({ source: '', target: '', required: false })
@@ -870,17 +866,17 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   // Handler for adding webhook
   const handleAddWebhook = async () => {
     if (!newWebhook.url) {
-      toast.error('Validation Error', { description: 'Webhook URL is required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Webhook created', { description: 'Webhook endpoint has been configured' })
+      toast.success('Webhook created')
       setShowWebhookConfig(false)
       setNewWebhook({ url: '', events: [] })
     } catch (err: any) {
-      toast.error('Error creating webhook', { description: err.message })
+      toast.error('Error creating webhook')
     } finally {
       setIsLoading(false)
     }
@@ -892,13 +888,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       await new Promise(r => setTimeout(r, 500))
       if (action === 'connect') {
-        toast.success('Directory connected', { description: `${directoryName} has been connected successfully` })
+        toast.success('Directory connected' has been connected successfully` })
       } else {
-        toast.success('Configuration saved', { description: `${directoryName} configuration updated` })
+        toast.success('Configuration saved' configuration updated` })
       }
       setShowDirectoryConfig(null)
     } catch (err: any) {
-      toast.error(`Error ${action}ing directory`, { description: err.message })
+      toast.error(`Error ${action}ing directory`)
     } finally {
       setIsLoading(false)
     }
@@ -910,13 +906,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     try {
       await new Promise(r => setTimeout(r, 500))
       if (action === 'connect') {
-        toast.success('HR system connected', { description: `${systemName} has been connected successfully` })
+        toast.success('HR system connected' has been connected successfully` })
       } else {
-        toast.success('Configuration saved', { description: `${systemName} configuration updated` })
+        toast.success('Configuration saved' configuration updated` })
       }
       setShowHRSystemConfig(null)
     } catch (err: any) {
-      toast.error(`Error ${action}ing HR system`, { description: err.message })
+      toast.error(`Error ${action}ing HR system`)
     } finally {
       setIsLoading(false)
     }
@@ -928,12 +924,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('User updated', { description: `${editingUser.displayName}'s profile has been updated` })
+      toast.success('User updated''s profile has been updated` })
       setShowUserEditor(false)
       setEditingUser(null)
       setSelectedUser(null)
     } catch (err: any) {
-      toast.error('Error updating user', { description: err.message })
+      toast.error('Error updating user')
     } finally {
       setIsLoading(false)
     }
@@ -945,10 +941,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Members added', { description: `${userIds.length} member(s) added to ${selectedGroup.name}` })
+      toast.success('Members added' member(s) added to ${selectedGroup.name}` })
       setShowMemberSelector(false)
     } catch (err: any) {
-      toast.error('Error adding members', { description: err.message })
+      toast.error('Error adding members')
     } finally {
       setIsLoading(false)
     }
@@ -960,12 +956,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Group updated', { description: `${editingGroup.name} has been updated` })
+      toast.success('Group updated' has been updated` })
       setShowGroupEditor(false)
       setEditingGroup(null)
       setSelectedGroup(null)
     } catch (err: any) {
-      toast.error('Error updating group', { description: err.message })
+      toast.error('Error updating group')
     } finally {
       setIsLoading(false)
     }
@@ -977,10 +973,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Users assigned', { description: `${userIds.length} user(s) assigned to ${selectedRole.displayName}` })
+      toast.success('Users assigned' user(s) assigned to ${selectedRole.displayName}` })
       setShowUserAssignment(false)
     } catch (err: any) {
-      toast.error('Error assigning users', { description: err.message })
+      toast.error('Error assigning users')
     } finally {
       setIsLoading(false)
     }
@@ -992,12 +988,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       await new Promise(r => setTimeout(r, 500))
-      toast.success('Role updated', { description: `${editingRole.displayName} has been updated` })
+      toast.success('Role updated' has been updated` })
       setShowRoleEditor(false)
       setEditingRole(null)
       setSelectedRole(null)
     } catch (err: any) {
-      toast.error('Error updating role', { description: err.message })
+      toast.error('Error updating role')
     } finally {
       setIsLoading(false)
     }
@@ -1007,7 +1003,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAIInsightAction = (insight: { id: string; type: 'success' | 'warning' | 'info'; title?: string; description?: string; category?: string }) => {
     // Don't process already actioned insights
     if (actionedInsights.has(insight.id)) {
-      toast.info('Already Processed', { description: 'This insight has already been addressed' })
+      toast.info('Already Processed')
       return
     }
 
@@ -1017,11 +1013,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         // For security warnings, navigate to relevant tab or trigger review
         if (insight.category === 'Security') {
           setActiveTab('audit')
-          toast.warning('Security Review Required', {
-            description: `${insight.title}: ${insight.description}. Opening audit logs for investigation.`
+          toast.warning('Security Review Required': ${insight.description}. Opening audit logs for investigation.`
           })
         } else {
-          toast.warning('Action Required', { description: insight.description || 'Please review this warning' })
+          toast.warning('Action Required')
         }
         break
 
@@ -1029,18 +1024,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         // For optimization recommendations, guide user to relevant settings
         if (insight.category === 'Optimization') {
           setActiveTab('roles')
-          toast.info('Review Recommended', {
-            description: `${insight.title}: Opening roles tab for permission review.`
+          toast.info('Review Recommended': Opening roles tab for permission review.`
           })
         } else {
-          toast.info('Insight Noted', { description: insight.description || 'This information has been noted' })
+          toast.info('Insight Noted')
         }
         break
 
       case 'success':
         // For success items, mark as acknowledged
-        toast.success('Compliance Verified', {
-          description: `${insight.title} has been acknowledged and logged.`
+        toast.success('Compliance Verified' has been acknowledged and logged.`
         })
         break
     }
@@ -1938,7 +1931,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           <Label>Bearer Token</Label>
                           <div className="flex items-center gap-2 mt-1">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'); toast.success('Copied', { description: 'Token copied to clipboard' }) }}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'); toast.success('Copied') }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <Button variant="outline" className="w-full" onClick={handleRegenerateToken} disabled={isLoading}>
