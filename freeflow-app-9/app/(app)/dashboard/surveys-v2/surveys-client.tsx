@@ -648,11 +648,10 @@ export default function SurveysClient() {
     setShowDeleteDialog(true)
   }
 
-  // Combine database surveys with mock surveys for display
-  // Database surveys take priority, mock surveys are for demo purposes when no real data
+  // Map database surveys to display format
   const combinedSurveys = useMemo(() => {
     // Map database surveys to the local Survey interface
-    const dbSurveysMapped: Survey[] = dbSurveys.map(dbSurvey => ({
+    return (dbSurveys || []).map(dbSurvey => ({
       id: dbSurvey.id,
       title: dbSurvey.title,
       description: dbSurvey.description || '',
@@ -677,9 +676,6 @@ export default function SurveysClient() {
         customThankYou: 'Thank you for your feedback!'
       }
     }))
-
-    // Return database surveys if available, otherwise show mock surveys as demo
-    return dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys
   }, [dbSurveys])
 
   // Computed values
@@ -697,21 +693,29 @@ export default function SurveysClient() {
     return mockResponses.filter(r => r.surveyId === selectedSurvey.id)
   }, [selectedSurvey])
 
-  // Computed stats - prefer database stats over mock stats
+  // Computed stats from database
   const displayStats = useMemo(() => {
-    if (dbStats && dbSurveys.length > 0) {
+    if (!dbStats) {
       return {
-        totalSurveys: dbStats.total,
-        activeSurveys: dbStats.active,
-        totalResponses: dbStats.totalResponses,
-        avgCompletionRate: Math.round(dbStats.avgCompletionRate * 10) / 10,
-        avgNPS: Math.round(dbStats.avgNPS * 10) / 10 || 0,
-        responsesThisWeek: mockStats.responsesThisWeek, // Would need additional query for real data
-        responsesLastWeek: mockStats.responsesLastWeek
+        totalSurveys: 0,
+        activeSurveys: 0,
+        totalResponses: 0,
+        avgCompletionRate: 0,
+        avgNPS: 0,
+        responsesThisWeek: 0,
+        responsesLastWeek: 0
       }
     }
-    return mockStats
-  }, [dbStats, dbSurveys])
+    return {
+      totalSurveys: dbStats.total,
+      activeSurveys: dbStats.active,
+      totalResponses: dbStats.totalResponses,
+      avgCompletionRate: Math.round(dbStats.avgCompletionRate * 10) / 10,
+      avgNPS: Math.round(dbStats.avgNPS * 10) / 10 || 0,
+      responsesThisWeek: mockStats.responsesThisWeek, // Would need additional query for real data
+      responsesLastWeek: mockStats.responsesLastWeek
+    }
+  }, [dbStats])
 
   const npsDistribution = useMemo(() => {
     const promoters = mockResponses.filter(r => r.npsScore && r.npsScore >= 9).length
