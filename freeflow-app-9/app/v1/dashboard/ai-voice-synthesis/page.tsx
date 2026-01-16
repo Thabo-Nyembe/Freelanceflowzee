@@ -38,7 +38,6 @@ import { toast } from 'sonner'
 
 const logger = createFeatureLogger('AI-Voice-Synthesis')
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -56,7 +55,6 @@ type ViewMode = 'synthesize' | 'voices' | 'projects' | 'analytics'
 type LayoutMode = 'grid' | 'list'
 
 export default function AIVoiceSynthesisPage() {
-  // A+++ STATE MANAGEMENT
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -90,22 +88,15 @@ export default function AIVoiceSynthesisPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
 
-  // A+++ LOAD AI VOICE SYNTHESIS DATA
   useEffect(() => {
     const loadAIVoiceSynthesisData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsPageLoading(false)
+      if (!userId) {        setIsPageLoading(false)
         return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)
-
-        logger.info('Loading AI Voice Synthesis data from Supabase', { userId })
-
-        // Parallel data loading - 4 simultaneous queries
+        setError(null)        // Parallel data loading - 4 simultaneous queries
         const [voicesResult, synthesesResult, projectsResult, statsResult] = await Promise.all([
           getVoices({ is_public: true }),
           getVoiceSyntheses(userId),
@@ -146,15 +137,7 @@ export default function AIVoiceSynthesisPage() {
         }
         if (statsResult.data) {
           setStats(statsResult.data)
-        }
-
-        logger.info('AI Voice Synthesis data loaded', {
-          voices: voicesResult.data?.length || 0,
-          syntheses: synthesesResult.data?.length || 0,
-          projects: projectsResult.data?.length || 0
-        })
-
-        // Data loaded successfully - show toast
+        }        // Data loaded successfully - show toast
         toast.success(`AI Voice Synthesis loaded - ${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`)
 
         setIsPageLoading(false)
@@ -180,22 +163,7 @@ export default function AIVoiceSynthesisPage() {
   const estimatedDuration = estimateDuration(characterCount, speed[0])
   const estimatedCost = calculateCost(characterCount, selectedVoice?.isPremium || false)
 
-  const handleSynthesize = async () => {
-    logger.info('Starting voice synthesis', {
-      voice: selectedVoice.name,
-      voiceId: selectedVoice.id,
-      characterCount,
-      estimatedDuration,
-      estimatedCost,
-      speed: speed[0],
-      pitch: pitch[0],
-      volume: volume[0],
-      audioFormat,
-      audioQuality,
-      language: selectedVoice.language
-    })
-
-    setIsSynthesizing(true)
+  const handleSynthesize = async () => {    setIsSynthesizing(true)
 
     const startTime = Date.now()
     const fileSize = Math.round(estimatedDuration * (audioQuality === 'high' ? 128 : audioQuality === 'medium' ? 96 : 64) / 8)
@@ -250,16 +218,7 @@ export default function AIVoiceSynthesisPage() {
           total_characters: characterCount,
           total_duration: estimatedDuration,
           total_cost: estimatedCost
-        })
-
-        logger.info('Voice synthesis saved to database', {
-          synthesisId: synthesis?.id,
-          voice: selectedVoice.name,
-          characterCount,
-          duration: estimatedDuration
-        })
-
-        announce('Voice synthesis completed', 'polite')
+        })        announce('Voice synthesis completed', 'polite')
         return { synthesis, fileSize }
       } else {
         // Fallback for non-authenticated users - still call API but don't save
@@ -305,7 +264,6 @@ export default function AIVoiceSynthesisPage() {
     setTimeout(() => setCopiedSSML(false), 2000)
   }
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
@@ -322,7 +280,6 @@ export default function AIVoiceSynthesisPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-6 pb-20 relative overflow-hidden">
@@ -573,7 +530,7 @@ export default function AIVoiceSynthesisPage() {
                         return
                       }
                       setIsPlaying(!isPlaying)
-                      toast.info(isPlaying ? 'Preview paused' : 'Playing preview', { description: 'Text-to-speech preview' })
+                      toast.info(isPlaying ? 'Preview paused' : 'Playing preview')
                     }}>
                       <Play className="w-4 h-4" />
                     </Button>
