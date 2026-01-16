@@ -267,340 +267,6 @@ interface DeliverabilityReport {
   recommendations: string[]
 }
 
-// ============== MOCK DATA ==============
-
-const mockCampaigns: Campaign[] = [
-  {
-    id: 'camp1',
-    name: 'Summer Sale 2024',
-    description: 'Annual summer sale announcement with exclusive discounts',
-    type: 'email',
-    emailType: 'regular',
-    status: 'completed',
-    subject: '🌞 Summer Sale is Here! Up to 50% Off',
-    previewText: 'Don\'t miss our biggest sale of the year',
-    fromName: 'FreeFlow Store',
-    fromEmail: 'hello@freeflow.com',
-    audienceId: 'aud1',
-    audienceName: 'All Subscribers',
-    audienceSize: 12450,
-    tags: ['sale', 'summer', '2024'],
-    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
-    stats: {
-      sent: 12450, delivered: 12234, bounced: 216, opens: 5856, uniqueOpens: 4234,
-      clicks: 1890, uniqueClicks: 1456, unsubscribes: 23, complaints: 2,
-      revenue: 45670, conversions: 234, openRate: 34.6, clickRate: 11.9,
-      bounceRate: 1.7, unsubscribeRate: 0.18, deliverabilityRate: 98.3
-    },
-    createdAt: new Date('2024-06-01'),
-    updatedAt: new Date('2024-06-15'),
-    sentAt: new Date('2024-06-15T10:00:00')
-  },
-  {
-    id: 'camp2',
-    name: 'Welcome Series - Day 1',
-    description: 'First email in welcome automation series',
-    type: 'automation',
-    emailType: 'automated',
-    status: 'running',
-    subject: 'Welcome to FreeFlow! Here\'s what to expect',
-    fromName: 'FreeFlow Team',
-    fromEmail: 'welcome@freeflow.com',
-    audienceId: 'aud2',
-    audienceName: 'New Signups',
-    audienceSize: 890,
-    tags: ['welcome', 'onboarding'],
-    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
-    stats: {
-      sent: 4532, delivered: 4498, bounced: 34, opens: 3456, uniqueOpens: 3012,
-      clicks: 1234, uniqueClicks: 987, unsubscribes: 12, complaints: 0,
-      revenue: 12340, conversions: 156, openRate: 67.0, clickRate: 21.9,
-      bounceRate: 0.8, unsubscribeRate: 0.26, deliverabilityRate: 99.2
-    },
-    automation: { type: 'signup', config: {}, delayDays: 0, delayHours: 1 },
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-06-20')
-  },
-  {
-    id: 'camp3',
-    name: 'Product Launch: Pro Plan',
-    description: 'Announcing new Pro plan features',
-    type: 'ab_test',
-    emailType: 'regular',
-    status: 'completed',
-    subject: 'Introducing FreeFlow Pro',
-    fromName: 'FreeFlow',
-    fromEmail: 'hello@freeflow.com',
-    audienceId: 'aud1',
-    audienceName: 'All Subscribers',
-    audienceSize: 10000,
-    tags: ['product', 'launch', 'pro'],
-    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
-    stats: {
-      sent: 10000, delivered: 9856, bounced: 144, opens: 4234, uniqueOpens: 3567,
-      clicks: 890, uniqueClicks: 756, unsubscribes: 8, complaints: 1,
-      revenue: 23450, conversions: 89, openRate: 36.2, clickRate: 7.7,
-      bounceRate: 1.4, unsubscribeRate: 0.08, deliverabilityRate: 98.6
-    },
-    abTest: {
-      id: 'ab1',
-      name: 'Subject Line Test',
-      testType: 'subject',
-      variants: [
-        { id: 'v1', name: 'Variant A', subject: 'Introducing FreeFlow Pro', stats: { sent: 5000, opens: 1890, clicks: 456, conversions: 45, openRate: 37.8, clickRate: 9.1 }, isWinner: true },
-        { id: 'v2', name: 'Variant B', subject: 'Meet the New FreeFlow Pro Plan', stats: { sent: 5000, opens: 1677, clicks: 300, conversions: 44, openRate: 33.5, clickRate: 6.0 }, isWinner: false }
-      ],
-      winner: 'v1',
-      winnerCriteria: 'open_rate',
-      testDuration: 4,
-      testPercentage: 100,
-      status: 'completed'
-    },
-    createdAt: new Date('2024-05-01'),
-    updatedAt: new Date('2024-05-10'),
-    sentAt: new Date('2024-05-10T09:00:00')
-  },
-  {
-    id: 'camp4',
-    name: 'Abandoned Cart Recovery',
-    description: 'Automated cart abandonment emails',
-    type: 'automation',
-    emailType: 'automated',
-    status: 'running',
-    subject: 'You left something behind! 🛒',
-    fromName: 'FreeFlow Store',
-    fromEmail: 'shop@freeflow.com',
-    audienceId: 'aud3',
-    audienceName: 'Cart Abandoners',
-    audienceSize: 2340,
-    tags: ['ecommerce', 'recovery', 'cart'],
-    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
-    stats: {
-      sent: 1234, delivered: 1220, bounced: 14, opens: 634, uniqueOpens: 567,
-      clicks: 312, uniqueClicks: 289, unsubscribes: 3, complaints: 0,
-      revenue: 8940, conversions: 67, openRate: 46.5, clickRate: 23.7,
-      bounceRate: 1.1, unsubscribeRate: 0.24, deliverabilityRate: 98.9
-    },
-    automation: { type: 'abandoned_cart', config: { cartValue: 50 }, delayDays: 0, delayHours: 2 },
-    createdAt: new Date('2024-02-15'),
-    updatedAt: new Date('2024-06-18')
-  },
-  {
-    id: 'camp5',
-    name: 'Monthly Newsletter - June',
-    description: 'June newsletter with company updates',
-    type: 'email',
-    emailType: 'regular',
-    status: 'scheduled',
-    subject: 'June Updates: New Features & Tips',
-    fromName: 'FreeFlow Newsletter',
-    fromEmail: 'newsletter@freeflow.com',
-    audienceId: 'aud4',
-    audienceName: 'Newsletter Subscribers',
-    audienceSize: 8900,
-    tags: ['newsletter', 'monthly'],
-    tracking: { opensTracking: true, clicksTracking: true, googleAnalytics: true },
-    schedule: { sendAt: new Date('2024-07-01T10:00:00'), timezone: 'America/New_York', sendTimeOptimization: true },
-    stats: {
-      sent: 0, delivered: 0, bounced: 0, opens: 0, uniqueOpens: 0,
-      clicks: 0, uniqueClicks: 0, unsubscribes: 0, complaints: 0,
-      revenue: 0, conversions: 0, openRate: 0, clickRate: 0,
-      bounceRate: 0, unsubscribeRate: 0, deliverabilityRate: 0
-    },
-    createdAt: new Date('2024-06-20'),
-    updatedAt: new Date('2024-06-22')
-  }
-]
-
-const mockAudiences: Audience[] = [
-  {
-    id: 'aud1',
-    name: 'All Subscribers',
-    description: 'Main subscriber list',
-    stats: { total: 12450, subscribed: 11234, unsubscribed: 890, cleaned: 326, pending: 0, avgOpenRate: 34.5, avgClickRate: 12.3 },
-    growthRate: 5.2,
-    tags: ['main', 'active'],
-    segments: [
-      { id: 'seg1', name: 'High Engagers', type: 'dynamic', conditions: [{ field: 'engagement_score', operator: 'greater_than', value: 80 }], memberCount: 2340, createdAt: new Date() },
-      { id: 'seg2', name: 'Inactive (90 days)', type: 'dynamic', conditions: [{ field: 'last_activity', operator: 'less_than', value: 90 }], memberCount: 1560, createdAt: new Date() }
-    ],
-    createdAt: new Date('2023-01-01')
-  },
-  {
-    id: 'aud2',
-    name: 'New Signups (30 days)',
-    description: 'Recently joined subscribers',
-    stats: { total: 890, subscribed: 870, unsubscribed: 12, cleaned: 8, pending: 0, avgOpenRate: 56.7, avgClickRate: 18.9 },
-    growthRate: 12.3,
-    tags: ['new', 'onboarding'],
-    segments: [],
-    createdAt: new Date('2024-05-01')
-  },
-  {
-    id: 'aud3',
-    name: 'E-commerce Customers',
-    description: 'Customers who have made a purchase',
-    stats: { total: 4560, subscribed: 4320, unsubscribed: 180, cleaned: 60, pending: 0, avgOpenRate: 42.3, avgClickRate: 15.6 },
-    growthRate: 8.7,
-    tags: ['customers', 'purchasers'],
-    segments: [
-      { id: 'seg3', name: 'VIP Customers', type: 'saved', conditions: [{ field: 'total_spent', operator: 'greater_than', value: 500 }], memberCount: 890, createdAt: new Date() },
-      { id: 'seg4', name: 'One-time Buyers', type: 'saved', conditions: [{ field: 'order_count', operator: 'equals', value: 1 }], memberCount: 2340, createdAt: new Date() }
-    ],
-    createdAt: new Date('2023-06-01')
-  },
-  {
-    id: 'aud4',
-    name: 'Newsletter Subscribers',
-    description: 'Blog and content subscribers',
-    stats: { total: 8900, subscribed: 8450, unsubscribed: 340, cleaned: 110, pending: 0, avgOpenRate: 38.9, avgClickRate: 14.2 },
-    growthRate: 3.4,
-    tags: ['content', 'blog'],
-    segments: [],
-    createdAt: new Date('2023-03-01')
-  }
-]
-
-const mockAutomations: AutomationWorkflow[] = [
-  {
-    id: 'auto1',
-    name: 'Welcome Email Series',
-    description: 'Onboard new subscribers with a 5-email series',
-    trigger: { type: 'signup', config: {}, delayDays: 0, delayHours: 1 },
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'email', config: { subject: 'Welcome!' }, position: 1, stats: { sent: 4532, opens: 3456, clicks: 1234 } },
-      { id: 's2', type: 'delay', config: { days: 2 }, position: 2 },
-      { id: 's3', type: 'email', config: { subject: 'Getting Started' }, position: 3, stats: { sent: 4012, opens: 2890, clicks: 890 } },
-      { id: 's4', type: 'delay', config: { days: 3 }, position: 4 },
-      { id: 's5', type: 'email', config: { subject: 'Pro Tips' }, position: 5, stats: { sent: 3678, opens: 2456, clicks: 678 } }
-    ],
-    stats: { enrolled: 4890, completed: 3456, active: 1234, revenue: 23450, openRate: 68.2, clickRate: 24.5 },
-    createdAt: new Date('2024-01-01')
-  },
-  {
-    id: 'auto2',
-    name: 'Abandoned Cart Recovery',
-    description: 'Recover lost sales with 3 follow-up emails',
-    trigger: { type: 'abandoned_cart', config: { minCartValue: 50 }, delayDays: 0, delayHours: 2 },
-    status: 'active',
-    steps: [
-      { id: 's6', type: 'email', config: { subject: 'You forgot something!' }, position: 1, stats: { sent: 1234, opens: 634, clicks: 312 } },
-      { id: 's7', type: 'delay', config: { days: 1 }, position: 2 },
-      { id: 's8', type: 'condition', config: { check: 'not_purchased' }, position: 3 },
-      { id: 's9', type: 'email', config: { subject: '10% off your cart' }, position: 4, stats: { sent: 890, opens: 456, clicks: 234 } }
-    ],
-    stats: { enrolled: 2340, completed: 1890, active: 450, revenue: 45670, openRate: 52.1, clickRate: 31.2 },
-    createdAt: new Date('2024-02-15')
-  },
-  {
-    id: 'auto3',
-    name: 'Birthday Campaign',
-    description: 'Send birthday wishes with special offer',
-    trigger: { type: 'birthday', config: { daysBefore: 3 }, delayDays: 0, delayHours: 0 },
-    status: 'active',
-    steps: [
-      { id: 's10', type: 'email', config: { subject: '🎂 Happy Birthday!' }, position: 1, stats: { sent: 456, opens: 376, clicks: 189 } }
-    ],
-    stats: { enrolled: 456, completed: 456, active: 0, revenue: 8900, openRate: 82.5, clickRate: 45.2 },
-    createdAt: new Date('2024-03-01')
-  }
-]
-
-const mockTemplates: EmailTemplate[] = [
-  { id: 't1', name: 'Welcome Email', category: 'basic', thumbnail: '📧', html: '', usageCount: 234, openRate: 68.2, clickRate: 24.5, isCustom: false, createdAt: new Date() },
-  { id: 't2', name: 'Product Launch', category: 'announcement', thumbnail: '🚀', html: '', usageCount: 156, openRate: 42.3, clickRate: 18.7, isCustom: false, createdAt: new Date() },
-  { id: 't3', name: 'Newsletter Classic', category: 'newsletter', thumbnail: '📰', html: '', usageCount: 445, openRate: 38.9, clickRate: 14.2, isCustom: false, createdAt: new Date() },
-  { id: 't4', name: 'Cart Abandonment', category: 'ecommerce', thumbnail: '🛒', html: '', usageCount: 312, openRate: 52.1, clickRate: 31.2, isCustom: false, createdAt: new Date() },
-  { id: 't5', name: 'Re-engagement', category: 'basic', thumbnail: '💫', html: '', usageCount: 189, openRate: 28.3, clickRate: 12.1, isCustom: false, createdAt: new Date() },
-  { id: 't6', name: 'Sale Announcement', category: 'ecommerce', thumbnail: '🎉', html: '', usageCount: 267, openRate: 45.6, clickRate: 22.8, isCustom: false, createdAt: new Date() },
-  { id: 't7', name: 'Event Invitation', category: 'event', thumbnail: '📅', html: '', usageCount: 123, openRate: 51.2, clickRate: 28.9, isCustom: false, createdAt: new Date() },
-  { id: 't8', name: 'Custom Brand Template', category: 'basic', thumbnail: '✨', html: '', usageCount: 89, openRate: 44.5, clickRate: 19.3, isCustom: true, createdAt: new Date() }
-]
-
-const mockDeliverability: DeliverabilityReport = {
-  domain: 'freeflow.com',
-  score: 92,
-  spfStatus: 'pass',
-  dkimStatus: 'pass',
-  dmarcStatus: 'pass',
-  blacklistStatus: 'clean',
-  reputation: 'excellent',
-  issues: [],
-  recommendations: ['Consider implementing BIMI for brand visibility', 'Monitor feedback loops from major ISPs']
-}
-
-// ============== HELPER FUNCTIONS ==============
-
-const getStatusColor = (status: CampaignStatus): string => {
-  const colors: Record<CampaignStatus, string> = {
-    draft: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300',
-    scheduled: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
-    sending: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
-    running: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
-    paused: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400',
-    completed: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400',
-    archived: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-700 dark:text-gray-400'
-  }
-  return colors[status] || colors.draft
-}
-
-const getCampaignTypeColor = (type: CampaignType): string => {
-  const colors: Record<CampaignType, string> = {
-    email: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-    sms: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    social: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    multi_channel: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    ab_test: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    automation: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-  }
-  return colors[type] || colors.email
-}
-
-const getCampaignIcon = (type: CampaignType) => {
-  const icons: Record<CampaignType, React.ReactNode> = {
-    email: <Mail className="w-4 h-4" />,
-    sms: <MessageSquare className="w-4 h-4" />,
-    social: <Globe className="w-4 h-4" />,
-    multi_channel: <Layers className="w-4 h-4" />,
-    ab_test: <Split className="w-4 h-4" />,
-    automation: <Zap className="w-4 h-4" />
-  }
-  return icons[type] || icons.email
-}
-
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-  return num.toString()
-}
-
-// ============== COMPETITIVE UPGRADE MOCK DATA ==============
-
-const mockCampaignAIInsights = [
-  { id: '1', query: "Which campaign is performing best?", insight: "Summer Sale campaign has 34% open rate - 12% above average. Subject line A/B test winner: urgency-based messaging.", confidence: 0.93, category: 'engagement' as const, timestamp: new Date().toISOString() },
-  { id: '2', query: "When should I send the next campaign?", insight: "Your audience is most active Tuesdays 10-11am EST. Avoid Mondays - 23% lower open rates.", confidence: 0.88, category: 'conversion' as const, timestamp: new Date().toISOString() },
-  { id: '3', query: "How to reduce unsubscribes?", insight: "Segment 'Inactive 90 days' has 5x higher unsubscribe rate. Consider a re-engagement campaign first.", confidence: 0.85, category: 'revenue' as const, timestamp: new Date().toISOString() },
-]
-
-const mockCampaignCollaborators = [
-  { id: '1', name: 'Marketing Team', avatar: '/avatars/marketing.jpg', status: 'active' as const, lastActive: 'Just now', role: 'Marketing' },
-  { id: '2', name: 'Content Writer', avatar: '/avatars/content.jpg', status: 'active' as const, lastActive: '5m ago', role: 'Content' },
-  { id: '3', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'idle' as const, lastActive: '15m ago', role: 'Design' },
-]
-
-const mockCampaignPredictions = [
-  { id: '1', metric: 'Open Rate', currentValue: 24.5, predictedValue: 28, confidence: 0.81, trend: 'up' as const, timeframe: 'Next campaign', factors: ['Subject line optimization', 'Send time optimization'] },
-  { id: '2', metric: 'Click Rate', currentValue: 3.2, predictedValue: 4.1, confidence: 0.77, trend: 'up' as const, timeframe: 'Next campaign', factors: ['Better CTAs', 'Personalization'] },
-  { id: '3', metric: 'Revenue per Email', currentValue: 0.42, predictedValue: 0.58, confidence: 0.74, trend: 'up' as const, timeframe: 'Q1', factors: ['Product recommendations', 'Cart abandonment flows'] },
-]
-
-const mockCampaignActivities = [
-  { id: '1', type: 'create' as const, title: 'Campaign scheduled', description: 'Spring Newsletter set for March 1st 10am', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date().toISOString(), metadata: {} },
-  { id: '2', type: 'update' as const, title: 'A/B test completed', description: 'Subject line B won with 28% open rate', user: { name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
-  { id: '3', type: 'milestone' as const, title: 'Subscriber milestone', description: 'Email list reached 50,000 subscribers', user: { name: 'Marketing Team', avatar: '/avatars/marketing.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
-]
-
 // Quick actions are defined inside the component to access state setters
 
 // ============== MAIN COMPONENT ==============
@@ -707,18 +373,18 @@ export default function CampaignsClient() {
   }
 
   const stats = useMemo(() => ({
-    totalCampaigns: mockCampaigns.length,
-    activeCampaigns: mockCampaigns.filter(c => c.status === 'running').length,
-    scheduledCampaigns: mockCampaigns.filter(c => c.status === 'scheduled').length,
-    totalSubscribers: mockAudiences.reduce((sum, a) => sum + a.stats.subscribed, 0),
-    avgOpenRate: mockCampaigns.filter(c => c.stats.openRate > 0).reduce((sum, c) => sum + c.stats.openRate, 0) / mockCampaigns.filter(c => c.stats.openRate > 0).length || 0,
-    avgClickRate: mockCampaigns.filter(c => c.stats.clickRate > 0).reduce((sum, c) => sum + c.stats.clickRate, 0) / mockCampaigns.filter(c => c.stats.clickRate > 0).length || 0,
-    totalRevenue: mockCampaigns.reduce((sum, c) => sum + c.stats.revenue, 0),
-    totalSent: mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
+    totalCampaigns: dbCampaigns.length,
+    activeCampaigns: dbCampaigns.filter(c => c.status === 'running').length,
+    scheduledCampaigns: dbCampaigns.filter(c => c.status === 'scheduled').length,
+    totalSubscribers: 0 => sum + a.stats.subscribed, 0),
+    avgOpenRate: 0,
+    avgClickRate: 0,
+    totalRevenue: dbCampaigns.reduce((sum, c) => sum + (c.revenue || 0), 0) => sum + c.stats.revenue, 0),
+    totalSent: dbCampaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0) => sum + c.stats.sent, 0)
   }), [])
 
   const filteredCampaigns = useMemo(() => {
-    return mockCampaigns.filter(campaign => {
+    return dbCampaigns.filter(campaign => {
       if (statusFilter !== 'all' && campaign.status !== statusFilter) return false
       if (typeFilter !== 'all' && campaign.type !== typeFilter) return false
       if (searchQuery && !campaign.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
@@ -1382,15 +1048,15 @@ export default function CampaignsClient() {
                     <div className="flex items-center gap-4">
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-indigo-100">Active Automations</p>
-                        <p className="text-xl font-bold">{mockAutomations.filter(a => a.status === 'active').length}</p>
+                        <p className="text-xl font-bold">{0}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-indigo-100">Total Enrolled</p>
-                        <p className="text-xl font-bold">{formatNumber(mockAutomations.reduce((sum, a) => sum + a.stats.enrolled, 0))}</p>
+                        <p className="text-xl font-bold">{formatNumber(0) => sum + a.stats.enrolled, 0))}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-indigo-100">Revenue Generated</p>
-                        <p className="text-xl font-bold">${formatNumber(mockAutomations.reduce((sum, a) => sum + a.stats.revenue, 0))}</p>
+                        <p className="text-xl font-bold">${formatNumber(0) => sum + a.stats.revenue, 0))}</p>
                       </div>
                     </div>
                   </div>
@@ -1432,7 +1098,7 @@ export default function CampaignsClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockAutomations.map(automation => (
+                {[].map(automation => (
                   <Card key={automation.id} className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
@@ -1503,15 +1169,15 @@ export default function CampaignsClient() {
                     <div className="flex items-center gap-4">
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-emerald-100">Total Templates</p>
-                        <p className="text-xl font-bold">{mockTemplates.length}</p>
+                        <p className="text-xl font-bold">{0}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-emerald-100">Custom Templates</p>
-                        <p className="text-xl font-bold">{mockTemplates.filter(t => t.isCustom).length}</p>
+                        <p className="text-xl font-bold">{0}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-emerald-100">Avg Open Rate</p>
-                        <p className="text-xl font-bold">{(mockTemplates.reduce((sum, t) => sum + t.openRate, 0) / mockTemplates.length).toFixed(1)}%</p>
+                        <p className="text-xl font-bold">{(0).toFixed(1)}%</p>
                       </div>
                     </div>
                   </div>
@@ -1556,7 +1222,7 @@ export default function CampaignsClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
-                {mockTemplates.map(template => (
+                {[].map(template => (
                   <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
                     <div className="h-40 bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center relative">
                       <span className="text-6xl">{template.thumbnail}</span>
@@ -1598,7 +1264,7 @@ export default function CampaignsClient() {
                     <div className="flex items-center gap-4">
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-violet-100">Total Audiences</p>
-                        <p className="text-xl font-bold">{mockAudiences.length}</p>
+                        <p className="text-xl font-bold">{0}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-violet-100">Total Subscribers</p>
@@ -1606,7 +1272,7 @@ export default function CampaignsClient() {
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-violet-100">Segments</p>
-                        <p className="text-xl font-bold">{mockAudiences.reduce((sum, a) => sum + a.segments.length, 0)}</p>
+                        <p className="text-xl font-bold">{0 => sum + a.segments.length, 0)}</p>
                       </div>
                     </div>
                   </div>
@@ -1651,7 +1317,7 @@ export default function CampaignsClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockAudiences.map(audience => (
+                {[].map(audience => (
                   <Card key={audience.id} className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
@@ -1786,7 +1452,7 @@ export default function CampaignsClient() {
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Top Performing Campaigns</h3>
                 <div className="space-y-4">
-                  {mockCampaigns.filter(c => c.stats.openRate > 0).sort((a, b) => b.stats.openRate - a.stats.openRate).slice(0, 5).map((campaign, i) => (
+                  {dbCampaigns.slice(0, 5).map((campaign, i) => (
                     <div key={campaign.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
                         <span className="text-lg font-bold text-gray-400">#{i + 1}</span>
@@ -1844,7 +1510,7 @@ export default function CampaignsClient() {
                     <Shield className="w-8 h-8 text-green-600" />
                     <Badge className="bg-green-100 text-green-700">Excellent</Badge>
                   </div>
-                  <p className="text-4xl font-bold text-green-700">{mockDeliverability.score}</p>
+                  <p className="text-4xl font-bold text-green-700">{0}</p>
                   <p className="text-sm text-green-600 mt-1">Sender Score</p>
                 </Card>
                 <Card className="p-6">
@@ -1852,7 +1518,7 @@ export default function CampaignsClient() {
                     <CheckCircle className="w-6 h-6 text-green-500" />
                     <span className="font-medium">SPF</span>
                   </div>
-                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.spfStatus.toUpperCase()}</p>
+                  <p className="text-lg font-semibold text-green-600">{'UNKNOWN'}</p>
                   <p className="text-xs text-gray-500 mt-1">Email authentication</p>
                 </Card>
                 <Card className="p-6">
@@ -1860,7 +1526,7 @@ export default function CampaignsClient() {
                     <CheckCircle className="w-6 h-6 text-green-500" />
                     <span className="font-medium">DKIM</span>
                   </div>
-                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.dkimStatus.toUpperCase()}</p>
+                  <p className="text-lg font-semibold text-green-600">{'UNKNOWN'}</p>
                   <p className="text-xs text-gray-500 mt-1">Domain verification</p>
                 </Card>
                 <Card className="p-6">
@@ -1868,7 +1534,7 @@ export default function CampaignsClient() {
                     <CheckCircle className="w-6 h-6 text-green-500" />
                     <span className="font-medium">DMARC</span>
                   </div>
-                  <p className="text-lg font-semibold text-green-600">{mockDeliverability.dmarcStatus.toUpperCase()}</p>
+                  <p className="text-lg font-semibold text-green-600">{'UNKNOWN'}</p>
                   <p className="text-xs text-gray-500 mt-1">Policy enforcement</p>
                 </Card>
               </div>
@@ -1911,7 +1577,7 @@ export default function CampaignsClient() {
                 <Card className="p-6">
                   <h3 className="font-semibold mb-4">Recommendations</h3>
                   <div className="space-y-3">
-                    {mockDeliverability.recommendations.map((rec, i) => (
+                    {[].map((rec, i) => (
                       <div key={i} className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-blue-800 dark:text-blue-300">{rec}</p>
@@ -2687,16 +2353,16 @@ export default function CampaignsClient() {
       {/* AI-Powered Campaign Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
-          insights={mockCampaignAIInsights}
+          insights={[]}
           onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
         />
-        <PredictiveAnalytics predictions={mockCampaignPredictions} />
+        <PredictiveAnalytics predictions={[]} />
       </div>
 
       {/* Activity Feed */}
       <div className="mt-6">
         <ActivityFeed
-          activities={mockCampaignActivities}
+          activities={[]}
           maxItems={5}
           showFilters={true}
         />
@@ -2730,7 +2396,7 @@ export default function CampaignsClient() {
               <Label>Select Campaign</Label>
               <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
                 <option value="">Select a campaign...</option>
-                {mockCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(campaign => (
+                {dbCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(campaign => (
                   <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
                 ))}
               </select>
@@ -2802,7 +2468,7 @@ export default function CampaignsClient() {
             <div className="border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Recent Campaign Performance</h4>
               <div className="space-y-3">
-                {mockCampaigns.slice(0, 3).map(campaign => (
+                {dbCampaigns.slice(0, 3).map(campaign => (
                   <div key={campaign.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                     <div>
                       <p className="font-medium">{campaign.name}</p>
@@ -2852,18 +2518,18 @@ export default function CampaignsClient() {
                 <p className="text-sm text-gray-500">Total Subscribers</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg text-center">
-                <p className="text-2xl font-bold text-green-600">{mockAudiences.length}</p>
+                <p className="text-2xl font-bold text-green-600">{0}</p>
                 <p className="text-sm text-gray-500">Audiences</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg text-center">
-                <p className="text-2xl font-bold text-blue-600">{mockAudiences.reduce((sum, a) => sum + a.segments.length, 0)}</p>
+                <p className="text-2xl font-bold text-blue-600">{0 => sum + a.segments.length, 0)}</p>
                 <p className="text-sm text-gray-500">Segments</p>
               </div>
             </div>
             <div className="border rounded-lg p-4">
               <h4 className="font-semibold mb-3">Your Audiences</h4>
               <div className="space-y-3">
-                {mockAudiences.map(audience => (
+                {[].map(audience => (
                   <div key={audience.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div>
                       <p className="font-medium">{audience.name}</p>

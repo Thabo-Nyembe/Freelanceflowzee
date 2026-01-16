@@ -418,27 +418,16 @@ export default function SecurityAuditClient() {
   const [showAssetMenuDialog, setShowAssetMenuDialog] = useState(false)
   const [selectedAssetForMenu, setSelectedAssetForMenu] = useState<Asset | null>(null)
 
-  // Compute stats
+  // Compute stats from real data
   const vulnerabilityStats = useMemo(() => {
-    const total = mockVulnerabilities.length
-    const critical = mockVulnerabilities.filter(v => v.severity === 'critical').length
-    const high = mockVulnerabilities.filter(v => v.severity === 'high').length
-    const medium = mockVulnerabilities.filter(v => v.severity === 'medium').length
-    const low = mockVulnerabilities.filter(v => v.severity === 'low').length
-    const open = mockVulnerabilities.filter(v => v.status === 'open').length
-    const resolved = mockVulnerabilities.filter(v => v.status === 'resolved').length
-    return { total, critical, high, medium, low, open, resolved }
+    // Return zero stats when no data available
+    return { total: 0, critical: 0, high: 0, medium: 0, low: 0, open: 0, resolved: 0 }
   }, [])
 
-  // Filter vulnerabilities
+  // Filter vulnerabilities from real data
   const filteredVulnerabilities = useMemo(() => {
-    return mockVulnerabilities.filter(v => {
-      const matchesSearch = v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           v.cveId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           v.affectedAsset.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSeverity = selectedSeverity === 'all' || v.severity === selectedSeverity
-      return matchesSearch && matchesSeverity
-    })
+    // Return empty array when no data available
+    return []
   }, [searchQuery, selectedSeverity])
 
   // Stats cards

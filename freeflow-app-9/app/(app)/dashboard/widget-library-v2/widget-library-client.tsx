@@ -279,15 +279,14 @@ export default function WidgetLibraryClient() {
 
   // Stats calculation
   const stats = useMemo(() => {
-    if (widgets.length === 0) return hookStats
     const totalWidgets = widgets.length
     const totalInstalls = widgets.reduce((sum, w) => sum + w.installs, 0)
     const totalDownloads = widgets.reduce((sum, w) => sum + w.downloads, 0)
-    const avgRating = widgets.reduce((sum, w) => sum + w.rating, 0) / widgets.length
+    const avgRating = widgets.length > 0 ? widgets.reduce((sum, w) => sum + w.rating, 0) / widgets.length : 0
     const officialCount = widgets.filter(w => w.is_official).length
     const featuredCount = widgets.filter(w => w.is_featured).length
     return { totalWidgets, totalInstalls, totalDownloads, avgRating, officialCount, featuredCount }
-  }, [widgets, hookStats])
+  }, [widgets])
 
   // Filtered widgets
   const filteredWidgets = useMemo(() => {

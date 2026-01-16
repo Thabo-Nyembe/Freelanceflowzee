@@ -608,8 +608,8 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   const masterTrack = useMemo(() => tracks.find(t => t.type === 'master'), [tracks])
 
   const filteredEffects = useMemo(() => {
-    if (!searchQuery) return effects
     return effects.filter(e =>
+      !searchQuery ||
       e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       e.brand.toLowerCase().includes(searchQuery.toLowerCase())
@@ -617,8 +617,8 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   }, [effects, searchQuery])
 
   const filteredInstruments = useMemo(() => {
-    if (!searchQuery) return instruments
     return instruments.filter(i =>
+      !searchQuery ||
       i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       i.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       i.brand.toLowerCase().includes(searchQuery.toLowerCase())

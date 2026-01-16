@@ -402,13 +402,15 @@ export default function ComponentLibraryClient() {
   }, [searchQuery, selectedCategory, statusFilter])
 
   const filteredTokens = useMemo(() => {
-    if (tokenCategory === 'all') return mockTokens
-    return mockTokens.filter(t => t.category === tokenCategory)
+    return mockTokens.filter(t => tokenCategory === 'all' || t.category === tokenCategory)
   }, [tokenCategory])
 
   const filteredIcons = useMemo(() => {
-    if (!iconSearch) return mockIcons
-    return mockIcons.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()) || i.tags.some(t => t.includes(iconSearch.toLowerCase())))
+    return mockIcons.filter(i =>
+      !iconSearch ||
+      i.name.toLowerCase().includes(iconSearch.toLowerCase()) ||
+      i.tags.some(t => t.includes(iconSearch.toLowerCase()))
+    )
   }, [iconSearch])
 
   const getStatusColor = (status: ComponentStatus) => {

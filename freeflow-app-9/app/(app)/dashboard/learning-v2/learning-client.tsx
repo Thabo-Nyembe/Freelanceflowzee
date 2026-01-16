@@ -592,7 +592,7 @@ export default function LearningClient() {
   const { collections: dbCollections, loading: collectionsLoading, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating } = useCollections()
 
   // Merge DB data with mock data as fallback
-  const courses = dbCourses?.length ? dbCourses.map(c => ({
+  const courses = (dbCourses || []).map(c => ({
     ...mockCourses[0],
     id: c.id,
     title: c.title,
@@ -609,9 +609,9 @@ export default function LearningClient() {
     isNew: c.is_new,
     isFeatured: c.is_featured,
     skills: c.skills || []
-  })) : mockCourses
+  }))
 
-  const learningPaths = dbPaths?.length ? dbPaths.map(p => ({
+  const learningPaths = (dbPaths || []).map(p => ({
     ...mockLearningPaths[0],
     id: p.id,
     title: p.title,
@@ -626,9 +626,9 @@ export default function LearningClient() {
     completedCourses: 0,
     courses: [],
     milestones: []
-  })) : mockLearningPaths
+  }))
 
-  const collections = dbCollections?.length ? dbCollections.map(c => ({
+  const collections = (dbCollections || []).map(c => ({
     id: c.id,
     name: c.name,
     description: c.description || '',
@@ -636,9 +636,9 @@ export default function LearningClient() {
     isPublic: c.is_public,
     createdAt: c.created_at,
     likes: c.likes
-  })) : mockCollections
+  }))
 
-  const progress = dbProgress?.length ? dbProgress.map(p => ({
+  const progress = (dbProgress || []).map(p => ({
     courseId: p.course_id,
     lessonsCompleted: p.lessons_completed,
     totalLessons: p.total_lessons,
@@ -649,7 +649,7 @@ export default function LearningClient() {
     bookmarks: [],
     completedAt: p.completed_at,
     certificateUrl: p.certificate_url
-  })) : mockProgress
+  }))
 
   const [skills] = useState<Skill[]>(mockSkills)
   const [stats] = useState<LearningStats>(mockStats)

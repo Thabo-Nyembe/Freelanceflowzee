@@ -2639,7 +2639,7 @@ export default function SurveysClient() {
                       if (survey) setSelectedSurveyForResults(survey)
                     }}
                   >
-                    {(combinedSurveys.length > 0 ? combinedSurveys : mockSurveys).map(survey => (
+                    {(combinedSurveys || []).map(survey => (
                       <option key={survey.id} value={survey.id}>
                         {survey.title} ({survey.responses} responses)
                       </option>

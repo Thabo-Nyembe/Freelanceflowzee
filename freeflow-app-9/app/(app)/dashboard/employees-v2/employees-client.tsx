@@ -529,23 +529,23 @@ export default function EmployeesClient() {
   const stats = useMemo(() => {
     const hasDbData = dbEmployees && dbEmployees.length > 0
 
-    // Use real data if available, otherwise fall back to mock
-    const total = hasDbData ? dbStats.total : mockEmployees.length
-    const active = hasDbData ? dbStats.active : mockEmployees.filter(e => e.status === 'active').length
-    const onboarding = hasDbData ? dbStats.onboarding : mockEmployees.filter(e => e.status === 'onboarding').length
+    // Use real data when available
+    const total = hasDbData ? dbStats.total : 0
+    const active = hasDbData ? dbStats.active : 0
+    const onboarding = hasDbData ? dbStats.onboarding : 0
     const avgPerformance = hasDbData && dbStats.avgPerformance > 0
       ? dbStats.avgPerformance.toFixed(0)
-      : (mockEmployees.filter(e => e.performanceScore > 0).reduce((sum, e) => sum + e.performanceScore, 0) / mockEmployees.filter(e => e.performanceScore > 0).length).toFixed(0)
-    const totalPayroll = hasDbData ? dbStats.totalPayroll : mockEmployees.reduce((sum, e) => sum + e.salary, 0)
-    const avgTenure = hasDbData && dbStats.avgTenure > 0 ? dbStats.avgTenure.toFixed(1) : '2.3'
+      : '0'
+    const totalPayroll = hasDbData ? dbStats.totalPayroll : 0
+    const avgTenure = hasDbData && dbStats.avgTenure > 0 ? dbStats.avgTenure.toFixed(1) : '0'
 
     return {
       total,
       active,
       onboarding,
       avgPerformance,
-      pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
-      pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
+      pendingTimeOff: 0,
+      pendingReviews: 0,
       totalPayroll,
       avgTenure
     }

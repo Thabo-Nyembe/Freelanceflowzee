@@ -217,309 +217,6 @@ interface ServiceCatalogEntry {
   dependencies: string[]
 }
 
-// ============== MOCK DATA ==============
-
-const mockLogs: LogEntry[] = [
-  {
-    id: 'log1',
-    timestamp: '2024-01-15T10:30:45.123Z',
-    level: 'error',
-    service: 'api-gateway',
-    host: 'prod-api-01',
-    source: 'kubernetes',
-    message: 'Failed to process request: Connection timeout to database cluster',
-    attributes: { requestId: 'req-123', userId: 'usr-456', endpoint: '/api/v1/users', db_host: 'db-primary-01' },
-    traceId: 'trace-789',
-    spanId: 'span-001',
-    tags: ['production', 'api', 'database', 'timeout'],
-    status: 504,
-    duration: 30250,
-    env: 'production',
-    version: 'v2.5.1',
-    container: 'api-gateway-abc123',
-    pod: 'api-gateway-7f8d9b-xyzab',
-    namespace: 'production'
-  },
-  {
-    id: 'log2',
-    timestamp: '2024-01-15T10:30:44.892Z',
-    level: 'warn',
-    service: 'auth-service',
-    host: 'prod-auth-02',
-    source: 'docker',
-    message: 'Rate limit approaching for IP 192.168.1.100 - 95/100 requests',
-    attributes: { ip: '192.168.1.100', currentRate: 95, limit: 100, windowMs: 60000 },
-    tags: ['production', 'auth', 'rate-limit'],
-    status: 429,
-    env: 'production',
-    version: 'v1.8.3'
-  },
-  {
-    id: 'log3',
-    timestamp: '2024-01-15T10:30:44.567Z',
-    level: 'info',
-    service: 'payment-processor',
-    host: 'prod-payment-01',
-    source: 'application',
-    message: 'Payment processed successfully for order #ORD-789456',
-    attributes: { transactionId: 'txn-789', amount: 99.99, currency: 'USD', orderId: 'ORD-789456', method: 'stripe' },
-    traceId: 'trace-456',
-    spanId: 'span-002',
-    tags: ['production', 'payment', 'success'],
-    status: 200,
-    duration: 1250,
-    env: 'production',
-    version: 'v3.2.0'
-  },
-  {
-    id: 'log4',
-    timestamp: '2024-01-15T10:30:44.234Z',
-    level: 'debug',
-    service: 'cache-service',
-    host: 'prod-cache-01',
-    source: 'redis',
-    message: 'Cache miss for key: user:profile:123 - fetching from database',
-    attributes: { key: 'user:profile:123', ttl: 3600, cacheSize: '2.3GB' },
-    tags: ['production', 'cache', 'miss'],
-    status: 200,
-    duration: 5,
-    env: 'production'
-  },
-  {
-    id: 'log5',
-    timestamp: '2024-01-15T10:30:43.999Z',
-    level: 'critical',
-    service: 'notification-service',
-    host: 'prod-notify-01',
-    source: 'smtp',
-    message: 'CRITICAL: SMTP connection refused - email queue backing up (1,234 pending)',
-    attributes: { recipient: 'user@example.com', type: 'welcome_email', queueSize: 1234 },
-    tags: ['production', 'notification', 'email', 'critical'],
-    status: 500,
-    env: 'production'
-  },
-  {
-    id: 'log6',
-    timestamp: '2024-01-15T10:30:43.567Z',
-    level: 'info',
-    service: 'api-gateway',
-    host: 'prod-api-02',
-    source: 'nginx',
-    message: 'Request completed: GET /api/v1/products (200) - 89ms',
-    attributes: { method: 'GET', path: '/api/v1/products', responseSize: 15420, userAgent: 'Mozilla/5.0' },
-    traceId: 'trace-111',
-    spanId: 'span-003',
-    tags: ['production', 'api'],
-    status: 200,
-    duration: 89,
-    env: 'production'
-  },
-  {
-    id: 'log7',
-    timestamp: '2024-01-15T10:30:43.123Z',
-    level: 'error',
-    service: 'search-service',
-    host: 'prod-search-01',
-    source: 'elasticsearch',
-    message: 'Index health degraded: yellow state detected on products_v2',
-    attributes: { index: 'products_v2', shards: { active: 3, relocating: 1, initializing: 0, unassigned: 1 } },
-    tags: ['production', 'search', 'elasticsearch'],
-    status: 503,
-    env: 'production'
-  },
-  {
-    id: 'log8',
-    timestamp: '2024-01-15T10:30:42.789Z',
-    level: 'notice',
-    service: 'scheduler',
-    host: 'prod-scheduler-01',
-    source: 'cron',
-    message: 'Scheduled job completed: daily_report_generation (duration: 45s)',
-    attributes: { jobId: 'daily_report', duration: 45000, rowsProcessed: 50000 },
-    tags: ['production', 'scheduler', 'cron'],
-    status: 200,
-    duration: 45000,
-    env: 'production'
-  }
-]
-
-const mockStreams: LogStream[] = [
-  { id: 's1', name: 'All Errors', query: 'level:(error OR critical OR emergency)', color: 'red', count: 1456, isLive: true, createdBy: 'admin', createdAt: new Date('2024-01-01'), sharedWith: ['team'] },
-  { id: 's2', name: 'API Gateway', query: 'service:api-gateway', color: 'blue', count: 23400, isLive: true, createdBy: 'admin', createdAt: new Date('2024-01-01'), sharedWith: [] },
-  { id: 's3', name: 'High Latency (>1s)', query: 'duration:>1000', color: 'yellow', count: 670, isLive: false, createdBy: 'developer', createdAt: new Date('2024-01-05'), sharedWith: [] },
-  { id: 's4', name: 'Payment Errors', query: 'service:payment-processor level:error', color: 'purple', count: 123, isLive: true, createdBy: 'finance-team', createdAt: new Date('2024-01-10'), sharedWith: ['finance-team'] },
-  { id: 's5', name: 'Auth Failures', query: 'service:auth-service status:401', color: 'orange', count: 890, isLive: false, createdBy: 'security', createdAt: new Date('2024-01-08'), sharedWith: ['security'] },
-  { id: 's6', name: 'Database Queries', query: 'source:postgresql OR source:mysql', color: 'green', count: 45600, isLive: true, createdBy: 'dba', createdAt: new Date('2024-01-02'), sharedWith: ['dba-team'] }
-]
-
-const mockPatterns: LogPattern[] = [
-  { id: 'p1', pattern: 'Connection timeout to * cluster', count: 2340, percentage: 15.2, firstSeen: new Date('2024-01-14'), lastSeen: new Date(), services: ['api-gateway', 'payment-processor'], level: 'error', status: 'new', anomalyScore: 0.85 },
-  { id: 'p2', pattern: 'Rate limit * for IP *', count: 5670, percentage: 8.4, firstSeen: new Date('2024-01-15'), lastSeen: new Date(), services: ['auth-service'], level: 'warn', status: 'acknowledged', anomalyScore: 0.45 },
-  { id: 'p3', pattern: 'Cache miss for key: *', count: 124500, percentage: 45.3, firstSeen: new Date('2024-01-10'), lastSeen: new Date(), services: ['cache-service'], level: 'debug', status: 'ignored', anomalyScore: 0.1 },
-  { id: 'p4', pattern: 'Request completed: * /api/* (*)', count: 890000, percentage: 78.9, firstSeen: new Date('2024-01-01'), lastSeen: new Date(), services: ['api-gateway'], level: 'info', status: 'ignored', anomalyScore: 0.05 },
-  { id: 'p5', pattern: 'SMTP connection refused - email queue *', count: 45, percentage: 0.3, firstSeen: new Date('2024-01-15'), lastSeen: new Date(), services: ['notification-service'], level: 'critical', status: 'new', anomalyScore: 0.95 }
-]
-
-const mockSavedViews: SavedView[] = [
-  { id: 'v1', name: 'Production Errors', query: 'env:production level:(error OR critical)', filters: { service: ['api-gateway', 'auth-service'] }, columns: ['timestamp', 'level', 'service', 'message'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-10'), createdBy: 'admin', isDefault: true, isShared: true },
-  { id: 'v2', name: 'Payment Transactions', query: 'service:payment-processor', filters: { level: ['info', 'error'] }, columns: ['timestamp', 'message', 'attributes.transactionId'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-12'), createdBy: 'finance', isDefault: false, isShared: true },
-  { id: 'v3', name: 'High Latency Requests', query: 'duration:>500', filters: {}, columns: ['timestamp', 'service', 'duration', 'message'], sort: { field: 'duration', order: 'desc' }, createdAt: new Date('2024-01-14'), createdBy: 'sre', isDefault: false, isShared: false },
-  { id: 'v4', name: 'Security Events', query: 'tags:security OR service:auth-service', filters: { level: ['warn', 'error'] }, columns: ['timestamp', 'level', 'service', 'host', 'message'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-13'), createdBy: 'security', isDefault: false, isShared: true }
-]
-
-const mockAlerts: LogAlert[] = [
-  { id: 'a1', name: 'Error Rate Spike', query: 'level:error', threshold: { warning: 50, critical: 100 }, operator: 'above', aggregation: 'count', timeWindow: '5m', status: 'ok', lastTriggered: new Date('2024-01-14T15:30:00'), notifications: ['#alerts-channel', 'oncall@company.com'] },
-  { id: 'a2', name: 'Payment Failures', query: 'service:payment-processor level:error', threshold: { warning: 3, critical: 5 }, operator: 'above', aggregation: 'count', timeWindow: '15m', status: 'critical', lastTriggered: new Date('2024-01-15T10:25:00'), notifications: ['#payments-alerts', 'payments-team@company.com'] },
-  { id: 'a3', name: 'API P99 Latency', query: 'service:api-gateway', threshold: { warning: 2000, critical: 5000 }, operator: 'above', aggregation: 'max', timeWindow: '5m', status: 'warning', notifications: ['#api-alerts'] },
-  { id: 'a4', name: 'No Auth Logs', query: 'service:auth-service', threshold: { warning: 0, critical: 0 }, operator: 'equal', aggregation: 'count', timeWindow: '10m', status: 'no_data', notifications: ['#auth-alerts'] },
-  { id: 'a5', name: 'Email Queue Backlog', query: 'service:notification-service message:*queue*', threshold: { warning: 500, critical: 1000 }, operator: 'above', aggregation: 'count', timeWindow: '30m', status: 'critical', lastTriggered: new Date(), notifications: ['#notifications-team'] }
-]
-
-const mockPipelines: LogPipeline[] = [
-  { id: 'pipe1', name: 'API Gateway Parsing', filter: 'service:api-gateway', status: 'active', order: 1, processors: [
-    { id: 'proc1', type: 'grok', name: 'Parse access logs', config: { pattern: '%{HTTPDATE:timestamp} %{WORD:method} %{URIPATH:path}' }, isEnabled: true },
-    { id: 'proc2', type: 'status', name: 'Remap status codes', config: { mappings: { '2xx': 'ok', '4xx': 'warn', '5xx': 'error' } }, isEnabled: true }
-  ], sampleRate: 100, bytesProcessed: 15400000000, logsProcessed: 45600000 },
-  { id: 'pipe2', name: 'Payment Processing', filter: 'service:payment-*', status: 'active', order: 2, processors: [
-    { id: 'proc3', type: 'attribute', name: 'Extract transaction ID', config: { path: 'message', target: 'transaction_id' }, isEnabled: true },
-    { id: 'proc4', type: 'category', name: 'Categorize by amount', config: { rules: [{ min: 0, max: 100, category: 'small' }, { min: 100, max: 1000, category: 'medium' }] }, isEnabled: true }
-  ], sampleRate: 100, bytesProcessed: 2300000000, logsProcessed: 12300000 },
-  { id: 'pipe3', name: 'Database Logs', filter: 'source:(postgresql OR mysql)', status: 'active', order: 3, processors: [
-    { id: 'proc5', type: 'grok', name: 'Parse SQL queries', config: { pattern: '%{WORD:operation} %{WORD:table}' }, isEnabled: true }
-  ], sampleRate: 50, bytesProcessed: 8900000000, logsProcessed: 23400000 }
-]
-
-const mockArchives: LogArchive[] = [
-  { id: 'arch1', name: 'Production Logs', destination: 'S3', bucket: 'company-logs-prod', path: '/logs/production/', status: 'active', rehydrationEnabled: true, encryptionType: 'KMS', lastArchived: new Date(), totalSize: '2.4 TB', retentionDays: 365 },
-  { id: 'arch2', name: 'Staging Logs', destination: 'S3', bucket: 'company-logs-staging', path: '/logs/staging/', status: 'active', rehydrationEnabled: false, encryptionType: 'AES-256', lastArchived: new Date(), totalSize: '456 GB', retentionDays: 90 },
-  { id: 'arch3', name: 'Compliance Archive', destination: 'Glacier', bucket: 'company-compliance-archive', path: '/compliance/', status: 'active', rehydrationEnabled: true, encryptionType: 'KMS', lastArchived: new Date(), totalSize: '12.8 TB', retentionDays: 2555 }
-]
-
-const mockIndexes: LogIndex[] = [
-  { id: 'idx1', name: 'main', filter: '*', dailyLimit: 50000000, dailyUsage: 34500000, retentionDays: 15, isEnabled: true, exclusionFilters: [
-    { id: 'exc1', name: 'Exclude debug logs', query: 'level:debug', sampleRate: 0, isEnabled: true },
-    { id: 'exc2', name: 'Sample trace logs', query: 'level:trace', sampleRate: 10, isEnabled: true }
-  ] },
-  { id: 'idx2', name: 'errors', filter: 'level:(error OR critical)', dailyLimit: 10000000, dailyUsage: 890000, retentionDays: 30, isEnabled: true, exclusionFilters: [] },
-  { id: 'idx3', name: 'security', filter: 'tags:security', dailyLimit: 5000000, dailyUsage: 230000, retentionDays: 90, isEnabled: true, exclusionFilters: [] }
-]
-
-const mockForwarders: LogForwarder[] = [
-  { id: 'fwd1', name: 'SIEM Integration', type: 'splunk', endpoint: 'https://splunk.company.com:8088', status: 'active', logsForwarded: 12340000, lastForwarded: new Date() },
-  { id: 'fwd2', name: 'Analytics Pipeline', type: 'kafka', endpoint: 'kafka://analytics.company.com:9092', status: 'active', logsForwarded: 45600000, lastForwarded: new Date() },
-  { id: 'fwd3', name: 'Cold Storage', type: 'elasticsearch', endpoint: 'https://es-archive.company.com:9200', status: 'paused', logsForwarded: 8900000, lastForwarded: new Date('2024-01-14') }
-]
-
-const mockSensitiveRules: SensitiveDataRule[] = [
-  { id: 'sr1', name: 'Credit Cards', pattern: '\\b(?:\\d{4}[- ]?){3}\\d{4}\\b', type: 'credit_card', action: 'redact', matchCount: 1234, isEnabled: true },
-  { id: 'sr2', name: 'API Keys', pattern: 'sk_[a-zA-Z0-9]{32}', type: 'api_key', action: 'hash', matchCount: 567, isEnabled: true },
-  { id: 'sr3', name: 'Email Addresses', pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', type: 'email', action: 'partial_mask', matchCount: 45600, isEnabled: false },
-  { id: 'sr4', name: 'SSN', pattern: '\\b\\d{3}-\\d{2}-\\d{4}\\b', type: 'ssn', action: 'redact', matchCount: 23, isEnabled: true }
-]
-
-const mockServiceCatalog: ServiceCatalogEntry[] = [
-  { name: 'api-gateway', team: 'Platform', tier: 'critical', logsPerSecond: 1250, errorRate: 0.5, p99Latency: 245, dependencies: ['auth-service', 'cache-service'] },
-  { name: 'auth-service', team: 'Security', tier: 'critical', logsPerSecond: 890, errorRate: 0.2, p99Latency: 89, dependencies: ['user-db'] },
-  { name: 'payment-processor', team: 'Payments', tier: 'critical', logsPerSecond: 450, errorRate: 0.8, p99Latency: 1250, dependencies: ['stripe-api', 'transaction-db'] },
-  { name: 'notification-service', team: 'Communications', tier: 'high', logsPerSecond: 234, errorRate: 2.5, p99Latency: 456, dependencies: ['smtp', 'sms-gateway'] },
-  { name: 'cache-service', team: 'Platform', tier: 'high', logsPerSecond: 3400, errorRate: 0.1, p99Latency: 5, dependencies: ['redis-cluster'] }
-]
-
-// ============== HELPER FUNCTIONS ==============
-
-const getLevelColor = (level: LogLevel): string => {
-  const colors: Record<LogLevel, string> = {
-    emergency: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400',
-    alert: 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400',
-    critical: 'bg-red-200 text-red-900 border-red-300 dark:bg-red-900/40 dark:text-red-300',
-    error: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400',
-    warn: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
-    notice: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
-    info: 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400',
-    debug: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
-    trace: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-400'
-  }
-  return colors[level] || colors.info
-}
-
-const getLevelIcon = (level: LogLevel) => {
-  const icons: Record<LogLevel, React.ReactNode> = {
-    emergency: <AlertCircle className="w-4 h-4" />,
-    alert: <BellRing className="w-4 h-4" />,
-    critical: <XCircle className="w-4 h-4" />,
-    error: <XCircle className="w-4 h-4" />,
-    warn: <AlertTriangle className="w-4 h-4" />,
-    notice: <Info className="w-4 h-4" />,
-    info: <Info className="w-4 h-4" />,
-    debug: <Code className="w-4 h-4" />,
-    trace: <Terminal className="w-4 h-4" />
-  }
-  return icons[level] || icons.info
-}
-
-const getAlertStatusColor = (status: AlertSeverity): string => {
-  const colors: Record<AlertSeverity, string> = {
-    ok: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    warning: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    no_data: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
-  }
-  return colors[status] || colors.ok
-}
-
-const getPipelineStatusColor = (status: PipelineStatus): string => {
-  const colors: Record<PipelineStatus, string> = {
-    active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    disabled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
-    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  }
-  return colors[status] || colors.disabled
-}
-
-const formatDuration = (ms?: number): string => {
-  if (!ms) return '-'
-  if (ms < 1000) return `${ms}ms`
-  if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`
-  return `${(ms / 60000).toFixed(2)}m`
-}
-
-const formatBytes = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
-}
-
-// Enhanced Competitive Upgrade Mock Data
-const mockLogsAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Error Spike Detected', description: 'Error rate increased 340% in payment-service over last 15 minutes.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Anomaly' },
-  { id: '2', type: 'info' as const, title: 'Pattern Recognition', description: 'Identified recurring timeout pattern in auth-service during peak hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pattern' },
-  { id: '3', type: 'success' as const, title: 'Log Volume Optimized', description: 'Smart sampling reduced log volume by 45% without data loss.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
-
-const mockLogsCollaborators = [
-  { id: '1', name: 'SRE Lead', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
-  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
-  { id: '3', name: 'Security Analyst', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
-
-const mockLogsPredictions = [
-  { id: '1', title: 'Storage Forecast', prediction: 'Log storage will reach 80% capacity in 12 days', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Error Trend', prediction: 'Error rate expected to normalize after deployment fix', confidence: 78, trend: 'down' as const, impact: 'medium' as const },
-]
-
-const mockLogsActivities = [
-  { id: '1', user: 'SRE Lead', action: 'Created', target: 'alert for payment-service errors', timestamp: new Date().toISOString(), type: 'info' as const },
-  { id: '2', user: 'DevOps', action: 'Archived', target: '30-day old logs to cold storage', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
-  { id: '3', user: 'System', action: 'Detected', target: 'anomaly in api-gateway logs', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
-
-// Note: Quick actions are defined inside the component to access component state/handlers
-// This mock is kept for type reference only
-const mockLogsQuickActionsPlaceholder = [] as const
-
-// ============== MAIN COMPONENT ==============
-
 export default function LogsClient() {
 
   const { getUserId } = useAuthUserId()
@@ -695,27 +392,27 @@ export default function LogsClient() {
   }
 
   const stats = useMemo(() => ({
-    totalLogs: mockLogs.length * 1000000,
-    errorRate: ((mockLogs.filter(l => l.level === 'error' || l.level === 'critical').length / mockLogs.length) * 100),
-    avgLatency: mockLogs.reduce((sum, l) => sum + (l.duration || 0), 0) / mockLogs.filter(l => l.duration).length,
-    activeServices: [...new Set(mockLogs.map(l => l.service))].length,
+    totalLogs: dbSystemLogs.length + dbAccessLogs.length + dbActivityLogs.length,
+    errorRate: 0,
+    avgLatency: 0,
+    activeServices: 0,
     logsPerSecond: 1245,
     bytesIngested: 15400000000,
-    alertsActive: mockAlerts.filter(a => a.status === 'critical' || a.status === 'warning').length,
-    pipelinesActive: mockPipelines.filter(p => p.status === 'active').length
+    alertsActive: 0,
+    pipelinesActive: 0
   }), [])
 
   const logsByLevel = useMemo(() => ({
-    critical: mockLogs.filter(l => l.level === 'critical').length,
-    error: mockLogs.filter(l => l.level === 'error').length,
-    warn: mockLogs.filter(l => l.level === 'warn').length,
-    info: mockLogs.filter(l => l.level === 'info').length,
-    debug: mockLogs.filter(l => l.level === 'debug').length
+    critical: 0,
+    error: 0,
+    warn: 0,
+    info: 0,
+    debug: 0
   }), [])
 
   const filteredLogs = selectedLevel
-    ? mockLogs.filter(l => l.level === selectedLevel)
-    : mockLogs
+    ? dbSystemLogs.filter(l => l.level === selectedLevel)
+    : dbSystemLogs
 
   // CRUD Handlers
 
@@ -1414,7 +1111,7 @@ export default function LogsClient() {
                     Service
                   </h3>
                   <div className="space-y-1">
-                    {mockServiceCatalog.map(service => (
+                    {[].map(service => (
                       <div key={service.name} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${service.tier === 'critical' ? 'bg-red-500' : service.tier === 'high' ? 'bg-yellow-500' : 'bg-green-500'}`} />
@@ -1432,7 +1129,7 @@ export default function LogsClient() {
                     Saved Views
                   </h3>
                   <div className="space-y-2">
-                    {mockSavedViews.slice(0, 4).map(view => (
+                    {[].map(view => (
                       <div key={view.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
                         <div className="flex items-center gap-2">
                           <span className="text-sm">{view.name}</span>
@@ -1666,7 +1363,7 @@ export default function LogsClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {mockStreams.map(stream => (
+                {[].map(stream => (
                   <Card key={stream.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -1742,7 +1439,7 @@ export default function LogsClient() {
 
               <Card>
                 <ScrollArea className="h-[600px]">
-                  {mockPatterns.map(pattern => (
+                  {[].map(pattern => (
                     <div key={pattern.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
@@ -1794,7 +1491,7 @@ export default function LogsClient() {
               </div>
 
               <div className="space-y-4">
-                {mockPipelines.map((pipeline, index) => (
+                {[].map((pipeline, index) => (
                   <Card key={pipeline.id} className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
@@ -1847,7 +1544,7 @@ export default function LogsClient() {
               </div>
 
               <div className="space-y-4">
-                {mockIndexes.map(index => (
+                {[].map(index => (
                   <Card key={index.id} className="p-4">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -1909,7 +1606,7 @@ export default function LogsClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {mockArchives.map(archive => (
+                {[].map(archive => (
                   <Card key={archive.id} className="p-4">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -1976,7 +1673,7 @@ export default function LogsClient() {
               </div>
 
               <div className="space-y-4">
-                {mockAlerts.map(alert => (
+                {[].map(alert => (
                   <Card key={alert.id} className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -2106,7 +1803,7 @@ export default function LogsClient() {
                   <div className="flex items-center gap-3">
                     <Lock className="w-8 h-8 text-blue-600" />
                     <div>
-                      <p className="text-2xl font-bold">{mockSensitiveRules.filter(r => r.isEnabled).length}</p>
+                      <p className="text-2xl font-bold">{0}</p>
                       <p className="text-sm text-gray-500">Active Rules</p>
                     </div>
                   </div>
@@ -2136,7 +1833,7 @@ export default function LogsClient() {
                   <h3 className="font-semibold">Scanning Rules</h3>
                 </div>
                 <div className="divide-y">
-                  {mockSensitiveRules.map(rule => (
+                  {[].map(rule => (
                     <div key={rule.id} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <Switch checked={rule.isEnabled} />
@@ -2673,18 +2370,18 @@ export default function LogsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockLogsAIInsights}
+              insights={[]}
               title="Log Analytics Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockLogsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockLogsPredictions}
+              predictions={[]}
               title="Log Forecasts"
             />
           </div>
@@ -2692,7 +2389,7 @@ export default function LogsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockLogsActivities}
+            activities={[]}
             title="Log Activity"
             maxItems={5}
           />

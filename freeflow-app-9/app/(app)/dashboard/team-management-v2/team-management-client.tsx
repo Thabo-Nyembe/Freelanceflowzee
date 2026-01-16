@@ -110,7 +110,6 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const [settingsTab, setSettingsTab] = useState('organization')
 
   const { teams, loading, error, createTeam, updateTeam, deleteTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
-  const displayTeams = teams.length > 0 ? teams : initialTeams
 
 
   // Form state for new team member
@@ -247,15 +246,15 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   ])
 
   const stats = useMemo(() => ({
-    totalTeams: displayTeams.length,
-    activeTeams: displayTeams.filter(t => t.status === 'active').length,
+    totalTeams: (teams || []).length,
+    activeTeams: (teams || []).filter(t => t.status === 'active').length,
     totalMembers: teamMembers.length,
     avgPerformance: Math.round(teamMembers.reduce((sum, m) => sum + (m.performance || 0), 0) / teamMembers.length),
     goalsOnTrack: okrs.filter(o => o.status === 'on-track').length,
     goalsAtRisk: okrs.filter(o => o.status === 'at-risk' || o.status === 'behind').length,
     pendingReviews: reviews.filter(r => r.status === 'pending' || r.status === 'in-progress').length,
     upcoming1on1s: oneOnOnes.filter(o => o.status === 'scheduled').length,
-  }), [displayTeams, teamMembers, okrs, reviews, oneOnOnes])
+  }), [teams, teamMembers, okrs, reviews, oneOnOnes])
 
   const views = [
     { id: 'teams' as const, name: 'Teams', icon: Building2, count: stats.totalTeams },
@@ -952,7 +951,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {displayTeams
+                  {(teams || [])
                     .filter(t =>
                       (typeFilter === 'all' || t.team_type === typeFilter) &&
                       (statusFilter === 'all' || t.status === statusFilter) &&

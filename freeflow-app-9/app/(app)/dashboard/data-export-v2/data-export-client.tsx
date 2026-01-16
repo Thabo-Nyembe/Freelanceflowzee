@@ -143,291 +143,6 @@ interface Integration {
   icon: string
 }
 
-// Mock data sources
-const mockDataSources: DataSource[] = [
-  {
-    id: 'ds1',
-    name: 'Production PostgreSQL',
-    type: 'postgresql',
-    status: 'connected',
-    host: 'prod-db.company.com:5432',
-    lastSync: '2024-01-15T10:30:00Z',
-    recordsExtracted: 2450000,
-    tablesCount: 45,
-    icon: '🐘'
-  },
-  {
-    id: 'ds2',
-    name: 'Salesforce CRM',
-    type: 'salesforce',
-    status: 'syncing',
-    host: 'company.salesforce.com',
-    lastSync: '2024-01-15T10:25:00Z',
-    recordsExtracted: 850000,
-    tablesCount: 28,
-    icon: '☁️'
-  },
-  {
-    id: 'ds3',
-    name: 'MongoDB Analytics',
-    type: 'mongodb',
-    status: 'connected',
-    host: 'analytics-cluster.mongodb.net',
-    lastSync: '2024-01-15T09:45:00Z',
-    recordsExtracted: 5200000,
-    tablesCount: 12,
-    icon: '🍃'
-  },
-  {
-    id: 'ds4',
-    name: 'HubSpot Marketing',
-    type: 'hubspot',
-    status: 'error',
-    host: 'api.hubapi.com',
-    lastSync: '2024-01-14T18:00:00Z',
-    recordsExtracted: 320000,
-    tablesCount: 15,
-    icon: '🔶'
-  },
-  {
-    id: 'ds5',
-    name: 'AWS S3 Data Lake',
-    type: 's3',
-    status: 'connected',
-    host: 's3://company-data-lake',
-    lastSync: '2024-01-15T10:00:00Z',
-    recordsExtracted: 12000000,
-    tablesCount: 156,
-    icon: '📦'
-  }
-]
-
-// Mock pipelines
-const mockPipelines: Pipeline[] = [
-  {
-    id: 'pipe1',
-    name: 'Customer 360 Sync',
-    description: 'Sync customer data from all sources to data warehouse',
-    source: mockDataSources[0],
-    destination: { type: 'snowflake', name: 'Analytics Warehouse' },
-    schedule: { frequency: 'hourly', nextRun: '2024-01-15T11:00:00Z' },
-    status: 'active',
-    transforms: [
-      { id: 't1', name: 'Filter Active', type: 'filter', config: {}, order: 1 },
-      { id: 't2', name: 'Deduplicate', type: 'dedupe', config: {}, order: 2 }
-    ],
-    lastRun: {
-      timestamp: '2024-01-15T10:00:00Z',
-      duration: 245,
-      recordsProcessed: 45000,
-      status: 'success'
-    },
-    metrics: {
-      totalRuns: 720,
-      successRate: 99.2,
-      avgDuration: 230,
-      dataVolume: '2.4 TB'
-    }
-  },
-  {
-    id: 'pipe2',
-    name: 'Sales Pipeline Export',
-    description: 'Export sales data to BI tools',
-    source: mockDataSources[1],
-    destination: { type: 'bigquery', name: 'Sales Analytics' },
-    schedule: { frequency: 'realtime', nextRun: 'Continuous' },
-    status: 'running',
-    transforms: [
-      { id: 't3', name: 'Currency Convert', type: 'map', config: {}, order: 1 }
-    ],
-    lastRun: {
-      timestamp: '2024-01-15T10:28:00Z',
-      duration: 12,
-      recordsProcessed: 1500,
-      status: 'success'
-    },
-    metrics: {
-      totalRuns: 8500,
-      successRate: 98.5,
-      avgDuration: 15,
-      dataVolume: '850 GB'
-    }
-  },
-  {
-    id: 'pipe3',
-    name: 'Marketing Attribution',
-    description: 'Aggregate marketing data for attribution',
-    source: mockDataSources[3],
-    destination: { type: 's3', name: 'Marketing Lake' },
-    schedule: { frequency: 'daily', nextRun: '2024-01-16T00:00:00Z' },
-    status: 'error',
-    transforms: [
-      { id: 't4', name: 'Join Campaigns', type: 'join', config: {}, order: 1 },
-      { id: 't5', name: 'Aggregate Metrics', type: 'aggregate', config: {}, order: 2 }
-    ],
-    lastRun: {
-      timestamp: '2024-01-15T00:00:00Z',
-      duration: 0,
-      recordsProcessed: 0,
-      status: 'failed'
-    },
-    metrics: {
-      totalRuns: 30,
-      successRate: 86.7,
-      avgDuration: 1800,
-      dataVolume: '120 GB'
-    }
-  }
-]
-
-// Mock export jobs
-const mockExportJobs: ExportJob[] = [
-  {
-    id: 'job1',
-    name: 'Q4 Financial Report',
-    pipelineId: 'pipe1',
-    status: 'completed',
-    progress: 100,
-    startTime: '2024-01-15T08:00:00Z',
-    endTime: '2024-01-15T08:15:00Z',
-    recordsExported: 1250000,
-    fileSizeMb: 2400,
-    format: 'parquet',
-    destination: 's3://exports/finance/'
-  },
-  {
-    id: 'job2',
-    name: 'Customer Data Backup',
-    pipelineId: 'pipe1',
-    status: 'running',
-    progress: 67,
-    startTime: '2024-01-15T10:00:00Z',
-    recordsExported: 850000,
-    fileSizeMb: 1200,
-    format: 'json',
-    destination: 's3://backups/customers/'
-  },
-  {
-    id: 'job3',
-    name: 'Sales Export - Weekly',
-    pipelineId: 'pipe2',
-    status: 'queued',
-    progress: 0,
-    startTime: '2024-01-15T12:00:00Z',
-    recordsExported: 0,
-    fileSizeMb: 0,
-    format: 'csv',
-    destination: 'gs://analytics/sales/'
-  }
-]
-
-// Mock schema mappings
-const mockSchemaMappings: SchemaMapping[] = [
-  { sourceColumn: 'id', destinationType: 'INTEGER', destinationColumn: 'customer_id', isPrimaryKey: true, isNullable: false },
-  { sourceColumn: 'email', destinationType: 'VARCHAR(255)', destinationColumn: 'email_address', isPrimaryKey: false, isNullable: false },
-  { sourceColumn: 'created_at', destinationType: 'TIMESTAMP', destinationColumn: 'created_timestamp', transformation: 'TO_UTC', isPrimaryKey: false, isNullable: false },
-  { sourceColumn: 'revenue', destinationType: 'DECIMAL(10,2)', destinationColumn: 'total_revenue', transformation: 'CURRENCY_CONVERT', isPrimaryKey: false, isNullable: true },
-  { sourceColumn: 'status', destinationType: 'VARCHAR(50)', destinationColumn: 'account_status', isPrimaryKey: false, isNullable: false }
-]
-
-// Mock destinations
-const mockDestinations: Destination[] = [
-  { id: 'dest1', name: 'Analytics Warehouse', type: 'warehouse', platform: 'snowflake', status: 'active', host: 'company.snowflakecomputing.com', lastWrite: '2024-12-25T10:30:00Z', recordsWritten: 45000000, dataVolume: '2.4 TB', icon: '❄️' },
-  { id: 'dest2', name: 'Sales Analytics', type: 'warehouse', platform: 'bigquery', status: 'active', host: 'bigquery.googleapis.com/company-project', lastWrite: '2024-12-25T10:28:00Z', recordsWritten: 12000000, dataVolume: '850 GB', icon: '📊' },
-  { id: 'dest3', name: 'Marketing Lake', type: 'lake', platform: 's3', status: 'active', host: 's3://company-marketing-lake', lastWrite: '2024-12-24T00:00:00Z', recordsWritten: 8500000, dataVolume: '320 GB', icon: '📦' },
-  { id: 'dest4', name: 'Real-time Events', type: 'stream', platform: 'kafka', status: 'active', host: 'kafka.company.com:9092', lastWrite: '2024-12-25T10:30:00Z', recordsWritten: 125000000, dataVolume: '1.2 TB', icon: '⚡' },
-  { id: 'dest5', name: 'BI Webhook', type: 'api', platform: 'webhook', status: 'inactive', host: 'https://bi.company.com/webhook', lastWrite: '2024-12-23T18:00:00Z', recordsWritten: 500000, dataVolume: '45 GB', icon: '🔗' },
-  { id: 'dest6', name: 'Archive Storage', type: 'file', platform: 'gcs', status: 'active', host: 'gs://company-archive', lastWrite: '2024-12-25T06:00:00Z', recordsWritten: 250000000, dataVolume: '5.8 TB', icon: '🗄️' }
-]
-
-// Mock audit logs
-const mockAuditLogs: AuditLog[] = [
-  { id: 'audit1', action: 'run', resource: 'Customer 360 Sync', resourceType: 'pipeline', user: 'system', timestamp: '2024-12-25T10:00:00Z', details: 'Scheduled run completed successfully', status: 'success' },
-  { id: 'audit2', action: 'error', resource: 'Marketing Attribution', resourceType: 'pipeline', user: 'system', timestamp: '2024-12-25T00:00:00Z', details: 'Connection timeout to HubSpot API', status: 'failed' },
-  { id: 'audit3', action: 'update', resource: 'Production PostgreSQL', resourceType: 'source', user: 'admin@company.com', timestamp: '2024-12-24T15:30:00Z', details: 'Updated connection credentials', status: 'success' },
-  { id: 'audit4', action: 'create', resource: 'Q4 Financial Report', resourceType: 'job', user: 'finance@company.com', timestamp: '2024-12-25T08:00:00Z', details: 'Created new export job', status: 'success' },
-  { id: 'audit5', action: 'connect', resource: 'AWS S3 Data Lake', resourceType: 'source', user: 'data-eng@company.com', timestamp: '2024-12-24T10:00:00Z', details: 'Successfully connected to S3 bucket', status: 'success' },
-  { id: 'audit6', action: 'delete', resource: 'Old Test Pipeline', resourceType: 'pipeline', user: 'admin@company.com', timestamp: '2024-12-23T14:00:00Z', details: 'Deleted unused test pipeline', status: 'success' }
-]
-
-// Mock integrations (Segment-style)
-const mockIntegrations: Integration[] = [
-  { id: 'int1', name: 'Google Analytics 4', category: 'analytics', status: 'enabled', eventsTracked: 2500000, lastEvent: '2024-12-25T10:30:00Z', icon: '📈' },
-  { id: 'int2', name: 'Mixpanel', category: 'analytics', status: 'enabled', eventsTracked: 1800000, lastEvent: '2024-12-25T10:29:00Z', icon: '📊' },
-  { id: 'int3', name: 'Amplitude', category: 'product', status: 'enabled', eventsTracked: 3200000, lastEvent: '2024-12-25T10:30:00Z', icon: '📉' },
-  { id: 'int4', name: 'Intercom', category: 'support', status: 'enabled', eventsTracked: 450000, lastEvent: '2024-12-25T10:25:00Z', icon: '💬' },
-  { id: 'int5', name: 'HubSpot', category: 'marketing', status: 'pending', eventsTracked: 0, lastEvent: '', icon: '🔶' },
-  { id: 'int6', name: 'Salesforce', category: 'crm', status: 'enabled', eventsTracked: 890000, lastEvent: '2024-12-25T10:28:00Z', icon: '☁️' },
-  { id: 'int7', name: 'Facebook Ads', category: 'advertising', status: 'enabled', eventsTracked: 1200000, lastEvent: '2024-12-25T10:30:00Z', icon: '📱' },
-  { id: 'int8', name: 'Google Ads', category: 'advertising', status: 'enabled', eventsTracked: 980000, lastEvent: '2024-12-25T10:30:00Z', icon: '🎯' }
-]
-
-const getDestinationStatusColor = (status: Destination['status']) => {
-  switch (status) {
-    case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-    case 'inactive': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-    case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  }
-}
-
-const getAuditActionColor = (action: AuditLog['action']) => {
-  switch (action) {
-    case 'create': return 'bg-green-100 text-green-700'
-    case 'update': return 'bg-blue-100 text-blue-700'
-    case 'delete': return 'bg-red-100 text-red-700'
-    case 'run': return 'bg-purple-100 text-purple-700'
-    case 'error': return 'bg-red-100 text-red-700'
-    case 'connect': return 'bg-cyan-100 text-cyan-700'
-  }
-}
-
-const getIntegrationStatusColor = (status: Integration['status']) => {
-  switch (status) {
-    case 'enabled': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-    case 'disabled': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-    case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-  }
-}
-
-// Mock data for AI-powered competitive upgrade components
-const mockDataExportAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Pipeline Optimization', description: 'Query caching improved sync speed by 45%. 2M fewer API calls.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Schema Drift Detected', description: 'Salesforce source has 3 new columns not in destination mapping.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Schema' },
-  { id: '3', type: 'info' as const, title: 'Cost Reduction', description: 'Incremental sync reduced BigQuery storage costs by $450/month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cost' },
-]
-
-const mockDataExportCollaborators = [
-  { id: '1', name: 'Data Engineer', avatar: '/avatars/data-eng.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '2', name: 'Analytics Lead', avatar: '/avatars/analytics.jpg', status: 'online' as const, role: 'Analytics' },
-  { id: '3', name: 'DevOps', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
-]
-
-const mockDataExportPredictions = [
-  { id: '1', title: 'Data Volume Growth', prediction: 'Monthly export volume will hit 500GB by Q2 based on growth rate', confidence: 93, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Pipeline Health', prediction: 'PostgreSQL sync may fail next week - connection pool near limit', confidence: 78, trend: 'down' as const, impact: 'high' as const },
-]
-
-const mockDataExportActivities = [
-  { id: '1', user: 'Data Engineer', action: 'Created', target: 'Snowflake → BigQuery pipeline', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Analytics Lead', action: 'Ran', target: 'full sync on customers table', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'DevOps', action: 'Fixed', target: 'MongoDB connection timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
-
-const mockDataExportQuickActions = [
-  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { window.location.href = '/dashboard/data-export-v2?showWizard=true' }, variant: 'default' as const },
-  { id: '2', label: 'Run All Syncs', icon: 'play', action: async () => {
-    const toastId = toast.loading('Running all data syncs...')
-    try {
-      await Promise.all(mockPipelines.map(p => fetch(`/api/pipelines/${p.id}/sync`, { method: 'POST' }).catch(() => null)))
-      toast.dismiss(toastId)
-      toast.success(`${mockPipelines.length} pipelines synced successfully!`)
-    } catch {
-      toast.dismiss(toastId)
-      toast.error('Some syncs failed')
-    }
-  }, variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => { window.location.href = '/dashboard/data-export-v2?tab=monitoring' }, variant: 'outline' as const },
-]
 
 // Database export type
 interface DataExport {
@@ -555,12 +270,12 @@ export default function DataExportClient() {
   }
 
   const stats = useMemo(() => ({
-    totalSources: mockDataSources.length,
-    connectedSources: mockDataSources.filter(s => s.status === 'connected' || s.status === 'syncing').length,
-    activePipelines: mockPipelines.filter(p => p.status === 'active' || p.status === 'running').length,
-    totalRecords: mockDataSources.reduce((sum, s) => sum + s.recordsExtracted, 0),
-    runningJobs: mockExportJobs.filter(j => j.status === 'running').length,
-    successRate: mockPipelines.reduce((sum, p) => sum + p.metrics.successRate, 0) / mockPipelines.length
+    totalSources: 0,
+    connectedSources: 0,
+    activePipelines: 0,
+    totalRecords: 0,
+    runningJobs: 0,
+    successRate: 0
   }), [])
 
   // CRUD Handlers
@@ -604,7 +319,7 @@ export default function DataExportClient() {
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export started' is now running` })
+      toast.success('Export started')
       fetchDataExports()
     } catch (error: any) {
       toast.error('Failed to start export')
@@ -621,7 +336,7 @@ export default function DataExportClient() {
         .update({ status: 'scheduled', scheduled_at: scheduledAt })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export scheduled' scheduled for 1 hour` })
+      toast.success('Export scheduled for 1 hour')
       fetchDataExports()
     } catch (error: any) {
       toast.error('Failed to schedule export')
@@ -656,7 +371,7 @@ export default function DataExportClient() {
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export deleted' has been removed` })
+      toast.success('Export deleted')
       fetchDataExports()
     } catch (error: any) {
       toast.error('Failed to delete export')
@@ -814,7 +529,7 @@ export default function DataExportClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockPipelines.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-green-200 text-sm">Active Pipelines</p>
                   </div>
                 </div>
@@ -883,7 +598,7 @@ export default function DataExportClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockPipelines.map(pipeline => (
+              {[].map(pipeline => (
                 <Card key={pipeline.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
@@ -1112,7 +827,7 @@ export default function DataExportClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {mockDataSources.map(source => (
+              {[].map(source => (
                 <Card key={source.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -1351,8 +1066,8 @@ export default function DataExportClient() {
                     </div>
                   </div>
                 ))}
-                {/* Mock fallback data */}
-                {mockExportJobs.map(job => (
+                
+                {[].map(job => (
                   <div key={job.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="grid grid-cols-7 gap-4 items-center">
                       <div>
@@ -1548,7 +1263,7 @@ export default function DataExportClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockSchemaMappings.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-cyan-200 text-sm">Column Mappings</p>
                   </div>
                 </div>
@@ -1616,7 +1331,7 @@ export default function DataExportClient() {
                 </div>
               </div>
               <ScrollArea className="h-[400px]">
-                {mockSchemaMappings.map((mapping, i) => (
+                {[].map((mapping, i) => (
                   <div key={i} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 items-center">
                       <div className="flex items-center gap-2">
@@ -1765,7 +1480,7 @@ export default function DataExportClient() {
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Pipeline Health</h3>
                 <div className="space-y-4">
-                  {mockPipelines.map(pipeline => (
+                  {[].map(pipeline => (
                     <div key={pipeline.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${
@@ -1823,7 +1538,7 @@ export default function DataExportClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockDestinations.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-rose-200 text-sm">Destinations</p>
                   </div>
                 </div>
@@ -1900,7 +1615,7 @@ export default function DataExportClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {mockDestinations.map(dest => (
+              {[].map(dest => (
                 <Card key={dest.id} className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -1987,7 +1702,7 @@ export default function DataExportClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                {mockIntegrations.map(integration => (
+                {[].map(integration => (
                   <div key={integration.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -2014,7 +1729,7 @@ export default function DataExportClient() {
               <h3 className="font-semibold text-lg mb-4">Activity Log</h3>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-3">
-                  {mockAuditLogs.map(log => (
+                  {[].map(log => (
                     <div key={log.id} className="flex items-start gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <Badge className={getAuditActionColor(log.action)}>
                         {log.action}
@@ -2451,18 +2166,18 @@ export default function DataExportClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDataExportAIInsights}
+              insights={[]}
               title="Data Pipeline Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDataExportCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDataExportPredictions}
+              predictions={[]}
               title="Pipeline Forecasts"
             />
           </div>
@@ -2470,12 +2185,12 @@ export default function DataExportClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDataExportActivities}
+            activities={[]}
             title="Pipeline Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDataExportQuickActions}
+            actions={[]}
             variant="grid"
           />
         </div>

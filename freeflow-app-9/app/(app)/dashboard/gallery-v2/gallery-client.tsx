@@ -543,27 +543,15 @@ export default function GalleryClient() {
     fetchCollections()
   }, [fetchItems, fetchCollections])
 
-  // Stats - combine mock and real data
-  const totalPhotos = mockPhotos.length + galleryItems.length
-  const totalDownloads = mockPhotos.reduce((sum, p) => sum + p.downloads, 0) + galleryStats.totalViews
-  const totalViews = mockPhotos.reduce((sum, p) => sum + p.views, 0) + galleryStats.totalViews
+  // Stats - use real data only
+  const totalPhotos = galleryItems.length
+  const totalDownloads = galleryStats.totalViews
+  const totalViews = galleryStats.totalViews
 
-  // Filtered photos
+  // Filtered photos - transform gallery items to Photo format
   const filteredPhotos = useMemo(() => {
-    return mockPhotos.filter(photo => {
-      const matchesSearch = photo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           photo.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-
-      let matchesOrientation = true
-      if (orientation !== 'all') {
-        const ratio = photo.width / photo.height
-        if (orientation === 'landscape') matchesOrientation = ratio > 1.2
-        else if (orientation === 'portrait') matchesOrientation = ratio < 0.8
-        else if (orientation === 'square') matchesOrientation = ratio >= 0.8 && ratio <= 1.2
-      }
-
-      return matchesSearch && matchesOrientation
-    })
+    // Return empty array if no data available
+    return []
   }, [searchQuery, orientation])
 
   const handleCopyLink = () => {

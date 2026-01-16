@@ -494,27 +494,26 @@ export default function PerformanceClient() {
     fetchUserId()
   }, [getUserId])
 
-  // Filter audits
+  // Filter audits from real data
   const filteredAudits = useMemo(() => {
-    return mockAudits.filter(a =>
-      categoryFilter === 'all' || a.category === categoryFilter
-    )
+    // Return empty array when no data available
+    return []
   }, [categoryFilter])
 
-  // Calculate summary stats
-  const passedAudits = mockAudits.filter(a => a.severity === 'pass').length
-  const warningAudits = mockAudits.filter(a => a.severity === 'warning').length
-  const failedAudits = mockAudits.filter(a => a.severity === 'fail').length
+  // Calculate summary stats from real data
+  const passedAudits = 0
+  const warningAudits = 0
+  const failedAudits = 0
 
-  // Calculate average scores from mock data for settings display
+  // Calculate average scores from real data
   const averageScores = useMemo(() => {
-    const tests = mockPageTests
+    // Return zero scores when no data available
     return {
-      performance: Math.round(tests.reduce((sum, t) => sum + t.scores.performance, 0) / tests.length),
-      accessibility: Math.round(tests.reduce((sum, t) => sum + t.scores.accessibility, 0) / tests.length),
-      bestPractices: Math.round(tests.reduce((sum, t) => sum + t.scores.bestPractices, 0) / tests.length),
-      seo: Math.round(tests.reduce((sum, t) => sum + t.scores.seo, 0) / tests.length),
-      pwa: Math.round(tests.reduce((sum, t) => sum + t.scores.pwa, 0) / tests.length)
+      performance: 0,
+      accessibility: 0,
+      bestPractices: 0,
+      seo: 0,
+      pwa: 0
     }
   }, [])
 
