@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (170/301 pages migrated - 56.5%) 🎉 50% MILESTONE ACHIEVED!
+**Phase 3 In Progress:** 🚧 Page Migrations (180/301 pages migrated - 59.8%) 🎉 APPROACHING 60% MILESTONE!
 
 ---
 
@@ -80,7 +80,7 @@
 
 **Goal:** Migrate all 301 pages with mock/setTimeout data to real database integration
 
-**Current Progress:** 170/301 pages migrated (56.5%) 🎉 **50% MILESTONE ACHIEVED!**
+**Current Progress:** 180/301 pages migrated (59.8%) 🎉 **APPROACHING 60% MILESTONE!**
 
 ### Completed Migrations
 
@@ -1237,6 +1237,43 @@ useEffect(() => {
 
 **Note:** Batch #11 focused on lib utilities only (no dashboard pages), so page count remains at 170/301 (56.5%)
 
+#### Batch #12: V2 Dashboard Pages Mock Cleanup (10 pages) - Commit: 31fb1b97
+**Date:** January 17, 2026
+**Files Migrated:**
+- **ai-assistant-v2** (already migrated - added tracking comment)
+- **ai-create-v2** (8 MOCK constants - 350+ lines removed)
+- **analytics-v2** (10 MOCK constants - 14 lines removed)
+- **automation-v2** (7 MOCK constants - 48 lines removed)
+- **billing-v2** (7 fallback patterns - 46 lines removed)
+- **bookings-v2** (4 MOCK constants - 17 lines removed)
+- **builds-v2** (9 MOCK constants - 500+ lines removed)
+- **campaigns-v2** (27+ field mappings fixed - 88 lines removed)
+- **capacity-v2** (8 MOCK constants - 226 lines removed)
+- **chat-v2** (4 MOCK constants - 85 lines removed)
+
+**Lines Removed:** 1,374+ lines (313 insertions - migration comments)
+**MOCK Constants:** 67+ constants migrated
+
+**Database Hooks Used:**
+- useAIAssistant, useAICreate, useAnalytics
+- useAutomation, useBilling, useBookings
+- useBuilds, useBuildPipelines, useBuildArtifacts
+- useCampaigns, useCapacity, useChat
+
+**Patterns:**
+- Empty arrays: `const MOCK_X = []`
+- Zero value objects: `{ totalRevenue: 0 }`
+- Removed fallbacks: `data.length > 0 ? data : mockData` → `data || []`
+- Dynamic Supabase imports in handlers
+- Migration comments: `// MIGRATED: Batch #12 - Removed mock data, using database hooks`
+
+**Special Fixes:**
+- campaigns-v2: Fixed 27+ field mapping inconsistencies (campaign_name, campaign_type, etc.)
+- campaigns-v2: Fixed broken stats calculations with syntax errors
+- builds-v2: Integrated 3 hooks (useBuilds, useBuildPipelines, useBuildArtifacts)
+
+**Progress Update:** 170/301 → 180/301 (59.8% complete) - Just 0.2% from 60% milestone!
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -1246,7 +1283,7 @@ useEffect(() => {
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 131 pages need mock data → database migration
+**Remaining:** 121 pages need mock data → database migration
 
 ---
 
