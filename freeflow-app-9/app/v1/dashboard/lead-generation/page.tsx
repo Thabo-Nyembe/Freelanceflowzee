@@ -14,7 +14,6 @@ import {
   formatROI
 } from '@/lib/lead-gen-utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -27,7 +26,6 @@ const logger = createFeatureLogger('LeadGenerationPage')
 type ViewMode = 'overview' | 'leads' | 'forms' | 'pages' | 'campaigns'
 
 export default function LeadGenerationPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -42,21 +40,15 @@ export default function LeadGenerationPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
 
-  // A+++ LOAD LEAD GENERATION DATA
   useEffect(() => {
     const loadLeadGenerationData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading lead generation data', { userId })
-
-        const {
+        setError(null)        const {
           getLeads,
           getLeadForms,
           getLandingPages,
@@ -79,22 +71,14 @@ export default function LeadGenerationPage() {
         setLeadStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Lead generation loaded', {
-          description: `${leadsResult.data?.length || 0} leads, ${formsResult.data?.length || 0} forms from database`
-        })
-        logger.info('Lead generation data loaded successfully', {
-          leadsCount: leadsResult.data?.length,
-          formsCount: formsResult.data?.length,
-          pagesCount: pagesResult.data?.length,
-          campaignsCount: campaignsResult.data?.length
-        })
-        announce('Lead generation dashboard loaded successfully', 'polite')
+        toast.success('Lead generation loaded' leads, ${formsResult.data?.length || 0} forms from database`
+        })        announce('Lead generation dashboard loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load lead generation data'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load lead generation data', { error: errorMessage, userId })
-        toast.error('Failed to load lead generation', { description: errorMessage })
+        toast.error('Failed to load lead generation')
         announce('Error loading lead generation dashboard', 'assertive')
       }
     }
@@ -460,7 +444,6 @@ export default function LeadGenerationPage() {
     </div>
   )
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:bg-none dark:bg-gray-900">
@@ -478,7 +461,6 @@ export default function LeadGenerationPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:bg-none dark:bg-gray-900">
