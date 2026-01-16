@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 136/286 pages integrated (47.6%)
+**Overall Progress:** 137/286 pages integrated (47.9%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 130/223 using Supabase hooks (58.3%) 🚧
-  - **Mock → Database:** 7/157 migrated (4.5%) 🎉 NEW!
+- **V2 Pages:** 131/223 using Supabase hooks (58.7%) 🚧
+  - **Mock → Database:** 8/157 migrated (5.1%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -403,6 +403,21 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** File has pre-existing template literal syntax errors in toast messages (lines 697, 731, 796, 811, 812, 814 - unrelated to migration, requires separate cleanup)
    - **Migration Time:** ~1 hour
    - **Complexity:** High (manual Supabase → hooks migration, 6 mutation functions migrated, complex schema mapping with field name transformations and default values)
+
+8. `pricing` (app/v2/dashboard) - ✅ **MIGRATED** (3,524 lines) - Commit: TBD
+   - **Pattern:** Manual Supabase → Hooks with schema mapping (UI PricingPlan ↔ DB PricingPlan)
+   - **Tables:** pricing_plans (via use-pricing-plans hook)
+   - **Hook Features:** Real-time subscriptions, automatic refetch, mutation hooks (createPlan, updatePlan, deletePlan, toggleActive, setFeatured, updateSubscribers)
+   - **Mapping:** Field name mapping (is_featured → isFeatured, subscribers_count → subscriberCount, revenue_monthly → revenue, churn_rate → churnRate, created_at → createdAt, updated_at → updatedAt), constructed prices object from monthly_price/annual_price, array mapping for features with default IDs, default values for missing fields (slug, model, status, trialDays, isPopular)
+   - **Write Operations:** Replaced ALL manual Supabase calls with hook mutations:
+     - CREATE: createPlan() for handleCreatePlan
+     - UPDATE: updatePlan() for handleUpdatePlan, handleArchivePlan
+   - **Impact:** Replaced 3 manual database functions with hook-based mutations, real database integration with real-time subscriptions, schema mapping converts DB format to UI PricingPlan format, stats calculation uses mappedPlans
+   - **Kept as Mock:** Coupons (separate booking_coupons table), Subscriptions, Invoices (competitive showcase features)
+   - **Cleanup:** Removed manual fetchPlans function, updated useEffect to only fetch coupons, replaced all initialPlans references with mappedPlans in UI rendering and stats calculation
+   - **Note:** File has pre-existing template literal syntax errors in JSX (lines 2607, 3331 - unrelated to migration)
+   - **Migration Time:** ~45 minutes
+   - **Complexity:** Medium (hook integration with real-time subscriptions, 3 mutation functions migrated, schema mapping with field transformations and array mapping)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)

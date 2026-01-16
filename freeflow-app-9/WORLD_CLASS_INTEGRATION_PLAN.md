@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (7/301 pages migrated - 2.3%) 🎉 SEVENTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (8/301 pages migrated - 2.7%) 🎉 EIGHTH MILESTONE!
 
 ---
 
@@ -672,6 +672,159 @@ const handleStartDeployment = async (deployment: DBDeployment) => {
 - ✅ Fixed pre-existing authentication bug
 - ✅ Kept mock data for: BuildLogs, Domains, EnvVars, Functions, EdgeConfigs, Blobs, Protections, Webhooks, Integrations, UsageMetrics (competitive showcase features)
 
+#### 8. pricing (v2) ✅ (Commit: TBD)
+**File:** `app/v2/dashboard/pricing/pricing-client.tsx` (3,524 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium (hook integration with real-time subscriptions, 3 mutation functions migrated, schema mapping)
+
+**Before:** Manual Supabase calls, UI using initialPlans parameter/mockPlans
+```typescript
+const [dbPlans, setDbPlans] = useState<DbPricingPlan[]>([])
+const [loading, setLoading] = useState(true)
+
+// Manual fetch with manual createClient
+const fetchPlans = useCallback(async () => {
+  try {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+    const { data, error } = await supabase.from('pricing_plans').select('*').order('sort_order', { ascending: true })
+    if (error) throw error
+    setDbPlans(data || [])
+  } catch (error) { console.error('Error fetching plans:', error) }
+}, [])
+
+// Stats calculated from initialPlans (prop parameter, defaults to mockPlans)
+const stats = useMemo(() => {
+  const totalRevenue = initialPlans.reduce((sum, p) => sum + p.revenue, 0)
+  // ...
+}, [initialPlans])
+
+// Manual mutation handlers
+const handleCreatePlan = async () => {
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  const { error } = await supabase.from('pricing_plans').insert({ /* ... */ })
+  // ...
+  fetchPlans()
+}
+```
+
+**After:** Hook-based with schema mapping, real-time subscriptions, and mutation hooks
+```typescript
+// Integrate usePricingPlans hook with real-time subscriptions
+const {
+  plans: dbPlans,
+  stats: dbStats,
+  loading,
+  error: plansError,
+  createPlan,
+  updatePlan,
+  deletePlan,
+  toggleActive,
+  setFeatured,
+  updateSubscribers
+} = usePricingPlans([], initialStats)
+
+// Map DB pricing plans to UI format
+const mappedPlans: PricingPlan[] = useMemo(() => {
+  if (!dbPlans || dbPlans.length === 0) return []
+
+  return dbPlans.map((dbPlan): PricingPlan => ({
+    id: dbPlan.id,
+    name: dbPlan.name,
+    slug: dbPlan.name.toLowerCase().replace(/\s+/g, '-'),
+    description: dbPlan.description || '',
+    model: 'flat' as PricingModel,
+    status: dbPlan.is_active ? 'active' : 'inactive',
+    prices: {
+      monthly: dbPlan.monthly_price,
+      annual: dbPlan.annual_price
+    },
+    currency: dbPlan.currency,
+    features: Array.isArray(dbPlan.features) ? dbPlan.features.map((f: any, idx: number) => ({
+      id: f.id || `feature-${idx}`,
+      name: f.name || '',
+      description: f.description,
+      included: f.included ?? true,
+      limit: f.limit
+    })) : [],
+    limits: dbPlan.limits || {},
+    isFeatured: dbPlan.is_featured,
+    isPopular: false,
+    trialDays: 0,
+    subscriberCount: dbPlan.subscribers_count,
+    revenue: dbPlan.revenue_monthly,
+    churnRate: dbPlan.churn_rate,
+    createdAt: dbPlan.created_at,
+    updatedAt: dbPlan.updated_at
+  }))
+}, [dbPlans])
+
+// Stats calculated from mappedPlans
+const stats = useMemo(() => {
+  const totalRevenue = mappedPlans.reduce((sum, p) => sum + p.revenue, 0)
+  // ...
+}, [mappedPlans])
+
+// Mutation handlers now use hooks (automatic refetch via real-time subscriptions)
+const handleCreatePlan = async () => {
+  const result = await createPlan({
+    name: planForm.name,
+    description: planForm.description,
+    monthly_price: planForm.monthly_price,
+    annual_price: planForm.annual_price,
+    is_featured: planForm.is_featured,
+    features: planForm.features,
+    // ...
+  })
+  // Hook handles automatic refetch via real-time subscriptions
+}
+```
+
+**Tables Integrated:**
+- `pricing_plans` (via use-pricing-plans hook) - Pricing plan management, subscriptions tracking, revenue analytics
+
+**Schema Mapping Performed:**
+- Field name mapping:
+  - `is_featured` → `isFeatured`
+  - `subscribers_count` → `subscriberCount`
+  - `revenue_monthly` → `revenue`
+  - `churn_rate` → `churnRate`
+  - `created_at` → `createdAt`
+  - `updated_at` → `updatedAt`
+- Constructed fields:
+  - `slug` - generated from name (lowercase, hyphenated)
+  - `prices` object - constructed from `monthly_price` and `annual_price`
+  - `features` array - mapped with default IDs if missing
+- Default values for missing UI fields:
+  - `model` - default to 'flat'
+  - `status` - derived from is_active
+  - `trialDays` - default to 0
+  - `isPopular` - default to false
+
+**Write Operations Migrated:**
+- CREATE: `createPlan()` → `handleCreatePlan`
+- UPDATE: `updatePlan()` → `handleUpdatePlan`, `handleArchivePlan`
+- Total: 3 mutation functions converted from manual Supabase to hooks
+
+**Cleanup Performed:**
+- Removed manual fetchPlans function
+- Updated useEffect to only fetch coupons (hook handles plan fetching)
+- Replaced all `initialPlans` references with `mappedPlans` in UI rendering
+- Updated stats calculation dependency to use mappedPlans
+
+**Fixes Applied:**
+- Note: File has pre-existing template literal syntax errors in JSX (lines 2607, 3331 - unrelated to migration)
+
+**Impact:**
+- ✅ Replaced 3 manual database mutation functions with hook-based mutations
+- ✅ Real database integration with schema mapping (DB → UI format)
+- ✅ Real-time subscriptions for automatic updates (no manual refetch needed)
+- ✅ Hook provides additional utilities: toggleActive, setFeatured, updateSubscribers
+- ✅ All mutations benefit from hook's automatic refetch
+- ✅ UI correctly uses database data instead of initialPlans/mockPlans
+- ✅ Kept mock data for: Coupons (separate booking_coupons table), Subscriptions, Invoices (competitive showcase features)
+
 **Pattern Reinforced (manual Supabase → hooks with mutations):**
 1. Import hooks (useDeployments, useCreateDeployment, useUpdateDeployment, useDeleteDeployment)
 2. Call query hook for data fetching (replaces manual fetch)
@@ -690,7 +843,7 @@ const handleStartDeployment = async (deployment: DBDeployment) => {
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 294 pages need mock data → database migration
+**Remaining:** 293 pages need mock data → database migration
 
 ---
 
