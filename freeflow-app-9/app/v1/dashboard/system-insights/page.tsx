@@ -44,24 +44,17 @@ export default function SystemInsightsPage() {
 
   useEffect(() => {
     const loadSystemMetrics = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        return
+      if (!userId) {        return
       }
 
-      try {
-        logger.info('Loading system insights metrics', { userId })
-
-        // Dynamic import for code splitting
+      try {        // Dynamic import for code splitting
         const { getSystemMetrics } = await import('@/lib/system-insights-queries')
 
         const { data, error } = await getSystemMetrics(userId)
 
         if (error) throw error
 
-        setSystemMetrics(data)
-        logger.info('System metrics loaded successfully', { userId, hasMetrics: !!data })
-        announce('System insights loaded', 'polite')
+        setSystemMetrics(data)        announce('System insights loaded', 'polite')
       } catch (err) {
         logger.error('Failed to load system metrics', { error: err, userId })
       }
@@ -71,13 +64,7 @@ export default function SystemInsightsPage() {
   }, [userId, announce])
 
   // Demo: Success Toast with Data - Real API call
-  const showSuccessToast = async () => {
-    logger.info('Success toast demonstrated', {
-      type: 'demo',
-      category: 'success-toast'
-    })
-
-    try {
+  const showSuccessToast = async () => {    try {
       const startTime = Date.now()
       const res = await fetch('/api/system/health', { method: 'GET' })
       const duration = ((Date.now() - startTime) / 1000).toFixed(1)
@@ -85,13 +72,10 @@ export default function SystemInsightsPage() {
       if (!res.ok) throw new Error('Health check failed')
 
       const data = await res.json()
-      toast.success('Operation Completed Successfully', {
-        description: `System healthy, ${Object.keys(data).length} checks passed, ${duration}s`
+      toast.success('Operation Completed Successfully' checks passed, ${duration}s`
       })
     } catch (error) {
-      toast.error('Operation Failed', {
-        description: 'Could not complete health check'
-      })
+      toast.error('Operation Failed')
     }
   }
 
@@ -105,31 +89,19 @@ export default function SystemInsightsPage() {
       category: 'error-toast'
     })
 
-    toast.error('Operation Failed', {
-      description: `Something went wrong • Error ID: ${errorId}`,
+    toast.error('Operation Failed'`,
       icon: <XCircle className="h-5 w-5" />
     })
   }
 
   // Demo: Copy Toast with Character Count - Real clipboard operation
   const showCopyToast = async () => {
-    const content = 'const greeting = "Hello, World!";'
-
-    logger.info('Copy toast demonstrated', {
-      type: 'demo',
-      contentLength: content.length,
-      category: 'copy-toast'
-    })
-
-    try {
+    const content = 'const greeting = "Hello, World!";'    try {
       await navigator.clipboard.writeText(content)
-      toast.success('Code Copied', {
-        description: `${content.length} characters copied to clipboard`
+      toast.success('Code Copied' characters copied to clipboard`
       })
     } catch (error) {
-      toast.error('Failed to copy', {
-        description: 'Could not access clipboard'
-      })
+      toast.error('Failed to copy')
     }
   }
 
@@ -145,16 +117,7 @@ export default function SystemInsightsPage() {
         toastNotifications: 1247,
         eventsLogged: 8392
       }
-    }
-
-    logger.info('File toast demonstrated', {
-      type: 'demo',
-      fileName,
-      fileSize: '1.2 KB',
-      category: 'file-toast'
-    })
-
-    try {
+    }    try {
       const jsonStr = JSON.stringify(projectData, null, 2)
       const blob = new Blob([jsonStr], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -166,27 +129,17 @@ export default function SystemInsightsPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('File Downloaded', {
-        description: `${fileName}, ${(blob.size / 1024).toFixed(1)} KB`
+      toast.success('File Downloaded', ${(blob.size / 1024).toFixed(1)} KB`
       })
     } catch (error) {
-      toast.error('Download Failed', {
-        description: 'Could not generate download file'
-      })
+      toast.error('Download Failed')
     }
   }
 
   // Demo: Progress Toast - Real API call with loading state
   const showProgressToast = async () => {
     setLoading(true)
-    const startTime = Date.now()
-
-    logger.info('Progress toast demonstrated', {
-      type: 'demo',
-      category: 'progress-toast'
-    })
-
-    try {
+    const startTime = Date.now()    try {
       // Simulate video analysis with real API call
       const res = await fetch('/api/analytics/summary', { method: 'GET' })
       const duration = ((Date.now() - startTime) / 1000).toFixed(1)
@@ -194,13 +147,10 @@ export default function SystemInsightsPage() {
       if (!res.ok) throw new Error('Processing failed')
 
       const data = await res.json()
-      toast.success('Processing Complete', {
-        description: `Analysis complete, ${Object.keys(data).length} metrics retrieved, ${duration}s`
+      toast.success('Processing Complete' metrics retrieved, ${duration}s`
       })
     } catch (error) {
-      toast.error('Processing Failed', {
-        description: 'Could not complete analysis'
-      })
+      toast.error('Processing Failed')
     } finally {
       setLoading(false)
     }
@@ -210,64 +160,25 @@ export default function SystemInsightsPage() {
   const [deletedItems, setDeletedItems] = useState<string[]>([])
 
   const showActionToast = () => {
-    const itemsToDelete = ['item-1', 'item-2', 'item-3']
-
-    logger.info('Action toast demonstrated', {
-      type: 'demo',
-      action: 'delete',
-      itemCount: itemsToDelete.length,
-      category: 'action-toast'
-    })
-
-    // Actually update state
+    const itemsToDelete = ['item-1', 'item-2', 'item-3']    // Actually update state
     setDeletedItems(prev => [...prev, ...itemsToDelete])
 
-    toast.success(`${itemsToDelete.length} Items Deleted`, {
-      description: 'Files moved to trash',
-      action: {
-        label: 'Undo',
-        onClick: () => {
-          setDeletedItems(prev => prev.filter(id => !itemsToDelete.includes(id)))
-          toast.success('Restored', { description: `${itemsToDelete.length} items restored` })
+    toast.success(`${itemsToDelete.length} Items Deleted` items restored` })
         }
       }
     })
   }
 
   // Demo: Metric Toast
-  const showMetricToast = () => {
-    logger.info('Metric toast demonstrated', {
-      type: 'demo',
-      metric: 'API Response Time',
-      value: 145,
-      trend: 'improved',
-      category: 'metric-toast'
-    })
-
-    toast.success('API Performance - Response time: 145ms (32% faster)')
+  const showMetricToast = () => {    toast.success('API Performance - Response time: 145ms (32% faster)')
   }
 
   // Demo: Data Operation Toast
-  const showDataToast = () => {
-    logger.info('Data toast demonstrated', {
-      type: 'demo',
-      operation: 'sync',
-      recordCount: 247,
-      category: 'data-toast'
-    })
-
-    toast.success('Data Synchronized - 247 records updated')
+  const showDataToast = () => {    toast.success('Data Synchronized - 247 records updated')
   }
 
   // Demo: Multiple Toast Types
-  const showMultipleToasts = () => {
-    logger.info('Multiple toasts demonstrated', {
-      type: 'demo',
-      count: 5,
-      category: 'multiple-toasts'
-    })
-
-    toast.success('Task 1 Complete - File uploaded')
+  const showMultipleToasts = () => {    toast.success('Task 1 Complete - File uploaded')
     setTimeout(() => toast.success('Task 2 Complete - Data processed'), 500)
     setTimeout(() => toast.success('Task 3 Complete - Report generated'), 1000)
     setTimeout(() => toast.success('Task 4 Complete - Email sent'), 1500)
@@ -509,8 +420,7 @@ export default function SystemInsightsPage() {
   contentLength: 245
 });
 
-toast.success('Code Copied', {
-  description: \`\${content.length} characters copied\`
+toast.success('Code Copied' characters copied\`
 });`}</pre>
                 </div>
               </div>
@@ -530,9 +440,7 @@ toast.success('Code Copied', {
   requiredRole
 });
 
-toast.error('Authorization Failed', {
-  description: 'Please log in to access this page'
-});`}</pre>
+toast.error('Authorization Failed');`}</pre>
                 </div>
               </div>
 
@@ -549,9 +457,7 @@ toast.error('Authorization Failed', {
   format: 'JSON'
 });
 
-toast.success('File Downloaded', {
-  description: 'project-data.json • 1.2 MB'
-});`}</pre>
+toast.success('File Downloaded');`}</pre>
                 </div>
               </div>
             </CardContent>
