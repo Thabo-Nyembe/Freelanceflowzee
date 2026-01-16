@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -597,7 +596,7 @@ const mockAppStoreActivities = [
 // ============================================================================
 
 export default function AppStoreClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('discover')
   const [apps, setApps] = useState<App[]>(mockApps)
   const [reviews, setReviews] = useState<Review[]>(mockReviews)
@@ -649,6 +648,8 @@ export default function AppStoreClient() {
   // Fetch user on mount
   useEffect(() => {
     const getUser = async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) setUserId(user.id)
     }
@@ -732,7 +733,7 @@ export default function AppStoreClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase, userId])
+  }, [ userId])
 
   useEffect(() => {
     fetchApps()
@@ -781,6 +782,8 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .insert({
@@ -794,12 +797,16 @@ export default function AppStoreClient() {
       if (error) throw error
 
       // Update install count
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('plugins')
         .update({ install_count: app.downloadCount + 1 })
         .eq('id', app.id)
 
       // Record download
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('plugin_downloads')
         .insert({
@@ -825,6 +832,8 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .delete()
@@ -850,6 +859,8 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })
@@ -876,6 +887,8 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('plugin_reviews')
         .upsert({
@@ -909,6 +922,8 @@ export default function AppStoreClient() {
       const trialEnds = new Date()
       trialEnds.setDate(trialEnds.getDate() + app.trialDays)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .insert({
@@ -937,6 +952,8 @@ export default function AppStoreClient() {
       return
     }
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('plugin_wishlists')
         .insert({
@@ -958,6 +975,8 @@ export default function AppStoreClient() {
     setLoading(true)
     try {
       for (const update of updates) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('installed_plugins')
           .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })

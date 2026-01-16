@@ -1,7 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -275,7 +274,7 @@ const mockFormsActivities = [
 // ============================================================================
 
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [statusFilter, setStatusFilter] = useState<FormStatus | 'all'>('all')
@@ -376,6 +375,8 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -432,6 +433,8 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleDuplicateForm = async (form: Form) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
