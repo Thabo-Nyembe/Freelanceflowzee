@@ -137,293 +137,6 @@ interface Topic {
   featured: boolean
 }
 
-// Mock Data
-const mockPhotographers: Photographer[] = [
-  {
-    id: '1',
-    name: 'Alex Rivera',
-    username: 'alexrivera',
-    avatar: '/avatars/alex.jpg',
-    bio: 'Travel and landscape photographer. Capturing moments around the world.',
-    location: 'San Francisco, CA',
-    photos: 342,
-    followers: 12500,
-    following: 156
-  },
-  {
-    id: '2',
-    name: 'Sarah Kim',
-    username: 'sarahkim',
-    avatar: '/avatars/sarah.jpg',
-    bio: 'Portrait and lifestyle photographer based in NYC.',
-    location: 'New York, NY',
-    photos: 218,
-    followers: 8900,
-    following: 234
-  },
-  {
-    id: '3',
-    name: 'James Chen',
-    username: 'jameschen',
-    avatar: '/avatars/james.jpg',
-    bio: 'Architecture and urban photography enthusiast.',
-    location: 'Chicago, IL',
-    photos: 156,
-    followers: 5600,
-    following: 89
-  }
-]
-
-const mockPhotos: Photo[] = [
-  {
-    id: '1',
-    url: '/gallery/mountain-sunset.jpg',
-    thumbnailUrl: '/gallery/thumb/mountain-sunset.jpg',
-    title: 'Mountain Sunset',
-    description: 'Golden hour at the mountain peak with breathtaking views',
-    width: 4000,
-    height: 2667,
-    color: '#f97316',
-    photographer: mockPhotographers[0],
-    location: 'Yosemite National Park, CA',
-    camera: 'Sony A7R IV',
-    lens: 'Sony 24-70mm f/2.8 GM',
-    aperture: 'f/11',
-    shutterSpeed: '1/125s',
-    iso: 100,
-    focalLength: '35mm',
-    takenAt: '2024-10-15T18:30:00Z',
-    uploadedAt: '2024-10-20T10:00:00Z',
-    views: 15420,
-    downloads: 892,
-    likes: 1256,
-    isLiked: true,
-    isSaved: false,
-    tags: ['nature', 'sunset', 'mountains', 'landscape', 'golden hour'],
-    license: 'free',
-    collections: ['1', '3']
-  },
-  {
-    id: '2',
-    url: '/gallery/city-skyline.jpg',
-    thumbnailUrl: '/gallery/thumb/city-skyline.jpg',
-    title: 'City Skyline at Night',
-    description: 'Urban nightscape with city lights reflecting on the water',
-    width: 5000,
-    height: 3333,
-    color: '#3b82f6',
-    photographer: mockPhotographers[2],
-    location: 'Chicago, IL',
-    camera: 'Canon EOS R5',
-    lens: 'Canon RF 15-35mm f/2.8L',
-    aperture: 'f/8',
-    shutterSpeed: '30s',
-    iso: 400,
-    focalLength: '24mm',
-    takenAt: '2024-11-05T21:00:00Z',
-    uploadedAt: '2024-11-10T14:30:00Z',
-    views: 8932,
-    downloads: 456,
-    likes: 789,
-    isLiked: false,
-    isSaved: true,
-    tags: ['city', 'night', 'architecture', 'urban', 'skyline'],
-    license: 'free',
-    collections: ['2']
-  },
-  {
-    id: '3',
-    url: '/gallery/portrait-studio.jpg',
-    thumbnailUrl: '/gallery/thumb/portrait-studio.jpg',
-    title: 'Studio Portrait',
-    description: 'Professional studio portrait with dramatic lighting',
-    width: 3000,
-    height: 4500,
-    color: '#1f2937',
-    photographer: mockPhotographers[1],
-    location: null,
-    camera: 'Nikon Z9',
-    lens: 'Nikon 85mm f/1.4S',
-    aperture: 'f/2.0',
-    shutterSpeed: '1/200s',
-    iso: 200,
-    focalLength: '85mm',
-    takenAt: '2024-11-20T14:00:00Z',
-    uploadedAt: '2024-11-22T09:15:00Z',
-    views: 5678,
-    downloads: 234,
-    likes: 567,
-    isLiked: false,
-    isSaved: false,
-    tags: ['portrait', 'studio', 'people', 'dramatic', 'lighting'],
-    license: 'premium',
-    collections: []
-  },
-  {
-    id: '4',
-    url: '/gallery/ocean-waves.jpg',
-    thumbnailUrl: '/gallery/thumb/ocean-waves.jpg',
-    title: 'Ocean Waves',
-    description: 'Powerful waves crashing on the rocky shore',
-    width: 4500,
-    height: 3000,
-    color: '#0ea5e9',
-    photographer: mockPhotographers[0],
-    location: 'Big Sur, CA',
-    camera: 'Sony A7R IV',
-    lens: 'Sony 70-200mm f/2.8 GM',
-    aperture: 'f/5.6',
-    shutterSpeed: '1/1000s',
-    iso: 200,
-    focalLength: '135mm',
-    takenAt: '2024-09-28T07:45:00Z',
-    uploadedAt: '2024-10-01T16:00:00Z',
-    views: 12345,
-    downloads: 678,
-    likes: 945,
-    isLiked: true,
-    isSaved: true,
-    tags: ['ocean', 'waves', 'seascape', 'nature', 'water'],
-    license: 'free',
-    collections: ['1']
-  },
-  {
-    id: '5',
-    url: '/gallery/autumn-forest.jpg',
-    thumbnailUrl: '/gallery/thumb/autumn-forest.jpg',
-    title: 'Autumn Forest Path',
-    description: 'A winding path through colorful autumn foliage',
-    width: 3500,
-    height: 5250,
-    color: '#ea580c',
-    photographer: mockPhotographers[0],
-    location: 'Vermont',
-    camera: 'Sony A7R IV',
-    lens: 'Sony 24mm f/1.4 GM',
-    aperture: 'f/8',
-    shutterSpeed: '1/60s',
-    iso: 400,
-    focalLength: '24mm',
-    takenAt: '2024-10-20T11:30:00Z',
-    uploadedAt: '2024-10-25T12:00:00Z',
-    views: 9876,
-    downloads: 543,
-    likes: 821,
-    isLiked: false,
-    isSaved: false,
-    tags: ['autumn', 'forest', 'fall', 'nature', 'path', 'trees'],
-    license: 'free',
-    collections: ['1', '3']
-  },
-  {
-    id: '6',
-    url: '/gallery/coffee-shop.jpg',
-    thumbnailUrl: '/gallery/thumb/coffee-shop.jpg',
-    title: 'Cozy Coffee Shop',
-    description: 'Warm atmosphere in a local coffee shop',
-    width: 4000,
-    height: 4000,
-    color: '#92400e',
-    photographer: mockPhotographers[1],
-    location: 'Brooklyn, NY',
-    camera: 'Fujifilm X-T5',
-    lens: 'Fujinon 35mm f/1.4',
-    aperture: 'f/2.0',
-    shutterSpeed: '1/125s',
-    iso: 800,
-    focalLength: '35mm',
-    takenAt: '2024-11-15T10:00:00Z',
-    uploadedAt: '2024-11-18T11:30:00Z',
-    views: 4567,
-    downloads: 189,
-    likes: 423,
-    isLiked: false,
-    isSaved: false,
-    tags: ['coffee', 'cafe', 'interior', 'lifestyle', 'cozy'],
-    license: 'free',
-    collections: []
-  }
-]
-
-const mockCollections: Collection[] = [
-  {
-    id: '1',
-    name: 'Nature & Landscapes',
-    description: 'Beautiful natural scenery from around the world',
-    coverPhoto: '/gallery/thumb/mountain-sunset.jpg',
-    photoCount: 156,
-    isPrivate: false,
-    createdBy: 'Alex Rivera',
-    createdAt: '2024-06-15T00:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'Urban Architecture',
-    description: 'City skylines and architectural marvels',
-    coverPhoto: '/gallery/thumb/city-skyline.jpg',
-    photoCount: 89,
-    isPrivate: false,
-    createdBy: 'James Chen',
-    createdAt: '2024-07-20T00:00:00Z'
-  },
-  {
-    id: '3',
-    name: 'Autumn Vibes',
-    description: 'Fall colors and seasonal photography',
-    coverPhoto: '/gallery/thumb/autumn-forest.jpg',
-    photoCount: 42,
-    isPrivate: false,
-    createdBy: 'Alex Rivera',
-    createdAt: '2024-09-01T00:00:00Z'
-  },
-  {
-    id: '4',
-    name: 'My Favorites',
-    description: 'Personal collection of inspiring images',
-    coverPhoto: '/gallery/thumb/ocean-waves.jpg',
-    photoCount: 28,
-    isPrivate: true,
-    createdBy: 'You',
-    createdAt: '2024-10-01T00:00:00Z'
-  }
-]
-
-const mockTopics: Topic[] = [
-  { id: '1', name: 'Nature', slug: 'nature', description: 'Photos of natural landscapes and wildlife', coverPhoto: '/topics/nature.jpg', photoCount: 45000, featured: true },
-  { id: '2', name: 'Architecture', slug: 'architecture', description: 'Buildings and structural photography', coverPhoto: '/placeholder.svg', photoCount: 28000, featured: true },
-  { id: '3', name: 'Travel', slug: 'travel', description: 'Destinations and adventures worldwide', coverPhoto: '/topics/travel.jpg', photoCount: 52000, featured: true },
-  { id: '4', name: 'People', slug: 'people', description: 'Portraits and human moments', coverPhoto: '/topics/people.jpg', photoCount: 38000, featured: false },
-  { id: '5', name: 'Food & Drink', slug: 'food-drink', description: 'Culinary photography', coverPhoto: '/topics/food.jpg', photoCount: 21000, featured: false },
-  { id: '6', name: 'Business', slug: 'business', description: 'Work and professional life', coverPhoto: '/topics/business.jpg', photoCount: 15000, featured: false }
-]
-
-// Enhanced Competitive Upgrade Mock Data - Gallery Context
-const mockGalleryAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Trending Content', description: 'Your landscape photos are getting 3x more views this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'info' as const, title: 'Storage Optimization', description: 'Enable smart compression to save 2.5GB of storage space.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Storage' },
-  { id: '3', type: 'warning' as const, title: 'License Expiring', description: '12 photos have licenses expiring in 7 days. Review and renew.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Licensing' },
-]
-
-const mockGalleryCollaborators = [
-  { id: '1', name: 'Emma Watson', avatar: '/avatars/emma.jpg', status: 'online' as const, role: 'Photographer', lastActive: 'Now' },
-  { id: '2', name: 'Liam Brown', avatar: '/avatars/liam.jpg', status: 'online' as const, role: 'Editor', lastActive: '8m ago' },
-  { id: '3', name: 'Ava Williams', avatar: '/avatars/ava.jpg', status: 'away' as const, role: 'Curator', lastActive: '25m ago' },
-]
-
-const mockGalleryPredictions = [
-  { id: '1', label: 'Monthly Views', current: 12500, target: 15000, predicted: 14200, confidence: 80, trend: 'up' as const },
-  { id: '2', label: 'Download Rate', current: 8.5, target: 12, predicted: 10.2, confidence: 72, trend: 'up' as const },
-  { id: '3', label: 'Engagement Score', current: 78, target: 85, predicted: 82, confidence: 85, trend: 'up' as const },
-]
-
-const mockGalleryActivities = [
-  { id: '1', user: 'Emma Watson', action: 'uploaded', target: '24 new photos', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'Liam Brown', action: 'edited', target: 'sunset collection metadata', timestamp: '25m ago', type: 'info' as const },
-  { id: '3', user: 'Ava Williams', action: 'featured', target: '5 photos in showcase', timestamp: '1h ago', type: 'success' as const },
-]
-
-// Quick actions are now defined inside the component to access state setters
-// See galleryQuickActions inside GalleryClient component
 
 export default function GalleryClient() {
 
@@ -483,7 +196,7 @@ export default function GalleryClient() {
     is_public: true
   })
 
-  // Liked and saved items state (local tracking for mock data)
+  // Liked and saved items state
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
 
@@ -696,11 +409,6 @@ export default function GalleryClient() {
         setLikedItems(newLiked)
         toast.error('Failed to update like')
       }
-    } else {
-      // For mock data, just show success
-      toast.success(
-        isCurrentlyLiked ? 'Unliked' : 'Liked'
-      )
     }
   }
 
@@ -743,11 +451,6 @@ export default function GalleryClient() {
         setSavedItems(newSaved)
         toast.error('Failed to update')
       }
-    } else {
-      // For mock data, just show success
-      toast.success(
-        isCurrentlySaved ? 'Unsaved' : 'Saved'
-      )
     }
   }
 
@@ -756,11 +459,7 @@ export default function GalleryClient() {
     const url = 'url' in photo ? photo.url : ('file_url' in photo ? photo.file_url : '')
 
     if (url) {
-      // Real download using downloadFile from button-handlers
       await downloadFile(url, `${title.replace(/[^a-z0-9]/gi, '_')}.jpg`)
-    } else {
-      // For mock data without real URLs, show info toast
-      toast.info('Demo mode'" would download here` })
     }
 
     // Track download for gallery items
@@ -923,7 +622,7 @@ export default function GalleryClient() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                 <div className="text-amber-200 text-sm mb-1">Collections</div>
-                <div className="text-3xl font-bold text-white">{mockCollections.length}</div>
+                <div className="text-3xl font-bold text-white">{galleryCollections.length}</div>
               </div>
             </div>
           </div>
@@ -1038,7 +737,7 @@ export default function GalleryClient() {
                     <p className="text-rose-200 text-sm">Photos</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCollections.length}</p>
+                    <p className="text-3xl font-bold">{galleryCollections.length}</p>
                     <p className="text-rose-200 text-sm">Collections</p>
                   </div>
                 </div>
@@ -1156,7 +855,7 @@ export default function GalleryClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCollections.length + galleryCollections.length}</p>
+                    <p className="text-3xl font-bold">{galleryCollections.length}</p>
                     <p className="text-amber-200 text-sm">Collections</p>
                   </div>
                 </div>
@@ -1220,34 +919,6 @@ export default function GalleryClient() {
                     </div>
                   </div>
                 ))}
-                {/* Mock Collections */}
-                {mockCollections.map(collection => (
-                  <div
-                    key={collection.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-amber-500/50 transition-colors cursor-pointer group"
-                  >
-                    <div className="h-40 relative" style={{ backgroundColor: '#d4a574' }}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Folder className="w-16 h-16 text-white/30" />
-                      </div>
-                      {collection.isPrivate && (
-                        <span className="absolute top-3 right-3 px-2 py-1 bg-black/50 text-white text-xs rounded-full">
-                          Private
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
-                        {collection.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{collection.description}</p>
-                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{collection.photoCount} photos</span>
-                        <span>by {collection.createdBy}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </TabsContent>
@@ -1264,50 +935,14 @@ export default function GalleryClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPhotographers.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-indigo-200 text-sm">Photographers</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockPhotographers.map(photographer => (
-                <div
-                  key={photographer.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:border-amber-500/50 transition-colors"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                      <User className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{photographer.name}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">@{photographer.username}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {photographer.location}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-4">{photographer.bio}</p>
-                  <div className="flex items-center gap-6 mt-4 text-sm">
-                    <div>
-                      <span className="font-semibold text-gray-900 dark:text-white">{photographer.photos}</span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">photos</span>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-gray-900 dark:text-white">{formatNumber(photographer.followers)}</span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-1">followers</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleFollowPhotographer(photographer.id, photographer.name)}
-                    className="w-full mt-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Follow
-                  </button>
-                </div>
-              ))}
+              {/* No photographers to display */}
             </div>
           </TabsContent>
 
@@ -1323,34 +958,14 @@ export default function GalleryClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTopics.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Topics</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {mockTopics.map(topic => (
-                <div
-                  key={topic.id}
-                  className="relative rounded-xl overflow-hidden cursor-pointer group aspect-[4/3]"
-                  style={{ backgroundColor: '#d4a574' }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Tag className="w-8 h-8 text-white/30" />
-                  </div>
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                  <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                    <h3 className="text-white font-semibold">{topic.name}</h3>
-                    <p className="text-white/70 text-sm">{formatNumber(topic.photoCount)} photos</p>
-                  </div>
-                  {topic.featured && (
-                    <span className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500 text-white text-xs rounded-full">
-                      Featured
-                    </span>
-                  )}
-                </div>
-              ))}
+              {/* No topics to display */}
             </div>
           </TabsContent>
 
@@ -2085,18 +1700,18 @@ export default function GalleryClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockGalleryAIInsights}
+              insights={[]}
               title="Gallery Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockGalleryCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockGalleryPredictions}
+              predictions={[]}
               title="Gallery Metrics Forecast"
             />
           </div>
@@ -2104,7 +1719,7 @@ export default function GalleryClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockGalleryActivities}
+            activities={[]}
             title="Gallery Activity"
             maxItems={5}
           />

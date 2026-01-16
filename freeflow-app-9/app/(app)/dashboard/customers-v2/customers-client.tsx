@@ -277,7 +277,7 @@ interface EmailStep {
 }
 
 // ============================================================================
-// MOCK DATA - SALESFORCE CRM LEVEL
+// PIPELINE CONFIGURATION
 // ============================================================================
 
 const PIPELINE_STAGES: { id: DealStage; name: string; color: string; probability: number }[] = [
@@ -359,40 +359,6 @@ const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
   return colors[rating]
 }
 
-// Enhanced Competitive Upgrade Mock Data - Customers Context
-const mockCustomersAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High-Value Lead', description: 'Enterprise Corp shows strong buying signals. Lead score increased to 92.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Leads' },
-  { id: '2', type: 'warning' as const, title: 'Churn Risk Alert', description: '3 accounts showing decreased engagement. Recommend immediate outreach.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
-  { id: '3', type: 'info' as const, title: 'Upsell Opportunity', description: '5 customers ready for premium tier based on usage patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
-]
-
-const mockCustomersCollaborators = [
-  { id: '1', name: 'Amanda Foster', avatar: '/avatars/amanda.jpg', status: 'online' as const, role: 'Account Manager', lastActive: 'Now' },
-  { id: '2', name: 'Brandon Lee', avatar: '/avatars/brandon.jpg', status: 'online' as const, role: 'Sales Rep', lastActive: '3m ago' },
-  { id: '3', name: 'Crystal Wang', avatar: '/avatars/crystal.jpg', status: 'away' as const, role: 'Customer Success', lastActive: '15m ago' },
-  { id: '4', name: 'Derek Johnson', avatar: '/avatars/derek.jpg', status: 'offline' as const, role: 'Support Lead', lastActive: '2h ago' },
-]
-
-const mockCustomersPredictions = [
-  { id: '1', label: 'Customer Lifetime Value', current: 45000, target: 60000, predicted: 52000, confidence: 78, trend: 'up' as const },
-  { id: '2', label: 'Churn Rate', current: 5.2, target: 3.0, predicted: 4.1, confidence: 82, trend: 'down' as const },
-  { id: '3', label: 'NPS Score', current: 72, target: 80, predicted: 76, confidence: 85, trend: 'up' as const },
-]
-
-const mockCustomersActivities = [
-  { id: '1', user: 'Amanda Foster', action: 'converted', target: 'lead to opportunity', timestamp: '5m ago', type: 'success' as const },
-  { id: '2', user: 'Brandon Lee', action: 'scheduled', target: 'demo with TechCorp', timestamp: '20m ago', type: 'info' as const },
-  { id: '3', user: 'Crystal Wang', action: 'resolved', target: 'support ticket #1234', timestamp: '45m ago', type: 'success' as const },
-  { id: '4', user: 'System', action: 'flagged', target: '2 accounts for review', timestamp: '1h ago', type: 'warning' as const },
-]
-
-// Quick actions - these will be wired to real handlers in the component
-const mockCustomersQuickActions = [
-  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => {} },
-  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => {} },
-  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => {} },
-  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => {} },
-]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -2300,18 +2266,18 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockCustomersAIInsights}
+              insights={[]}
               title="Customer Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockCustomersCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCustomersPredictions}
+              predictions={[]}
               title="Customer Metrics Forecast"
             />
           </div>
@@ -2319,7 +2285,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockCustomersActivities}
+            activities={[]}
             title="Customer Activity"
             maxItems={5}
           />

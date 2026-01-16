@@ -293,7 +293,7 @@ export default function ResourceLibraryPage() {
   }
 
   // Use database resources if available, otherwise fall back to mock data
-  const displayResources = resources.length > 0 ? resources : mockResources
+  const displayResources = resources || []
 
   const filteredResources = displayResources.filter((resource: any) => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

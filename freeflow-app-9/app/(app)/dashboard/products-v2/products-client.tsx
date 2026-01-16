@@ -338,8 +338,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showWebhookSettings, setShowWebhookSettings] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showBulkEditDialog, setShowBulkEditDialog] = useState(false)
-  const [localProducts, setLocalProducts] = useState(mockProducts)
-  const [localCoupons, setLocalCoupons] = useState(mockCoupons)
+  const [localProducts, setLocalProducts] = useState<StripeProduct[]>([])
+  const [localCoupons, setLocalCoupons] = useState<Coupon[]>([])
 
   const { data: apiProducts } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
@@ -347,13 +347,13 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   })
   const { stats } = useProductStats()
 
-  // Calculate stats from mock data
-  const totalRevenue = mockProducts.reduce((sum, p) => sum + p.revenue, 0)
-  const totalMRR = mockProducts.reduce((sum, p) => sum + p.mrr, 0)
-  const totalSubscribers = mockProducts.reduce((sum, p) => sum + p.subscribers, 0)
-  const activeProducts = mockProducts.filter(p => p.status === 'active').length
-  const avgConversion = mockProducts.reduce((sum, p) => sum + p.conversionRate, 0) / mockProducts.length
-  const avgChurn = mockProducts.filter(p => p.mrr > 0).reduce((sum, p) => sum + p.churnRate, 0) / mockProducts.filter(p => p.mrr > 0).length
+  // Calculate stats from local data
+  const totalRevenue = localProducts.reduce((sum, p) => sum + p.revenue, 0)
+  const totalMRR = localProducts.reduce((sum, p) => sum + p.mrr, 0)
+  const totalSubscribers = localProducts.reduce((sum, p) => sum + p.subscribers, 0)
+  const activeProducts = localProducts.filter(p => p.status === 'active').length
+  const avgConversion = localProducts.length > 0 ? localProducts.reduce((sum, p) => sum + p.conversionRate, 0) / localProducts.length : 0
+  const avgChurn = localProducts.filter(p => p.mrr > 0).length > 0 ? localProducts.filter(p => p.mrr > 0).reduce((sum, p) => sum + p.churnRate, 0) / localProducts.filter(p => p.mrr > 0).length : 0
 
   const filteredProducts = useMemo(() => {
     return localProducts.filter(product => {

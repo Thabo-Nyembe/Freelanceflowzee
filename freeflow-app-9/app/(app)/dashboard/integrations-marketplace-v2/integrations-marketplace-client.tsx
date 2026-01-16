@@ -484,7 +484,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [settingsTab, setSettingsTab] = useState('general')
   const [showConfigureDialog, setShowConfigureDialog] = useState(false)
   const [configureApp, setConfigureApp] = useState<AppListing | null>(null)
-  const [installedAppsList, setInstalledAppsList] = useState(mockApps.filter(app => app.status === 'installed'))
+  const [installedAppsList, setInstalledAppsList] = useState<AppListing[]>([])
 
   // Quick actions with real functionality
   const mockIntegrationsQuickActions = [

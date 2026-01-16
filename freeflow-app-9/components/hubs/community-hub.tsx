@@ -92,104 +92,11 @@ interface CommunityHubProps {
   onMemberConnect?: (memberId: string) => void
 }
 
-const MOCK_MEMBERS: CommunityMember[] = [
-  {
-    id: 'member_001',
-    name: 'Sarah Johnson',
-    username: '@sarahdesigns',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-    bio: 'UI/UX Designer specializing in SaaS products. 5+ years experience creating user-centered designs.',
-    location: 'San Francisco, CA',
-    skills: ['UI/UX Design', 'Figma', 'Prototyping', 'User Research'],
-    rating: 4.9,
-    projects: 47,
-    joined: '2023-03-15',
-    verified: true,
-    online: true
-  },
-  {
-    id: 'member_002',
-    name: 'Marcus Chen',
-    username: '@marcusdev',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
-    bio: 'Full-stack developer with expertise in React, Node.js, and cloud architecture.',
-    location: 'Toronto, Canada',
-    skills: ['React', 'Node.js', 'AWS', 'TypeScript'],
-    rating: 4.8,
-    projects: 62,
-    joined: '2022-11-20',
-    verified: true,
-    online: false
-  },
-  {
-    id: 'member_003',
-    name: 'Elena Rodriguez',
-    username: '@elenacontent',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena',
-    bio: 'Content strategist and copywriter helping brands tell their stories effectively.',
-    location: 'Madrid, Spain',
-    skills: ['Content Strategy', 'Copywriting', 'SEO', 'Social Media'],
-    rating: 4.7,
-    projects: 34,
-    joined: '2023-07-08',
-    verified: false,
-    online: true
-  }
-]
+// MOCK DATA - REMOVED (Migration #85)
+// All mock data replaced with database queries
+const MOCK_MEMBERS: CommunityMember[] = []
 
-const MOCK_POSTS: Post[] = [
-  {
-    id: 'post_001',
-    author: MOCK_MEMBERS[0],
-    content: "Just completed a mobile app redesign project! The client saw a 40% increase in user engagement after implementing the new design system. Key takeaways: always start with user research and never underestimate the power of good micro-interactions. 🎨✨",
-    tags: ['design', 'mobile', 'ux', 'success-story'],
-    likes: 24,
-    comments: 8,
-    shares: 3,
-    bookmarked: false,
-    liked: false,
-    createdAt: '2024-02-08T14:30:00Z',
-    type: 'project',
-    projectData: {
-      title: 'FinTech Mobile App Redesign',
-      description: 'Complete UI/UX overhaul focusing on user engagement and conversion optimization',
-      skills: ['UI/UX Design', 'Mobile Design', 'Prototyping'],
-      budget: '$5,000 - $8,000'
-    }
-  },
-  {
-    id: 'post_002',
-    author: MOCK_MEMBERS[1],
-    content: "Question for the community: What's your preferred approach for handling state management in large React applications? Redux Toolkit, Zustand, or Context API? Looking for real-world experiences and trade-offs.",
-    tags: ['react', 'state-management', 'question', 'javascript'],
-    likes: 18,
-    comments: 15,
-    shares: 2,
-    bookmarked: true,
-    liked: true,
-    createdAt: '2024-02-07T10:15:00Z',
-    type: 'question'
-  },
-  {
-    id: 'post_003',
-    author: MOCK_MEMBERS[2],
-    content: "Hosting a virtual workshop next week: 'Building Brand Voice in the Digital Age'. We'll cover tone development, content pillars, and practical exercises. Free for community members! 🎯",
-    tags: ['workshop', 'branding', 'content', 'education'],
-    likes: 31,
-    comments: 12,
-    shares: 8,
-    bookmarked: false,
-    liked: false,
-    createdAt: '2024-02-06T16:45:00Z',
-    type: 'event',
-    eventData: {
-      title: 'Building Brand Voice in the Digital Age',
-      date: '2024-02-15T18:00:00Z',
-      location: 'Virtual (Zoom)',
-      attendees: 47
-    }
-  }
-]
+const MOCK_POSTS: Post[] = []
 
 const logger = createFeatureLogger('CommunityHub')
 

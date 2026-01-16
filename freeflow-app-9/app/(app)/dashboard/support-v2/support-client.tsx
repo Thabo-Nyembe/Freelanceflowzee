@@ -449,7 +449,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   // Ticket state management
-  const [tickets, setTickets] = useState(mockTickets)
+  const [tickets, setTickets] = useState<Ticket[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   // Integration connection states
@@ -492,16 +492,16 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   // Calculate stats
   const stats = useMemo(() => ({
-    total: mockTickets.length,
-    open: mockTickets.filter(t => t.status === 'open').length,
-    inProgress: mockTickets.filter(t => t.status === 'in_progress').length,
-    resolved: mockTickets.filter(t => t.status === 'resolved').length,
-    slaBreached: mockTickets.filter(t => t.slaBreached).length,
+    total: tickets.length,
+    open: tickets.filter(t => t.status === 'open').length,
+    inProgress: tickets.filter(t => t.status === 'in_progress').length,
+    resolved: tickets.filter(t => t.status === 'resolved').length,
+    slaBreached: tickets.filter(t => t.slaBreached).length,
     avgFirstResponse: '1.2h',
     avgResolution: '8.4h',
     satisfaction: 4.7,
-    unassigned: mockTickets.filter(t => !t.assignee).length
-  }), [])
+    unassigned: tickets.filter(t => !t.assignee).length
+  }), [tickets])
 
   // Handlers
   const [showCreateDialog, setShowCreateDialog] = useState(false)

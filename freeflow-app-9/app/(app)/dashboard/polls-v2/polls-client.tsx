@@ -57,17 +57,6 @@ import {
   Sliders
 } from 'lucide-react'
 
-// Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
-
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
 
 
 
@@ -244,225 +233,6 @@ interface FormAnalytics {
 // MOCK DATA
 // ============================================================================
 
-const mockThemes: FormTheme[] = [
-  { id: 'theme-1', name: 'Default', backgroundColor: '#ffffff', questionColor: '#1f2937', answerColor: '#3b82f6', buttonColor: '#3b82f6', buttonTextColor: '#ffffff', fontFamily: 'Inter', progressBar: 'top', animation: 'slide' },
-  { id: 'theme-2', name: 'Dark', backgroundColor: '#1f2937', questionColor: '#ffffff', answerColor: '#60a5fa', buttonColor: '#60a5fa', buttonTextColor: '#1f2937', fontFamily: 'Inter', progressBar: 'top', animation: 'fade' },
-  { id: 'theme-3', name: 'Nature', backgroundColor: '#ecfdf5', questionColor: '#065f46', answerColor: '#059669', buttonColor: '#059669', buttonTextColor: '#ffffff', fontFamily: 'Poppins', progressBar: 'bottom', animation: 'slide' },
-  { id: 'theme-4', name: 'Sunset', backgroundColor: '#fff7ed', questionColor: '#9a3412', answerColor: '#ea580c', buttonColor: '#ea580c', buttonTextColor: '#ffffff', fontFamily: 'DM Sans', progressBar: 'none', animation: 'fade' }
-]
-
-const mockQuestions: Question[] = [
-  {
-    id: 'q-welcome',
-    type: 'welcome',
-    title: 'Welcome to our Survey!',
-    description: 'We appreciate your time. This survey takes about 3 minutes.',
-    required: false,
-    settings: { buttonText: 'Start' }
-  },
-  {
-    id: 'q-1',
-    type: 'short_text',
-    title: "What's your name?",
-    placeholder: 'Type your name here...',
-    required: true,
-    settings: {}
-  },
-  {
-    id: 'q-2',
-    type: 'email',
-    title: "What's your email address?",
-    description: "We'll send you a copy of your responses",
-    placeholder: 'name@example.com',
-    required: true,
-    settings: {}
-  },
-  {
-    id: 'q-3',
-    type: 'multiple_choice',
-    title: 'How did you hear about us?',
-    required: true,
-    options: [
-      { id: 'opt-1', text: 'Social Media' },
-      { id: 'opt-2', text: 'Friend/Family' },
-      { id: 'opt-3', text: 'Search Engine' },
-      { id: 'opt-4', text: 'Advertisement' },
-      { id: 'opt-5', text: 'Other' }
-    ],
-    settings: { allowOther: true, randomizeOptions: false }
-  },
-  {
-    id: 'q-4',
-    type: 'nps',
-    title: 'How likely are you to recommend us to a friend?',
-    description: '0 = Not at all likely, 10 = Extremely likely',
-    required: true,
-    settings: { minValue: 0, maxValue: 10, minLabel: 'Not likely', maxLabel: 'Very likely' }
-  },
-  {
-    id: 'q-5',
-    type: 'rating',
-    title: 'How would you rate your overall experience?',
-    required: true,
-    settings: { minValue: 1, maxValue: 5 }
-  },
-  {
-    id: 'q-6',
-    type: 'long_text',
-    title: 'Any additional feedback you would like to share?',
-    placeholder: 'Share your thoughts...',
-    required: false,
-    settings: {}
-  },
-  {
-    id: 'q-thank',
-    type: 'thank_you',
-    title: 'Thank you for your feedback!',
-    description: "Your responses have been recorded. We'll be in touch soon.",
-    required: false,
-    settings: { buttonText: 'Done' }
-  }
-]
-
-const mockForms: Form[] = [
-  {
-    id: 'form-1',
-    title: 'Customer Satisfaction Survey',
-    description: 'Measure customer satisfaction and gather feedback',
-    slug: 'customer-satisfaction',
-    status: 'active',
-    questions: mockQuestions,
-    theme: mockThemes[0],
-    settings: {
-      showProgressBar: true,
-      showQuestionNumbers: true,
-      allowBackNavigation: true,
-      shuffleQuestions: false,
-      limitResponses: false,
-      closeOnDate: false,
-      notifyOnResponse: true,
-      notifyEmails: ['team@company.com'],
-      sendConfirmationEmail: true,
-      redirectOnComplete: false,
-      passwordProtected: false
-    },
-    responseCount: 1247,
-    viewCount: 3892,
-    completionRate: 78.5,
-    averageTime: 185,
-    createdAt: '2024-11-01T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z',
-    publishedAt: '2024-11-05T09:00:00Z',
-    workspace: 'Marketing',
-    createdBy: { id: 'user-1', name: 'John Smith', avatar: '/avatars/john.jpg' }
-  },
-  {
-    id: 'form-2',
-    title: 'Event Registration Form',
-    description: 'Register for our upcoming product launch event',
-    slug: 'event-registration',
-    status: 'active',
-    questions: mockQuestions.slice(0, 5),
-    theme: mockThemes[2],
-    settings: {
-      showProgressBar: true,
-      showQuestionNumbers: false,
-      allowBackNavigation: true,
-      shuffleQuestions: false,
-      limitResponses: true,
-      maxResponses: 500,
-      closeOnDate: true,
-      closeDate: '2024-12-31T23:59:59Z',
-      notifyOnResponse: true,
-      notifyEmails: ['events@company.com'],
-      sendConfirmationEmail: true,
-      redirectOnComplete: true,
-      redirectUrl: 'https://company.com/event/confirmation',
-      passwordProtected: false
-    },
-    responseCount: 342,
-    viewCount: 1250,
-    completionRate: 85.2,
-    averageTime: 120,
-    createdAt: '2024-12-01T08:00:00Z',
-    updatedAt: '2024-12-22T16:45:00Z',
-    publishedAt: '2024-12-05T12:00:00Z',
-    workspace: 'Events',
-    createdBy: { id: 'user-2', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg' }
-  },
-  {
-    id: 'form-3',
-    title: 'Employee Feedback Survey',
-    description: 'Quarterly employee engagement and satisfaction survey',
-    slug: 'employee-feedback-q4',
-    status: 'draft',
-    questions: mockQuestions.slice(0, 6),
-    theme: mockThemes[1],
-    settings: {
-      showProgressBar: true,
-      showQuestionNumbers: true,
-      allowBackNavigation: false,
-      shuffleQuestions: false,
-      limitResponses: false,
-      closeOnDate: false,
-      notifyOnResponse: false,
-      notifyEmails: [],
-      sendConfirmationEmail: false,
-      redirectOnComplete: false,
-      passwordProtected: true,
-      password: 'employee2024'
-    },
-    responseCount: 0,
-    viewCount: 45,
-    completionRate: 0,
-    averageTime: 0,
-    createdAt: '2024-12-20T10:00:00Z',
-    updatedAt: '2024-12-23T09:15:00Z',
-    workspace: 'HR',
-    createdBy: { id: 'user-3', name: 'Mike Johnson', avatar: '/avatars/mike.jpg' }
-  },
-  {
-    id: 'form-4',
-    title: 'Product Feedback Form',
-    description: 'Share your thoughts on our latest product release',
-    slug: 'product-feedback-v2',
-    status: 'paused',
-    questions: mockQuestions,
-    theme: mockThemes[3],
-    settings: {
-      showProgressBar: true,
-      showQuestionNumbers: false,
-      allowBackNavigation: true,
-      shuffleQuestions: false,
-      limitResponses: false,
-      closeOnDate: false,
-      notifyOnResponse: true,
-      notifyEmails: ['product@company.com'],
-      sendConfirmationEmail: false,
-      redirectOnComplete: false,
-      passwordProtected: false
-    },
-    responseCount: 89,
-    viewCount: 456,
-    completionRate: 62.3,
-    averageTime: 240,
-    createdAt: '2024-10-15T14:00:00Z',
-    updatedAt: '2024-12-10T11:20:00Z',
-    publishedAt: '2024-10-20T08:00:00Z',
-    workspace: 'Product',
-    createdBy: { id: 'user-1', name: 'John Smith', avatar: '/avatars/john.jpg' }
-  }
-]
-
-const mockTemplates: FormTemplate[] = [
-  { id: 'tpl-1', name: 'Customer Satisfaction', description: 'Measure customer happiness with your product or service', category: 'Feedback', thumbnail: '/templates/csat.png', questionsCount: 8, usageCount: 15420, questions: mockQuestions },
-  { id: 'tpl-2', name: 'NPS Survey', description: 'Net Promoter Score survey to measure customer loyalty', category: 'Feedback', thumbnail: '/templates/nps.png', questionsCount: 5, usageCount: 28930, questions: mockQuestions.slice(0, 5) },
-  { id: 'tpl-3', name: 'Event Registration', description: 'Collect attendee information for your events', category: 'Registration', thumbnail: '/templates/event.png', questionsCount: 10, usageCount: 12350, questions: mockQuestions },
-  { id: 'tpl-4', name: 'Job Application', description: 'Screen candidates with a comprehensive application form', category: 'HR', thumbnail: '/templates/job.png', questionsCount: 15, usageCount: 8920, questions: mockQuestions },
-  { id: 'tpl-5', name: 'Contact Form', description: 'Simple contact form for your website', category: 'Contact', thumbnail: '/templates/contact.png', questionsCount: 4, usageCount: 45680, questions: mockQuestions.slice(0, 4) },
-  { id: 'tpl-6', name: 'Quiz', description: 'Create engaging quizzes with scoring', category: 'Quiz', thumbnail: '/templates/quiz.png', questionsCount: 10, usageCount: 6780, questions: mockQuestions }
-]
-
 const questionTypes = [
   { type: 'short_text', label: 'Short Text', icon: Type, description: 'Single line text input' },
   { type: 'long_text', label: 'Long Text', icon: FileText, description: 'Multi-line text area' },
@@ -479,31 +249,6 @@ const questionTypes = [
   { type: 'picture_choice', label: 'Picture Choice', icon: Image, description: 'Image options' },
   { type: 'ranking', label: 'Ranking', icon: ArrowUp, description: 'Drag to rank items' },
   { type: 'statement', label: 'Statement', icon: MessageSquare, description: 'Info block' }
-]
-
-// Enhanced Competitive Upgrade Mock Data - Polls Context
-const mockPollsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Response Rate', description: 'Customer Satisfaction Survey has 85% response rate. Great engagement!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'Trending Topics', description: 'Product feedback questions getting most attention this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '3', type: 'warning' as const, title: 'Low Completion', description: '3 surveys have <50% completion rate. Consider shortening them.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-]
-
-const mockPollsCollaborators = [
-  { id: '1', name: 'Research Lead', avatar: '/avatars/sarah-chen.jpg', status: 'online' as const, role: 'Survey Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marketing Team', avatar: '/avatars/emily.jpg', status: 'online' as const, role: 'Contributor', lastActive: '10m ago' },
-  { id: '3', name: 'Data Analyst', avatar: '/avatars/maya.jpg', status: 'away' as const, role: 'Analyst', lastActive: '30m ago' },
-]
-
-const mockPollsPredictions = [
-  { id: '1', label: 'Avg Response Rate', current: 72, target: 80, predicted: 78, confidence: 80, trend: 'up' as const },
-  { id: '2', label: 'Completion Rate', current: 65, target: 75, predicted: 72, confidence: 75, trend: 'up' as const },
-  { id: '3', label: 'Monthly Responses', current: 1250, target: 1500, predicted: 1400, confidence: 82, trend: 'up' as const },
-]
-
-const mockPollsActivities = [
-  { id: '1', user: 'Research Lead', action: 'created', target: 'Employee Engagement Survey', timestamp: '20m ago', type: 'success' as const },
-  { id: '2', user: 'System', action: 'collected', target: '50 new responses', timestamp: '45m ago', type: 'info' as const },
-  { id: '3', user: 'Marketing Team', action: 'shared', target: 'survey link to 500 customers', timestamp: '1h ago', type: 'info' as const },
 ]
 
 // Quick actions defined inline within component for proper state access
@@ -540,8 +285,8 @@ interface DbPoll {
 export default function PollsClient() {
 
   const [activeTab, setActiveTab] = useState('forms')
-  const [forms, setForms] = useState<Form[]>(mockForms)
-  const [templates] = useState<FormTemplate[]>(mockTemplates)
+  const [forms, setForms] = useState<Form[]>([])
+  const [templates] = useState<FormTemplate[]>([])
   const [_selectedForm, _setSelectedForm] = useState<Form | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
@@ -572,7 +317,7 @@ export default function PollsClient() {
   const [selectedFormForView, setSelectedFormForView] = useState<Form | null>(null)
 
   // Selected theme
-  const [selectedTheme, setSelectedTheme] = useState<string>(mockThemes[0].id)
+  const [selectedTheme, setSelectedTheme] = useState<string>([][0].id)
 
   // Dialog states for functionality
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
@@ -913,8 +658,8 @@ export default function PollsClient() {
     toast.success(`Editing: ${form.title}`)
   }
 
-  // Handle share for mockForms
-  const handleShareMockForm = async (form: Form) => {
+  // Handle share for []
+  const handleShareForm = async (form: Form) => {
     const url = `${window.location.origin}/polls/${form.slug}`
     try {
       // Try Web Share API first
@@ -954,7 +699,7 @@ export default function PollsClient() {
   }
 
   // Handle duplicate mock form
-  const handleDuplicateMockForm = (form: Form) => {
+  const handleDuplicateForm = (form: Form) => {
     const duplicatedForm: Form = {
       ...form,
       id: `form-${Date.now()}`,
@@ -970,7 +715,7 @@ export default function PollsClient() {
   }
 
   // Handle delete mock form
-  const handleDeleteMockForm = (form: Form) => {
+  const handleDeleteForm = (form: Form) => {
     if (confirm(`Are you sure you want to delete "${form.title}"? This action cannot be undone.`)) {
       setForms(prev => prev.filter(f => f.id !== form.id))
       toast.success(`Deleted: ${form.title}`)
@@ -1123,7 +868,7 @@ export default function PollsClient() {
       slug: `${template.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
       status: 'draft',
       questions: template.questions,
-      theme: mockThemes[0],
+      theme: [][0],
       settings: {
         showProgressBar: true,
         showQuestionNumbers: true,
@@ -1293,7 +1038,7 @@ export default function PollsClient() {
                       <button onClick={() => handleEditForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Edit2 className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button onClick={() => handleShareMockForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => handleShareForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Share2 className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -1343,10 +1088,10 @@ export default function PollsClient() {
                       </button>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => handleDuplicateMockForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Duplicate form">
+                      <button onClick={() => handleDuplicateForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Duplicate form">
                         <Copy className="w-4 h-4 text-gray-400" />
                       </button>
-                      <button onClick={() => handleDeleteMockForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Delete form">
+                      <button onClick={() => handleDeleteForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Delete form">
                         <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" />
                       </button>
                     </div>
@@ -1559,7 +1304,7 @@ export default function PollsClient() {
                   Drop-off Analysis
                 </h3>
                 <div className="space-y-3">
-                  {mockQuestions.slice(1, 6).map((q, i) => {
+                  {[].slice(1, 6).map((q, i) => {
                     const dropOff = 100 - (i * 15)
                     return (
                       <div key={q.id}>
@@ -2143,7 +1888,7 @@ export default function PollsClient() {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                          {mockThemes.map(theme => (
+                          {[].map(theme => (
                             <button
                               key={theme.id}
                               onClick={() => handleThemeSelect(theme)}
@@ -2516,38 +2261,6 @@ export default function PollsClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockPollsAIInsights}
-              title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockPollsCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockPollsPredictions}
-              title="Response Rate Forecast"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockPollsActivities}
-            title="Survey Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={pollsQuickActions}
-            variant="grid"
-          />
-        </div>
       </div>
 
       {/* Create Form Dialog */}

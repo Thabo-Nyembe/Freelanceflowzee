@@ -47,17 +47,6 @@ import {
   Sliders
 } from 'lucide-react'
 
-// Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
-
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -183,153 +172,6 @@ interface WebhookStats {
   deliveriesThisWeek: number
 }
 
-// Mock data
-const mockEndpoints: WebhookEndpoint[] = [
-  {
-    id: 'wh1',
-    name: 'Slack Notifications',
-    url: 'https://hooks.slack.com/services/T00000/B00000/XXXX',
-    description: 'Send notifications to #general channel',
-    status: 'active',
-    events: ['user.created', 'order.completed', 'payment.received'],
-    authType: 'bearer',
-    secret: 'whsec_abc123def456ghi789',
-    headers: { 'Content-Type': 'application/json' },
-    retryPolicy: { maxRetries: 3, backoffType: 'exponential', initialDelay: 1000 },
-    rateLimiting: { enabled: true, requestsPerMinute: 60 },
-    filters: [],
-    totalDeliveries: 15420,
-    successfulDeliveries: 15380,
-    failedDeliveries: 40,
-    successRate: 99.74,
-    avgResponseTime: 245,
-    lastDeliveryAt: '2024-12-23T08:15:00Z',
-    lastDeliveryStatus: 'success',
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z'
-  },
-  {
-    id: 'wh2',
-    name: 'CRM Sync',
-    url: 'https://api.crm.example.com/webhooks/sync',
-    description: 'Sync customer data to CRM',
-    status: 'active',
-    events: ['user.created', 'user.updated', 'user.deleted'],
-    authType: 'api_key',
-    secret: 'whsec_xyz789abc123',
-    headers: { 'Content-Type': 'application/json', 'X-API-Key': 'crm_key_xxx' },
-    retryPolicy: { maxRetries: 5, backoffType: 'exponential', initialDelay: 2000 },
-    rateLimiting: { enabled: true, requestsPerMinute: 100 },
-    filters: [{ id: 'f1', field: 'user.type', operator: 'equals', value: 'customer' }],
-    totalDeliveries: 8750,
-    successfulDeliveries: 8720,
-    failedDeliveries: 30,
-    successRate: 99.66,
-    avgResponseTime: 380,
-    lastDeliveryAt: '2024-12-23T08:10:00Z',
-    lastDeliveryStatus: 'success',
-    createdAt: '2024-02-20T09:00:00Z',
-    updatedAt: '2024-12-18T11:00:00Z'
-  },
-  {
-    id: 'wh3',
-    name: 'Analytics Tracker',
-    url: 'https://analytics.example.com/events',
-    description: 'Track all user events for analytics',
-    status: 'paused',
-    events: ['*'],
-    authType: 'hmac',
-    secret: 'whsec_analytics123',
-    headers: { 'Content-Type': 'application/json' },
-    retryPolicy: { maxRetries: 2, backoffType: 'linear', initialDelay: 500 },
-    rateLimiting: { enabled: false, requestsPerMinute: 0 },
-    filters: [],
-    totalDeliveries: 45000,
-    successfulDeliveries: 44800,
-    failedDeliveries: 200,
-    successRate: 99.56,
-    avgResponseTime: 120,
-    lastDeliveryAt: '2024-12-15T16:00:00Z',
-    lastDeliveryStatus: 'success',
-    createdAt: '2024-03-10T08:00:00Z',
-    updatedAt: '2024-12-15T16:00:00Z'
-  },
-  {
-    id: 'wh4',
-    name: 'Payment Gateway',
-    url: 'https://payment.example.com/webhook',
-    description: 'Process payment confirmations',
-    status: 'failed',
-    events: ['payment.received', 'payment.failed', 'refund.created'],
-    authType: 'bearer',
-    secret: 'whsec_payment456',
-    headers: { 'Content-Type': 'application/json' },
-    retryPolicy: { maxRetries: 5, backoffType: 'exponential', initialDelay: 5000 },
-    rateLimiting: { enabled: true, requestsPerMinute: 30 },
-    filters: [{ id: 'f2', field: 'amount', operator: 'greater_than', value: '100' }],
-    totalDeliveries: 3200,
-    successfulDeliveries: 3100,
-    failedDeliveries: 100,
-    successRate: 96.88,
-    avgResponseTime: 890,
-    lastDeliveryAt: '2024-12-22T14:30:00Z',
-    lastDeliveryStatus: 'failed',
-    createdAt: '2024-04-05T11:00:00Z',
-    updatedAt: '2024-12-22T14:30:00Z'
-  }
-]
-
-const mockEventTypes: EventType[] = [
-  { id: 'evt1', name: 'user.created', category: 'Users', description: 'Triggered when a new user is created', payloadExample: '{"user_id": "usr_123", "email": "user@example.com"}', subscriberCount: 4, totalDeliveries: 12500, avgResponseTime: 210 },
-  { id: 'evt2', name: 'user.updated', category: 'Users', description: 'Triggered when user profile is updated', payloadExample: '{"user_id": "usr_123", "changes": {"name": "New Name"}}', subscriberCount: 2, totalDeliveries: 8900, avgResponseTime: 195 },
-  { id: 'evt3', name: 'user.deleted', category: 'Users', description: 'Triggered when a user account is deleted', payloadExample: '{"user_id": "usr_123", "deleted_at": "2024-12-23T10:00:00Z"}', subscriberCount: 2, totalDeliveries: 450, avgResponseTime: 180 },
-  { id: 'evt4', name: 'order.created', category: 'Orders', description: 'Triggered when a new order is placed', payloadExample: '{"order_id": "ord_456", "total": 99.99}', subscriberCount: 3, totalDeliveries: 15600, avgResponseTime: 320 },
-  { id: 'evt5', name: 'order.completed', category: 'Orders', description: 'Triggered when an order is completed', payloadExample: '{"order_id": "ord_456", "status": "completed"}', subscriberCount: 3, totalDeliveries: 14200, avgResponseTime: 285 },
-  { id: 'evt6', name: 'payment.received', category: 'Payments', description: 'Triggered when payment is received', payloadExample: '{"payment_id": "pay_789", "amount": 99.99}', subscriberCount: 2, totalDeliveries: 14100, avgResponseTime: 450 },
-  { id: 'evt7', name: 'payment.failed', category: 'Payments', description: 'Triggered when payment fails', payloadExample: '{"payment_id": "pay_789", "error": "insufficient_funds"}', subscriberCount: 2, totalDeliveries: 890, avgResponseTime: 380 },
-  { id: 'evt8', name: 'refund.created', category: 'Payments', description: 'Triggered when a refund is created', payloadExample: '{"refund_id": "ref_012", "amount": 50.00}', subscriberCount: 1, totalDeliveries: 320, avgResponseTime: 420 }
-]
-
-const mockDeliveryLogs: DeliveryLog[] = [
-  { id: 'log1', webhookId: 'wh1', webhookName: 'Slack Notifications', eventType: 'order.completed', status: 'success', statusCode: 200, requestHeaders: { 'Content-Type': 'application/json' }, requestBody: '{"event": "order.completed", "data": {"order_id": "ord_123"}}', responseHeaders: { 'Content-Type': 'application/json' }, responseBody: '{"ok": true}', responseTime: 234, attempt: 1, maxAttempts: 3, error: null, timestamp: '2024-12-23T08:15:00Z' },
-  { id: 'log2', webhookId: 'wh2', webhookName: 'CRM Sync', eventType: 'user.created', status: 'success', statusCode: 201, requestHeaders: { 'Content-Type': 'application/json' }, requestBody: '{"event": "user.created", "data": {"user_id": "usr_456"}}', responseHeaders: { 'Content-Type': 'application/json' }, responseBody: '{"success": true}', responseTime: 412, attempt: 1, maxAttempts: 5, error: null, timestamp: '2024-12-23T08:10:00Z' },
-  { id: 'log3', webhookId: 'wh4', webhookName: 'Payment Gateway', eventType: 'payment.received', status: 'failed', statusCode: 503, requestHeaders: { 'Content-Type': 'application/json' }, requestBody: '{"event": "payment.received", "data": {"payment_id": "pay_789"}}', responseHeaders: null, responseBody: null, responseTime: 5000, attempt: 3, maxAttempts: 5, error: 'Service Unavailable', timestamp: '2024-12-22T14:30:00Z' },
-  { id: 'log4', webhookId: 'wh1', webhookName: 'Slack Notifications', eventType: 'user.created', status: 'success', statusCode: 200, requestHeaders: { 'Content-Type': 'application/json' }, requestBody: '{"event": "user.created", "data": {"user_id": "usr_999"}}', responseHeaders: { 'Content-Type': 'application/json' }, responseBody: '{"ok": true}', responseTime: 189, attempt: 1, maxAttempts: 3, error: null, timestamp: '2024-12-23T07:45:00Z' },
-  { id: 'log5', webhookId: 'wh4', webhookName: 'Payment Gateway', eventType: 'payment.failed', status: 'retrying', statusCode: 504, requestHeaders: { 'Content-Type': 'application/json' }, requestBody: '{"event": "payment.failed", "data": {"payment_id": "pay_888"}}', responseHeaders: null, responseBody: null, responseTime: 30000, attempt: 2, maxAttempts: 5, error: 'Gateway Timeout', timestamp: '2024-12-23T06:00:00Z' }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: 'int1', name: 'Slack', icon: '💬', category: 'Communication', description: 'Send notifications to Slack channels', installed: true, eventsSupported: ['*'], popularity: 95 },
-  { id: 'int2', name: 'Stripe', icon: '💳', category: 'Payments', description: 'Process payments and manage subscriptions', installed: true, eventsSupported: ['payment.*', 'subscription.*'], popularity: 92 },
-  { id: 'int3', name: 'Salesforce', icon: '☁️', category: 'CRM', description: 'Sync customer data with Salesforce', installed: false, eventsSupported: ['user.*', 'order.*'], popularity: 88 },
-  { id: 'int4', name: 'HubSpot', icon: '🧡', category: 'CRM', description: 'Marketing automation and CRM', installed: false, eventsSupported: ['user.*', 'order.*'], popularity: 85 },
-  { id: 'int5', name: 'Mailchimp', icon: '📧', category: 'Email', description: 'Email marketing automation', installed: true, eventsSupported: ['user.created', 'order.completed'], popularity: 82 },
-  { id: 'int6', name: 'Twilio', icon: '📱', category: 'Communication', description: 'SMS and voice notifications', installed: false, eventsSupported: ['*'], popularity: 78 },
-  { id: 'int7', name: 'Segment', icon: '📊', category: 'Analytics', description: 'Customer data platform', installed: false, eventsSupported: ['*'], popularity: 75 },
-  { id: 'int8', name: 'Zendesk', icon: '🎫', category: 'Support', description: 'Customer support ticketing', installed: false, eventsSupported: ['user.*', 'order.*'], popularity: 72 }
-]
-
-const mockTemplates: WebhookTemplate[] = [
-  { id: 'tpl1', name: 'Slack Alert', description: 'Send alerts to Slack channel', url: 'https://hooks.slack.com/services/...', events: ['*'], headers: { 'Content-Type': 'application/json' }, category: 'Communication' },
-  { id: 'tpl2', name: 'Discord Bot', description: 'Post messages to Discord', url: 'https://discord.com/api/webhooks/...', events: ['*'], headers: { 'Content-Type': 'application/json' }, category: 'Communication' },
-  { id: 'tpl3', name: 'Zapier Trigger', description: 'Trigger Zapier automations', url: 'https://hooks.zapier.com/...', events: ['*'], headers: { 'Content-Type': 'application/json' }, category: 'Automation' },
-  { id: 'tpl4', name: 'Custom API', description: 'Send to any REST API', url: 'https://your-api.com/webhook', events: ['*'], headers: { 'Content-Type': 'application/json' }, category: 'Custom' }
-]
-
-const mockStats: WebhookStats = {
-  totalEndpoints: 4,
-  activeEndpoints: 2,
-  pausedEndpoints: 1,
-  failedEndpoints: 1,
-  totalDeliveries: 72370,
-  successfulDeliveries: 72000,
-  failedDeliveries: 370,
-  successRate: 99.49,
-  avgResponseTime: 284,
-  deliveriesToday: 1250,
-  deliveriesThisWeek: 8420
-}
-
 interface WebhooksClientProps {
   initialWebhooks: Webhook[]
   initialEventTypes: WebhookEventType[]
@@ -344,31 +186,6 @@ interface WebhooksClientProps {
     avgResponseTime: number
   }
 }
-
-// Enhanced Competitive Upgrade Mock Data - Webhooks Context
-const mockWebhooksAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Delivery Failures', description: '5 webhooks showing increased failure rate. Check endpoint availability.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deliveries' },
-  { id: '2', type: 'success' as const, title: 'Performance Optimal', description: 'Average response time improved to 145ms. Excellent performance!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '3', type: 'info' as const, title: 'New Events Available', description: '3 new event types available for subscription. Review and enable.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Features' },
-]
-
-const mockWebhooksCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'API Developer', lastActive: 'Now' },
-  { id: '2', name: 'Partner Dev', avatar: '/avatars/partner.jpg', status: 'online' as const, role: 'Partner Integration', lastActive: '8m ago' },
-  { id: '3', name: 'Support Eng', avatar: '/avatars/supeng.jpg', status: 'away' as const, role: 'Technical Support', lastActive: '25m ago' },
-]
-
-const mockWebhooksPredictions = [
-  { id: '1', label: 'Success Rate', current: 96.5, target: 99, predicted: 98, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Avg Response Time', current: 145, target: 100, predicted: 120, confidence: 75, trend: 'down' as const },
-  { id: '3', label: 'Monthly Events', current: 125000, target: 150000, predicted: 140000, confidence: 88, trend: 'up' as const },
-]
-
-const mockWebhooksActivities = [
-  { id: '1', user: 'Integration Lead', action: 'created', target: 'new webhook endpoint', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'System', action: 'retried', target: '23 failed deliveries', timestamp: '20m ago', type: 'info' as const },
-  { id: '3', user: 'Partner Dev', action: 'tested', target: 'order.created webhook', timestamp: '45m ago', type: 'info' as const },
-]
 
 // Quick actions are now defined inside the component to access real handlers
 
@@ -479,23 +296,6 @@ export default function WebhooksClient({
     })
   }, [webhooks, searchQuery, statusFilter])
 
-  const filteredEndpoints = useMemo(() => {
-    return mockEndpoints.filter(endpoint => {
-      const matchesSearch = endpoint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        endpoint.url.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesStatus = statusFilter === 'all' || endpoint.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-  }, [searchQuery, statusFilter])
-
-  const groupedEvents = useMemo(() => {
-    const groups: Record<string, EventType[]> = {}
-    mockEventTypes.forEach(event => {
-      if (!groups[event.category]) groups[event.category] = []
-      groups[event.category].push(event)
-    })
-    return groups
-  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -790,7 +590,7 @@ export default function WebhooksClient({
   // Export delivery logs
   const handleExportLogs = async () => {
     try {
-      const exportData = JSON.stringify(mockDeliveryLogs, null, 2)
+      const exportData = JSON.stringify([], null, 2)
       const blob = new Blob([exportData], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -1089,8 +889,8 @@ export default function WebhooksClient({
 
   // Filter integrations
   const filteredIntegrations = useMemo(() => {
-    if (!integrationSearch) return mockIntegrations
-    return mockIntegrations.filter(i =>
+    if (!integrationSearch) return []
+    return [].filter(i =>
       i.name.toLowerCase().includes(integrationSearch.toLowerCase()) ||
       i.category.toLowerCase().includes(integrationSearch.toLowerCase())
     )
@@ -1496,7 +1296,7 @@ export default function WebhooksClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEventTypes.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-blue-200 text-sm">Event Types</p>
                   </div>
                 </div>
@@ -1505,7 +1305,7 @@ export default function WebhooksClient({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Available Event Types</h2>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {mockEventTypes.length} event types
+                {[].length} event types
               </div>
             </div>
             <div className="space-y-4">
@@ -1575,7 +1375,7 @@ export default function WebhooksClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDeliveryLogs.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-amber-200 text-sm">Log Entries</p>
                   </div>
                 </div>
@@ -1604,7 +1404,7 @@ export default function WebhooksClient({
                   </tr>
                 </thead>
                 <tbody>
-                  {mockDeliveryLogs.map((log) => (
+                  {[].map((log) => (
                     <tr key={log.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
                         {new Date(log.timestamp).toLocaleString()}
@@ -1701,7 +1501,7 @@ export default function WebhooksClient({
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Webhook Templates</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockTemplates.map((template) => (
+              {[].map((template) => (
                 <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -1766,16 +1566,16 @@ export default function WebhooksClient({
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
-                      <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                      <div className="text-2xl font-bold">{{totalEndpoints:0,activeEndpoints:0,pausedEndpoints:0,failedEndpoints:0,totalDeliveries:0,successfulDeliveries:0,failedDeliveries:0,successRate:0,avgResponseTime:0,deliveriesToday:0,deliveriesThisWeek:0}.successRate}%</div>
                       <div className="text-xs opacity-80">Success Rate</div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 text-center">
                       <div className="bg-white/20 rounded-lg p-2">
-                        <div className="text-lg font-semibold">{mockStats.totalEndpoints}</div>
+                        <div className="text-lg font-semibold">{{totalEndpoints:0,activeEndpoints:0,pausedEndpoints:0,failedEndpoints:0,totalDeliveries:0,successfulDeliveries:0,failedDeliveries:0,successRate:0,avgResponseTime:0,deliveriesToday:0,deliveriesThisWeek:0}.totalEndpoints}</div>
                         <div className="text-xs opacity-80">Endpoints</div>
                       </div>
                       <div className="bg-white/20 rounded-lg p-2">
-                        <div className="text-lg font-semibold">{mockStats.avgResponseTime}ms</div>
+                        <div className="text-lg font-semibold">{{totalEndpoints:0,activeEndpoints:0,pausedEndpoints:0,failedEndpoints:0,totalDeliveries:0,successfulDeliveries:0,failedDeliveries:0,successRate:0,avgResponseTime:0,deliveriesToday:0,deliveriesThisWeek:0}.avgResponseTime}ms</div>
                         <div className="text-xs opacity-80">Avg Latency</div>
                       </div>
                     </div>
@@ -2396,38 +2196,6 @@ export default function WebhooksClient({
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <AIInsightsPanel
-              insights={mockWebhooksAIInsights}
-              title="Webhooks Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
-            />
-          </div>
-          <div className="space-y-6">
-            <CollaborationIndicator
-              collaborators={mockWebhooksCollaborators}
-              maxVisible={4}
-            />
-            <PredictiveAnalytics
-              predictions={mockWebhooksPredictions}
-              title="Delivery Metrics Forecast"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <ActivityFeed
-            activities={mockWebhooksActivities}
-            title="Webhook Activity"
-            maxItems={5}
-          />
-          <QuickActionsToolbar
-            actions={webhooksQuickActions}
-            variant="grid"
-          />
-        </div>
       </div>
 
       {/* Create/Edit Endpoint Dialog */}
@@ -2504,7 +2272,7 @@ export default function WebhooksClient({
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Events to Subscribe</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-40 overflow-y-auto p-3 border dark:border-gray-600 rounded-lg">
-                  {mockEventTypes.map(event => (
+                  {[].map(event => (
                     <label key={event.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
                         type="checkbox"
@@ -2649,7 +2417,7 @@ export default function WebhooksClient({
                 onChange={(e) => setSelectedTestEvent(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
               >
-                {mockEventTypes.map(event => (
+                {[].map(event => (
                   <option key={event.id} value={event.name}>{event.name}</option>
                 ))}
               </select>

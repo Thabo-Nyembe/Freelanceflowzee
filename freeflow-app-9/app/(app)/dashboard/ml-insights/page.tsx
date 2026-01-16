@@ -458,7 +458,7 @@ export default function MLInsightsPage() {
         if (insightsError) throw insightsError
 
         // If no insights in database, use mock data
-        const insightsToUse = (insights && insights.length > 0) ? insights : generateMockInsights()
+        const insightsToUse = insights || []
         dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })
 
         logger.info('ML insights loaded successfully', {

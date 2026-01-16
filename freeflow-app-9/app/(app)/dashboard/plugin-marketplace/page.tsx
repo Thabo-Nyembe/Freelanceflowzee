@@ -472,7 +472,7 @@ export default function PluginMarketplacePage() {
         if (pluginsError) throw pluginsError
 
         // If no plugins in database, use mock data
-        const pluginsToUse = (plugins && plugins.length > 0) ? plugins : generateMockPlugins()
+        const pluginsToUse = plugins || []
         dispatch({ type: 'SET_PLUGINS', plugins: pluginsToUse as Plugin[] })
 
         // Pre-install some plugins for demo (first 5)
