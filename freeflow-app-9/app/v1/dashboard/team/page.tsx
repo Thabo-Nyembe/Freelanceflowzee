@@ -15,7 +15,6 @@ import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { createFeatureLogger } from '@/lib/logger'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -70,7 +69,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function TeamPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -103,123 +101,14 @@ export default function TeamPage() {
   const [bulkEmails, setBulkEmails] = useState('')
 
   const [teamMembers, setTeamMembers] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Lead Designer',
-      department: 'Design',
-      email: 'sarah@company.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-      status: 'online',
-      joinDate: '2023-01-15',
-      projects: 12,
-      completedTasks: 156,
-      rating: 4.9,
-      skills: ['UI/UX', 'Figma', 'Sketch'],
-      availability: 'Available',
-      workHours: '9:00 AM - 6:00 PM PST',
-      timezone: 'PST'
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      role: 'Frontend Developer',
-      department: 'Development',
-      email: 'mike@company.com',
-      phone: '+1 (555) 234-5678',
-      location: 'New York, NY',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
-      status: 'busy',
-      joinDate: '2023-03-20',
-      projects: 8,
-      completedTasks: 203,
-      rating: 4.8,
-      skills: ['React', 'TypeScript', 'Next.js'],
-      availability: 'Busy until 3 PM',
-      workHours: '8:00 AM - 5:00 PM EST',
-      timezone: 'EST'
-    },
-    {
-      id: 3,
-      name: 'Emma Wilson',
-      role: 'Project Manager',
-      department: 'Management',
-      email: 'emma@company.com',
-      phone: '+1 (555) 345-6789',
-      location: 'Austin, TX',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
-      status: 'away',
-      joinDate: '2022-11-10',
-      projects: 15,
-      completedTasks: 89,
-      rating: 4.7,
-      skills: ['Project Management', 'Agile', 'Scrum'],
-      availability: 'In Meeting',
-      workHours: '9:00 AM - 6:00 PM CST',
-      timezone: 'CST'
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      role: 'Backend Developer',
-      department: 'Development',
-      email: 'david@company.com',
-      phone: '+1 (555) 456-7890',
-      location: 'Seattle, WA',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
-      status: 'offline',
-      joinDate: '2023-05-01',
-      projects: 6,
-      completedTasks: 134,
-      rating: 4.6,
-      skills: ['Node.js', 'Python', 'PostgreSQL'],
-      availability: 'Offline',
-      workHours: '10:00 AM - 7:00 PM PST',
-      timezone: 'PST'
-    },
-    {
-      id: 5,
-      name: 'Lisa Brown',
-      role: 'Marketing Specialist',
-      department: 'Marketing',
-      email: 'lisa@company.com',
-      phone: '+1 (555) 567-8901',
-      location: 'Miami, FL',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa',
-      status: 'online',
-      joinDate: '2023-07-15',
-      projects: 10,
-      completedTasks: 67,
-      rating: 4.5,
-      skills: ['Content Marketing', 'SEO', 'Analytics'],
-      availability: 'Available',
-      workHours: '9:00 AM - 6:00 PM EST',
-      timezone: 'EST'
-    },
-    {
-      id: 6,
-      name: 'Alex Rivera',
-      role: 'QA Engineer',
-      department: 'Quality Assurance',
-      email: 'alex@company.com',
-      phone: '+1 (555) 678-9012',
-      location: 'Denver, CO',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-      status: 'online',
-      joinDate: '2023-09-01',
-      projects: 7,
-      completedTasks: 98,
-      rating: 4.8,
-      skills: ['Manual Testing', 'Automation', 'Selenium'],
-      availability: 'Available',
-      workHours: '8:00 AM - 5:00 PM MST',
-      timezone: 'MST'
-    }
+    { id: 1, name: 'Sarah Johnson', role: 'Lead Designer', department: 'Design', email: 'sarah@company.com', phone: '+1 (555) 123-4567', location: 'San Francisco, CA', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', status: 'online', joinDate: '2023-01-15', projects: 12, completedTasks: 156, rating: 4.9, skills: ['UI/UX', 'Figma', 'Sketch'], availability: 'Available', workHours: '9:00 AM - 6:00 PM PST', timezone: 'PST' },
+    { id: 2, name: 'Mike Chen', role: 'Frontend Developer', department: 'Development', email: 'mike@company.com', phone: '+1 (555) 234-5678', location: 'New York, NY', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike', status: 'busy', joinDate: '2023-03-20', projects: 8, completedTasks: 203, rating: 4.8, skills: ['React', 'TypeScript', 'Next.js'], availability: 'Busy until 3 PM', workHours: '8:00 AM - 5:00 PM EST', timezone: 'EST' },
+    { id: 3, name: 'Emma Wilson', role: 'Project Manager', department: 'Management', email: 'emma@company.com', phone: '+1 (555) 345-6789', location: 'Austin, TX', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', status: 'away', joinDate: '2022-11-10', projects: 15, completedTasks: 89, rating: 4.7, skills: ['Project Management', 'Agile', 'Scrum'], availability: 'In Meeting', workHours: '9:00 AM - 6:00 PM CST', timezone: 'CST' },
+    { id: 4, name: 'David Kim', role: 'Backend Developer', department: 'Development', email: 'david@company.com', phone: '+1 (555) 456-7890', location: 'Seattle, WA', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David', status: 'offline', joinDate: '2023-05-01', projects: 6, completedTasks: 134, rating: 4.6, skills: ['Node.js', 'Python', 'PostgreSQL'], availability: 'Offline', workHours: '10:00 AM - 7:00 PM PST', timezone: 'PST' },
+    { id: 5, name: 'Lisa Brown', role: 'Marketing Specialist', department: 'Marketing', email: 'lisa@company.com', phone: '+1 (555) 567-8901', location: 'Miami, FL', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa', status: 'online', joinDate: '2023-07-15', projects: 10, completedTasks: 67, rating: 4.5, skills: ['Content Marketing', 'SEO', 'Analytics'], availability: 'Available', workHours: '9:00 AM - 6:00 PM EST', timezone: 'EST' },
+    { id: 6, name: 'Alex Rivera', role: 'QA Engineer', department: 'Quality Assurance', email: 'alex@company.com', phone: '+1 (555) 678-9012', location: 'Denver, CO', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex', status: 'online', joinDate: '2023-09-01', projects: 7, completedTasks: 98, rating: 4.8, skills: ['Manual Testing', 'Automation', 'Selenium'], availability: 'Available', workHours: '8:00 AM - 5:00 PM MST', timezone: 'MST' }
   ])
 
-  // A+++ LOAD TEAM DATA FROM DATABASE
   useEffect(() => {
     const loadTeamData = async () => {
       if (!userId || userLoading) {
@@ -231,14 +120,12 @@ export default function TeamPage() {
         setIsLoading(true)
         setError(null)
 
-        // Load team members from database
         const result = await getTeamMembers(userId)
 
         if (result.error) {
           throw new Error(result.error.message || 'Failed to load team data')
         }
 
-        // If database returns members, use them; otherwise keep defaults for demo
         if (result.data && result.data.length > 0) {
           const mappedMembers = result.data.map((m: DBTeamMember) => ({
             id: m.id,
@@ -260,10 +147,6 @@ export default function TeamPage() {
             timezone: m.timezone || 'UTC'
           }))
           setTeamMembers(mappedMembers)
-          logger.info('Team members loaded from database', { count: mappedMembers.length })
-        } else {
-          // Keep demo data for users without team members
-          logger.info('Using demo team data - no members in database', { userId })
         }
 
         setIsLoading(false)
@@ -299,7 +182,6 @@ export default function TeamPage() {
     }
 
     try {
-      // Map role to department
       const roleToDepartment: Record<string, DepartmentType> = {
         'Lead Designer': 'design',
         'Frontend Developer': 'development',
@@ -309,7 +191,6 @@ export default function TeamPage() {
         'Team Member': 'operations'
       }
 
-      // Save to database
       const result = await createTeamMember(userId, {
         name: inviteName,
         email: inviteEmail,
@@ -324,7 +205,6 @@ export default function TeamPage() {
         throw new Error(result.error.message || 'Failed to invite member')
       }
 
-      // Add to local state with database ID
       const newMember = {
         id: result.data?.id || `temp_${Date.now()}`,
         name: inviteName,
@@ -347,16 +227,8 @@ export default function TeamPage() {
 
       setTeamMembers([...teamMembers, newMember])
 
-      logger.info('Team member invited and saved to database', {
-        memberId: newMember.id,
-        name: inviteName,
-        email: inviteEmail,
-        role: inviteRole,
-        totalMembers: teamMembers.length + 1
-      })
-
       toast.success('Invitation Sent!', {
-        description: `Invited ${inviteName} as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
+        description: `Invited ${inviteName} as ${inviteRole}`
       })
 
       setShowInviteDialog(false)
@@ -372,16 +244,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Viewing member profile', {
-      memberId: id,
-      memberName: member.name,
-      role: member.role,
-      projects: member.projects,
-      completedTasks: member.completedTasks
-    })
-
     toast.success(`${member.name} Profile`, {
-      description: `${member.role} • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating} rating`
+      description: `${member.role} • ${member.projects} projects • ${member.completedTasks} tasks`
     })
   }
 
@@ -389,14 +253,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Edit member dialog opened', {
-      memberId: id,
-      memberName: member.name,
-      currentRole: member.role
-    })
-
     toast.info(`Edit Team Member`, {
-      description: `Editing ${member.name} - ${member.role}`
+      description: `Editing ${member.name}`
     })
   }
 
@@ -416,26 +274,17 @@ export default function TeamPage() {
 
     setIsRemoving(true)
     try {
-      // Remove member from database
       const result = await deleteTeamMember(memberToRemove.toString(), userId)
 
       if (result.error) {
         throw new Error(result.error.message || 'Failed to remove member')
       }
 
-      // Update local state
       const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove)
       setTeamMembers(updatedMembers)
 
-      logger.info('Team member removed from database', {
-        memberId: memberToRemove,
-        memberName: member.name,
-        role: member.role,
-        remainingMembers: updatedMembers.length
-      })
-
       toast.success('Member Removed', {
-        description: `${member.name} removed from team - ${updatedMembers.length} members remaining`
+        description: `${member.name} removed from team`
       })
       announce(`${member.name} removed from team`, 'polite')
     } catch (error) {
@@ -470,13 +319,6 @@ export default function TeamPage() {
       m.id === changeRoleMemberId ? { ...m, role: newRole } : m
     ))
 
-    logger.info('Member role changed', {
-      memberId: changeRoleMemberId,
-      memberName: member.name,
-      previousRole,
-      newRole
-    })
-
     toast.success('Role Updated', {
       description: `${member.name} role changed from ${previousRole} to ${newRole}`
     })
@@ -492,14 +334,8 @@ export default function TeamPage() {
 
     const permissions = ['Read', 'Write', 'Admin', 'Owner']
 
-    logger.info('Permissions dialog opened', {
-      memberId: id,
-      memberName: member.name,
-      role: member.role
-    })
-
     toast.info(`Set Permissions`, {
-      description: `Configure ${permissions.length} permission levels for ${member.name}`
+      description: `Configure permissions for ${member.name}`
     })
   }
 
@@ -507,15 +343,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Message composer opened', {
-      memberId: id,
-      memberName: member.name,
-      email: member.email,
-      status: member.status
-    })
-
     toast.info(`Send Message`, {
-      description: `Composing message to ${member.name} (${member.email})`
+      description: `Composing message to ${member.name}`
     })
   }
 
@@ -523,16 +352,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Viewing member activity', {
-      memberId: id,
-      memberName: member.name,
-      projects: member.projects,
-      completedTasks: member.completedTasks,
-      rating: member.rating
-    })
-
     toast.success(`${member.name} Activity`, {
-      description: `${member.completedTasks} tasks completed • ${member.projects} active projects • ${member.rating} rating`
+      description: `${member.completedTasks} tasks • ${member.projects} projects`
     })
   }
 
@@ -558,15 +379,8 @@ export default function TeamPage() {
       m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
     ))
 
-    logger.info('Project assigned to member', {
-      memberId: assignProjectMemberId,
-      memberName: member.name,
-      projectName,
-      newProjectCount: member.projects + 1
-    })
-
     toast.success('Project Assigned', {
-      description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
+      description: `${projectName} assigned to ${member.name}`
     })
 
     setShowAssignProjectDialog(false)
@@ -578,14 +392,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Viewing member projects', {
-      memberId: id,
-      memberName: member.name,
-      activeProjects: member.projects
-    })
-
     toast.success(`${member.name}'s Projects`, {
-      description: `${member.projects} active projects • ${member.completedTasks} tasks completed`
+      description: `${member.projects} active projects`
     })
   }
 
@@ -597,20 +405,14 @@ export default function TeamPage() {
       tasks: teamMembers.reduce((sum, m) => sum + m.completedTasks, 0)
     }
 
-    logger.info('Team analytics accessed', stats)
-
     toast.success(`Team Analytics`, {
-      description: `${stats.totalMembers} members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
+      description: `${stats.totalMembers} members • ${stats.online} online`
     })
   }
 
   const handleTeamSettings = () => {
-    logger.info('Team settings accessed', {
-      totalMembers: teamMembers.length
-    })
-
     toast.info(`Team Settings`, {
-      description: 'Configure team preferences, roles, and permissions'
+      description: 'Configure team preferences and permissions'
     })
   }
 
@@ -639,13 +441,8 @@ export default function TeamPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    logger.info('Team data exported', {
-      totalMembers: teamMembers.length,
-      fileSize: blob.size
-    })
-
     toast.success('Team Data Exported', {
-      description: `${teamMembers.length} members exported - ${Math.round(blob.size / 1024)}KB`
+      description: `${teamMembers.length} members exported`
     })
   }
 
@@ -667,11 +464,6 @@ export default function TeamPage() {
       return
     }
 
-    logger.info('Bulk invite initiated', {
-      emailCount: emailList.length,
-      emails: emailList
-    })
-
     toast.success('Bulk Invitations Sent', {
       description: `${emailList.length} invitation emails sent`
     })
@@ -683,11 +475,6 @@ export default function TeamPage() {
   const handleTeamChat = () => {
     const onlineMembers = teamMembers.filter(m => m.status === 'online').length
 
-    logger.info('Team chat opened', {
-      totalMembers: teamMembers.length,
-      onlineMembers
-    })
-
     toast.info(`Team Chat`, {
       description: `${onlineMembers}/${teamMembers.length} members online`
     })
@@ -696,23 +483,14 @@ export default function TeamPage() {
   const handleScheduleMeeting = () => {
     const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length
 
-    logger.info('Meeting scheduler opened', {
-      totalMembers: teamMembers.length,
-      availableMembers
-    })
-
     toast.info(`Schedule Meeting`, {
       description: `${availableMembers}/${teamMembers.length} members available`
     })
   }
 
   const handleViewCalendar = () => {
-    logger.info('Team calendar accessed', {
-      totalMembers: teamMembers.length
-    })
-
     toast.info(`Team Calendar`, {
-      description: `View schedules for ${teamMembers.length} team members`
+      description: `View schedules for ${teamMembers.length} members`
     })
   }
 
@@ -720,15 +498,8 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    logger.info('Performance review opened', {
-      memberId: id,
-      memberName: member.name,
-      rating: member.rating,
-      completedTasks: member.completedTasks
-    })
-
     toast.success(`Review ${member.name}`, {
-      description: `Current rating: ${member.rating} • ${member.completedTasks} tasks completed`
+      description: `Rating: ${member.rating} • ${member.completedTasks} tasks completed`
     })
   }
 
@@ -738,23 +509,12 @@ export default function TeamPage() {
 
     const hoursWorked = Math.floor(Math.random() * 40) + 120
 
-    logger.info('Time tracking viewed', {
-      memberId: id,
-      memberName: member.name,
-      hoursWorked
-    })
-
     toast.success(`${member.name} Time Tracking`, {
-      description: `${hoursWorked} hours this month • ${member.workHours}`
+      description: `${hoursWorked} hours this month`
     })
   }
 
   const handleFilter = (filter: string) => {
-    logger.info('Filter applied', {
-      filterType: filter,
-      totalMembers: teamMembers.length
-    })
-
     toast.success(`Filter Applied`, {
       description: `Filtering team by: ${filter}`
     })
@@ -793,7 +553,7 @@ export default function TeamPage() {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.department.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = selectedRole === 'all' || 
+    const matchesRole = selectedRole === 'all' ||
                        member.role.toLowerCase().includes(selectedRole.toLowerCase())
     return matchesSearch && matchesRole
   })
@@ -806,7 +566,6 @@ export default function TeamPage() {
     averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative">
@@ -830,7 +589,6 @@ export default function TeamPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative">
@@ -1028,7 +786,7 @@ export default function TeamPage() {
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       {getStatusIcon(member.status)}
@@ -1043,7 +801,7 @@ export default function TeamPage() {
                       <span>{member.workHours}</span>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 text-center mb-4">
                     <div>
                       <div className="text-sm font-semibold">{member.projects}</div>
@@ -1058,7 +816,7 @@ export default function TeamPage() {
                       <div className="text-xs text-gray-500">Rating</div>
                     </div>
                   </div>
-                  
+
                   <div className="mb-4">
                     <p className="text-xs text-gray-500 mb-2">Skills:</p>
                     <div className="flex flex-wrap gap-1">
@@ -1074,7 +832,7 @@ export default function TeamPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" className="flex-1">
                       <MessageSquare className="h-4 w-4 mr-2" />
