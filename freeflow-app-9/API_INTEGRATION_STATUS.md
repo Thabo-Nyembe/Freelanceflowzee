@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 145/286 pages integrated (50.7%)
+**Overall Progress:** 146/286 pages integrated (51.0%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 139/223 using Supabase hooks (62.3%) 🚧
-  - **Mock → Database:** 16/157 migrated (10.2%) 🎉 NEW!
+- **V2 Pages:** 140/223 using Supabase hooks (62.8%) 🚧
+  - **Mock → Database:** 17/157 migrated (10.8%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -552,6 +552,24 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** Clean migration, no errors introduced, ~6 lines removed/modified
    - **Migration Time:** ~3 minutes
    - **Complexity:** Medium (two fallback patterns with different handling approaches)
+
+17. `faq-v2` (app/(app)/dashboard) - ✅ **MIGRATED** - Commit: PENDING
+   - **Pattern:** Completion of partial integration - removed dual mock fallback patterns
+   - **Tables:** faqs (via use-faqs hook)
+   - **Hook Features:** Already integrated with useFAQs (createFAQ, updateFAQ, deleteFAQ, markHelpful mutations)
+   - **Mapping:** Already implemented - DB FAQ → UI Article with field transformations (question → title, answer → content, views_count → viewCount, helpful_count → helpfulCount, not_helpful_count → notHelpfulCount, searches_count → searchCount, average_read_time → avgReadTime)
+   - **Cleanup:** Removed TWO mock fallback patterns:
+     1. Articles mapping (lines 479-508): Removed if/else fallback check `if (dbFaqs && dbFaqs.length > 0) { map db } return mockArticles`
+     2. Stats calculation (lines 510-538): Removed if/else fallback, added null guard
+   - **Before (Articles):** `if (dbFaqs && dbFaqs.length > 0) { return dbFaqs.map(...) } return mockArticles`
+   - **After (Articles):** `return (dbFaqs || []).map(...)` - safe array handling
+   - **Before (Stats):** `if (dbStats && dbStats.total > 0) { return db stats } return mockStats`
+   - **After (Stats):** `if (!dbStats) return zeros; return db stats` - null guard instead of fallback
+   - **Impact:** Now uses 100% database data for FAQ articles and stats
+   - **Kept as Mock:** mockAuthors, collections (separate entities, will be migrated separately)
+   - **Note:** Clean migration, no errors introduced, dual fallback pattern identical to surveys-v2
+   - **Migration Time:** ~3 minutes
+   - **Complexity:** Medium (two fallback patterns with consistent removal approach)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
