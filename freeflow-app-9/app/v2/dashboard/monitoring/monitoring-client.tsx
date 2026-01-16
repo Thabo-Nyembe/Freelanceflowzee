@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -553,7 +552,7 @@ const initialAlertForm: AlertFormData = {
 }
 
 export default function MonitoringClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('infrastructure')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<HostStatus | 'all'>('all')
@@ -600,6 +599,8 @@ export default function MonitoringClient() {
   // Fetch servers from Supabase
   const fetchServers = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('servers')
         .select('*')
@@ -611,11 +612,13 @@ export default function MonitoringClient() {
     } catch (error) {
       console.error('Error fetching servers:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch alerts from Supabase
   const fetchAlerts = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_alerts')
         .select('*')
@@ -626,7 +629,7 @@ export default function MonitoringClient() {
     } catch (error) {
       console.error('Error fetching alerts:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Load data on mount
   useEffect(() => {
@@ -638,9 +641,13 @@ export default function MonitoringClient() {
   const handleCreateServer = async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('servers').insert({
         user_id: user.id,
         server_name: serverForm.server_name,
@@ -670,6 +677,8 @@ export default function MonitoringClient() {
   // Delete server
   const handleDeleteServer = async (serverId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('servers')
         .update({ deleted_at: new Date().toISOString() })
@@ -688,9 +697,13 @@ export default function MonitoringClient() {
   const handleCreateAlert = async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').insert({
         user_id: user.id,
         title: alertForm.title,
@@ -717,8 +730,12 @@ export default function MonitoringClient() {
   // Acknowledge alert
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update({
@@ -740,8 +757,12 @@ export default function MonitoringClient() {
   // Resolve alert
   const handleResolveAlert = async (alertId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update({

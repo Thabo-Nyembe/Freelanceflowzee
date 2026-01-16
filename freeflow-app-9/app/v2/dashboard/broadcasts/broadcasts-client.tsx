@@ -1,7 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -406,7 +405,7 @@ const mockEvents: EventTracking[] = [
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [broadcastTypeFilter, setBroadcastTypeFilter] = useState<BroadcastType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BroadcastStatus | 'all'>('all')
@@ -461,9 +460,13 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const fetchBroadcasts = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('broadcasts')
         .select('*')
@@ -479,18 +482,22 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create broadcast
   const handleCreateBroadcast = async () => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create broadcasts')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: formData.title,
@@ -524,6 +531,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     if (!editingBroadcast) return
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -559,6 +568,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Delete broadcast
   const handleDeleteBroadcast = async (broadcastId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({ deleted_at: new Date().toISOString() })
@@ -578,6 +589,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Send broadcast
   const handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -601,6 +614,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Schedule broadcast
   const handleScheduleBroadcast = async (broadcastId: string, broadcastTitle: string, scheduledFor: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -624,6 +639,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Pause broadcast
   const handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -647,12 +664,16 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const handleDuplicateBroadcast = async (broadcast: Broadcast) => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate broadcasts')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: `Copy of ${broadcast.title}`,
