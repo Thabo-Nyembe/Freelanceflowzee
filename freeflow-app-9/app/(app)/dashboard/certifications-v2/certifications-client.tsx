@@ -860,11 +860,11 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification created', { description: `"${certForm.certification_name}" has been added` })
+      toast.success('Certification created'" has been added` })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Failed to create certification', { description: error.message })
+      toast.error('Failed to create certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -895,12 +895,12 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification updated', { description: `"${certForm.certification_name}" has been updated` })
+      toast.success('Certification updated'" has been updated` })
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
     } catch (error: any) {
-      toast.error('Failed to update certification', { description: error.message })
+      toast.error('Failed to update certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -911,11 +911,11 @@ export default function CertificationsClient() {
     setIsSubmitting(true)
     try {
       await deleteCertification(certToDelete.id)
-      toast.success('Certification deleted', { description: `"${certToDelete.certification_name}" has been removed` })
+      toast.success('Certification deleted'" has been removed` })
       setShowDeleteDialog(false)
       setCertToDelete(null)
     } catch (error: any) {
-      toast.error('Failed to delete certification', { description: error.message })
+      toast.error('Failed to delete certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -2378,7 +2378,7 @@ export default function CertificationsClient() {
             <AIInsightsPanel
               insights={mockCertsAIInsights}
               title="Certification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

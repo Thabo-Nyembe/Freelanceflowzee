@@ -343,14 +343,11 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         message_type: 'text',
         status: 'sent'
       })
-      toast.success('Message Sent', {
-        description: `Message delivered to ${selectedConversation.customer.name}`
+      toast.success('Message Sent'`
       })
       setNewMessage('')
     } catch (err) {
-      toast.error('Failed to send message', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to send message')
     } finally {
       setIsSaving(false)
     }
@@ -363,9 +360,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       messageInputRef.current?.focus()
       toast.success(`Reply inserted: ${reply.name}`)
     } catch (err) {
-      toast.error('Failed to insert reply', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to insert reply')
     }
   }, [])
 
@@ -382,7 +377,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
             ? { ...conv, tags: [...conv.tags, 'billing'] }
             : conv
         ))
-        toast.success('Tag Added', { description: 'Conversation tagged as billing' })
+        toast.success('Tag Added')
       } catch (err) {
         toast.error('Failed to add tag')
       } finally {
@@ -403,8 +398,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, assignee: member } : null)
-      toast.success('Conversation Assigned', {
-        description: `Assigned to ${member.name}`
+      toast.success('Conversation Assigned'`
       })
       setShowAssignDialog(false)
     } catch (err) {
@@ -426,9 +420,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, status: 'closed' } : null)
-      toast.success('Conversation Closed', {
-        description: 'The conversation has been marked as resolved'
-      })
+      toast.success('Conversation Closed')
     } catch (err) {
       toast.error('Failed to close conversation')
     } finally {
@@ -448,9 +440,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, status: 'snoozed' } : null)
-      toast.success('Conversation Snoozed', {
-        description: 'Will reopen in 24 hours'
-      })
+      toast.success('Conversation Snoozed')
     } catch (err) {
       toast.error('Failed to snooze conversation')
     } finally {
@@ -471,7 +461,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, tags: updatedTags } : null)
-      toast.success('Tag Added', { description: newTag })
+      toast.success('Tag Added')
       setNewTag('')
       setShowTagDialog(false)
     } catch (err) {
@@ -497,7 +487,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         ...prev,
         customer: { ...prev.customer, notes: updatedNotes }
       } : null)
-      toast.success('Note Added', { description: 'Internal note saved' })
+      toast.success('Note Added')
       setNewNote('')
       setShowNoteDialog(false)
     } catch (err) {
@@ -519,9 +509,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, isStarred: newStarred } : null)
-      toast.success(newStarred ? 'Starred' : 'Unstarred', {
-        description: 'Conversation updated'
-      })
+      toast.success(newStarred ? 'Starred' : 'Unstarred')
     } catch (err) {
       toast.error('Failed to update star status')
     } finally {
@@ -536,9 +524,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       await deleteMessage(messageId)
       toast.success('Message Deleted')
     } catch (err) {
-      toast.error('Failed to delete message', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to delete message')
     } finally {
       setIsSaving(false)
     }
@@ -1935,7 +1921,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           <AIInsightsPanel
             insights={chatAIInsights}
             title="Chat Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+            onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
           />
         </div>
         <div className="space-y-6">

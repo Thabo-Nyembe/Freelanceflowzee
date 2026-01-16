@@ -653,7 +653,7 @@ export default function GrowthHubClient() {
   // CRUD Handlers
   const handleCreateExperiment = async () => {
     if (!userId || !experimentForm.name.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in experiment name' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -669,12 +669,12 @@ export default function GrowthHubClient() {
         variants: JSON.stringify([{ id: 'control', name: 'Control', allocation: 50 }, { id: 'variant-a', name: 'Variant A', allocation: 50 }])
       })
       if (error) throw error
-      toast.success('Experiment created', { description: `"${experimentForm.name}" is ready to configure` })
+      toast.success('Experiment created'" is ready to configure` })
       setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
       setShowCreateExperimentModal(false)
       refreshExperiments()
     } catch (err: any) {
-      toast.error('Failed to create experiment', { description: err.message })
+      toast.error('Failed to create experiment')
     } finally { setIsLoading(false) }
   }
 
@@ -683,10 +683,10 @@ export default function GrowthHubClient() {
     try {
       const { error } = await supabase.from('growth_experiments').update({ status: 'running', started_at: new Date().toISOString() }).eq('id', expId)
       if (error) throw error
-      toast.success('Experiment started', { description: `"${expName}" is now running` })
+      toast.success('Experiment started'" is now running` })
       refreshExperiments()
     } catch (err: any) {
-      toast.error('Failed to start experiment', { description: err.message })
+      toast.error('Failed to start experiment')
     } finally { setIsLoading(false) }
   }
 
@@ -695,10 +695,10 @@ export default function GrowthHubClient() {
     try {
       const { error } = await supabase.from('growth_experiments').update({ status: 'paused' }).eq('id', expId)
       if (error) throw error
-      toast.info('Experiment stopped', { description: `"${expName}" has been paused` })
+      toast.info('Experiment stopped'" has been paused` })
       refreshExperiments()
     } catch (err: any) {
-      toast.error('Failed to stop experiment', { description: err.message })
+      toast.error('Failed to stop experiment')
     } finally { setIsLoading(false) }
   }
 
@@ -707,11 +707,11 @@ export default function GrowthHubClient() {
     try {
       const { error } = await supabase.from('growth_experiments').delete().eq('id', expId)
       if (error) throw error
-      toast.success('Experiment deleted', { description: `"${expName}" has been removed` })
+      toast.success('Experiment deleted'" has been removed` })
       setSelectedExperiment(null)
       refreshExperiments()
     } catch (err: any) {
-      toast.error('Failed to delete experiment', { description: err.message })
+      toast.error('Failed to delete experiment')
     } finally { setIsLoading(false) }
   }
 
@@ -761,7 +761,7 @@ export default function GrowthHubClient() {
 
   const handleCreateFunnel = async () => {
     if (!funnelForm.name.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in funnel name' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -773,12 +773,12 @@ export default function GrowthHubClient() {
         is_active: true
       })
       if (error) throw error
-      toast.success('Funnel created', { description: `"${funnelForm.name}" is ready to track` })
+      toast.success('Funnel created'" is ready to track` })
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnelModal(false)
       refreshFunnels()
     } catch (err: any) {
-      toast.error('Failed to create funnel', { description: err.message })
+      toast.error('Failed to create funnel')
     } finally { setIsLoading(false) }
   }
 
@@ -787,17 +787,17 @@ export default function GrowthHubClient() {
     try {
       const { error } = await supabase.from('conversion_funnels').delete().eq('id', funnelId)
       if (error) throw error
-      toast.success('Funnel deleted', { description: `"${funnelName}" has been removed` })
+      toast.success('Funnel deleted'" has been removed` })
       setSelectedFunnel(null)
       refreshFunnels()
     } catch (err: any) {
-      toast.error('Failed to delete funnel', { description: err.message })
+      toast.error('Failed to delete funnel')
     } finally { setIsLoading(false) }
   }
 
   const handleCreateCohort = async () => {
     if (!cohortForm.name.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in cohort name' })
+      toast.error('Missing required fields')
       return
     }
     setIsLoading(true)
@@ -811,12 +811,12 @@ export default function GrowthHubClient() {
         metadata: JSON.stringify({ definition: cohortForm.definition })
       })
       if (error) throw error
-      toast.success('Cohort created', { description: `"${cohortForm.name}" is ready for analysis` })
+      toast.success('Cohort created'" is ready for analysis` })
       setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
       setShowCreateCohortModal(false)
       refreshCohorts()
     } catch (err: any) {
-      toast.error('Failed to create cohort', { description: err.message })
+      toast.error('Failed to create cohort')
     } finally { setIsLoading(false) }
   }
 
@@ -825,11 +825,11 @@ export default function GrowthHubClient() {
     try {
       const { error } = await supabase.from('cohorts').delete().eq('id', cohortId)
       if (error) throw error
-      toast.success('Cohort deleted', { description: `"${cohortName}" has been removed` })
+      toast.success('Cohort deleted'" has been removed` })
       setSelectedCohort(null)
       refreshCohorts()
     } catch (err: any) {
-      toast.error('Failed to delete cohort', { description: err.message })
+      toast.error('Failed to delete cohort')
     } finally { setIsLoading(false) }
   }
 
@@ -2074,7 +2074,7 @@ export default function GrowthHubClient() {
             <AIInsightsPanel
               insights={mockGrowthAIInsights}
               title="Growth Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

@@ -456,8 +456,7 @@ export default function ThirdPartyIntegrationsClient() {
     }
 
     const selectedApp = mockApps.find(a => a.id === newIntegrationApp)
-    toast.success('Integration Connected', {
-      description: `${selectedApp?.name} has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`
+    toast.success('Integration Connected' has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`
     })
 
     // Reset form
@@ -585,32 +584,27 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Handlers
   const handleConnectIntegration = (integrationName: string) => {
-    toast.info('Connecting integration', {
-      description: `Setting up ${integrationName}...`
+    toast.info('Connecting integration'...`
     })
   }
 
   const handleDisconnectIntegration = (integrationName: string) => {
-    toast.success('Integration disconnected', {
-      description: `${integrationName} has been removed`
+    toast.success('Integration disconnected' has been removed`
     })
   }
 
   const handleRefreshIntegration = (integrationName: string) => {
-    toast.info('Refreshing integration', {
-      description: `Syncing ${integrationName} data...`
+    toast.info('Refreshing integration' data...`
     })
   }
 
   const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Opening configuration', {
-      description: `Configuring ${integrationName} settings`
+    toast.info('Opening configuration' settings`
     })
   }
 
   const handleViewLogs = (integrationName: string) => {
-    toast.info('Loading logs', {
-      description: `Fetching ${integrationName} activity logs`
+    toast.info('Loading logs' activity logs`
     })
   }
 
@@ -622,8 +616,7 @@ export default function ThirdPartyIntegrationsClient() {
     }
     const triggerApp = mockApps.find(a => a.id === newZapTriggerApp)
     const actionApp = mockApps.find(a => a.id === newZapActionApp)
-    toast.success('Zap Created', {
-      description: `${newZapName}: ${triggerApp?.name} → ${actionApp?.name}`
+    toast.success('Zap Created': ${triggerApp?.name} → ${actionApp?.name}`
     })
     setNewZapName('')
     setNewZapDescription('')
@@ -636,8 +629,7 @@ export default function ThirdPartyIntegrationsClient() {
   const handleToggleZapStatus = (zap: Zap, e: React.MouseEvent) => {
     e.stopPropagation()
     const newStatus = zap.status === 'active' ? 'paused' : 'active'
-    toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
-      description: `${zap.name} is now ${newStatus}`
+    toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}` is now ${newStatus}`
     })
   }
 
@@ -645,15 +637,13 @@ export default function ThirdPartyIntegrationsClient() {
   const handleEditZap = (zap: Zap, e: React.MouseEvent) => {
     e.stopPropagation()
     setSelectedZap(zap)
-    toast.info('Edit Mode', {
-      description: `Editing ${zap.name}`
+    toast.info('Edit Mode'`
     })
   }
 
   // Apply zap filters handler
   const handleApplyZapFilters = () => {
-    toast.success('Filters Applied', {
-      description: `Showing ${filterZapStatus === 'all' ? 'all' : filterZapStatus} zaps${filterZapApp ? ` for ${mockApps.find(a => a.id === filterZapApp)?.name}` : ''}`
+    toast.success('Filters Applied' zaps${filterZapApp ? ` for ${mockApps.find(a => a.id === filterZapApp)?.name}` : ''}`
     })
     setShowFilterZapsDialog(false)
   }
@@ -661,8 +651,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Manage app handler
   const handleSaveAppSettings = () => {
     if (showManageAppDialog) {
-      toast.success('Settings Saved', {
-        description: `${showManageAppDialog.name} settings updated`
+      toast.success('Settings Saved' settings updated`
       })
     }
     setShowManageAppDialog(null)
@@ -671,8 +660,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Connect app handler
   const handleConnectApp = () => {
     if (showConnectAppDialog) {
-      toast.success('App Connected', {
-        description: `${showConnectAppDialog.name} has been connected`
+      toast.success('App Connected' has been connected`
       })
     }
     setShowConnectAppDialog(null)
@@ -681,12 +669,10 @@ export default function ThirdPartyIntegrationsClient() {
   // Refresh connection handler
   const handleRefreshConnection = (conn: Connection, e: React.MouseEvent) => {
     e.stopPropagation()
-    toast.info('Syncing', {
-      description: `Refreshing ${conn.app.name} data...`
+    toast.info('Syncing' data...`
     })
     setTimeout(() => {
-      toast.success('Sync Complete', {
-        description: `${conn.app.name} data is now up to date`
+      toast.success('Sync Complete' data is now up to date`
       })
     }, 1500)
   }
@@ -699,37 +685,29 @@ export default function ThirdPartyIntegrationsClient() {
 
   // History filter handler
   const handleApplyHistoryFilters = () => {
-    toast.success('Filters Applied', {
-      description: `Showing ${historyStatus === 'all' ? 'all' : historyStatus} logs for the last ${historyDateRange}`
+    toast.success('Filters Applied' logs for the last ${historyDateRange}`
     })
     setShowHistoryFilterDialog(false)
   }
 
   // Refresh history handler
   const handleRefreshHistory = () => {
-    toast.info('Refreshing', {
-      description: 'Fetching latest execution logs...'
-    })
+    toast.info('Refreshing')
     setTimeout(() => {
-      toast.success('Logs Refreshed', {
-        description: 'Execution history is now up to date'
-      })
+      toast.success('Logs Refreshed')
     }, 1000)
   }
 
   // Upgrade handler
   const handleUpgrade = () => {
-    toast.success('Upgrade Initiated', {
-      description: 'Redirecting to billing portal...'
-    })
+    toast.success('Upgrade Initiated')
     setShowUpgradeDialog(false)
   }
 
   // Regenerate API key handler
   const handleRegenerateApiKey = () => {
     const keyType = showRegenerateApiKeyDialog
-    toast.success('API Key Regenerated', {
-      description: `Your ${keyType} API key has been regenerated. Please update your applications.`
+    toast.success('API Key Regenerated' API key has been regenerated. Please update your applications.`
     })
     setShowRegenerateApiKeyDialog(null)
   }
@@ -737,12 +715,10 @@ export default function ThirdPartyIntegrationsClient() {
   // Webhook test handler
   const handleTestWebhook = () => {
     if (showWebhookTestDialog) {
-      toast.info('Testing Webhook', {
-        description: `Sending test payload to ${showWebhookTestDialog.name}...`
+      toast.info('Testing Webhook'...`
       })
       setTimeout(() => {
-        toast.success('Test Successful', {
-          description: `${showWebhookTestDialog.name} responded with 200 OK`
+        toast.success('Test Successful' responded with 200 OK`
         })
         setShowWebhookTestDialog(null)
       }, 1500)
@@ -752,8 +728,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Webhook edit handler
   const handleSaveWebhook = () => {
     if (showWebhookEditDialog) {
-      toast.success('Webhook Updated', {
-        description: `${showWebhookEditDialog.name} configuration saved`
+      toast.success('Webhook Updated' configuration saved`
       })
     }
     setShowWebhookEditDialog(null)
@@ -765,8 +740,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Webhook Created', {
-      description: `${newWebhookName} has been configured`
+    toast.success('Webhook Created' has been configured`
     })
     setNewWebhookName('')
     setNewWebhookUrl('')
@@ -780,8 +754,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please provide an integration name')
       return
     }
-    toast.success('Custom Integration Created', {
-      description: `${customIntegrationName} is ready for development`
+    toast.success('Custom Integration Created' is ready for development`
     })
     setCustomIntegrationName('')
     setCustomIntegrationDescription('')
@@ -791,13 +764,10 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Export data handler
   const handleExportData = () => {
-    toast.success('Export Started', {
-      description: `Preparing ${exportFormat.toUpperCase()} export...`
+    toast.success('Export Started' export...`
     })
     setTimeout(() => {
-      toast.success('Export Complete', {
-        description: 'Download will begin shortly'
-      })
+      toast.success('Export Complete')
       setShowExportDataDialog(false)
     }, 1500)
   }
@@ -808,8 +778,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please select a target environment')
       return
     }
-    toast.success('Configuration Cloned', {
-      description: `Settings cloned to ${cloneTarget}`
+    toast.success('Configuration Cloned'`
     })
     setCloneTarget('')
     setShowCloneConfigDialog(false)
@@ -817,37 +786,30 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Pause all zaps handler
   const handlePauseAllZaps = () => {
-    toast.success('All Zaps Paused', {
-      description: `${zaps.filter(z => z.status === 'active').length} active zaps have been paused`
+    toast.success('All Zaps Paused' active zaps have been paused`
     })
     setShowPauseAllDialog(false)
   }
 
   // Delete all connections handler
   const handleDeleteAllConnections = () => {
-    toast.success('Connections Deleted', {
-      description: 'All app connections have been removed'
-    })
+    toast.success('Connections Deleted')
     setShowDeleteConnectionsDialog(false)
   }
 
   // Reset settings handler
   const handleResetSettings = () => {
-    toast.success('Settings Reset', {
-      description: 'All settings restored to defaults'
-    })
+    toast.success('Settings Reset')
     setShowResetSettingsDialog(false)
   }
 
   // Sync connection now handler
   const handleSyncNow = () => {
     if (selectedConnection) {
-      toast.info('Syncing', {
-        description: `Synchronizing ${selectedConnection.app.name}...`
+      toast.info('Syncing'...`
       })
       setTimeout(() => {
-        toast.success('Sync Complete', {
-          description: `${selectedConnection.app.name} data synchronized`
+        toast.success('Sync Complete' data synchronized`
         })
       }, 1500)
     }
@@ -856,8 +818,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Reauthorize connection handler
   const handleReauthorize = () => {
     if (selectedConnection) {
-      toast.info('Reauthorizing', {
-        description: `Redirecting to ${selectedConnection.app.name} for authorization...`
+      toast.info('Reauthorizing' for authorization...`
       })
     }
   }
@@ -865,8 +826,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Disconnect connection handler
   const handleDisconnect = () => {
     if (selectedConnection) {
-      toast.success('Disconnected', {
-        description: `${selectedConnection.app.name} has been disconnected`
+      toast.success('Disconnected' has been disconnected`
       })
       setSelectedConnection(null)
     }
@@ -876,8 +836,7 @@ export default function ThirdPartyIntegrationsClient() {
   const handleToggleSelectedZapStatus = () => {
     if (selectedZap) {
       const newStatus = selectedZap.status === 'active' ? 'paused' : 'active'
-      toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
-        description: `${selectedZap.name} is now ${newStatus}`
+      toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}` is now ${newStatus}`
       })
     }
   }
@@ -885,8 +844,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Edit selected zap handler
   const handleEditSelectedZap = () => {
     if (selectedZap) {
-      toast.info('Edit Mode', {
-        description: `Opening editor for ${selectedZap.name}`
+      toast.info('Edit Mode'`
       })
     }
   }
@@ -897,8 +855,7 @@ export default function ThirdPartyIntegrationsClient() {
       setActiveTab('history')
       setLogsFilterZapId(selectedZap.id)
       setSelectedZap(null)
-      toast.info('Filtered History', {
-        description: `Showing history for ${selectedZap.name}`
+      toast.info('Filtered History'`
       })
     }
   }
@@ -2118,7 +2075,7 @@ export default function ThirdPartyIntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

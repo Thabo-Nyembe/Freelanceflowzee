@@ -739,17 +739,14 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release created successfully', {
-        description: `${formData.release_name} (${formData.version}) has been created`
+      toast.success('Release created successfully' (${formData.version}) has been created`
       })
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchReleases()
     } catch (error: any) {
       console.error('Error creating release:', error)
-      toast.error('Failed to create release', {
-        description: error.message
-      })
+      toast.error('Failed to create release')
     } finally {
       setIsSaving(false)
     }
@@ -788,8 +785,7 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release updated successfully', {
-        description: `${formData.release_name} has been updated`
+      toast.success('Release updated successfully' has been updated`
       })
       setShowEditDialog(false)
       setReleaseToEdit(null)
@@ -797,9 +793,7 @@ export default function ReleasesClient() {
       fetchReleases()
     } catch (error: any) {
       console.error('Error updating release:', error)
-      toast.error('Failed to update release', {
-        description: error.message
-      })
+      toast.error('Failed to update release')
     } finally {
       setIsSaving(false)
     }
@@ -825,17 +819,14 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release deleted successfully', {
-        description: `${releaseToDelete.release_name} has been deleted`
+      toast.success('Release deleted successfully' has been deleted`
       })
       setShowDeleteDialog(false)
       setReleaseToDelete(null)
       fetchReleases()
     } catch (error: any) {
       console.error('Error deleting release:', error)
-      toast.error('Failed to delete release', {
-        description: error.message
-      })
+      toast.error('Failed to delete release')
     } finally {
       setIsSaving(false)
     }
@@ -883,8 +874,7 @@ export default function ReleasesClient() {
 
       if (releaseError) throw releaseError
 
-      toast.success('Deployment started', {
-        description: `${releaseToDeploy.release_name} deployment is in progress`
+      toast.success('Deployment started' deployment is in progress`
       })
       setShowDeployDialog(false)
       setReleaseToDeploy(null)
@@ -892,9 +882,7 @@ export default function ReleasesClient() {
       fetchDeployments()
     } catch (error: any) {
       console.error('Error deploying release:', error)
-      toast.error('Failed to deploy release', {
-        description: error.message
-      })
+      toast.error('Failed to deploy release')
     } finally {
       setIsDeploying(false)
     }
@@ -942,8 +930,7 @@ export default function ReleasesClient() {
 
       if (releaseError) throw releaseError
 
-      toast.success('Rollback initiated', {
-        description: `Rolling back ${releaseToRollback.version} to ${targetVersion}`
+      toast.success('Rollback initiated' to ${targetVersion}`
       })
       setShowRollbackDialog(false)
       setReleaseToRollback(null)
@@ -953,9 +940,7 @@ export default function ReleasesClient() {
       fetchRollbacks()
     } catch (error: any) {
       console.error('Error rolling back release:', error)
-      toast.error('Failed to rollback release', {
-        description: error.message
-      })
+      toast.error('Failed to rollback release')
     } finally {
       setIsRollingBack(false)
     }
@@ -1012,9 +997,7 @@ export default function ReleasesClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export successful', {
-        description: 'Release history has been downloaded'
-      })
+      toast.success('Export successful')
     } catch (error) {
       toast.error('Failed to export releases')
     }
@@ -1188,7 +1171,7 @@ export default function ReleasesClient() {
               />
             </div>
             <Button variant="outline" size="icon" onClick={() => {
-              toast.info('Filter releases', { description: 'Opening filter panel' })
+              toast.info('Filter releases')
             }}>
               <Filter className="w-4 h-4" />
             </Button>
@@ -1313,13 +1296,13 @@ export default function ReleasesClient() {
                 { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
                   const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
                   if (scheduledRelease) openDeployDialog(scheduledRelease)
-                  else toast.info('No releases to deploy', { description: 'Create a new release first' })
+                  else toast.info('No releases to deploy')
                 }},
                 { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple', onClick: () => setShowCreateDialog(true) },
                 { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange', onClick: () => {
                   const deployedRelease = releases.find(r => r.status === 'deployed')
                   if (deployedRelease) openRollbackDialog(deployedRelease)
-                  else toast.info('No deployed releases available to rollback', { description: 'Deploy a release first' })
+                  else toast.info('No deployed releases available to rollback')
                 }},
                 { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue', onClick: () => setActiveTab('assets') },
                 { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan', onClick: () => setActiveTab('analytics') }
@@ -1542,12 +1525,11 @@ export default function ReleasesClient() {
 
                                     if (error) throw error
 
-                                    toast.success('Deployment paused successfully', {
-                                      description: `${dbRelease.release_name} deployment has been paused`
+                                    toast.success('Deployment paused successfully' deployment has been paused`
                                     })
                                     fetchReleases()
                                   } catch (error: any) {
-                                    toast.error('Failed to pause deployment', { description: error.message })
+                                    toast.error('Failed to pause deployment')
                                   }
                                 }}
                               >
@@ -1610,7 +1592,7 @@ export default function ReleasesClient() {
                       if (scheduledRelease) {
                         openDeployDialog(scheduledRelease)
                       } else {
-                        toast.info('No releases to deploy', { description: 'Create a new release or schedule one first' })
+                        toast.info('No releases to deploy')
                       }
                     }}
                   >
@@ -1773,7 +1755,7 @@ export default function ReleasesClient() {
                     if (deployedRelease) {
                       openRollbackDialog(deployedRelease)
                     } else {
-                      toast.info('No deployed releases available to rollback', { description: 'Deploy a release first' })
+                      toast.info('No deployed releases available to rollback')
                     }
                   }}
                 >
@@ -2392,7 +2374,7 @@ export default function ReleasesClient() {
             <AIInsightsPanel
               insights={mockReleasesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2462,7 +2444,7 @@ export default function ReleasesClient() {
                         Copy Version
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => {
-                        toast.info('Opening in new tab', { description: selectedRelease.name })
+                        toast.info('Opening in new tab')
                         window.open(`/releases/${selectedRelease.id}`, '_blank')
                       }}>
                         <ExternalLink className="w-4 h-4 mr-2" />
@@ -2617,7 +2599,7 @@ export default function ReleasesClient() {
                       // Open Git repository in new tab - uses the branch/tag info from the release
                       const repoUrl = `https://github.com/your-org/your-repo/tree/${selectedRelease.tagName || selectedRelease.branch}`
                       window.open(repoUrl, '_blank', 'noopener,noreferrer')
-                      toast.success('Opened repository in new tab', { description: selectedRelease.tagName || selectedRelease.branch })
+                      toast.success('Opened repository in new tab')
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />

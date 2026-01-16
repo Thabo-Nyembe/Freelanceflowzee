@@ -1964,7 +1964,7 @@ export default function VideoStudioClient() {
                             size="sm"
                             onClick={() => {
                             window.open(`/dashboard/video-studio-v2/presets/${preset.id}`, '_blank')
-                            toast.info('Opening preset editor', { description: `Editing ${preset.name} preset settings` })
+                            toast.info('Opening preset editor' preset settings` })
                           }}
                           >
                             Edit
@@ -1977,7 +1977,7 @@ export default function VideoStudioClient() {
                           onClick={() => {
                           const presetName = prompt('Enter preset name:')
                           if (presetName) {
-                            toast.success('Custom preset created', { description: `${presetName} preset is ready to configure` })
+                            toast.success('Custom preset created' preset is ready to configure` })
                           }
                         }}
                         >
@@ -2285,7 +2285,7 @@ export default function VideoStudioClient() {
             <AIInsightsPanel
               insights={mockVideoStudioAIInsights}
               title="Studio Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

@@ -148,9 +148,7 @@ export function BusinessIntelligenceClient() {
 
   // Handle save settings
   const handleSaveSettings = () => {
-    toast.success('Settings saved successfully', {
-      description: 'Your dashboard preferences have been updated'
-    })
+    toast.success('Settings saved successfully')
     setShowSettingsDialog(false)
   }
 
@@ -160,8 +158,7 @@ export function BusinessIntelligenceClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success(`Goal "${goalName}" added successfully`, {
-      description: `Target: ${goalTarget} in ${goalCategory}`
+    toast.success(`Goal "${goalName}" added successfully` in ${goalCategory}`
     })
     setGoalName('')
     setGoalTarget('')
@@ -172,15 +169,12 @@ export function BusinessIntelligenceClient() {
   // Handle add goal from template
   const handleAddGoalFromTemplate = (templateId: string, templateName: string) => {
     setSelectedTemplate(templateId)
-    toast.success(`Goal "${templateName}" added from template`, {
-      description: 'You can customize this goal in the Goals tab'
-    })
+    toast.success(`Goal "${templateName}" added from template`)
   }
 
   // Handle apply filters
   const handleApplyFilters = () => {
-    toast.success('Filters applied', {
-      description: `Category: ${filterCategory}, Status: ${filterStatus}`
+    toast.success('Filters applied', Status: ${filterStatus}`
     })
     setShowFilterDialog(false)
   }
@@ -215,9 +209,7 @@ export function BusinessIntelligenceClient() {
       toast.error('Please enter a report name')
       return
     }
-    toast.success(`Report "${reportName}" created`, {
-      description: reportDescription || 'Custom report added to your dashboard'
-    })
+    toast.success(`Report "${reportName}" created`)
     setReportName('')
     setReportDescription('')
     setShowAddReportDialog(false)
@@ -229,9 +221,7 @@ export function BusinessIntelligenceClient() {
       toast.error('Please enter an email address')
       return
     }
-    toast.success(`Report shared with ${shareEmail}`, {
-      description: 'An email with the report link has been sent'
-    })
+    toast.success(`Report shared with ${shareEmail}`)
     setShareEmail('')
     setShowShareDialog(false)
   }
@@ -539,9 +529,7 @@ export function BusinessIntelligenceClient() {
                   <CardDescription>Understanding your client economics</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Client metrics exported', {
-                    description: 'LTV, CAC, and ratio data downloaded'
-                  })
+                  toast.success('Client metrics exported')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export Metrics
@@ -640,9 +628,7 @@ export function BusinessIntelligenceClient() {
                   <CardDescription>Key insights to improve your project profitability</CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Profitability report generated', {
-                    description: 'Detailed analysis downloaded as PDF'
-                  })
+                  toast.success('Profitability report generated')
                 }}>
                   <FileText className="w-4 h-4 mr-2" />
                   Generate Report

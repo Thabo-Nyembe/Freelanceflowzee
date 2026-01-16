@@ -587,7 +587,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   // Create or update release note
   const handleSubmitReleaseNote = async () => {
     if (!formData.version.trim() || !formData.title.trim()) {
-      toast.error('Validation Error', { description: 'Version and title are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -608,7 +608,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           setShowCreateModal(false)
           resetForm()
         } else {
-          toast.error('Update Failed', { description: result.error || 'Failed to update release note' })
+          toast.error('Update Failed')
         }
       } else {
         const result = await createReleaseNote(releaseData)
@@ -617,11 +617,11 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           setShowCreateModal(false)
           resetForm()
         } else {
-          toast.error('Creation Failed', { description: result.error || 'Failed to create release note' })
+          toast.error('Creation Failed')
         }
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -635,10 +635,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (result.success) {
         toast.success(`Release note ${noteVersion} is now live`)
       } else {
-        toast.error('Publish Failed', { description: result.error || 'Failed to publish release note' })
+        toast.error('Publish Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -652,10 +652,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (result.success) {
         toast.success(`Release note ${noteVersion} has been archived`)
       } else {
-        toast.error('Archive Failed', { description: result.error || 'Failed to archive release note' })
+        toast.error('Archive Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -668,10 +668,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (result.success) {
         toast.success('You liked this release note')
       } else {
-        toast.error('Like Failed', { description: result.error || 'Failed to like release note' })
+        toast.error('Like Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     }
   }
 
@@ -694,10 +694,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
         setDeleteTargetId(null)
         setSelectedRelease(null)
       } else {
-        toast.error('Delete Failed', { description: result.error || 'Failed to delete release note' })
+        toast.error('Delete Failed')
       }
     } catch (error) {
-      toast.error('Error', { description: 'An unexpected error occurred' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -2231,7 +2231,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
             <AIInsightsPanel
               insights={mockReleaseNotesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

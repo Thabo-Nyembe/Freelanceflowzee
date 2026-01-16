@@ -342,7 +342,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   // Handlers
   const handleCreateForm = async () => {
     if (!newFormTitle.trim()) {
-      toast.error('Validation Error', { description: 'Form title is required' })
+      toast.error('Validation Error')
       return
     }
     setIsSubmitting(true)
@@ -381,12 +381,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         metadata: {},
         send_confirmation_email: false
       })
-      toast.success('Form Created', { description: `"${newFormTitle}" has been created` })
+      toast.success('Form Created'" has been created` })
       setNewFormTitle('')
       setNewFormDescription('')
       setShowCreateDialog(false)
     } catch (err: any) {
-      toast.error('Error', { description: err.message || 'Failed to create form' })
+      toast.error('Error')
     } finally {
       setIsSubmitting(false)
     }
@@ -395,9 +395,9 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handlePublishForm = async (form: Form) => {
     try {
       await updateForm(form.id, { status: 'active' as FormStatus })
-      toast.success('Form Published', { description: `"${form.title}" is now live` })
+      toast.success('Form Published'" is now live` })
     } catch (err: any) {
-      toast.error('Error', { description: err.message || 'Failed to publish form' })
+      toast.error('Error')
     }
   }
 
@@ -408,19 +408,19 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
       const { id, created_at, updated_at, deleted_at, ...rest } = form
       await createForm({ ...rest, user_id: user.id, title: `${form.title} (Copy)`, status: 'draft' as FormStatus })
-      toast.success('Form Duplicated', { description: `Copy of "${form.title}" created` })
+      toast.success('Form Duplicated'" created` })
     } catch (err: any) {
-      toast.error('Error', { description: err.message || 'Failed to duplicate form' })
+      toast.error('Error')
     }
   }
 
   const handleDeleteForm = async (form: Form) => {
     try {
       await deleteForm(form.id)
-      toast.success('Form Deleted', { description: `"${form.title}" has been deleted` })
+      toast.success('Form Deleted'" has been deleted` })
       setSelectedForm(null)
     } catch (err: any) {
-      toast.error('Error', { description: err.message || 'Failed to delete form' })
+      toast.error('Error')
     }
   }
 
@@ -2062,7 +2062,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <AIInsightsPanel
               insights={mockFormsAIInsights}
               title="Forms Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

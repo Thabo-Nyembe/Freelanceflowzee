@@ -333,7 +333,7 @@ const mockApiQuickActions = [
     icon: 'plus',
     action: async () => {
       // This will be handled by the component's setShowCreateEndpointDialog
-      toast.info('Opening endpoint builder...', { description: 'Configure your new API endpoint' })
+      toast.info('Opening endpoint builder...')
     },
     variant: 'default' as const
   },
@@ -760,11 +760,11 @@ export default function ApiClient() {
         rate_limit_per_hour: endpointForm.rateLimit,
         tags: endpointForm.tags
       })
-      toast.success(`${endpointForm.name} has been created`, { description: `${endpointForm.method} ${endpointForm.path}` })
+      toast.success(`${endpointForm.name} has been created` ${endpointForm.path}` })
       setShowCreateEndpointDialog(false)
       setEndpointForm({ name: '', description: '', method: 'GET', path: '/api/v1/', version: 'v1', requiresAuth: true, rateLimit: 1000, tags: [] })
     } catch (err) {
-      toast.error('Failed to create endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to create endpoint')
     } finally {
       setIsSubmitting(false)
     }
@@ -786,13 +786,12 @@ export default function ApiClient() {
         rate_limit_per_hour: apiKeyForm.rateLimit,
         expires_at: apiKeyForm.expiresAt || undefined
       })
-      toast.success(`${apiKeyForm.name} has been created`, {
-        description: `Key: ${result.key_value?.slice(0, 20)}...`
+      toast.success(`${apiKeyForm.name} has been created`...`
       })
       setShowCreateKeyDialog(false)
       setApiKeyForm({ name: '', description: '', environment: 'development', scopes: ['read'], rateLimit: 1000, expiresAt: '' })
     } catch (err) {
-      toast.error('Failed to generate API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to generate API key')
     } finally {
       setIsSubmitting(false)
     }
@@ -803,7 +802,7 @@ export default function ApiClient() {
       await revokeKey(keyId, 'Revoked by user')
       toast.promise(Promise.resolve(), { loading: 'Revoking key...', success: `"${keyName}" has been revoked and can no longer be used`, error: 'Failed to revoke key' })
     } catch (err) {
-      toast.error('Failed to revoke key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to revoke key')
     }
   }
 
@@ -812,7 +811,7 @@ export default function ApiClient() {
       await deleteEndpoint(endpointId)
       toast.promise(Promise.resolve(), { loading: 'Deleting endpoint...', success: `"${endpointName}" has been removed`, error: 'Failed to delete endpoint' })
     } catch (err) {
-      toast.error('Failed to delete endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to delete endpoint')
     }
   }
 
@@ -821,7 +820,7 @@ export default function ApiClient() {
       await deleteKey(keyId)
       toast.promise(Promise.resolve(), { loading: 'Deleting API key...', success: `"${keyName}" has been removed`, error: 'Failed to delete key' })
     } catch (err) {
-      toast.error('Failed to delete key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to delete key')
     }
   }
 
@@ -836,11 +835,11 @@ export default function ApiClient() {
         rate_limit_per_hour: editKeyForm.rateLimit,
         scopes: editKeyForm.scopes
       })
-      toast.success(`"${editKeyForm.name}" updated successfully`, { description: 'API key settings have been saved' })
+      toast.success(`"${editKeyForm.name}" updated successfully`)
       setShowEditKeyDialog(false)
       setSelectedKeyForEdit(null)
     } catch (err) {
-      toast.error('Failed to update API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to update API key')
     } finally {
       setIsSubmitting(false)
     }
@@ -876,11 +875,11 @@ export default function ApiClient() {
       await updateKey(selectedKeyForEdit.id, {
         rate_limit_per_hour: editKeyForm.rateLimit
       })
-      toast.success(`Rate limit updated to ${editKeyForm.rateLimit}/hr`, { description: `For API key "${selectedKeyForEdit.name}"` })
+      toast.success(`Rate limit updated to ${editKeyForm.rateLimit}/hr`"` })
       setShowRateLimitDialog(false)
       setSelectedKeyForEdit(null)
     } catch (err) {
-      toast.error('Failed to update rate limit', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to update rate limit')
     } finally {
       setIsSubmitting(false)
     }
@@ -889,7 +888,7 @@ export default function ApiClient() {
   // OAuth configuration handler
   const handleSaveOAuthConfig = async () => {
     if (!oauthConfigForm.clientId || !oauthConfigForm.clientSecret) {
-      toast.error('Please fill in required fields', { description: 'Client ID and Client Secret are required' })
+      toast.error('Please fill in required fields')
       return
     }
 
@@ -902,12 +901,10 @@ export default function ApiClient() {
         body: JSON.stringify(oauthConfigForm)
       })
       if (!response.ok) throw new Error('Failed to save configuration')
-      toast.success('OAuth 2.0 Configuration Saved', {
-        description: 'Your OAuth settings have been updated successfully'
-      })
+      toast.success('OAuth 2.0 Configuration Saved')
       setShowOAuthConfigDialog(false)
     } catch (err) {
-      toast.error('Failed to save OAuth configuration', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to save OAuth configuration')
     } finally {
       setIsSubmitting(false)
     }
@@ -936,13 +933,12 @@ export default function ApiClient() {
         body: JSON.stringify(inviteForm)
       })
       if (!response.ok) throw new Error('Failed to send invitation')
-      toast.success('Invitation Sent', {
-        description: `Invite sent to ${inviteForm.email} with ${inviteForm.role} role`
+      toast.success('Invitation Sent' with ${inviteForm.role} role`
       })
       setInviteForm({ email: '', role: 'developer', permissions: ['read', 'write'] })
       setShowInviteTeamMemberDialog(false)
     } catch (err) {
-      toast.error('Failed to send invitation', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)
     }
@@ -954,11 +950,11 @@ export default function ApiClient() {
     setIsSubmitting(true)
     try {
       await deleteKey(selectedKeyForEdit.id)
-      toast.success(`"${selectedKeyForEdit.name}" has been deleted`, { description: 'This API key can no longer be used' })
+      toast.success(`"${selectedKeyForEdit.name}" has been deleted`)
       setShowDeleteKeyDialog(false)
       setSelectedKeyForEdit(null)
     } catch (err) {
-      toast.error('Failed to delete API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to delete API key')
     } finally {
       setIsSubmitting(false)
     }
@@ -981,14 +977,14 @@ export default function ApiClient() {
         status: 'active'
       })
       if (result.success) {
-        toast.success('Webhook created', { description: `"${webhookForm.name}" is now active` })
+        toast.success('Webhook created'" is now active` })
         setWebhookForm({ name: '', url: '', events: ['request.created'], secret: '' })
         setShowCreateWebhookDialog(false)
       } else {
-        toast.error('Failed to create webhook', { description: result.error })
+        toast.error('Failed to create webhook')
       }
     } catch (err) {
-      toast.error('Failed to create webhook', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to create webhook')
     } finally {
       setIsSubmitting(false)
     }
@@ -1058,15 +1054,12 @@ export default function ApiClient() {
 
       if (error) throw error
 
-      toast.success('Collection created', {
-        description: `"${collectionForm.name}" is now ready to use`
+      toast.success('Collection created'" is now ready to use`
       })
       setCollectionForm({ name: '', description: '' })
       setShowCreateCollectionDialog(false)
     } catch (err) {
-      toast.error('Failed to create collection', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to create collection')
     } finally {
       setIsSubmitting(false)
     }
@@ -1190,9 +1183,7 @@ export default function ApiClient() {
                 const currentIndex = methods.indexOf(methodFilter)
                 const nextIndex = (currentIndex + 1) % methods.length
                 setMethodFilter(methods[nextIndex])
-                toast.success(`Filter: ${methods[nextIndex] === 'all' ? 'All methods' : methods[nextIndex]}`, {
-                  description: 'Click again to cycle through filters'
-                })
+                toast.success(`Filter: ${methods[nextIndex] === 'all' ? 'All methods' : methods[nextIndex]}`)
               }}
             >
               <Filter className="w-4 h-4" />
@@ -1323,7 +1314,7 @@ export default function ApiClient() {
                   )
                 }},
                 { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {
-                  toast.info('Viewing API collections', { description: 'Navigate to Collections tab' })
+                  toast.info('Viewing API collections')
                 }},
                 { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: async () => {
                   // Create file input and trigger import
@@ -1355,7 +1346,7 @@ export default function ApiClient() {
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
                 { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => window.open('/api-docs', '_blank') },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {
-                  toast.info('Viewing request history', { description: 'Navigate to History tab' })
+                  toast.info('Viewing request history')
                 }},
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
@@ -1422,12 +1413,7 @@ export default function ApiClient() {
                               { label: 'Delete', action: () => handleDeleteEndpoint(endpoint.id, endpoint.name) }
                             ]
                             // For now, cycle through actions with each click
-                            toast.info(`${endpoint.name} options`, {
-                              description: 'Test | Copy cURL | Delete',
-                              action: {
-                                label: 'Test',
-                                onClick: () => handleTestEndpoint(endpoint.name, endpoint.path, endpoint.method)
-                              }
+                            toast.info(`${endpoint.name} options`
                             })
                           }}
                         >
@@ -1549,7 +1535,7 @@ export default function ApiClient() {
                           'PHP': `<?php\n$ch = curl_init();\ncurl_setopt($ch, CURLOPT_URL, '${window.location.origin}/api/v1/users');\ncurl_setopt($ch, CURLOPT_HTTPHEADER, [\n    'Content-Type: application/json',\n    'Authorization: Bearer YOUR_API_KEY'\n]);\n$response = curl_exec($ch);\ncurl_close($ch);`
                         }
                         await navigator.clipboard.writeText(codeSnippets[lang])
-                        toast.success(`${lang} code copied to clipboard`, { description: 'Paste into your project and update the API key' })
+                        toast.success(`${lang} code copied to clipboard`)
                       }}>
                         <Code className="w-4 h-4 mr-2" />
                         {lang}
@@ -1607,12 +1593,12 @@ export default function ApiClient() {
                   )
                 }},
                 { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {
-                  toast.info('API key permissions', { description: 'Navigate to Settings tab to configure scopes and access controls' })
+                  toast.info('API key permissions')
                 }},
                 { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {
-                  toast.info('API usage log', { description: 'Navigate to History tab to view usage' })
+                  toast.info('API usage log')
                 }},
-                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.warning('Select a key first', { description: 'Click on an API key from the list below to revoke it' }) },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.warning('Select a key first') },
                 { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: async () => {
                   try {
                     const keysList = apiKeys.map(k => `${k.name}: ${k.keyPrefix}...`).join('\n')
@@ -1650,7 +1636,7 @@ export default function ApiClient() {
                   }
                 }},
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {
-                  toast.info('Key settings', { description: 'Navigate to Settings tab' })
+                  toast.info('Key settings')
                 }},
               ].map((action, idx) => (
                 <Button
@@ -1695,12 +1681,7 @@ export default function ApiClient() {
                         size="icon"
                         onClick={() => {
                           // Show key options with actions
-                          toast.info(`${key.name} options`, {
-                            description: 'Edit | Copy | Revoke | Delete',
-                            action: {
-                              label: 'Revoke',
-                              onClick: () => handleRevokeApiKey(key.id, key.name)
-                            }
+                          toast.info(`${key.name} options`
                           })
                         }}
                       >
@@ -1847,8 +1828,8 @@ export default function ApiClient() {
                     toast.error('Failed to export collections')
                   }
                 }},
-                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Share Collections', { description: 'Select a collection to share with team members' }) },
-                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Fork Collection', { description: 'Select a collection to create a fork' }) },
+                { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Share Collections') },
+                { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Fork Collection') },
                 { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowGenerateSdkDialog(true) },
                 { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: async () => {
                   toast.promise(
@@ -1864,7 +1845,7 @@ export default function ApiClient() {
                     }
                   )
                 }},
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Archive Collections', { description: 'Select collections to archive' }) }
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Archive Collections') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1957,8 +1938,8 @@ export default function ApiClient() {
             {/* History Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Search History', { description: 'Use the search bar above to filter requests' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Filter Requests', { description: 'Filter by method, status code, or environment' }) },
+                { icon: Search, label: 'Search', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Search History') },
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Filter Requests') },
                 { icon: Download, label: 'Export HAR', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: async () => {
                   try {
                     const harData = {
@@ -1987,8 +1968,8 @@ export default function ApiClient() {
                     toast.error('Failed to export HAR file')
                   }
                 }},
-                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.warning('Clear History', { description: 'This will permanently delete all request history. Are you sure?', action: { label: 'Clear', onClick: () => toast.success('History cleared') } }) },
-                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Replay Request', { description: 'Select a request from the history to replay it' }) },
+                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.warning('Clear History' }) },
+                { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Replay Request') },
                 { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   if (history.length > 0) {
                     const lastRequest = history[0]
@@ -1996,11 +1977,11 @@ export default function ApiClient() {
                     await navigator.clipboard.writeText(curlCommand)
                     toast.success('cURL command copied to clipboard')
                   } else {
-                    toast.info('No requests to copy', { description: 'Make some API requests first' })
+                    toast.info('No requests to copy')
                   }
                 }},
-                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Inspect Request', { description: 'Select a request from the history to view details' }) },
-                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Save to Collection', { description: 'Select a request to save it to a collection' }) }
+                { icon: Eye, label: 'Inspect', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Inspect Request') },
+                { icon: BookmarkPlus, label: 'Save', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Save to Collection') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2072,25 +2053,25 @@ export default function ApiClient() {
                 { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const healthy = monitors.filter(m => m.status === 'healthy').length
                   const total = monitors.length
-                  toast.success('System Status', { description: `${healthy}/${total} monitors healthy. Overall uptime: ${(monitors.reduce((sum, m) => sum + m.uptime, 0) / total).toFixed(2)}%` })
+                  toast.success('System Status'/${total} monitors healthy. Overall uptime: ${(monitors.reduce((sum, m) => sum + m.uptime, 0) / total).toFixed(2)}%` })
                 }},
                 { icon: Bell, label: 'Alerts', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
                   const totalAlerts = monitors.reduce((sum, m) => sum + m.alerts, 0)
                   if (totalAlerts > 0) {
-                    toast.warning(`${totalAlerts} Active Alerts`, { description: 'Click to view alert details' })
+                    toast.warning(`${totalAlerts} Active Alerts`)
                   } else {
-                    toast.success('No Active Alerts', { description: 'All monitors are running smoothly' })
+                    toast.success('No Active Alerts')
                   }
                 }},
                 { icon: Globe, label: 'Regions', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => {
                   const regions = [...new Set(monitors.map(m => m.region))]
-                  toast.info('Monitor Regions', { description: `Monitoring from: ${regions.join(', ')}` })
+                  toast.info('Monitor Regions'` })
                 }},
-                { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Check Intervals', { description: 'Configure monitoring intervals: 60s, 300s, 600s, 1800s' }) },
+                { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Check Intervals') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => {
                   const avgUptime = monitors.reduce((sum, m) => sum + m.uptime, 0) / monitors.length
                   const avgResponse = monitors.reduce((sum, m) => sum + m.avgResponseTime, 0) / monitors.length
-                  toast.info('Monitor Analytics', { description: `Avg Uptime: ${avgUptime.toFixed(2)}% | Avg Response: ${avgResponse.toFixed(0)}ms` })
+                  toast.info('Monitor Analytics'% | Avg Response: ${avgResponse.toFixed(0)}ms` })
                 }},
                 { icon: Shield, label: 'SSL Check', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.promise(
                   (async () => {
@@ -2103,7 +2084,7 @@ export default function ApiClient() {
                     error: 'SSL check failed'
                   }
                 )},
-                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Monitor Settings', { description: 'Configure notification channels, thresholds, and alert rules' }) }
+                { icon: Settings, label: 'Configure', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Monitor Settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2217,10 +2198,10 @@ export default function ApiClient() {
                 )},
                 { icon: Eye, label: 'View Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => {
                   const totalDeliveries = webhooks.reduce((sum, w) => sum + w.totalDeliveries, 0)
-                  toast.info('Webhook Logs', { description: `${totalDeliveries.toLocaleString()} total deliveries across all webhooks` })
+                  toast.info('Webhook Logs' total deliveries across all webhooks` })
                 }},
-                { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Webhook Secrets', { description: 'Manage signing secrets for webhook verification' }) },
-                { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Webhook Signatures', { description: 'HMAC-SHA256 signatures are enabled for all webhooks' }) },
+                { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Webhook Secrets') },
+                { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Webhook Signatures') },
                 { icon: Download, label: 'Export', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: async () => {
                   try {
                     const exportData = {
@@ -2246,7 +2227,7 @@ export default function ApiClient() {
                     toast.error('Failed to export webhooks')
                   }
                 }},
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Webhook Settings', { description: 'Configure retry policies, timeout, and delivery options' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Webhook Settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2389,16 +2370,16 @@ export default function ApiClient() {
                 { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowCreateTestSuiteDialog(true) },
                 { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const avgCoverage = testSuites.reduce((sum, s) => sum + s.coverage, 0) / testSuites.length
-                  toast.info('Code Coverage', { description: `Average coverage across all suites: ${avgCoverage.toFixed(1)}%` })
+                  toast.info('Code Coverage'%` })
                 }},
-                { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('CI/CD Integration', { description: 'Configure GitHub Actions, GitLab CI, or Jenkins integration' }) },
+                { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('CI/CD Integration') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => {
                   const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
                   const passed = testSuites.reduce((sum, s) => sum + s.passed, 0)
                   const failed = testSuites.reduce((sum, s) => sum + s.failed, 0)
-                  toast.info('Test Reports', { description: `Total: ${totalTests} | Passed: ${passed} | Failed: ${failed}` })
+                  toast.info('Test Reports' | Passed: ${passed} | Failed: ${failed}` })
                 }},
-                { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Schedule Tests', { description: 'Configure scheduled test runs: hourly, daily, weekly' }) },
+                { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Schedule Tests') },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: async () => {
                   try {
                     const exportData = {
@@ -2432,7 +2413,7 @@ export default function ApiClient() {
                     toast.error('Failed to export test results')
                   }
                 }},
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Test Settings', { description: 'Configure test environment, timeouts, and parallel execution' }) }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.info('Test Settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2452,7 +2433,7 @@ export default function ApiClient() {
                 <Button variant="outline" onClick={() => {
                   if (runningTests) {
                     setRunningTests(false)
-                    toast.info('Tests stopped', { description: 'Test execution has been cancelled' })
+                    toast.info('Tests stopped')
                   } else {
                     setRunningTests(true)
                     toast.promise(
@@ -2583,7 +2564,7 @@ export default function ApiClient() {
                     <Button className="w-full" variant="outline" onClick={() => {
                       const failedCount = stats.totalTests - stats.passedTests
                       if (failedCount === 0) {
-                        toast.success('No failed tests to rerun', { description: 'All tests are passing!' })
+                        toast.success('No failed tests to rerun')
                         return
                       }
                       setRunningTests(true)
@@ -2965,12 +2946,12 @@ export default function ApiClient() {
                 // Real insight action - based on insight type
                 if (insight.type === 'warning' && insight.category === 'Usage') {
                   // Redirect to usage settings
-                  toast.warning(insight.title, { description: insight.description })
+                  toast.warning(insight.title)
                 } else if (insight.type === 'success' && insight.category === 'Performance') {
                   // Show performance details
-                  toast.success(insight.title, { description: insight.description })
+                  toast.success(insight.title)
                 } else {
-                  toast.info(insight.title, { description: insight.description })
+                  toast.info(insight.title)
                 }
               }}
             />
@@ -3543,7 +3524,7 @@ export default function ApiClient() {
                   toast.error('Please fill in all required fields')
                   return
                 }
-                toast.success('Monitor created', { description: `"${monitorForm.name}" is now active` })
+                toast.success('Monitor created'" is now active` })
                 setMonitorForm({ name: '', endpoint: '', interval: '5m', alertThreshold: 500 })
                 setShowCreateMonitorDialog(false)
               }}>
@@ -3661,7 +3642,7 @@ export default function ApiClient() {
                   toast.error('Please enter a suite name')
                   return
                 }
-                toast.success('Test suite created', { description: `"${testSuiteForm.name}" is ready for test cases` })
+                toast.success('Test suite created'" is ready for test cases` })
                 setTestSuiteForm({ name: '', description: '', endpoints: [] })
                 setShowCreateTestSuiteDialog(false)
               }}>

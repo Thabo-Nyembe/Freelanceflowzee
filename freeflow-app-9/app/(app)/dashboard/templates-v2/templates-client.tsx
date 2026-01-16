@@ -571,9 +571,7 @@ export default function TemplatesClient() {
   // REAL Supabase Handlers
   const handleCreateTemplate = useCallback(async () => {
     if (!newTemplateName.trim()) {
-      toast.error('Template name required', {
-        description: 'Please enter a name for your template'
-      })
+      toast.error('Template name required')
       return
     }
 
@@ -593,8 +591,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template created', {
-        description: `"${newTemplateName}" has been created successfully`
+      toast.success('Template created'" has been created successfully`
       })
       setNewTemplateName('')
       setNewTemplateDescription('')
@@ -602,9 +599,7 @@ export default function TemplatesClient() {
       setIsCreateDialogOpen(false)
       refetch()
     } catch (error) {
-      toast.error('Failed to create template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to create template')
     }
   }, [newTemplateName, newTemplateDescription, newTemplateCategory, createTemplate, refetch])
 
@@ -615,14 +610,11 @@ export default function TemplatesClient() {
         userName: undefined,
         department: undefined
       })
-      toast.success('Using template', {
-        description: `Creating project from "${template.name}"...`
+      toast.success('Using template'"...`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to use template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to use template')
     }
   }, [applyTemplate, refetch])
 
@@ -643,49 +635,39 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template duplicated', {
-        description: `Copy of "${template.name}" created`
+      toast.success('Template duplicated'" created`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to duplicate template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to duplicate template')
     }
   }, [createTemplate, refetch])
 
   const handleDeleteTemplate = useCallback(async (template: Template) => {
     try {
       await deleteTemplate(template.id)
-      toast.success('Template deleted', {
-        description: `"${template.name}" has been deleted`
+      toast.success('Template deleted'" has been deleted`
       })
       setSelectedTemplate(null)
       refetch()
     } catch (error) {
-      toast.error('Failed to delete template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to delete template')
     }
   }, [deleteTemplate, refetch])
 
   const handleDownloadTemplate = useCallback(async (template: Template) => {
     try {
       await downloadTemplate(template.id)
-      toast.success('Downloading template', {
-        description: `"${template.name}" download started`
+      toast.success('Downloading template'" download started`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to download template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to download template')
     }
   }, [downloadTemplate, refetch])
 
   const handleFavoriteTemplate = (templateName: string) => {
-    toast.success('Added to favorites', {
-      description: `"${templateName}" saved to favorites`
+    toast.success('Added to favorites'" saved to favorites`
     })
   }
 
@@ -982,8 +964,7 @@ export default function TemplatesClient() {
                       <Button size="sm" variant="secondary" className="gap-1" onClick={(e) => {
                         e.stopPropagation()
                         setSelectedTemplate(template)
-                        toast.success('Opening template preview', {
-                          description: `Viewing "${template.name}"`
+                        toast.success('Opening template preview'"`
                         })
                       }}>
                         <Eye className="w-4 h-4" />
@@ -1085,12 +1066,12 @@ export default function TemplatesClient() {
               {[
                 { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500', action: () => setIsCreateDialogOpen(true) },
                 { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.success(showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only'); } },
-                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => { setActiveTab('my-templates'); toast.success('Recent templates shown below', { description: 'Sorted by last edited date' }); } },
+                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => { setActiveTab('my-templates'); toast.success('Recent templates shown below'); } },
                 { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500', action: () => setShowImportDialog(true) },
                 { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => setShowDuplicateDialog(true) },
                 { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500', action: () => setShowExportDialog(true) },
                 { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => setShowOrganizeDialog(true) },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => { const unusedCount = allTemplates.filter(t => t.usageCount === 0).length; toast.success(`Cleanup complete! ${unusedCount} unused templates found`, { description: 'Templates with 0 uses identified' }); } },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => { const unusedCount = allTemplates.filter(t => t.usageCount === 0).length; toast.success(`Cleanup complete! ${unusedCount} unused templates found`); } },
               ].map((actionItem, i) => (
                 <Card
                   key={i}
@@ -1189,7 +1170,7 @@ export default function TemplatesClient() {
                       isPublic: false
                     }
                     setLocalCollections([...localCollections, newCollection])
-                    toast.success('New collection created!', { description: `"${newCollection.name}" added` })
+                    toast.success('New collection created!'" added` })
                   }}>
                     <FolderPlus className="h-4 w-4 mr-2" />
                     New
@@ -1231,7 +1212,7 @@ export default function TemplatesClient() {
                   isPublic: false
                 }
                 setLocalCollections([...localCollections, newCollection])
-                toast.success('New collection created successfully!', { description: `"${newCollection.name}" added to your collections` })
+                toast.success('New collection created successfully!'" added to your collections` })
               }}>
                 <FolderPlus className="w-4 h-4" />
                 New Collection
@@ -1304,7 +1285,7 @@ export default function TemplatesClient() {
                           createdAt: new Date().toISOString().split('T')[0]
                         }
                         setLocalBrandAssets([...localBrandAssets, newAsset])
-                        toast.success('Brand asset uploaded!', { description: `"${newAsset.name}" added to brand kit` })
+                        toast.success('Brand asset uploaded!'" added to brand kit` })
                       }
                     }
                     input.click()
@@ -1353,7 +1334,7 @@ export default function TemplatesClient() {
                       createdAt: new Date().toISOString().split('T')[0]
                     }
                     setLocalBrandAssets([...localBrandAssets, newAsset])
-                    toast.success('Brand asset uploaded!', { description: `"${newAsset.name}" added to brand kit` })
+                    toast.success('Brand asset uploaded!'" added to brand kit` })
                   }
                 }
                 input.click()
@@ -1409,7 +1390,7 @@ export default function TemplatesClient() {
                           createdAt: new Date().toISOString().split('T')[0]
                         }
                         setLocalBrandAssets([...localBrandAssets, newAsset])
-                        toast.success('Logo uploaded!', { description: `"${newAsset.name}" added to logos` })
+                        toast.success('Logo uploaded!'" added to logos` })
                       }
                     }
                     input.click()
@@ -1463,7 +1444,7 @@ export default function TemplatesClient() {
                         createdAt: new Date().toISOString().split('T')[0]
                       }
                       setLocalBrandAssets([...localBrandAssets, newAsset])
-                      toast.success('Brand color added!', { description: `${colorValue} added to brand colors` })
+                      toast.success('Brand color added!' added to brand colors` })
                     }
                     input.click()
                   }}>
@@ -1517,7 +1498,7 @@ export default function TemplatesClient() {
                         createdAt: new Date().toISOString().split('T')[0]
                       }
                       setLocalBrandAssets([...localBrandAssets, newAsset])
-                      toast.success('Brand font added!', { description: `"${fontName}" added to brand fonts` })
+                      toast.success('Brand font added!'" added to brand fonts` })
                     }
                   }}>
                     <Plus className="w-4 h-4" />
@@ -1574,7 +1555,7 @@ export default function TemplatesClient() {
                     link.click()
                     document.body.removeChild(link)
                     URL.revokeObjectURL(url)
-                    toast.success('Analytics report exported successfully', { description: 'Downloaded as JSON file' })
+                    toast.success('Analytics report exported successfully')
                   }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
@@ -2133,7 +2114,7 @@ export default function TemplatesClient() {
                               if (confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
                                 const newKey = `tmpl_${Math.random().toString(36).substring(2, 15)}_${Date.now().toString(36)}`
                                 navigator.clipboard.writeText(newKey)
-                                toast.success('New API key generated successfully', { description: 'Key copied to clipboard' })
+                                toast.success('New API key generated successfully')
                               }
                             }}>Regenerate</Button>
                           </div>
@@ -2172,7 +2153,7 @@ export default function TemplatesClient() {
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
                             if (confirm('Are you sure you want to delete ALL templates? This action cannot be undone.')) {
                               if (confirm('This will permanently delete all templates. Type "DELETE" to confirm.')) {
-                                toast.success('All templates have been deleted', { description: 'Templates cleared from the system' })
+                                toast.success('All templates have been deleted')
                               }
                             }
                           }}>Delete All</Button>
@@ -2185,7 +2166,7 @@ export default function TemplatesClient() {
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
                             if (confirm('Reset all settings to defaults? This cannot be undone.')) {
                               setSettingsTab('general')
-                              toast.success('Settings reset to defaults', { description: 'All configurations restored' })
+                              toast.success('Settings reset to defaults')
                             }
                           }}>Reset</Button>
                         </div>
@@ -2204,7 +2185,7 @@ export default function TemplatesClient() {
             <AIInsightsPanel
               insights={mockTemplatesAIInsights}
               title="Template Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2366,7 +2347,7 @@ export default function TemplatesClient() {
                       }
                     } else {
                       await navigator.clipboard.writeText(shareUrl)
-                      toast.success('Share link copied to clipboard!', { description: shareUrl })
+                      toast.success('Share link copied to clipboard!')
                     }
                   }}>
                     <Share2 className="w-4 h-4" />
@@ -2687,7 +2668,7 @@ export default function TemplatesClient() {
                 if (folderName && folderName.trim()) {
                   setFolders([...folders, folderName.trim()])
                   setSelectedFolder(folderName.trim().toLowerCase().replace(/\s+/g, '-'))
-                  toast.success('New folder created successfully!', { description: `"${folderName}" added to folders` })
+                  toast.success('New folder created successfully!'" added to folders` })
                 }
               }}>
                 <FolderPlus className="w-4 h-4" />

@@ -603,12 +603,12 @@ export default function CommunityClient() {
   // Create Channel Handler
   const handleCreateChannel = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create a channel' })
+      toast.error('Authentication required')
       return
     }
 
     if (!channelForm.name.trim()) {
-      toast.error('Validation error', { description: 'Channel name is required' })
+      toast.error('Validation error')
       return
     }
 
@@ -628,11 +628,11 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Channel created', { description: `#${channelForm.name} has been created successfully` })
+      toast.success('Channel created' has been created successfully` })
       setShowCreateChannel(false)
       setChannelForm({ name: '', type: 'text', description: '', isPrivate: false })
     } catch (error: any) {
-      toast.error('Failed to create channel', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to create channel')
     } finally {
       setIsSubmitting(false)
     }
@@ -641,7 +641,7 @@ export default function CommunityClient() {
   // Invite Member Handler
   const handleInviteMember = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to invite members' })
+      toast.error('Authentication required')
       return
     }
 
@@ -663,9 +663,9 @@ export default function CommunityClient() {
 
       // Copy to clipboard
       await navigator.clipboard.writeText(`${window.location.origin}/invite/${inviteCode}`)
-      toast.success('Invite link created', { description: 'Invite link has been copied to clipboard' })
+      toast.success('Invite link created')
     } catch (error: any) {
-      toast.error('Failed to create invite', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to create invite')
     } finally {
       setIsSubmitting(false)
     }
@@ -674,7 +674,7 @@ export default function CommunityClient() {
   // Ban Member Handler
   const handleBanMember = async (memberId: string, memberName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to moderate members' })
+      toast.error('Authentication required')
       return
     }
 
@@ -696,10 +696,10 @@ export default function CommunityClient() {
         .eq('user_id', memberId)
         .eq('community_id', communities?.[0]?.id)
 
-      toast.success('Member banned', { description: `${memberName} has been banned from the community` })
+      toast.success('Member banned' has been banned from the community` })
       refreshMembers()
     } catch (error: any) {
-      toast.error('Failed to ban member', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to ban member')
     } finally {
       setIsSubmitting(false)
     }
@@ -708,7 +708,7 @@ export default function CommunityClient() {
   // Pin Message Handler
   const handlePinMessage = async (messageId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to pin messages' })
+      toast.error('Authentication required')
       return
     }
 
@@ -720,10 +720,10 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Message pinned', { description: 'Message has been pinned to the channel' })
+      toast.success('Message pinned')
       refreshPosts()
     } catch (error: any) {
-      toast.error('Failed to pin message', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to pin message')
     } finally {
       setIsSubmitting(false)
     }
@@ -732,12 +732,12 @@ export default function CommunityClient() {
   // Create Event Handler
   const handleCreateEvent = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create events' })
+      toast.error('Authentication required')
       return
     }
 
     if (!eventForm.name.trim() || !eventForm.scheduledStart) {
-      toast.error('Validation error', { description: 'Event name and start time are required' })
+      toast.error('Validation error')
       return
     }
 
@@ -758,12 +758,12 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Event created', { description: `"${eventForm.name}" has been scheduled` })
+      toast.success('Event created'" has been scheduled` })
       setShowCreateEvent(false)
       setEventForm({ name: '', description: '', entityType: 'voice', scheduledStart: '', scheduledEnd: '', location: '' })
       refreshEvents()
     } catch (error: any) {
-      toast.error('Failed to create event', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to create event')
     } finally {
       setIsSubmitting(false)
     }
@@ -772,12 +772,12 @@ export default function CommunityClient() {
   // Create Role Handler
   const handleCreateRole = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create roles' })
+      toast.error('Authentication required')
       return
     }
 
     if (!roleForm.name.trim()) {
-      toast.error('Validation error', { description: 'Role name is required' })
+      toast.error('Validation error')
       return
     }
 
@@ -797,11 +797,11 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Role created', { description: `"${roleForm.name}" role has been created` })
+      toast.success('Role created'" role has been created` })
       setShowCreateRole(false)
       setRoleForm({ name: '', color: '#6b7280', isHoisted: false, isMentionable: false })
     } catch (error: any) {
-      toast.error('Failed to create role', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to create role')
     } finally {
       setIsSubmitting(false)
     }
@@ -810,7 +810,7 @@ export default function CommunityClient() {
   // Send Message Handler
   const handleSendMessageSubmit = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to send messages' })
+      toast.error('Authentication required')
       return
     }
 
@@ -832,7 +832,7 @@ export default function CommunityClient() {
       setMessageInput('')
       refreshPosts()
     } catch (error: any) {
-      toast.error('Failed to send message', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to send message')
     } finally {
       setIsSubmitting(false)
     }
@@ -841,7 +841,7 @@ export default function CommunityClient() {
   // Mark Event as Interested Handler
   const handleEventInterest = async (eventId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to mark interest' })
+      toast.error('Authentication required')
       return
     }
 
@@ -858,7 +858,7 @@ export default function CommunityClient() {
       if (existing) {
         // Remove interest
         await supabase.from('community_event_attendees').delete().eq('id', existing.id)
-        toast.success('Interest removed', { description: 'You are no longer interested in this event' })
+        toast.success('Interest removed')
       } else {
         // Add interest
         await supabase.from('community_event_attendees').insert({
@@ -866,12 +866,12 @@ export default function CommunityClient() {
           user_id: userId,
           status: 'interested'
         })
-        toast.success('Interest marked', { description: 'You have marked interest in this event' })
+        toast.success('Interest marked')
       }
 
       refreshEvents()
     } catch (error: any) {
-      toast.error('Failed to update interest', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to update interest')
     } finally {
       setIsSubmitting(false)
     }
@@ -880,7 +880,7 @@ export default function CommunityClient() {
   // Update Community Settings Handler
   const handleUpdateSettings = async (settings: Record<string, any>) => {
     if (!userId || !communities?.[0]?.id) {
-      toast.error('Authentication required', { description: 'Please sign in to update settings' })
+      toast.error('Authentication required')
       return
     }
 
@@ -888,11 +888,11 @@ export default function CommunityClient() {
     try {
       const result = await updateCommunity({ ...settings }, communities[0].id)
       if (result) {
-        toast.success('Settings updated', { description: 'Community settings have been saved' })
+        toast.success('Settings updated')
         refetchCommunities()
       }
     } catch (error: any) {
-      toast.error('Failed to update settings', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to update settings')
     } finally {
       setIsSubmitting(false)
     }
@@ -901,7 +901,7 @@ export default function CommunityClient() {
   // Delete Community Handler
   const handleDeleteCommunity = async () => {
     if (!userId || !communities?.[0]?.id) {
-      toast.error('Authentication required', { description: 'Please sign in to delete community' })
+      toast.error('Authentication required')
       return
     }
 
@@ -909,11 +909,11 @@ export default function CommunityClient() {
     try {
       const result = await deleteCommunity(communities[0].id)
       if (result) {
-        toast.success('Community deleted', { description: 'The community has been permanently deleted' })
+        toast.success('Community deleted')
         refetchCommunities()
       }
     } catch (error: any) {
-      toast.error('Failed to delete community', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to delete community')
     } finally {
       setIsSubmitting(false)
     }
@@ -922,7 +922,7 @@ export default function CommunityClient() {
   // Add Reaction Handler
   const handleAddReaction = async (postId: string, emoji: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to react' })
+      toast.error('Authentication required')
       return
     }
 
@@ -947,7 +947,7 @@ export default function CommunityClient() {
 
       refreshPosts()
     } catch (error: any) {
-      toast.error('Failed to add reaction', { description: error.message || 'An unexpected error occurred' })
+      toast.error('Failed to add reaction')
     }
   }
 
@@ -996,7 +996,7 @@ export default function CommunityClient() {
       setShowPinnedMessages(true)
       toast.success(`${data?.length || 0} pinned messages found`)
     } catch (error: any) {
-      toast.error('Failed to load pinned messages', { description: error.message })
+      toast.error('Failed to load pinned messages')
     }
   }
 
@@ -2194,7 +2194,7 @@ export default function CommunityClient() {
                           disabled={isSubmitting}
                           onClick={async () => {
                             if (!userId) {
-                              toast.error('Authentication required', { description: 'Please sign in to create webhooks' })
+                              toast.error('Authentication required')
                               return
                             }
                             setIsSubmitting(true)
@@ -2209,9 +2209,9 @@ export default function CommunityClient() {
                                 is_active: true
                               })
                               if (error) throw error
-                              toast.success('Webhook created', { description: 'New webhook has been created successfully' })
+                              toast.success('Webhook created')
                             } catch (error: any) {
-                              toast.error('Failed to create webhook', { description: error.message })
+                              toast.error('Failed to create webhook')
                             } finally {
                               setIsSubmitting(false)
                             }
@@ -2309,7 +2309,7 @@ export default function CommunityClient() {
                           disabled={isSubmitting}
                           onClick={async () => {
                             if (!userId) {
-                              toast.error('Authentication required', { description: 'Please sign in to export data' })
+                              toast.error('Authentication required')
                               return
                             }
                             setIsSubmitting(true)
@@ -2330,9 +2330,9 @@ export default function CommunityClient() {
                               document.body.removeChild(a)
                               URL.revokeObjectURL(url)
 
-                              toast.success('Export complete', { description: 'Server data has been exported' })
+                              toast.success('Export complete')
                             } catch (error: any) {
-                              toast.error('Failed to export data', { description: error.message })
+                              toast.error('Failed to export data')
                             } finally {
                               setIsSubmitting(false)
                             }
@@ -2406,10 +2406,10 @@ export default function CommunityClient() {
                                   .eq('community_id', communities?.[0]?.id)
                                   .lt('last_active_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
                                 if (error) throw error
-                                toast.success('Members pruned', { description: 'Inactive members have been removed' })
+                                toast.success('Members pruned')
                                 refreshMembers()
                               } catch (error: any) {
-                                toast.error('Failed to prune members', { description: error.message })
+                                toast.error('Failed to prune members')
                               } finally {
                                 setIsSubmitting(false)
                               }
@@ -2436,10 +2436,10 @@ export default function CommunityClient() {
                                   .update({ deleted_at: new Date().toISOString() })
                                   .eq('community_id', communities?.[0]?.id)
                                 if (error) throw error
-                                toast.success('Messages deleted', { description: 'All messages have been deleted' })
+                                toast.success('Messages deleted')
                                 refreshPosts()
                               } catch (error: any) {
-                                toast.error('Failed to delete messages', { description: error.message })
+                                toast.error('Failed to delete messages')
                               } finally {
                                 setIsSubmitting(false)
                               }
@@ -2481,7 +2481,7 @@ export default function CommunityClient() {
             <AIInsightsPanel
               insights={communityAIInsights}
               title="Community Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

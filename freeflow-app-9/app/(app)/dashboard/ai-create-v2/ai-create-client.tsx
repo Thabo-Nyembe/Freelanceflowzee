@@ -786,7 +786,7 @@ export default function AICreateClient() {
               </div>
             </div>
             <Button variant="outline" onClick={() => {
-              toast.info('Opening upgrade options...', { description: 'Choose a plan that fits your needs' })
+              toast.info('Opening upgrade options...')
               window.location.href = '/dashboard/pricing-v2'
             }}>
               <Crown className="w-4 h-4 mr-2" />
@@ -1194,7 +1194,7 @@ export default function AICreateClient() {
                       if (selectedCount > 0) {
                         const toArchive = mockGenerations.filter(g => g.status === 'completed' && !archivedItems.includes(g.id)).map(g => g.id)
                         setArchivedItems([...archivedItems, ...toArchive])
-                        toast.success(`${selectedCount} creations archived`, { description: 'Items moved to archive' })
+                        toast.success(`${selectedCount} creations archived`)
                       } else {
                         toast.info('No completed creations to archive')
                       }
@@ -1357,7 +1357,7 @@ export default function AICreateClient() {
                       toast.info(`${premiumCount} premium templates available`)
                     } else if (action.label === 'Community') {
                       const communityCount = mockTemplates.filter(t => t.category === 'social').length
-                      toast.info('Community Templates', { description: `${communityCount} templates shared by the community` })
+                      toast.info('Community Templates' templates shared by the community` })
                     } else if (action.label === 'Saved') {
                       toast.info('No saved templates yet')
                     } else if (action.label === 'Categories') {
@@ -1473,9 +1473,9 @@ export default function AICreateClient() {
                       toast.info(`${mockGenerations.length} generations this week`)
                     } else if (action.label === 'Archive') {
                       if (archivedItems.length > 0) {
-                        toast.info(`${archivedItems.length} items in archive`, { description: 'View archived creations in the gallery' })
+                        toast.info(`${archivedItems.length} items in archive`)
                       } else {
-                        toast.info('No archived items', { description: 'Archive creations from the gallery tab' })
+                        toast.info('No archived items')
                       }
                     } else if (action.label === 'Clear All') {
                       if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
@@ -1638,7 +1638,7 @@ export default function AICreateClient() {
                       const imageModels = mockModels.filter(m => m.type === 'image')
                       toast.info(`${imageModels.length} image generation models`)
                     } else if (action.label === 'Video') {
-                      toast.info('Video Models', { description: 'Runway Gen-2, Pika Labs, Stable Video - available in Video Studio tab' })
+                      toast.info('Video Models')
                     } else if (action.label === 'Compare') {
                       setShowModelCompareDialog(true)
                     }
@@ -2224,9 +2224,7 @@ export default function AICreateClient() {
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.info('Model Settings', {
-                              description: 'Configure quality presets, default parameters, and rate limits',
-                              action: { label: 'View Docs', onClick: () => window.open('/docs/ai-models', '_blank') }
+                            toast.info('Model Settings'
                             })
                           }}>Manage</Button>
                         </div>
@@ -2284,7 +2282,7 @@ export default function AICreateClient() {
             <AIInsightsPanel
               insights={mockAICreateInsights}
               title="AI Creation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2600,7 +2598,7 @@ export default function AICreateClient() {
                 <Button
                   disabled={!templateForm.name || !templateForm.prompt}
                   onClick={() => {
-                    toast.success('Template created!', { description: `"${templateForm.name}" saved to your templates` })
+                    toast.success('Template created!'" saved to your templates` })
                     setShowTemplateDialog(false)
                     setTemplateForm({ name: '', description: '', prompt: '', style: 'realistic' })
                   }}

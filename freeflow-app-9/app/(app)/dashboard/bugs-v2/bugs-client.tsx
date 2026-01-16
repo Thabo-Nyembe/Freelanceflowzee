@@ -609,10 +609,10 @@ export default function BugsClient() {
   const handleLabelFilterToggle = (labelId: string, labelName: string) => {
     setSelectedLabelFilters(prev => {
       if (prev.includes(labelId)) {
-        toast.info('Label Filter Removed', { description: `Removed "${labelName}" filter` })
+        toast.info('Label Filter Removed'" filter` })
         return prev.filter(id => id !== labelId)
       } else {
-        toast.info('Label Filter Applied', { description: `Filtering by "${labelName}"` })
+        toast.info('Label Filter Applied'"` })
         return [...prev, labelId]
       }
     })
@@ -640,7 +640,7 @@ export default function BugsClient() {
       const failed = results.failed ?? Math.floor(Math.random() * 5)
       const skipped = results.skipped ?? Math.floor(Math.random() * 10)
       setTestResults({ passed, failed, skipped })
-      toast.success('Test Suite Complete', { description: `${passed} passed, ${failed} failed, ${skipped} skipped` })
+      toast.success('Test Suite Complete' passed, ${failed} failed, ${skipped} skipped` })
     } catch (error) {
       toast.error('Failed to run tests')
     } finally {
@@ -667,7 +667,7 @@ export default function BugsClient() {
       link.click()
       URL.revokeObjectURL(url)
       setShowExportReportDialog(false)
-      toast.success('Report Exported', { description: `Bug summary exported to ${exportFormat.toUpperCase()}` })
+      toast.success('Report Exported'` })
     } catch (error) {
       toast.error('Failed to export report')
     } finally {
@@ -692,7 +692,7 @@ export default function BugsClient() {
         if (error) throw error
         fetchBugs()
       }
-      toast.success('Bug Assigned', { description: `Bug ${bugToAssign.key} assigned to ${selectedAssignee}` })
+      toast.success('Bug Assigned' assigned to ${selectedAssignee}` })
       setShowAssignDialog(false)
       setBugToAssign(null)
       setSelectedAssignee('')
@@ -710,7 +710,7 @@ export default function BugsClient() {
       if (dbBug) {
         await handleUpdateStatus(dbBug.id, selectedNewStatus)
       } else {
-        toast.success('Status Changed', { description: `Bug ${bugToChangeStatus.key} status changed to ${selectedNewStatus}` })
+        toast.success('Status Changed' status changed to ${selectedNewStatus}` })
       }
       setShowStatusDialog(false)
       setBugToChangeStatus(null)
@@ -740,7 +740,7 @@ export default function BugsClient() {
       const result = await response.json()
       setShowImportDialog(false)
       setImportFile(null)
-      toast.success('Bugs Imported', { description: `Successfully imported ${result.count || 'bugs'} from ${importFile.name}` })
+      toast.success('Bugs Imported' from ${importFile.name}` })
       fetchBugs() // Refresh bug list
     } catch (error) {
       toast.error('Failed to import bugs')
@@ -755,7 +755,7 @@ export default function BugsClient() {
       toast.error('Please enter a PR link')
       return
     }
-    toast.success('PR Linked', { description: 'Pull request linked to bug successfully' })
+    toast.success('PR Linked')
     setShowLinkPRDialog(false)
     setPrLink('')
   }
@@ -766,7 +766,7 @@ export default function BugsClient() {
       toast.error('Please enter a comment')
       return
     }
-    toast.success('Comment Added', { description: 'Your comment has been added to the bug' })
+    toast.success('Comment Added')
     setShowAddCommentDialog(false)
     setCommentText('')
   }
@@ -777,7 +777,7 @@ export default function BugsClient() {
       toast.error('Please enter a label name')
       return
     }
-    toast.success('Label Created', { description: `Label "${newLabelName}" has been created` })
+    toast.success('Label Created'" has been created` })
     setShowAddLabelDialog(false)
     setNewLabelName('')
     setNewLabelColor('#3b82f6')
@@ -794,7 +794,7 @@ export default function BugsClient() {
   // Handler for archiving bugs
   const handleArchiveBugs = () => {
     const closedCount = allBugs.filter(b => b.status === 'closed').length
-    toast.success('Bugs Archived', { description: `${closedCount} closed bugs have been archived` })
+    toast.success('Bugs Archived' closed bugs have been archived` })
     setShowArchiveDialog(false)
   }
 
@@ -806,7 +806,7 @@ export default function BugsClient() {
         break
       case 'Search Issues':
         document.querySelector<HTMLInputElement>('input[placeholder="Search bugs..."]')?.focus()
-        toast.info('Search Active', { description: 'Start typing to search bugs' })
+        toast.info('Search Active')
         break
       case 'Advanced Filter':
         setShowFiltersDialog(true)
@@ -828,7 +828,7 @@ export default function BugsClient() {
         setShowHistoryDialog(true)
         break
       default:
-        toast.info(action, { description: `${action} action triggered` })
+        toast.info(action action triggered` })
     }
   }
 
@@ -1964,7 +1964,7 @@ export default function BugsClient() {
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => {
                               window.open(`/dashboard/bugs-v2/labels/${label.id}`, '_blank')
-                              toast.info('Label Editor', { description: `Opening label editor for ${label.name}...` })
+                              toast.info('Label Editor'...` })
                             }}>
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -2024,7 +2024,7 @@ export default function BugsClient() {
                       <Button variant="outline" className="w-full" onClick={() => {
                         const statusName = prompt('Enter custom status name:')
                         if (statusName) {
-                          toast.success('Custom status created', { description: statusName })
+                          toast.success('Custom status created')
                         }
                       }}>
                         <Plus className="w-4 h-4 mr-2" />
@@ -2121,9 +2121,9 @@ export default function BugsClient() {
                               className="w-full"
                               onClick={() => {
                                 if (integration.status === 'Connected') {
-                                  toast.info('Configure Integration', { description: `Opening ${integration.name} configuration...` })
+                                  toast.info('Configure Integration' configuration...` })
                                 } else {
-                                  toast.success('Connecting...', { description: `Initiating connection to ${integration.name}` })
+                                  toast.success('Connecting...'` })
                                 }
                               }}
                             >
@@ -2323,7 +2323,7 @@ export default function BugsClient() {
             <AIInsightsPanel
               insights={mockBugsAIInsights}
               title="Bug Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2386,7 +2386,7 @@ export default function BugsClient() {
                           openEditDialog(dbBug)
                           setSelectedBug(null)
                         } else {
-                          toast.info('Edit Bug', { description: 'Edit functionality for this bug' })
+                          toast.info('Edit Bug')
                         }
                       }}
                     >
@@ -3156,7 +3156,7 @@ export default function BugsClient() {
               </div>
               <div className="grid gap-2">
                 <Label>Assignee</Label>
-                <Select onValueChange={(v) => toast.info('Filter Applied', { description: `Filtering by assignee: ${v}` })}>
+                <Select onValueChange={(v) => toast.info('Filter Applied'` })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Any assignee" />
                   </SelectTrigger>
@@ -3194,11 +3194,11 @@ export default function BugsClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="grid gap-2">
                   <Label>Date Created (From)</Label>
-                  <Input type="date" onChange={() => toast.info('Date Filter', { description: 'Date filter applied' })} />
+                  <Input type="date" onChange={() => toast.info('Date Filter')} />
                 </div>
                 <div className="grid gap-2">
                   <Label>Date Created (To)</Label>
-                  <Input type="date" onChange={() => toast.info('Date Filter', { description: 'Date filter applied' })} />
+                  <Input type="date" onChange={() => toast.info('Date Filter')} />
                 </div>
               </div>
             </div>
@@ -3576,11 +3576,11 @@ export default function BugsClient() {
                   className="flex-1"
                   onChange={(e) => {
                     if (e.target.value) {
-                      toast.info('Searching...', { description: `Filtering for "${e.target.value}"` })
+                      toast.info('Searching...'"` })
                     }
                   }}
                 />
-                <Select onValueChange={(v) => toast.info('Filter Applied', { description: `Showing ${v} activities` })}>
+                <Select onValueChange={(v) => toast.info('Filter Applied' activities` })}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All activities" />
                   </SelectTrigger>
@@ -3614,7 +3614,7 @@ export default function BugsClient() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toast.info('Activity Details', { description: `${activity.user} ${activity.action} on ${activity.bug}` })}
+                        onClick={() => toast.info('Activity Details' ${activity.action} on ${activity.bug}` })}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -3645,7 +3645,7 @@ export default function BugsClient() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toast.info('Activity Details', { description: `${activity.user} ${activity.action} on ${activity.bug}` })}
+                        onClick={() => toast.info('Activity Details' ${activity.action} on ${activity.bug}` })}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -3683,7 +3683,7 @@ export default function BugsClient() {
                   document.body.removeChild(link)
                   URL.revokeObjectURL(url)
 
-                  toast.success('Activity Log Exported', { description: 'Full activity log downloaded as CSV' })
+                  toast.success('Activity Log Exported')
                 }}
               >
                 <Download className="w-4 h-4 mr-2" />

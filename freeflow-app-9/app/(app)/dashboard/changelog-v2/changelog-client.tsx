@@ -481,9 +481,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   // CRUD Handlers for Changelog/Release entries
   const handleCreateRelease = useCallback(async () => {
     if (!changelogForm.title || !changelogForm.version) {
-      toast.error('Validation Error', {
-        description: 'Title and version are required'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -494,17 +492,14 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_date: new Date().toISOString(),
       })
       if (result) {
-        toast.success('Release Created', {
-          description: `Version ${changelogForm.version} has been created successfully`
+        toast.success('Release Created' has been created successfully`
         })
         setIsCreateDialogOpen(false)
         setChangelogForm(defaultChangelogForm)
         refetch()
       }
     } catch (err) {
-      toast.error('Error Creating Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Creating Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -517,8 +512,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await updateChange(changelogForm, editingChangelog.id)
       if (result) {
-        toast.success('Release Updated', {
-          description: `Version ${changelogForm.version || editingChangelog.version} has been updated`
+        toast.success('Release Updated' has been updated`
         })
         setIsEditDialogOpen(false)
         setEditingChangelog(null)
@@ -526,9 +520,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         refetch()
       }
     } catch (err) {
-      toast.error('Error Updating Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Updating Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -541,17 +533,14 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await deleteChange(deletingChangelog.id)
       if (result) {
-        toast.success('Release Deleted', {
-          description: `Version ${deletingChangelog.version} has been removed`
+        toast.success('Release Deleted' has been removed`
         })
         setIsDeleteDialogOpen(false)
         setDeletingChangelog(null)
         refetch()
       }
     } catch (err) {
-      toast.error('Error Deleting Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Deleting Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -566,15 +555,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         last_published_at: new Date().toISOString(),
       }, entry.id)
       if (result) {
-        toast.success('Release Published', {
-          description: `Version ${entry.version} is now live`
+        toast.success('Release Published' is now live`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Publishing Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Publishing Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -588,15 +574,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         scheduled_for: scheduledDate,
       }, entry.id)
       if (result) {
-        toast.success('Release Scheduled', {
-          description: `Version ${entry.version} scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
+        toast.success('Release Scheduled' scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Scheduling Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Scheduling Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -609,15 +592,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_status: 'archived',
       }, entry.id)
       if (result) {
-        toast.success('Release Archived', {
-          description: `Version ${entry.version} has been archived`
+        toast.success('Release Archived' has been archived`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Archiving Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Archiving Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -731,9 +711,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   const handleCopyChecksum = useCallback((checksum: string) => {
     navigator.clipboard.writeText(checksum)
-    toast.success('Checksum Copied', {
-      description: 'SHA256 checksum copied to clipboard'
-    })
+    toast.success('Checksum Copied')
   }, [])
 
   const handleResetTemplate = useCallback(() => {
@@ -811,9 +789,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   const handleAddEnvironment = useCallback(() => {
     if (!newEnvironmentForm.name || !newEnvironmentForm.url) {
-      toast.error('Validation Error', {
-        description: 'Environment name and URL are required'
-      })
+      toast.error('Validation Error')
       return
     }
     setIsSubmitting(true)
@@ -1748,7 +1724,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                       </Button>
                       <Button onClick={() => {
                         if (!webhookForm.name || !webhookForm.url) {
-                          toast.error('Validation Error', { description: 'Name and URL are required' })
+                          toast.error('Validation Error')
                           return
                         }
                         const webhookName = webhookForm.name
@@ -2644,7 +2620,7 @@ Thanks to all contributors!`}
             <AIInsightsPanel
               insights={mockChangelogAIInsights}
               title="Changelog Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
