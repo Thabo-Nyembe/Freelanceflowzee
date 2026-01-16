@@ -660,61 +660,48 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Handlers
   const handleSendProposal = () => {
     if (!selectedRenewal) return
-    toast.success('Proposal sent successfully', {
-      description: `Renewal proposal sent to ${selectedRenewal.customerName}`
+    toast.success('Proposal sent successfully'`
     })
     setIsRenewalDialogOpen(false)
   }
 
   const handleScheduleMeeting = () => {
     if (!selectedRenewal) return
-    toast.success('Meeting scheduled', {
-      description: `Meeting request sent to ${selectedRenewal.customerName}`
+    toast.success('Meeting scheduled'`
     })
   }
 
   const handleExport = () => {
-    toast.success('Export started', {
-      description: 'Your renewal data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleScheduleRenewal = () => {
-    toast.info('Schedule Renewal', {
-      description: 'Opening renewal scheduler...'
-    })
+    toast.info('Schedule Renewal')
   }
 
   const handleContactEmail = (email: string, name: string) => {
-    toast.success('Opening email', {
-      description: `Composing email to ${name}`
+    toast.success('Opening email'`
     })
   }
 
   const handleContactPhone = (phone: string, name: string) => {
-    toast.success('Initiating call', {
-      description: `Calling ${name}`
+    toast.success('Initiating call'`
     })
   }
 
   const handleProcessRenewal = (contractName: string) => {
-    toast.success('Processing renewal', {
-      description: `"${contractName}" renewal is being processed`
+    toast.success('Processing renewal'" renewal is being processed`
     })
   }
 
   const handleExportRenewals = () => {
-    toast.success('Exporting renewals', {
-      description: 'Renewal data will be downloaded shortly'
-    })
+    toast.success('Exporting renewals')
   }
 
   // Handler for creating new renewal
   const handleCreateRenewal = () => {
     if (!newRenewalData.customerName || !newRenewalData.currentARR || !newRenewalData.renewalDate) {
-      toast.error('Missing required fields', {
-        description: 'Please fill in customer name, current ARR, and renewal date'
-      })
+      toast.error('Missing required fields')
       return
     }
 
@@ -1824,7 +1811,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             <AIInsightsPanel
               insights={mockRenewalsAIInsights}
               title="Renewal Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

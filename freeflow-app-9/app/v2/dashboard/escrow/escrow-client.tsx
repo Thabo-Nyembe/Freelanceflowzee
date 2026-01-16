@@ -745,15 +745,12 @@ export default function EscrowClient() {
         metadata: { description: newEscrowForm.description }
       })
 
-      toast.success('Escrow created successfully', {
-        description: `Created escrow for "${newEscrowForm.projectTitle}"`
+      toast.success('Escrow created successfully'"`
       })
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
     } catch (error: any) {
-      toast.error('Failed to create escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -785,16 +782,13 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await releaseFunds(selectedEscrowDeposit.id, amount)
-      toast.success('Funds released successfully', {
-        description: `Released ${formatCurrency(amount)} for "${selectedEscrowDeposit.project_title}"`
+      toast.success('Funds released successfully' for "${selectedEscrowDeposit.project_title}"`
       })
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
     } catch (error: any) {
-      toast.error('Failed to release funds', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to release funds')
     } finally {
       setIsSubmitting(false)
     }
@@ -804,13 +798,9 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'refunded' })
-      toast.success('Refund requested', {
-        description: 'Your refund request has been submitted and is being processed'
-      })
+      toast.success('Refund requested')
     } catch (error: any) {
-      toast.error('Failed to request refund', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to request refund')
     } finally {
       setIsSubmitting(false)
     }
@@ -842,16 +832,12 @@ export default function EscrowClient() {
           }
         }
       })
-      toast.success('Dispute opened', {
-        description: 'A dispute case has been opened and is under review'
-      })
+      toast.success('Dispute opened')
       setShowDisputeDialog(false)
       resetDisputeForm()
       setSelectedEscrowDeposit(null)
     } catch (error: any) {
-      toast.error('Failed to open dispute', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to open dispute')
     } finally {
       setIsSubmitting(false)
     }
@@ -866,13 +852,10 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
-      toast.success('Escrow cancelled', {
-        description: `Escrow for "${deposit.project_title}" has been cancelled`
+      toast.success('Escrow cancelled'" has been cancelled`
       })
     } catch (error: any) {
-      toast.error('Failed to cancel escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to cancel escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -887,13 +870,10 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await deleteDeposit(deposit.id)
-      toast.success('Escrow deleted', {
-        description: `Escrow for "${deposit.project_title}" has been deleted`
+      toast.success('Escrow deleted'" has been deleted`
       })
     } catch (error: any) {
-      toast.error('Failed to delete escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -932,15 +912,12 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Payout created', {
-        description: `${payoutForm.method === 'instant' ? 'Instant payout' : 'Standard payout'} of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
+      toast.success('Payout created' of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
       })
       setShowCreatePayout(false)
       resetPayoutForm()
     } catch (error: any) {
-      toast.error('Failed to create payout', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create payout')
     } finally {
       setIsSubmitting(false)
     }
@@ -967,33 +944,24 @@ export default function EscrowClient() {
       // You could store the invitation in a table here
       // For now we just show success
 
-      toast.success('Invitation sent', {
-        description: `An invitation has been sent to ${inviteForm.email}`
+      toast.success('Invitation sent'`
       })
       setShowInviteAccount(false)
       resetInviteForm()
     } catch (error: any) {
-      toast.error('Failed to send invitation', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleSyncNow = async () => {
-    toast.info('Syncing...', {
-      description: 'Refreshing escrow data from the server'
-    })
+    toast.info('Syncing...')
     try {
       await fetchDeposits()
-      toast.success('Sync complete', {
-        description: 'All data has been refreshed'
-      })
+      toast.success('Sync complete')
     } catch (error: any) {
-      toast.error('Sync failed', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Sync failed')
     }
   }
 
@@ -1060,16 +1028,13 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Transfer initiated successfully', {
-        description: `${formatCurrency(parseFloat(transferForm.amount))} transfer is being processed`
+      toast.success('Transfer initiated successfully' transfer is being processed`
       })
       setShowNewTransferDialog(false)
       resetTransferForm()
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Please try again'
-      toast.error('Failed to initiate transfer', {
-        description: errorMessage
-      })
+      toast.error('Failed to initiate transfer')
     } finally {
       setIsSubmitting(false)
     }
@@ -1089,15 +1054,11 @@ export default function EscrowClient() {
       const data = await res.json()
       const newKey = data.key || `ek_live_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`
       setApiKey(newKey)
-      toast.success('API key regenerated successfully', {
-        description: 'Your previous key has been invalidated'
-      })
+      toast.success('API key regenerated successfully')
       setShowRegenerateApiKeyDialog(false)
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Please try again'
-      toast.error('Failed to regenerate API key', {
-        description: errorMessage
-      })
+      toast.error('Failed to regenerate API key')
     } finally {
       setIsRegeneratingKey(false)
     }
@@ -1146,16 +1107,13 @@ export default function EscrowClient() {
       link.click()
       URL.revokeObjectURL(link.href)
 
-      toast.success('Data exported successfully', {
-        description: `Downloaded ${filename}.csv`
+      toast.success('Data exported successfully'.csv`
       })
       setShowExportDataDialog(false)
       resetExportForm()
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Please try again'
-      toast.error('Failed to export data', {
-        description: errorMessage
-      })
+      toast.error('Failed to export data')
     } finally {
       setIsSubmitting(false)
     }
@@ -1178,17 +1136,14 @@ export default function EscrowClient() {
       })
       if (!res.ok) throw new Error('Failed to submit response')
 
-      toast.success('Dispute response submitted', {
-        description: `Response to dispute ${selectedDisputeForResponse.id} has been submitted for review`
+      toast.success('Dispute response submitted' has been submitted for review`
       })
       setShowDisputeResponseDialog(false)
       resetDisputeResponseForm()
       setSelectedDisputeForResponse(null)
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Please try again'
-      toast.error('Failed to submit dispute response', {
-        description: errorMessage
-      })
+      toast.error('Failed to submit dispute response')
     } finally {
       setIsSubmitting(false)
     }
@@ -1263,9 +1218,7 @@ export default function EscrowClient() {
       resetReportForm()
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Please try again'
-      toast.error('Failed to generate report', {
-        description: errorMessage
-      })
+      toast.error('Failed to generate report')
     } finally {
       setIsSubmitting(false)
     }
@@ -2446,11 +2399,7 @@ export default function EscrowClient() {
                         </div>
                         <button
                           onClick={() => {
-                            toast.warning('Are you sure?', {
-                              description: 'This will temporarily disable all escrow transactions',
-                              action: {
-                                label: 'Confirm',
-                                onClick: () => toast.error('Escrow service disabled', { description: 'Contact support to re-enable' })
+                            toast.warning('Are you sure?')
                               }
                             })
                           }}
@@ -2473,7 +2422,7 @@ export default function EscrowClient() {
             <AIInsightsPanel
               insights={mockEscrowAIInsights}
               title="Escrow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

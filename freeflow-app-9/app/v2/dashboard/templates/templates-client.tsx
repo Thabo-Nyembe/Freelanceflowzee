@@ -541,9 +541,7 @@ export default function TemplatesClient() {
   // REAL Supabase Handlers
   const handleCreateTemplate = useCallback(async () => {
     if (!newTemplateName.trim()) {
-      toast.error('Template name required', {
-        description: 'Please enter a name for your template'
-      })
+      toast.error('Template name required')
       return
     }
 
@@ -563,8 +561,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template created', {
-        description: `"${newTemplateName}" has been created successfully`
+      toast.success('Template created'" has been created successfully`
       })
       setNewTemplateName('')
       setNewTemplateDescription('')
@@ -572,9 +569,7 @@ export default function TemplatesClient() {
       setIsCreateDialogOpen(false)
       refetch()
     } catch (error) {
-      toast.error('Failed to create template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to create template')
     }
   }, [newTemplateName, newTemplateDescription, newTemplateCategory, createTemplate, refetch])
 
@@ -585,14 +580,11 @@ export default function TemplatesClient() {
         userName: undefined,
         department: undefined
       })
-      toast.success('Using template', {
-        description: `Creating project from "${template.name}"...`
+      toast.success('Using template'"...`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to use template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to use template')
     }
   }, [applyTemplate, refetch])
 
@@ -613,49 +605,39 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template duplicated', {
-        description: `Copy of "${template.name}" created`
+      toast.success('Template duplicated'" created`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to duplicate template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to duplicate template')
     }
   }, [createTemplate, refetch])
 
   const handleDeleteTemplate = useCallback(async (template: Template) => {
     try {
       await deleteTemplate(template.id)
-      toast.success('Template deleted', {
-        description: `"${template.name}" has been deleted`
+      toast.success('Template deleted'" has been deleted`
       })
       setSelectedTemplate(null)
       refetch()
     } catch (error) {
-      toast.error('Failed to delete template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to delete template')
     }
   }, [deleteTemplate, refetch])
 
   const handleDownloadTemplate = useCallback(async (template: Template) => {
     try {
       await downloadTemplate(template.id)
-      toast.success('Downloading template', {
-        description: `"${template.name}" download started`
+      toast.success('Downloading template'" download started`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to download template', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to download template')
     }
   }, [downloadTemplate, refetch])
 
   const handleFavoriteTemplate = (templateName: string) => {
-    toast.success('Added to favorites', {
-      description: `"${templateName}" saved to favorites`
+    toast.success('Added to favorites'" saved to favorites`
     })
   }
 
@@ -1971,7 +1953,7 @@ export default function TemplatesClient() {
             <AIInsightsPanel
               insights={mockTemplatesAIInsights}
               title="Template Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2628,9 +2610,7 @@ export default function TemplatesClient() {
                   className="flex-1 gap-2 bg-cyan-600 hover:bg-cyan-700"
                   onClick={() => {
                     setShowExportAssetsDialog(false)
-                    toast.success('Export started', {
-                      description: 'Your assets are being prepared for download'
-                    })
+                    toast.success('Export started')
                   }}
                 >
                   <Download className="w-4 h-4" />

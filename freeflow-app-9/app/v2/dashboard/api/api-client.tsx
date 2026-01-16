@@ -750,11 +750,11 @@ export default function ApiClient() {
         rate_limit_per_hour: endpointForm.rateLimit,
         tags: endpointForm.tags
       })
-      toast.success('Endpoint created', { description: `${endpointForm.name} has been created` })
+      toast.success('Endpoint created' has been created` })
       setShowCreateEndpointDialog(false)
       setEndpointForm({ name: '', description: '', method: 'GET', path: '/api/v1/', version: 'v1', requiresAuth: true, rateLimit: 1000, tags: [] })
     } catch (err) {
-      toast.error('Failed to create endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to create endpoint')
     } finally {
       setIsSubmitting(false)
     }
@@ -776,11 +776,11 @@ export default function ApiClient() {
         rate_limit_per_hour: apiKeyForm.rateLimit,
         expires_at: apiKeyForm.expiresAt || undefined
       })
-      toast.success('API key generated', { description: `${apiKeyForm.name} has been created. Key: ${result.key_value?.slice(0, 20)}...` })
+      toast.success('API key generated' has been created. Key: ${result.key_value?.slice(0, 20)}...` })
       setShowCreateKeyDialog(false)
       setApiKeyForm({ name: '', description: '', environment: 'development', scopes: ['read'], rateLimit: 1000, expiresAt: '' })
     } catch (err) {
-      toast.error('Failed to generate API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to generate API key')
     } finally {
       setIsSubmitting(false)
     }
@@ -789,36 +789,36 @@ export default function ApiClient() {
   const handleRevokeApiKey = async (keyId: string, keyName: string) => {
     try {
       await revokeKey(keyId, 'Revoked by user')
-      toast.info('Key revoked', { description: `"${keyName}" has been revoked` })
+      toast.info('Key revoked'" has been revoked` })
     } catch (err) {
-      toast.error('Failed to revoke key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to revoke key')
     }
   }
 
   const handleDeleteEndpoint = async (endpointId: string, endpointName: string) => {
     try {
       await deleteEndpoint(endpointId)
-      toast.success('Endpoint deleted', { description: `"${endpointName}" has been removed` })
+      toast.success('Endpoint deleted'" has been removed` })
     } catch (err) {
-      toast.error('Failed to delete endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to delete endpoint')
     }
   }
 
   const handleDeleteApiKey = async (keyId: string, keyName: string) => {
     try {
       await deleteKey(keyId)
-      toast.success('API key deleted', { description: `"${keyName}" has been removed` })
+      toast.success('API key deleted'" has been removed` })
     } catch (err) {
-      toast.error('Failed to delete key', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to delete key')
     }
   }
 
   const handleTestEndpoint = (endpointName: string) => {
-    toast.success('Test complete', { description: `"${endpointName}" responded with 200 OK` })
+    toast.success('Test complete'" responded with 200 OK` })
   }
 
   const handleExportApiDocs = () => {
-    toast.success('Exporting docs', { description: 'API documentation will be downloaded' })
+    toast.success('Exporting docs')
   }
 
   return (
@@ -2050,7 +2050,7 @@ export default function ApiClient() {
             <AIInsightsPanel
               insights={mockApiAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2522,7 +2522,7 @@ export default function ApiClient() {
                 <Button variant="outline" size="icon" onClick={() => {
                     const query = (document.querySelector('input[placeholder="Search documentation..."]') as HTMLInputElement)?.value;
                     if (query && query.trim()) {
-                      toast.success(`Searching documentation for "${query}"`, { description: 'Found 12 matching articles' });
+                      toast.success(`Searching documentation for "${query}"`);
                     } else {
                       toast.info('Please enter a search term');
                     }
@@ -2665,7 +2665,7 @@ export default function ApiClient() {
                     try {
                       if (selectedKeyForEdit) {
                         await revokeKey(selectedKeyForEdit.id);
-                        toast.success('API key revoked successfully', { description: `${selectedKeyForEdit.name} has been revoked and can no longer be used.` });
+                        toast.success('API key revoked successfully' has been revoked and can no longer be used.` });
                       }
                       setShowRevokeKeyDialog(false);
                     } catch (error) {
@@ -2973,7 +2973,7 @@ export default function ApiClient() {
               <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>Close</Button>
               <Button variant="destructive" onClick={() => {
                   if (confirm('Are you sure you want to clear all request history? This action cannot be undone.')) {
-                    toast.success('Request history cleared', { description: `${history.length} requests have been removed from history.` });
+                    toast.success('Request history cleared' requests have been removed from history.` });
                     setShowHistoryDialog(false);
                   }
                 }}>
@@ -3162,7 +3162,7 @@ export default function ApiClient() {
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Usage report exported', { description: 'Report has been downloaded as JSON' });
+                  toast.success('Usage report exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
@@ -3465,7 +3465,7 @@ echo $response;
                   };
                   const code = codeSnippets[selectedCodeGenLanguage] || codeSnippets['cURL'];
                   navigator.clipboard.writeText(code);
-                  toast.success('Code copied to clipboard', { description: `${selectedCodeGenLanguage} snippet ready to use` });
+                  toast.success('Code copied to clipboard' snippet ready to use` });
                 }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy Code
               </Button>
@@ -3650,7 +3650,7 @@ echo $response;
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportCollectionsDialog(false);
-                  toast.success('Collections exported', { description: `${collections.length} collections saved to file` });
+                  toast.success('Collections exported' collections saved to file` });
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
@@ -4039,7 +4039,7 @@ echo $response;
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportHarDialog(false);
-                  toast.success('HAR file exported', { description: `${history.length} requests exported` });
+                  toast.success('HAR file exported' requests exported` });
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export HAR
               </Button>
@@ -4079,7 +4079,7 @@ echo $response;
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                   if (confirm('Are you sure you want to clear history? This action cannot be undone.')) {
-                    toast.success('History cleared successfully', { description: `${history.length} request records have been deleted.` });
+                    toast.success('History cleared successfully' request records have been deleted.` });
                     setShowClearHistoryDialog(false);
                   }
                 }}>
@@ -4500,7 +4500,7 @@ echo $response;
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Analytics report exported', { description: 'Report has been downloaded as JSON' });
+                  toast.success('Analytics report exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
@@ -4536,7 +4536,7 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSslCheckDialog(false)}>Close</Button>
               <Button onClick={() => {
-                  toast.success('SSL settings saved', { description: 'SSL certificate monitoring configured. You will be alerted 30 days before expiry.' });
+                  toast.success('SSL settings saved');
                   setShowSslCheckDialog(false);
                 }}>Save Settings</Button>
             </DialogFooter>
@@ -4779,7 +4779,7 @@ echo $response;
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Webhook logs exported', { description: 'Logs have been downloaded as JSON' });
+                  toast.success('Webhook logs exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Logs
               </Button>
@@ -4806,7 +4806,7 @@ echo $response;
                         if (confirm('Are you sure you want to regenerate this secret? This will invalidate existing signatures.')) {
                           const newSecret = 'whsec_' + Math.random().toString(36).substring(2, 15);
                           navigator.clipboard.writeText(newSecret);
-                          toast.success('Secret regenerated', { description: 'New secret has been copied to clipboard. Make sure to update your webhook receiver.' });
+                          toast.success('Secret regenerated');
                         }
                       }}>Regenerate</Button>
                   </div>
@@ -4924,7 +4924,7 @@ echo $response;
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportWebhooksDialog(false);
-                  toast.success('Webhooks exported', { description: `${webhooks.length} webhook configurations saved` });
+                  toast.success('Webhooks exported' webhook configurations saved` });
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
@@ -5157,7 +5157,7 @@ echo $response;
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Coverage report exported', { description: 'Report has been downloaded as JSON' });
+                  toast.success('Coverage report exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
@@ -5283,7 +5283,7 @@ echo $response;
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  toast.success('Test report exported', { description: 'Report has been downloaded as JSON' });
+                  toast.success('Test report exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
@@ -5842,8 +5842,7 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTryEndpointDialog(false)}>Close</Button>
               <Button onClick={() => {
-                  toast.success('Request completed', {
-                    description: `${selectedEndpoint?.method} ${selectedEndpoint?.path} - 200 OK (145ms)`
+                  toast.success('Request completed' ${selectedEndpoint?.path} - 200 OK (145ms)`
                   })
                 }}>
                 <Send className="w-4 h-4 mr-2" /> Send
@@ -5940,7 +5939,7 @@ echo $response;
 .then(response => response.json())
 .then(data => console.log(data));`;
                   navigator.clipboard.writeText(code);
-                  toast.success('Code copied to clipboard', { description: `${selectedEndpoint?.method} ${selectedEndpoint?.path}` });
+                  toast.success('Code copied to clipboard' ${selectedEndpoint?.path}` });
                 }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy
               </Button>
@@ -6102,7 +6101,7 @@ echo $response;
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportTestReportDialog(false);
-                  toast.success('Test report exported', { description: `${selectedTestSuite?.tests || 0} test results saved` });
+                  toast.success('Test report exported' test results saved` });
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>

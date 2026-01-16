@@ -516,16 +516,16 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.success(`Tutorial "${n}" published successfully!`)
   }
   const handleStartTutorial = (n: string) => {
-    toast.success(`Starting "${n}"`, { description: 'Loading tutorial player...' })
+    toast.success(`Starting "${n}"`)
   }
   const handleCompleteTutorial = (n: string) => {
     toast.success(`Congratulations! You completed "${n}"`)
   }
   const handleMyList = () => {
-    toast.success('My List', { description: 'Opening your saved courses...' })
+    toast.success('My List')
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.success(actionLabel, { description: `Executing ${actionLabel.toLowerCase()}...` })
+    toast.success(actionLabel...` })
   }
   const handleMarkAllRead = () => {
     toast.success('All notifications marked as read')
@@ -537,25 +537,25 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Photo selected', { description: `Uploading ${file.name}...` })
+        toast.success('Photo selected'...` })
       }
     }
     input.click()
   }
   const handleUpgradePlan = (planName: string) => {
-    toast.success('Upgrade initiated', { description: `Redirecting to checkout for ${planName}...` })
+    toast.success('Upgrade initiated'...` })
   }
   const handleAddPaymentMethod = () => {
-    toast.info('Opening payment form', { description: 'Secure payment powered by Stripe' })
+    toast.info('Opening payment form')
   }
   const handleConnectService = (serviceName: string) => {
     toast.success(`${serviceName} connected successfully!`)
   }
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('learn_xxxxxxxxxxxxxxxx').then(() => {
-      toast.success('Copied', { description: 'API key copied to clipboard' })
+      toast.success('Copied')
     }).catch(() => {
-      toast.error('Failed', { description: 'Could not copy to clipboard' })
+      toast.error('Failed')
     })
   }
   const handleRegenerateApiKey = () => {
@@ -568,12 +568,12 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   }
   const handleClearHistory = () => {
     if (confirm('Are you sure you want to clear your watch history? This action cannot be undone.')) {
-      toast.success('Watch history cleared', { description: 'Your viewing history has been removed' })
+      toast.success('Watch history cleared')
     }
   }
   const handleResetProgress = () => {
     if (confirm('Are you sure you want to reset all your course progress? This action cannot be undone.')) {
-      toast.success('Progress reset', { description: 'All course progress has been cleared' })
+      toast.success('Progress reset')
     }
   }
   const handleDeleteAccount = () => {
@@ -585,7 +585,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.success(`You're now enrolled in "${courseName}"!`)
   }
   const handleCreateGoal = () => {
-    toast.success('Goal created', { description: 'Your learning goal has been saved' })
+    toast.success('Goal created')
     setShowGoalDialog(false)
   }
 
@@ -1777,7 +1777,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <AIInsightsPanel
               insights={mockTutorialsAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2131,7 +2131,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
             <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-              toast.success('Opening detailed analytics', { description: 'Loading comprehensive report...' })
+              toast.success('Opening detailed analytics')
               setShowAnalyticsDialog(false)
             }}>View Full Report</Button>
           </DialogFooter>

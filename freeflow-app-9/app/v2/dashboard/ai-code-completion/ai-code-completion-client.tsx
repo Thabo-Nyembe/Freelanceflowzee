@@ -241,7 +241,7 @@ export default function AiCodeCompletionClient() {
       action: () => {
         const code = completion || codeInput
         if (!code.trim()) {
-          toast.error('No code to export', { description: 'Write or generate some code first' })
+          toast.error('No code to export')
           return
         }
         setExportFileName(`code-snippet-${Date.now()}`)
@@ -279,16 +279,7 @@ export default function AiCodeCompletionClient() {
       }
       setSnippets([...snippets, newSnippet])
       setCodeInput(newSnippet.code)
-      setSelectedLanguage(newSnippetLanguage)
-
-      logger.info('New snippet created locally', {
-        snippetId: newSnippet.id,
-        name: newSnippetName.trim(),
-        language: newSnippetLanguage
-      })
-
-      toast.success('Snippet Created', {
-        description: `"${newSnippetName.trim()}" is ready to edit`
+      setSelectedLanguage(newSnippetLanguage)      toast.success('Snippet Created'" is ready to edit`
       })
       setShowNewSnippetDialog(false)
       return
@@ -319,16 +310,7 @@ export default function AiCodeCompletionClient() {
 
       setSnippets([...snippets, newSnippet])
       setCodeInput(newSnippet.code)
-      setSelectedLanguage(newSnippetLanguage)
-
-      logger.info('New snippet created in database', {
-        snippetId: newSnippet.id,
-        name: newSnippetName.trim(),
-        language: newSnippetLanguage
-      })
-
-      toast.success('Snippet Created', {
-        description: `"${newSnippetName.trim()}" saved and ready to edit`
+      setSelectedLanguage(newSnippetLanguage)      toast.success('Snippet Created'" saved and ready to edit`
       })
       announce('New code snippet created', 'polite')
     } catch (err) {
@@ -418,18 +400,7 @@ export default function AiCodeCompletionClient() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    logger.info('Code exported successfully', {
-      format: exportFormat,
-      fileName: exportFileName,
-      extension,
-      fileSize: blob.size,
-      includeMetadata
-    })
-
-    toast.success('Code Exported', {
-      description: `${exportFileName}.${extension} (${Math.round(blob.size / 1024)}KB)`
+    URL.revokeObjectURL(url)    toast.success('Code Exported'.${extension} (${Math.round(blob.size / 1024)}KB)`
     })
     setShowExportDialog(false)
   }
@@ -446,12 +417,7 @@ export default function AiCodeCompletionClient() {
     }
 
     try {
-      localStorage.setItem('ai-code-settings', JSON.stringify(settings))
-
-      logger.info('AI Code settings saved', settings)
-
-      toast.success('Settings Saved', {
-        description: `Model: ${aiModel}, Max Tokens: ${maxTokens}, Temperature: ${temperature}`
+      localStorage.setItem('ai-code-settings', JSON.stringify(settings))      toast.success('Settings Saved', Max Tokens: ${maxTokens}, Temperature: ${temperature}`
       })
       announce('Settings saved successfully', 'polite')
     } catch (err) {
@@ -473,9 +439,7 @@ export default function AiCodeCompletionClient() {
         if (settings.maxTokens) setMaxTokens(settings.maxTokens)
         if (settings.temperature !== undefined) setTemperature(settings.temperature)
         if (settings.showLineNumbers !== undefined) setShowLineNumbers(settings.showLineNumbers)
-        if (settings.enableTypeInference !== undefined) setEnableTypeInference(settings.enableTypeInference)
-        logger.info('AI Code settings loaded from localStorage', settings)
-      }
+        if (settings.enableTypeInference !== undefined) setEnableTypeInference(settings.enableTypeInference)      }
     } catch (err) {
       logger.error('Failed to load settings from localStorage', { error: err })
     }
@@ -484,17 +448,12 @@ export default function AiCodeCompletionClient() {
   // Load data from Supabase
   useEffect(() => {
     const loadAICodeData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
-        setIsLoading(true)
-        logger.info('Loading AI Code Completion data from Supabase', { userId, language: selectedLanguage })
-
-        // Load completions, snippets, and stats
+        setIsLoading(true)        // Load completions, snippets, and stats
         const [completionsResult, snippetsResult, statsResult] = await Promise.all([
           getCodeCompletions(userId, { language: selectedLanguage as ProgrammingLanguage }),
           getCodeSnippets(userId, { language: selectedLanguage as ProgrammingLanguage }),
@@ -511,17 +470,7 @@ export default function AiCodeCompletionClient() {
             createdAt: s.created_at
           }))
           setSnippets(uiSnippets)
-        }
-
-        logger.info('AI Code data loaded', {
-          completions: completionsResult.data?.length || 0,
-          snippets: snippetsResult.data?.length || 0,
-          userId,
-          language: selectedLanguage
-        })
-
-        toast.success('AI Code Completion loaded', {
-          description: `${completionsResult.data?.length || 0} completions • ${snippetsResult.data?.length || 0} snippets`
+        }        toast.success('AI Code Completion loaded' completions • ${snippetsResult.data?.length || 0} snippets`
         })
         announce('AI Code Completion loaded successfully', 'polite')
 
@@ -585,16 +534,13 @@ export default function AiCodeCompletionClient() {
           await updateCodeStats(userId, {
             total_completions: 1,
             total_tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4)
-          })
-          logger.info('Code completion saved to database', { completionId: completionData?.id })
-        }
+          })        }
 
         setCompletion(mockCompletion)
         setSuggestions(completionSuggestions)
         setIsCompleting(false)
 
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated - ${completionSuggestions.length} suggestions`
+        toast.success('Code Completed' lines generated - ${completionSuggestions.length} suggestions`
         })
         announce('Code completion generated', 'polite')
       } catch (err) {
@@ -602,8 +548,7 @@ export default function AiCodeCompletionClient() {
         setCompletion(mockCompletion)
         setSuggestions(completionSuggestions)
         setIsCompleting(false)
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated`
+        toast.success('Code Completed' lines generated`
         })
       }
     } else {
@@ -611,8 +556,7 @@ export default function AiCodeCompletionClient() {
       setCompletion(mockCompletion)
       setSuggestions(completionSuggestions)
       setIsCompleting(false)
-      toast.success('Code Completed', {
-        description: `${mockCompletion.split('\n').length} lines generated`
+      toast.success('Code Completed' lines generated`
       })
     }
   }, [codeInput, userId, selectedLanguage, announce])
@@ -649,17 +593,7 @@ export default function AiCodeCompletionClient() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    logger.info('Code downloaded successfully', {
-      language: selectedLanguage,
-      contentLength: code.length,
-      filename,
-      fileSize: blob.size
-    })
-
-    toast.success('Code Downloaded', {
-      description: `${filename} (${code.length} characters, ${Math.round(blob.size / 1024)}KB)`
+    URL.revokeObjectURL(url)    toast.success('Code Downloaded' (${code.length} characters, ${Math.round(blob.size / 1024)}KB)`
     })
   }
   const handleShareCode = () => {
@@ -669,17 +603,7 @@ export default function AiCodeCompletionClient() {
 
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareUrl)
-    }
-
-    logger.info('Code share link generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      shareId,
-      shareUrl
-    })
-
-    toast.success('Share Link Generated', {
-      description: `Link copied to clipboard - ${code.length} characters shared`
+    }    toast.success('Share Link Generated' characters shared`
     })
   }
 
@@ -731,18 +655,7 @@ export default function AiCodeCompletionClient() {
         createdAt: data?.created_at || new Date().toISOString()
       }
 
-      setSnippets([...snippets, newSnippet])
-
-      logger.info('Snippet saved successfully', {
-        snippetId: newSnippet.id,
-        name: snippetName.trim(),
-        language: selectedLanguage,
-        codeLength: code.length,
-        totalSnippets: snippets.length + 1
-      })
-
-      toast.success('Snippet Saved', {
-        description: `"${snippetName.trim()}" saved - ${snippets.length + 1} total snippets`
+      setSnippets([...snippets, newSnippet])      toast.success('Snippet Saved'" saved - ${snippets.length + 1} total snippets`
       })
       announce('Snippet saved successfully', 'polite')
     } catch (error) {
@@ -765,22 +678,10 @@ export default function AiCodeCompletionClient() {
     if (userId) {
       try {
         const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
-        await incrementSnippetUsage(snippetId)
-        logger.info('Snippet usage tracked in database', { snippetId })
-      } catch (error: any) {
+        await incrementSnippetUsage(snippetId)      } catch (error: any) {
         logger.error('Failed to track snippet usage', { error: error.message })
       }
-    }
-
-    logger.info('Snippet loaded successfully', {
-      snippetId,
-      snippetName: snippet.name,
-      language: snippet.language,
-      codeLength: snippet.code.length
-    })
-
-    toast.success('Snippet Loaded', {
-      description: `"${snippet.name}" - ${snippet.code.length} characters loaded`
+    }    toast.success('Snippet Loaded'" - ${snippet.code.length} characters loaded`
     })
   }
   const handleOptimizeCode = () => {
@@ -789,17 +690,9 @@ export default function AiCodeCompletionClient() {
 
     setOriginalCode(code)
     const optimizationTypes = ['Loop unrolling', 'Memoization', 'Lazy evaluation', 'Code splitting']
-    const applied = Math.floor(Math.random() * 3) + 1
+    const applied = Math.floor(Math.random() * 3) + 1    })
 
-    logger.info('Code optimization completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      optimizationsApplied: applied,
-      types: optimizationTypes.slice(0, applied)
-    })
-
-    toast.success('Code Optimized', {
-      description: `${applied} optimizations applied - ${code.length} characters analyzed`
+    toast.success('Code Optimized' optimizations applied - ${code.length} characters analyzed`
     })
   }
 
@@ -808,16 +701,7 @@ export default function AiCodeCompletionClient() {
     if (!code) return
 
     setOriginalCode(code)
-    const improvements = ['Extract functions', 'Reduce complexity', 'Improve naming', 'Remove duplication']
-
-    logger.info('Code refactoring completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      improvements: improvements.length
-    })
-
-    toast.success('Code Refactored', {
-      description: `${improvements.length} improvements - Better structure and readability`
+    const improvements = ['Extract functions', 'Reduce complexity', 'Improve naming', 'Remove duplication']    toast.success('Code Refactored' improvements - Better structure and readability`
     })
   }
 
@@ -825,17 +709,7 @@ export default function AiCodeCompletionClient() {
     const code = codeInput
     if (!code) return
 
-    const commentCount = Math.floor(code.split('\n').length / 3)
-
-    logger.info('AI documentation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      commentsAdded: commentCount,
-      docType: 'inline+JSDoc'
-    })
-
-    toast.success('Documentation Added', {
-      description: `${commentCount} inline comments and JSDoc added`
+    const commentCount = Math.floor(code.split('\n').length / 3)    toast.success('Documentation Added' inline comments and JSDoc added`
     })
   }
 
@@ -843,16 +717,7 @@ export default function AiCodeCompletionClient() {
     const code = codeInput
     if (!code) return
 
-    const docTypes = ['README.md', 'API.md', 'USAGE.md']
-
-    logger.info('Documentation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      documentTypes: docTypes
-    })
-
-    toast.success('Documentation Generated', {
-      description: `${docTypes.length} docs created - README, API reference, usage examples`
+    const docTypes = ['README.md', 'API.md', 'USAGE.md']    toast.success('Documentation Generated' docs created - README, API reference, usage examples`
     })
   }
 
@@ -860,16 +725,7 @@ export default function AiCodeCompletionClient() {
     const code = codeInput
     if (!code) return
 
-    const rulesApplied = ['Indentation', 'Semicolons', 'Quotes', 'Line length']
-
-    logger.info('Code formatted successfully', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      rulesApplied: rulesApplied.length
-    })
-
-    toast.success('Code Formatted', {
-      description: `${rulesApplied.length} formatting rules applied - Prettier/ESLint compliant`
+    const rulesApplied = ['Indentation', 'Semicolons', 'Quotes', 'Line length']    toast.success('Code Formatted' formatting rules applied - Prettier/ESLint compliant`
     })
   }
 
@@ -877,17 +733,7 @@ export default function AiCodeCompletionClient() {
     const code = codeInput
     if (!code) return
 
-    const checks = { syntax: 'passed', types: 'passed', linting: '2 warnings' }
-
-    logger.info('Code validation completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      checks
-    })
-
-    toast.success('Validation Complete', {
-      description: 'Syntax ✓ Types ✓ Linting: 2 warnings'
-    })
+    const checks = { syntax: 'passed', types: 'passed', linting: '2 warnings' }    toast.success('Validation Complete')
   }
 
   const handleGenerateTests = () => {
@@ -895,36 +741,17 @@ export default function AiCodeCompletionClient() {
     if (!code) return
 
     const testCount = Math.floor(code.split('function').length * 2)
-    const coveragePercent = Math.floor(Math.random() * 20) + 80
-
-    logger.info('Unit tests generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      testsGenerated: testCount,
-      estimatedCoverage: coveragePercent
-    })
-
-    toast.success('Tests Generated', {
-      description: `${testCount} test cases created - ~${coveragePercent}% coverage`
+    const coveragePercent = Math.floor(Math.random() * 20) + 80    toast.success('Tests Generated' test cases created - ~${coveragePercent}% coverage`
     })
   }
   const handleFixBugsAuto = () => {
     const bugsFixed = bugs.length
     if (bugsFixed === 0) {
-      toast.info('No Bugs Found', { description: 'Run bug analysis first' })
+      toast.info('No Bugs Found')
       return
     }
 
-    setBugs([])
-
-    logger.info('Auto-fix bugs completed', {
-      language: selectedLanguage,
-      bugsFixed,
-      codeLength: codeInput.length
-    })
-
-    toast.success('Bugs Auto-Fixed', {
-      description: `${bugsFixed} issues resolved automatically`
+    setBugs([])    toast.success('Bugs Auto-Fixed' issues resolved automatically`
     })
   }
 
@@ -933,17 +760,7 @@ export default function AiCodeCompletionClient() {
     if (!code) return
 
     const reviewCategories = ['Best Practices', 'Security', 'Performance', 'Maintainability']
-    const score = Math.floor(Math.random() * 20) + 80
-
-    logger.info('Code review completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      categories: reviewCategories,
-      overallScore: score
-    })
-
-    toast.info('Code Review Complete', {
-      description: `Overall score: ${score}/100 - ${reviewCategories.length} categories analyzed`
+    const score = Math.floor(Math.random() * 20) + 80    toast.info('Code Review Complete'/100 - ${reviewCategories.length} categories analyzed`
     })
   }
 
@@ -952,17 +769,7 @@ export default function AiCodeCompletionClient() {
     if (!code) return
 
     const vulnerabilities = ['SQL Injection', 'XSS', 'CSRF', 'Insecure Dependencies']
-    const issuesFound = Math.floor(Math.random() * 2)
-
-    logger.info('Security scan completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      vulnerabilitiesScanned: vulnerabilities.length,
-      issuesFound
-    })
-
-    toast.info('Security Scan Complete', {
-      description: `${issuesFound} issues found - ${vulnerabilities.length} vulnerability types scanned`
+    const issuesFound = Math.floor(Math.random() * 2)    toast.info('Security Scan Complete' issues found - ${vulnerabilities.length} vulnerability types scanned`
     })
   }
 
@@ -972,18 +779,7 @@ export default function AiCodeCompletionClient() {
 
     const timeComplexity = 'O(n log n)'
     const spaceComplexity = 'O(n)'
-    const bottlenecks = Math.floor(Math.random() * 3)
-
-    logger.info('Performance profile completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      timeComplexity,
-      spaceComplexity,
-      bottlenecksFound: bottlenecks
-    })
-
-    toast.info('Performance Analysis', {
-      description: `Time: ${timeComplexity} Space: ${spaceComplexity} - ${bottlenecks} bottlenecks`
+    const bottlenecks = Math.floor(Math.random() * 3)    toast.info('Performance Analysis' Space: ${spaceComplexity} - ${bottlenecks} bottlenecks`
     })
   }
 
@@ -992,31 +788,13 @@ export default function AiCodeCompletionClient() {
     if (!code) return
 
     const interfacesAdded = Math.floor(code.split('function').length * 1.5)
-    const typesAdded = Math.floor(code.split('\n').length / 5)
-
-    logger.info('Type definitions added', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      interfacesAdded,
-      typesAdded
-    })
-
-    toast.success('Types Added', {
-      description: `${interfacesAdded} interfaces, ${typesAdded} type annotations`
+    const typesAdded = Math.floor(code.split('\n').length / 5)    toast.success('Types Added' interfaces, ${typesAdded} type annotations`
     })
   }
 
   const handleQuickExport = (format: 'gist' | 'markdown' | 'pdf') => {
     const code = completion || codeInput
-    if (!code) return
-
-    logger.info('Quick export initiated', {
-      language: selectedLanguage,
-      format,
-      codeLength: code.length
-    })
-
-    toast.success(`Exported as ${format.toUpperCase()}`, {
+    if (!code) return    toast.success(`Exported as ${format.toUpperCase()}`, {
       description: `${code.length} characters exported in ${format} format`
     })
   }
@@ -1047,46 +825,23 @@ export default function AiCodeCompletionClient() {
         }
         if (ext && langMap[ext]) {
           setSelectedLanguage(langMap[ext])
-        }
-
-        logger.info('Code file imported successfully', {
-          fileName: file.name,
-          fileSize: file.size,
-          codeLength: text.length,
-          language: langMap[ext || ''] || 'unknown'
-        })
-
-        toast.success('Code Imported', {
-          description: `${file.name} (${text.length} characters, ${Math.round(file.size / 1024)}KB)`
+        }        toast.success('Code Imported' (${text.length} characters, ${Math.round(file.size / 1024)}KB)`
         })
       } catch (error) {
         logger.error('Code import failed', { error, fileName: file.name })
-        toast.error('Import Failed', { description: 'Could not read file' })
+        toast.error('Import Failed')
       }
     }
-    input.click()
-
-    logger.info('Import code dialog opened', {})
-  }
+    input.click()  }
 
   const handleDiffCode = () => {
     if (!originalCode) {
-      toast.info('No Changes', { description: 'Make optimizations first to see diff' })
+      toast.info('No Changes')
       return
     }
 
     const additions = Math.floor(Math.random() * 20) + 5
-    const deletions = Math.floor(Math.random() * 15) + 3
-
-    logger.info('Code diff generated', {
-      originalLength: originalCode.length,
-      currentLength: codeInput.length,
-      additions,
-      deletions
-    })
-
-    toast.info('Code Diff', {
-      description: `+${additions} additions, -${deletions} deletions`
+    const deletions = Math.floor(Math.random() * 15) + 3    toast.info('Code Diff' additions, -${deletions} deletions`
     })
   }
 
@@ -1100,15 +855,7 @@ export default function AiCodeCompletionClient() {
         action: 'manual_save'
       }
       setVersionHistory([newVersion, ...versionHistory].slice(0, 10)) // Keep last 10
-    }
-
-    logger.info('Version history accessed', {
-      totalVersions: versionHistory.length,
-      currentCodeLength: codeInput.length
-    })
-
-    toast.info('Version History', {
-      description: `${versionHistory.length} previous versions available`
+    }    toast.info('Version History' previous versions available`
     })
   }
 
@@ -1118,18 +865,7 @@ export default function AiCodeCompletionClient() {
 
     const lines = code.split('\n').length
     const functions = code.split('function').length - 1
-    const patterns = ['Async/Await', 'Error Handling', 'State Management']
-
-    logger.info('AI code explanation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      linesAnalyzed: lines,
-      functionsFound: functions,
-      patternsDetected: patterns
-    })
-
-    toast.info('AI Explanation', {
-      description: `${lines} lines, ${functions} functions, ${patterns.length} patterns detected`
+    const patterns = ['Async/Await', 'Error Handling', 'State Management']    toast.info('AI Explanation' lines, ${functions} functions, ${patterns.length} patterns detected`
     })
   }
 

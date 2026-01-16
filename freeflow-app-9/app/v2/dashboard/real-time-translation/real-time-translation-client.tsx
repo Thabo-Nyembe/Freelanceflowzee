@@ -67,7 +67,6 @@ import {
   getConfidenceColor
 } from '@/lib/real-time-translation-utils'
 
-// A+++ UTILITIES
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -177,11 +176,11 @@ export default function RealTimeTranslationClient() {
   // Handle new translation creation
   const handleCreateTranslation = async () => {
     if (!newTranslationName.trim()) {
-      toast.error('Name required', { description: 'Please enter a name for this translation job' })
+      toast.error('Name required')
       return
     }
     if (!newTranslationSource.trim() && newTranslationType === 'text') {
-      toast.error('Source text required', { description: 'Please enter text to translate' })
+      toast.error('Source text required')
       return
     }
 
@@ -200,8 +199,7 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to create translation')
 
-      toast.success('Translation Created', {
-        description: `"${newTranslationName}" has been created and queued for translation`
+      toast.success('Translation Created'" has been created and queued for translation`
       })
 
       // Reset form
@@ -212,9 +210,7 @@ export default function RealTimeTranslationClient() {
       setNewTranslationType('text')
       setShowNewTranslationDialog(false)
     } catch (error) {
-      toast.error('Failed to create translation', {
-        description: 'Please try again later'
-      })
+      toast.error('Failed to create translation')
     } finally {
       setIsCreatingTranslation(false)
     }
@@ -237,15 +233,12 @@ export default function RealTimeTranslationClient() {
         URL.revokeObjectURL(url)
       }
 
-      toast.success('Export Complete', {
-        description: `Translation history exported as ${exportFormat.toUpperCase()}`
+      toast.success('Export Complete'`
       })
 
       setShowExportDialog(false)
     } catch (error) {
-      toast.error('Export Failed', {
-        description: 'Unable to export translations. Please try again.'
-      })
+      toast.error('Export Failed')
     } finally {
       setIsExporting(false)
     }
@@ -265,15 +258,11 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to save settings')
 
-      toast.success('Settings Saved', {
-        description: 'Your translation preferences have been updated'
-      })
+      toast.success('Settings Saved')
 
       setShowSettingsDialog(false)
     } catch (error) {
-      toast.error('Failed to save settings', {
-        description: 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSavingSettings(false)
     }
@@ -283,32 +272,32 @@ export default function RealTimeTranslationClient() {
   const handleCopyText = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('Copied!', { description: `${label} copied to clipboard` })
+      toast.success('Copied!' copied to clipboard` })
     } catch (error) {
-      toast.error('Failed to copy', { description: 'Please try again' })
+      toast.error('Failed to copy')
     }
   }
 
   // Handle text-to-speech
   const handleListenText = (text: string, lang: string) => {
     if (!text) {
-      toast.error('No text', { description: 'Please enter text first' })
+      toast.error('No text')
       return
     }
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = lang
       window.speechSynthesis.speak(utterance)
-      toast.success('Playing audio', { description: 'Text-to-speech started' })
+      toast.success('Playing audio')
     } else {
-      toast.error('Not supported', { description: 'Text-to-speech is not supported in your browser' })
+      toast.error('Not supported')
     }
   }
 
   // Handle create live session
   const handleCreateSession = async () => {
     if (!newSessionName.trim()) {
-      toast.error('Name required', { description: 'Please enter a session name' })
+      toast.error('Name required')
       return
     }
 
@@ -327,15 +316,14 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to create session')
 
-      toast.success('Session Created', {
-        description: `"${newSessionName}" is now active and ready for participants`
+      toast.success('Session Created'" is now active and ready for participants`
       })
       setNewSessionName('')
       setNewSessionParticipants('')
       setNewSessionLanguages(['en', 'es'])
       setShowCreateSessionDialog(false)
     } catch (error) {
-      toast.error('Failed to create session', { description: 'Please try again later' })
+      toast.error('Failed to create session')
     } finally {
       setIsCreatingSession(false)
     }
@@ -352,12 +340,10 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to pause session')
 
-      toast.success('Session Paused', {
-        description: 'The live translation session has been paused'
-      })
+      toast.success('Session Paused')
       setShowPauseSessionDialog(false)
     } catch (error) {
-      toast.error('Failed to pause session', { description: 'Please try again' })
+      toast.error('Failed to pause session')
     } finally {
       setIsPausingSession(false)
     }
@@ -384,12 +370,10 @@ export default function RealTimeTranslationClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Session Exported', {
-        description: 'Session transcript and data have been exported'
-      })
+      toast.success('Session Exported')
       setShowExportSessionDialog(false)
     } catch (error) {
-      toast.error('Export failed', { description: 'Please try again' })
+      toast.error('Export failed')
     } finally {
       setIsExportingSession(false)
     }
@@ -411,12 +395,10 @@ export default function RealTimeTranslationClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Download Started', {
-        description: 'Your translated document is being downloaded'
-      })
+      toast.success('Download Started')
       setShowDownloadDocumentDialog(false)
     } catch (error) {
-      toast.error('Download failed', { description: 'Please try again' })
+      toast.error('Download failed')
     } finally {
       setIsDownloadingDocument(false)
     }
@@ -424,16 +406,14 @@ export default function RealTimeTranslationClient() {
 
   // Handle filter history
   const handleApplyFilter = () => {
-    toast.success('Filters Applied', {
-      description: 'Translation history has been filtered'
-    })
+    toast.success('Filters Applied')
     setShowFilterHistoryDialog(false)
   }
 
   // Handle save translation to favorites
   const handleSaveTranslationToFavorites = async () => {
     if (!saveTranslationName.trim()) {
-      toast.error('Name required', { description: 'Please enter a name for this translation' })
+      toast.error('Name required')
       return
     }
 
@@ -450,14 +430,13 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to save')
 
-      toast.success('Translation Saved', {
-        description: `"${saveTranslationName}" has been saved to your favorites`
+      toast.success('Translation Saved'" has been saved to your favorites`
       })
       setSaveTranslationName('')
       setSaveTranslationFolder('default')
       setShowSaveTranslationDialog(false)
     } catch (error) {
-      toast.error('Failed to save', { description: 'Please try again' })
+      toast.error('Failed to save')
     } finally {
       setIsSavingTranslation(false)
     }
@@ -469,7 +448,6 @@ export default function RealTimeTranslationClient() {
     { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ]
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -492,21 +470,15 @@ export default function RealTimeTranslationClient() {
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // A+++ LOAD TRANSLATION DATA
   useEffect(() => {
     const loadTranslationData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading translation data', { userId })
-
-        const {
+        setError(null)        const {
           getTranslationHistory,
           getLiveSessions,
           getDocumentTranslations,
@@ -526,21 +498,14 @@ export default function RealTimeTranslationClient() {
         setTranslationStats(statsData.data || null)
 
         setIsLoading(false)
-        toast.success('Translation loaded', {
-          description: `${resultsData.data?.length || 0} translations from database`
-        })
-        logger.info('Translation data loaded successfully', {
-          resultsCount: resultsData.data?.length,
-          sessionsCount: sessionsData.data?.length,
-          documentsCount: documentsData.data?.length
-        })
-        announce('Real-time translation loaded successfully', 'polite')
+        toast.success('Translation loaded' translations from database`
+        })        announce('Real-time translation loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load translation data'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load translation data', { error: errorMessage, userId })
-        toast.error('Failed to load translation', { description: errorMessage })
+        toast.error('Failed to load translation')
         announce('Error loading translation', 'assertive')
       }
     }
@@ -566,7 +531,7 @@ export default function RealTimeTranslationClient() {
       const data = await res.json()
       setTranslatedText(data.data?.translated || 'Translation completed')
     } catch (error) {
-      toast.error('Translation failed', { description: 'Please try again' })
+      toast.error('Translation failed')
     } finally {
       setIsTranslating(false)
     }
@@ -1549,7 +1514,7 @@ export default function RealTimeTranslationClient() {
                 onClick={() => {
                   setTargetLanguage(lang.code as Language)
                   setShowAllLanguagesDialog(false)
-                  toast.success('Language Selected', { description: `${lang.name} set as target language` })
+                  toast.success('Language Selected' set as target language` })
                 }}
               >
                 <span className="text-2xl">{lang.flag}</span>
@@ -1738,7 +1703,7 @@ export default function RealTimeTranslationClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Settings Updated', { description: 'Session settings have been saved' })
+                toast.success('Settings Updated')
                 setShowSessionSettingsDialog(false)
               }}
               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
@@ -2014,7 +1979,7 @@ export default function RealTimeTranslationClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Document Queued', { description: 'Your document has been queued for translation' })
+                toast.success('Document Queued')
                 setShowUploadDocumentDialog(false)
               }}
               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
@@ -2263,7 +2228,7 @@ export default function RealTimeTranslationClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Export Started', { description: 'Your translation history is being exported' })
+                toast.success('Export Started')
                 setShowExportHistoryDialog(false)
               }}
               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"

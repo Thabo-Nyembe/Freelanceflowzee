@@ -502,23 +502,20 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Playbook created successfully', {
-      description: `"${newPlaybookData.name}" is now active and ready to use.`
+    toast.success('Playbook created successfully'" is now active and ready to use.`
     })
     setShowNewPlaybookDialog(false)
     setNewPlaybookData({ name: '', trigger: '', description: '' })
   }
 
   const handleGenerateHealthReport = () => {
-    toast.success('Health report generated', {
-      description: `Report for ${healthReportData.period.replace('_', ' ')} has been created in ${healthReportData.format.toUpperCase()} format.`
+    toast.success('Health report generated' has been created in ${healthReportData.format.toUpperCase()} format.`
     })
     setShowHealthReportDialog(false)
   }
 
   const handleExportData = () => {
-    toast.success('Data exported successfully', {
-      description: `Customer success data exported as ${exportDataData.format.toUpperCase()} file.`
+    toast.success('Data exported successfully' file.`
     })
     setShowExportDataDialog(false)
   }
@@ -528,8 +525,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Customer added successfully', {
-      description: `${newCustomerData.name} has been added to your portfolio.`
+    toast.success('Customer added successfully' has been added to your portfolio.`
     })
     setShowAddCustomerDialog(false)
     setNewCustomerData({ name: '', industry: '', tier: 'starter', csm: '' })
@@ -540,8 +536,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Call scheduled', {
-      description: `Call with ${scheduleCallData.customer} scheduled for ${scheduleCallData.date} at ${scheduleCallData.time}.`
+    toast.success('Call scheduled' scheduled for ${scheduleCallData.date} at ${scheduleCallData.time}.`
     })
     setShowScheduleCallDialog(false)
     setScheduleCallData({ customer: '', date: '', time: '', purpose: '' })
@@ -552,8 +547,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Campaign sent', {
-      description: `Email campaign "${campaignData.subject}" has been sent to ${campaignData.recipients} customers.`
+    toast.success('Campaign sent'" has been sent to ${campaignData.recipients} customers.`
     })
     setShowSendCampaignDialog(false)
     setCampaignData({ subject: '', template: '', recipients: 'all' })
@@ -564,8 +558,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Goals set successfully', {
-      description: `Target for ${goalsData.metric}: ${goalsData.target}`
+    toast.success('Goals set successfully': ${goalsData.target}`
     })
     setShowSetGoalsDialog(false)
     setGoalsData({ metric: '', target: '', deadline: '' })
@@ -576,8 +569,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Recognition sent', {
-      description: `Customer win for ${recognizeData.customer} has been recorded and shared.`
+    toast.success('Recognition sent' has been recorded and shared.`
     })
     setShowRecognizeDialog(false)
     setRecognizeData({ customer: '', achievement: '', message: '' })
@@ -588,16 +580,14 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Gift sent', {
-      description: `${giftData.giftType} gift has been sent to ${giftData.customer}.`
+    toast.success('Gift sent' gift has been sent to ${giftData.customer}.`
     })
     setShowSendGiftDialog(false)
     setGiftData({ customer: '', giftType: '', message: '' })
   }
 
   const handleGenerateReport = () => {
-    toast.success('Report generated', {
-      description: `${reportData.type} report for ${reportData.period} period has been created.`
+    toast.success('Report generated' report for ${reportData.period} period has been created.`
     })
     setShowGenerateReportDialog(false)
   }
@@ -607,8 +597,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Introduction sent', {
-      description: `Introduction email sent between ${introduceData.from} and ${introduceData.to}.`
+    toast.success('Introduction sent' and ${introduceData.to}.`
     })
     setShowIntroduceDialog(false)
     setIntroduceData({ from: '', to: '', context: '' })
@@ -619,8 +608,7 @@ export default function CustomerSuccessClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('CSM added', {
-      description: `${newCSMData.name} has been added to the team.`
+    toast.success('CSM added' has been added to the team.`
     })
     setShowAddCSMDialog(false)
     setNewCSMData({ name: '', email: '', capacity: '' })
@@ -729,21 +717,15 @@ export default function CustomerSuccessClient() {
 
   // Handlers
   const handleScheduleQBR = (customerId: string) => {
-    toast.info('Schedule QBR', {
-      description: 'Opening calendar...'
-    })
+    toast.info('Schedule QBR')
   }
 
   const handleLogInteraction = (customerId: string) => {
-    toast.success('Interaction logged', {
-      description: 'Customer touchpoint recorded'
-    })
+    toast.success('Interaction logged')
   }
 
   const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'Customer success report will be downloaded'
-    })
+    toast.success('Exporting report')
   }
 
   return (
@@ -1266,12 +1248,12 @@ export default function CustomerSuccessClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500', onClick: () => setShowNewPlaybookDialog(true) },
-                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', onClick: () => toast.info('Templates library', { description: 'Browse pre-built playbook templates' }) },
+                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', onClick: () => toast.info('Templates library') },
                 { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500', onClick: () => setShowNewPlaybookDialog(true) },
                 { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500', onClick: () => setShowHealthReportDialog(true) },
-                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', onClick: () => toast.info('Active Enrollments', { description: `${playbooks.reduce((sum, p) => sum + p.activeAccounts, 0)} accounts currently enrolled in playbooks` }) },
+                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', onClick: () => toast.info('Active Enrollments' accounts currently enrolled in playbooks` }) },
                 { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500', onClick: () => setShowScheduleCallDialog(true) },
-                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500', onClick: () => toast.info('Training Resources', { description: 'Opening CS training materials...' }) },
+                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500', onClick: () => toast.info('Training Resources') },
                 { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500', onClick: () => setShowExportDataDialog(true) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.onClick}>
@@ -1757,7 +1739,7 @@ export default function CustomerSuccessClient() {
             <AIInsightsPanel
               insights={mockCSAIInsights}
               title="Customer Success Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

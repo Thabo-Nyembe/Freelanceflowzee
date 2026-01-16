@@ -651,7 +651,7 @@ export default function AccessLogsClient() {
         is_suspicious: true,
         metadata: { action: 'ip_blocked', blocked_ip: ip }
       })
-      toast.success('IP blocked', { description: `${ip} has been added to blocklist` })
+      toast.success('IP blocked' has been added to blocklist` })
     } catch (err) {
       toast.error('Failed to block IP')
     }
@@ -694,7 +694,7 @@ export default function AccessLogsClient() {
         .lt('created_at', thirtyDaysAgo.toISOString())
 
       if (error) throw error
-      toast.success('Old logs archived', { description: 'Logs older than 30 days have been removed' })
+      toast.success('Old logs archived')
       fetchLogs()
     } catch (err) {
       console.error('Clear logs error:', err)
@@ -824,7 +824,7 @@ export default function AccessLogsClient() {
 
   const handleFilterByIP = (ip: string) => {
     setSearchQuery(ip)
-    toast.info('Filter applied', { description: `Showing logs from ${ip}` })
+    toast.info('Filter applied'` })
   }
 
   const handleBlockIP = (ip: string) => {
@@ -848,7 +848,7 @@ export default function AccessLogsClient() {
         resource: '/alerts/create',
         metadata: { action: 'alert_created' }
       })
-      toast.success('Alert created', { description: 'You will be notified of suspicious activity' })
+      toast.success('Alert created')
     } catch {
       toast.error('Failed to create alert')
     }
@@ -908,14 +908,14 @@ export default function AccessLogsClient() {
         a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
         a.click()
         URL.revokeObjectURL(url)
-        toast.info('PDF export generated as JSON', { description: 'Full PDF support coming soon' })
+        toast.info('PDF export generated as JSON')
       }
 
-      toast.success('Export completed', { description: `Exported ${exportDateRange} of access logs as ${exportFormat.toUpperCase()}` })
+      toast.success('Export completed' of access logs as ${exportFormat.toUpperCase()}` })
       setShowExportDialog(false)
     } catch (err) {
       console.error('Export error:', err)
-      toast.error('Export failed', { description: 'Please try again' })
+      toast.error('Export failed')
     } finally {
       setIsExporting(false)
     }
@@ -946,10 +946,10 @@ export default function AccessLogsClient() {
         metadata: { scope: auditScope, depth: auditDepth, score, issues, warnings, passed }
       })
 
-      toast.success('Audit completed', { description: `Security score: ${score}/100` })
+      toast.success('Audit completed'/100` })
     } catch (err) {
       console.error('Audit error:', err)
-      toast.error('Audit failed', { description: 'Please try again' })
+      toast.error('Audit failed')
     } finally {
       setIsAuditing(false)
     }
@@ -970,8 +970,7 @@ export default function AccessLogsClient() {
         }
       })
 
-      toast.success('Alert configuration saved', {
-        description: `Alerts ${alertEnabled ? 'enabled' : 'disabled'} with ${alertThreshold}% threshold over ${alertTimeWindow}`
+      toast.success('Alert configuration saved' with ${alertThreshold}% threshold over ${alertTimeWindow}`
       })
       setShowAlertConfigDialog(false)
     } catch (err) {
@@ -1019,7 +1018,7 @@ export default function AccessLogsClient() {
           }
         }
       })
-      toast.success('View saved', { description: `"${newViewName}" has been saved` })
+      toast.success('View saved'" has been saved` })
       setShowSaveViewDialog(false)
       setNewViewName('')
       setNewViewDefault(false)
@@ -1041,7 +1040,7 @@ export default function AccessLogsClient() {
         resource: '/integrations/webhook',
         metadata: { action: 'webhook_connected', url: webhookUrl }
       })
-      toast.success('Webhook connected', { description: 'Your webhook endpoint is now active' })
+      toast.success('Webhook connected')
       setShowWebhookDialog(false)
       setWebhookUrl('')
       setWebhookSecret('')
@@ -1061,7 +1060,7 @@ export default function AccessLogsClient() {
   const handleShareLog = (log: AccessLog) => {
     const shareUrl = `${window.location.origin}/logs/${log.requestId}`
     navigator.clipboard.writeText(shareUrl)
-    toast.success('Share link copied', { description: 'Link to this log entry has been copied' })
+    toast.success('Share link copied')
   }
 
   // Quick action handlers for Logs tab
@@ -1101,29 +1100,29 @@ export default function AccessLogsClient() {
   const handlePatternsQuickAction = (label: string) => {
     switch (label) {
       case 'Find Pattern':
-        toast.info('Pattern search', { description: 'Searching for recurring patterns...' })
+        toast.info('Pattern search')
         break
       case 'Set Alert':
         setShowAlertConfigDialog(true)
         break
       case 'Investigate':
-        toast.info('Investigation started', { description: 'Analyzing suspicious patterns...' })
+        toast.info('Investigation started')
         break
       case 'Export':
         setShowExportDialog(true)
         break
       case 'Archive':
-        toast.success('Patterns archived', { description: 'Selected patterns have been archived' })
+        toast.success('Patterns archived')
         break
       case 'Tag Pattern':
-        toast.info('Tag pattern', { description: 'Select a pattern to tag' })
+        toast.info('Tag pattern')
         break
       case 'Dismiss':
-        toast.success('Pattern dismissed', { description: 'Pattern removed from view' })
+        toast.success('Pattern dismissed')
         break
       case 'Share':
         navigator.clipboard.writeText(`${window.location.origin}/logs/patterns`)
-        toast.success('Link copied', { description: 'Patterns link copied to clipboard' })
+        toast.success('Link copied')
         break
       default:
         toast.info(`${label} clicked`)
@@ -2283,7 +2282,7 @@ export default function AccessLogsClient() {
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Access Log Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

@@ -937,30 +937,30 @@ export default function MarketingClient() {
   }, [searchQuery, leadFilter])
 
   // Handlers
-  const handleCreateCampaign = () => toast.info('Create', { description: 'Opening builder...' })
-  const handleLaunchCampaign = (n: string) => toast.success('Launched', { description: `"${n}" is live` })
-  const handlePauseCampaign = (n: string) => toast.info('Paused', { description: `"${n}" paused` })
-  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleCreateCampaign = () => toast.info('Create')
+  const handleLaunchCampaign = (n: string) => toast.success('Launched'" is live` })
+  const handlePauseCampaign = (n: string) => toast.info('Paused'" paused` })
+  const handleExportAnalytics = () => toast.success('Exporting')
   const handleAddLead = () => {
-    toast.info('Add Lead', { description: 'Opening lead capture form...' })
+    toast.info('Add Lead')
   }
   const handleNewSequence = () => {
-    toast.info('New Sequence', { description: 'Opening email sequence builder...' })
+    toast.info('New Sequence')
   }
   const handleCreateContent = () => {
-    toast.info('Create Content', { description: 'Opening content editor...' })
+    toast.info('Create Content')
   }
   const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', { description: 'Opening workflow builder...' })
+    toast.info('Create Workflow')
   }
   const handleSendEmail = (leadName: string) => {
-    toast.info('Send Email', { description: `Composing email to ${leadName}...` })
+    toast.info('Send Email'...` })
   }
   const handleLogCall = (leadName: string) => {
-    toast.info('Log Call', { description: `Recording call with ${leadName}...` })
+    toast.info('Log Call'...` })
   }
   const handleScheduleMeeting = (leadName: string) => {
-    toast.info('Schedule Meeting', { description: `Scheduling meeting with ${leadName}...` })
+    toast.info('Schedule Meeting'...` })
   }
   const handleQuickAction = (label: string) => {
     toast.success(`${label} opened`)
@@ -1899,10 +1899,10 @@ export default function MarketingClient() {
             <div className="mt-6">
               <ActivityFeed
                 activities={mockActivities}
-                onMarkRead={(id) => toast.success('Marked as read', { description: `Activity ${id} marked as read` })}
-                onMarkAllRead={() => toast.success('All marked as read', { description: 'All activities marked as read' })}
-                onPin={(id) => toast.success('Activity pinned', { description: `Activity ${id} has been pinned` })}
-                onArchive={(id) => toast.success('Activity archived', { description: `Activity ${id} moved to archive` })}
+                onMarkRead={(id) => toast.success('Marked as read' marked as read` })}
+                onMarkAllRead={() => toast.success('All marked as read')}
+                onPin={(id) => toast.success('Activity pinned' has been pinned` })}
+                onArchive={(id) => toast.success('Activity archived' moved to archive` })}
               />
             </div>
           </TabsContent>

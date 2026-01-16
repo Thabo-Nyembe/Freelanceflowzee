@@ -53,7 +53,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
@@ -135,7 +134,6 @@ const emailAgentActivities = [
 
 export default function EmailAgentClient() {
   const { toast } = useToast();
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 

@@ -932,11 +932,11 @@ export default function MilestonesClient() {
 
   // Additional handlers (available for future use)
   const _handleAddDependency = (_milestoneId: string) => {
-    toast.info('Add Dependency', { description: 'Select a milestone to link' })
+    toast.info('Add Dependency')
   }
 
   const _handleExportTimeline = () => {
-    toast.success('Exporting timeline', { description: 'Timeline chart will be downloaded' })
+    toast.success('Exporting timeline')
   }
 
   return (
@@ -1858,7 +1858,7 @@ export default function MilestonesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="ms_sk_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('ms_sk_xxxxxxxxxxxxx'); toast.success('API Key Copied', { description: 'Key copied to clipboard' }); }}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('ms_sk_xxxxxxxxxxxxx'); toast.success('API Key Copied'); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1985,7 +1985,7 @@ export default function MilestonesClient() {
             <AIInsightsPanel
               insights={mockMilestonesAIInsights}
               title="Milestone Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

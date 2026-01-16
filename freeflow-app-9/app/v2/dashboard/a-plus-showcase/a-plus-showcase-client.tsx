@@ -53,7 +53,6 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('A-Plus-Showcase')
 
 // ============================================================================
-// A+++ UTILITIES
 // ============================================================================
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
@@ -86,7 +85,6 @@ import {
 } from 'lucide-react'
 
 // ============================================================================
-// A++++ TYPES
 // ============================================================================
 
 type ComponentCategory = 'ui' | 'layout' | 'animation' | 'data-display' | 'navigation' | 'feedback' | 'forms' | 'utilities'
@@ -145,40 +143,29 @@ type ShowcaseAction =
   | { type: 'TOGGLE_FAVORITES_ONLY' }
 
 // ============================================================================
-// A++++ REDUCER
 // ============================================================================
 
 function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): ShowcaseState {
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_COMPONENTS':
-      logger.info('Setting components', { count: action.components.length })
-      return { ...state, components: action.components }
+    case 'SET_COMPONENTS':      return { ...state, components: action.components }
 
-    case 'ADD_COMPONENT':
-      logger.info('Adding component', { componentId: action.component.id, name: action.component.name })
-      return { ...state, components: [action.component, ...state.components] }
+    case 'ADD_COMPONENT':      return { ...state, components: [action.component, ...state.components] }
 
-    case 'UPDATE_COMPONENT':
-      logger.info('Updating component', { componentId: action.component.id, name: action.component.name })
-      return {
+    case 'UPDATE_COMPONENT':      return {
         ...state,
         components: state.components.map(c => c.id === action.component.id ? action.component : c),
         selectedComponent: state.selectedComponent?.id === action.component.id ? action.component : state.selectedComponent
       }
 
-    case 'DELETE_COMPONENT':
-      logger.info('Deleting component', { componentId: action.componentId })
-      return {
+    case 'DELETE_COMPONENT':      return {
         ...state,
         components: state.components.filter(c => c.id !== action.componentId),
         selectedComponent: state.selectedComponent?.id === action.componentId ? null : state.selectedComponent
       }
 
-    case 'SELECT_COMPONENT':
-      logger.info('Selecting component', { componentId: action.component?.id })
-      return { ...state, selectedComponent: action.component }
+    case 'SELECT_COMPONENT':      return { ...state, selectedComponent: action.component }
 
     case 'SET_SEARCH':
       logger.debug('Search term updated', { searchTerm: action.searchTerm })
@@ -213,9 +200,7 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
       logger.debug('Clearing selected components')
       return { ...state, selectedComponents: [] }
 
-    case 'TOGGLE_FAVORITE':
-      logger.info('Toggling favorite', { componentId: action.componentId })
-      return {
+    case 'TOGGLE_FAVORITE':      return {
         ...state,
         components: state.components.map(c =>
           c.id === action.componentId ? { ...c, isFavorite: !c.isFavorite } : c
@@ -232,7 +217,6 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
 }
 
 // ============================================================================
-// A++++ MOCK DATA
 // ============================================================================
 
 function generateMockComponents(): ComponentShowcase[] {
@@ -290,14 +274,10 @@ function generateMockComponents(): ComponentShowcase[] {
       version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
       dependencies: ['react', 'typescript', 'tailwindcss'].slice(0, Math.floor(Math.random() * 3) + 1)
     }
-  })
-
-  logger.info('Mock components generated', { count: components.length })
-  return components
+  })  return components
 }
 
 // ============================================================================
-// A++++ CATEGORIES
 // ============================================================================
 
 interface CategoryOption {
@@ -319,7 +299,6 @@ const categoryOptions: CategoryOption[] = [
 ]
 
 // ============================================================================
-// A++++ FLOATING PARTICLE COMPONENT
 // ============================================================================
 
 const FloatingParticle: React.FC<{
@@ -345,7 +324,6 @@ const FloatingParticle: React.FC<{
 }
 
 // ============================================================================
-// A++++ MAIN COMPONENT
 // ============================================================================
 
 
@@ -382,7 +360,6 @@ export default function APlusShowcaseClient() {
   logger.debug('A+ showcase component mounting')
 
   // ============================================================================
-  // A++++ STATE MANAGEMENT
   // ============================================================================
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
@@ -436,27 +413,18 @@ export default function APlusShowcaseClient() {
   ]
 
   // ============================================================================
-  // A++++ LOAD DATA
   // ============================================================================
   useEffect(() => {
     const loadComponents = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
-      }
-
-      logger.info('Loading components', { userId })
-      try {
+      }      try {
         setIsLoading(true)
         setError(null)
 
         // Note: In production, this would fetch from /api/components
         const mockComponents = generateMockComponents()
-        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
-
-        logger.info('Components loaded successfully', { count: mockComponents.length, userId })
-        setIsLoading(false)
+        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })        setIsLoading(false)
         announce('Components loaded successfully', 'polite')
       } catch (err) {
         logger.error('Failed to load components', {
@@ -473,7 +441,6 @@ export default function APlusShowcaseClient() {
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
-  // A++++ COMPUTED VALUES
   // ============================================================================
   const stats = useMemo(() => {
     logger.debug('Computing component stats')
@@ -554,35 +521,16 @@ export default function APlusShowcaseClient() {
   }, [state.components, state.searchTerm, state.filterCategory, state.filterDifficulty, state.sortBy, state.showFavoritesOnly])
 
   // ============================================================================
-  // A++++ HANDLERS
   // ============================================================================
 
-  const handleViewComponent = (component: ComponentShowcase) => {
-    logger.info('Opening component view', {
-      componentId: component.id,
-      name: component.name,
-      category: component.category,
-      difficulty: component.difficulty,
-      popularity: component.popularity,
-      downloads: component.downloads
-    })
-
-    dispatch({ type: 'SELECT_COMPONENT', component })
+  const handleViewComponent = (component: ComponentShowcase) => {    dispatch({ type: 'SELECT_COMPONENT', component })
     setShowViewModal(true)
   }
 
-  const handleCopyCode = async (code: string, componentName: string) => {
-    logger.info('Copying code to clipboard', { componentName, codeLength: code.length })
-
-    try {
+  const handleCopyCode = async (code: string, componentName: string) => {    try {
       await navigator.clipboard.writeText(code)
       const lines = code.split('\n').length
-      const chars = code.length
-
-      logger.info('Code copied successfully', { componentName, lines, chars })
-
-      toast.success('Code copied to clipboard', {
-        description: `${componentName} - ${lines} lines - ${chars} characters - Ready to paste`
+      const chars = code.length      toast.success('Code copied to clipboard' - ${lines} lines - ${chars} characters - Ready to paste`
       })
       announce('Code copied to clipboard', 'polite')
     } catch (err) {
@@ -591,16 +539,7 @@ export default function APlusShowcaseClient() {
     }
   }
 
-  const handleDownloadComponent = (component: ComponentShowcase) => {
-    logger.info('Downloading component', {
-      componentId: component.id,
-      name: component.name,
-      category: component.category,
-      version: component.version,
-      language: component.language
-    })
-
-    // Generate real file download
+  const handleDownloadComponent = (component: ComponentShowcase) => {    // Generate real file download
     const fileName = `${component.name.replace(/\s+/g, '-').toLowerCase()}-${component.version}.${component.language === 'typescript' || component.language === 'tsx' ? 'tsx' : 'jsx'}`
     const blob = new Blob([component.code], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -618,17 +557,7 @@ export default function APlusShowcaseClient() {
     dispatch({ type: 'UPDATE_COMPONENT', component: updatedComponent })
 
     const fileSizeKB = (blob.size / 1024).toFixed(1)
-    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)
-
-    logger.info('Component downloaded successfully', {
-      componentId: component.id,
-      fileName,
-      fileSize: blob.size,
-      totalDownloads: updatedComponent.downloads
-    })
-
-    toast.success(`${component.name} downloaded`, {
-      description: `${fileName} - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`
+    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)    toast.success(`${component.name} downloaded` - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`
     })
     announce(`Downloaded ${component.name}`, 'polite')
   }
@@ -637,43 +566,21 @@ export default function APlusShowcaseClient() {
     const component = state.components.find(c => c.id === componentId)
 
     if (component) {
-      const newState = !component.isFavorite
-
-      logger.info('Toggling favorite', {
-        componentId,
-        name: component.name,
-        currentState: component.isFavorite,
-        newState
-      })
-
-      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
+      const newState = !component.isFavorite      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
 
       const popularityK = (component.popularity / 1000).toFixed(1)
 
-      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites', {
-        description: `${component.name} - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`
+      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites' - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`
       })
     }
   }
 
-  const handleShareComponent = async (component: ComponentShowcase) => {
-    logger.info('Sharing component', {
-      componentId: component.id,
-      name: component.name,
-      category: component.category
-    })
-
-    const shareUrl = `https://kazi.com/components/${component.id}`
+  const handleShareComponent = async (component: ComponentShowcase) => {    const shareUrl = `https://kazi.com/components/${component.id}`
 
     try {
-      await navigator.clipboard.writeText(shareUrl)
+      await navigator.clipboard.writeText(shareUrl)      const downloadsK = (component.downloads / 1000).toFixed(1)
 
-      logger.info('Share link copied successfully', { componentId: component.id, shareUrl })
-
-      const downloadsK = (component.downloads / 1000).toFixed(1)
-
-      toast.success('Share link copied to clipboard', {
-        description: `${component.name} - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`
+      toast.success('Share link copied to clipboard' - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`
       })
       announce('Share link copied', 'polite')
     } catch (err) {
@@ -686,7 +593,6 @@ export default function APlusShowcaseClient() {
   }
 
   // ============================================================================
-  // A++++ DIALOG HANDLERS
   // ============================================================================
 
   const handleCreateNewComponent = () => {
@@ -717,12 +623,7 @@ export default function APlusShowcaseClient() {
       dependencies: ['react', 'typescript']
     }
 
-    dispatch({ type: 'ADD_COMPONENT', component: newComponent })
-
-    logger.info('New component created', { componentId: newComponent.id, name: newComponent.name })
-
-    toast.success('Component created successfully', {
-      description: `${newComponent.name} has been added to the ${selectedCategory} category`
+    dispatch({ type: 'ADD_COMPONENT', component: newComponent })    toast.success('Component created successfully' has been added to the ${selectedCategory} category`
     })
 
     // Reset form
@@ -778,17 +679,7 @@ export default function APlusShowcaseClient() {
     a.href = url
     a.download = fileName
     a.click()
-    URL.revokeObjectURL(url)
-
-    logger.info('Showcase exported', {
-      format: exportFormat,
-      componentCount: exportData.length,
-      includeCode: exportIncludeCode,
-      includePremium: exportIncludePremium
-    })
-
-    toast.success('Export completed', {
-      description: `${exportData.length} components exported as ${exportFormat.toUpperCase()}`
+    URL.revokeObjectURL(url)    toast.success('Export completed' components exported as ${exportFormat.toUpperCase()}`
     })
 
     setShowExportDialog(false)
@@ -797,16 +688,7 @@ export default function APlusShowcaseClient() {
 
   const handleSaveSettings = () => {
     // Apply view mode setting
-    dispatch({ type: 'SET_VIEW_MODE', viewMode: settingsViewMode })
-
-    logger.info('Settings saved', {
-      viewMode: settingsViewMode,
-      autoSave: settingsAutoSave,
-      notifications: settingsNotifications
-    })
-
-    toast.success('Settings saved', {
-      description: `View mode: ${settingsViewMode}, Auto-save: ${settingsAutoSave ? 'On' : 'Off'}, Notifications: ${settingsNotifications ? 'On' : 'Off'}`
+    dispatch({ type: 'SET_VIEW_MODE', viewMode: settingsViewMode })    toast.success('Settings saved', Auto-save: ${settingsAutoSave ? 'On' : 'Off'}, Notifications: ${settingsNotifications ? 'On' : 'Off'}`
     })
 
     setShowSettingsDialog(false)
@@ -829,7 +711,6 @@ export default function APlusShowcaseClient() {
   }
 
   // ============================================================================
-  // A++++ LOADING STATE
   // ============================================================================
   if (isLoading) {
     return (
@@ -862,7 +743,6 @@ export default function APlusShowcaseClient() {
   }
 
   // ============================================================================
-  // A++++ ERROR STATE
   // ============================================================================
   if (error) {
     return (
@@ -882,7 +762,6 @@ export default function APlusShowcaseClient() {
   }
 
   // ============================================================================
-  // A++++ MAIN RENDER
   // ============================================================================
   return (
     <div className="p-6 space-y-6 min-h-screen relative">

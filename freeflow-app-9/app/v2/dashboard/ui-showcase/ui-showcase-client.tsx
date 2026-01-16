@@ -26,7 +26,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -70,13 +69,10 @@ export default function UiShowcaseClient() {
   const { announce } = useAnnouncer()
 
   React.useEffect(() => {
-    if (userId) {
-      logger.info('UI Showcase loaded', { userId })
-      announce('UI showcase loaded', 'polite')
+    if (userId) {      announce('UI showcase loaded', 'polite')
     }
   }, [userId, announce])
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -167,7 +163,6 @@ export default function UiShowcaseClient() {
     announce('Settings saved', 'polite')
   }
 
-  // A+++ LOAD UI SHOWCASE DATA
   useEffect(() => {
     const loadUIShowcaseData = async () => {
       try {
@@ -203,7 +198,6 @@ export default function UiShowcaseClient() {
     }, 2000)
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 p-6">
@@ -219,7 +213,6 @@ export default function UiShowcaseClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="h-full overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 p-6">
