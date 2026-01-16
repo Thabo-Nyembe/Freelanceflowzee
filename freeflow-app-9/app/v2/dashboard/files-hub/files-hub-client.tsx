@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -444,7 +443,7 @@ interface DbFolder {
 }
 
 export default function FilesHubClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('files')
@@ -484,6 +483,8 @@ export default function FilesHubClient() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -530,7 +531,7 @@ export default function FilesHubClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -607,6 +608,8 @@ export default function FilesHubClient() {
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -614,6 +617,8 @@ export default function FilesHubClient() {
         ? folders.find(f => f.id === currentFolderId)?.path || '/'
         : '/'
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('folders').insert({
         user_id: user.id,
         parent_id: currentFolderId,
@@ -636,6 +641,8 @@ export default function FilesHubClient() {
 
   const handleDeleteFile = async (fileId: string, fileName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
       toast.success('File deleted' moved to trash` })
@@ -647,6 +654,8 @@ export default function FilesHubClient() {
 
   const handleToggleStar = async (fileId: string, currentlyStarred: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({ is_starred: !currentlyStarred }).eq('id', fileId)
       if (error) throw error
       toast.success(currentlyStarred ? 'Removed from starred' : 'Added to starred')
@@ -658,9 +667,13 @@ export default function FilesHubClient() {
 
   const handleShareFile = async (fileId: string, fileName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('file_shares').insert({
         file_id: fileId,
         shared_by: user.id,
@@ -669,6 +682,8 @@ export default function FilesHubClient() {
       })
       if (error) throw error
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
       toast.success('File shared'` })
       fetchData()
@@ -679,6 +694,8 @@ export default function FilesHubClient() {
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
       toast.success('Folder deleted'" has been deleted` })
