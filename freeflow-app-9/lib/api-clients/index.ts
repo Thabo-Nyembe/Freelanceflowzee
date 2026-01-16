@@ -220,3 +220,29 @@ export {
   useUpdateBookingStatus,
   useCalendarStats
 } from './use-calendar'
+
+// Notifications
+export { notificationsClient } from './notifications-client'
+export type {
+  Notification,
+  NotificationAction,
+  NotificationPreferences,
+  CreateNotificationData,
+  NotificationFilters,
+  NotificationStats
+} from './notifications-client'
+
+export {
+  useNotifications,
+  useNotification,
+  useCreateNotification,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useArchiveNotification,
+  useTogglePin,
+  useDeleteNotification,
+  useDeleteAllArchived,
+  useNotificationPreferences,
+  useUpdatePreferences,
+  useNotificationStats
+} from './use-notifications'

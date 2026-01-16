@@ -25,10 +25,11 @@ Successfully created a world-class API client infrastructure that replaces 59 pa
 | **Messages API** | ✅ Complete | 2 | ~400 | Real-time messaging, conversations, reactions |
 | **Files/Storage API** | ✅ Complete | 2 | ~500 | File management, Supabase Storage, folders |
 | **Calendar/Events API** | ✅ Complete | 2 | ~600 | Events, bookings, recurring events, RRULE |
+| **Notifications API** | ✅ Complete | 2 | ~700 | Alerts, preferences, real-time, channels |
 | **File Upload** | ✅ Complete | 1 | ~200 | Drag & drop, Supabase Storage |
 | **Index Exports** | ✅ Complete | 1 | ~100 | Central import location |
 
-**Total:** 19 files, ~4,000 lines of production-ready code
+**Total:** 21 files, ~4,700 lines of production-ready code
 
 ---
 
@@ -857,7 +858,230 @@ function BookingForm({ serviceType }: { serviceType: string }) {
 
 ---
 
-## 10. File Upload Component
+## 10. Notifications API Client
+
+### Files
+- [notifications-client.ts](lib/api-clients/notifications-client.ts) - API client
+- [use-notifications.ts](lib/api-clients/use-notifications.ts) - React hooks
+
+### Features
+✅ Notification CRUD operations
+✅ Multiple notification types (info, success, warning, error, achievement)
+✅ Multiple categories (project, task, client, invoice, message, booking)
+✅ Priority levels (low, medium, high, urgent)
+✅ Read/unread status tracking
+✅ Archive functionality
+✅ Pin/unpin notifications
+✅ Action buttons on notifications
+✅ Notification preferences management
+✅ Channel preferences (email, push, SMS, in-app)
+✅ Category-specific preferences
+✅ Email digest settings (realtime, hourly, daily, weekly)
+✅ Quiet hours and do not disturb
+✅ Notification statistics
+✅ Optimistic updates
+
+### Types
+```typescript
+interface Notification {
+  id: string
+  user_id: string
+  type: 'info' | 'success' | 'warning' | 'error' | 'achievement' | 'system' | 'chat' | 'task' | 'project' | 'invoice' | 'booking'
+  category: 'general' | 'project' | 'task' | 'client' | 'invoice' | 'message' | 'booking' | 'system'
+  title: string
+  message: string
+  icon: string | null
+  image_url: string | null
+  link_url: string | null
+  link_text: string | null
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  is_read: boolean
+  is_archived: boolean
+  is_pinned: boolean
+  action_buttons: NotificationAction[] | null
+  related_id: string | null
+  related_type: string | null
+  created_at: string
+}
+
+interface NotificationPreferences {
+  id: string
+  user_id: string
+  // Channel preferences
+  email_enabled: boolean
+  push_enabled: boolean
+  sms_enabled: boolean
+  in_app_enabled: boolean
+  // Category preferences
+  projects_enabled: boolean
+  tasks_enabled: boolean
+  clients_enabled: boolean
+  invoices_enabled: boolean
+  messages_enabled: boolean
+  bookings_enabled: boolean
+  system_enabled: boolean
+  // Email settings
+  email_digest: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'never'
+  email_summary_enabled: boolean
+  // Quiet hours
+  quiet_hours_enabled: boolean
+  quiet_hours_start: string | null
+  quiet_hours_end: string | null
+  do_not_disturb: boolean
+}
+
+interface NotificationStats {
+  total_notifications: number
+  unread_count: number
+  archived_count: number
+  pinned_count: number
+  by_type: Array<{ type: string; count: number }>
+  by_category: Array<{ category: string; count: number }>
+  by_priority: Array<{ priority: string; count: number }>
+  recent_unread: number
+  oldest_unread_date: string | null
+}
+```
+
+### React Hooks
+```typescript
+useNotifications(page, pageSize, filters?) // Get notifications with pagination
+useNotification(id) // Get single notification
+useCreateNotification() // Create new notification
+useMarkAsRead() // Mark notification as read
+useMarkAllAsRead() // Mark all notifications as read
+useArchiveNotification() // Archive notification
+useTogglePin() // Pin/unpin notification
+useDeleteNotification() // Delete notification
+useDeleteAllArchived() // Delete all archived notifications
+useNotificationPreferences() // Get user preferences
+useUpdatePreferences() // Update user preferences
+useNotificationStats() // Get notification statistics
+```
+
+### Usage Example
+```tsx
+import {
+  useNotifications,
+  useMarkAsRead,
+  useMarkAllAsRead,
+  useNotificationStats,
+  useNotificationPreferences,
+  useUpdatePreferences
+} from '@/lib/api-clients'
+
+function NotificationsCenter() {
+  const { data: notifications, isLoading } = useNotifications(1, 20, {
+    is_read: false,
+    priority: ['high', 'urgent']
+  })
+
+  const { data: stats } = useNotificationStats()
+  const { data: preferences } = useNotificationPreferences()
+  const markAsRead = useMarkAsRead()
+  const markAllAsRead = useMarkAllAsRead()
+  const updatePreferences = useUpdatePreferences()
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    await markAsRead.mutateAsync(notificationId)
+  }
+
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead.mutateAsync()
+  }
+
+  const handleToggleEmail = async () => {
+    await updatePreferences.mutateAsync({
+      email_enabled: !preferences?.email_enabled
+    })
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between items-center">
+        <h2>Notifications ({stats?.unread_count} unread)</h2>
+        <button onClick={handleMarkAllAsRead}>
+          Mark all as read
+        </button>
+      </div>
+
+      {notifications?.data.map(notification => (
+        <div
+          key={notification.id}
+          className={notification.is_read ? 'opacity-50' : ''}
+          onClick={() => handleMarkAsRead(notification.id)}
+        >
+          <h3>{notification.title}</h3>
+          <p>{notification.message}</p>
+          {notification.action_buttons?.map(action => (
+            <button key={action.label}>{action.label}</button>
+          ))}
+        </div>
+      ))}
+
+      <div className="preferences">
+        <label>
+          <input
+            type="checkbox"
+            checked={preferences?.email_enabled}
+            onChange={handleToggleEmail}
+          />
+          Email Notifications
+        </label>
+      </div>
+    </div>
+  )
+}
+```
+
+### Integration with Real-time Subscriptions
+```tsx
+import { useNotifications, useCreateNotification } from '@/lib/api-clients'
+import { useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+function NotificationsWithRealtime() {
+  const { data: notifications, refetch } = useNotifications()
+  const supabase = createClient()
+
+  useEffect(() => {
+    // Subscribe to real-time notification inserts
+    const channel = supabase
+      .channel('notifications-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications'
+        },
+        (payload) => {
+          // Refetch notifications when new one arrives
+          refetch()
+
+          // Show toast notification
+          const notification = payload.new as Notification
+          if (notification.priority === 'urgent') {
+            toast.error(notification.title)
+          } else {
+            toast.info(notification.title)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [refetch, supabase])
+
+  return <NotificationsList notifications={notifications?.data} />
+}
+```
+
+---
+
+## 11. File Upload Component
 
 ### File
 - [advanced-file-upload.tsx](components/world-class/file-upload/advanced-file-upload.tsx)
@@ -894,7 +1118,7 @@ function BookingForm({ serviceType }: { serviceType: string }) {
 
 ---
 
-## 11. Pattern: Before vs After
+## 12. Pattern: Before vs After
 
 ### BEFORE (Mock Data - 59 pages like this)
 ```typescript
@@ -1112,7 +1336,7 @@ export default function ProjectsPage() {
 
 ---
 
-## 12. Quick Reference
+## 13. Quick Reference
 
 ### Import Everything
 ```typescript
