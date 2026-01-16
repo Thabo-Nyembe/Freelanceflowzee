@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -384,61 +385,94 @@ export default function AIDesignClient() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [generations, setGenerations] = useState<Generation[]>(mockGenerations)
+  // Database integration via hook
+  const {
+    designs: dbDesigns,
+    stats: dbStats,
+    isLoading: isLoadingDesigns,
+    isGenerating: isGeneratingHook,
+    error: designsError,
+    fetchDesigns,
+    createDesign,
+    updateDesign,
+    likeDesign,
+    incrementViews,
+    deleteDesign
+  } = useAIDesigns([])
+
+  // Keep mock data for collections and prompt history (no hooks available yet)
   const [collections, setCollections] = useState<Collection[]>(mockCollections)
   const [promptHistory, setPromptHistory] = useState<PromptHistory[]>(mockPromptHistory)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch AI design projects from Supabase
-  const fetchGenerations = useCallback(async () => {
-    try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('ai_design_projects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      if (data && data.length > 0) {
-        const mapped: Generation[] = data.map((p: any) => ({
-          id: p.id,
-          prompt: p.prompt || '',
-          negativePrompt: p.parameters?.negative_prompt,
-          style: p.parameters?.style || 'photorealistic',
-          model: p.model?.replace('-', '_') || 'midjourney_v6',
-          aspectRatio: p.parameters?.aspect_ratio || '1:1',
-          quality: p.parameters?.quality || 'high',
-          status: p.status === 'generating' ? 'processing' : p.status || 'pending',
-          imageUrl: p.parameters?.image_url,
-          thumbnailUrl: p.parameters?.thumbnail_url,
-          seed: p.parameters?.seed,
-          likes: p.parameters?.likes || 0,
-          views: p.parameters?.views || 0,
-          downloads: p.parameters?.downloads || 0,
-          isFavorite: p.parameters?.is_favorite || false,
-          isPublic: p.parameters?.is_public || false,
-          createdAt: p.created_at,
-          generationTime: p.parameters?.generation_time,
-          creditsUsed: p.parameters?.credits_used || 5
-        }))
-        setGenerations(mapped)
-      }
-    } catch (err) {
-      console.error('Error fetching generations:', err)
-    }
-  }, [])
-
+  // Fetch designs on mount
   useEffect(() => {
-    fetchGenerations()
-  }, [fetchGenerations])
+    fetchDesigns()
+  }, [fetchDesigns])
+
+  // Schema mapping: DB AIDesign → UI Generation
+  const styleMap: Record<DBAIDesign['style'], StylePreset> = {
+    'modern': 'digital_art',
+    'minimalist': 'minimalist',
+    'creative': 'digital_art',
+    'professional': 'photorealistic',
+    'abstract': 'digital_art',
+    'vintage': 'vintage'
+  }
+
+  const modelMap: Record<string, ModelType> = {
+    'midjourney-v6': 'midjourney_v6',
+    'midjourney-v5': 'midjourney_v5',
+    'dalle-3': 'dalle_3',
+    'dall-e-3': 'dalle_3',
+    'stable-diffusion': 'stable_diffusion',
+    'flux-pro': 'flux_pro'
+  }
+
+  const aspectRatioFromResolution = (resolution: string): AspectRatio => {
+    if (!resolution) return '1:1'
+    const [width, height] = resolution.split('x').map(Number)
+    if (!width || !height) return '1:1'
+    const ratio = width / height
+    if (Math.abs(ratio - 1) < 0.1) return '1:1'
+    if (Math.abs(ratio - 16/9) < 0.1) return '16:9'
+    if (Math.abs(ratio - 9/16) < 0.1) return '9:16'
+    if (Math.abs(ratio - 4/3) < 0.1) return '4:3'
+    if (Math.abs(ratio - 3/4) < 0.1) return '3:4'
+    if (Math.abs(ratio - 2/3) < 0.1) return '2:3'
+    if (Math.abs(ratio - 3/2) < 0.1) return '3:2'
+    return '1:1'
+  }
+
+  const generations: Generation[] = useMemo(() => {
+    if (!dbDesigns || dbDesigns.length === 0) return []
+
+    return dbDesigns.map((dbDesign): Generation => ({
+      id: dbDesign.id,
+      prompt: dbDesign.prompt,
+      negativePrompt: '',
+      style: styleMap[dbDesign.style] || 'digital_art',
+      model: modelMap[dbDesign.model] || 'midjourney_v6',
+      aspectRatio: aspectRatioFromResolution(dbDesign.resolution),
+      quality: 'standard' as QualityLevel,
+      status: (dbDesign.status === 'processing' ? 'processing' :
+               dbDesign.status === 'completed' ? 'completed' :
+               dbDesign.status === 'failed' ? 'failed' : 'pending') as GenerationStatus,
+      imageUrl: dbDesign.output_url || undefined,
+      thumbnailUrl: dbDesign.thumbnail_url || undefined,
+      seed: dbDesign.seed || undefined,
+      likes: dbDesign.likes,
+      views: dbDesign.views,
+      downloads: dbDesign.downloads,
+      isFavorite: false,
+      isPublic: dbDesign.is_public,
+      variations: dbDesign.output_urls.length > 1 ? dbDesign.output_urls : undefined,
+      upscaledUrl: undefined,
+      createdAt: dbDesign.created_at,
+      generationTime: dbDesign.generation_time_ms,
+      creditsUsed: dbDesign.credits_used
+    }))
+  }, [dbDesigns])
 
   // Stats
   const stats: AIDesignStats = useMemo(() => ({
@@ -461,119 +495,94 @@ export default function AIDesignClient() {
 
   // Generate new image
   const handleGenerate = async () => {
-    if (!prompt.trim()) return
+    if (!prompt.trim()) {
+      toast.error('Prompt is required')
+      return
+    }
+
     setIsGenerating(true)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Authentication required')
-        return
+      // Map UI style to DB style
+      const dbStyleMap: Record<StylePreset, DBAIDesign['style']> = {
+        'photorealistic': 'professional',
+        'anime': 'creative',
+        'digital_art': 'modern',
+        'oil_painting': 'vintage',
+        'watercolor': 'vintage',
+        'sketch': 'minimalist',
+        '3d_render': 'modern',
+        'neon': 'creative',
+        'vintage': 'vintage',
+        'minimalist': 'minimalist'
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('ai_design_projects')
-        .insert({
-          user_id: user.id,
-          name: prompt.slice(0, 50),
-          type: 'batch-generate',
-          status: 'generating',
-          progress: 0,
-          tool_id: 'ai-image-gen',
+      const result = await createDesign(
+        prompt,
+        dbStyleMap[selectedStyle] || 'modern',
+        {
+          title: prompt.slice(0, 50),
           model: selectedModel.replace('_', '-'),
-          prompt: prompt,
-          parameters: {
-            negative_prompt: negativePrompt,
-            style: selectedStyle,
-            aspect_ratio: selectedRatio,
-            quality: selectedQuality,
-            credits_used: selectedQuality === 'ultra' ? 8 : selectedQuality === 'high' ? 5 : selectedQuality === 'standard' ? 3 : 2
-          }
-        })
-        .select()
-        .single()
+          resolution: selectedRatio === '1:1' ? '1024x1024' :
+                     selectedRatio === '16:9' ? '1536x864' :
+                     selectedRatio === '9:16' ? '864x1536' :
+                     '1024x1024',
+          tags: [selectedStyle, selectedModel]
+        }
+      )
 
-      if (error) throw error
-
-      toast.success('Generation started')
-      setPrompt('')
-      setNegativePrompt('')
-      fetchGenerations()
+      if (result) {
+        toast.success('Design generation started!')
+        setPrompt('')
+        setNegativePrompt('')
+      } else {
+        toast.error('Failed to start generation')
+      }
     } catch (err: any) {
-      toast.error('Generation failed')
+      console.error('Generation error:', err)
+      toast.error(err.message || 'Generation failed')
     } finally {
       setIsGenerating(false)
     }
   }
 
-  // Toggle favorite
+  // Toggle favorite (client-side only - DB doesn't have is_favorite field)
   const handleToggleFavorite = async (gen: Generation) => {
-    try {
-      const newFavorite = !gen.isFavorite
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('ai_design_projects')
-        .update({ parameters: { ...gen, is_favorite: newFavorite } })
-        .eq('id', gen.id)
-
-      if (error) throw error
-
-      setGenerations(prev => prev.map(g =>
-        g.id === gen.id ? { ...g, isFavorite: newFavorite } : g
-      ))
-      toast.success(newFavorite ? 'Added to favorites' : 'Removed from favorites')
-    } catch (err: any) {
-      toast.error('Update failed')
-    }
+    // Note: ai_designs table doesn't have is_favorite, using is_public as proxy for now
+    toast.info('Favorites feature coming soon')
   }
 
   // Delete generation
   const handleDeleteGeneration = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('ai_design_projects')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
-      setGenerations(prev => prev.filter(g => g.id !== id))
+      await deleteDesign(id)
       setShowGenerationDialog(false)
-      toast.success('Generation deleted')
+      toast.success('Design deleted successfully')
     } catch (err: any) {
-      toast.error('Delete failed')
+      console.error('Delete error:', err)
+      toast.error(err.message || 'Failed to delete design')
     }
   }
 
   // Download handler
   const handleDownloadDesign = async (gen: Generation) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('ai_design_projects')
-        .update({
-          parameters: {
-            ...gen,
-            downloads: (gen.downloads || 0) + 1
-          }
-        })
-        .eq('id', gen.id)
+      if (!gen.imageUrl) {
+        toast.error('No image available to download')
+        return
+      }
 
-      if (error) throw error
+      // Create download link
+      const link = document.createElement('a')
+      link.href = gen.imageUrl
+      link.download = `design-${gen.id}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
 
-      setGenerations(prev => prev.map(g =>
-        g.id === gen.id ? { ...g, downloads: g.downloads + 1 } : g
-      ))
       toast.success('Download started')
     } catch (err: any) {
+      console.error('Download error:', err)
       toast.error('Download failed')
     }
   }
@@ -590,15 +599,9 @@ export default function AIDesignClient() {
     toast.info('Settings loaded')
   }
 
-  // Create collection
+  // Create collection (client-side only - no hook available yet)
   const handleCreateCollection = async (name: string, description: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Using a generic approach since collection table may vary
       const newCollection: Collection = {
         id: crypto.randomUUID(),
         name,
@@ -609,7 +612,7 @@ export default function AIDesignClient() {
       }
 
       setCollections(prev => [newCollection, ...prev])
-      toast.success('Collection created'" is ready to use` })
+      toast.success('Collection created')
     } catch (err: any) {
       toast.error('Failed to create collection')
     }
@@ -619,7 +622,7 @@ export default function AIDesignClient() {
   const handleExportDesigns = async () => {
     setIsLoading(true)
     try {
-      toast.success('Export started' designs` })
+      toast.success('Export started')
     } finally {
       setIsLoading(false)
     }
