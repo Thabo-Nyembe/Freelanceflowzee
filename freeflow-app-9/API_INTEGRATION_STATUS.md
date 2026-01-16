@@ -375,7 +375,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1 hour
    - **Complexity:** Medium (schema mapping with default values, multiple filter integration)
 
-6. `ai-design-v2` - ✅ **MIGRATED** (2,132 lines, -47 net) - Commit: `TBD`
+6. `ai-design-v2` - ✅ **MIGRATED** (2,132 lines, -47 net) - Commit: `40be5e67`
    - **Pattern:** Hook integration with complex schema mapping (UI Generation ↔ DB AIDesign)
    - **Tables:** ai_designs (via use-ai-designs hook)
    - **Mapping:** Complex style/model mapping (DB: 'modern'/'midjourney-v6' → UI: 'digital_art'/'midjourney_v6'), field name mapping (output_url → imageUrl, thumbnail_url → thumbnailUrl, generation_time_ms → generationTime, is_public → isPublic), default values for missing UI fields (negativePrompt, aspectRatio, quality, isFavorite, variations, upscaledUrl)

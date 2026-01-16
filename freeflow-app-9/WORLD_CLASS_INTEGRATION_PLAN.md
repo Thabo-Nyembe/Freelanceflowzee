@@ -414,7 +414,7 @@ const mappedKeys: ApiKey[] = useMemo(() => dbKeys.map((dbKey): ApiKey => ({
 4. Sync mapped data to local state via useEffect
 5. Update all dependencies and references to use mapped data
 
-#### 6. ai-design-v2 ✅ (Commit: TBD)
+#### 6. ai-design-v2 ✅ (Commit: 40be5e67)
 **File:** `app/(app)/dashboard/ai-design-v2/ai-design-client.tsx` (2,132 lines)
 **Migration Date:** January 16, 2026
 **Complexity:** Medium-High (complex schema mapping with style/model enums, multiple field transformations)
