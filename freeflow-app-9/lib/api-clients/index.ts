@@ -132,3 +132,31 @@ export {
   usePerformanceMetrics,
   usePredictiveInsights
 } from './use-analytics'
+
+// Messages/Chat
+export { messagesClient } from './messages-client'
+export type {
+  Message,
+  MessageAttachment,
+  MessageReaction,
+  Conversation,
+  ConversationParticipant,
+  CreateMessageData,
+  UpdateMessageData,
+  CreateConversationData,
+  MessageFilters,
+  ConversationFilters,
+  MessagingStats
+} from './messages-client'
+
+export {
+  useConversations,
+  useMessages,
+  useSendMessage,
+  useMarkAsRead,
+  useMarkConversationAsRead,
+  useDeleteMessage,
+  useCreateConversation,
+  useMessagingStats,
+  useAddReaction
+} from './use-messages'
