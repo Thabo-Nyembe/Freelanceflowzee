@@ -92,7 +92,6 @@ import {
   UsersRound
 } from "lucide-react";
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -102,7 +101,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 const logger = createFeatureLogger('Collaboration')
 
 export default function CollaborationPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -143,21 +141,15 @@ export default function CollaborationPage() {
     { id: 6, type: 'image', name: 'mockup-v2.png', size: '3.1 MB', date: '5 days ago', url: '/placeholder-image.jpg' }
   ]
 
-  // A+++ LOAD COLLABORATION DATA
   useEffect(() => {
     const loadCollaborationData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading collaboration data', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getChannels, getTeams, getMeetings, getWorkspaceFiles } = await import('@/lib/collaboration-queries')
 
         // Load collaboration data in parallel
@@ -174,20 +166,13 @@ export default function CollaborationPage() {
         setWorkspaceFiles(filesResult.data || [])
 
         setIsLoading(false)
-        toast.success(`Collaboration loaded - ${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`)
-        logger.info('Collaboration data loaded successfully', {
-          channelsCount: channelsResult.data?.length,
-          teamsCount: teamsResult.data?.length,
-          meetingsCount: meetingsResult.data?.length,
-          filesCount: filesResult.data?.length
-        })
-        announce('Collaboration data loaded successfully', 'polite')
+        toast.success(`Collaboration loaded - ${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`)        announce('Collaboration data loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load collaboration data'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load collaboration data', { error: errorMessage, userId })
-        toast.error('Failed to load collaboration', { description: errorMessage })
+        toast.error('Failed to load collaboration')
         announce('Error loading collaboration data', 'assertive')
       }
     }
@@ -196,9 +181,7 @@ export default function CollaborationPage() {
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers with enhanced logging
-  const handleStartAudioCall = async () => {
-    logger.info('Audio call started', { participants: 3 })
-    try {
+  const handleStartAudioCall = async () => {    try {
       // Request microphone permission for audio call
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       stream.getTracks().forEach(track => track.stop()) // Stop after getting permission
@@ -209,9 +192,7 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleStartVideoCall = async () => {
-    logger.info('Video call started', { participants: 3 })
-    try {
+  const handleStartVideoCall = async () => {    try {
       // Request camera and microphone permission for video call
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       stream.getTracks().forEach(track => track.stop()) // Stop after getting permission
@@ -224,9 +205,7 @@ export default function CollaborationPage() {
 
   const [messageInput, setMessageInput] = useState('')
 
-  const handleSendMessage = async () => {
-    logger.info('Message sent')
-    if (!messageInput.trim()) {
+  const handleSendMessage = async () => {    if (!messageInput.trim()) {
       toast.error('Please enter a message')
       return
     }
@@ -245,15 +224,11 @@ export default function CollaborationPage() {
 
   const [feedbackMode, setFeedbackMode] = useState(false)
 
-  const handleAddPinpointFeedback = () => {
-    logger.info('Pinpoint feedback mode activated')
-    setFeedbackMode(!feedbackMode)
+  const handleAddPinpointFeedback = () => {    setFeedbackMode(!feedbackMode)
     toast.success(feedbackMode ? 'Pinpoint feedback mode deactivated' : 'Pinpoint feedback mode active - Click on media to add feedback')
   }
 
-  const handleUploadFile = () => {
-    logger.info('File upload initiated')
-    const input = document.createElement('input')
+  const handleUploadFile = () => {    const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
     input.onchange = async (e) => {
@@ -285,9 +260,7 @@ export default function CollaborationPage() {
   const [isRecording, setIsRecording] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
 
-  const handleAddVoiceNote = async () => {
-    logger.info('Voice note recording started')
-    try {
+  const handleAddVoiceNote = async () => {    try {
       if (isRecording && mediaRecorderRef.current) {
         mediaRecorderRef.current.stop()
         setIsRecording(false)
@@ -302,9 +275,7 @@ export default function CollaborationPage() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' })
         stream.getTracks().forEach(track => track.stop())
-        // Could upload the blob here
-        logger.info('Voice note recorded', { size: blob.size })
-      }
+        // Could upload the blob here      }
       mediaRecorder.start()
       setIsRecording(true)
       toast.success('Recording voice note - Click again to stop')
@@ -314,9 +285,7 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleShareScreen = async () => {
-    logger.info('Screen sharing started')
-    try {
+  const handleShareScreen = async () => {    try {
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
       stream.getVideoTracks()[0].onended = () => {
         toast.info('Screen sharing stopped')
@@ -330,22 +299,16 @@ export default function CollaborationPage() {
 
   const [editingFeedbackId, setEditingFeedbackId] = useState<number | null>(null)
 
-  const handleEditFeedback = (id: number) => {
-    logger.info('Edit feedback', { feedbackId: id })
-    setEditingFeedbackId(id)
+  const handleEditFeedback = (id: number) => {    setEditingFeedbackId(id)
     toast.success('Edit mode active - Make your changes')
   }
 
-  const handleDeleteFeedback = (id: number) => {
-    logger.info('Delete feedback requested', { feedbackId: id })
-    setFeedbackToDelete(id)
+  const handleDeleteFeedback = (id: number) => {    setFeedbackToDelete(id)
     setShowDeleteFeedbackDialog(true)
   }
 
   const confirmDeleteFeedback = async () => {
-    if (feedbackToDelete !== null) {
-      logger.info('Feedback deleted', { feedbackId: feedbackToDelete })
-      const result = await apiCall(`/api/feedback/${feedbackToDelete}`, { method: 'DELETE' }, {
+    if (feedbackToDelete !== null) {      const result = await apiCall(`/api/feedback/${feedbackToDelete}`, { method: 'DELETE' }, {
         loading: 'Deleting feedback...',
         success: 'Feedback deleted',
         error: 'Failed to delete feedback'
@@ -360,15 +323,11 @@ export default function CollaborationPage() {
 
   const [replyingToMessageId, setReplyingToMessageId] = useState<number | null>(null)
 
-  const handleReplyToMessage = (id: number) => {
-    logger.info('Reply to message', { messageId: id })
-    setReplyingToMessageId(id)
+  const handleReplyToMessage = (id: number) => {    setReplyingToMessageId(id)
     toast.success('Reply mode active - Type your reply')
   }
 
-  const handleReactToMessage = async (id: number, emoji: string) => {
-    logger.info('Message reaction added', { messageId: id, emoji })
-    const result = await apiPost(`/api/messages/${id}/reactions`, { emoji }, {
+  const handleReactToMessage = async (id: number, emoji: string) => {    const result = await apiPost(`/api/messages/${id}/reactions`, { emoji }, {
       loading: 'Adding reaction...',
       success: 'Reaction added: ' + emoji,
       error: 'Failed to add reaction'
@@ -377,9 +336,7 @@ export default function CollaborationPage() {
 
   const [pinnedMessages, setPinnedMessages] = useState<number[]>([])
 
-  const handlePinMessage = async (id: number) => {
-    logger.info('Message pinned', { messageId: id })
-    const isPinned = pinnedMessages.includes(id)
+  const handlePinMessage = async (id: number) => {    const isPinned = pinnedMessages.includes(id)
     if (isPinned) {
       setPinnedMessages(prev => prev.filter(msgId => msgId !== id))
       toast.success('Message unpinned')
@@ -393,9 +350,7 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleArchiveConversation = async () => {
-    logger.info('Conversation archived')
-    const result = await apiPost('/api/conversations/archive', {
+  const handleArchiveConversation = async () => {    const result = await apiPost('/api/conversations/archive', {
       conversationId: channels[0]?.id || 'default'
     }, {
       loading: 'Archiving conversation...',
@@ -417,9 +372,7 @@ export default function CollaborationPage() {
     { id: 'user-5', name: 'Eric Taylor', email: 'eric@company.com', avatar: 'ET' },
   ]
 
-  const handleAddParticipants = () => {
-    logger.info('Add participants initiated')
-    setShowAddParticipantsDialog(true)
+  const handleAddParticipants = () => {    setShowAddParticipantsDialog(true)
   }
 
   const confirmAddParticipants = async () => {
@@ -444,16 +397,12 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleRemoveParticipant = (id: number) => {
-    logger.info('Remove participant requested', { participantId: id })
-    setParticipantToRemove(id)
+  const handleRemoveParticipant = (id: number) => {    setParticipantToRemove(id)
     setShowRemoveParticipantDialog(true)
   }
 
   const confirmRemoveParticipant = async () => {
-    if (participantToRemove !== null) {
-      logger.info('Participant removed', { participantId: participantToRemove })
-      const result = await apiCall(`/api/participants/${participantToRemove}`, { method: 'DELETE' }, {
+    if (participantToRemove !== null) {      const result = await apiCall(`/api/participants/${participantToRemove}`, { method: 'DELETE' }, {
         loading: 'Removing participant...',
         success: 'Participant removed',
         error: 'Failed to remove participant'
@@ -466,9 +415,7 @@ export default function CollaborationPage() {
     setParticipantToRemove(null)
   }
 
-  const handleExportChat = () => {
-    logger.info('Export chat history initiated')
-    // Create sample chat history data for export
+  const handleExportChat = () => {    // Create sample chat history data for export
     const chatHistory = {
       exported: new Date().toISOString(),
       channels: channels,
@@ -483,9 +430,7 @@ export default function CollaborationPage() {
 
   const [notificationsMuted, setNotificationsMuted] = useState(false)
 
-  const handleMuteNotifications = async () => {
-    logger.info('Notifications muted')
-    setNotificationsMuted(!notificationsMuted)
+  const handleMuteNotifications = async () => {    setNotificationsMuted(!notificationsMuted)
     const result = await apiPost('/api/notifications/settings', {
       muted: !notificationsMuted
     }, {
@@ -495,9 +440,7 @@ export default function CollaborationPage() {
     })
   }
 
-  const handleCreateCanvas = async () => {
-    logger.info('Canvas created')
-    const result = await apiPost('/api/canvas', {
+  const handleCreateCanvas = async () => {    const result = await apiPost('/api/canvas', {
       name: 'New Canvas',
       type: 'whiteboard'
     }, {
@@ -509,15 +452,11 @@ export default function CollaborationPage() {
 
   const [drawingMode, setDrawingMode] = useState(false)
 
-  const handleAddDrawing = () => {
-    logger.info('Drawing mode activated')
-    setDrawingMode(!drawingMode)
+  const handleAddDrawing = () => {    setDrawingMode(!drawingMode)
     toast.success(drawingMode ? 'Drawing mode deactivated' : 'Drawing mode activated')
   }
 
-  const handleSaveCanvas = async () => {
-    logger.info('Canvas saved')
-    const result = await apiPost('/api/canvas/save', {
+  const handleSaveCanvas = async () => {    const result = await apiPost('/api/canvas/save', {
       canvasId: 'current-canvas',
       timestamp: new Date().toISOString()
     }, {
@@ -527,9 +466,7 @@ export default function CollaborationPage() {
     })
   }
 
-  const handleExportMedia = () => {
-    logger.info('Media export initiated')
-    // Export media files as JSON list
+  const handleExportMedia = () => {    // Export media files as JSON list
     const mediaExport = {
       exported: new Date().toISOString(),
       files: mediaItems,
@@ -540,23 +477,14 @@ export default function CollaborationPage() {
 
   const [previewMedia, setPreviewMedia] = useState<{ type: string; name: string } | null>(null)
 
-  const handleViewMediaPreview = (type: string) => {
-    logger.info('View media preview', { mediaType: type })
-    setPreviewMedia({ type, name: `${type}-preview` })
+  const handleViewMediaPreview = (type: string) => {    setPreviewMedia({ type, name: `${type}-preview` })
     toast.success('Viewing ' + type + ' preview')
   }
 
   // NEW ENTERPRISE HANDLERS - Meeting Enhancement
   const [meetingRecording, setMeetingRecording] = useState(false)
 
-  const handleRecordMeeting = async () => {
-    logger.info('Meeting recording started', {
-      activeMeetings: 3,
-      quality: '1080p HD',
-      audio: 'High-quality stereo',
-      features: ['transcript', 'captions', 'cloud storage', 'AI summary']
-    })
-    setMeetingRecording(!meetingRecording)
+  const handleRecordMeeting = async () => {    setMeetingRecording(!meetingRecording)
     if (meetingRecording) {
       toast.success('Meeting recording stopped')
     } else {
@@ -571,13 +499,7 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleCreateBreakoutRoom = async () => {
-    logger.info('Breakout rooms created', {
-      totalParticipants: 12,
-      onlineParticipants: 8,
-      features: ['auto-assign', 'manual assignment', 'timer', 'broadcast']
-    })
-    const result = await apiPost('/api/meetings/breakout-rooms', {
+  const handleCreateBreakoutRoom = async () => {    const result = await apiPost('/api/meetings/breakout-rooms', {
       participants: 8,
       autoAssign: true
     }, {
@@ -589,33 +511,19 @@ export default function CollaborationPage() {
 
   const [liveCaptionsEnabled, setLiveCaptionsEnabled] = useState(false)
 
-  const handleLiveCaptions = () => {
-    logger.info('Live captions activated', {
-      language: 'English',
-      accuracy: '95%+',
-      latency: '<1 second',
-      languages: 30
-    })
-    setLiveCaptionsEnabled(!liveCaptionsEnabled)
+  const handleLiveCaptions = () => {    setLiveCaptionsEnabled(!liveCaptionsEnabled)
     toast.success(liveCaptionsEnabled ? 'Live captions disabled' : 'Live captions activated - 95%+ accuracy, 30+ languages')
   }
 
   const [virtualBackgroundEnabled, setVirtualBackgroundEnabled] = useState(false)
 
-  const handleVirtualBackground = () => {
-    logger.info('Virtual background activated', {
-      options: 20,
-      features: ['blur', 'office scenes', 'nature scenes', 'custom images', 'AI edge detection']
-    })
-    setVirtualBackgroundEnabled(!virtualBackgroundEnabled)
+  const handleVirtualBackground = () => {    setVirtualBackgroundEnabled(!virtualBackgroundEnabled)
     toast.success(virtualBackgroundEnabled ? 'Virtual background disabled' : 'Virtual background ready - 20+ options available')
   }
 
   const [mutedParticipants, setMutedParticipants] = useState<string[]>([])
 
-  const handleMuteParticipant = async (name: string) => {
-    logger.info('Participant muted', { participant: name })
-    const isMuted = mutedParticipants.includes(name)
+  const handleMuteParticipant = async (name: string) => {    const isMuted = mutedParticipants.includes(name)
     if (isMuted) {
       setMutedParticipants(prev => prev.filter(p => p !== name))
       toast.success('Participant unmuted: ' + name)
@@ -631,9 +539,7 @@ export default function CollaborationPage() {
 
   const [spotlightedParticipant, setSpotlightedParticipant] = useState<string | null>(null)
 
-  const handleSpotlightParticipant = (name: string) => {
-    logger.info('Spotlight activated', { participant: name })
-    if (spotlightedParticipant === name) {
+  const handleSpotlightParticipant = (name: string) => {    if (spotlightedParticipant === name) {
       setSpotlightedParticipant(null)
       toast.success('Spotlight removed')
     } else {
@@ -644,9 +550,7 @@ export default function CollaborationPage() {
 
   const [handRaised, setHandRaised] = useState(false)
 
-  const handleRaiseHand = async () => {
-    logger.info('Hand raised')
-    setHandRaised(!handRaised)
+  const handleRaiseHand = async () => {    setHandRaised(!handRaised)
     if (handRaised) {
       toast.success('Hand lowered')
     } else {
@@ -672,9 +576,7 @@ export default function CollaborationPage() {
     { id: 5, user: 'Emily Martinez', content: 'Here\'s the updated project timeline for everyone.', time: '10:32 AM' },
   ]
 
-  const handleSearchMessages = () => {
-    logger.info('Message search activated', { resultsFound: 247 })
-    setShowSearchDialog(true)
+  const handleSearchMessages = () => {    setShowSearchDialog(true)
   }
 
   const performSearch = async () => {
@@ -689,13 +591,9 @@ export default function CollaborationPage() {
       msg.user.toLowerCase().includes(searchQuery.toLowerCase())
     )
     setSearchResults(results)
-    setIsSearching(false)
-    logger.info('Search completed', { query: searchQuery, resultsCount: results.length })
-  }
+    setIsSearching(false)  }
 
-  const handleSendFile = () => {
-    logger.info('File send initiated', { maxSize: '100MB', totalMessages: 247 })
-    const input = document.createElement('input')
+  const handleSendFile = () => {    const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
     input.accept = '*/*'
@@ -733,12 +631,7 @@ export default function CollaborationPage() {
   // NEW ENTERPRISE HANDLERS - Collaboration Tools
   const [whiteboardActive, setWhiteboardActive] = useState(false)
 
-  const handleStartWhiteboard = async () => {
-    logger.info('Whiteboard started', {
-      collaborators: 8,
-      features: ['drawing tools', 'shapes', 'text', 'sticky notes', 'real-time sync']
-    })
-    setWhiteboardActive(true)
+  const handleStartWhiteboard = async () => {    setWhiteboardActive(true)
     const result = await apiPost('/api/whiteboard/create', {
       name: 'New Whiteboard',
       participants: teams.map(t => t.id)
@@ -755,12 +648,7 @@ export default function CollaborationPage() {
   const [pollType, setPollType] = useState<'multiple' | 'single'>('single')
   const [isCreatingPoll, setIsCreatingPoll] = useState(false)
 
-  const handleCreatePoll = () => {
-    logger.info('Poll creator opened', {
-      participants: 12,
-      types: ['multiple choice', 'yes/no', 'rating', 'open text', 'ranking']
-    })
-    setShowPollDialog(true)
+  const handleCreatePoll = () => {    setShowPollDialog(true)
   }
 
   const addPollOption = () => {
@@ -819,13 +707,7 @@ export default function CollaborationPage() {
   const [meetingDuration, setMeetingDuration] = useState('30')
   const [isSchedulingMeeting, setIsSchedulingMeeting] = useState(false)
 
-  const handleRecurringMeeting = () => {
-    logger.info('Recurring meeting setup', {
-      currentMeetings: 12,
-      options: ['daily', 'weekly', 'monthly', 'custom'],
-      integration: ['calendar sync', 'email reminders']
-    })
-    setShowRecurringMeetingDialog(true)
+  const handleRecurringMeeting = () => {    setShowRecurringMeetingDialog(true)
   }
 
   const confirmScheduleRecurringMeeting = async () => {
@@ -856,13 +738,7 @@ export default function CollaborationPage() {
   }
 
   // NEW ENTERPRISE HANDLERS - Workspace Management
-  const handleExportWorkspace = async (workspaceId: string) => {
-    logger.info('Workspace export initiated', {
-      workspaceId,
-      format: 'ZIP',
-      contents: ['files', 'comments', 'version history', 'team members']
-    })
-    toast.loading('Exporting workspace...')
+  const handleExportWorkspace = async (workspaceId: string) => {    toast.loading('Exporting workspace...')
     try {
       const response = await fetch(`/api/workspaces/${workspaceId}/export`)
       if (response.ok) {
@@ -888,19 +764,7 @@ export default function CollaborationPage() {
   }
 
   // NEW ENTERPRISE HANDLERS - Analytics & Reporting
-  const handleGenerateTeamReport = () => {
-    logger.info('Team report generated', {
-      teamMembers: 12,
-      activeProjects: 27,
-      meetingsAnalyzed: 12,
-      metrics: {
-        responseTime: '2.3h',
-        projectCompletion: '87%',
-        collaborationScore: '94%',
-        satisfaction: '9.1/10'
-      }
-    })
-    // Generate and download team report as JSON
+  const handleGenerateTeamReport = () => {    // Generate and download team report as JSON
     const reportData = {
       generated: new Date().toISOString(),
       teamMembers: 12,
@@ -923,9 +787,7 @@ export default function CollaborationPage() {
   const [inviteRole, setInviteRole] = useState('Editor')
   const [isInviting, setIsInviting] = useState(false)
 
-  const handleInviteMember = () => {
-    logger.info('Invite member initiated', { currentTeamSize: 12 })
-    setShowInviteDialog(true)
+  const handleInviteMember = () => {    setShowInviteDialog(true)
   }
 
   const confirmInviteMember = async () => {
@@ -959,11 +821,7 @@ export default function CollaborationPage() {
   const [bulkEmails, setBulkEmails] = useState('')
   const [isBulkInviting, setIsBulkInviting] = useState(false)
 
-  const handleBulkInvite = () => {
-    logger.info('Bulk invite initiated', {
-      options: ['CSV upload', 'email list', 'integration']
-    })
-    setShowBulkInviteDialog(true)
+  const handleBulkInvite = () => {    setShowBulkInviteDialog(true)
   }
 
   const confirmBulkInvite = async () => {
@@ -991,25 +849,17 @@ export default function CollaborationPage() {
 
   const [viewingProfile, setViewingProfile] = useState<string | null>(null)
 
-  const handleViewProfile = (memberId: string) => {
-    logger.info('View profile', { memberId })
-    setViewingProfile(memberId)
+  const handleViewProfile = (memberId: string) => {    setViewingProfile(memberId)
     toast.success('Viewing profile: ' + memberId)
   }
 
   const [editingPermissions, setEditingPermissions] = useState<string | null>(null)
 
-  const handleEditPermissions = (memberId: string) => {
-    logger.info('Edit permissions', { memberId, currentPermission: 'Editor' })
-    setEditingPermissions(memberId)
+  const handleEditPermissions = (memberId: string) => {    setEditingPermissions(memberId)
     toast.success('Edit permissions: ' + memberId + ' - Current: Editor')
   }
 
-  const handleStartMeeting = async () => {
-    logger.info('Meeting started', {
-      features: ['HD video', 'screen sharing', 'recording', 'live captions']
-    })
-    try {
+  const handleStartMeeting = async () => {    try {
       // Request camera and microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       stream.getTracks().forEach(track => track.stop())
@@ -1027,9 +877,7 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleJoinMeeting = async (meetingId: string) => {
-    logger.info('Joined meeting', { meetingId, quality: 'HD' })
-    try {
+  const handleJoinMeeting = async (meetingId: string) => {    try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       stream.getTracks().forEach(track => track.stop())
       const result = await apiPost(`/api/meetings/${meetingId}/join`, {}, {
@@ -1049,11 +897,7 @@ export default function CollaborationPage() {
   const [newWorkspaceDescription, setNewWorkspaceDescription] = useState('')
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false)
 
-  const handleCreateWorkspace = () => {
-    logger.info('Create workspace initiated', {
-      options: ['private', 'team', 'public']
-    })
-    setShowCreateWorkspaceDialog(true)
+  const handleCreateWorkspace = () => {    setShowCreateWorkspaceDialog(true)
   }
 
   const confirmCreateWorkspace = async () => {
@@ -1081,16 +925,13 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleJoinWorkspace = async (workspaceId: string) => {
-    logger.info('Joined workspace', { workspaceId, accessLevel: 'Contributor' })
-    const result = await apiPost(`/api/workspaces/${workspaceId}/join`, {}, {
+  const handleJoinWorkspace = async (workspaceId: string) => {    const result = await apiPost(`/api/workspaces/${workspaceId}/join`, {}, {
       loading: 'Joining workspace...',
       success: 'Joined workspace: ' + workspaceId + ' - Access level: Contributor',
       error: 'Failed to join workspace'
     })
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
@@ -1107,7 +948,6 @@ export default function CollaborationPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
@@ -1317,9 +1157,7 @@ export default function CollaborationPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {
-                              logger.info('Download file clicked', { fileName: 'Project_Timeline_v2.pdf' })
-                              toast.success('Downloading Project_Timeline_v2.pdf...')
+                            onClick={() => {                              toast.success('Downloading Project_Timeline_v2.pdf...')
                               // Simulate file download
                               const link = document.createElement('a')
                               link.href = '#'
@@ -2293,9 +2131,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-1"
-                        onClick={() => {
-                          logger.info('Download recording clicked', { meeting: 'Sprint Planning Meeting' })
-                          toast.success('Downloading Sprint Planning Meeting recording (1h 23m)...')
+                        onClick={() => {                          toast.success('Downloading Sprint Planning Meeting recording (1h 23m)...')
                         }}
                       >
                         <Download className="h-4 w-4" />
@@ -2311,9 +2147,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-2"
-                        onClick={() => {
-                          logger.info('Download recording clicked', { meeting: 'Client Presentation' })
-                          toast.success('Downloading Client Presentation recording (45m)...')
+                        onClick={() => {                          toast.success('Downloading Client Presentation recording (45m)...')
                         }}
                       >
                         <Download className="h-4 w-4" />
@@ -2329,9 +2163,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="download-recording-btn-3"
-                        onClick={() => {
-                          logger.info('Download recording clicked', { meeting: 'Design Review' })
-                          toast.success('Downloading Design Review recording (1h 12m)...')
+                        onClick={() => {                          toast.success('Downloading Design Review recording (1h 12m)...')
                         }}
                       >
                         <Download className="h-4 w-4" />
@@ -2544,9 +2376,7 @@ export default function CollaborationPage() {
                           variant="destructive"
                           className="w-full"
                           data-testid="view-critical-issues-btn"
-                          onClick={() => {
-                            logger.info('View critical issues clicked', { count: 3 })
-                            toast.success('Opening 3 critical issues that require immediate attention')
+                          onClick={() => {                            toast.success('Opening 3 critical issues that require immediate attention')
                           }}
                         >
                           <Target className="w-4 h-4 mr-2" />
@@ -2805,14 +2635,7 @@ export default function CollaborationPage() {
                       <Button
                         size="lg"
                         className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                        onClick={() => {
-                          logger.info('AI Feedback Analysis - Export report clicked', {
-                            totalFeedback: 63,
-                            categories: 5,
-                            criticalIssues: 3,
-                            estimatedTime: 12
-                          })
-                          const reportData = {
+                        onClick={() => {                          const reportData = {
                             generated: new Date().toISOString(),
                             totalFeedback: 63,
                             categories: ['Design', 'Performance', 'UX', 'Content', 'Features'],
@@ -2835,9 +2658,7 @@ export default function CollaborationPage() {
                       <Button
                         size="lg"
                         variant="outline"
-                        onClick={() => {
-                          logger.info('AI Feedback Analysis - View detailed roadmap clicked')
-                          toast.success('Implementation Roadmap opened - Interactive view with dependencies')
+                        onClick={() => {                          toast.success('Implementation Roadmap opened - Interactive view with dependencies')
                         }}
                       >
                         <ArrowRight className="w-5 w-5 mr-2" />
@@ -2921,9 +2742,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-1"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Brand_Logo_v2.png' })
-                              toast.success('Downloading Brand_Logo_v2.png (1.2 MB)...')
+                            onClick={() => {                              toast.success('Downloading Brand_Logo_v2.png (1.2 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -2932,9 +2751,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-1"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Brand_Logo_v2.png' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Brand_Logo_v2.png',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -2968,9 +2785,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-2"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Product_Demo.mp4' })
-                              toast.success('Downloading Product_Demo.mp4 (45 MB)...')
+                            onClick={() => {                              toast.success('Downloading Product_Demo.mp4 (45 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -2979,9 +2794,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-2"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Product_Demo.mp4' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Product_Demo.mp4',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -3015,9 +2828,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-3"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Q1_Report.pdf' })
-                              toast.success('Downloading Q1_Report.pdf (3.8 MB)...')
+                            onClick={() => {                              toast.success('Downloading Q1_Report.pdf (3.8 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -3026,9 +2837,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-3"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Q1_Report.pdf' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Q1_Report.pdf',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -3062,9 +2871,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-4"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Mockup_Homepage.jpg' })
-                              toast.success('Downloading Mockup_Homepage.jpg (2.1 MB)...')
+                            onClick={() => {                              toast.success('Downloading Mockup_Homepage.jpg (2.1 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -3073,9 +2880,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-4"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Mockup_Homepage.jpg' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Mockup_Homepage.jpg',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -3109,9 +2914,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-5"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Meeting_Recording.mp4' })
-                              toast.success('Downloading Meeting_Recording.mp4 (127 MB)...')
+                            onClick={() => {                              toast.success('Downloading Meeting_Recording.mp4 (127 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -3120,9 +2923,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-5"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Meeting_Recording.mp4' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Meeting_Recording.mp4',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -3156,9 +2957,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="download-media-btn-6"
-                            onClick={() => {
-                              logger.info('Download media clicked', { fileName: 'Style_Guide.pdf' })
-                              toast.success('Downloading Style_Guide.pdf (5.3 MB)...')
+                            onClick={() => {                              toast.success('Downloading Style_Guide.pdf (5.3 MB)...')
                             }}
                           >
                             <Download className="h-4 w-4" />
@@ -3167,9 +2966,7 @@ export default function CollaborationPage() {
                             size="sm"
                             variant="ghost"
                             data-testid="share-media-btn-6"
-                            onClick={() => {
-                              logger.info('Share media clicked', { fileName: 'Style_Guide.pdf' })
-                              shareContent({
+                            onClick={() => {                              shareContent({
                                 title: 'Style_Guide.pdf',
                                 text: 'Shared from FreeFlow Collaboration',
                                 url: window.location.href
@@ -3276,9 +3073,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-pen"
-                      onClick={() => {
-                        logger.info('Drawing tool selected', { tool: 'Pen' })
-                        toast.success('Pen tool selected')
+                      onClick={() => {                        toast.success('Pen tool selected')
                       }}
                     >
                       <Edit className="h-4 w-4" />
@@ -3287,9 +3082,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-shape"
-                      onClick={() => {
-                        logger.info('Drawing tool selected', { tool: 'Shape' })
-                        toast.success('Shape tool selected')
+                      onClick={() => {                        toast.success('Shape tool selected')
                       }}
                     >
                       <Square className="h-4 w-4" />
@@ -3298,9 +3091,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-line"
-                      onClick={() => {
-                        logger.info('Drawing tool selected', { tool: 'Line' })
-                        toast.success('Line tool selected')
+                      onClick={() => {                        toast.success('Line tool selected')
                       }}
                     >
                       <Activity className="h-4 w-4" />
@@ -3309,9 +3100,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-comment"
-                      onClick={() => {
-                        logger.info('Drawing tool selected', { tool: 'Comment' })
-                        toast.success('Comment tool selected - Click to add comment')
+                      onClick={() => {                        toast.success('Comment tool selected - Click to add comment')
                       }}
                     >
                       <MessageCircle className="h-4 w-4" />
@@ -3320,9 +3109,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-image"
-                      onClick={() => {
-                        logger.info('Drawing tool selected', { tool: 'Image' })
-                        toast.success('Image tool selected - Click to insert image')
+                      onClick={() => {                        toast.success('Image tool selected - Click to insert image')
                       }}
                     >
                       <Image className="h-4 w-4"  loading="lazy"/>
@@ -3331,9 +3118,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       size="sm"
                       data-testid="drawing-tool-more"
-                      onClick={() => {
-                        logger.info('More drawing tools clicked')
-                        toast.success('More tools: Arrow, Highlighter, Eraser, Text')
+                      onClick={() => {                        toast.success('More tools: Arrow, Highlighter, Eraser, Text')
                       }}
                     >
                       <MoreVertical className="h-4 w-4" />
@@ -3377,9 +3162,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="open-canvas-btn-1"
-                        onClick={() => {
-                          logger.info('Open canvas clicked', { canvas: 'Product Wireframes' })
-                          toast.success('Opening Product Wireframes canvas with 8 collaborators...')
+                        onClick={() => {                          toast.success('Opening Product Wireframes canvas with 8 collaborators...')
                         }}
                       >
                         Open
@@ -3395,9 +3178,7 @@ export default function CollaborationPage() {
                         size="sm"
                         variant="ghost"
                         data-testid="open-canvas-btn-2"
-                        onClick={() => {
-                          logger.info('Open canvas clicked', { canvas: 'User Flow Diagram' })
-                          toast.success('Opening User Flow Diagram canvas with 5 collaborators...')
+                        onClick={() => {                          toast.success('Opening User Flow Diagram canvas with 5 collaborators...')
                         }}
                       >
                         Open
@@ -3795,9 +3576,7 @@ export default function CollaborationPage() {
                       className={`p-2 text-xl rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${selectedEmoji === emoji ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
                       onClick={() => {
                         setSelectedEmoji(emoji)
-                        toast.success(`Emoji selected: ${emoji}`)
-                        logger.info('Emoji selected', { emoji })
-                        announce(`Emoji ${emoji} selected`, 'polite')
+                        toast.success(`Emoji selected: ${emoji}`)                        announce(`Emoji ${emoji} selected`, 'polite')
                       }}
                     >
                       {emoji}
@@ -3850,9 +3629,7 @@ export default function CollaborationPage() {
                 size="sm"
                 className="text-blue-600"
                 data-testid="filter-all-btn"
-                onClick={() => {
-                  logger.info('Media filter clicked', { filter: 'All' })
-                  toast.success('Showing all media files')
+                onClick={() => {                  toast.success('Showing all media files')
                 }}
               >
                 All
@@ -3861,9 +3638,7 @@ export default function CollaborationPage() {
                 variant="ghost"
                 size="sm"
                 data-testid="filter-images-btn"
-                onClick={() => {
-                  logger.info('Media filter clicked', { filter: 'Images' })
-                  toast.success('Filtering by images only')
+                onClick={() => {                  toast.success('Filtering by images only')
                 }}
               >
                 Images
@@ -3872,9 +3647,7 @@ export default function CollaborationPage() {
                 variant="ghost"
                 size="sm"
                 data-testid="filter-videos-btn"
-                onClick={() => {
-                  logger.info('Media filter clicked', { filter: 'Videos' })
-                  toast.success('Filtering by videos only')
+                onClick={() => {                  toast.success('Filtering by videos only')
                 }}
               >
                 Videos
@@ -3883,9 +3656,7 @@ export default function CollaborationPage() {
                 variant="ghost"
                 size="sm"
                 data-testid="filter-documents-btn"
-                onClick={() => {
-                  logger.info('Media filter clicked', { filter: 'Documents' })
-                  toast.success('Filtering by documents only')
+                onClick={() => {                  toast.success('Filtering by documents only')
                 }}
               >
                 Documents
@@ -3898,9 +3669,7 @@ export default function CollaborationPage() {
                   className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
                   onClick={() => {
                     setPreviewMedia({ type: item.type, name: item.name })
-                    toast.success(`Opened ${item.name} - ${item.size}`)
-                    logger.info('Media item opened', { item: item.name, type: item.type })
-                  }}
+                    toast.success(`Opened ${item.name} - ${item.size}`)                  }}
                 >
                   <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative">
                     {item.type === 'image' ? (
