@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 130/286 pages integrated (45.5%)
+**Overall Progress:** 131/286 pages integrated (45.8%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 124/223 using Supabase hooks (55.6%) 🚧
-  - **Mock → Database:** 1/157 migrated (0.6%) 🎉 NEW!
+- **V2 Pages:** 125/223 using Supabase hooks (56.1%) 🚧
+  - **Mock → Database:** 2/157 migrated (1.3%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 130/286 pages integrated (45.5%)
+**Overall Progress:** 131/286 pages integrated (45.8%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 124/223 (55.6%) 🚧
+**V2 Pages (Supabase Hooks):** 125/223 (56.1%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 1 page 🎉
-**Remaining:** 99 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 2 pages 🎉
+**Remaining:** 98 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -323,7 +323,7 @@ Based on detailed analysis of 21 sample pages:
 This category tracks pages migrated from mock/setTimeout data to real database integration,
 bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
-**Pages Migrated: 1/157 (0.6%)**
+**Pages Migrated: 2/157 (1.3%)**
 
 **Completed Migrations:**
 1. `help-center-v2` - ✅ **MIGRATED** (3,257 lines, +67 net) - Commit: `18da5532`
@@ -335,6 +335,15 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~2 hours
    - **Complexity:** High (large file, multiple data sources, complex UI state management)
 
+2. `courses-v2` - ✅ **MIGRATED** (2,993 lines, -21 net) - Commit: `8d30f2e3`
+   - **Pattern:** Hook connection with direct assignment (const courses = dbCourses)
+   - **Tables:** courses, course_lessons, course_enrollments, course_progress, course_reviews
+   - **Write Operations:** Already using mutation hooks (useCreateCourse, useUpdateCourse, useDeleteCourse)
+   - **Impact:** Real database integration, hook-based filtering, cleaner code (removed 59 lines)
+   - **Fixes:** 11 handler fixes (6 duplicate createClient(), 5 mangled toast messages, simplified filtering)
+   - **Migration Time:** ~1.5 hours
+   - **Complexity:** Medium (hooks already in place, mainly data source switch + cleanup)
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -345,11 +354,11 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
 **Next Targets (Priority Order):**
 - tutorials-v2 (already has useTutorials hook available)
-- courses (has useCoursesExtended hook available)
 - customer-support (has useCustomerSupport hook available)
+- invoicing-v2 (has invoicing hooks available)
 - Estimated: 10-15 pages can be migrated quickly with existing hooks
 
-**Total Remaining:** 156 V2 pages with mock/setTimeout data need real database integration
+**Total Remaining:** 155 V2 pages with mock/setTimeout data need real database integration
 
 #### Available Hooks Infrastructure
 

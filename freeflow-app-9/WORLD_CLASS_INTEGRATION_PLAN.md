@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (1/301 pages migrated - 0.3%) 🎉 FIRST MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (2/301 pages migrated - 0.7%) 🎉 SECOND MILESTONE!
 
 ---
 
@@ -80,11 +80,11 @@
 
 **Goal:** Migrate all 301 pages with mock/setTimeout data to real database integration
 
-**Current Progress:** 1/301 pages migrated (0.3%) 🎉 **FIRST MILESTONE ACHIEVED!**
+**Current Progress:** 2/301 pages migrated (0.7%) 🎉 **SECOND MILESTONE ACHIEVED!**
 
 ### Completed Migrations
 
-#### help-center-v2 ✅ (Commit: 18da5532)
+#### 1. help-center-v2 ✅ (Commit: 18da5532)
 **File:** `app/(app)/dashboard/help-center-v2/help-center-client.tsx` (3,257 lines)
 **Migration Date:** January 16, 2026
 **Complexity:** High (large file, multiple data sources, complex UI state)
@@ -129,16 +129,69 @@ const { data: collectionsData, refresh: refreshCollections } = useHelpDocs()
 4. Migrate writes to Supabase dynamic imports
 5. Call refresh() after database mutations
 
+#### 2. courses-v2 ✅ (Commit: 8d30f2e3)
+**File:** `app/(app)/dashboard/courses-v2/courses-client.tsx` (2,993 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium (hooks already in place, mainly data source switch + cleanup)
+
+**Before:** Mock data with hooks imported but not used
+```typescript
+const [courses, setCourses] = useState<Course[]>(mockCourses)
+// useCoursesExtended hook was imported but dbCourses never used
+```
+
+**After:** Direct assignment with hook-based filtering
+```typescript
+const { courses: dbCourses, refresh: refreshCourses } = useCoursesExtended({
+  category: categoryFilter !== 'all' ? categoryFilter : undefined,
+  search: searchQuery || undefined
+})
+const courses = (dbCourses || []) as Course[]
+// Write operations already using mutation hooks
+```
+
+**Tables Integrated:**
+- `courses` - Course content, metadata, pricing, settings
+- `course_lessons` - Lecture content, videos, ordering
+- `course_enrollments` - Student enrollment tracking
+- `course_progress` - Lesson completion tracking
+- `course_reviews` - Course ratings and instructor responses
+
+**Write Operations Already Using Hooks:**
+- `createCourseMutation` - useCreateCourse hook (already correct)
+- `updateCourseMutation` - useUpdateCourse hook (already correct)
+- `deleteCourseMutation` - useDeleteCourse hook (already correct)
+
+**Cleanup Performed:**
+- Removed 6 duplicate `createClient()` declarations in handlers
+- Fixed 5 mangled toast messages from sed replacement
+- Simplified `filteredCourses` (category/search filtering now hook-based)
+- Updated stats dependencies to recalculate on data changes
+- Net result: -21 lines (removed 59 lines of redundant code)
+
+**Impact:**
+- ✅ Real database integration (no more mockCourses)
+- ✅ Hook-based filtering at database level
+- ✅ Cleaner code (removed duplicate imports, fixed toast messages)
+- ✅ Write operations already using mutation hooks
+- ✅ Simpler pattern than help-center-v2 (direct assignment vs useEffect sync)
+
+**New Pattern Established (for pages with existing hooks):**
+1. Connect hook data directly (const courses = dbCourses)
+2. Remove mock data references
+3. Fix any duplicate imports/calls
+4. Leverage hook-based filtering when available
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
 1. `tutorials-v2` - useTutorials hook ready
-2. `courses` - useCoursesExtended hook ready
-3. `customer-support` - useCustomerSupport hook ready
+2. `customer-support` - useCustomerSupport hook ready
+3. `invoicing-v2` - invoicing hooks ready
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 300 pages need mock data → database migration
+**Remaining:** 299 pages need mock data → database migration
 
 ---
 
