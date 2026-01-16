@@ -7,9 +7,9 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 168/286 pages integrated (58.7%)
+**Overall Progress:** 171/286 pages integrated (59.8%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 105/223 using Supabase hooks (47.1%) 🚧
+- **V2 Pages:** 108/223 using Supabase hooks (48.4%) 🚧
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated
 
@@ -51,13 +51,13 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 168/286 pages integrated (58.7%)
+**Overall Progress:** 171/286 pages integrated (59.8%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
 **V2 Pages (Supabase Hooks):** 105/223 (47.1%) 🚧
-**Remaining:** 118 V2 pages need Supabase hook integration
+***Remaining:** 115 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -230,7 +230,7 @@ Based on detailed analysis of 21 sample pages:
 - ✅ Real data from database
 - ⚠️ Mock data only for competitive upgrade features (AI insights, predictions)
 
-**Category B: Manual Supabase → Migrated (13 pages) ✅**
+***Category B: Manual Supabase → Migrated (16 pages) ✅**
 - `analytics` - ✅ **MIGRATED** (4,335 → 4,218 LOC, -117 lines) - Now uses extended hooks
 - `crm` - ✅ **MIGRATED** (4,098 → 4,082 LOC, -16 lines) - Now uses extended hooks
 - `data-export` - ✅ **MIGRATED** (5,310 → 5,302 LOC, -8 lines) - Now uses useDataExports hook
@@ -244,7 +244,10 @@ Based on detailed analysis of 21 sample pages:
 - `security` - ✅ **MIGRATED** (2,757 → 2,754 LOC, -3 lines) - Dynamic imports for 10 handlers (security_audit_logs operations)
 - `permissions` - ✅ **MIGRATED** (3,627 → 3,633 LOC, +6 lines) - Dynamic imports for 10 handlers (roles, role_assignments CRUD)
 - `vulnerability-scan` - ✅ **MIGRATED** (2,881 → 2,879 LOC, -2 lines) - Dynamic imports for 7 handlers (vulnerability_scans operations)
-- **Total Impact:** 186 lines removed, 82+ manual Supabase queries eliminated, 63 handlers migrated to dynamic imports
+- `mobile-app` - ✅ **MIGRATED** (3,276 → 3,318 LOC, +42 lines) - Dynamic imports for 21 handlers (builds, downloads, reviews, campaigns, IAPs, settings, CI/CD)
+- `system-insights` - ✅ **MIGRATED** (3,710 → 3,735 LOC, +25 lines) - Dynamic imports for 10 handlers (alerts, metrics, settings, activity logs)
+- `motion-graphics` - ✅ **MIGRATED** (3,636 → 3,661 LOC, +25 lines) - Dynamic imports for 10 handlers (projects, templates, exports)
+- **Total Impact:** 92 lines removed (net), 189+ manual Supabase queries eliminated, 86 handlers migrated to dynamic imports, 7 pages converted to hooks
 
 **Category C: Verified Production-Ready (1 page)**
 - `projects-hub` - ✅ Already using `useProjects()` hook with smart fallback pattern
