@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 137/286 pages integrated (47.9%)
+**Overall Progress:** 138/286 pages integrated (48.3%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 131/223 using Supabase hooks (58.7%) 🚧
-  - **Mock → Database:** 8/157 migrated (5.1%) 🎉 NEW!
+- **V2 Pages:** 132/223 using Supabase hooks (59.2%) 🚧
+  - **Mock → Database:** 9/157 migrated (5.7%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -404,7 +404,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1 hour
    - **Complexity:** High (manual Supabase → hooks migration, 6 mutation functions migrated, complex schema mapping with field name transformations and default values)
 
-8. `pricing` (app/v2/dashboard) - ✅ **MIGRATED** (3,524 lines) - Commit: TBD
+8. `pricing` (app/v2/dashboard) - ✅ **MIGRATED** (3,524 lines) - Commit: `5ed0d28b`
    - **Pattern:** Manual Supabase → Hooks with schema mapping (UI PricingPlan ↔ DB PricingPlan)
    - **Tables:** pricing_plans (via use-pricing-plans hook)
    - **Hook Features:** Real-time subscriptions, automatic refetch, mutation hooks (createPlan, updatePlan, deletePlan, toggleActive, setFeatured, updateSubscribers)
@@ -418,6 +418,20 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** File has pre-existing template literal syntax errors in JSX (lines 2607, 3331 - unrelated to migration)
    - **Migration Time:** ~45 minutes
    - **Complexity:** Medium (hook integration with real-time subscriptions, 3 mutation functions migrated, schema mapping with field transformations and array mapping)
+
+9. `alerts` (app/v2/dashboard) - ✅ **MIGRATED** (3,122 lines) - Commit: TBD
+   - **Pattern:** Completion of partial integration - removed mock fallback pattern
+   - **Tables:** alerts (via use-alerts hook)
+   - **Hook Features:** Already integrated with createAlert, acknowledgeAlert, resolveAlert, escalateAlert, snoozeAlert, deleteAlert mutations
+   - **Mapping:** Already implemented - DB Alert → UI Alert with field transformations (severity, status, service, incidentNumber, deduplicationKey)
+   - **Cleanup:** Removed mock fallback pattern from filteredAlerts and alertStats calculations
+   - **Before:** `const alertsToFilter = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts`
+   - **After:** Direct usage of `mappedAlerts` without fallback
+   - **Impact:** Now uses 100% database data for alerts display and stats
+   - **Kept as Mock:** OnCallSchedules, Services, EscalationPolicies, Integrations, AIInsights, Collaborators, Predictions, Activities (supplementary competitive showcase features)
+   - **Note:** File has pre-existing template literal syntax errors (lines 584, 630, 1019 - unrelated to migration)
+   - **Migration Time:** ~10 minutes (was 95% complete, only needed fallback removal)
+   - **Complexity:** Low (page was already integrated, just needed final cleanup)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)

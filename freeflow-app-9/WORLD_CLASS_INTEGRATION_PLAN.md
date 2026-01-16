@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (8/301 pages migrated - 2.7%) 🎉 EIGHTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (9/301 pages migrated - 3.0%) 🎉 NINTH MILESTONE!
 
 ---
 
@@ -824,6 +824,119 @@ const handleCreatePlan = async () => {
 - ✅ All mutations benefit from hook's automatic refetch
 - ✅ UI correctly uses database data instead of initialPlans/mockPlans
 - ✅ Kept mock data for: Coupons (separate booking_coupons table), Subscriptions, Invoices (competitive showcase features)
+
+#### 9. alerts (v2) ✅ (Commit: TBD)
+**File:** `app/v2/dashboard/alerts/alerts-client.tsx` (3,122 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Low (page was 95% integrated, only needed final cleanup to remove mock fallback)
+
+**Before:** Hook already integrated but falling back to mockAlerts when empty
+```typescript
+// Hook already integrated
+const {
+  dbAlerts,
+  isLoading,
+  fetchAlerts,
+  createAlert,
+  acknowledgeAlert,
+  resolveAlert,
+  escalateAlert,
+  snoozeAlert,
+  deleteAlert
+} = useAlerts()
+
+// Schema mapping already implemented
+const mappedAlerts: Alert[] = useMemo(() => {
+  return dbAlerts.map(a => ({ /* ... mapping ... */ }))
+}, [dbAlerts])
+
+// BUT: Falling back to mockAlerts when empty
+const alertsToFilter = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
+const filteredAlerts = useMemo(() => {
+  return alertsToFilter.filter(/* ... */)
+}, [alertsToFilter, searchQuery, selectedSeverity, selectedStatus])
+
+const alertStats = useMemo(() => {
+  const alertsSource = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
+  // ... stats calculation
+}, [mappedAlerts])
+```
+
+**After:** Removed mock fallback, using 100% database data
+```typescript
+// Same hook integration (already complete)
+const {
+  dbAlerts,
+  isLoading,
+  fetchAlerts,
+  createAlert,
+  acknowledgeAlert,
+  resolveAlert,
+  escalateAlert,
+  snoozeAlert,
+  deleteAlert
+} = useAlerts()
+
+// Same schema mapping (already complete)
+const mappedAlerts: Alert[] = useMemo(() => {
+  return dbAlerts.map(a => ({ /* ... mapping ... */ }))
+}, [dbAlerts])
+
+// NOW: Direct usage without fallback
+const filteredAlerts = useMemo(() => {
+  return mappedAlerts.filter(alert => {
+    const matchesSearch = alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         alert.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         alert.service.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSeverity = selectedSeverity === 'all' || alert.severity === selectedSeverity
+    const matchesStatus = selectedStatus === 'all' || alert.status === selectedStatus
+    return matchesSearch && matchesSeverity && matchesStatus
+  })
+}, [mappedAlerts, searchQuery, selectedSeverity, selectedStatus])
+
+const alertStats = useMemo(() => {
+  const alertsSource = mappedAlerts
+  const triggered = alertsSource.filter(a => a.status === 'triggered').length
+  const acknowledged = alertsSource.filter(a => a.status === 'acknowledged').length
+  const resolved = alertsSource.filter(a => a.status === 'resolved').length
+  const critical = alertsSource.filter(a => a.severity === 'critical').length
+  const high = alertsSource.filter(a => a.severity === 'high').length
+  // ... more stats
+}, [mappedAlerts])
+```
+
+**Tables Integrated:**
+- `alerts` (via use-alerts hook) - Alert management, incident tracking, on-call notifications
+
+**Schema Mapping:**
+- Already implemented in previous integration:
+  - DB severity/status → UI AlertSeverity/AlertStatus
+  - source_type/source → service
+  - alert_code → incidentNumber
+  - source_id → deduplicationKey
+  - metadata extraction for impactedUsers and runbook
+
+**Write Operations:**
+- Already migrated (mutations already using hooks):
+  - CREATE: createAlert()
+  - UPDATE: acknowledgeAlert(), resolveAlert(), escalateAlert(), snoozeAlert()
+  - DELETE: deleteAlert()
+
+**Cleanup Performed:**
+- Removed mock fallback pattern from filteredAlerts calculation
+- Removed mock fallback pattern from alertStats calculation
+- Updated useMemo dependencies to use mappedAlerts directly
+
+**Fixes Applied:**
+- Note: File has pre-existing template literal syntax errors (lines 584, 630, 1019 - unrelated to migration)
+
+**Impact:**
+- ✅ Now uses 100% database data for alerts display (no mock fallback)
+- ✅ Stats calculated from real database data only
+- ✅ Cleaner code without conditional fallback logic
+- ✅ All mutations already using hooks (already complete)
+- ✅ Schema mapping already complete
+- ✅ Kept mock data for: OnCallSchedules, Services, EscalationPolicies, Integrations, AIInsights, Collaborators, Predictions, Activities (supplementary competitive showcase features)
 
 **Pattern Reinforced (manual Supabase → hooks with mutations):**
 1. Import hooks (useDeployments, useCreateDeployment, useUpdateDeployment, useDeleteDeployment)
