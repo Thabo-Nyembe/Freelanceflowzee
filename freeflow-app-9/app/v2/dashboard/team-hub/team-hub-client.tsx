@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useTeamHub } from '@/hooks/use-team-hub'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -444,7 +444,14 @@ interface DbTeamMember {
 }
 
 export default function TeamHubClient() {
-  const supabase = createClient()
+  // Team Hub Hook for data management
+  const {
+    members: hookMembers,
+    isLoading: teamHubLoading,
+    refresh: refreshTeams,
+    updateMemberStatus,
+    inviteMember
+  } = useTeamHub()
 
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
@@ -465,9 +472,7 @@ export default function TeamHubClient() {
   const [showSearch, setShowSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Data State
-  const [dbMembers, setDbMembers] = useState<DbTeamMember[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // Data State (hookMembers now comes from hook as hookMembers)
   const [isSaving, setIsSaving] = useState(false)
 
   // Dialog State
@@ -513,28 +518,8 @@ export default function TeamHubClient() {
     skills: ''
   })
 
-  // Fetch team members
-  const fetchMembers = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('team_members')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbMembers(data || [])
-    } catch (error) {
-      console.error('Error fetching team members:', error)
-      toast.error('Failed to load team members')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
+  // Team members auto-fetched by useTeamHub hook
+  // Hook provides: hookMembers, teamHubLoading, refreshTeams
 
   // Create team member
   const handleCreateMember = async () => {
@@ -544,6 +529,8 @@ export default function TeamHubClient() {
     }
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to add team members')
@@ -568,7 +555,7 @@ export default function TeamHubClient() {
       toast.success('Team member added successfully')
       setShowCreateMemberDialog(false)
       resetMemberForm()
-      fetchMembers()
+      refreshTeams()
     } catch (error) {
       console.error('Error creating team member:', error)
       toast.error('Failed to add team member')
@@ -580,6 +567,8 @@ export default function TeamHubClient() {
   // Update member status
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -587,7 +576,7 @@ export default function TeamHubClient() {
 
       if (error) throw error
       toast.success(`Status updated to ${newStatus}`)
-      fetchMembers()
+      refreshTeams()
     } catch (error) {
       console.error('Error updating status:', error)
       toast.error('Failed to update status')
@@ -597,6 +586,8 @@ export default function TeamHubClient() {
   // Delete team member
   const handleDeleteMember = async (memberId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .delete()
@@ -604,7 +595,7 @@ export default function TeamHubClient() {
 
       if (error) throw error
       toast.success('Team member removed')
-      fetchMembers()
+      refreshTeams()
     } catch (error) {
       console.error('Error deleting member:', error)
       toast.error('Failed to remove team member')
@@ -627,9 +618,7 @@ export default function TeamHubClient() {
   }
 
   // Load data on mount
-  useEffect(() => {
-    fetchMembers()
-  }, [fetchMembers])
+  // Team members auto-fetched by useTeamHub hook on mount
 
   // Stats
   const stats = useMemo(() => {
@@ -1109,8 +1098,8 @@ export default function TeamHubClient() {
   }
 
   // Combined stats from mock + db
-  const combinedMemberCount = members.length + dbMembers.length
-  const dbOnlineCount = dbMembers.filter(m => m.status === 'online').length
+  const combinedMemberCount = members.length + hookMembers.length
+  const dbOnlineCount = hookMembers.filter(m => m.status === 'online').length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1331,7 +1320,7 @@ export default function TeamHubClient() {
                   </CardContent>
                 </Card>
               ) : (
-                dbMembers.map(member => (
+                hookMembers.map(member => (
                   <Card key={member.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-green-500">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
