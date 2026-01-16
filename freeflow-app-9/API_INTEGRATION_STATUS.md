@@ -7,9 +7,9 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 157/286 pages integrated (54.9%)
+**Overall Progress:** 159/286 pages integrated (55.6%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 94/223 using Supabase hooks (42.2%) 🚧
+- **V2 Pages:** 96/223 using Supabase hooks (43.0%) 🚧
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated
 
@@ -51,13 +51,13 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 157/286 pages integrated (54.9%)
+**Overall Progress:** 159/286 pages integrated (55.6%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 94/223 (42.2%) 🚧
-**Remaining:** 129 V2 pages need Supabase hook integration
+**V2 Pages (Supabase Hooks):** 96/223 (43.0%) 🚧
+**Remaining:** 127 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -159,8 +159,8 @@
 - **Unique to app/(app):** 9 pages
 
 **Integration Status:**
-- **Hook-Integrated:** 94/223 pages (42.2%) ✅
-- **Not Integrated:** 129/223 pages (57.8%) ⏳
+- **Hook-Integrated:** 96/223 pages (43.0%) ✅
+- **Not Integrated:** 127/223 pages (57.0%) ⏳
 - **Infrastructure:** 500+ Supabase hooks available in `lib/hooks/`
 
 #### File Locations
@@ -230,14 +230,15 @@ Based on detailed analysis of 21 sample pages:
 - ✅ Real data from database
 - ⚠️ Mock data only for competitive upgrade features (AI insights, predictions)
 
-**Category B: Manual Supabase → Migrated (2 pages) ✅**
+**Category B: Manual Supabase → Migrated (4 pages) ✅**
 - `analytics` - ✅ **MIGRATED** (4,335 → 4,218 LOC, -117 lines) - Now uses extended hooks
 - `crm` - ✅ **MIGRATED** (4,098 → 4,082 LOC, -16 lines) - Now uses extended hooks
-- Both pages now use dedicated Supabase hooks for consistency with V2 architecture
+- `data-export` - ✅ **MIGRATED** (5,310 → 5,302 LOC, -8 lines) - Now uses useDataExports hook
+- `team-hub` - ✅ **MIGRATED** (3,067 → 3,056 LOC, -11 lines) - Now uses useTeamHub hook
+- **Total Impact:** 152 lines removed, 15+ manual Supabase queries eliminated
 
-**Category C: To Be Verified (2 pages analyzed)**
-- `projects-hub` - Hook available, needs verification
-- `team-hub` - Hook available, needs verification
+**Category C: Verified Production-Ready (1 page)**
+- `projects-hub` - ✅ Already using `useProjects()` hook with smart fallback pattern
 
 **Category D: Not Analyzed (200 pages)**
 - Remaining V2 pages not yet audited
