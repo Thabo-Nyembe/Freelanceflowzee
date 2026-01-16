@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useHelpArticles, useHelpCategories } from '@/lib/hooks/use-help-extended'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -418,7 +419,11 @@ const mockHelpDocsActivities = [
 ]
 
 export default function HelpDocsClient() {
-  const supabase = createClient()
+  // Hooks
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+  const { data: dbArticles = [], isLoading, refresh: refreshArticles } = useHelpArticles()
+  const { data: dbCategories = [], refresh: refreshCategories } = useHelpCategories()
 
   // UI State
   const [activeTab, setActiveTab] = useState('home')
@@ -434,10 +439,16 @@ export default function HelpDocsClient() {
   const [ticketFilter, setTicketFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Data State
-  const [dbArticles, setDbArticles] = useState<DbHelpArticle[]>([])
-  const [dbCategories, setDbCategories] = useState<DbHelpCategory[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // Fetch user ID
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
+  // Local UI state
   const [isSaving, setIsSaving] = useState(false)
 
   // Dialog State
@@ -511,46 +522,24 @@ export default function HelpDocsClient() {
   // Generate article code
   const generateArticleCode = () => `ART-${Date.now().toString(36).toUpperCase()}`
 
-  // Fetch articles
-  const fetchArticles = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('help_articles')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbArticles(data || [])
-    } catch (error) {
-      console.error('Error fetching articles:', error)
-      toast.error('Failed to load articles')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
-
   // Create article
   const handleCreateArticle = async () => {
     if (!formData.title.trim()) {
       toast.error('Title is required')
       return
     }
+    if (!userId) {
+      toast.error('Please sign in to create articles')
+      return
+    }
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create articles')
-        return
-      }
 
       const { error } = await supabase.from('help_articles').insert({
-        user_id: user.id,
+        user_id: userId,
         article_code: generateArticleCode(),
         title: formData.title,
         content: formData.content || null,
@@ -560,8 +549,8 @@ export default function HelpDocsClient() {
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
         meta_title: formData.meta_title || null,
         meta_description: formData.meta_description || null,
-        author_name: user.email?.split('@')[0] || 'Author',
-        author_id: user.id,
+        author_name: user?.email?.split('@')[0] || 'Author',
+        author_id: userId,
         published_at: formData.status === 'published' ? new Date().toISOString() : null
       })
 
@@ -570,7 +559,7 @@ export default function HelpDocsClient() {
       toast.success('Article created successfully')
       setShowCreateDialog(false)
       resetForm()
-      fetchArticles()
+      refreshArticles()
     } catch (error) {
       console.error('Error creating article:', error)
       toast.error('Failed to create article')
@@ -584,6 +573,9 @@ export default function HelpDocsClient() {
     if (!editingArticle) return
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -606,7 +598,7 @@ export default function HelpDocsClient() {
       setShowEditDialog(false)
       setEditingArticle(null)
       resetForm()
-      fetchArticles()
+      refreshArticles()
     } catch (error) {
       console.error('Error updating article:', error)
       toast.error('Failed to update article')
@@ -618,6 +610,9 @@ export default function HelpDocsClient() {
   // Delete article
   const handleDeleteArticle = async (articleId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('help_articles')
         .update({ deleted_at: new Date().toISOString() })
@@ -626,7 +621,7 @@ export default function HelpDocsClient() {
       if (error) throw error
 
       toast.success('Article deleted successfully')
-      fetchArticles()
+      refreshArticles()
     } catch (error) {
       console.error('Error deleting article:', error)
       toast.error('Failed to delete article')
@@ -636,6 +631,9 @@ export default function HelpDocsClient() {
   // Update article status
   const handleUpdateStatus = async (articleId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -648,7 +646,7 @@ export default function HelpDocsClient() {
       if (error) throw error
 
       toast.success(`Article status updated to ${newStatus}`)
-      fetchArticles()
+      refreshArticles()
     } catch (error) {
       console.error('Error updating status:', error)
       toast.error('Failed to update status')
@@ -661,6 +659,9 @@ export default function HelpDocsClient() {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -672,7 +673,7 @@ export default function HelpDocsClient() {
       if (error) throw error
 
       toast.success('Thank you for your feedback!')
-      fetchArticles()
+      refreshArticles()
     } catch (error) {
       console.error('Error submitting feedback:', error)
       toast.error('Failed to submit feedback')
@@ -684,6 +685,9 @@ export default function HelpDocsClient() {
     try {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
       await supabase
         .from('help_articles')
@@ -723,11 +727,6 @@ export default function HelpDocsClient() {
     })
     setShowEditDialog(true)
   }
-
-  // Load data on mount
-  useEffect(() => {
-    fetchArticles()
-  }, [fetchArticles])
 
   // Legacy handlers for UI compatibility
   const handleContactSupport = () => {
