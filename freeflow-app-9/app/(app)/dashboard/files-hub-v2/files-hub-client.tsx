@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { copyToClipboard } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -311,7 +310,7 @@ interface DbFolder {
 }
 
 export default function FilesHubClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('files')
@@ -372,6 +371,8 @@ export default function FilesHubClient() {
     try {
       setLoading(true)
       setError(null)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setError('Not authenticated')
@@ -478,7 +479,7 @@ export default function FilesHubClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Map database activity types to UI activity types
   const mapActivityType = (activity: string): FileActivity['action'] => {
@@ -561,6 +562,8 @@ export default function FilesHubClient() {
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -568,6 +571,8 @@ export default function FilesHubClient() {
         ? folders.find(f => f.id === currentFolderId)?.path || '/'
         : '/'
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('folders').insert({
         user_id: user.id,
         parent_id: currentFolderId,
@@ -590,6 +595,8 @@ export default function FilesHubClient() {
 
   const handleDeleteFile = async (fileId: string, fileName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
       toast.success('File deleted' moved to trash` })
@@ -601,6 +608,8 @@ export default function FilesHubClient() {
 
   const handleToggleStar = async (fileId: string, currentlyStarred: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({ is_starred: !currentlyStarred }).eq('id', fileId)
       if (error) throw error
       toast.success(currentlyStarred ? 'Removed from starred' : 'Added to starred')
@@ -612,9 +621,13 @@ export default function FilesHubClient() {
 
   const handleShareFile = async (fileId: string, fileName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('file_shares').insert({
         file_id: fileId,
         shared_by: user.id,
@@ -623,6 +636,8 @@ export default function FilesHubClient() {
       })
       if (error) throw error
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
       toast.success('File shared'` })
       fetchData()
@@ -633,6 +648,8 @@ export default function FilesHubClient() {
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
       toast.success('Folder deleted'" has been deleted` })
@@ -646,9 +663,13 @@ export default function FilesHubClient() {
   // Move file handler
   const handleMoveFile = async (fileId: string, targetFolderId: string | null, fileName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({
         folder_id: targetFolderId,
         updated_at: new Date().toISOString()
@@ -657,6 +678,8 @@ export default function FilesHubClient() {
       if (error) throw error
 
       // Log the activity
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('file_activities').insert({
         file_id: fileId,
         user_id: user.id,
@@ -674,9 +697,13 @@ export default function FilesHubClient() {
   // Rename file handler
   const handleRenameFile = async (fileId: string, newName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('files').update({
         name: newName,
         updated_at: new Date().toISOString()
@@ -685,6 +712,8 @@ export default function FilesHubClient() {
       if (error) throw error
 
       // Log the activity
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('file_activities').insert({
         file_id: fileId,
         user_id: user.id,
@@ -706,6 +735,8 @@ export default function FilesHubClient() {
 
     try {
       toast.loading('Uploading files...')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -761,6 +792,8 @@ export default function FilesHubClient() {
   const handleDownloadFile = async (file: FileItem) => {
     try {
       toast.loading('Preparing download...')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.storage
         .from('files')
         .download(file.path || `${file.id}/${file.name}`)
@@ -803,6 +836,8 @@ export default function FilesHubClient() {
 
     try {
       toast.loading('Revoking access...')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('file_shares').delete().eq('id', linkId)
       if (error) throw error
       toast.dismiss()

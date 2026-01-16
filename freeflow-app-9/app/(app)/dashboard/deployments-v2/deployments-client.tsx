@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -339,7 +338,7 @@ const defaultDeploymentForm = {
 }
 
 export default function DeploymentsClient() {
-  const supabase = createClient()
+
 
   // Database state
   const [dbDeployments, setDbDeployments] = useState<DbDeployment[]>([])
@@ -353,6 +352,8 @@ export default function DeploymentsClient() {
   const fetchDeployments = useCallback(async () => {
     try {
       setLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('deployments')
         .select('*')
@@ -365,7 +366,7 @@ export default function DeploymentsClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchDeployments()
@@ -383,6 +384,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deployments').insert({
         user_id: userData.user.id,
         deployment_name: deploymentForm.deployment_name,
@@ -414,6 +417,8 @@ export default function DeploymentsClient() {
   // Start deployment (update status to in_progress)
   const handleStartDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
@@ -433,6 +438,8 @@ export default function DeploymentsClient() {
       const startTime = deployment.started_at ? new Date(deployment.started_at).getTime() : Date.now()
       const duration = Math.floor((Date.now() - startTime) / 1000)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({
@@ -461,6 +468,8 @@ export default function DeploymentsClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'rolled_back' })
@@ -478,6 +487,8 @@ export default function DeploymentsClient() {
   // Cancel deployment
   const handleCancelDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'cancelled' })
@@ -494,6 +505,8 @@ export default function DeploymentsClient() {
   // Delete deployment
   const handleDeleteDeployment = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deployments').delete().eq('id', id)
       if (error) throw error
       toast.success('Deployment Deleted')
@@ -649,6 +662,8 @@ export default function DeploymentsClient() {
   const handleDeleteEnvVar = async (envVar: EnvVar) => {
     setIsProcessing(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('environment_variables').delete().eq('id', envVar.id)
       if (error) throw error
       toast.success('Variable Deleted' has been removed` })
@@ -665,6 +680,8 @@ export default function DeploymentsClient() {
   const handleDeleteBlob = async (blob: StorageBlob) => {
     setIsProcessing(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('storage_blobs').delete().eq('id', blob.id)
       if (error) throw error
       toast.success('Deleted' has been deleted` })
@@ -700,6 +717,8 @@ export default function DeploymentsClient() {
   const handleDeleteHook = async (hookName: string) => {
     setIsProcessing(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deploy_hooks').delete().eq('name', hookName)
       if (error) throw error
       toast.success('Hook Deleted' has been removed` })
@@ -716,6 +735,8 @@ export default function DeploymentsClient() {
   const handleRemoveTeamMember = async (member: TeamMember) => {
     setIsProcessing(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('team_members').delete().eq('id', member.id)
       if (error) throw error
       toast.success('Member Removed' has been removed from the team` })
@@ -741,6 +762,8 @@ export default function DeploymentsClient() {
       })
       if (!response.ok) throw new Error('Plugin installation failed')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('installed_plugins').insert({
         name: pluginName,
         installed_at: new Date().toISOString(),
@@ -824,6 +847,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('serverless_functions').insert({
         user_id: userData.user.id,
         name,
@@ -852,6 +877,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('edge_configs').insert({
         user_id: userData.user.id,
         name,
@@ -965,6 +992,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deploy_hooks').insert({
         user_id: userData.user.id,
         name,
@@ -1012,6 +1041,8 @@ export default function DeploymentsClient() {
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ environment: 'production' })
@@ -2397,6 +2428,8 @@ export default function DeploymentsClient() {
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
                               setIsProcessing(true)
                               try {
+                                const { createClient } = await import('@/lib/supabase/client')
+                                const supabase = createClient()
                                 const { error } = await supabase.from('webhooks').delete().eq('id', webhook.id)
                                 if (error) throw error
                                 toast.success('Webhook Deleted' has been removed` })
@@ -2544,6 +2577,8 @@ export default function DeploymentsClient() {
                   try {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     const { error } = await supabase.from('environment_variables').insert({
                       user_id: userData.user.id,
                       key,
@@ -3185,6 +3220,8 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { error } = await supabase.from('edge_configs').upsert({
                     id: selectedEdgeConfig.id,
                     user_id: userData.user.id,
@@ -3245,6 +3282,8 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { error } = await supabase.from('storage_folders').insert({
                     user_id: userData.user.id,
                     name: name,
@@ -3824,6 +3863,8 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { error } = await supabase.from('protection_rules').insert({
                     user_id: userData.user.id,
                     name: ruleName,
