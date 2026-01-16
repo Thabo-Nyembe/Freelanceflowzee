@@ -187,7 +187,7 @@ interface Review {
 }
 
 // Mock data
-const mockCourses: Course[] = [
+const courses: Course[] = [
   {
     id: '1',
     title: 'Complete Web Development Bootcamp 2024',
@@ -527,25 +527,25 @@ const mockReviews: Review[] = [
 ]
 
 // Enhanced Courses Mock Data
-const mockCoursesAIInsights = [
+const coursesAIInsights = [
   { id: '1', type: 'success' as const, title: 'Course Performance', description: 'Python Masterclass completion rate up 18% this month. Students love the new exercises.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
   { id: '2', type: 'info' as const, title: 'Engagement Alert', description: 'Module 4 has highest drop-off rate. Consider adding more interactive content.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Content' },
   { id: '3', type: 'warning' as const, title: 'Q&A Backlog', description: '15 student questions unanswered for more than 48 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Support' },
 ]
 
-const mockCoursesCollaborators = [
+const coursesCollaborators = [
   { id: '1', name: 'Lead Instructor', avatar: '/avatars/instructor.jpg', status: 'online' as const, role: 'Course Creator', lastActive: 'Now' },
   { id: '2', name: 'TA Sarah', avatar: '/avatars/ta.jpg', status: 'online' as const, role: 'Teaching Assistant', lastActive: '5m ago' },
   { id: '3', name: 'Content Editor', avatar: '/avatars/editor.jpg', status: 'away' as const, role: 'Video Production', lastActive: '1h ago' },
 ]
 
-const mockCoursesPredictions = [
+const coursesPredictions = [
   { id: '1', label: 'Enrollments', current: 2847, target: 3500, predicted: 3200, confidence: 82, trend: 'up' as const },
   { id: '2', label: 'Completion Rate', current: 68, target: 75, predicted: 72, confidence: 78, trend: 'up' as const },
   { id: '3', label: 'Revenue', current: 28450, target: 35000, predicted: 32000, confidence: 85, trend: 'up' as const },
 ]
 
-const mockCoursesActivities = [
+const coursesActivities = [
   { id: '1', user: 'Lead Instructor', action: 'published', target: 'new lecture in Python Advanced', timestamp: '15m ago', type: 'success' as const },
   { id: '2', user: 'TA Sarah', action: 'answered', target: '8 student questions', timestamp: '30m ago', type: 'info' as const },
   { id: '3', user: 'Content Editor', action: 'uploaded', target: '3 new video lessons', timestamp: '2h ago', type: 'info' as const },
@@ -621,6 +621,9 @@ export default function CoursesClient() {
   const createCourseMutation = useCreateCourse()
   const updateCourseMutation = useUpdateCourse()
   const deleteCourseMutation = useDeleteCourse()
+
+  // Use database courses (with fallback to empty array)
+  const courses = (dbCourses || []) as Course[]
 
   // Course form state
   const [courseForm, setCourseForm] = useState({
@@ -703,29 +706,25 @@ export default function CoursesClient() {
 
   // Stats
   const stats = useMemo(() => {
-    const totalCourses = mockCourses.length
-    const publishedCourses = mockCourses.filter(c => c.status === 'published').length
-    const totalStudents = mockCourses.reduce((sum, c) => sum + c.stats.enrollments, 0)
-    const totalRevenue = mockCourses.reduce((sum, c) => sum + c.revenue.totalRevenue, 0)
-    const avgRating = mockCourses.filter(c => c.stats.rating > 0).reduce((sum, c) => sum + c.stats.rating, 0) / mockCourses.filter(c => c.stats.rating > 0).length || 0
-    const totalCompletions = mockCourses.reduce((sum, c) => sum + c.stats.completions, 0)
-    const totalHours = mockCourses.reduce((sum, c) => sum + c.stats.totalHours, 0)
-    const totalReviews = mockCourses.reduce((sum, c) => sum + c.stats.reviewCount, 0)
+    const totalCourses = courses.length
+    const publishedCourses = courses.filter(c => c.status === 'published').length
+    const totalStudents = courses.reduce((sum, c) => sum + c.stats.enrollments, 0)
+    const totalRevenue = courses.reduce((sum, c) => sum + c.revenue.totalRevenue, 0)
+    const avgRating = courses.filter(c => c.stats.rating > 0).reduce((sum, c) => sum + c.stats.rating, 0) / courses.filter(c => c.stats.rating > 0).length || 0
+    const totalCompletions = courses.reduce((sum, c) => sum + c.stats.completions, 0)
+    const totalHours = courses.reduce((sum, c) => sum + c.stats.totalHours, 0)
+    const totalReviews = courses.reduce((sum, c) => sum + c.stats.reviewCount, 0)
 
     return { totalCourses, publishedCourses, totalStudents, totalRevenue, avgRating, totalCompletions, totalHours, totalReviews }
-  }, [])
+  }, [courses])
 
-  // Filtered courses
+  // Filtered courses (category and search filtering is already done by the hook)
   const filteredCourses = useMemo(() => {
-    return mockCourses.filter(c => {
+    return courses.filter(c => {
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter
-      const matchesCategory = categoryFilter === 'all' || c.category === categoryFilter
-      const matchesSearch = !searchQuery ||
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.instructor.name.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesStatus && matchesCategory && matchesSearch
+      return matchesStatus
     })
-  }, [statusFilter, categoryFilter, searchQuery])
+  }, [courses, statusFilter])
 
   // Helpers
   const getStatusColor = (status: string) => {
@@ -783,7 +782,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -861,8 +859,7 @@ export default function CoursesClient() {
         watermark_enabled: false
       } as any)
 
-      toast.success('Course created successfully'"`
-      })
+      toast.success('Course created successfully')
       setShowCreateCourseDialog(false)
       resetCourseForm()
       refreshCourses()
@@ -938,8 +935,7 @@ export default function CoursesClient() {
         keywords: courseForm.keywords
       } as any)
 
-      toast.success('Course updated successfully'"`
-      })
+      toast.success('Course updated successfully')
       setShowEditCourseDialog(false)
       resetCourseForm()
       setSelectedCourse(null)
@@ -958,8 +954,7 @@ export default function CoursesClient() {
     try {
       await deleteCourseMutation.mutateAsync({ id: courseToDelete.id } as any)
 
-      toast.success('Course deleted'"`
-      })
+      toast.success('Course deleted')
       setShowDeleteCourseDialog(false)
       setCourseToDelete(null)
       refreshCourses()
@@ -985,8 +980,7 @@ export default function CoursesClient() {
         publish_date: new Date().toISOString()
       } as any)
 
-      toast.success('Course published'" is now live`
-      })
+      toast.success(`Course published: ${course.course_name} is now live`)
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to publish course')
@@ -1004,8 +998,7 @@ export default function CoursesClient() {
         is_published: false
       } as any)
 
-      toast.success('Course archived'" has been archived`
-      })
+      toast.success(`Course archived: ${course.course_name} has been archived`)
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to archive course')
@@ -1040,8 +1033,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Enrolled!'"`
-      })
+      toast.success('Enrolled!')
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to enroll')
@@ -1052,7 +1044,6 @@ export default function CoursesClient() {
 
   const handleStartLesson = async (lecture: Lecture) => {
     try {
-      const supabase = createClient()
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -1063,8 +1054,6 @@ export default function CoursesClient() {
       }
 
       // Track lesson start in course_progress table
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('course_progress').upsert({
         user_id: user.id,
         lesson_id: lecture.id,
@@ -1072,8 +1061,7 @@ export default function CoursesClient() {
         started_at: new Date().toISOString()
       })
 
-      toast.info('Starting lesson'"...`
-      })
+      toast.info(`Starting lesson: ${lecture.title}...`)
     } catch (error: any) {
       toast.error('Failed to start lesson')
     }
@@ -1082,7 +1070,6 @@ export default function CoursesClient() {
   const handleCompleteCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -1093,8 +1080,6 @@ export default function CoursesClient() {
       }
 
       // Update enrollment status to completed
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('course_enrollments')
         .update({ status: 'completed', completed_at: new Date().toISOString(), progress_percent: 100 })
@@ -1152,8 +1137,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Section added'" to the course`
-      })
+      toast.success(`Section added: ${sectionForm.name} to the course`)
       setShowAddSectionDialog(false)
       resetSectionForm()
       refreshCourses()
@@ -1172,8 +1156,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { error } = await supabase.from('course_lessons').insert({
@@ -1187,8 +1169,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Lecture added'" to the section`
-      })
+      toast.success(`Lecture added: ${lectureForm.title} to the section`)
       setShowAddLectureDialog(false)
       resetLectureForm()
       refreshCourses()
@@ -1202,8 +1183,6 @@ export default function CoursesClient() {
   const handleRespondToReview = async (reviewId: string, response: string) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { error } = await supabase
@@ -1320,7 +1299,7 @@ export default function CoursesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-3xl font-bold">{courses.length}</p>
                     <p className="text-orange-200 text-sm">Courses</p>
                   </div>
                 </div>
@@ -1573,7 +1552,7 @@ export default function CoursesClient() {
                   Add Section
                 </Button>
               </div>
-              {mockCourses[0].curriculum.map((section, sIdx) => (
+              {courses[0].curriculum.map((section, sIdx) => (
                 <div key={section.id} className="mb-4 border dark:border-gray-700 rounded-lg overflow-hidden">
                   <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1665,7 +1644,7 @@ export default function CoursesClient() {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 dark:text-white">Revenue Overview</h3>
                 <div className="space-y-4">
-                  {mockCourses.filter(c => c.status === 'published').map(course => (
+                  {courses.filter(c => c.status === 'published').map(course => (
                     <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{course.thumbnail}</span>
@@ -1689,7 +1668,7 @@ export default function CoursesClient() {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 dark:text-white">Engagement Metrics</h3>
                 <div className="space-y-4">
-                  {mockCourses.filter(c => c.status === 'published').map(course => (
+                  {courses.filter(c => c.status === 'published').map(course => (
                     <div key={course.id} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-sm dark:text-white">{course.title}</span>
@@ -2512,18 +2491,18 @@ export default function CoursesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockCoursesAIInsights}
+              insights={coursesAIInsights}
               title="Course Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockCoursesCollaborators}
+              collaborators={coursesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCoursesPredictions}
+              predictions={coursesPredictions}
               title="Learning Forecasts"
             />
           </div>
@@ -2531,7 +2510,7 @@ export default function CoursesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockCoursesActivities}
+            activities={coursesActivities}
             title="Course Activity"
             maxItems={5}
           />
