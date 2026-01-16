@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -25,7 +24,9 @@ import {
   List, Kanban, Archive,
   Loader2
 } from 'lucide-react'
-import { useSupabaseQuery, useSupabaseMutation, useRealtimeSubscription } from '@/lib/hooks/use-supabase-helpers'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useCRMContacts, useCRMDeals, useCRMActivities } from '@/lib/hooks/use-crm-extended'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 
 // Competitive Upgrade Components
 import {
@@ -166,39 +167,40 @@ const mockCrmActivitiesFeed = crmActivities
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
-  const supabase = createClient()
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
 
-  // Supabase queries
-  const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({
+  // Database hooks - Extended CRM hooks
+  const { data: dbContacts = [], isLoading: contactsLoading, refresh: refreshContacts } = useCRMContacts(userId || undefined)
+  const { data: dbDeals = [], isLoading: dealsLoading, refresh: refreshDeals } = useCRMDeals(userId || undefined)
+  const { data: dbActivities = [], isLoading: activitiesLoading, refresh: refreshActivities } = useCRMActivities(undefined) // Note: useCRMActivities expects contactId, not userId
+
+  // Mutation hooks for CRUD operations
+  const contactMutation = useSupabaseMutation({
     table: 'crm_contacts',
-    orderBy: { column: 'created_at', ascending: false }
+    onSuccess: () => refreshContacts()
   })
 
-  const { data: dbDeals, isLoading: dealsLoading, refetch: refetchDeals } = useSupabaseQuery<any>({
+  const dealMutation = useSupabaseMutation({
     table: 'crm_deals',
-    orderBy: { column: 'created_at', ascending: false }
+    onSuccess: () => refreshDeals()
   })
 
-  const { data: dbActivities, isLoading: activitiesLoading, refetch: refetchActivities } = useSupabaseQuery<any>({
+  const activityMutation = useSupabaseMutation({
     table: 'crm_activities',
-    orderBy: { column: 'created_at', ascending: false }
+    onSuccess: () => refreshActivities()
   })
 
-  // Mutations
-  const contactMutation = useSupabaseMutation<any>({
-    table: 'crm_contacts',
-    onSuccess: () => refetchContacts()
-  })
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
 
-  const dealMutation = useSupabaseMutation<any>({
-    table: 'crm_deals',
-    onSuccess: () => refetchDeals()
-  })
-
-  const activityMutation = useSupabaseMutation<any>({
-    table: 'crm_activities',
-    onSuccess: () => refetchActivities()
-  })
+  // Hooks automatically fetch data when userId changes - no manual fetch needed
 
   // Use DB data or fallback to mock data
   const contacts: Contact[] = dbContacts.length > 0 ? dbContacts.map((c: any) => ({
@@ -450,8 +452,7 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Contact created' has been added to your CRM`
-      })
+      toast.success('Contact created - Added to your CRM')
       setShowAddContactDialog(false)
     } else {
       toast.error('Failed to create contact')
@@ -494,8 +495,7 @@ export default function CrmClient() {
     }, selectedContact.id)
 
     if (result) {
-      toast.success('Contact updated' has been updated`
-      })
+      toast.success('Contact updated')
       setShowEditContactDialog(false)
       setSelectedContact(null)
     } else {
@@ -506,8 +506,7 @@ export default function CrmClient() {
   const handleDeleteContact = async (contactId: string, contactName: string) => {
     const success = await contactMutation.remove(contactId)
     if (success) {
-      toast.success('Contact deleted' has been removed`
-      })
+      toast.success('Contact deleted')
       setSelectedContact(null)
     } else {
       toast.error('Failed to delete contact')
@@ -547,8 +546,7 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Deal created' has been added to your pipeline`
-      })
+      toast.success('Deal created - Added to your pipeline')
       setShowAddDealDialog(false)
     } else {
       toast.error('Failed to create deal')
@@ -585,8 +583,7 @@ export default function CrmClient() {
     }, selectedDeal.id)
 
     if (result) {
-      toast.success('Deal updated' has been updated`
-      })
+      toast.success('Deal updated')
       setShowEditDealDialog(false)
       setSelectedDeal(null)
     } else {
@@ -597,8 +594,7 @@ export default function CrmClient() {
   const handleDeleteDeal = async (dealId: string, dealName: string) => {
     const success = await dealMutation.remove(dealId)
     if (success) {
-      toast.success('Deal deleted' has been removed`
-      })
+      toast.success('Deal deleted')
       setSelectedDeal(null)
     } else {
       toast.error('Failed to delete deal')
@@ -621,8 +617,7 @@ export default function CrmClient() {
     }, dealId)
 
     if (result) {
-      toast.success('Deal stage updated'`
-      })
+      toast.success('Deal stage updated')
     } else {
       toast.error('Failed to update deal stage')
     }
@@ -658,8 +653,7 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Activity logged' has been recorded`
-      })
+      toast.success('Activity logged')
       setShowAddActivityDialog(false)
     } else {
       toast.error('Failed to log activity')
@@ -724,8 +718,7 @@ export default function CrmClient() {
     }, contactId)
 
     if (result) {
-      toast.success('Lead qualified' has been moved to qualified status`
-      })
+      toast.success('Lead qualified - Moved to qualified status')
     } else {
       toast.error('Failed to qualify lead')
     }
@@ -787,10 +780,9 @@ export default function CrmClient() {
         }
       }
 
-      await refetchContacts()
+      await refreshContacts()
 
-      toast.success('Import complete' contacts imported successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`
-      })
+      toast.success(`Import complete - ${successCount} contacts imported successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`)
       setShowImportDialog(false)
     } catch (error) {
       toast.error('Import failed')
@@ -799,8 +791,7 @@ export default function CrmClient() {
 
   // Automation API Handlers
   const handleEditAutomation = async (automation: Automation) => {
-    toast.success('Opening editor' for editing`
-    })
+    toast.success('Opening editor for editing')
     // In production, this would open an automation editor
     setShowAutomationActionsDialog(false)
   }
@@ -821,8 +812,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused' has been ${newStatus === 'active' ? 'activated' : 'paused'}`
-        })
+        toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused')
       } else {
         toast.error('Failed to update automation')
       }
@@ -836,12 +826,10 @@ export default function CrmClient() {
     try {
       const response = await fetch(`/api/crm?type=activities`)
       if (response.ok) {
-        toast.success('History loaded'`
-        })
+        toast.success('History loaded')
       }
     } catch {
-      toast.info('Viewing history'`
-      })
+      toast.info('Viewing history')
     }
     setShowAutomationActionsDialog(false)
   }
@@ -861,8 +849,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Automation duplicated' created`
-        })
+        toast.success('Automation duplicated')
       } else {
         toast.error('Failed to duplicate automation')
       }
@@ -887,8 +874,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Automation deleted' has been removed`
-        })
+        toast.success('Automation deleted')
       } else {
         toast.error('Failed to delete automation')
       }
@@ -3396,8 +3382,7 @@ export default function CrmClient() {
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
-                      toast.success('File selected' is ready to import`
-                      })
+                      toast.success('File selected - Ready to import')
                     }
                   }}
                 />
@@ -3776,8 +3761,7 @@ export default function CrmClient() {
                     activity_date: new Date().toISOString(),
                     completed: true
                   })
-                  toast.success('Call logged' recorded`
-                  })
+                  toast.success('Call logged')
                 }
                 setShowContactCallDialog(false)
               }}>
