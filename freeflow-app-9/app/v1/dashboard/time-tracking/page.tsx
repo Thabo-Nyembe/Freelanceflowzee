@@ -1,16 +1,26 @@
 'use client'
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect } from 'react'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw, Square, AlertTriangle } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,21 +31,34 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
+import {
+  Clock,
+  Play,
+  Pause,
+  Square,
+  Plus,
+  Edit,
+  Trash2,
+  Copy,
+  Download,
+  FileText,
+  Calendar,
+  Filter,
+  BarChart3,
+  AlertTriangle,
+  RotateCcw
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { BorderTrail } from '@/components/ui/border-trail'
-import { GlowEffect } from '@/components/ui/glow-effect'
-
-// A+++ UTILITIES
-import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
-import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { useAnnouncer } from '@/lib/accessibility'
-import { createFeatureLogger } from '@/lib/logger'
-import { useCurrentUser } from '@/hooks/use-ai-data'
-import { archiveTimeEntry } from '@/lib/time-tracking-queries'
-
-const logger = createFeatureLogger('TimeTracking')
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { useLogger } from '@/hooks/use-logger'
+import { useAccessibility } from '@/hooks/use-accessibility'
+import LiquidGlassCard from '@/components/ui/liquid-glass-card'
+import BorderTrail from '@/components/ui/border-trail'
+import GlowEffect from '@/components/ui/glow-effect'
+import TextShimmer from '@/components/ui/text-shimmer'
+import ErrorEmptyState from '@/components/ui/error-empty-state'
+import CardSkeleton from '@/components/ui/card-skeleton'
+import DashboardSkeleton from '@/components/ui/dashboard-skeleton'
 
 interface TimeEntry {
   id: string
@@ -45,7 +68,7 @@ interface TimeEntry {
   startTime: Date
   endTime?: Date
   duration: number
-  isRunning: boolean
+  isRunning?: boolean
   isPaused?: boolean
 }
 
@@ -61,87 +84,75 @@ interface Task {
   projectId: string
 }
 
+// Archive time entry helper
+async function archiveTimeEntry(entryId: string, userId: string) {
+  try {
+    const { archiveTimeEntry: archiveFn } = await import('@/lib/time-tracking-queries')
+    return await archiveFn(entryId, userId)
+  } catch (error) {
+    return { success: false, error: { message: 'Failed to archive entry' } }
+  }
+}
+
 export default function TimeTrackingPage() {
-  // A+++ STATE MANAGEMENT
+  const { user, isLoading: userLoading } = useCurrentUser()
+  const userId = user?.id
+  const logger = useLogger()
+  const { announce } = useAccessibility()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
-  const { userId, loading: userLoading } = useCurrentUser()
 
-  const [activeTimer, setActiveTimer] = useState<TimeEntry | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
-  const [selectedProject, setSelectedProject] = useState<string>('')
-  const [selectedTask, setSelectedTask] = useState<string>('')
-  const [description, setDescription] = useState<any>('')
-  const [elapsedTime, setElapsedTime] = useState<any>(0)
+  const [activeTimer, setActiveTimer] = useState<TimeEntry | null>(null)
   const [timerDisplay, setTimerDisplay] = useState('00:00:00')
+  const [elapsedTime, setElapsedTime] = useState(0)
 
-  // AlertDialog states for confirmations
+  const [selectedProject, setSelectedProject] = useState('')
+  const [selectedTask, setSelectedTask] = useState('')
+  const [description, setDescription] = useState('')
+
+  // Dialog states
   const [showDeleteEntryDialog, setShowDeleteEntryDialog] = useState(false)
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
   const [showDeleteTaskDialog, setShowDeleteTaskDialog] = useState(false)
   const [showArchiveEntryDialog, setShowArchiveEntryDialog] = useState(false)
+  const [showEditEntryDialog, setShowEditEntryDialog] = useState(false)
+  const [showManualEntryDialog, setShowManualEntryDialog] = useState(false)
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [showEditTaskDialog, setShowEditTaskDialog] = useState(false)
+
+  // Form states
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null)
+  const [entryToArchive, setEntryToArchive] = useState<string | null>(null)
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
-  const [entryToArchive, setEntryToArchive] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  // Dialog states for prompt() replacements
-  const [showEditEntryDialog, setShowEditEntryDialog] = useState(false)
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null)
   const [newEntryDescription, setNewEntryDescription] = useState('')
-
-  const [showManualEntryDialog, setShowManualEntryDialog] = useState(false)
   const [manualHours, setManualHours] = useState('')
-
-  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
   const [filterStartDate, setFilterStartDate] = useState('')
   const [filterEndDate, setFilterEndDate] = useState('')
-
-  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
-
-  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
   const [editProjectName, setEditProjectName] = useState('')
-
-  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
   const [newTaskName, setNewTaskName] = useState('')
-
-  const [showEditTaskDialog, setShowEditTaskDialog] = useState(false)
   const [editTaskName, setEditTaskName] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  // Mock data - replace with real data from your API
-  const projects: Project[] = [
-    {
-      id: '1',
-      name: 'Website Redesign',
-      tasks: [
-        { id: '1', name: 'UI Design', projectId: '1' },
-        { id: '2', name: 'Frontend Development', projectId: '1' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Mobile App',
-      tasks: [
-        { id: '3', name: 'Wireframes', projectId: '2' },
-        { id: '4', name: 'User Testing', projectId: '2' },
-      ],
-    },
-  ]
+  const formatTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+    return `${hours}h ${minutes}m ${secs}s`
+  }
 
-  // A+++ LOAD TIME TRACKING DATA
   useEffect(() => {
     const loadTimeTrackingData = async () => {
-      if (userLoading) {
-        logger.info('Waiting for user authentication')
-        return // Keep loading state while auth is loading
-      }
-
-      if (!userId) {
-        logger.info('No user found, stopping load')
+      if (userLoading || !userId) {
         setIsLoading(false)
         return
       }
@@ -150,51 +161,39 @@ export default function TimeTrackingPage() {
         setIsLoading(true)
         setError(null)
 
-        logger.info('Loading time tracking data from Supabase', { userId })
-
-        // Dynamic import for code splitting
         const {
           getTimeEntries,
-          getTimeTrackingSummary
+          getTimeTrackingSummary,
+          getProjects
         } = await import('@/lib/time-tracking-queries')
 
-        // Load running/paused timer and recent entries in parallel
-        // We need to check both running and paused status
-        const [entriesResult, summaryResult, activeTimerResult] = await Promise.all([
+        // Load projects, entries, and active timer in parallel
+        const [entriesResult, summaryResult, projectsResult, activeTimerResult] = await Promise.all([
           getTimeEntries(userId, {
-            startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Last 7 days
+            startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           }),
           getTimeTrackingSummary(userId),
-          // Get any running or paused timer
+          getProjects(userId),
           getTimeEntries(userId, {}).then(res => {
             if (res.error) return { data: null, error: res.error }
-            // Find the most recent running or paused timer
             const activeTimer = res.data.find(entry => entry.status === 'running' || entry.status === 'paused')
             return { data: activeTimer || null, error: null }
           })
         ])
 
-        const runningResult = activeTimerResult
-
-        if (runningResult.error || entriesResult.error || summaryResult.error) {
-          throw new Error('Failed to load time tracking data')
+        if (entriesResult.error) {
+          throw new Error(entriesResult.error?.message || 'Failed to load time entries')
         }
 
-        // Set running or paused timer if exists
-        if (runningResult.data) {
-          const runningEntry = runningResult.data
+        // Restore active timer if exists
+        if (activeTimerResult.data) {
+          const runningEntry = activeTimerResult.data
           const startTime = new Date(runningEntry.start_time)
           const isPaused = runningEntry.status === 'paused'
 
-          // Calculate elapsed time
-          let elapsed: number
-          if (isPaused) {
-            // If paused, use the stored duration
-            elapsed = runningEntry.duration
-          } else {
-            // If running, calculate elapsed since start
-            elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000)
-          }
+          const elapsed = isPaused
+            ? runningEntry.duration
+            : Math.floor((Date.now() - startTime.getTime()) / 1000)
 
           setActiveTimer({
             id: runningEntry.id,
@@ -207,55 +206,55 @@ export default function TimeTrackingPage() {
             isPaused: isPaused
           })
           setElapsedTime(elapsed)
-
-          logger.info('Timer restored', {
-            entryId: runningEntry.id,
-            elapsed: elapsed,
-            status: isPaused ? 'paused' : 'running'
-          })
         }
 
-        // Transform and set time entries
-        if (entriesResult.data.length > 0) {
-          const transformedEntries = entriesResult.data.map(entry => ({
-            id: entry.id,
-            projectId: entry.project_id || '',
-            taskId: entry.task_id || '',
-            description: entry.description,
-            startTime: new Date(entry.start_time),
-            endTime: entry.end_time ? new Date(entry.end_time) : undefined,
-            duration: entry.duration,
-            isRunning: entry.status === 'running'
+        // Transform entries
+        const transformedEntries: TimeEntry[] = entriesResult.data.map(entry => ({
+          id: entry.id,
+          projectId: entry.project_id || '',
+          taskId: entry.task_id || '',
+          description: entry.description,
+          startTime: new Date(entry.start_time),
+          endTime: entry.end_time ? new Date(entry.end_time) : undefined,
+          duration: entry.duration,
+          isRunning: entry.status === 'running',
+          isPaused: entry.status === 'paused'
+        }))
+
+        setTimeEntries(transformedEntries)
+
+        // Transform projects with tasks
+        const transformedProjects: Project[] = (projectsResult.data || []).map(project => ({
+          id: project.id,
+          name: project.name,
+          tasks: (project.tasks || []).map(task => ({
+            id: task.id,
+            name: task.name,
+            projectId: project.id
           }))
+        }))
 
-          setTimeEntries(transformedEntries)
-
-          logger.info('Time entries loaded', {
-            count: transformedEntries.length,
-            totalHours: summaryResult.data?.total_hours || 0
-          })
-        }
-
+        setProjects(transformedProjects)
         setIsLoading(false)
-        announce(`Time tracking dashboard loaded with ${entriesResult.data.length} entries`, 'polite')
+        announce(`Time tracking loaded with ${transformedEntries.length} entries`, 'polite')
       } catch (err) {
-        logger.error('Failed to load time tracking data', { error: err })
-        setError(err instanceof Error ? err.message : 'Failed to load time tracking data')
+        logger.error('Failed to load time tracking', { error: err })
+        setError(err instanceof Error ? err.message : 'Failed to load time tracking')
         setIsLoading(false)
-        announce('Error loading time tracking dashboard', 'assertive')
+        announce('Error loading time tracking', 'assertive')
       }
     }
 
     loadTimeTrackingData()
-  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading])
 
+  // Timer interval
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (activeTimer && !activeTimer.isPaused) {
       interval = setInterval(() => {
         setElapsedTime((prev: number) => {
           const newElapsed = prev + 1
-          // Update display
           const hours = Math.floor(newElapsed / 3600)
           const minutes = Math.floor((newElapsed % 3600) / 60)
           const seconds = newElapsed % 60
@@ -266,7 +265,6 @@ export default function TimeTrackingPage() {
         })
       }, 1000)
     } else if (activeTimer && activeTimer.isPaused) {
-      // Update display for paused timer
       const hours = Math.floor(elapsedTime / 3600)
       const minutes = Math.floor((elapsedTime % 3600) / 60)
       const seconds = elapsedTime % 60
@@ -279,25 +277,12 @@ export default function TimeTrackingPage() {
     return () => clearInterval(interval)
   }, [activeTimer, elapsedTime])
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return `${hours.toString().padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
   const startTimer = async () => {
-    if (!selectedProject || !selectedTask) return
-
-    if (!userId) {
-      toast.error('Please log in to start timer')
-      logger.warn('Start timer attempted without authentication')
+    if (!userId || !selectedProject || !selectedTask) {
+      toast.error('Please select project and task')
       return
     }
 
-    // Stop any existing timer first
     if (activeTimer) {
       await stopTimer()
     }
@@ -306,13 +291,6 @@ export default function TimeTrackingPage() {
     const taskObj = projectObj?.tasks.find(t => t.id === selectedTask)
 
     try {
-      logger.info('Starting timer', {
-        projectId: selectedProject,
-        taskId: selectedTask,
-        description
-      })
-
-      // Dynamic import for code splitting
       const { createTimeEntry } = await import('@/lib/time-tracking-queries')
 
       const { data, error } = await createTimeEntry(userId, {
@@ -345,31 +323,18 @@ export default function TimeTrackingPage() {
       setTimeEntries((prev) => [newEntry, ...prev])
       setElapsedTime(0)
 
-      logger.info('Timer started successfully', { entryId: data.id })
-      toast.success(`Timer Started - Tracking time for ${projectObj?.name} - ${taskObj?.name}`)
-      announce(`Timer started for ${projectObj?.name} - ${taskObj?.name}`, 'polite')
+      toast.success(`Timer Started - ${projectObj?.name} - ${taskObj?.name}`)
+      announce(`Timer started for ${projectObj?.name}`, 'polite')
     } catch (error) {
-      logger.error('Failed to start timer', { error })
-      toast.error('Failed to Start Timer', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error(error instanceof Error ? error.message : 'Failed to start timer')
       announce('Failed to start timer', 'assertive')
     }
   }
 
   const stopTimer = async () => {
-    if (!activeTimer) return
-
-    if (!userId) {
-      toast.error('Please log in to stop timer')
-      logger.warn('Stop timer attempted without authentication')
-      return
-    }
+    if (!activeTimer || !userId) return
 
     try {
-      logger.info('Stopping timer', { entryId: activeTimer.id, duration: elapsedTime })
-
-      // Dynamic import for code splitting
       const { stopTimeEntry } = await import('@/lib/time-tracking-queries')
 
       const { data, error } = await stopTimeEntry(activeTimer.id, userId)
@@ -399,39 +364,21 @@ export default function TimeTrackingPage() {
       const minutes = Math.floor((data.duration % 3600) / 60)
       const durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
 
-      logger.info('Timer stopped successfully', {
-        entryId: data.id,
-        duration: data.duration,
-        durationText
-      })
-
-      toast.success(`Timer Stopped - Duration: ${durationText}${data.is_billable ? ` - $${data.total_amount.toFixed(2)}` : ''}`)
+      toast.success(`Timer Stopped - ${durationText}${data.is_billable ? ` - $${data.total_amount.toFixed(2)}` : ''}`)
       announce(`Timer stopped. Duration: ${durationText}`, 'polite')
     } catch (error) {
-      logger.error('Failed to stop timer', { error })
-      toast.error('Failed to Stop Timer', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error(error instanceof Error ? error.message : 'Failed to stop timer')
       announce('Failed to stop timer', 'assertive')
     }
   }
 
   const pauseTimer = async () => {
-    if (!activeTimer || !userId) {
-      toast.error('No active timer')
-      logger.warn('Pause timer attempted without active timer')
-      return
-    }
-
-    if (activeTimer.isPaused) {
-      toast.info('Timer is already paused')
+    if (!activeTimer || !userId || activeTimer.isPaused) {
+      toast.error(activeTimer?.isPaused ? 'Timer is already paused' : 'No active timer')
       return
     }
 
     try {
-      logger.info('Pausing timer', { timerId: activeTimer.id, elapsed: elapsedTime })
-
-      // Dynamic import for code splitting
       const { pauseTimeEntry } = await import('@/lib/time-tracking-queries')
 
       const { data, error } = await pauseTimeEntry(activeTimer.id, userId)
@@ -443,36 +390,21 @@ export default function TimeTrackingPage() {
       setActiveTimer(prev => prev ? { ...prev, isPaused: true, isRunning: false, duration: data.duration } : null)
       setElapsedTime(data.duration)
 
-      toast.success(`Timer Paused - Elapsed: ${timerDisplay}`)
+      toast.success(`Timer Paused - ${timerDisplay}`)
       announce('Timer paused', 'polite')
-
-      logger.info('Timer paused successfully', { timerId: activeTimer.id, elapsed: data.duration })
-
     } catch (err) {
-      logger.error('Unexpected error pausing timer', { error: err })
-      toast.error('Failed to Pause Timer', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error(err instanceof Error ? err.message : 'Failed to pause timer')
       announce('Error pausing timer', 'assertive')
     }
   }
 
   const resumeTimer = async () => {
-    if (!activeTimer || !userId) {
-      toast.error('No timer to resume')
-      logger.warn('Resume timer attempted without paused timer')
-      return
-    }
-
-    if (!activeTimer.isPaused) {
-      toast.info('Timer is already running')
+    if (!activeTimer || !userId || !activeTimer.isPaused) {
+      toast.error(activeTimer && !activeTimer.isPaused ? 'Timer is already running' : 'No timer to resume')
       return
     }
 
     try {
-      logger.info('Resuming timer', { timerId: activeTimer.id })
-
-      // Dynamic import for code splitting
       const { resumeTimeEntry } = await import('@/lib/time-tracking-queries')
 
       const { data, error } = await resumeTimeEntry(activeTimer.id, userId)
@@ -485,28 +417,18 @@ export default function TimeTrackingPage() {
         ...prev,
         isPaused: false,
         isRunning: true,
-        startTime: new Date(data.start_time) // Use the new start time from database
+        startTime: new Date(data.start_time)
       } : null)
 
-      toast.success('Timer Resumed - Continue tracking time')
+      toast.success('Timer Resumed')
       announce('Timer resumed', 'polite')
-
-      logger.info('Timer resumed successfully', { timerId: activeTimer.id })
-
     } catch (err) {
-      logger.error('Unexpected error resuming timer', { error: err })
-      toast.error('Failed to Resume Timer', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error(err instanceof Error ? err.message : 'Failed to resume timer')
       announce('Error resuming timer', 'assertive')
     }
   }
 
   const handleEditEntry = (entry: TimeEntry) => {
-    logger.info('Edit entry initiated', {
-      entryId: entry.id,
-      currentDescription: entry.description
-    })
     setEditingEntry(entry)
     setNewEntryDescription(entry.description)
     setShowEditEntryDialog(true)
@@ -520,11 +442,7 @@ export default function TimeTrackingPage() {
         e.id === editingEntry.id ? { ...e, description: newEntryDescription } : e
       )
     )
-    logger.info('Entry updated successfully', {
-      entryId: editingEntry.id,
-      newDescription: newEntryDescription
-    })
-    toast.success('Entry Updated - Time entry description has been updated successfully')
+    toast.success('Entry Updated')
     announce('Time entry updated', 'polite')
     setShowEditEntryDialog(false)
     setEditingEntry(null)
@@ -534,11 +452,9 @@ export default function TimeTrackingPage() {
   const handleDeleteEntry = async (entryId: string) => {
     if (!userId) {
       toast.error('Please log in to delete entries')
-      logger.warn('Delete entry attempted without authentication')
       return
     }
 
-    logger.info('Delete entry initiated', { entryId })
     setEntryToDelete(entryId)
     setShowDeleteEntryDialog(true)
   }
@@ -548,7 +464,6 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      // Dynamic import for code splitting
       const { deleteTimeEntry } = await import('@/lib/time-tracking-queries')
 
       const { success, error } = await deleteTimeEntry(entryToDelete, userId)
@@ -558,17 +473,10 @@ export default function TimeTrackingPage() {
       }
 
       setTimeEntries((prev) => prev.filter((e) => e.id !== entryToDelete))
-      logger.info('Entry deleted successfully', {
-        entryId: entryToDelete,
-        remainingEntries: timeEntries.length - 1
-      })
-      toast.success('Entry Deleted - Time entry has been permanently removed from your records')
+      toast.success('Entry Deleted')
       announce('Time entry deleted', 'polite')
     } catch (error) {
-      logger.error('Failed to delete entry', { error, entryId: entryToDelete })
-      toast.error('Failed to Delete Entry', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error(error instanceof Error ? error.message : 'Failed to delete entry')
     } finally {
       setIsDeleting(false)
       setShowDeleteEntryDialog(false)
@@ -577,15 +485,8 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddManualEntry = () => {
-    logger.info('Manual entry initiated', {
-      projectSelected: !!selectedProject,
-      taskSelected: !!selectedTask
-    })
     if (!selectedProject || !selectedTask) {
-      logger.warn('Missing project or task selection')
-      toast.error('Selection Required', {
-        description: 'Please select a project and task before adding a manual entry'
-      })
+      toast.error('Please select a project and task')
       return
     }
     setManualHours('')
@@ -595,7 +496,7 @@ export default function TimeTrackingPage() {
   const confirmAddManualEntry = () => {
     const hours = parseFloat(manualHours)
     if (isNaN(hours) || hours <= 0) {
-      toast.error('Invalid Hours', { description: 'Please enter a valid number of hours' })
+      toast.error('Please enter a valid number of hours')
       return
     }
 
@@ -611,21 +512,13 @@ export default function TimeTrackingPage() {
       isRunning: false,
     }
     setTimeEntries((prev) => [...prev, newEntry])
-    logger.info('Manual entry added successfully', {
-      duration: hours + ' hour(s)',
-      totalEntries: timeEntries.length + 1
-    })
-    toast.success('Manual Entry Added - Added ' + hours + ' hour(s) to your time tracking records')
+    toast.success(`Manual Entry Added - ${hours} hour(s)`)
     announce('Manual entry added', 'polite')
     setShowManualEntryDialog(false)
     setManualHours('')
   }
 
   const handleDuplicateEntry = (entry: TimeEntry) => {
-    logger.info('Duplicate entry initiated', {
-      sourceEntryId: entry.id,
-      duration: formatTime(entry.duration)
-    })
     const duplicated: TimeEntry = {
       ...entry,
       id: Date.now().toString(),
@@ -634,18 +527,10 @@ export default function TimeTrackingPage() {
       isRunning: false,
     }
     setTimeEntries((prev) => [...prev, duplicated])
-    logger.info('Entry duplicated successfully', {
-      newEntryId: duplicated.id,
-      totalEntries: timeEntries.length + 1
-    })
-    toast.success('Entry Duplicated - Time entry has been duplicated and added to your records')
+    toast.success('Entry Duplicated')
   }
 
   const handleExportReport = (format: 'csv' | 'pdf' | 'json') => {
-    logger.info('Export report initiated', {
-      format: format.toUpperCase(),
-      entryCount: timeEntries.length
-    })
     const data = timeEntries.map((entry) => ({
       project: projects.find((p) => p.id === entry.projectId)?.name || 'Unknown',
       task: projects.find((p) => p.id === entry.projectId)?.tasks.find((t) => t.id === entry.taskId)?.name || 'Unknown',
@@ -682,23 +567,14 @@ export default function TimeTrackingPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    logger.info('Report exported successfully', {
-      filename,
-      entriesExported: data.length
-    })
-    toast.success('Report Exported - Downloaded ' + filename + ' with ' + data.length + ' entries')
+    toast.success(`Report Exported - ${filename}`)
   }
 
   const handleFilterByProject = () => {
-    logger.debug('Filter options requested', {
-      availableFilters: ['Project', 'Date Range', 'Task', 'Duration'],
-      currentEntries: timeEntries.length
-    })
     toast.info('Filter Options Available - Filter by Project, Date Range, Task, or Duration')
   }
 
   const handleFilterByDateRange = () => {
-    logger.debug('Date range filter initiated')
     setFilterStartDate('')
     setFilterEndDate('')
     setShowDateRangeDialog(true)
@@ -710,8 +586,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    logger.info('Date range filter applied', { start: filterStartDate, end: filterEndDate })
-    toast.success('Date Filter Applied - Filtering entries from ' + filterStartDate + ' to ' + filterEndDate)
+    toast.success(`Date Filter Applied - ${filterStartDate} to ${filterEndDate}`)
     announce('Date filter applied', 'polite')
     setShowDateRangeDialog(false)
     setFilterStartDate('')
@@ -719,8 +594,7 @@ export default function TimeTrackingPage() {
   }
 
   const handleClearFilters = () => {
-    logger.info('Filters cleared successfully')
-    toast.success('Filters Cleared - All filters have been reset to show all time entries')
+    toast.success('Filters Cleared')
   }
 
   const handleGenerateDailyReport = () => {
@@ -729,41 +603,23 @@ export default function TimeTrackingPage() {
       (e) => e.startTime.toLocaleDateString() === today
     )
     const totalTime = todayEntries.reduce((sum, e) => sum + e.duration, 0)
-    logger.info('Daily report generated', {
-      date: today,
-      entries: todayEntries.length,
-      totalTime: formatTime(totalTime)
-    })
-    toast.success('Daily Report Generated - ' + today + ' - ' + todayEntries.length + ' entries, ' + formatTime(totalTime) + ' total')
+    toast.success(`Daily Report - ${today} - ${todayEntries.length} entries, ${formatTime(totalTime)}`)
   }
 
   const handleGenerateWeeklyReport = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
-    logger.info('Weekly report generated', {
-      entries: timeEntries.length,
-      totalTime: formatTime(totalTime)
-    })
-    toast.success('Weekly Report Generated - ' + timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total time tracked')
+    toast.success(`Weekly Report - ${timeEntries.length} entries, ${formatTime(totalTime)}`)
   }
 
   const handleGenerateMonthlyReport = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
     const avgPerDay = timeEntries.length > 0 ? totalTime / timeEntries.length : 0
-    logger.info('Monthly report generated', {
-      entries: timeEntries.length,
-      totalTime: formatTime(totalTime),
-      avgPerEntry: formatTime(avgPerDay)
-    })
-    toast.success('Monthly Report Generated - ' + timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total, ' + formatTime(avgPerDay) + ' avg')
+    toast.success(`Monthly Report - ${timeEntries.length} entries, ${formatTime(totalTime)} total, ${formatTime(avgPerDay)} avg`)
   }
 
   const handleBulkDeleteEntries = () => {
-    logger.info('Bulk delete initiated', { currentEntries: timeEntries.length })
     if (timeEntries.length === 0) {
-      logger.warn('No entries available to delete')
-      toast.error('No Entries', {
-        description: 'There are no time entries to delete'
-      })
+      toast.error('There are no time entries to delete')
       return
     }
     setShowDeleteAllDialog(true)
@@ -774,7 +630,6 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      // Delete from database
       const { deleteAllTimeEntries } = await import('@/lib/time-tracking-queries')
       const result = await deleteAllTimeEntries(userId)
 
@@ -782,17 +637,11 @@ export default function TimeTrackingPage() {
         throw new Error(result.error.message || 'Failed to delete entries')
       }
 
-      // Update local state
       setTimeEntries([])
-
-      logger.info('All entries deleted from database', { deletedCount: result.deletedCount })
-      toast.success(`All Entries Deleted - ${result.deletedCount} time entries permanently removed`)
+      toast.success(`All Entries Deleted - ${result.deletedCount} entries removed`)
       announce('All time entries deleted', 'polite')
     } catch (error: any) {
-      logger.error('Failed to delete all entries', { error: error.message })
-      toast.error('Delete Failed', {
-        description: error.message || 'Please try again'
-      })
+      toast.error(error.message || 'Failed to delete entries')
     } finally {
       setIsDeleting(false)
       setShowDeleteAllDialog(false)
@@ -800,7 +649,6 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddProject = () => {
-    logger.info('Add project initiated')
     setNewProjectName('')
     setShowAddProjectDialog(true)
   }
@@ -811,20 +659,15 @@ export default function TimeTrackingPage() {
       return
     }
 
-    logger.info('Project added successfully', { projectName: newProjectName.trim() })
-    toast.success('Project Added - Project "' + newProjectName.trim() + '" created - you can now add tasks')
+    toast.success(`Project Added - "${newProjectName.trim()}"`)
     announce('Project added', 'polite')
     setShowAddProjectDialog(false)
     setNewProjectName('')
   }
 
   const handleEditProject = () => {
-    logger.info('Edit project initiated')
     if (!selectedProject) {
-      logger.warn('No project selected for editing')
-      toast.error('No Project Selected', {
-        description: 'Please select a project to edit'
-      })
+      toast.error('Please select a project to edit')
       return
     }
     const project = projects.find((p) => p.id === selectedProject)
@@ -838,25 +681,15 @@ export default function TimeTrackingPage() {
       return
     }
 
-    const project = projects.find((p) => p.id === selectedProject)
-    logger.info('Project updated successfully', {
-      projectId: selectedProject,
-      oldName: project?.name,
-      newName: editProjectName.trim()
-    })
-    toast.success('Project Updated - Project name changed to "' + editProjectName.trim() + '"')
+    toast.success(`Project Updated - "${editProjectName.trim()}"`)
     announce('Project updated', 'polite')
     setShowEditProjectDialog(false)
     setEditProjectName('')
   }
 
   const handleDeleteProject = () => {
-    logger.info('Delete project initiated')
     if (!selectedProject) {
-      logger.warn('No project selected for deletion')
-      toast.error('No Project Selected', {
-        description: 'Please select a project to delete'
-      })
+      toast.error('Please select a project to delete')
       return
     }
     setProjectToDelete(selectedProject)
@@ -871,14 +704,7 @@ export default function TimeTrackingPage() {
     setIsDeleting(true)
     try {
       setSelectedProject('')
-      // Note: Projects are mock data in this component
-      // In production, would delete from a projects database table
-
-      logger.info('Project deleted successfully', {
-        projectId: projectToDelete,
-        projectName: project?.name
-      })
-      toast.success('Project Deleted - Project removed - all time entries have been preserved')
+      toast.success('Project Deleted - All time entries preserved')
       announce(`Project ${project?.name} deleted`, 'polite')
     } finally {
       setIsDeleting(false)
@@ -888,12 +714,8 @@ export default function TimeTrackingPage() {
   }
 
   const handleAddTask = () => {
-    logger.info('Add task initiated')
     if (!selectedProject) {
-      logger.warn('No project selected for task creation')
-      toast.error('No Project Selected', {
-        description: 'Please select a project before adding a task'
-      })
+      toast.error('Please select a project before adding a task')
       return
     }
     setNewTaskName('')
@@ -906,23 +728,15 @@ export default function TimeTrackingPage() {
       return
     }
 
-    logger.info('Task added successfully', {
-      taskName: newTaskName.trim(),
-      projectId: selectedProject
-    })
-    toast.success('Task Added - Task "' + newTaskName.trim() + '" added to project')
+    toast.success(`Task Added - "${newTaskName.trim()}"`)
     announce('Task added', 'polite')
     setShowAddTaskDialog(false)
     setNewTaskName('')
   }
 
   const handleEditTask = () => {
-    logger.info('Edit task initiated')
     if (!selectedTask) {
-      logger.warn('No task selected for editing')
-      toast.error('No Task Selected', {
-        description: 'Please select a task to edit'
-      })
+      toast.error('Please select a task to edit')
       return
     }
     const task = projects
@@ -938,27 +752,15 @@ export default function TimeTrackingPage() {
       return
     }
 
-    const task = projects
-      .find((p) => p.id === selectedProject)
-      ?.tasks.find((t) => t.id === selectedTask)
-    logger.info('Task updated successfully', {
-      taskId: selectedTask,
-      oldName: task?.name,
-      newName: editTaskName.trim()
-    })
-    toast.success('Task Updated - Task name changed to "' + editTaskName.trim() + '"')
+    toast.success(`Task Updated - "${editTaskName.trim()}"`)
     announce('Task updated', 'polite')
     setShowEditTaskDialog(false)
     setEditTaskName('')
   }
 
   const handleDeleteTask = () => {
-    logger.info('Delete task initiated')
     if (!selectedTask) {
-      logger.warn('No task selected for deletion')
-      toast.error('No Task Selected', {
-        description: 'Please select a task to delete'
-      })
+      toast.error('Please select a task to delete')
       return
     }
     setTaskToDelete(selectedTask)
@@ -975,12 +777,7 @@ export default function TimeTrackingPage() {
     setIsDeleting(true)
     try {
       setSelectedTask('')
-      // Note: Projects are demo data - in production, would delete via database
-      logger.info('Task deleted successfully', {
-        taskId: taskToDelete,
-        taskName: task?.name
-      })
-      toast.success('Task Deleted - Task removed - all time entries have been preserved')
+      toast.success('Task Deleted - All time entries preserved')
       announce(`Task ${task?.name} deleted`, 'polite')
     } finally {
       setIsDeleting(false)
@@ -990,15 +787,11 @@ export default function TimeTrackingPage() {
   }
 
   const handleClearDescription = () => {
-    logger.debug('Description cleared', {
-      previousDescription: description || 'empty'
-    })
     setDescription('')
-    toast.success('Description Cleared - Task description has been reset')
+    toast.success('Description Cleared')
   }
 
   const handleArchiveEntry = (entryId: string) => {
-    logger.info('Archive entry initiated', { entryId })
     setEntryToArchive(entryId)
     setShowArchiveEntryDialog(true)
   }
@@ -1008,23 +801,17 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      // Archive entry in database
       const { success, error } = await archiveTimeEntry(entryToArchive, userId)
 
       if (error) {
-        logger.error('Failed to archive entry in database', { error, entryId: entryToArchive })
-        toast.error('Archive Failed', { description: 'Could not archive time entry' })
+        toast.error('Archive Failed')
         return
       }
 
-      // Update local state
       setTimeEntries(prev => prev.filter(e => e.id !== entryToArchive))
-
-      logger.info('Entry archived successfully', { entryId: entryToArchive })
-      toast.success('Entry Archived - Time entry archived - can be restored later')
+      toast.success('Entry Archived - Can be restored later')
       announce('Time entry archived', 'polite')
     } catch (error) {
-      logger.error('Exception archiving entry', { error })
       toast.error('Archive Failed')
     } finally {
       setIsDeleting(false)
@@ -1035,24 +822,12 @@ export default function TimeTrackingPage() {
 
   const handleViewDetailedStats = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
-    const projectBreakdown = projects.map((project) => {
-      const projectEntries = timeEntries.filter((e) => e.projectId === project.id)
-      const projectTime = projectEntries.reduce((sum, e) => sum + e.duration, 0)
-      return `${project.name}: ${formatTime(projectTime)}`
-    }).join('\n')
-    logger.info('Detailed statistics generated', {
-      totalTime: formatTime(totalTime),
-      totalEntries: timeEntries.length,
-      projectCount: projects.length
-    })
-    toast.success('Detailed Statistics - Total: ' + formatTime(totalTime) + ' across ' + timeEntries.length + ' entries')
+    toast.success(`Detailed Statistics - Total: ${formatTime(totalTime)} across ${timeEntries.length} entries`)
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative p-6">
-        {/* Pattern Craft Background */}
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
         <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
         <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
@@ -1071,11 +846,9 @@ export default function TimeTrackingPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative p-6">
-        {/* Pattern Craft Background */}
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
         <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
         <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
@@ -1095,7 +868,6 @@ export default function TimeTrackingPage() {
 
   return (
     <div className="min-h-screen relative p-6 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
-      {/* Pattern Craft Background */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
       <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
       <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
