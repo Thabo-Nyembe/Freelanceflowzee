@@ -190,3 +190,33 @@ export {
   useDownloadFile,
   useMoveFile
 } from './use-files'
+
+// Calendar/Events
+export { calendarClient } from './calendar-client'
+export type {
+  CalendarEvent,
+  EventAttendee,
+  EventReminder,
+  Calendar,
+  Booking,
+  CreateEventData,
+  UpdateEventData,
+  CreateCalendarData,
+  CreateBookingData,
+  EventFilters,
+  CalendarStats
+} from './calendar-client'
+
+export {
+  useEvents,
+  useEvent,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
+  useCalendars,
+  useCreateCalendar,
+  useBookings,
+  useCreateBooking,
+  useUpdateBookingStatus,
+  useCalendarStats
+} from './use-calendar'

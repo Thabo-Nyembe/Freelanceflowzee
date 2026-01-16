@@ -24,10 +24,11 @@ Successfully created a world-class API client infrastructure that replaces 59 pa
 | **Analytics API** | ✅ Complete | 2 | ~400 | Dashboard metrics, predictive insights |
 | **Messages API** | ✅ Complete | 2 | ~400 | Real-time messaging, conversations, reactions |
 | **Files/Storage API** | ✅ Complete | 2 | ~500 | File management, Supabase Storage, folders |
+| **Calendar/Events API** | ✅ Complete | 2 | ~600 | Events, bookings, recurring events, RRULE |
 | **File Upload** | ✅ Complete | 1 | ~200 | Drag & drop, Supabase Storage |
 | **Index Exports** | ✅ Complete | 1 | ~100 | Central import location |
 
-**Total:** 17 files, ~3,400 lines of production-ready code
+**Total:** 19 files, ~4,000 lines of production-ready code
 
 ---
 
@@ -643,7 +644,220 @@ function UploadSection({ folderId }: { folderId: string }) {
 
 ---
 
-## 9. File Upload Component
+## 9. Calendar/Events API Client
+
+### Files
+- [calendar-client.ts](lib/api-clients/calendar-client.ts) - API client
+- [use-calendar.ts](lib/api-clients/use-calendar.ts) - React hooks
+
+### Features
+✅ Calendar events CRUD
+✅ Multiple calendars support
+✅ Recurring events (iCalendar RRULE format)
+✅ Event attendees management
+✅ Event reminders (email, notification, SMS)
+✅ Event status (confirmed, tentative, cancelled)
+✅ Event visibility (public, private, confidential)
+✅ All-day events
+✅ Timezone support
+✅ Event search and filtering
+✅ Bookings system
+✅ Booking status management
+✅ Payment tracking for bookings
+✅ Calendar statistics
+✅ Optimistic updates
+
+### Types
+```typescript
+interface CalendarEvent {
+  id: string
+  user_id: string
+  calendar_id: string | null
+  title: string
+  description: string | null
+  location: string | null
+  start_time: string
+  end_time: string
+  all_day: boolean
+  timezone: string
+  color: string | null
+  status: 'confirmed' | 'tentative' | 'cancelled'
+  visibility: 'public' | 'private' | 'confidential'
+  recurrence_rule: string | null // iCalendar RRULE
+  recurrence_end: string | null
+  is_recurring: boolean
+  attendees: EventAttendee[]
+  reminders: EventReminder[]
+  created_at: string
+  updated_at: string
+}
+
+interface EventAttendee {
+  email: string
+  name: string
+  status: 'accepted' | 'declined' | 'tentative' | 'needs-action'
+  is_organizer: boolean
+  optional: boolean
+}
+
+interface EventReminder {
+  type: 'email' | 'notification' | 'sms'
+  minutes_before: number
+}
+
+interface Calendar {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  color: string
+  timezone: string
+  is_default: boolean
+  is_visible: boolean
+  is_shared: boolean
+  shared_with: string[]
+}
+
+interface Booking {
+  id: string
+  user_id: string
+  service_type: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show'
+  start_time: string
+  end_time: string
+  duration_minutes: number
+  payment_status: 'unpaid' | 'paid' | 'refunded'
+  payment_amount: number | null
+  notes: string | null
+}
+
+interface CalendarStats {
+  total_events: number
+  upcoming_events: number
+  events_today: number
+  events_this_week: number
+  events_this_month: number
+  recurring_events: number
+  total_bookings: number
+  pending_bookings: number
+  confirmed_bookings: number
+}
+```
+
+### React Hooks
+```typescript
+useEvents(startDate, endDate, filters?) // Get events in date range
+useEvent(id) // Get single event
+useCreateEvent() // Create new event
+useUpdateEvent() // Update event
+useDeleteEvent() // Delete event
+useCalendars() // Get all calendars
+useCreateCalendar() // Create new calendar
+useBookings(status?) // Get bookings with optional status filter
+useCreateBooking() // Create new booking
+useUpdateBookingStatus() // Confirm/cancel/complete bookings
+useCalendarStats() // Get calendar statistics
+```
+
+### Usage Example
+```tsx
+import {
+  useEvents,
+  useCreateEvent,
+  useBookings,
+  useUpdateBookingStatus,
+  useCalendarStats
+} from '@/lib/api-clients'
+
+function CalendarPage() {
+  const today = new Date()
+  const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+  const { data: events, isLoading } = useEvents(
+    today.toISOString(),
+    weekFromNow.toISOString(),
+    {
+      status: ['confirmed', 'tentative'],
+      is_recurring: false
+    }
+  )
+
+  const { data: bookings } = useBookings(['pending', 'confirmed'])
+  const { data: stats } = useCalendarStats()
+  const createEvent = useCreateEvent()
+  const updateBooking = useUpdateBookingStatus()
+
+  const handleCreateEvent = async () => {
+    await createEvent.mutateAsync({
+      title: 'Team Meeting',
+      start_time: new Date(Date.now() + 3600000).toISOString(),
+      end_time: new Date(Date.now() + 7200000).toISOString(),
+      description: 'Weekly sync',
+      location: 'Conference Room A',
+      attendees: [
+        { email: 'john@example.com', name: 'John Doe', optional: false }
+      ],
+      reminders: [
+        { type: 'email', minutes_before: 60 },
+        { type: 'notification', minutes_before: 15 }
+      ],
+      recurrence_rule: 'FREQ=WEEKLY;BYDAY=MO' // Every Monday
+    })
+  }
+
+  const handleConfirmBooking = async (bookingId: string) => {
+    await updateBooking.mutateAsync({
+      id: bookingId,
+      status: 'confirmed'
+    })
+  }
+
+  return (
+    <div>
+      <h2>Upcoming Events: {stats?.upcoming_events}</h2>
+      <EventsList events={events} />
+      <BookingsList
+        bookings={bookings}
+        onConfirm={handleConfirmBooking}
+      />
+    </div>
+  )
+}
+```
+
+### Integration with Booking System
+```tsx
+import { useCreateBooking, useBookings } from '@/lib/api-clients'
+
+function BookingForm({ serviceType }: { serviceType: string }) {
+  const createBooking = useCreateBooking()
+  const { data: existingBookings } = useBookings(['confirmed'])
+
+  const handleBookService = async (date: Date, duration: number) => {
+    await createBooking.mutateAsync({
+      service_type: serviceType,
+      start_time: date.toISOString(),
+      end_time: new Date(date.getTime() + duration * 60000).toISOString(),
+      duration_minutes: duration,
+      location: 'Office',
+      notes: 'First consultation',
+      payment_amount: 150.00
+    })
+  }
+
+  return (
+    <div>
+      <h3>Book {serviceType}</h3>
+      <DateTimePicker onSelect={(date) => handleBookService(date, 60)} />
+      <p>Existing bookings: {existingBookings?.data.length}</p>
+    </div>
+  )
+}
+```
+
+---
+
+## 10. File Upload Component
 
 ### File
 - [advanced-file-upload.tsx](components/world-class/file-upload/advanced-file-upload.tsx)
@@ -680,7 +894,7 @@ function UploadSection({ folderId }: { folderId: string }) {
 
 ---
 
-## 10. Pattern: Before vs After
+## 11. Pattern: Before vs After
 
 ### BEFORE (Mock Data - 59 pages like this)
 ```typescript
@@ -898,7 +1112,7 @@ export default function ProjectsPage() {
 
 ---
 
-## 11. Quick Reference
+## 12. Quick Reference
 
 ### Import Everything
 ```typescript
