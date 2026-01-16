@@ -119,18 +119,13 @@ export default function MarketingPage() {
   // Load marketing data
   useEffect(() => {
     const loadMarketing = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading marketing data', { userId })
-
-        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        setError(null)        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
 
         const [leadsResult, campaignsResult] = await Promise.all([
           getLeads(userId),
@@ -142,19 +137,12 @@ export default function MarketingPage() {
 
         setIsLoading(false)
         announce('Marketing data loaded successfully', 'polite')
-        toast.success('Marketing loaded', {
-          description: `${leadsResult?.length || 0} leads, ${campaignsResult?.length || 0} campaigns`
-        })
-        logger.info('Marketing loaded', {
-          success: true,
-          leadCount: leadsResult?.length || 0,
-          campaignCount: campaignsResult?.length || 0
-        })
-      } catch (err) {
+        toast.success('Marketing loaded' leads, ${campaignsResult?.length || 0} campaigns`
+        })      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load marketing'
         setError(errorMessage)
         setIsLoading(false)
-        toast.error('Failed to load marketing', { description: errorMessage })
+        toast.error('Failed to load marketing')
         announce('Error loading marketing', 'assertive')
         logger.error('Marketing load failed', { error: err })
       }
@@ -166,7 +154,7 @@ export default function MarketingPage() {
   // Button 1: Add Lead
   const handleAddLead = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to add leads' })
+      toast.error('Authentication required')
       return
     }
 
@@ -180,12 +168,8 @@ export default function MarketingPage() {
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Adding new lead')
-        const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
-        const result = await createLead(userId, leadData)
-        logger.info('Lead added', { success: true, result })
-        announce('Lead added successfully', 'polite')
+      (async () => {        const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
+        const result = await createLead(userId, leadData)        announce('Lead added successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult.data || [])
         return result
@@ -206,17 +190,13 @@ export default function MarketingPage() {
   // Button 2: Edit Lead
   const handleEditLead = async (leadId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit leads' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Editing lead', { leadId })
-        const { updateLead, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLead(leadId, { score_value: 90, score: 'hot' })
-        logger.info('Lead edited', { success: true, leadId })
-        announce('Lead updated successfully', 'polite')
+      (async () => {        const { updateLead, getLeads } = await import('@/lib/admin-marketing-queries')
+        await updateLead(leadId, { score_value: 90, score: 'hot' })        announce('Lead updated successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -242,7 +222,7 @@ export default function MarketingPage() {
     if (!deleteLead) return
 
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete leads' })
+      toast.error('Authentication required')
       setDeleteLead(null)
       return
     }
@@ -251,12 +231,8 @@ export default function MarketingPage() {
     const leadId = deleteLead.id
 
     toast.promise(
-      (async () => {
-        logger.info('Deleting lead', { leadId })
-        const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
-        await deleteLeadQuery(leadId)
-        logger.info('Lead deleted', { success: true, leadId })
-        announce('Lead deleted successfully', 'polite')
+      (async () => {        const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
+        await deleteLeadQuery(leadId)        announce('Lead deleted successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult.data || [])
       })(),
@@ -277,17 +253,13 @@ export default function MarketingPage() {
   // Button 4: Qualify Lead
   const handleQualifyLead = async (leadId: string, leadName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to qualify leads' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Qualifying lead', { leadId })
-        const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLeadStatus(leadId, 'qualified')
-        logger.info('Lead qualified', { success: true, leadId })
-        announce('Lead qualified successfully', 'polite')
+      (async () => {        const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
+        await updateLeadStatus(leadId, 'qualified')        announce('Lead qualified successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -307,19 +279,15 @@ export default function MarketingPage() {
   // Button 5: Convert to Deal
   const handleConvertToDeal = async (leadId: string, leadName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to convert leads' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Converting lead to deal', { leadId })
-        // Update lead status to converted
+      (async () => {        // Update lead status to converted
         // NOTE: Future integration with CRM deals system will create actual deal record
         const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLeadStatus(leadId, 'won')
-        logger.info('Lead converted to deal', { success: true, leadId })
-        announce('Lead converted to deal', 'polite')
+        await updateLeadStatus(leadId, 'won')        announce('Lead converted to deal', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -343,17 +311,13 @@ export default function MarketingPage() {
     const leadsCount = filteredLeads.length
 
     toast.promise(
-      (async () => {
-        logger.info('Exporting leads')
-        const response = await fetch('/api/admin/marketing/leads/export', {
+      (async () => {        const response = await fetch('/api/admin/marketing/leads/export', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ format: 'csv', status: leadsTab })
         })
         if (!response.ok) throw new Error('Failed to export leads')
-        const result = await response.json()
-        logger.info('Leads export completed', { success: true, count: leadsCount, result })
-        announce('Leads exported successfully', 'polite')
+        const result = await response.json()        announce('Leads exported successfully', 'polite')
         return result
       })(),
       {
@@ -372,7 +336,7 @@ export default function MarketingPage() {
   // Button 7: Create Campaign
   const handleCreateCampaign = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create campaigns' })
+      toast.error('Authentication required')
       return
     }
 
@@ -386,12 +350,8 @@ export default function MarketingPage() {
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Creating new campaign')
-        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        const result = await createCampaign(userId, campaignData)
-        logger.info('Campaign created', { success: true, result })
-        announce('Campaign created successfully', 'polite')
+      (async () => {        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        const result = await createCampaign(userId, campaignData)        announce('Campaign created successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult.data || [])
         return result
@@ -412,17 +372,13 @@ export default function MarketingPage() {
   // Button 8: Edit Campaign
   const handleEditCampaign = async (campaignId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit campaigns' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Editing campaign', { campaignId })
-        const { updateCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaign(campaignId, { budget: 15000 })
-        logger.info('Campaign edited', { success: true, campaignId })
-        announce('Campaign updated successfully', 'polite')
+      (async () => {        const { updateCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaign(campaignId, { budget: 15000 })        announce('Campaign updated successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -448,7 +404,7 @@ export default function MarketingPage() {
     if (!deleteCampaign) return
 
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete campaigns' })
+      toast.error('Authentication required')
       setDeleteCampaign(null)
       return
     }
@@ -457,12 +413,8 @@ export default function MarketingPage() {
     const campaignId = deleteCampaign.id
 
     toast.promise(
-      (async () => {
-        logger.info('Deleting campaign', { campaignId })
-        const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await deleteCampaignQuery(campaignId)
-        logger.info('Campaign deleted', { success: true, campaignId })
-        announce('Campaign deleted successfully', 'polite')
+      (async () => {        const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await deleteCampaignQuery(campaignId)        announce('Campaign deleted successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult.data || [])
       })(),
@@ -483,17 +435,13 @@ export default function MarketingPage() {
   // Button 10: Send Campaign
   const handleSendCampaign = async (campaignId: string, campaignName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to send campaigns' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Sending campaign', { campaignId })
-        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaignStatus(campaignId, 'active')
-        logger.info('Campaign sent', { success: true, campaignId })
-        announce('Campaign sent successfully', 'polite')
+      (async () => {        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaignStatus(campaignId, 'active')        announce('Campaign sent successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -513,17 +461,13 @@ export default function MarketingPage() {
   // Button 11: Schedule Campaign
   const handleScheduleCampaign = async (campaignId: string, campaignName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to schedule campaigns' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Scheduling campaign', { campaignId })
-        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaignStatus(campaignId, 'scheduled')
-        logger.info('Campaign scheduled', { success: true, campaignId })
-        announce('Campaign scheduled successfully', 'polite')
+      (async () => {        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaignStatus(campaignId, 'scheduled')        announce('Campaign scheduled successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -541,11 +485,9 @@ export default function MarketingPage() {
   }
 
   // Button 12: View Campaign Analytics
-  const handleViewCampaignAnalytics = (campaign: Campaign) => {
-    logger.info('Opening campaign analytics', { campaignId: campaign.id })
-    setSelectedCampaign(campaign)
+  const handleViewCampaignAnalytics = (campaign: Campaign) => {    setSelectedCampaign(campaign)
     setShowCampaignModal(true)
-    toast.success('Campaign Analytics', { description: `Viewing "${campaign.name}"` })
+    toast.success('Campaign Analytics'"` })
     announce('Campaign analytics opened', 'polite')
   }
 
@@ -554,17 +496,13 @@ export default function MarketingPage() {
   // This uses API endpoint for complex business logic that creates test variants
   const handleABTestCampaign = async (campaignId: string, campaignName: string) => {
     toast.promise(
-      (async () => {
-        logger.info('Creating A/B test for campaign', { campaignId })
-        const response = await fetch(`/api/admin/marketing/campaigns/${campaignId}/ab-test`, {
+      (async () => {        const response = await fetch(`/api/admin/marketing/campaigns/${campaignId}/ab-test`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ variants: ['A', 'B'], splitRatio: 50 })
         })
         if (!response.ok) throw new Error('Failed to create A/B test')
-        const result = await response.json()
-        logger.info('A/B test created', { success: true, campaignId, result })
-        announce('A/B test created successfully', 'polite')
+        const result = await response.json()        announce('A/B test created successfully', 'polite')
         return result
       })(),
       {
@@ -583,14 +521,12 @@ export default function MarketingPage() {
   // Button 14: Duplicate Campaign
   const handleDuplicateCampaign = async (campaignId: string, campaignName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to duplicate campaigns' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Duplicating campaign', { campaignId })
-        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+      (async () => {        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
         const originalCampaign = campaigns.find(c => c.id === campaignId)
         if (!originalCampaign) throw new Error('Campaign not found')
         await createCampaign(userId, {
@@ -604,9 +540,7 @@ export default function MarketingPage() {
           target_audience: originalCampaign.targetAudience ? [String(originalCampaign.targetAudience)] : undefined,
           channels: originalCampaign.channels,
           tags: originalCampaign.tags
-        })
-        logger.info('Campaign duplicated', { success: true, campaignId })
-        announce('Campaign duplicated successfully', 'polite')
+        })        announce('Campaign duplicated successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -626,26 +560,18 @@ export default function MarketingPage() {
   // Button 15: Refresh Marketing
   const handleRefreshMarketing = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to refresh marketing' })
+      toast.error('Authentication required')
       return
     }
 
     toast.promise(
-      (async () => {
-        logger.info('Refreshing marketing data')
-        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
+      (async () => {        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
         const [leadsResult, campaignsResult] = await Promise.all([
           getLeads(userId),
           getCampaigns(userId)
         ])
         setLeads(leadsResult || [])
-        setCampaigns(campaignsResult || [])
-        logger.info('Marketing refresh completed', {
-          success: true,
-          leadCount: leadsResult?.length || 0,
-          campaignCount: campaignsResult?.length || 0
-        })
-        announce('Marketing refreshed successfully', 'polite')
+        setCampaigns(campaignsResult || [])        announce('Marketing refreshed successfully', 'polite')
         return { leadsCount: leadsResult?.length || 0, campaignsCount: campaignsResult?.length || 0 }
       })(),
       {
