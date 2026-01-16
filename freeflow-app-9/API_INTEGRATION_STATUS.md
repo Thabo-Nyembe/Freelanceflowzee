@@ -45,7 +45,7 @@
 
 **Target:** 301 pages with mock data
 
-**Progress:** 7/301 pages migrated (2.3%)
+**Progress:** 8/301 pages migrated (2.7%)
 
 **V1 Pages Identified (63 pages):**
 
@@ -58,8 +58,8 @@
 - [x] **Invoices** (2,002 → 969 lines) - ✅ **MIGRATED** - 52% reduction, payment processing with PDF generation
 - [x] **Bookings** (1,558 → 837 lines) - ✅ **MIGRATED** - 46% reduction, appointment management with status tracking
 
-#### Tier 2: Business Operations (8 pages)
-- [ ] CRM
+#### Tier 2: Business Operations (8 pages) - 🚧 1/8 STARTED
+- [x] **CRM** (975 → 778 lines) - ✅ **MIGRATED** - 20% reduction, sales pipeline with Kanban board
 - [ ] Analytics Advanced
 - [ ] Time Tracking
 - [ ] Financial
@@ -259,13 +259,19 @@ Every API client includes:
 - [x] All code committed and pushed
 
 ### Migration Progress 🚧
-- [x] **4/63 V1 pages migrated** (6.3% of V1 pages)
-- [x] **4/301 total pages migrated** (1.3% overall)
-- **Messages Page:** 690 → 280 lines (59% reduction, 410 lines removed)
-- **Files Page:** 1,151 → 450 lines (61% reduction, 701 lines removed)
-- **Tasks Page:** 1,613 → 650 lines (60% reduction, 963 lines removed)
-- **Projects Page:** 1,815 → 710 lines (61% reduction, 1,105 lines removed)
-- **Total Reduction:** 5,269 → 2,090 lines (60% average reduction, 3,179 lines removed)
+- [x] **8/63 V1 pages migrated** (12.7% of V1 pages)
+- [x] **8/301 total pages migrated** (2.7% overall)
+- **Tier 1 (7 pages):** 10,707 → 4,668 lines (56% avg reduction, 6,039 lines removed)
+  - Messages: 690 → 280 lines (59%)
+  - Files: 1,151 → 450 lines (61%)
+  - Tasks: 1,613 → 650 lines (60%)
+  - Projects: 1,815 → 710 lines (61%)
+  - Calendar: 1,878 → 772 lines (59%)
+  - Invoices: 2,002 → 969 lines (52%)
+  - Bookings: 1,558 → 837 lines (46%)
+- **Tier 2 (1 page):** 975 → 778 lines (20% avg reduction, 197 lines removed)
+  - CRM: 975 → 778 lines (20%)
+- **Total Reduction:** 11,682 → 5,446 lines (53% average reduction, 6,236 lines removed)
 
 ### Quality Metrics (Post-Migration)
 - [ ] 70%+ code reduction across all pages
@@ -325,6 +331,6 @@ Every API client includes:
 
 ---
 
-**Status Updated:** 2026-01-16 02:45 UTC
+**Status Updated:** 2026-01-16 03:15 UTC
 
-**Next Action:** Begin migrating V1 Messages page (690 lines) to use useConversations and useMessages hooks
+**Next Action:** Continue Tier 2 Business Operations - migrate Analytics Advanced page

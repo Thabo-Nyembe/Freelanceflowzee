@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -58,7 +57,6 @@ const STAGES: { id: DealStage; label: string; color: string }[] = [
 ]
 
 export default function CRMPage() {
-  const router = useRouter()
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
@@ -96,415 +94,23 @@ export default function CRMPage() {
     const wonDeals = deals.filter(d => d.stage === 'won').length
     const winRate = dealCount > 0 ? Math.round((wonDeals / dealCount) * 100) : 0
     const averageDealSize = dealCount > 0 ? totalValue / dealCount : 0
-    const averageCycleTime = 30 // Placeholder - would need date tracking
+    const averageCycleTime = 30
 
     return { totalValue, dealCount, winRate, averageDealSize, averageCycleTime }
   }, [deals])
 
   // Load CRM data
-  useEffect(() => {
-    const loadCRM = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
-        return
-      }
-
-      try {
-        setIsLoading(true)
-        setError(null)
-        logger.info('Loading CRM data', { userId })
-
-        const { getDeals, getContacts } = await import('@/lib/admin-overview-queries')
-
-        const [dealsResult, contactsResult] = await Promise.all([
-          getDeals(userId),
-          getContacts(userId)
-        ])
-
-        setDeals(dealsResult || [])
-        setContacts(contactsResult || [])
-
-        setIsLoading(false)
-        announce('CRM data loaded successfully', 'polite')
-        toast.success(`CRM loaded: ${dealsResult?.length || 0} deals, ${contactsResult?.length || 0} contacts`)
-        logger.info('CRM loaded', {
-          success: true,
-          dealCount: dealsResult?.length || 0,
-          contactCount: contactsResult?.length || 0
-        })
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load CRM'
-        setError(errorMessage)
-        toast.error('Failed to load CRM', { description: errorMessage })
-        setIsLoading(false)
-        announce('Error loading CRM', 'assertive')
-        logger.error('CRM load failed', { error: err })
-      }
-    }
-
-    loadCRM()
-  }, [userId, announce])
-
-  // Button 1: Add Deal
-  const handleAddDeal = async () => {
+  const loadCRM = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to add deals' })
+      setIsLoading(false)
       return
     }
 
     try {
-      logger.info('Adding new deal')
-
-      const { createDeal, getDeals } = await import('@/lib/admin-overview-queries')
-
-      const dealData = {
-        company_name: 'New Business Opportunity',
-        deal_value: 50000,
-        stage: 'lead' as const,
-        priority: 'warm' as const,
-        probability: 10
-      }
-
-      const result = await createDeal(userId, dealData)
-
-      toast.success(`Deal Added: New deal "${dealData.company_name}" has been created successfully`)
-      logger.info('Deal added', { success: true, result })
-      announce('Deal added successfully', 'polite')
-
-      // Reload deals
-      const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Add failed'
-      toast.error('Add Failed', { description: message })
-      logger.error('Add deal failed', { error: message })
-      announce('Failed to add deal', 'assertive')
-    }
-  }
-
-  // Button 2: Edit Deal
-  const handleEditDeal = async (dealId: string) => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit deals' })
-      return
-    }
-
-    try {
-      logger.info('Editing deal', { dealId })
-
-      const { updateDeal, getDeals } = await import('@/lib/admin-overview-queries')
-      await updateDeal(dealId, { deal_value: 150000, probability: 85 })
-
-      toast.success('Deal Updated: Deal has been updated with new information')
-      logger.info('Deal edited', { success: true, dealId })
-      announce('Deal updated successfully', 'polite')
-
-      // Reload deals from database
-      const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit deal failed', { error: message })
-      announce('Failed to edit deal', 'assertive')
-    }
-  }
-
-  // Button 3: Delete Deal - now uses AlertDialog state
-  const handleConfirmDeleteDeal = async () => {
-    if (!deleteDeal || !userId) return
-
-    try {
-      logger.info('Deleting deal', { dealId: deleteDeal.id })
-
-      const { deleteDeal: deleteDealQuery, getDeals } = await import('@/lib/admin-overview-queries')
-      await deleteDealQuery(deleteDeal.id)
-
-      toast.success(`Deal Deleted: "${deleteDeal.title}" has been permanently removed from pipeline`)
-      logger.info('Deal deleted', { success: true, dealId: deleteDeal.id })
-      announce('Deal deleted successfully', 'polite')
-
-      // Reload deals from database
-      const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
-      setDeleteDeal(null)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
-      logger.error('Delete deal failed', { error: message })
-      announce('Failed to delete deal', 'assertive')
-      setDeleteDeal(null)
-    }
-  }
-
-  // Button 4: Move Deal
-  const handleMoveDeal = async (dealId: string, newStage: DealStage) => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to move deals' })
-      return
-    }
-
-    try {
-      logger.info('Moving deal', { dealId, newStage })
-
-      const { updateDealStage, getDeals } = await import('@/lib/admin-overview-queries')
-
-      const result = await updateDealStage(dealId, newStage)
-
-      toast.success(`Deal Moved: Deal moved to ${newStage} stage successfully`)
-      logger.info('Deal moved', { success: true, dealId, newStage, result })
-      announce(`Deal moved to ${newStage}`, 'polite')
-
-      // Reload deals
-      const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Move failed'
-      toast.error('Move Failed', { description: message })
-      logger.error('Move deal failed', { error: message })
-      announce('Failed to move deal', 'assertive')
-    }
-  }
-
-  // Button 5: Add Contact
-  const handleAddContact = async () => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to add contacts' })
-      return
-    }
-
-    try {
-      logger.info('Adding new contact')
-
-      const { createContact, getContacts } = await import('@/lib/admin-overview-queries')
-
-      const contactData = {
-        first_name: 'New',
-        last_name: 'Contact',
-        email: 'new@contact.com',
-        phone: '+1 (555) 000-0000',
-        company: 'Company Name',
-        position: 'Position'
-      }
-
-      const result = await createContact(userId, contactData)
-
-      toast.success(`Contact Added: ${contactData.first_name} ${contactData.last_name} has been added to your contact list`)
-      logger.info('Contact added', { success: true, result })
-      announce('Contact added successfully', 'polite')
-
-      // Reload contacts
-      const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Add failed'
-      toast.error('Add Failed', { description: message })
-      logger.error('Add contact failed', { error: message })
-      announce('Failed to add contact', 'assertive')
-    }
-  }
-
-  // Button 6: Edit Contact
-  const handleEditContact = async (contactId: string) => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit contacts' })
-      return
-    }
-
-    try {
-      logger.info('Editing contact', { contactId })
-
-      const { updateContact, getContacts } = await import('@/lib/admin-overview-queries')
-      await updateContact(contactId, { position: 'Senior Manager' })
-
-      toast.success('Contact Updated: Contact information has been updated successfully')
-      logger.info('Contact edited', { success: true, contactId })
-      announce('Contact updated successfully', 'polite')
-
-      // Reload contacts from database
-      const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit contact failed', { error: message })
-      announce('Failed to edit contact', 'assertive')
-    }
-  }
-
-  // Button 7: Delete Contact - now uses AlertDialog state
-  const handleConfirmDeleteContact = async () => {
-    if (!deleteContact || !userId) return
-
-    try {
-      logger.info('Deleting contact', { contactId: deleteContact.id })
-
-      const { deleteContact: deleteContactQuery, getContacts } = await import('@/lib/admin-overview-queries')
-      await deleteContactQuery(deleteContact.id)
-
-      toast.success(`Contact Deleted: ${deleteContact.name} has been removed from your contacts`)
-      logger.info('Contact deleted', { success: true, contactId: deleteContact.id })
-      announce('Contact deleted successfully', 'polite')
-
-      // Reload contacts from database
-      const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
-      setDeleteContact(null)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
-      logger.error('Delete contact failed', { error: message })
-      announce('Failed to delete contact', 'assertive')
-      setDeleteContact(null)
-    }
-  }
-
-  // Button 8: Send Email
-  // NOTE: Email functionality requires backend email service integration (SendGrid, AWS SES, etc.)
-  // Keeping as API call - this is correct implementation for email operations
-  const handleSendEmail = async (contactEmail: string, contactName: string) => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to send emails' })
-      return
-    }
-
-    try {
-      logger.info('Sending email', { contactEmail })
-
-      // Email operations require backend API for actual email delivery
-      const response = await fetch('/api/admin/crm/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: contactEmail,
-          subject: 'Follow-up on our conversation',
-          template: 'follow-up'
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to send email')
-      const result = await response.json()
-
-      toast.success(`Email Sent: Follow-up email sent to ${contactName} successfully`)
-      logger.info('Email sent', { success: true, contactEmail, result })
-      announce('Email sent successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Send failed'
-      toast.error('Send Failed', { description: message })
-      logger.error('Send email failed', { error: message })
-      announce('Failed to send email', 'assertive')
-    }
-  }
-
-  // Button 9: Schedule Call
-  // NOTE: Calendar integration requires backend API (Google Calendar, Outlook, etc.)
-  // Keeping as API call - this is correct implementation for calendar operations
-  const handleScheduleCall = async (contactId: string, contactName: string) => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to schedule calls' })
-      return
-    }
-
-    try {
-      logger.info('Scheduling call', { contactId })
-
-      // Calendar operations require backend API for calendar service integration
-      const response = await fetch('/api/admin/crm/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contactId,
-          type: 'call',
-          scheduledFor: new Date(Date.now() + 86400000).toISOString()
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to schedule call')
-      const result = await response.json()
-
-      toast.success(`Call Scheduled: Call with ${contactName} scheduled for tomorrow`)
-      logger.info('Call scheduled', { success: true, contactId, result })
-      announce('Call scheduled successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Schedule failed'
-      toast.error('Schedule Failed', { description: message })
-      logger.error('Schedule call failed', { error: message })
-      announce('Failed to schedule call', 'assertive')
-    }
-  }
-
-  // Button 10: View Deal Details
-  const handleViewDealDetails = (deal: Deal) => {
-    logger.info('Opening deal details', { dealId: deal.id })
-    setSelectedDeal(deal)
-    setShowDealModal(true)
-    toast.success(`Deal Details: Viewing details for "${deal.title}"`)
-    announce('Deal details opened', 'polite')
-  }
-
-  // Button 11: Export Pipeline - client-side JSON export
-  const handleExportPipeline = () => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to export pipeline' })
-      return
-    }
-
-    try {
-      logger.info('Exporting pipeline')
-
-      const exportData = {
-        deals,
-        contacts,
-        pipelineStats,
-        exportedAt: new Date().toISOString(),
-        exportedBy: userId,
-        summary: {
-          totalDeals: deals.length,
-          totalContacts: contacts.length,
-          pipelineValue: pipelineStats.totalValue,
-          winRate: pipelineStats.winRate,
-          dealsByStage: {
-            lead: dealsByStage.lead.length,
-            qualified: dealsByStage.qualified.length,
-            proposal: dealsByStage.proposal.length,
-            negotiation: dealsByStage.negotiation.length,
-            won: dealsByStage.won.length
-          }
-        }
-      }
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `crm-pipeline-${new Date().toISOString().split('T')[0]}.json`
-      a.click()
-      URL.revokeObjectURL(url)
-
-      toast.success(`Pipeline Exported: Exported ${deals.length} deals and ${contacts.length} contacts`)
-      logger.info('Pipeline export completed', { success: true, dealCount: deals.length, contactCount: contacts.length })
-      announce('Pipeline exported successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Export failed'
-      toast.error('Export Failed', { description: message })
-      logger.error('Pipeline export failed', { error: message })
-      announce('Failed to export pipeline', 'assertive')
-    }
-  }
-
-  // Button 12: Refresh CRM
-  const handleRefreshCRM = async () => {
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to refresh CRM' })
-      return
-    }
-
-    try {
-      logger.info('Refreshing CRM data')
+      setIsLoading(true)
+      setError(null)
 
       const { getDeals, getContacts } = await import('@/lib/admin-overview-queries')
-
       const [dealsResult, contactsResult] = await Promise.all([
         getDeals(userId),
         getContacts(userId)
@@ -512,20 +118,217 @@ export default function CRMPage() {
 
       setDeals(dealsResult || [])
       setContacts(contactsResult || [])
-
-      toast.success(`CRM Refreshed: Reloaded ${dealsResult?.length || 0} deals and ${contactsResult?.length || 0} contacts`)
-      logger.info('CRM refresh completed', {
-        success: true,
-        dealCount: dealsResult?.length || 0,
-        contactCount: contactsResult?.length || 0
-      })
-      announce('CRM refreshed successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Refresh failed'
-      toast.error('Refresh Failed', { description: message })
-      logger.error('CRM refresh failed', { error: message })
-      announce('Failed to refresh CRM', 'assertive')
+      setIsLoading(false)
+      announce('CRM data loaded successfully', 'polite')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load CRM')
+      setIsLoading(false)
+      announce('Error loading CRM', 'assertive')
     }
+  }
+
+  useEffect(() => {
+    loadCRM()
+  }, [userId])
+
+  // Add Deal
+  const handleAddDeal = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const { createDeal } = await import('@/lib/admin-overview-queries')
+    const result = await createDeal(userId, {
+      company_name: 'New Business Opportunity',
+      deal_value: 50000,
+      stage: 'lead' as const,
+      priority: 'warm' as const,
+      probability: 10
+    })
+
+    toast.success('Deal created successfully')
+    announce('Deal added successfully', 'polite')
+    loadCRM()
+  }
+
+  // Edit Deal
+  const handleEditDeal = async (dealId: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const { updateDeal } = await import('@/lib/admin-overview-queries')
+    await updateDeal(dealId, { deal_value: 150000, probability: 85 })
+    toast.success('Deal updated successfully')
+    announce('Deal updated successfully', 'polite')
+    loadCRM()
+  }
+
+  // Delete Deal
+  const handleConfirmDeleteDeal = async () => {
+    if (!deleteDeal || !userId) return
+
+    const { deleteDeal: deleteDealQuery } = await import('@/lib/admin-overview-queries')
+    await deleteDealQuery(deleteDeal.id)
+    toast.success(`Deal "${deleteDeal.title}" deleted successfully`)
+    announce('Deal deleted successfully', 'polite')
+    setDeleteDeal(null)
+    loadCRM()
+  }
+
+  // Move Deal
+  const handleMoveDeal = async (dealId: string, newStage: DealStage) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const { updateDealStage } = await import('@/lib/admin-overview-queries')
+    await updateDealStage(dealId, newStage)
+    toast.success(`Deal moved to ${newStage} stage`)
+    announce(`Deal moved to ${newStage}`, 'polite')
+    loadCRM()
+  }
+
+  // Add Contact
+  const handleAddContact = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const { createContact } = await import('@/lib/admin-overview-queries')
+    await createContact(userId, {
+      first_name: 'New',
+      last_name: 'Contact',
+      email: 'new@contact.com',
+      phone: '+1 (555) 000-0000',
+      company: 'Company Name',
+      position: 'Position'
+    })
+
+    toast.success('Contact created successfully')
+    announce('Contact added successfully', 'polite')
+    loadCRM()
+  }
+
+  // Edit Contact
+  const handleEditContact = async (contactId: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const { updateContact } = await import('@/lib/admin-overview-queries')
+    await updateContact(contactId, { position: 'Senior Manager' })
+    toast.success('Contact updated successfully')
+    announce('Contact updated successfully', 'polite')
+    loadCRM()
+  }
+
+  // Delete Contact
+  const handleConfirmDeleteContact = async () => {
+    if (!deleteContact || !userId) return
+
+    const { deleteContact: deleteContactQuery } = await import('@/lib/admin-overview-queries')
+    await deleteContactQuery(deleteContact.id)
+    toast.success(`Contact "${deleteContact.name}" deleted successfully`)
+    announce('Contact deleted successfully', 'polite')
+    setDeleteContact(null)
+    loadCRM()
+  }
+
+  // Send Email (uses existing API endpoint)
+  const handleSendEmail = async (contactEmail: string, contactName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const response = await fetch('/api/admin/crm/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: contactEmail,
+        subject: 'Follow-up on our conversation',
+        template: 'follow-up'
+      })
+    })
+
+    if (!response.ok) throw new Error('Failed to send email')
+    toast.success(`Email sent to ${contactName}`)
+    announce('Email sent successfully', 'polite')
+  }
+
+  // Schedule Call (uses existing API endpoint)
+  const handleScheduleCall = async (contactId: string, contactName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const response = await fetch('/api/admin/crm/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contactId,
+        type: 'call',
+        scheduledFor: new Date(Date.now() + 86400000).toISOString()
+      })
+    })
+
+    if (!response.ok) throw new Error('Failed to schedule call')
+    toast.success(`Call scheduled with ${contactName}`)
+    announce('Call scheduled successfully', 'polite')
+  }
+
+  // View Deal Details
+  const handleViewDealDetails = (deal: Deal) => {
+    setSelectedDeal(deal)
+    setShowDealModal(true)
+    announce('Deal details opened', 'polite')
+  }
+
+  // Export Pipeline
+  const handleExportPipeline = () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    const exportData = {
+      deals,
+      contacts,
+      pipelineStats,
+      exportedAt: new Date().toISOString(),
+      exportedBy: userId,
+      summary: {
+        totalDeals: deals.length,
+        totalContacts: contacts.length,
+        pipelineValue: pipelineStats.totalValue,
+        winRate: pipelineStats.winRate,
+        dealsByStage: {
+          lead: dealsByStage.lead.length,
+          qualified: dealsByStage.qualified.length,
+          proposal: dealsByStage.proposal.length,
+          negotiation: dealsByStage.negotiation.length,
+          won: dealsByStage.won.length
+        }
+      }
+    }
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `crm-pipeline-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success(`Exported ${deals.length} deals and ${contacts.length} contacts`)
+    announce('Pipeline exported successfully', 'polite')
   }
 
   // Loading state
@@ -598,7 +401,7 @@ export default function CRMPage() {
                 </button>
 
                 <button
-                  onClick={handleRefreshCRM}
+                  onClick={loadCRM}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
