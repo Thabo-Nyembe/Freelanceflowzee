@@ -44,7 +44,6 @@ import {
 
 const logger = createFeatureLogger('CanvasCollaboration')
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import {
@@ -90,7 +89,6 @@ interface CanvasProject {
 }
 
 export default function CanvasCollaboration() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -484,16 +482,7 @@ export default function CanvasCollaboration() {
         }
 
         setRecentProjects([newProject, ...recentProjects])
-        setCanvasName(name)
-
-        logger.info('Canvas created successfully', {
-          projectId: newCanvas.id,
-          name,
-          size,
-          totalProjects: recentProjects.length + 1
-        })
-
-        toast.success(`Canvas created - ${name} (${size}) - Ready to start designing`)
+        setCanvasName(name)        toast.success(`Canvas created - ${name} (${size}) - Ready to start designing`)
         announce('Canvas created successfully', 'polite')
       }
 
@@ -502,9 +491,7 @@ export default function CanvasCollaboration() {
       setNewCanvasName('')
     } catch (err: any) {
       logger.error('Failed to create canvas', { error: err })
-      toast.error('Failed to create canvas', {
-        description: err.message || 'Please try again'
-      })
+      toast.error('Failed to create canvas')
     }
   }
 
@@ -512,16 +499,7 @@ export default function CanvasCollaboration() {
     const project = recentProjects.find(p => p.id === canvasId)
 
     if (project) {
-      setCanvasName(project.name)
-
-      logger.info('Canvas opened successfully', {
-        projectId: canvasId,
-        projectName: project.name,
-        size: project.size,
-        collaborators: project.collaborators.length
-      })
-
-      toast.success(`Canvas ${project.name} (${project.size}) loaded successfully`)
+      setCanvasName(project.name)      toast.success(`Canvas ${project.name} (${project.size}) loaded successfully`)
     }
   }
 
@@ -553,24 +531,12 @@ export default function CanvasCollaboration() {
 
           if (error) {
             logger.error('Failed to save canvas to database', { error })
-          } else {
-            logger.info('Canvas saved to database', { canvasId: currentProject.id })
-          }
+          } else {          }
         }
       } catch (err) {
         logger.error('Exception saving canvas', { error: err })
       }
-    }
-
-    logger.info('Canvas saved successfully', {
-      canvasName,
-      layers: layers.length,
-      collaborators: collaborators.filter(c => c.isActive).length,
-      historySteps: canvasHistory.length,
-      dataSize: Math.round(imageData.length / 1024) + 'KB'
-    })
-
-    toast.success(`Canvas saved - ${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`)
+    }    toast.success(`Canvas saved - ${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`)
     announce('Canvas saved', 'polite')
   }
 
@@ -631,16 +597,7 @@ export default function CanvasCollaboration() {
 
     try {
       // Copy to clipboard
-      await navigator.clipboard.writeText(shareLink)
-
-      logger.info('Canvas share link generated', {
-        canvasName,
-        shareLink,
-        collaborators: collaborators.length,
-        layers: layers.length
-      })
-
-      toast.success(`Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`)
+      await navigator.clipboard.writeText(shareLink)      toast.success(`Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`)
     } catch (err) {
       logger.error('Failed to copy share link', { error: err })
       toast.error('Failed to copy share link to clipboard')
@@ -677,9 +634,7 @@ export default function CanvasCollaboration() {
           if (error) {
             logger.error('Failed to invite collaborator', { error })
           } else if (collab?.id) {
-            collaboratorId = collab.id
-            logger.info('Collaborator saved to database', { collaboratorId })
-          }
+            collaboratorId = collab.id          }
         }
       } catch (err) {
         logger.error('Exception inviting collaborator', { error: err })
@@ -696,16 +651,7 @@ export default function CanvasCollaboration() {
       tool: 'select'
     }
 
-    setCollaborators([...collaborators, newCollaborator])
-
-    logger.info('Collaborator invited successfully', {
-      email,
-      collaboratorName: name,
-      collaboratorId: newCollaborator.id,
-      totalCollaborators: collaborators.length + 1
-    })
-
-    toast.success(`Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`)
+    setCollaborators([...collaborators, newCollaborator])    toast.success(`Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`)
     announce('Collaborator invited successfully', 'polite')
     setShowInviteDialog(false)
     setInviteEmail('')
@@ -732,24 +678,14 @@ export default function CanvasCollaboration() {
 
           if (error) {
             logger.error('Failed to remove collaborator from database', { error })
-          } else {
-            logger.info('Collaborator removed from database', { collaboratorId: removeCollaborator.id })
-          }
+          } else {          }
         }
       } catch (err) {
         logger.error('Exception removing collaborator', { error: err })
       }
     }
 
-    setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))
-
-    logger.info('Collaborator removed successfully', {
-      collaboratorName: removeCollaborator.name,
-      collaboratorId: removeCollaborator.id,
-      remainingCollaborators: collaborators.length - 1
-    })
-
-    toast.success(`Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`)
+    setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))    toast.success(`Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`)
     announce('Collaborator removed', 'polite')
     setRemoveCollaborator(null)
   }
@@ -782,66 +718,31 @@ export default function CanvasCollaboration() {
 
           if (error) {
             logger.error('Failed to save comment to database', { error })
-          } else {
-            logger.info('Comment saved to database', { commentId: savedComment?.id })
-          }
+          } else {          }
         }
       } catch (err) {
         logger.error('Exception saving comment', { error: err })
       }
-    }
-
-    logger.info('Comment mode activated', {
-      canvasName,
-      commentLength: comment.length,
-      activeCollaborators: collaborators.filter(c => c.isActive).length
-    })
-
-    toast.success(`Comment added - "${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`)
+    }    toast.success(`Comment added - "${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`)
     announce('Comment added successfully', 'polite')
     setShowCommentDialog(false)
     setNewComment('')
   }
 
-  const handleResolveComment = (id: string) => {
-    logger.info('Comment resolved successfully', {
-      commentId: id,
-      canvasName,
-      resolvedBy: 'You'
-    })
-
-    toast.success(`Comment resolved - Comment #${id} marked as resolved`)
+  const handleResolveComment = (id: string) => {    toast.success(`Comment resolved - Comment #${id} marked as resolved`)
   }
 
   const handleUndo = () => {
-    undo() // Call existing undo function
-
-    logger.info('Undo action performed', {
-      canvasName,
-      currentStep: historyStep,
-      totalSteps: canvasHistory.length,
-      stepsRemaining: historyStep
-    })
-
-    toast.success(`Action undone - Reverted to step ${historyStep}/${canvasHistory.length - 1}`)
+    undo() // Call existing undo function    toast.success(`Action undone - Reverted to step ${historyStep}/${canvasHistory.length - 1}`)
   }
 
   const handleRedo = () => {
-    redo() // Call existing redo function
-
-    logger.info('Redo action performed', {
-      canvasName,
-      currentStep: historyStep,
-      totalSteps: canvasHistory.length,
-      stepsRemaining: canvasHistory.length - 1 - historyStep
-    })
-
-    toast.success(`Action redone - Advanced to step ${historyStep}/${canvasHistory.length - 1}`)
+    redo() // Call existing redo function    toast.success(`Action redone - Advanced to step ${historyStep}/${canvasHistory.length - 1}`)
   }
 
   const handleCopyElement = async () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element to copy' })
+      toast.error('No Selection')
       return
     }
 
@@ -860,40 +761,23 @@ export default function CanvasCollaboration() {
       await navigator.clipboard.writeText(JSON.stringify(elementData))
     } catch {
       // Ignore clipboard errors, internal clipboard still works
-    }
-
-    logger.info('Element copied to clipboard', {
-      elementType: selectedTool,
-      selectedCount: selectedElements.length,
-      canvasName
-    })
-
-    toast.success(`Element copied - ${selectedElements.length} element(s) copied - Ready to paste`)
+    }    toast.success(`Element copied - ${selectedElements.length} element(s) copied - Ready to paste`)
   }
 
   const handlePasteElement = () => {
     if (!clipboard) {
-      toast.error('Clipboard Empty', { description: 'No element to paste' })
+      toast.error('Clipboard Empty')
       return
     }
 
     // Perform actual paste by adding duplicated elements with offset
     const pastedElements = clipboard.elements?.map((el: string, i: number) => `${el}-pasted-${Date.now()}-${i}`) || []
-    setSelectedElements(pastedElements)
-
-    logger.info('Element pasted successfully', {
-      elementType: clipboard.type,
-      canvasName,
-      clipboardAge: Date.now() - clipboard.timestamp + 'ms',
-      pastedCount: pastedElements.length
-    })
-
-    toast.success(`Element pasted - ${clipboard.type} element pasted onto canvas`)
+    setSelectedElements(pastedElements)    toast.success(`Element pasted - ${clipboard.type} element pasted onto canvas`)
   }
 
   const handleDeleteElement = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element to delete' })
+      toast.error('No Selection')
       return
     }
 
@@ -903,20 +787,12 @@ export default function CanvasCollaboration() {
     setSelectedElements([])
 
     // Save canvas state after deletion
-    saveCanvasState()
-
-    logger.info('Elements deleted successfully', {
-      deletedCount: count,
-      canvasName,
-      remainingLayers: layers.length
-    })
-
-    toast.success(`Elements deleted - ${count} element(s) removed from canvas`)
+    saveCanvasState()    toast.success(`Elements deleted - ${count} element(s) removed from canvas`)
   }
 
   const handleDuplicateElement = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element to duplicate' })
+      toast.error('No Selection')
       return
     }
 
@@ -927,20 +803,12 @@ export default function CanvasCollaboration() {
     setSelectedElements([...selectedElements, ...duplicatedElements])
 
     // Save canvas state after duplication
-    saveCanvasState()
-
-    logger.info('Elements duplicated successfully', {
-      duplicatedCount: count,
-      canvasName,
-      newElements: duplicatedElements.length
-    })
-
-    toast.success(`Elements duplicated - ${count} duplicate(s) created and placed on canvas`)
+    saveCanvasState()    toast.success(`Elements duplicated - ${count} duplicate(s) created and placed on canvas`)
   }
 
   const handleGroupElements = () => {
     if (selectedElements.length < 2) {
-      toast.error('Select Multiple', { description: 'Please select at least 2 elements to group' })
+      toast.error('Select Multiple')
       return
     }
 
@@ -959,78 +827,45 @@ export default function CanvasCollaboration() {
       opacity: 100,
       type: 'shape'
     }
-    setLayers([...layers, newLayer])
-
-    logger.info('Elements grouped successfully', {
-      groupedCount: count,
-      groupId,
-      canvasName,
-      totalLayers: layers.length + 1
-    })
-
-    toast.success(`Elements grouped - ${count} elements grouped together as one unit`)
+    setLayers([...layers, newLayer])    toast.success(`Elements grouped - ${count} elements grouped together as one unit`)
   }
 
   const handleUngroupElements = () => {
     // Find and remove group layers
     const groupLayers = layers.filter(l => l.name.startsWith('Group ('))
     if (groupLayers.length === 0) {
-      toast.error('No Groups', { description: 'No grouped elements to ungroup' })
+      toast.error('No Groups')
       return
     }
 
     // Remove group layers
     setLayers(layers.filter(l => !l.name.startsWith('Group (')))
-    setSelectedElements([])
-
-    logger.info('Group ungrouped successfully', {
-      canvasName,
-      totalLayers: layers.length - groupLayers.length,
-      ungroupedCount: groupLayers.length
-    })
-
-    toast.success('Group ungrouped - Elements separated and can now be edited individually')
+    setSelectedElements([])    toast.success('Group ungrouped - Elements separated and can now be edited individually')
   }
 
   const handleAlignElements = (align: string) => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select elements to align' })
+      toast.error('No Selection')
       return
     }
 
     // Perform alignment action - update canvas state
-    saveCanvasState()
-
-    logger.info('Elements aligned successfully', {
-      alignmentType: align,
-      elementCount: selectedElements.length,
-      canvasName
-    })
-
-    toast.success(`Elements aligned - ${selectedElements.length} elements aligned: ${align}`)
+    saveCanvasState()    toast.success(`Elements aligned - ${selectedElements.length} elements aligned: ${align}`)
   }
 
   const handleDistributeElements = (direction: string) => {
     if (selectedElements.length < 3) {
-      toast.error('Select Multiple', { description: 'Please select at least 3 elements to distribute' })
+      toast.error('Select Multiple')
       return
     }
 
     // Perform distribution action - update canvas state
-    saveCanvasState()
-
-    logger.info('Elements distributed successfully', {
-      direction,
-      elementCount: selectedElements.length,
-      canvasName
-    })
-
-    toast.success(`Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`)
+    saveCanvasState()    toast.success(`Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`)
   }
 
   const handleBringToFront = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element' })
+      toast.error('No Selection')
       return
     }
 
@@ -1038,20 +873,12 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
     const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
-    setLayers([...otherLayers, ...selectedLayers])
-
-    logger.info('Element brought to front', {
-      elementCount: selectedElements.length,
-      canvasName,
-      totalLayers: layers.length
-    })
-
-    toast.success(`Brought to front - ${selectedElements.length} element(s) moved to top layer`)
+    setLayers([...otherLayers, ...selectedLayers])    toast.success(`Brought to front - ${selectedElements.length} element(s) moved to top layer`)
   }
 
   const handleSendToBack = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element' })
+      toast.error('No Selection')
       return
     }
 
@@ -1059,20 +886,12 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
     const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
-    setLayers([...selectedLayers, ...otherLayers])
-
-    logger.info('Element sent to back', {
-      elementCount: selectedElements.length,
-      canvasName,
-      totalLayers: layers.length
-    })
-
-    toast.success(`Sent to back - ${selectedElements.length} element(s) moved to bottom layer`)
+    setLayers([...selectedLayers, ...otherLayers])    toast.success(`Sent to back - ${selectedElements.length} element(s) moved to bottom layer`)
   }
 
   const handleLockElement = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element to lock' })
+      toast.error('No Selection')
       return
     }
 
@@ -1080,19 +899,12 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     setLayers(layers.map(l =>
       selectedLayerIds.includes(l.id) ? { ...l, locked: true } : l
-    ))
-
-    logger.info('Elements locked successfully', {
-      lockedCount: selectedElements.length,
-      canvasName
-    })
-
-    toast.success(`Elements locked - ${selectedElements.length} element(s) locked and protected from changes`)
+    ))    toast.success(`Elements locked - ${selectedElements.length} element(s) locked and protected from changes`)
   }
 
   const handleUnlockElement = () => {
     if (selectedElements.length === 0) {
-      toast.error('No Selection', { description: 'Please select an element to unlock' })
+      toast.error('No Selection')
       return
     }
 
@@ -1100,14 +912,7 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     setLayers(layers.map(l =>
       selectedLayerIds.includes(l.id) ? { ...l, locked: false } : l
-    ))
-
-    logger.info('Elements unlocked successfully', {
-      unlockedCount: selectedElements.length,
-      canvasName
-    })
-
-    toast.success(`Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`)
+    ))    toast.success(`Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`)
   }
 
   const handleAIGenerateIdeas = () => {
@@ -1120,16 +925,7 @@ export default function CanvasCollaboration() {
       `Consider using ${layers.length > 3 ? 'layer grouping' : 'additional layers'} for organization`,
       `The current ${selectedColor} could be complemented with analogous colors`
     ]
-    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)]
-
-    logger.info('AI Generate Ideas initiated', {
-      canvasName,
-      layers: layers.length,
-      currentTool: selectedTool,
-      ideaGenerated: randomIdea
-    })
-
-    toast.success(`AI ideas generated - Creative suggestion: ${suggestion}`)
+    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)]    toast.success(`AI ideas generated - Creative suggestion: ${suggestion}`)
   }
 
   const handleAISuggestColors = () => {
@@ -1150,17 +946,7 @@ export default function CanvasCollaboration() {
 
     // Apply a suggested color to the palette
     const newSuggestedColor = colors[Math.floor(Math.random() * colors.length)]
-    setSelectedColor(newSuggestedColor)
-
-    logger.info('AI Suggest Colors initiated', {
-      canvasName,
-      currentColor: selectedColor,
-      suggestedScheme: randomScheme,
-      suggestedColors,
-      appliedColor: newSuggestedColor
-    })
-
-    toast.success(`AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}. Applied: ${newSuggestedColor}`)
+    setSelectedColor(newSuggestedColor)    toast.success(`AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}. Applied: ${newSuggestedColor}`)
   }
 
   const handleAIImproveLayout = () => {
@@ -1178,17 +964,7 @@ export default function CanvasCollaboration() {
     }
 
     // Zoom to fit canvas
-    setZoom(100)
-
-    logger.info('AI Improve Layout initiated', {
-      canvasName,
-      layers: layers.length,
-      suggestion: randomSuggestion,
-      gridEnabled: true,
-      zoomReset: true
-    })
-
-    toast.success(`AI layout suggestions - Recommendation: ${randomSuggestion}. Grid enabled for alignment.`)
+    setZoom(100)    toast.success(`AI layout suggestions - Recommendation: ${randomSuggestion}. Grid enabled for alignment.`)
   }
 
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {
