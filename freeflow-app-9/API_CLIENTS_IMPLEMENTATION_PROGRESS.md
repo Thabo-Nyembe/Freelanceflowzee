@@ -23,10 +23,11 @@ Successfully created a world-class API client infrastructure that replaces 59 pa
 | **Tasks API** | ✅ Complete | 2 | ~450 | Task management, comments, time tracking |
 | **Analytics API** | ✅ Complete | 2 | ~400 | Dashboard metrics, predictive insights |
 | **Messages API** | ✅ Complete | 2 | ~400 | Real-time messaging, conversations, reactions |
+| **Files/Storage API** | ✅ Complete | 2 | ~500 | File management, Supabase Storage, folders |
 | **File Upload** | ✅ Complete | 1 | ~200 | Drag & drop, Supabase Storage |
 | **Index Exports** | ✅ Complete | 1 | ~100 | Central import location |
 
-**Total:** 15 files, ~2,900 lines of production-ready code
+**Total:** 17 files, ~3,400 lines of production-ready code
 
 ---
 
@@ -468,7 +469,181 @@ function MessagingPage() {
 
 ---
 
-## 8. File Upload Component
+## 8. Files/Storage API Client
+
+### Files
+- [files-client.ts](lib/api-clients/files-client.ts) - API client
+- [use-files.ts](lib/api-clients/use-files.ts) - React hooks
+
+### Features
+✅ File upload to Supabase Storage
+✅ File CRUD operations
+✅ Folder management (hierarchical)
+✅ File metadata (tags, custom fields)
+✅ File sharing and permissions
+✅ File versions support
+✅ Storage statistics
+✅ File download
+✅ Move files between folders
+✅ Star/favorite files
+✅ Soft delete (trash)
+✅ Permanent delete
+✅ Multi-file upload
+✅ File type filtering
+✅ Search functionality
+✅ Storage quota tracking
+
+### Types
+```typescript
+interface FileItem {
+  id: string
+  user_id: string
+  name: string
+  original_name: string
+  path: string
+  storage_path: string
+  bucket: string
+  size: number
+  mime_type: string
+  extension: string
+  folder_id: string | null
+  is_public: boolean
+  is_starred: boolean
+  is_deleted: boolean
+  version: number
+  thumbnail_url: string | null
+  download_url: string | null
+  tags: string[]
+  metadata: Record<string, any>
+  uploaded_at: string
+  updated_at: string
+}
+
+interface Folder {
+  id: string
+  user_id: string
+  name: string
+  parent_id: string | null
+  path: string
+  color: string | null
+  icon: string | null
+  is_shared: boolean
+  is_public: boolean
+  file_count: number
+  total_size: number
+  created_at: string
+  updated_at: string
+}
+
+interface StorageStats {
+  total_files: number
+  total_size: number
+  total_folders: number
+  storage_used: number
+  storage_limit: number
+  storage_percent: number
+  files_by_type: Array<{
+    type: string
+    count: number
+    size: number
+  }>
+  recent_uploads: number
+  starred_files: number
+  shared_files: number
+}
+```
+
+### React Hooks
+```typescript
+useFiles(page, pageSize, filters?) // Get all files with pagination
+useFile(id) // Get single file by ID
+useUploadFile() // Upload single file
+useUploadFiles() // Upload multiple files
+useUpdateFile() // Update file metadata
+useDeleteFile() // Soft delete (move to trash)
+usePermanentlyDeleteFile() // Permanently delete
+useStarFile() // Star/unstar file
+useFolders() // Get all folders
+useCreateFolder() // Create new folder
+useStorageStats() // Get storage statistics
+useDownloadFile() // Download file
+useMoveFile() // Move file to folder
+```
+
+### Usage Example
+```tsx
+import {
+  useFiles,
+  useUploadFile,
+  useFolders,
+  useStorageStats
+} from '@/lib/api-clients'
+
+function FilesPage() {
+  const [currentFolder, setCurrentFolder] = useState<string | null>(null)
+
+  const { data: files, isLoading } = useFiles(1, 50, {
+    folder_id: currentFolder,
+    is_starred: false
+  })
+
+  const { data: folders } = useFolders()
+  const { data: stats } = useStorageStats()
+  const uploadFile = useUploadFile()
+
+  const handleUpload = async (file: File) => {
+    await uploadFile.mutateAsync({
+      file,
+      folder_id: currentFolder,
+      tags: ['important'],
+      is_public: false
+    })
+  }
+
+  return (
+    <div>
+      <h2>Storage: {stats?.storage_percent.toFixed(1)}% used</h2>
+      <FileList files={files?.data} />
+      <UploadButton onUpload={handleUpload} />
+    </div>
+  )
+}
+```
+
+### Integration with AdvancedFileUpload Component
+The Files API client works seamlessly with the AdvancedFileUpload component:
+
+```tsx
+import { AdvancedFileUpload } from '@/components/world-class'
+import { useUploadFiles } from '@/lib/api-clients'
+
+function UploadSection({ folderId }: { folderId: string }) {
+  const uploadFiles = useUploadFiles()
+
+  const handleComplete = async (uploadedFiles: File[]) => {
+    await uploadFiles.mutateAsync(
+      uploadedFiles.map(file => ({
+        file,
+        folder_id: folderId,
+        is_public: false
+      }))
+    )
+  }
+
+  return (
+    <AdvancedFileUpload
+      bucket="user-files"
+      maxFiles={10}
+      maxSizeMB={50}
+      onUploadComplete={handleComplete}
+    />
+  )
+}
+```
+
+---
+
+## 9. File Upload Component
 
 ### File
 - [advanced-file-upload.tsx](components/world-class/file-upload/advanced-file-upload.tsx)
@@ -505,7 +680,7 @@ function MessagingPage() {
 
 ---
 
-## 9. Pattern: Before vs After
+## 10. Pattern: Before vs After
 
 ### BEFORE (Mock Data - 59 pages like this)
 ```typescript

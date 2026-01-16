@@ -160,3 +160,33 @@ export {
   useMessagingStats,
   useAddReaction
 } from './use-messages'
+
+// Files/Storage
+export { filesClient } from './files-client'
+export type {
+  FileItem,
+  Folder,
+  FileShare,
+  FileVersion,
+  UploadFileData,
+  UpdateFileData,
+  CreateFolderData,
+  FileFilters,
+  StorageStats
+} from './files-client'
+
+export {
+  useFiles,
+  useFile,
+  useUploadFile,
+  useUploadFiles,
+  useUpdateFile,
+  useDeleteFile,
+  usePermanentlyDeleteFile,
+  useStarFile,
+  useFolders,
+  useCreateFolder,
+  useStorageStats,
+  useDownloadFile,
+  useMoveFile
+} from './use-files'
