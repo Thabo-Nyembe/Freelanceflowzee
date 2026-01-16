@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -675,7 +674,7 @@ interface ProfileSettings {
 }
 
 export default function ProfileClient() {
-  const supabase = createClient()
+
   const { user } = useAuth()
 
   // UI State
@@ -747,7 +746,7 @@ export default function ProfileClient() {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+  }, [user?.id, ])
 
   useEffect(() => {
     fetchProfileData()
@@ -759,6 +758,8 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_profiles')
         .update({
@@ -791,6 +792,8 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('skills').insert({
         user_id: user.id,
         name: skillName,
@@ -816,6 +819,8 @@ export default function ProfileClient() {
   // Delete skill
   const handleDeleteSkill = async (skillId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('skills').delete().eq('id', skillId)
       if (error) throw error
 
@@ -831,6 +836,8 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('experience').insert({
         user_id: user.id,
         company: exp.company || '',
@@ -855,6 +862,8 @@ export default function ProfileClient() {
   // Delete experience
   const handleDeleteExperience = async (expId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('experience').delete().eq('id', expId)
       if (error) throw error
 
@@ -871,6 +880,8 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('profile_settings')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -940,6 +951,8 @@ export default function ProfileClient() {
 
         // Update profile with new avatar URL
         if (profile?.id) {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
           await supabase
             .from('user_profiles')
             .update({ avatar: urlData.publicUrl })
@@ -967,6 +980,8 @@ export default function ProfileClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) throw error
       toast.success('Password updated successfully!')
@@ -991,14 +1006,26 @@ export default function ProfileClient() {
     try {
       // First, delete user data
       if (user?.id) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('user_profiles').delete().eq('user_id', user.id)
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('skills').delete().eq('user_id', user.id)
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('experience').delete().eq('user_id', user.id)
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('education').delete().eq('user_id', user.id)
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('profile_settings').delete().eq('user_id', user.id)
       }
 
       // Sign out (in a real app, you'd also call an API to delete the auth user)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.auth.signOut()
       toast.success('Account deleted. Redirecting...')
       window.location.href = '/'
@@ -1051,6 +1078,8 @@ export default function ProfileClient() {
   const handleConnectGoogle = async () => {
     toast.loading('Connecting to Google...')
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: window.location.href }
@@ -1876,6 +1905,8 @@ export default function ProfileClient() {
                                 // Update endorsements count in database
                                 const skillToUpdate = skills.find(s => s.id === skill.id)
                                 if (skillToUpdate) {
+                                  const { createClient } = await import('@/lib/supabase/client')
+                                  const supabase = createClient()
                                   await supabase
                                     .from('skills')
                                     .update({ endorsements: skillToUpdate.endorsements + 1 })

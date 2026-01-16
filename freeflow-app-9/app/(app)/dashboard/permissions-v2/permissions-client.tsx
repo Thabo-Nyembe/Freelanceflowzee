@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -248,7 +247,7 @@ const mockPermissionsActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [userStatusFilter, setUserStatusFilter] = useState<UserStatus | 'all'>('all')
@@ -454,9 +453,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('roles').insert({
         user_id: user.id,
         role_name: newRole.role_name,
@@ -501,6 +504,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         permissions: [...currentPermissions, permission]
       }).eq('id', roleId)
@@ -527,6 +532,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const currentPermissions = roleData?.permissions || []
       const updatedPermissions = currentPermissions.filter((p: string) => p !== permission)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         permissions: updatedPermissions
       }).eq('id', roleId)
@@ -543,6 +550,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleDeleteRole = async (roleId: string, roleName: string) => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         deleted_at: new Date().toISOString()
       }).eq('id', roleId)
@@ -560,6 +569,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleExportPermissions = async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -605,6 +616,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       // Note: User creation typically involves auth - this creates a profile entry
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -625,6 +638,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -642,9 +657,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignUserToRole = async (userId: string, roleId: string) => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('role_assignments').insert({
         user_id: user.id,
         role_id: roleId,
@@ -702,6 +721,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm('Are you sure you want to reset ALL permissions to defaults? This action cannot be undone.')) return
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('roles').update({ permissions: [] }).neq('role_type', 'system')
       if (error) throw error
       toast.success('Permissions reset')
@@ -765,6 +786,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleSendPasswordReset = async (email: string) => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) throw error
       toast.success('Password reset sent'` })
