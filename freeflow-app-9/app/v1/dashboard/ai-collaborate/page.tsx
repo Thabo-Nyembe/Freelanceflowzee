@@ -18,7 +18,6 @@ import {
   Loader
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -134,11 +133,9 @@ const STYLE_PREFERENCES = [
 // ============================================================================
 
 export default function AICollaboratePage() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -156,7 +153,6 @@ export default function AICollaboratePage() {
   const [category, setCategory] = useState<'all' | 'logo' | 'palette' | 'layout' | 'typography'>('all')
   const [filteredOptions, setFilteredOptions] = useState<AIDesignOption[]>(AI_DESIGN_OPTIONS)
 
-  // A+++ LOAD AI OPTIONS
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -193,14 +189,7 @@ export default function AICollaboratePage() {
 
   const handleGenerateOptions = useCallback(async () => {
     try {
-      setIsGenerating(true)
-
-      logger.info('AI generation initiated', {
-        selectedStyles,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
-      })
-
-      // Simulate API call
+      setIsGenerating(true)      // Simulate API call
       const response = await fetch('/api/client-zone/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -215,20 +204,11 @@ export default function AICollaboratePage() {
 
       if (!response.ok) {
         throw new Error('Failed to generate AI options')
-      }
-
-      logger.info('AI options generated successfully', {
-        count: selectedStyles.length
-      })
-
-      toast.success('AI designs generated!', {
-        description: `${selectedStyles.length} new design options created based on your preferences`
+      }      toast.success('AI designs generated!' new design options created based on your preferences`
       })
     } catch (error: any) {
       logger.error('Failed to generate AI options', { error })
-      toast.error('Failed to generate designs', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to generate designs')
     } finally {
       setIsGenerating(false)
     }
@@ -239,13 +219,7 @@ export default function AICollaboratePage() {
   // ============================================================================
 
   const handleSelectOption = useCallback(async (optionId: number) => {
-    try {
-      logger.info('AI option selection initiated', {
-        optionId,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
-      })
-
-      const response = await fetch('/api/client-zone/ai/select', {
+    try {      const response = await fetch('/api/client-zone/ai/select', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,13 +245,7 @@ export default function AICollaboratePage() {
         setSelectedOptions(selectedOptions.filter(id => id !== optionId))
       } else {
         setSelectedOptions([...selectedOptions, optionId])
-      }
-
-      logger.info('AI option selected', { optionId })
-
-      toast.success('Option selected!', {
-        description: 'Design added to your selections'
-      })
+      }      toast.success('Option selected!')
     } catch (error: any) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
@@ -289,13 +257,7 @@ export default function AICollaboratePage() {
   // ============================================================================
 
   const handleRateOption = useCallback(async (optionId: number, rating: number) => {
-    try {
-      logger.info('Option rating submitted', {
-        optionId,
-        rating
-      })
-
-      const response = await fetch('/api/client-zone/ai/rate', {
+    try {      const response = await fetch('/api/client-zone/ai/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -343,13 +305,7 @@ export default function AICollaboratePage() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }
-
-      logger.info('Download selection initiated', {
-        selectedCount: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/download', {
+      }      const response = await fetch('/api/client-zone/ai/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -362,8 +318,7 @@ export default function AICollaboratePage() {
         throw new Error('Failed to download designs')
       }
 
-      toast.success('Downloads starting!', {
-        description: `${selectedOptions.length} design(s) downloading`
+      toast.success('Downloads starting!' design(s) downloading`
       })
     } catch (error: any) {
       logger.error('Failed to download selection', { error })
@@ -380,13 +335,7 @@ export default function AICollaboratePage() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }
-
-      logger.info('Share selection initiated', {
-        selectedCount: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/share', {
+      }      const response = await fetch('/api/client-zone/ai/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -399,16 +348,13 @@ export default function AICollaboratePage() {
         throw new Error('Failed to share designs')
       }
 
-      toast.success('Share link copied!', {
-        description: 'Design links copied to clipboard'
-      })
+      toast.success('Share link copied!')
     } catch (error: any) {
       logger.error('Failed to share selection', { error })
       toast.error('Failed to share designs')
     }
   }, [selectedOptions])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -424,7 +370,6 @@ export default function AICollaboratePage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
