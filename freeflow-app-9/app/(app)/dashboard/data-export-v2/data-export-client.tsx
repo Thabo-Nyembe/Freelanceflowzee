@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -451,7 +450,7 @@ interface DataExport {
 }
 
 export default function DataExportClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('pipelines')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null)
@@ -495,6 +494,8 @@ export default function DataExportClient() {
   const fetchDataExports = useCallback(async () => {
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('data_exports')
         .select('*')
@@ -508,7 +509,7 @@ export default function DataExportClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchDataExports()
@@ -569,9 +570,13 @@ export default function DataExportClient() {
       return
     }
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('data_exports').insert({
         user_id: user.id,
         export_name: formData.export_name,
@@ -592,6 +597,8 @@ export default function DataExportClient() {
 
   const handleRunExport = async (exportId: string, exportName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
@@ -607,6 +614,8 @@ export default function DataExportClient() {
   const handleScheduleExport = async (exportId: string, exportName: string) => {
     try {
       const scheduledAt = new Date(Date.now() + 3600000).toISOString() // 1 hour from now
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'scheduled', scheduled_at: scheduledAt })
@@ -621,6 +630,8 @@ export default function DataExportClient() {
 
   const handleDownloadExport = async (exportId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('data_exports')
         .select('download_url, export_name')
@@ -638,6 +649,8 @@ export default function DataExportClient() {
 
   const handleDeleteExport = async (exportId: string, exportName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ deleted_at: new Date().toISOString() })
@@ -652,6 +665,8 @@ export default function DataExportClient() {
 
   const handleCancelExport = async (exportId: string, exportName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'cancelled' })

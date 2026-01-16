@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -367,7 +366,7 @@ const mockAIDesignQuickActionsConfig = [
 ]
 
 export default function AIDesignClient() {
-  const supabase = createClient()
+
 
   const [activeTab, setActiveTab] = useState('generate')
   const [searchQuery, setSearchQuery] = useState('')
@@ -397,9 +396,13 @@ export default function AIDesignClient() {
   // Fetch AI design projects from Supabase
   const fetchGenerations = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('ai_design_projects')
         .select('*')
@@ -434,7 +437,7 @@ export default function AIDesignClient() {
     } catch (err) {
       console.error('Error fetching generations:', err)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchGenerations()
@@ -465,12 +468,16 @@ export default function AIDesignClient() {
     setIsGenerating(true)
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('ai_design_projects')
         .insert({
@@ -510,6 +517,8 @@ export default function AIDesignClient() {
   const handleToggleFavorite = async (gen: Generation) => {
     try {
       const newFavorite = !gen.isFavorite
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .update({ parameters: { ...gen, is_favorite: newFavorite } })
@@ -529,6 +538,8 @@ export default function AIDesignClient() {
   // Delete generation
   const handleDeleteGeneration = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .delete()
@@ -547,6 +558,8 @@ export default function AIDesignClient() {
   // Download handler
   const handleDownloadDesign = async (gen: Generation) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .update({
@@ -583,6 +596,8 @@ export default function AIDesignClient() {
   // Create collection
   const handleCreateCollection = async (name: string, description: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
