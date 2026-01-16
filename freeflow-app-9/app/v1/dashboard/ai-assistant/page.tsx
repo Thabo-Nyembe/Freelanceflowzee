@@ -53,7 +53,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -62,7 +61,6 @@ import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { copyToClipboard } from '@/lib/button-handlers'
 
-// A+++ SUPABASE INTEGRATION
 import {
   getConversations,
   getInsights,
@@ -130,7 +128,6 @@ interface ProjectAnalysis {
 }
 
 export default function AIAssistantPage() {
-  // A+++ STATE MANAGEMENT
   const router = useRouter()
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -158,21 +155,15 @@ export default function AIAssistantPage() {
   const [activeTab, setActiveTab] = useState<string>('chat')
   const [selectedModel, setSelectedModel] = useState<string>('anthropic')
 
-  // A+++ LOAD AI ASSISTANT DATA
   useEffect(() => {
     const loadAIAssistantData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsPageLoading(false)
+      if (!userId) {        setIsPageLoading(false)
         return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)
-        logger.info('Loading AI Assistant data from Supabase', { userId })
-
-        // Fetch all AI assistant data in parallel
+        setError(null)        // Fetch all AI assistant data in parallel
         const [conversationsResult, insightsResult, analysesResult, statsResult] = await Promise.all([
           getConversations(userId, { status: 'active' }),
           getInsights(userId, { status: 'active' }),
@@ -190,11 +181,7 @@ export default function AIAssistantPage() {
             tags: c.tags,
             messageCount: c.message_count
           }))
-          setConversations(transformedConversations)
-          logger.info('Loaded conversations from Supabase', { count: transformedConversations.length })
-        } else {
-          logger.info('No conversations found, using empty state')
-        }
+          setConversations(transformedConversations)        } else {        }
 
         // Transform insights data
         if (insightsResult.data && insightsResult.data.length > 0) {
@@ -207,9 +194,7 @@ export default function AIAssistantPage() {
             action: i.action,
             icon: getIconForCategory(i.category)
           }))
-          setAiInsights(transformedInsights)
-          logger.info('Loaded insights from Supabase', { count: transformedInsights.length })
-        }
+          setAiInsights(transformedInsights)        }
 
         // Transform project analyses data
         if (analysesResult.data && analysesResult.data.length > 0) {
@@ -221,19 +206,10 @@ export default function AIAssistantPage() {
             recommendations: a.recommendations,
             nextActions: a.next_actions
           }))
-          setProjectAnalysis(transformedAnalyses)
-          logger.info('Loaded project analyses from Supabase', { count: transformedAnalyses.length })
-        }
+          setProjectAnalysis(transformedAnalyses)        }
 
         // Log stats
-        if (statsResult.data) {
-          logger.info('AI Assistant stats', {
-            conversations: statsResult.data.total_conversations,
-            messages: statsResult.data.total_messages,
-            tokens: statsResult.data.total_tokens,
-            avgRating: statsResult.data.avg_rating
-          })
-        }
+        if (statsResult.data) {        }
 
         setIsPageLoading(false)
         announce('AI assistant loaded successfully', 'polite')
@@ -415,22 +391,8 @@ export default function AIAssistantPage() {
     setIsLoading(true)
 
     try {
-      // Use real AI instead of mock
-      logger.info('Sending message to Kazi AI', {
-        messageLength: currentMessage.length,
-        selectedModel
-      })
-
-      const taskType = getTaskTypeFromModel(selectedModel)
-      const response = await chat(currentMessage, taskType)
-
-      logger.info('Received AI response', {
-        provider: response.metadata.provider,
-        tokens: response.metadata.tokens.total,
-        cached: response.metadata.cached
-      })
-
-      const assistantMessage: Message = {
+      // Use real AI instead of mock      const taskType = getTaskTypeFromModel(selectedModel)
+      const response = await chat(currentMessage, taskType)      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: response.response,
         type: 'assistant',
@@ -455,9 +417,7 @@ export default function AIAssistantPage() {
 
       setMessages(prev => [...prev, errorMessage])
 
-      toast.error('AI request failed', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('AI request failed')
     } finally {
       setIsLoading(false)
     }
@@ -523,9 +483,7 @@ export default function AIAssistantPage() {
     if (userId) {
       try {
         const { rateMessage } = await import('@/lib/ai-assistant-queries')
-        await rateMessage(messageId, rating)
-        logger.info('Message rating persisted to database', { messageId, rating })
-      } catch (error: any) {
+        await rateMessage(messageId, rating)      } catch (error: any) {
         logger.error('Failed to persist message rating', { error: error.message })
       }
     }
@@ -554,14 +512,7 @@ export default function AIAssistantPage() {
   // Additional Handlers - WIRED TO DATABASE
   const handleNewConversation = async () => {
     const previousMessageCount = messages.length
-    const newMessage = { id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant' as const, timestamp: new Date() }
-
-    logger.info('New conversation initiated', {
-      previousMessageCount,
-      conversationReset: true
-    })
-
-    // Create new conversation in database
+    const newMessage = { id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant' as const, timestamp: new Date() }    // Create new conversation in database
     if (userId && previousMessageCount > 1) {
       try {
         const { createConversation } = await import('@/lib/ai-assistant-queries')
@@ -583,9 +534,7 @@ export default function AIAssistantPage() {
             timestamp: new Date(newConv.created_at),
             tags: newConv.tags,
             messageCount: previousMessageCount
-          }, ...prev])
-          logger.info('Previous conversation saved to database', { conversationId: newConv.id })
-        }
+          }, ...prev])        }
       } catch (err) {
         logger.error('Failed to save previous conversation', { error: err })
       }
@@ -598,16 +547,7 @@ export default function AIAssistantPage() {
   }
 
   const handleLoadConversation = async (conversationId: string, title: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)
-
-    logger.info('Loading conversation', {
-      conversationId,
-      title,
-      messageCount: conversation?.messageCount || 0,
-      tags: conversation?.tags || []
-    })
-
-    // Load messages from database
+    const conversation = conversations.find(c => c.id === conversationId)    // Load messages from database
     if (userId) {
       try {
         setIsLoading(true)
@@ -626,18 +566,14 @@ export default function AIAssistantPage() {
             rating: m.rating as 'up' | 'down' | null,
             suggestions: m.suggestions || []
           }))
-          setMessages(transformedMessages)
-          logger.info('Conversation loaded from database', { messageCount: transformedMessages.length })
-          toast.success(`${title} loaded - ${transformedMessages.length} messages restored`)
+          setMessages(transformedMessages)          toast.success(`${title} loaded - ${transformedMessages.length} messages restored`)
         } else {
           toast.success(`${title} - ${conversation?.messageCount || 0} messages loaded`)
         }
         announce(`Loaded conversation: ${title}`, 'polite')
       } catch (err) {
         logger.error('Failed to load conversation', { error: err })
-        toast.error('Failed to load conversation', {
-          description: err instanceof Error ? err.message : 'Please try again'
-        })
+        toast.error('Failed to load conversation')
       } finally {
         setIsLoading(false)
       }
@@ -645,15 +581,7 @@ export default function AIAssistantPage() {
   }
 
   const handleDeleteConversation = (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)
-
-    logger.info('Delete conversation requested', {
-      conversationId,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount
-    })
-
-    setConversationToDelete(conversationId)
+    const conversation = conversations.find(c => c.id === conversationId)    setConversationToDelete(conversationId)
     setShowDeleteConversationDialog(true)
   }
 
@@ -670,15 +598,7 @@ export default function AIAssistantPage() {
       }
 
       // Update local state
-      setConversations(prev => prev.filter(c => c.id !== conversationToDelete))
-
-      logger.info('Conversation deleted', {
-        conversationId: conversationToDelete,
-        title: conversation?.title,
-        messageCount: conversation?.messageCount
-      })
-
-      return { title: conversation?.title, messageCount: conversation?.messageCount }
+      setConversations(prev => prev.filter(c => c.id !== conversationToDelete))      return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
 
     toast.promise(deleteOperation(), {
@@ -692,26 +612,13 @@ export default function AIAssistantPage() {
     setConversationToDelete(null)
   }
 
-  const handleCopyMessage = async (messageId: string, content: string) => {
-    logger.info('Copying message to clipboard', {
-      messageId,
-      contentLength: content.length,
-      contentPreview: content.substring(0, 50)
-    })
+  const handleCopyMessage = async (messageId: string, content: string) => {    })
 
     await copyToClipboard(content, `Message copied - ${content.length} characters`)
   }
 
   const handleBookmarkMessage = async (messageId: string) => {
-    const message = messages.find(m => m.id === messageId)
-
-    logger.info('Bookmarking message', {
-      messageId,
-      messageType: message?.type,
-      contentLength: message?.content.length
-    })
-
-    // Save bookmark to API
+    const message = messages.find(m => m.id === messageId)    // Save bookmark to API
     try {
       const response = await fetch('/api/bookmarks', {
         method: 'POST',
@@ -745,15 +652,7 @@ export default function AIAssistantPage() {
 
   const handleRefreshInsights = async () => {
     const highPriority = aiInsights.filter(i => i.priority === 'high').length
-    const categories = [...new Set(aiInsights.map(i => i.category))]
-
-    logger.info('Refreshing AI insights', {
-      totalInsights: aiInsights.length,
-      highPriorityCount: highPriority,
-      categories
-    })
-
-    // Load fresh insights from database
+    const categories = [...new Set(aiInsights.map(i => i.category))]    // Load fresh insights from database
     if (userId) {
       try {
         setIsLoading(true)
@@ -777,18 +676,14 @@ export default function AIAssistantPage() {
           }))
           setAiInsights(transformedInsights)
           const newHighPriority = transformedInsights.filter(i => i.priority === 'high').length
-          toast.success(`Insights refreshed - ${transformedInsights.length} insights loaded (${newHighPriority} high priority)`)
-          logger.info('Insights refreshed from database', { count: transformedInsights.length })
-        } else {
+          toast.success(`Insights refreshed - ${transformedInsights.length} insights loaded (${newHighPriority} high priority)`)        } else {
           toast.success('No new insights - All data is up to date')
         }
         announce('Insights refreshed', 'polite')
       } catch (err) {
         toast.dismiss()
         logger.error('Failed to refresh insights', { error: err })
-        toast.error('Failed to refresh insights', {
-          description: err instanceof Error ? err.message : 'Please try again'
-        })
+        toast.error('Failed to refresh insights')
       } finally {
         setIsLoading(false)
       }
@@ -813,17 +708,7 @@ export default function AIAssistantPage() {
   }
 
   const handleImplementAction = async (insightId: string, action: string) => {
-    const insight = aiInsights.find(i => i.id === insightId)
-
-    logger.info('Implementing action', {
-      insightId,
-      action,
-      insightTitle: insight?.title,
-      category: insight?.category,
-      priority: insight?.priority
-    })
-
-    // Special handling for Growth Hub navigation
+    const insight = aiInsights.find(i => i.id === insightId)    // Special handling for Growth Hub navigation
     if (action === 'Explore Growth Hub') {
       toast.success('Redirecting to AI-powered business growth tools')
       router.push('/dashboard/growth-hub')
@@ -834,9 +719,7 @@ export default function AIAssistantPage() {
     if (userId) {
       try {
         const { implementInsight } = await import('@/lib/ai-assistant-queries')
-        await implementInsight(insightId, action)
-        logger.info('Insight implementation tracked in database', { insightId, action })
-        toast.success(`Action started - ${action} (${insight?.priority} priority)`)
+        await implementInsight(insightId, action)        toast.success(`Action started - ${action} (${insight?.priority} priority)`)
       } catch (error: any) {
         logger.error('Failed to track insight implementation', { error: error.message })
         toast.error('Failed to start action')
@@ -862,16 +745,7 @@ export default function AIAssistantPage() {
   }
 
   const handleExportConversation = async (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)
-
-    logger.info('Exporting conversation', {
-      conversationId,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount,
-      format: 'markdown'
-    })
-
-    try {
+    const conversation = conversations.find(c => c.id === conversationId)    try {
       // Try to fetch full conversation from API
       const response = await fetch(`/api/conversations/${conversationId}/export`)
 
@@ -901,15 +775,7 @@ export default function AIAssistantPage() {
   }
 
   const handleShareConversation = async (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)
-
-    logger.info('Sharing conversation', {
-      conversationId,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount
-    })
-
-    try {
+    const conversation = conversations.find(c => c.id === conversationId)    try {
       // Create share link via API
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: 'POST'
@@ -932,15 +798,7 @@ export default function AIAssistantPage() {
   }
 
   const handleVoiceInput = async () => {
-    const newListeningState = !isListening
-
-    logger.info('Voice input toggled', {
-      previousState: isListening,
-      newState: newListeningState,
-      voiceModeEnabled: isVoiceMode
-    })
-
-    setIsListening(!isListening)
+    const newListeningState = !isListening    setIsListening(!isListening)
 
     if (newListeningState) {
       // Start speech recognition
@@ -985,15 +843,7 @@ export default function AIAssistantPage() {
 
   const handleRegenerateResponse = async (messageId: string) => {
     const message = messages.find(m => m.id === messageId)
-    const messageIndex = messages.findIndex(m => m.id === messageId)
-
-    logger.info('Regenerating AI response', {
-      messageId,
-      messageType: message?.type,
-      selectedModel
-    })
-
-    // Find the user message before this assistant message
+    const messageIndex = messages.findIndex(m => m.id === messageId)    // Find the user message before this assistant message
     const userMessageIndex = messages.slice(0, messageIndex).reverse().findIndex(m => m.type === 'user')
     if (userMessageIndex === -1) {
       toast.error('No user message found to regenerate response')
@@ -1027,13 +877,7 @@ export default function AIAssistantPage() {
     }
   }
 
-  const handleSearchConversations = () => {
-    logger.info('Opening conversation search', {
-      totalConversations: conversations.length,
-      totalMessages: conversations.reduce((sum, c) => sum + c.messageCount, 0)
-    })
-
-    // Open search modal or navigate to search page
+  const handleSearchConversations = () => {    // Open search modal or navigate to search page
     const searchQuery = prompt('Search conversations:')
     if (searchQuery) {
       const matchingConversations = conversations.filter(c =>
@@ -1046,29 +890,13 @@ export default function AIAssistantPage() {
   }
 
   const handleFilterConversations = (filter: string) => {
-    const filteredCount = conversations.filter(c => c.tags.includes(filter.toLowerCase())).length
-
-    logger.info('Filtering conversations', {
-      filter,
-      filteredCount,
-      totalConversations: conversations.length
-    })
-
-    // Apply filter to state (this would typically update a filter state variable)
+    const filteredCount = conversations.filter(c => c.tags.includes(filter.toLowerCase())).length    // Apply filter to state (this would typically update a filter state variable)
     toast.success(`Filter applied - ${filteredCount} of ${conversations.length} conversations match "${filter}"`)
   }
 
   const handleExportInsights = () => {
     const highPriority = aiInsights.filter(i => i.priority === 'high').length
-    const categories = [...new Set(aiInsights.map(i => i.category))]
-
-    logger.info('Exporting insights report', {
-      totalInsights: aiInsights.length,
-      highPriorityCount: highPriority,
-      categories
-    })
-
-    // Generate report content
+    const categories = [...new Set(aiInsights.map(i => i.category))]    // Generate report content
     const content = `# AI Insights Report\n\nGenerated: ${new Date().toLocaleString()}\nTotal Insights: ${aiInsights.length}\nHigh Priority: ${highPriority}\n\n${aiInsights.map(i => `## ${i.title}\n\n**Category:** ${i.category}\n**Priority:** ${i.priority}\n\n${i.description}\n\n**Recommended Action:** ${i.action}\n\n---\n\n`).join('')}`
 
     const blob = new Blob([content], { type: 'text/markdown' })
@@ -1085,12 +913,7 @@ export default function AIAssistantPage() {
   }
 
   const handleScheduleReminder = async (action: string) => {
-    const reminderTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-
-    logger.info('Scheduling reminder', {
-      action,
-      scheduledFor: reminderTime.toISOString()
-    })
+    const reminderTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now    })
 
     try {
       // Try to use Notification API
@@ -1142,38 +965,18 @@ export default function AIAssistantPage() {
 
   const handleViewAnalytics = () => {
     const totalMessages = conversations.reduce((sum, c) => sum + c.messageCount, 0)
-    const avgMessagesPerConversation = conversations.length > 0 ? Math.round(totalMessages / conversations.length) : 0
-
-    logger.info('Viewing analytics', {
-      totalConversations: conversations.length,
-      totalMessages,
-      avgMessagesPerConversation,
-      totalInsights: aiInsights.length
-    })
-
-    // Navigate to analytics tab or show analytics modal
+    const avgMessagesPerConversation = conversations.length > 0 ? Math.round(totalMessages / conversations.length) : 0    // Navigate to analytics tab or show analytics modal
     setActiveTab('analytics')
     toast.success(`Analytics ready - ${conversations.length} conversations, ${totalMessages} messages`)
   }
 
   const handleConfigureAI = () => {
-    const settings = ['Model selection', 'Temperature', 'Context length', 'System prompts']
-
-    logger.info('Opening AI configuration', {
-      currentModel: selectedModel,
-      availableSettings: settings
-    })
-
-    // Navigate to AI settings page
+    const settings = ['Model selection', 'Temperature', 'Context length', 'System prompts']    // Navigate to AI settings page
     router.push('/dashboard/settings-v2')
     toast.success(`Opening AI configuration - Model: ${selectedModel}`)
   }
 
-  const handleSaveChat = () => {
-    logger.info('Saving chat', {
-      messageCount: messages.length,
-      hasUserMessages: messages.some(m => m.type === 'user')
-    })
+  const handleSaveChat = () => {    })
 
     const saveOperation = async () => {
       // Create conversation in database
@@ -1191,9 +994,7 @@ export default function AIAssistantPage() {
           }))
         })
 
-        if (error) throw new Error(error.message || 'Failed to save conversation')
-        logger.info('Chat saved to database', { conversationId: conversation?.id })
-      }
+        if (error) throw new Error(error.message || 'Failed to save conversation')      }
       return {
         messageCount: messages.length,
         userMessages: messages.filter(m => m.type === 'user').length,
@@ -1209,43 +1010,23 @@ export default function AIAssistantPage() {
   }
 
   const handleClearChat = () => {
-    const messageCount = messages.length
-
-    logger.info('Clear chat requested', { messageCount })
-
-    setShowClearChatDialog(true)
+    const messageCount = messages.length    setShowClearChatDialog(true)
   }
 
   const confirmClearChat = () => {
-    const messageCount = messages.length
-
-    logger.info('Chat cleared', { clearedMessageCount: messageCount })
-
-    setMessages([])
+    const messageCount = messages.length    setMessages([])
 
     toast.success(`Chat cleared - ${messageCount} messages removed`)
 
     setShowClearChatDialog(false)
   }
 
-  const handleAttachFile = () => {
-    logger.info('Attaching file', {
-      currentMessageCount: messages.length
-    })
-
-    const input = document.createElement('input')
+  const handleAttachFile = () => {    const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg'
     input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        logger.info('File selected', {
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type
-        })
-
-        try {
+      if (file) {        try {
           toast.loading(`Uploading ${file.name}...`)
 
           // Create FormData for file upload
@@ -1289,15 +1070,7 @@ export default function AIAssistantPage() {
   }
 
   const handleInsightDismiss = (insightId: string) => {
-    const insight = aiInsights.find(i => i.id === insightId)
-
-    logger.info('Dismissing insight', {
-      insightId,
-      title: insight?.title,
-      priority: insight?.priority
-    })
-
-    setInsightToDismiss(insightId)
+    const insight = aiInsights.find(i => i.id === insightId)    setInsightToDismiss(insightId)
     setShowDismissInsightDialog(true)
   }
 
@@ -1314,14 +1087,7 @@ export default function AIAssistantPage() {
       }
 
       // Update local state
-      setAiInsights(prev => prev.filter(i => i.id !== insightToDismiss))
-
-      logger.info('Insight dismissed', {
-        insightId: insightToDismiss,
-        title: insight?.title
-      })
-
-      return { title: insight?.title, priority: insight?.priority }
+      setAiInsights(prev => prev.filter(i => i.id !== insightToDismiss))      return { title: insight?.title, priority: insight?.priority }
     }
 
     toast.promise(dismissOperation(), {
@@ -1343,15 +1109,7 @@ export default function AIAssistantPage() {
         const { togglePinConversation } = await import('@/lib/ai-assistant-queries')
         const { error: pinError } = await togglePinConversation(conversationId)
         if (pinError) throw new Error(pinError.message || 'Failed to pin conversation')
-      }
-
-      logger.info('Pinning conversation', {
-        conversationId,
-        title: conversation?.title,
-        messageCount: conversation?.messageCount
-      })
-
-      return { title: conversation?.title }
+      }      return { title: conversation?.title }
     }
 
     toast.promise(pinOperation(), {
@@ -1374,15 +1132,7 @@ export default function AIAssistantPage() {
       }
 
       // Remove from active conversations list
-      setConversations(prev => prev.filter(c => c.id !== conversationId))
-
-      logger.info('Archiving conversation', {
-        conversationId,
-        title: conversation?.title,
-        messageCount: conversation?.messageCount
-      })
-
-      return { title: conversation?.title, messageCount: conversation?.messageCount }
+      setConversations(prev => prev.filter(c => c.id !== conversationId))      return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
 
     toast.promise(archiveOperation(), {
@@ -1394,7 +1144,6 @@ export default function AIAssistantPage() {
     announce('Conversation archived successfully', 'polite')
   }
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -1412,7 +1161,6 @@ export default function AIAssistantPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
