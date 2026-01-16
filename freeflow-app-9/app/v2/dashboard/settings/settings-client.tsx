@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -243,7 +242,7 @@ const mockSettingsActivities = [
 // Quick actions will be defined inside the component to use component functions
 
 export default function SettingsClient() {
-  const supabase = createClient()
+
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -292,6 +291,8 @@ export default function SettingsClient() {
   useEffect(() => {
     const fetchUserAndSettings = async () => {
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
@@ -389,7 +390,7 @@ export default function SettingsClient() {
       }
     }
     fetchUserAndSettings()
-  }, [supabase])
+  }, [])
 
   // Stats
   const stats = useMemo(() => {
@@ -448,6 +449,8 @@ export default function SettingsClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -478,6 +481,8 @@ export default function SettingsClient() {
     setIsSaving(true)
     try {
       for (const notif of notifications) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('notification_preferences')
           .upsert({
@@ -504,6 +509,8 @@ export default function SettingsClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -527,6 +534,8 @@ export default function SettingsClient() {
     setTheme(newTheme)
     if (!userId) return
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('user_settings')
         .upsert({
@@ -557,6 +566,8 @@ export default function SettingsClient() {
 
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) throw error
       toast.success('Password changed')
@@ -581,6 +592,8 @@ export default function SettingsClient() {
     ))
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('integrations')
         .upsert({
@@ -606,6 +619,8 @@ export default function SettingsClient() {
     setSessions(prev => prev.filter(s => s.id !== session.id))
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('user_sessions')
         .delete()
@@ -758,6 +773,8 @@ export default function SettingsClient() {
 
     if (userId) {
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('integrations')
           .update({ last_sync_at: new Date().toISOString() })
@@ -792,6 +809,8 @@ export default function SettingsClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.resend({ type: 'signup', email: profile.email })
       if (error) throw error
       toast.success('Verification email sent' for the verification link` })

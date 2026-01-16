@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Truck, Package, MapPin, Route, Clock, CheckCircle, XCircle,
@@ -680,7 +679,7 @@ const initialShipmentForm: ShipmentFormState = {
 }
 
 export default function LogisticsClient() {
-  const supabase = createClient()
+
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -715,6 +714,8 @@ export default function LogisticsClient() {
 
   // Fetch data from Supabase
   const fetchShipments = useCallback(async () => {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
     const { data, error } = await supabase
       .from('shipments')
       .select('*')
@@ -726,9 +727,11 @@ export default function LogisticsClient() {
       return
     }
     setDbShipments(data || [])
-  }, [supabase])
+  }, [])
 
   const fetchCarriers = useCallback(async () => {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
     const { data, error } = await supabase
       .from('shipping_carriers')
       .select('*')
@@ -739,9 +742,11 @@ export default function LogisticsClient() {
       return
     }
     setDbCarriers(data || [])
-  }, [supabase])
+  }, [])
 
   const fetchRoutes = useCallback(async () => {
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
     const { data, error } = await supabase
       .from('logistics_routes')
       .select('*')
@@ -753,7 +758,7 @@ export default function LogisticsClient() {
       return
     }
     setDbRoutes(data || [])
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     const loadData = async () => {
@@ -768,12 +773,16 @@ export default function LogisticsClient() {
   const handleCreateShipment = async () => {
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert({
         user_id: user.id,
         recipient_name: shipmentForm.recipientName,
@@ -807,6 +816,8 @@ export default function LogisticsClient() {
 
   const handleUpdateShipmentStatus = async (shipmentId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -824,6 +835,8 @@ export default function LogisticsClient() {
 
   const handleDeleteShipment = async (shipmentId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ deleted_at: new Date().toISOString() })
@@ -841,6 +854,8 @@ export default function LogisticsClient() {
 
   const handleToggleCarrier = async (carrierId: string, active: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipping_carriers')
         .update({ status: active ? 'active' : 'inactive', updated_at: new Date().toISOString() })

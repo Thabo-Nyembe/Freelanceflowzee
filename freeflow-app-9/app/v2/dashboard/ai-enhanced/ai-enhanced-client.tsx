@@ -70,7 +70,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // SUPABASE & QUERIES
-import { createClient } from '@/lib/supabase/client'
 import {
   getAIEnhancedTools,
   createAIEnhancedTool,
@@ -638,6 +637,8 @@ export default function AiEnhancedClient() {
     try {
       setIsSaving(true)
 
+      const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
