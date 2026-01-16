@@ -44,7 +44,6 @@ import {
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
@@ -62,7 +61,6 @@ const CURRENT_USER = {
 const DEMO_ROOM_ID = 'demo-collaboration-room-2025'
 
 export default function CollaborationDemoPage() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -320,15 +318,11 @@ Try moving your cursor around to see it synchronized across all connected users!
   }, [])
 
   const handleStartVideoCall = () => {
-    setShowVideoCall(true)
-    logger.info('Video call started from demo')
-    toast.success('Starting video call...')
+    setShowVideoCall(true)    toast.success('Starting video call...')
   }
 
   const handleEndVideoCall = () => {
-    setShowVideoCall(false)
-    logger.info('Video call ended')
-    toast.info('Video call ended')
+    setShowVideoCall(false)    toast.info('Video call ended')
   }
 
   // Video call fullscreen mode
