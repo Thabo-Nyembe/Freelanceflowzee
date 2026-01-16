@@ -684,7 +684,7 @@ export default function TicketsClient() {
 
   const handleSubmitNewTicket = async () => {
     if (!newTicket.subject.trim()) {
-      toast.error('Validation Error', { description: 'Subject is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -705,12 +705,12 @@ export default function TicketsClient() {
         attachment_count: 0,
         metadata: {}
       })
-      toast.success('Ticket Created', { description: `Ticket ${ticketNumber} created successfully` })
+      toast.success('Ticket Created' created successfully` })
       setShowCreateDialog(false)
       setNewTicket({ subject: '', description: '', priority: 'normal', category: 'General', customer_name: '', customer_email: '' })
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to create ticket' })
+      toast.error('Error')
     }
   }
 
@@ -724,43 +724,43 @@ export default function TicketsClient() {
 
     try {
       await assignTicket(ticketToAssign, agentId, agentName)
-      toast.success('Ticket Assigned', { description: `Ticket assigned to ${agentName}` })
+      toast.success('Ticket Assigned'` })
       setShowAssignDialog(false)
       setTicketToAssign(null)
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to assign ticket' })
+      toast.error('Error')
     }
   }
 
   const handleResolveTicket = async (ticketId: string) => {
     try {
       await updateTicket({ id: ticketId, status: 'solved', resolved_at: new Date().toISOString() })
-      toast.success('Ticket Resolved', { description: 'Ticket has been marked as solved' })
+      toast.success('Ticket Resolved')
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to resolve ticket' })
+      toast.error('Error')
     }
   }
 
   const handleCloseTicket = async (ticketId: string) => {
     try {
       await updateTicket({ id: ticketId, status: 'closed', closed_at: new Date().toISOString() })
-      toast.success('Ticket Closed', { description: 'Ticket has been closed' })
+      toast.success('Ticket Closed')
       setSelectedTicket(null)
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to close ticket' })
+      toast.error('Error')
     }
   }
 
   const handleEscalateTicket = async (ticketId: string) => {
     try {
       await updateTicket({ id: ticketId, priority: 'urgent', sla_status: 'at-risk' })
-      toast.success('Ticket Escalated', { description: 'Ticket has been escalated to urgent priority' })
+      toast.success('Ticket Escalated')
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to escalate ticket' })
+      toast.error('Error')
     }
   }
 
@@ -774,13 +774,13 @@ export default function TicketsClient() {
 
     try {
       await deleteTicket(ticketToDelete)
-      toast.success('Ticket Deleted', { description: 'Ticket has been deleted' })
+      toast.success('Ticket Deleted')
       setShowDeleteDialog(false)
       setTicketToDelete(null)
       setSelectedTicket(null)
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to delete ticket' })
+      toast.error('Error')
     }
   }
 
@@ -798,13 +798,13 @@ export default function TicketsClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Tickets exported to CSV file' })
+    toast.success('Export Complete')
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Refreshing ticket data...' })
+    toast.info('Refreshing')
     await refetch()
-    toast.success('Refreshed', { description: 'Ticket data updated' })
+    toast.success('Refreshed')
   }
 
   const handleNewTicket = () => {
@@ -817,7 +817,7 @@ export default function TicketsClient() {
 
   const handleConfirmBulkAssign = async () => {
     if (!selectedAgentForBulk) {
-      toast.error('Error', { description: 'Please select an agent' })
+      toast.error('Error')
       return
     }
 
@@ -832,7 +832,7 @@ export default function TicketsClient() {
     })
 
     if (ticketsToAssign.length === 0) {
-      toast.info('No Tickets', { description: 'No tickets match the selected filter' })
+      toast.info('No Tickets')
       return
     }
 
@@ -841,14 +841,13 @@ export default function TicketsClient() {
       for (const ticket of ticketsToAssign) {
         await assignTicket(ticket.id, selectedAgentForBulk, agent.name)
       }
-      toast.success('Bulk Assign Complete', {
-        description: `${ticketsToAssign.length} tickets assigned to ${agent.name}`
+      toast.success('Bulk Assign Complete' tickets assigned to ${agent.name}`
       })
       setShowBulkAssignDialog(false)
       setSelectedAgentForBulk('')
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to bulk assign tickets' })
+      toast.error('Error')
     }
   }
 
@@ -856,10 +855,10 @@ export default function TicketsClient() {
     try {
       // In a real app, get current user info
       await assignTicket(ticketId, 'current-user-id', 'Me')
-      toast.success('Ticket Assigned', { description: `Ticket ${ticketNumber} assigned to you` })
+      toast.success('Ticket Assigned' assigned to you` })
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to assign ticket' })
+      toast.error('Error')
     }
   }
 
@@ -869,13 +868,12 @@ export default function TicketsClient() {
 
   const handleConfirmAddAgent = async () => {
     if (!newAgent.name.trim() || !newAgent.email.trim()) {
-      toast.error('Validation Error', { description: 'Name and email are required' })
+      toast.error('Validation Error')
       return
     }
 
     // In a real implementation, this would call an API to create the agent
-    toast.success('Agent Added', {
-      description: `${newAgent.name} has been added to the ${newAgent.team} team`
+    toast.success('Agent Added' has been added to the ${newAgent.team} team`
     })
     setShowAddAgentDialog(false)
     setNewAgent({ name: '', email: '', team: 'Technical Support', role: 'agent' })
@@ -905,20 +903,19 @@ export default function TicketsClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Report Generated', {
-      description: `${reportType.charAt(0).toUpperCase() + reportType.slice(1).replace('-', ' ')} report for the last ${reportPeriod} downloaded`
+    toast.success('Report Generated' report for the last ${reportPeriod} downloaded`
     })
     setShowFullReportDialog(false)
   }
 
   const handleSendReply = async () => {
     if (!replyText.trim()) {
-      toast.error('Empty Reply', { description: 'Please enter a message before sending' })
+      toast.error('Empty Reply')
       return
     }
 
     if (!selectedTicket) {
-      toast.error('Error', { description: 'No ticket selected' })
+      toast.error('Error')
       return
     }
 
@@ -937,11 +934,11 @@ export default function TicketsClient() {
         await updateTicket({ id: selectedTicket.id, status: 'open', first_response_at: new Date().toISOString() })
       }
 
-      toast.success('Reply Sent', { description: 'Your reply has been sent to the customer' })
+      toast.success('Reply Sent')
       setReplyText('')
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to send reply' })
+      toast.error('Error')
     }
   }
 
@@ -954,41 +951,31 @@ export default function TicketsClient() {
         updateData.closed_at = new Date().toISOString()
       }
       await updateTicket(updateData)
-      toast.success('Status Updated', { description: `Ticket status changed to ${newStatus}` })
+      toast.success('Status Updated'` })
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to update ticket status' })
+      toast.error('Error')
     }
   }
 
   const handleSaveGeneralSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'General settings have been updated'
-    })
+    toast.success('Settings Saved')
   }
 
   const handleSaveSLASettings = () => {
-    toast.success('Settings Saved', {
-      description: 'SLA policies have been updated'
-    })
+    toast.success('Settings Saved')
   }
 
   const handleSaveRoutingSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Routing settings have been updated'
-    })
+    toast.success('Settings Saved')
   }
 
   const handleSaveNotificationSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Notification settings have been updated'
-    })
+    toast.success('Settings Saved')
   }
 
   const handleSaveAdvancedSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Advanced settings have been updated'
-    })
+    toast.success('Settings Saved')
   }
 
   const handleExportAllTickets = () => {
@@ -1046,8 +1033,7 @@ export default function TicketsClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', {
-      description: `${ticketsToExport.length} tickets exported as ${extension.toUpperCase()}`
+    toast.success('Export Complete' tickets exported as ${extension.toUpperCase()}`
     })
     setShowExportAllDialog(false)
   }
@@ -1111,9 +1097,7 @@ export default function TicketsClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Analytics Exported', {
-      description: 'Analytics data has been downloaded'
-    })
+    toast.success('Analytics Exported')
     setShowExportAnalyticsDialog(false)
   }
 
@@ -1125,7 +1109,7 @@ export default function TicketsClient() {
     const resolvedTickets = allTickets.filter(t => t.status === 'solved' || t.status === 'closed')
 
     if (resolvedTickets.length === 0) {
-      toast.info('No Tickets', { description: 'There are no resolved tickets to delete' })
+      toast.info('No Tickets')
       return
     }
 
@@ -1134,13 +1118,12 @@ export default function TicketsClient() {
       for (const ticket of resolvedTickets) {
         await deleteTicket(ticket.id)
       }
-      toast.success('Tickets Deleted', {
-        description: `${resolvedTickets.length} resolved tickets have been deleted`
+      toast.success('Tickets Deleted' resolved tickets have been deleted`
       })
       setShowDeleteResolvedDialog(false)
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to delete resolved tickets' })
+      toast.error('Error')
     }
   }
 
@@ -1153,12 +1136,10 @@ export default function TicketsClient() {
     if (!selectedIntegration) return
 
     if (selectedIntegration.status === 'connected') {
-      toast.success('Integration Configured', {
-        description: `${selectedIntegration.name} settings have been updated`
+      toast.success('Integration Configured' settings have been updated`
       })
     } else {
-      toast.success('Integration Connected', {
-        description: `${selectedIntegration.name} has been connected successfully`
+      toast.success('Integration Connected' has been connected successfully`
       })
     }
     setShowIntegrationDialog(false)
@@ -2465,7 +2446,7 @@ export default function TicketsClient() {
               <AIInsightsPanel
                 insights={mockTicketsAIInsights}
                 title="Ticket Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">

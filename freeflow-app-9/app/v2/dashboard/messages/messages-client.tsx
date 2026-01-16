@@ -408,7 +408,7 @@ export default function MessagesClient() {
   // Real Supabase handlers
   const handleSendMessage = async () => {
     if (!messageInput.trim()) {
-      toast.error('Message required', { description: 'Please enter a message to send' })
+      toast.error('Message required')
       return
     }
 
@@ -436,18 +436,18 @@ export default function MessagesClient() {
       })
       setMessageInput('')
       setMessageSubject('')
-      toast.success('Message sent', { description: 'Your message has been delivered' })
+      toast.success('Message sent')
     } catch (error) {
-      toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to send message')
     }
   }
 
   const handleDeleteMessage = async (messageId: string) => {
     try {
       await deleteMessage(messageId)
-      toast.success('Message deleted', { description: 'The message has been removed' })
+      toast.success('Message deleted')
     } catch (error) {
-      toast.error('Failed to delete message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete message')
     }
   }
 
@@ -458,9 +458,9 @@ export default function MessagesClient() {
         read_at: new Date().toISOString(),
         status: 'read' as const
       })
-      toast.success('Marked as read', { description: 'Message marked as read' })
+      toast.success('Marked as read')
     } catch (error) {
-      toast.error('Failed to mark as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to mark as read')
     }
   }
 
@@ -470,9 +470,9 @@ export default function MessagesClient() {
         status: 'archived' as const,
         folder: 'archive'
       })
-      toast.success('Message archived', { description: 'Message moved to archive' })
+      toast.success('Message archived')
     } catch (error) {
-      toast.error('Failed to archive message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to archive message')
     }
   }
 
@@ -481,11 +481,9 @@ export default function MessagesClient() {
       await updateMessage(messageId, {
         is_starred: !currentStarred
       })
-      toast.success(currentStarred ? 'Star removed' : 'Message starred', {
-        description: currentStarred ? 'Star has been removed' : 'Message has been starred'
-      })
+      toast.success(currentStarred ? 'Star removed' : 'Message starred')
     } catch (error) {
-      toast.error('Failed to update star', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update star')
     }
   }
 
@@ -494,11 +492,9 @@ export default function MessagesClient() {
       await updateMessage(messageId, {
         is_pinned: !currentPinned
       })
-      toast.success(currentPinned ? 'Message unpinned' : 'Message pinned', {
-        description: currentPinned ? 'Message has been unpinned' : 'Message has been pinned'
-      })
+      toast.success(currentPinned ? 'Message unpinned' : 'Message pinned')
     } catch (error) {
-      toast.error('Failed to update pin', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update pin')
     }
   }
 
@@ -507,18 +503,14 @@ export default function MessagesClient() {
       await updateMessage(messageId, {
         is_important: !currentImportant
       })
-      toast.success(currentImportant ? 'Removed important flag' : 'Marked as important', {
-        description: currentImportant ? 'Important flag removed' : 'Message marked as important'
-      })
+      toast.success(currentImportant ? 'Removed important flag' : 'Marked as important')
     } catch (error) {
-      toast.error('Failed to update importance', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update importance')
     }
   }
 
   const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel builder...'
-    })
+    toast.info('Create Channel')
   }
 
   const handleStartCall = (contactName: string, type: 'audio' | 'video' = 'audio') => {
@@ -557,8 +549,7 @@ export default function MessagesClient() {
 
   const handleEndCall = () => {
     if (activeCallChannel) {
-      toast.info('Call ended', {
-        description: `Call with ${activeCallChannel} has ended`
+      toast.info('Call ended' has ended`
       })
       sessionStorage.removeItem('active_call')
       setActiveCallChannel(null)
@@ -615,11 +606,11 @@ export default function MessagesClient() {
 
   const handleSendInvites = () => {
     if (!inviteEmails.trim()) {
-      toast.error('Email required', { description: 'Please enter at least one email address' })
+      toast.error('Email required')
       return
     }
     const emailList = inviteEmails.split(',').map(e => e.trim()).filter(e => e)
-    toast.success('Invitations sent', { description: `Sent invites to ${emailList.length} team member(s)` })
+    toast.success('Invitations sent' team member(s)` })
     setInviteEmails('')
     setInviteMessage('')
     setShowInviteDialog(false)
@@ -645,14 +636,14 @@ export default function MessagesClient() {
 
   const handleSaveNewWorkflow = () => {
     if (!workflowName.trim()) {
-      toast.error('Name required', { description: 'Please enter a workflow name' })
+      toast.error('Name required')
       return
     }
     if (!workflowTrigger) {
-      toast.error('Trigger required', { description: 'Please select a trigger for the workflow' })
+      toast.error('Trigger required')
       return
     }
-    toast.success('Workflow created', { description: `"${workflowName}" workflow has been created and activated` })
+    toast.success('Workflow created'" workflow has been created and activated` })
     setWorkflowName('')
     setWorkflowTrigger('')
     setWorkflowAction('')
@@ -676,15 +667,11 @@ export default function MessagesClient() {
     }))
 
     if (allPinned.length === 0) {
-      toast.info('No pinned messages', {
-        description: selectedChannel
-          ? `No messages are pinned in #${selectedChannel.name}`
+      toast.info('No pinned messages'`
           : 'No pinned messages found'
       })
     } else {
-      toast.success(`${allPinned.length} pinned message${allPinned.length === 1 ? '' : 's'} found`, {
-        description: selectedChannel
-          ? `Viewing pinned messages in #${selectedChannel.name}`
+      toast.success(`${allPinned.length} pinned message${allPinned.length === 1 ? '' : 's'} found``
           : 'Viewing all pinned messages',
         action: {
           label: 'Clear Filter',
@@ -711,12 +698,7 @@ export default function MessagesClient() {
       sessionStorage.removeItem(`channel_${channelName}_archived`)
       sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
 
-      toast.success(`#${channelName} restored`, {
-        description: 'Channel is now visible in your sidebar',
-        action: {
-          label: 'Undo',
-          onClick: () => handleArchiveChannel(channelName)
-        }
+      toast.success(`#${channelName} restored`
       })
     } else {
       // Archive the channel
@@ -737,12 +719,7 @@ export default function MessagesClient() {
         setSelectedChannel(null)
       }
 
-      toast.success(`#${channelName} archived`, {
-        description: 'Channel hidden from sidebar. You can restore it from archived channels.',
-        action: {
-          label: 'Undo',
-          onClick: () => handleArchiveChannel(channelName)
-        }
+      toast.success(`#${channelName} archived`
       })
     }
   }
@@ -768,10 +745,10 @@ export default function MessagesClient() {
 
   const handleUploadSelectedFiles = () => {
     if (selectedFiles.length === 0) {
-      toast.error('No files selected', { description: 'Please select files to upload' })
+      toast.error('No files selected')
       return
     }
-    toast.success('Files uploaded', { description: `${selectedFiles.length} file(s) uploaded successfully` })
+    toast.success('Files uploaded' file(s) uploaded successfully` })
     setSelectedFiles([])
     setShowFileUploadDialog(false)
   }
@@ -796,11 +773,11 @@ export default function MessagesClient() {
   }
 
   const handleRevokeSession = (sessionId: number) => {
-    toast.success('Session revoked', { description: `Session ${sessionId} has been terminated` })
+    toast.success('Session revoked' has been terminated` })
   }
 
   const handleRevokeAllSessions = () => {
-    toast.success('All sessions revoked', { description: 'All other sessions have been terminated' })
+    toast.success('All sessions revoked')
     setShowSessionManagementDialog(false)
   }
 
@@ -818,13 +795,12 @@ export default function MessagesClient() {
   }
 
   const handleToggleWorkflow = (workflowId: number, workflowName: string, currentStatus: boolean) => {
-    toast.success(currentStatus ? 'Workflow disabled' : 'Workflow enabled', {
-      description: `"${workflowName}" has been ${currentStatus ? 'disabled' : 'enabled'}`
+    toast.success(currentStatus ? 'Workflow disabled' : 'Workflow enabled'" has been ${currentStatus ? 'disabled' : 'enabled'}`
     })
   }
 
   const handleDeleteWorkflow = (workflowId: number, workflowName: string) => {
-    toast.success('Workflow deleted', { description: `"${workflowName}" has been removed` })
+    toast.success('Workflow deleted'" has been removed` })
   }
 
   const handleExportData = () => {
@@ -853,7 +829,7 @@ export default function MessagesClient() {
     link.click()
     window.URL.revokeObjectURL(url)
     document.body.removeChild(link)
-    toast.success('Export complete', { description: `Data exported as ${exportFormat.toUpperCase()} file` })
+    toast.success('Export complete' file` })
     setShowExportDialog(false)
   }
 
@@ -929,8 +905,7 @@ export default function MessagesClient() {
       setChannelFilter('all')
     }
 
-    toast.success('Filters applied', {
-      description: `Showing ${filterType} messages${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}`
+    toast.success('Filters applied' messages${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}`
     })
     setShowFilterDialog(false)
   }
@@ -941,7 +916,7 @@ export default function MessagesClient() {
     setFilterChannel('all')
     setChannelFilter('all')
     sessionStorage.removeItem('messages_filter_prefs')
-    toast.info('Filters cleared', { description: 'Showing all messages' })
+    toast.info('Filters cleared')
     setShowFilterDialog(false)
   }
 
@@ -958,13 +933,11 @@ export default function MessagesClient() {
 
       if (newState) {
         sessionStorage.setItem(reactionKey, newState)
-        toast.success('Reaction added', {
-          description: `You reacted with ${getReactionIcon(reactionType)} to the message`
+        toast.success('Reaction added' to the message`
         })
       } else {
         sessionStorage.removeItem(reactionKey)
-        toast.info('Reaction removed', {
-          description: `Removed your ${getReactionIcon(reactionType)} reaction`
+        toast.info('Reaction removed' reaction`
         })
       }
 
@@ -976,9 +949,7 @@ export default function MessagesClient() {
         })
       }
     } catch (error) {
-      toast.error('Failed to update reaction', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to update reaction')
     }
   }
 
@@ -988,8 +959,7 @@ export default function MessagesClient() {
     localStorage.setItem('messages_sidebar_theme_color', color)
     // Apply as CSS custom property for immediate visual feedback
     document.documentElement.style.setProperty('--sidebar-theme-color', color)
-    toast.success('Theme color updated', {
-      description: `Sidebar color set to ${color}`
+    toast.success('Theme color updated'`
     })
   }
 
@@ -1008,9 +978,9 @@ export default function MessagesClient() {
           status: 'read' as const
         })
       }
-      toast.success('All messages marked as read', { description: `${unreadMessages.length} messages updated` })
+      toast.success('All messages marked as read' messages updated` })
     } catch (error) {
-      toast.error('Failed to mark all as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to mark all as read')
     }
   }
 
@@ -1044,9 +1014,9 @@ export default function MessagesClient() {
         attachment_count: originalMessage.attachment_count,
         reaction_count: 0
       })
-      toast.success('Message forwarded', { description: 'Message has been forwarded successfully' })
+      toast.success('Message forwarded')
     } catch (error) {
-      toast.error('Failed to forward message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to forward message')
     }
   }
 
@@ -1082,9 +1052,9 @@ export default function MessagesClient() {
         attachment_count: 0,
         reaction_count: 0
       })
-      toast.success('Reply sent', { description: 'Your reply has been sent' })
+      toast.success('Reply sent')
     } catch (error) {
-      toast.error('Failed to send reply', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to send reply')
     }
   }
 
@@ -1098,7 +1068,7 @@ export default function MessagesClient() {
   // Submit reply from dialog
   const handleSubmitReply = async () => {
     if (!replyMessageId || !replyBody.trim()) {
-      toast.error('Reply required', { description: 'Please enter a reply message' })
+      toast.error('Reply required')
       return
     }
     await handleReplyToMessage(replyMessageId, replyBody)
@@ -1117,7 +1087,7 @@ export default function MessagesClient() {
   // Submit forward from dialog
   const handleSubmitForward = async () => {
     if (!forwardMessageId || !forwardRecipient) {
-      toast.error('Recipient required', { description: 'Please select a recipient' })
+      toast.error('Recipient required')
       return
     }
     await handleForwardMessage(forwardMessageId, forwardRecipient)
@@ -1157,17 +1127,16 @@ export default function MessagesClient() {
   // Browse channels handler
   const handleBrowseChannels = () => {
     setChannelFilter('all')
-    toast.success('Browsing Channels', { description: `Showing all ${mockChannels.length} channels` })
+    toast.success('Browsing Channels' channels` })
   }
 
   // View archived channels handler
   const handleViewArchivedChannels = async () => {
     const archivedList = Array.from(archivedChannels)
     if (archivedList.length === 0) {
-      toast.info('No Archived Channels', { description: 'You have no archived channels' })
+      toast.info('No Archived Channels')
     } else {
-      toast.success('Archived Channels', {
-        description: `${archivedList.length} archived channel(s): ${archivedList.join(', ')}`,
+      toast.success('Archived Channels' archived channel(s): ${archivedList.join(', ')}`,
         action: {
           label: 'Restore All',
           onClick: () => {
@@ -1187,10 +1156,10 @@ export default function MessagesClient() {
     const totalSaved = savedMessages.length + mockSaved.length
 
     if (totalSaved === 0) {
-      toast.info('No Saved Messages', { description: 'Bookmark messages to save them here' })
+      toast.info('No Saved Messages')
     } else {
       setShowSavedMessages(true)
-      toast.success(`${totalSaved} Saved Messages`, { description: 'Viewing your bookmarked messages' })
+      toast.success(`${totalSaved} Saved Messages`)
     }
   }
 
@@ -1198,7 +1167,7 @@ export default function MessagesClient() {
   const handleFilterFilesByType = (type: 'all' | 'images' | 'videos' | 'documents' | 'code') => {
     setFileTypeFilter(type)
     const typeLabels = { all: 'all files', images: 'image files', videos: 'video files', documents: 'document files', code: 'code files' }
-    toast.success(`Filtering ${typeLabels[type]}`, { description: `Showing ${type === 'all' ? 'all' : type} only` })
+    toast.success(`Filtering ${typeLabels[type]}` only` })
   }
 
   // Filter threads
@@ -1208,14 +1177,14 @@ export default function MessagesClient() {
     const count = filter === 'unread' ? mockThreads.filter(t => t.isUnread).length :
                   filter === 'following' ? mockThreads.filter(t => t.isFollowing).length :
                   mockThreads.length
-    toast.success(`Showing ${filterLabels[filter]}`, { description: `Found ${count} thread(s)` })
+    toast.success(`Showing ${filterLabels[filter]}` thread(s)` })
   }
 
   // Filter mentions
   const handleFilterMentions = (filter: 'all' | 'unread' | 'reactions' | 'starred') => {
     setMentionFilter(filter)
     const filterLabels = { all: 'all mentions', unread: 'unread mentions', reactions: 'messages with reactions', starred: 'starred mentions' }
-    toast.success(`Showing ${filterLabels[filter]}`, { description: 'Filter applied' })
+    toast.success(`Showing ${filterLabels[filter]}`)
   }
 
   // Schedule call handler
@@ -1226,7 +1195,7 @@ export default function MessagesClient() {
   // Submit scheduled call
   const handleSubmitScheduledCall = async () => {
     if (!scheduleCallDate || !scheduleCallTime) {
-      toast.error('Date and time required', { description: 'Please select a date and time for the call' })
+      toast.error('Date and time required')
       return
     }
 
@@ -1243,8 +1212,7 @@ export default function MessagesClient() {
     existingCalls.push(callData)
     sessionStorage.setItem('scheduled_calls', JSON.stringify(existingCalls))
 
-    toast.success('Call Scheduled', {
-      description: `${scheduleCallType === 'video' ? 'Video' : 'Audio'} call scheduled for ${scheduledDateTime.toLocaleString()}`
+    toast.success('Call Scheduled' call scheduled for ${scheduledDateTime.toLocaleString()}`
     })
 
     setShowScheduleCallDialog(false)
@@ -1261,8 +1229,7 @@ export default function MessagesClient() {
       channel: selectedChannel?.name || 'Quick Huddle'
     }
     sessionStorage.setItem('active_huddle', JSON.stringify(huddleData))
-    toast.success('Huddle Started', {
-      description: `Quick huddle in ${selectedChannel?.name || 'new channel'}`,
+    toast.success('Huddle Started'`,
       action: {
         label: 'End Huddle',
         onClick: () => {
@@ -1305,7 +1272,7 @@ export default function MessagesClient() {
   const handleViewCallRecordings = () => {
     const recordings = mockCalls.filter(c => c.isRecorded)
     if (recordings.length === 0) {
-      toast.info('No Recordings', { description: 'No call recordings available' })
+      toast.info('No Recordings')
     } else {
       toast.success(`${recordings.length} Recording(s)`, { description: 'Showing your call recordings' })
     }
@@ -1314,28 +1281,22 @@ export default function MessagesClient() {
   // View call history handler
   const handleViewCallHistory = () => {
     const completedCalls = mockCalls.filter(c => c.status === 'ended' || c.status === 'missed')
-    toast.success('Call History', { description: `${completedCalls.length} calls in history. ${mockCalls.filter(c => c.status === 'missed').length} missed.` })
+    toast.success('Call History' calls in history. ${mockCalls.filter(c => c.status === 'missed').length} missed.` })
   }
 
   // Open call settings handler
   const handleOpenCallSettings = () => {
-    toast.info('Call Settings', {
-      description: 'Audio: Default microphone, Video: Default camera',
-      action: {
-        label: 'Configure',
-        onClick: () => setSettingsTab('notifications')
-      }
+    toast.info('Call Settings'
     })
   }
 
   // Open channel settings handler
   const handleOpenChannelSettings = () => {
     if (!selectedChannel) {
-      toast.info('Select a Channel', { description: 'Please select a channel to configure its settings' })
+      toast.info('Select a Channel')
       return
     }
-    toast.success(`#${selectedChannel.name} Settings`, {
-      description: `Members: ${selectedChannel.memberCount}, Type: ${selectedChannel.type}`,
+    toast.success(`#${selectedChannel.name} Settings`, Type: ${selectedChannel.type}`,
       action: {
         label: 'Open Settings Tab',
         onClick: () => setSettingsTab('general')
@@ -1350,17 +1311,13 @@ export default function MessagesClient() {
 
   const handleConfirmLeaveWorkspace = () => {
     sessionStorage.clear()
-    toast.success('Left Workspace', { description: 'You have left the workspace. Redirecting...' })
+    toast.success('Left Workspace')
     setShowLeaveWorkspaceDialog(false)
   }
 
   // AI Insight action handler
   const handleAIInsightAction = (insight: { id: string; title: string; description: string }) => {
-    toast.success(`AI Insight: ${insight.title}`, {
-      description: insight.description,
-      action: {
-        label: 'Apply',
-        onClick: () => toast.info('Insight Applied', { description: 'AI recommendation has been applied' })
+    toast.success(`AI Insight: ${insight.title}`)
       }
     })
   }
@@ -1403,7 +1360,7 @@ export default function MessagesClient() {
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
               setMessageInput('')
-              toast.info('Compose Message', { description: 'Use the message input below to send a new message' })
+              toast.info('Compose Message')
             }}>
               <Plus className="w-4 h-4 mr-2" />
               New Message
@@ -1503,7 +1460,7 @@ export default function MessagesClient() {
                 { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleCreateChannel() },
                 { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleBrowseChannels() },
                 { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleInvitePeople() },
-                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Starred Channels', { description: `Found ${mockChannels.filter(c => c.isStarred).length} starred channels` }) } },
+                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Starred Channels' starred channels` }) } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleOpenMarketplace() },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleCreateWorkflow() },
                 { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleViewArchivedChannels() },
@@ -1719,13 +1676,13 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSelectedChannel(directMessages[0] || null); toast.success('New Direct Message', { description: directMessages.length > 0 ? `Selected ${directMessages[0].name}` : 'No contacts available' }) } },
-                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); document.querySelector<HTMLInputElement>('input[placeholder*="Message"]')?.focus(); toast.success('Compose Message', { description: 'Start typing your message below' }) } },
-                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { handleOpenReplyDialog(channelMessages[0].id) } else { toast.info('No Messages', { description: 'Select a conversation with messages first' }) } } },
-                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { if (channelMessages.length > 0) { handleOpenForwardDialog(channelMessages[0].id) } else { toast.info('No Messages', { description: 'Select a conversation with messages first' }) } } },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSelectedChannel(directMessages[0] || null); toast.success('New Direct Message'` : 'No contacts available' }) } },
+                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); document.querySelector<HTMLInputElement>('input[placeholder*="Message"]')?.focus(); toast.success('Compose Message') } },
+                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { handleOpenReplyDialog(channelMessages[0].id) } else { toast.info('No Messages') } } },
+                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { if (channelMessages.length > 0) { handleOpenForwardDialog(channelMessages[0].id) } else { toast.info('No Messages') } } },
                 { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleViewSavedMessages() },
                 { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleViewPinnedMessages() },
-                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Messages', { description: 'Type your search query' }) } },
+                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Messages') } },
                 { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleOpenFilterDialog() },
               ].map((action, idx) => (
                 <Button
@@ -1880,11 +1837,11 @@ export default function MessagesClient() {
                 { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleFilterThreads('all') },
                 { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleFilterThreads('following') },
                 { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleFilterThreads('unread') },
-                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setThreadFilter('all'); toast.success('My Replies', { description: `Showing ${mockThreads.filter(t => t.participants.some(p => p.id === currentUser.id)).length} threads with your replies` }) } },
+                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setThreadFilter('all'); toast.success('My Replies' threads with your replies` }) } },
                 { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleFilterThreads('mentions') },
                 { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleFilterThreads('archived') },
-                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Threads', { description: 'Enter your search query' }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); toast.success('Thread Settings', { description: 'Configure thread notification preferences' }) } },
+                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Threads') } },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); toast.success('Thread Settings') } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2010,7 +1967,7 @@ export default function MessagesClient() {
                           </div>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
                             setActiveCall(call)
-                            toast.success('Joining call', { description: `You are now in ${call.channelName}` })
+                            toast.success('Joining call'` })
                           }}>
                             Join
                           </Button>
@@ -2120,8 +2077,8 @@ export default function MessagesClient() {
                 { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleFilterFilesByType('videos') },
                 { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleFilterFilesByType('documents') },
                 { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleFilterFilesByType('code') },
-                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Files', { description: 'Enter your search query' }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); toast.success('File Settings', { description: 'Configure storage and retention settings' }) } },
+                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Files') } },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); toast.success('File Settings') } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2216,10 +2173,10 @@ export default function MessagesClient() {
                 { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleFilterMentions('unread') },
                 { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleFilterMentions('reactions') },
                 { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleFilterMentions('starred') },
-                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (mockMentions.length > 0) { handleOpenReplyDialog(mockMentions[0].message.id) } else { toast.info('No Mentions', { description: 'No mentions to reply to' }) } } },
+                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (mockMentions.length > 0) { handleOpenReplyDialog(mockMentions[0].message.id) } else { toast.info('No Mentions') } } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleMarkAllAsRead() },
                 { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleOpenFilterDialog() },
-                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); toast.success('Mention Settings', { description: 'Configure mention notification preferences' }) } },
+                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); toast.success('Mention Settings') } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2257,7 +2214,7 @@ export default function MessagesClient() {
                           <p className="text-sm">{mention.message.content}</p>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.info('Reply', { description: 'Enter your reply in the message input below' })
+                          toast.info('Reply')
                           setMessageInput(`@${mention.message.author.name} `)
                         }}>
                           <Reply className="w-4 h-4" />
@@ -2286,14 +2243,14 @@ export default function MessagesClient() {
                     </div>
                     <Button size="lg" onClick={() => {
                       if (!searchQuery.trim()) {
-                        toast.error('Search required', { description: 'Please enter a search term' })
+                        toast.error('Search required')
                         return
                       }
                       const results = supabaseMessages?.filter(m =>
                         m.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
                       ) || []
-                      toast.success(`Search complete`, { description: `Found ${results.length} matching messages` })
+                      toast.success(`Search complete` matching messages` })
                     }}>Search</Button>
                   </div>
 
@@ -2954,9 +2911,9 @@ export default function MessagesClient() {
                                 for (const msg of supabaseMessages) {
                                   await deleteMessage(msg.id, true)
                                 }
-                                toast.success('All messages deleted', { description: 'All your messages have been permanently deleted' })
+                                toast.success('All messages deleted')
                               } catch (error) {
-                                toast.error('Failed to delete messages', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                toast.error('Failed to delete messages')
                               }
                             }
                           }} disabled={mutating}>

@@ -374,16 +374,12 @@ export default function EcommerceClient() {
   }
 
   const handleExportData = async (type: string) => {
-    toast.success(`Exporting ${type} data...`, {
-      description: 'Your download will start shortly'
-    })
+    toast.success(`Exporting ${type} data...`)
     setShowExportDialog(false)
   }
 
   const handleImportData = async () => {
-    toast.success('Import started', {
-      description: 'Processing your file...'
-    })
+    toast.success('Import started')
     setShowImportDialog(false)
   }
 
@@ -413,9 +409,7 @@ export default function EcommerceClient() {
   }
 
   const handleBulkAction = (action: string) => {
-    toast.success(`Bulk ${action} completed`, {
-      description: 'All selected items have been updated'
-    })
+    toast.success(`Bulk ${action} completed`)
     setShowBulkActionsDialog(false)
   }
 

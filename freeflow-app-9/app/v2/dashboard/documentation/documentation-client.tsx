@@ -585,76 +585,55 @@ export default function DocumentationClient() {
   }
 
   const handleEditPage = (pageTitle: string) => {
-    toast.info('Edit Page', {
-      description: `Opening "${pageTitle}" for editing...`
+    toast.info('Edit Page'" for editing...`
     })
   }
 
   const handlePublishPage = (pageTitle: string) => {
-    toast.success('Page Published', {
-      description: `"${pageTitle}" is now live`
+    toast.success('Page Published'" is now live`
     })
   }
 
   const handleTranslatePage = (pageTitle: string) => {
-    toast.info('Translate Page', {
-      description: `Opening translation tools for "${pageTitle}"...`
+    toast.info('Translate Page'"...`
     })
   }
 
   const handleExportDocs = () => {
-    toast.success('Exporting Documentation', {
-      description: 'Documentation will be downloaded as PDF'
-    })
+    toast.success('Exporting Documentation')
   }
 
   const handleNewSpace = () => {
-    toast.info('New Space', {
-      description: 'Opening space creation wizard...'
-    })
+    toast.info('New Space')
     setShowNewSpace(true)
   }
 
   const handleImportFromGit = () => {
-    toast.info('Import from Git', {
-      description: 'Connecting to Git repository...'
-    })
+    toast.info('Import from Git')
   }
 
   const handleImportMarkdown = () => {
-    toast.info('Import Markdown', {
-      description: 'Opening file selector...'
-    })
+    toast.info('Import Markdown')
   }
 
   const handleNewChangelog = () => {
-    toast.info('New Changelog', {
-      description: 'Opening changelog editor...'
-    })
+    toast.info('New Changelog')
   }
 
   const handleSharePage = () => {
-    toast.info('Share Page', {
-      description: 'Generating share link...'
-    })
+    toast.info('Share Page')
   }
 
   const handleLikePage = () => {
-    toast.success('Page Liked', {
-      description: 'Thanks for your feedback!'
-    })
+    toast.success('Page Liked')
   }
 
   const handleViewComments = () => {
-    toast.info('Comments', {
-      description: 'Loading comments...'
-    })
+    toast.info('Comments')
   }
 
   const handleCreateTemplate = () => {
-    toast.info('Create Template', {
-      description: 'Opening template editor...'
-    })
+    toast.info('Create Template')
   }
 
   const handleUseTemplate = (templateName: string) => {
@@ -671,81 +650,60 @@ export default function DocumentationClient() {
   }
 
   const handleEditChangelog = (changelogTitle: string) => {
-    toast.info('Edit Changelog', {
-      description: `Opening "${changelogTitle}" for editing...`
+    toast.info('Edit Changelog'" for editing...`
     })
   }
 
   const handleAddLanguage = () => {
-    toast.info('Add Language', {
-      description: 'Opening language configuration...'
-    })
+    toast.info('Add Language')
   }
 
   const handleManageLocale = (localeName: string) => {
-    toast.info('Manage Locale', {
-      description: `Opening settings for ${localeName}...`
+    toast.info('Manage Locale'...`
     })
   }
 
   const handleExportReport = () => {
-    toast.success('Export Report', {
-      description: 'Generating analytics report...'
-    })
+    toast.success('Export Report')
   }
 
   const handleExportConfig = () => {
-    toast.success('Export Config', {
-      description: 'Downloading configuration file...'
-    })
+    toast.success('Export Config')
   }
 
   const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Configure Integration', {
-      description: `Opening settings for ${integrationName}...`
+    toast.info('Configure Integration'...`
     })
   }
 
   const handleAddIntegration = () => {
-    toast.info('Add Integration', {
-      description: 'Opening integration marketplace...'
-    })
+    toast.info('Add Integration')
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated', {
-      description: 'New API key generated successfully'
-    })
+    toast.success('API Key Regenerated')
   }
 
   const handleExportAllData = () => {
-    toast.success('Export Data', {
-      description: 'Preparing complete documentation backup...'
-    })
+    toast.success('Export Data')
   }
 
   const handleDeleteAllDocs = () => {
-    toast.error('Delete All Documentation', {
-      description: 'This action requires confirmation'
-    })
+    toast.error('Delete All Documentation')
   }
 
   const handleViewVersion = (versionNumber: number) => {
-    toast.info('View Version', {
-      description: `Loading version ${versionNumber}...`
+    toast.info('View Version'...`
     })
   }
 
   const handleRestoreVersion = (versionNumber: number) => {
-    toast.success('Restore Version', {
-      description: `Restoring to version ${versionNumber}...`
+    toast.success('Restore Version'...`
     })
   }
 
   const handleCreateSpaceSubmit = () => {
-    toast.success('Space Created', {
-      description: 'New documentation space created successfully'
-    })
+    toast.success('Space Created')
     setShowNewSpace(false)
   }
 
@@ -771,8 +729,7 @@ export default function DocumentationClient() {
     setQuickSearchQuery('')
     setQuickSearchResults([])
     setActiveTab('pages')
-    toast.success('Page Selected', {
-      description: `Navigated to "${page.title}"`
+    toast.success('Page Selected'"`
     })
   }
 
@@ -796,8 +753,7 @@ export default function DocumentationClient() {
     setIsExporting(false)
     setShowExportPdfDialog(false)
 
-    toast.success('Export Complete', {
-      description: `Successfully exported ${pagesToExport.length} pages as ${exportPdfOptions.format.toUpperCase()}`
+    toast.success('Export Complete' pages as ${exportPdfOptions.format.toUpperCase()}`
     })
 
     // Reset selection
@@ -2238,7 +2194,7 @@ export default function DocumentationClient() {
             <AIInsightsPanel
               insights={mockDocsAIInsights}
               title="Documentation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

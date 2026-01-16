@@ -591,7 +591,7 @@ export default function DataExportClient() {
       if (error) throw error
       setDataExports(data || [])
     } catch (error: any) {
-      toast.error('Failed to load exports', { description: error.message })
+      toast.error('Failed to load exports')
     } finally {
       setLoading(false)
     }
@@ -669,11 +669,11 @@ export default function DataExportClient() {
         status: 'pending',
       })
       if (error) throw error
-      toast.success('Export created', { description: formData.export_name })
+      toast.success('Export created')
       setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to create export', { description: error.message })
+      toast.error('Failed to create export')
     }
   }
 
@@ -684,10 +684,10 @@ export default function DataExportClient() {
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export started', { description: `${exportName} is now running` })
+      toast.success('Export started' is now running` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to start export', { description: error.message })
+      toast.error('Failed to start export')
     }
   }
 
@@ -699,10 +699,10 @@ export default function DataExportClient() {
         .update({ status: 'scheduled', scheduled_at: scheduledAt })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export scheduled', { description: `${exportName} scheduled for 1 hour` })
+      toast.success('Export scheduled' scheduled for 1 hour` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to schedule export', { description: error.message })
+      toast.error('Failed to schedule export')
     }
   }
 
@@ -717,9 +717,9 @@ export default function DataExportClient() {
       if (data?.download_url) {
         window.open(data.download_url, '_blank')
       }
-      toast.success('Downloading export', { description: data?.export_name || 'File ready' })
+      toast.success('Downloading export')
     } catch (error: any) {
-      toast.error('Download failed', { description: error.message })
+      toast.error('Download failed')
     }
   }
 
@@ -730,10 +730,10 @@ export default function DataExportClient() {
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export deleted', { description: `${exportName} has been removed` })
+      toast.success('Export deleted' has been removed` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to delete export', { description: error.message })
+      toast.error('Failed to delete export')
     }
   }
 
@@ -744,10 +744,10 @@ export default function DataExportClient() {
         .update({ status: 'cancelled' })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export cancelled', { description: exportName })
+      toast.success('Export cancelled')
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to cancel export', { description: error.message })
+      toast.error('Failed to cancel export')
     }
   }
 
@@ -791,7 +791,7 @@ export default function DataExportClient() {
         }
       )
     } catch (error: any) {
-      toast.error('Failed to create pipeline', { description: error.message })
+      toast.error('Failed to create pipeline')
     }
   }
 
@@ -826,15 +826,14 @@ export default function DataExportClient() {
 
       setIsSyncing(false)
       setSyncProgress(100)
-      toast.success('All syncs completed successfully', {
-        description: `${totalPipelines} pipelines synced`
+      toast.success('All syncs completed successfully' pipelines synced`
       })
       setShowRunAllSyncsDialog(false)
       setSyncProgress(0)
     } catch (error: any) {
       setIsSyncing(false)
       setSyncProgress(0)
-      toast.error('Failed to run all syncs', { description: error.message })
+      toast.error('Failed to run all syncs')
     }
   }
 
@@ -1739,9 +1738,7 @@ export default function DataExportClient() {
 
   // Credential Configuration Handler
   const handleConfigureCredential = async (credName: string) => {
-    toast.info(`Opening credential configuration for ${credName}`, {
-      description: 'Manage your stored credentials securely'
-    })
+    toast.info(`Opening credential configuration for ${credName}`)
   }
 
   // Create Job Handler
@@ -2216,7 +2213,7 @@ export default function DataExportClient() {
                 { icon: Plus, label: 'New Pipeline', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowNewPipelineQuickDialog(true) },
                 { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowRunAllSyncsDialog(true) },
                 { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowPauseAllDialog(true) },
-                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Sync started', { description: 'Refreshing all pipeline data' }); fetchDataExports(); } },
+                { icon: RefreshCw, label: 'Sync', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Sync started'); fetchDataExports(); } },
                 { icon: GitBranch, label: 'Clone', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setShowCloneDialog(true) },
                 { icon: Download, label: 'Export', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowExportPipelinesDialog(true) },
                 { icon: History, label: 'History', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowPipelineHistoryDialog(true) },
@@ -3549,7 +3546,7 @@ export default function DataExportClient() {
             <AIInsightsPanel
               insights={mockDataExportAIInsights}
               title="Data Pipeline Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

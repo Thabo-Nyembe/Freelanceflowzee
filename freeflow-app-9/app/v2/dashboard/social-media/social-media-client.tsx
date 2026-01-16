@@ -542,7 +542,7 @@ export default function SocialMediaClient() {
   // Handlers
   const handleCreatePost = () => setShowCreatePostDialog(true)
   const handleSchedulePost = (n: string) => setShowScheduleDialog(true)
-  const handlePublishPost = (n: string) => toast.success('Published', { description: `"${n}" is live` })
+  const handlePublishPost = (n: string) => toast.success('Published'" is live` })
   const handleConnectAccount = (p: string) => setShowConnectAccountDialog(true)
   const handleExportAnalytics = () => setShowExportDialog(true)
   const handleGenerateCaption = () => {
@@ -629,7 +629,7 @@ export default function SocialMediaClient() {
               />
             </div>
             <Button variant="outline" size="icon" onClick={() => {
-              toast.info('Notifications', { description: '3 new social media updates' })
+              toast.info('Notifications')
             }}>
               <Bell className="w-4 h-4" />
             </Button>
@@ -1902,7 +1902,7 @@ export default function SocialMediaClient() {
             <AIInsightsPanel
               insights={mockSocialMediaAIInsights}
               title="Social Media Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

@@ -67,7 +67,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -271,7 +270,6 @@ const cvPortfolioQuickActions = [
 ]
 
 export default function CvPortfolioClient() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
   const [isLoading, setIsLoading] = useState(true)
@@ -615,24 +613,13 @@ export default function CvPortfolioClient() {
 
   const yearsOfExperience = calculateYearsOfExperience()
 
-  // A+++ LOAD CV PORTFOLIO DATA
   useEffect(() => {
     const loadCVPortfolioData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
-      try {
-        logger.info('Loading CV portfolio data', {
-          userId,
-          hasProjects: projects.length > 0,
-          hasSkills: skills.length > 0,
-          hasExperience: experience.length > 0
-        })
-
-        setIsLoading(true)
+      try {        setIsLoading(true)
         setError(null)
 
         // Load from database
@@ -689,25 +676,7 @@ export default function CvPortfolioClient() {
             description: ed.description || ''
           }))
           setEducation(mappedEducation)
-        }
-
-        logger.info('Portfolio loaded from database', {
-          userId,
-          projectCount: projectsResult.data?.length || 0,
-          skillCount: skillsResult.data?.length || 0,
-          experienceCount: experienceResult.data?.length || 0,
-          educationCount: educationResult.data?.length || 0
-        })
-
-        const completeness = calculateCompleteness()
-        logger.info('CV portfolio loaded successfully', {
-          userId,
-          completenessScore: completeness,
-          projectCount: projects.length,
-          skillCount: skills.length,
-          experienceCount: experience.length,
-          yearsOfExperience: calculateYearsOfExperience()
-        })
+        }        const completeness = calculateCompleteness()        })
 
         setIsLoading(false)
         announce('CV portfolio loaded successfully', 'polite')
@@ -761,17 +730,8 @@ export default function CvPortfolioClient() {
 
     setProjects(prev => [...prev, newProject])
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Project added', {
-      projectId: newProject.id,
-      projectTitle: title,
-      technologiesCount: technologies.length,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddProjectDialog(false)
-    toast.success('Project Added!', {
-      description: `"${title}" added to portfolio (CV ${newCompleteness}% complete)`
+    const newCompleteness = calculateCompleteness()    setShowAddProjectDialog(false)
+    toast.success('Project Added!'" added to portfolio (CV ${newCompleteness}% complete)`
     })
   }
 
@@ -811,19 +771,9 @@ export default function CvPortfolioClient() {
             link: link || p.link
           }
         : p
-    ))
-
-    logger.info('Project updated', {
-      projectId: editingProject.id,
-      oldTitle: editingProject.title,
-      newTitle: title,
-      technologiesCount: technologies.length
-    })
-
-    setShowEditProjectDialog(false)
+    ))    setShowEditProjectDialog(false)
     setEditingProject(null)
-    toast.success('Project Updated!', {
-      description: `"${title}" has been updated`
+    toast.success('Project Updated!'" has been updated`
     })
   }
 
@@ -851,23 +801,12 @@ export default function CvPortfolioClient() {
 
       setProjects(prev => prev.filter(p => p.id !== projectToDelete))
 
-      const newCompleteness = calculateCompleteness()
-      logger.info('Project deleted', {
-        projectId: projectToDelete,
-        projectTitle: project.title,
-        remainingProjects: projects.length - 1,
-        completenessScore: newCompleteness
-      })
-
-      toast.success('Project Deleted', {
-        description: `"${project.title}" removed from portfolio`
+      const newCompleteness = calculateCompleteness()      toast.success('Project Deleted'" removed from portfolio`
       })
       announce(`Project ${project.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
-      toast.error('Failed to delete project', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete project')
     } finally {
       setIsDeleting(false)
       setShowDeleteProjectDialog(false)
@@ -875,14 +814,7 @@ export default function CvPortfolioClient() {
     }
   }
 
-  const handleViewProject = (project: Project) => {
-    logger.info('Viewing project details', {
-      projectId: project.id,
-      projectTitle: project.title,
-      status: project.status
-    })
-
-    setViewingProject(project)
+  const handleViewProject = (project: Project) => {    setViewingProject(project)
     setShowViewProjectDialog(true)
   }
 
@@ -906,7 +838,7 @@ export default function CvPortfolioClient() {
     const proficiency = parseInt(newSkillProficiency || '3')
 
     if (proficiency < 1 || proficiency > 5) {
-      toast.error('Invalid proficiency', { description: 'Level must be between 1-5' })
+      toast.error('Invalid proficiency')
       return
     }
 
@@ -933,26 +865,13 @@ export default function CvPortfolioClient() {
 
       setSkills(prev => [...prev, newSkill])
 
-      const newCompleteness = calculateCompleteness()
-      logger.info('Skill added', {
-        skillId: newSkill.id,
-        skillName: name,
-        category,
-        proficiency,
-        totalSkills: skills.length + 1,
-        completenessScore: newCompleteness
-      })
-
-      setShowAddSkillDialog(false)
-      toast.success('Skill Added!', {
-        description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
+      const newCompleteness = calculateCompleteness()      setShowAddSkillDialog(false)
+      toast.success('Skill Added!' (${proficiency}/5 stars) - ${skills.length + 1} skills total`
       })
       announce(`Skill ${name} added`, 'polite')
     } catch (error: any) {
       logger.error('Failed to add skill', { error: error.message })
-      toast.error('Failed to add skill', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to add skill')
     }
   }
 
@@ -969,23 +888,11 @@ export default function CvPortfolioClient() {
 
       setSkills(prev => prev.map(s =>
         s.id === skillId ? { ...s, proficiency: newProficiency } : s
-      ))
-
-      logger.info('Skill proficiency updated', {
-        skillId,
-        skillName: skill.name,
-        oldProficiency: skill.proficiency,
-        newProficiency
-      })
-
-      toast.success('Skill Updated!', {
-        description: `${skill.name}: ${newProficiency}/5 stars`
+      ))      toast.success('Skill Updated!': ${newProficiency}/5 stars`
       })
     } catch (error: any) {
       logger.error('Failed to update skill', { error: error.message, skillId })
-      toast.error('Failed to update skill', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to update skill')
     }
   }
 
@@ -1013,24 +920,12 @@ export default function CvPortfolioClient() {
 
       setSkills(prev => prev.filter(s => s.id !== skillToRemove))
 
-      const newCompleteness = calculateCompleteness()
-      logger.info('Skill removed', {
-        skillId: skillToRemove,
-        skillName: skill.name,
-        category: skill.category,
-        remainingSkills: skills.length - 1,
-        completenessScore: newCompleteness
-      })
-
-      toast.success('Skill Removed', {
-        description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
+      const newCompleteness = calculateCompleteness()      toast.success('Skill Removed' deleted (${skills.length - 1} skills remaining)`
       })
       announce(`Skill ${skill.name} removed`, 'polite')
     } catch (error: any) {
       logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
-      toast.error('Failed to remove skill', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to remove skill')
     } finally {
       setIsDeleting(false)
       setShowRemoveSkillDialog(false)
@@ -1092,19 +987,8 @@ export default function CvPortfolioClient() {
 
     setExperience(prev => [...prev, newExperience])
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Experience added', {
-      experienceId: newExperience.id,
-      company,
-      position,
-      descriptionLength: description.length,
-      technologiesCount: technologies.length,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddExperienceDialog(false)
-    toast.success('Experience Added!', {
-      description: `${position} at ${company} (CV ${newCompleteness}% complete)`
+    const newCompleteness = calculateCompleteness()    setShowAddExperienceDialog(false)
+    toast.success('Experience Added!' at ${company} (CV ${newCompleteness}% complete)`
     })
   }
 
@@ -1145,21 +1029,9 @@ export default function CvPortfolioClient() {
             description
           }
         : e
-    ))
-
-    logger.info('Experience updated', {
-      experienceId: editingExperience.id,
-      oldCompany: editingExperience.company,
-      newCompany: company,
-      oldPosition: editingExperience.position,
-      newPosition: position,
-      descriptionLength: description.length
-    })
-
-    setShowEditExperienceDialog(false)
+    ))    setShowEditExperienceDialog(false)
     setEditingExperience(null)
-    toast.success('Experience Updated!', {
-      description: `${position} at ${company}`
+    toast.success('Experience Updated!' at ${company}`
     })
   }
 
@@ -1188,26 +1060,12 @@ export default function CvPortfolioClient() {
       setExperience(prev => prev.filter(e => e.id !== experienceToDelete))
 
       const newCompleteness = calculateCompleteness()
-      const newYears = calculateYearsOfExperience()
-
-      logger.info('Experience deleted', {
-        experienceId: experienceToDelete,
-        company: exp.company,
-        position: exp.position,
-        remainingExperiences: experience.length - 1,
-        yearsOfExperience: newYears,
-        completenessScore: newCompleteness
-      })
-
-      toast.success('Experience Deleted', {
-        description: `${exp.position} at ${exp.company} removed`
+      const newYears = calculateYearsOfExperience()      toast.success('Experience Deleted' at ${exp.company} removed`
       })
       announce(`Experience at ${exp.company} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
-      toast.error('Failed to delete experience', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete experience')
     } finally {
       setIsDeleting(false)
       setShowDeleteExperienceDialog(false)
@@ -1263,18 +1121,8 @@ export default function CvPortfolioClient() {
 
     setEducation(prev => [...prev, newEducation])
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Education added', {
-      educationId: newEducation.id,
-      institution,
-      degree,
-      gpa: gpa || 'N/A',
-      completenessScore: newCompleteness
-    })
-
-    setShowAddEducationDialog(false)
-    toast.success('Education Added!', {
-      description: `${degree} from ${institution}`
+    const newCompleteness = calculateCompleteness()    setShowAddEducationDialog(false)
+    toast.success('Education Added!' from ${institution}`
     })
   }
 
@@ -1304,20 +1152,9 @@ export default function CvPortfolioClient() {
       e.id === editingEducation.id
         ? { ...e, institution, degree }
         : e
-    ))
-
-    logger.info('Education updated', {
-      educationId: editingEducation.id,
-      oldInstitution: editingEducation.institution,
-      newInstitution: institution,
-      oldDegree: editingEducation.degree,
-      newDegree: degree
-    })
-
-    setShowEditEducationDialog(false)
+    ))    setShowEditEducationDialog(false)
     setEditingEducation(null)
-    toast.success('Education Updated!', {
-      description: `${degree} from ${institution}`
+    toast.success('Education Updated!' from ${institution}`
     })
   }
 
@@ -1345,24 +1182,12 @@ export default function CvPortfolioClient() {
 
       setEducation(prev => prev.filter(e => e.id !== educationToDelete))
 
-      const newCompleteness = calculateCompleteness()
-      logger.info('Education deleted', {
-        educationId: educationToDelete,
-        institution: edu.institution,
-        degree: edu.degree,
-        remainingEducation: education.length - 1,
-        completenessScore: newCompleteness
-      })
-
-      toast.success('Education Deleted', {
-        description: `${edu.degree} removed from CV`
+      const newCompleteness = calculateCompleteness()      toast.success('Education Deleted' removed from CV`
       })
       announce(`Education ${edu.degree} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
-      toast.error('Failed to delete education', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete education')
     } finally {
       setIsDeleting(false)
       setShowDeleteEducationDialog(false)
@@ -1409,18 +1234,8 @@ export default function CvPortfolioClient() {
 
     setAchievements(prev => [...prev, newAchievement])
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Achievement added', {
-      achievementId: newAchievement.id,
-      title,
-      issuer,
-      date,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddAchievementDialog(false)
-    toast.success('Achievement Added!', {
-      description: `${title} - ${issuer}`
+    const newCompleteness = calculateCompleteness()    setShowAddAchievementDialog(false)
+    toast.success('Achievement Added!' - ${issuer}`
     })
   }
 
@@ -1450,20 +1265,9 @@ export default function CvPortfolioClient() {
       a.id === editingAchievement.id
         ? { ...a, title, issuer }
         : a
-    ))
-
-    logger.info('Achievement updated', {
-      achievementId: editingAchievement.id,
-      oldTitle: editingAchievement.title,
-      newTitle: title,
-      oldIssuer: editingAchievement.issuer,
-      newIssuer: issuer
-    })
-
-    setShowEditAchievementDialog(false)
+    ))    setShowEditAchievementDialog(false)
     setEditingAchievement(null)
-    toast.success('Achievement Updated!', {
-      description: `${title} - ${issuer}`
+    toast.success('Achievement Updated!' - ${issuer}`
     })
   }
 
@@ -1491,24 +1295,12 @@ export default function CvPortfolioClient() {
 
       setAchievements(prev => prev.filter(a => a.id !== achievementToDelete))
 
-      const newCompleteness = calculateCompleteness()
-      logger.info('Achievement deleted', {
-        achievementId: achievementToDelete,
-        title: achievement.title,
-        issuer: achievement.issuer,
-        remainingAchievements: achievements.length - 1,
-        completenessScore: newCompleteness
-      })
-
-      toast.success('Achievement Deleted', {
-        description: `${achievement.title} removed`
+      const newCompleteness = calculateCompleteness()      toast.success('Achievement Deleted' removed`
       })
       announce(`Achievement ${achievement.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
-      toast.error('Failed to delete achievement', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete achievement')
     } finally {
       setIsDeleting(false)
       setShowDeleteAchievementDialog(false)
@@ -1524,16 +1316,7 @@ export default function CvPortfolioClient() {
 
     setCvSections(prev => prev.map(s =>
       s.id === sectionId ? { ...s, visible: !s.visible } : s
-    ))
-
-    logger.info('CV section visibility toggled', {
-      sectionId,
-      sectionName: section.name,
-      newVisibility: !section.visible
-    })
-
-    toast.success('Section Updated', {
-      description: `${section.name} ${!section.visible ? 'shown' : 'hidden'}`
+    ))    toast.success('Section Updated' ${!section.visible ? 'shown' : 'hidden'}`
     })
   }
 
@@ -1551,17 +1334,7 @@ export default function CvPortfolioClient() {
       section.order = idx + 1
     })
 
-    setCvSections(newSections)
-
-    logger.info('CV section moved up', {
-      sectionId,
-      sectionName: temp.name,
-      oldPosition: index + 1,
-      newPosition: index
-    })
-
-    toast.success('Section Reordered', {
-      description: `${temp.name} moved up`
+    setCvSections(newSections)    toast.success('Section Reordered' moved up`
     })
   }
 
@@ -1579,17 +1352,7 @@ export default function CvPortfolioClient() {
       section.order = idx + 1
     })
 
-    setCvSections(newSections)
-
-    logger.info('CV section moved down', {
-      sectionId,
-      sectionName: temp.name,
-      oldPosition: index + 1,
-      newPosition: index + 2
-    })
-
-    toast.success('Section Reordered', {
-      description: `${temp.name} moved down`
+    setCvSections(newSections)    toast.success('Section Reordered' moved down`
     })
   }
 
@@ -1597,16 +1360,7 @@ export default function CvPortfolioClient() {
     const template = templates.find(t => t.id === templateId)
     if (!template) return
 
-    setSelectedTemplate(templateId)
-
-    logger.info('CV template changed', {
-      oldTemplate: selectedTemplate,
-      newTemplate: templateId,
-      templateName: template.name
-    })
-
-    toast.success('Template Changed!', {
-      description: `Now using ${template.name} template`
+    setSelectedTemplate(templateId)    toast.success('Template Changed!' template`
     })
   }
 
@@ -1634,18 +1388,7 @@ export default function CvPortfolioClient() {
 
     try {
       await toast.promise(
-        (async () => {
-          logger.info('Exporting CV', {
-            format,
-            completenessScore,
-            yearsOfExperience,
-            projectCount: projects.length,
-            skillCount: skills.length,
-            experienceCount: experience.length,
-            template: selectedTemplate
-          })
-
-          let blob: Blob
+        (async () => {          let blob: Blob
           let fileName: string
           let mimeType: string
 
@@ -1794,14 +1537,7 @@ export default function CvPortfolioClient() {
           document.body.appendChild(a)
           a.click()
           document.body.removeChild(a)
-          URL.revokeObjectURL(url)
-
-          logger.info('CV exported successfully', {
-            format,
-            fileName,
-            fileSize: blob.size
-          })
-        })(),
+          URL.revokeObjectURL(url)        })(),
         {
           loading: `Generating ${format} export...`,
           success: `CV exported as ${format}`,
@@ -1829,14 +1565,7 @@ export default function CvPortfolioClient() {
 
       try {
         const text = await file.text()
-        const data = JSON.parse(text)
-
-        logger.info('Importing CV data', {
-          fileName: file.name,
-          fileSize: file.size
-        })
-
-        // Validate and import
+        const data = JSON.parse(text)        // Validate and import
         if (data.profile) setProfileData(data.profile)
         if (data.experience) setExperience(data.experience)
         if (data.projects) setProjects(data.projects)
@@ -1846,18 +1575,7 @@ export default function CvPortfolioClient() {
         if (data.sections) setCvSections(data.sections)
         if (data.template) setSelectedTemplate(data.template)
 
-        const newCompleteness = calculateCompleteness()
-
-        logger.info('CV imported successfully', {
-          fileName: file.name,
-          projectCount: data.projects?.length || 0,
-          skillCount: data.skills?.length || 0,
-          experienceCount: data.experience?.length || 0,
-          completenessScore: newCompleteness
-        })
-
-        toast.success('CV Imported!', {
-          description: `Data loaded from ${file.name} (${newCompleteness}% complete)`
+        const newCompleteness = calculateCompleteness()        toast.success('CV Imported!' (${newCompleteness}% complete)`
         })
       } catch (error: any) {
         logger.error('Failed to import CV', {
@@ -1865,9 +1583,7 @@ export default function CvPortfolioClient() {
           fileName: file.name
         })
 
-        toast.error('Import Failed', {
-          description: 'Invalid CV file format'
-        })
+        toast.error('Import Failed')
       }
     }
 
@@ -1877,14 +1593,7 @@ export default function CvPortfolioClient() {
   const handleSharePortfolio = async () => {
     setIsSharing(true)
 
-    try {
-      logger.info('Generating share link', {
-        completenessScore,
-        projectCount: projects.length,
-        skillCount: skills.length
-      })
-
-      // Generate unique share ID
+    try {      // Generate unique share ID
       const shareId = `${profileData.name.toLowerCase().replace(/\s/g, '-')}-${Date.now().toString(36)}`
       const shareUrl = `${window.location.origin}/public/portfolio/${shareId}`
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -1896,40 +1605,19 @@ export default function CvPortfolioClient() {
 
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl)
-      }
-
-      logger.info('Share link generated', {
-        shareUrl,
-        expiresIn: '30 days'
-      })
-
-      toast.success('Share Link Generated!', {
-        description: 'Link copied to clipboard. Valid for 30 days.'
-      })
+      }      toast.success('Share Link Generated!')
     } catch (error: any) {
       logger.error('Failed to generate share link', {
         error: error.message
       })
 
-      toast.error('Share Failed', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Share Failed')
     } finally {
       setIsSharing(false)
     }
   }
 
-  const handleGenerateSummary = async () => {
-    logger.info('Generating AI summary', {
-      yearsOfExperience,
-      skillCount: skills.length,
-      projectCount: projects.length,
-      experienceCount: experience.length
-    })
-
-    toast.info('Generating Summary...', {
-      description: 'AI is analyzing your profile'
-    })
+  const handleGenerateSummary = async () => {    toast.info('Generating Summary...')
 
     // Generate summary based on actual portfolio data
     const technicalSkills = skills.filter(s => s.category === 'Technical').slice(0, 3).map(s => s.name)
@@ -1937,30 +1625,12 @@ export default function CvPortfolioClient() {
     const summary = `${profileData.title || 'Professional'} with ${yearsOfExperience}+ years of experience specializing in ${skillsText}. Proven track record of ${projects.length} successful projects and ${experience.length} professional roles. Expert in delivering innovative solutions with focus on quality and user experience.`
 
     // Update local state (profile bio is saved when portfolio settings are updated)
-    setProfileData(prev => ({ ...prev, bio: summary }))
-
-    logger.info('AI summary generated', {
-      summaryLength: summary.length,
-      wordCount: summary.split(' ').length
-    })
-
-    toast.success('Summary Generated!', {
-      description: `${summary.split(' ').length} words - Review and edit as needed`
+    setProfileData(prev => ({ ...prev, bio: summary }))    toast.success('Summary Generated!' words - Review and edit as needed`
     })
   }
 
   const handleTogglePreview = () => {
-    setPreviewMode(!previewMode)
-
-    logger.info('Preview mode toggled', {
-      previewMode: !previewMode,
-      template: selectedTemplate,
-      completenessScore
-    })
-
-    toast.info(previewMode ? 'Edit Mode' : 'Preview Mode', {
-      description: previewMode ? 'You can now edit your CV' : 'Viewing CV as it will appear'
-    })
+    setPreviewMode(!previewMode)    toast.info(previewMode ? 'Edit Mode' : 'Preview Mode')
   }
 
   // ==================== ADDITIONAL FEATURE HANDLERS ====================
@@ -1984,17 +1654,7 @@ export default function CvPortfolioClient() {
       newProjects[currentIndex + 1] = newProjects[currentIndex]
       newProjects[currentIndex] = temp
       setProjects(newProjects)
-    }
-
-    logger.info('Project reordered', {
-      projectId,
-      projectTitle: project.title,
-      direction,
-      newPosition: direction === 'up' ? currentIndex : currentIndex + 2
-    })
-
-    toast.success('Project Reordered', {
-      description: `${project.title} moved ${direction}`
+    }    toast.success('Project Reordered' moved ${direction}`
     })
   }
 
@@ -2044,17 +1704,7 @@ export default function CvPortfolioClient() {
         if (!response.ok) {
           logger.warn('Failed to persist reorder to server, but local state updated')
         }
-      }
-
-      logger.info('Project drag-drop reorder completed', {
-        projectId: draggedProjectId,
-        projectTitle: draggedProject.title,
-        fromIndex: draggedIndex,
-        toIndex: targetIndex
-      })
-
-      toast.success('Projects Reordered', {
-        description: `${draggedProject.title} moved to position ${targetIndex + 1}`
+      }      toast.success('Projects Reordered' moved to position ${targetIndex + 1}`
       })
     } catch (error: any) {
       logger.error('Failed to persist reorder', { error: error.message })
@@ -2090,15 +1740,7 @@ export default function CvPortfolioClient() {
           // Update local state
           setProjects(prev => prev.map(p =>
             p.id === projectId ? { ...p, status: newStatus } : p
-          ))
-
-          logger.info('Project featured status toggled', {
-            projectId,
-            projectTitle: project.title,
-            oldStatus: project.status,
-            newStatus
-          })
-        })(),
+          ))        })(),
         {
           loading: `${isFeatured ? 'Removing from featured...' : 'Adding to featured...'}`,
           success: `${project.title} ${isFeatured ? 'removed from featured' : 'is now featured'}`,
@@ -2127,9 +1769,7 @@ export default function CvPortfolioClient() {
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File too large', {
-          description: 'Maximum file size is 5MB'
-        })
+        toast.error('File too large')
         return
       }
 
@@ -2183,16 +1823,7 @@ export default function CvPortfolioClient() {
             }
 
             clearInterval(progressInterval)
-            setUploadProgress(100)
-
-            logger.info('Project image uploaded successfully', {
-              projectId,
-              projectTitle: project.title,
-              fileName: file.name,
-              fileSize: file.size,
-              fileType: file.type
-            })
-          })(),
+            setUploadProgress(100)          })(),
           {
             loading: `Uploading ${file.name}...`,
             success: `Image uploaded to ${project.title}`,
@@ -2227,16 +1858,7 @@ export default function CvPortfolioClient() {
       dateAdded: new Date().toISOString()
     }
 
-    setProjects(prev => [...prev, duplicated])
-
-    logger.info('Project duplicated', {
-      originalId: projectId,
-      newId: duplicated.id,
-      title: duplicated.title
-    })
-
-    toast.success('Project Duplicated!', {
-      description: `Copy of "${project.title}" created`
+    setProjects(prev => [...prev, duplicated])    toast.success('Project Duplicated!'" created`
     })
   }
 
@@ -2263,22 +1885,12 @@ export default function CvPortfolioClient() {
         }
       }
 
-      setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
-
-      logger.info('Bulk project delete', {
-        count: projectsToDelete.length,
-        projectIds: projectsToDelete
-      })
-
-      toast.success('Projects Deleted', {
-        description: `${projectsToDelete.length} projects removed`
+      setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))      toast.success('Projects Deleted' projects removed`
       })
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
-      toast.error('Failed to delete projects', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete projects')
     } finally {
       setIsDeleting(false)
       setShowBulkDeleteProjectsDialog(false)
@@ -2286,43 +1898,19 @@ export default function CvPortfolioClient() {
     }
   }
 
-  const handleBulkFeatureProjects = (projectIds: number[]) => {
-    logger.info('Bulk feature projects', {
-      count: projectIds.length,
-      projectIds
-    })
-
-    toast.success('Projects Featured!', {
-      description: `${projectIds.length} projects marked as featured`
+  const handleBulkFeatureProjects = (projectIds: number[]) => {    toast.success('Projects Featured!' projects marked as featured`
     })
   }
 
   // View Public Portfolio
   const handleViewPublicPortfolio = () => {
-    const publicUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`
-
-    logger.info('Viewing public portfolio', {
-      publicUrl
-    })
-
-    toast.info('Public Portfolio', {
-      description: 'Opening in new tab...'
-    })
+    const publicUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`    toast.info('Public Portfolio')
 
     window.open(publicUrl, '_blank')
   }
 
   // Download Analytics Report
-  const handleDownloadAnalytics = async () => {
-    logger.info('Downloading analytics report', {
-      projectCount: projects.length,
-      skillCount: skills.length,
-      experienceCount: experience.length
-    })
-
-    toast.info('Generating Analytics Report...', {
-      description: 'Compiling your portfolio data'
-    })
+  const handleDownloadAnalytics = async () => {    toast.info('Generating Analytics Report...')
 
     // Generate report from actual portfolio data
     const reportData = {
@@ -2353,15 +1941,7 @@ export default function CvPortfolioClient() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    logger.info('Analytics report downloaded', {
-      fileName: a.download
-    })
-
-    toast.success('Analytics Downloaded!', {
-      description: a.download
-    })
+    URL.revokeObjectURL(url)    toast.success('Analytics Downloaded!')
   }
 
   // Copy Portfolio Link
@@ -2371,23 +1951,13 @@ export default function CvPortfolioClient() {
     try {
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(publicUrl)
-      }
-
-      logger.info('Portfolio link copied', {
-        publicUrl
-      })
-
-      toast.success('Link Copied!', {
-        description: 'Portfolio link copied to clipboard'
-      })
+      }      toast.success('Link Copied!')
     } catch (error: any) {
       logger.error('Failed to copy link', {
         error: error.message
       })
 
-      toast.error('Copy Failed', {
-        description: 'Please copy manually'
-      })
+      toast.error('Copy Failed')
     }
   }
 
@@ -2410,30 +1980,14 @@ export default function CvPortfolioClient() {
       s.id === sectionId ? { ...s, visible: !s.visible } : s
     ))
 
-    const newVisibility = !section.visible
-
-    logger.info('Section visibility toggled', {
-      section: type,
-      sectionId,
-      oldVisibility: section.visible,
-      newVisibility
-    })
-
-    toast.success('Section Updated', {
-      description: `${section.name} is now ${newVisibility ? 'visible' : 'hidden'} on your CV`
+    const newVisibility = !section.visible    toast.success('Section Updated' is now ${newVisibility ? 'visible' : 'hidden'} on your CV`
     })
 
     announce(`${section.name} ${newVisibility ? 'shown' : 'hidden'}`, 'polite')
   }
 
   // Send Test Email
-  const handleSendTestEmail = () => {
-    logger.info('Sending test portfolio email', {
-      recipient: profileData.email
-    })
-
-    toast.info('Sending Test Email...', {
-      description: `Test email will be sent to ${profileData.email}`
+  const handleSendTestEmail = () => {    toast.info('Sending Test Email...'`
     })
   }
 
@@ -2446,12 +2000,7 @@ export default function CvPortfolioClient() {
     setEditProfileEmail(profileData.email)
     setEditProfilePhone(profileData.phone)
     setEditProfileWebsite(profileData.website)
-    setShowEditProfileDialog(true)
-
-    logger.info('Opening profile editor', {
-      profileName: profileData.name
-    })
-  }
+    setShowEditProfileDialog(true)  }
 
   const confirmEditProfile = async () => {
     if (!editProfileName.trim()) {
@@ -2488,15 +2037,7 @@ export default function CvPortfolioClient() {
             }
           }
 
-          setProfileData(prev => ({ ...prev, ...updatedProfile }))
-
-          logger.info('Profile updated', {
-            oldName: profileData.name,
-            newName: updatedProfile.name,
-            email: updatedProfile.email
-          })
-
-          setShowEditProfileDialog(false)
+          setProfileData(prev => ({ ...prev, ...updatedProfile }))          setShowEditProfileDialog(false)
         })(),
         {
           loading: 'Updating profile...',
@@ -2520,9 +2061,7 @@ export default function CvPortfolioClient() {
 
       // Validate file size (max 2MB for avatar)
       if (file.size > 2 * 1024 * 1024) {
-        toast.error('File too large', {
-          description: 'Maximum avatar size is 2MB'
-        })
+        toast.error('File too large')
         return
       }
 
@@ -2567,14 +2106,7 @@ export default function CvPortfolioClient() {
             }
 
             clearInterval(progressInterval)
-            setUploadProgress(100)
-
-            logger.info('Avatar uploaded successfully', {
-              fileName: file.name,
-              fileSize: file.size,
-              fileType: file.type
-            })
-          })(),
+            setUploadProgress(100)          })(),
           {
             loading: 'Uploading avatar...',
             success: 'Avatar updated successfully',
@@ -2607,30 +2139,12 @@ export default function CvPortfolioClient() {
     const wordCount = newBio.split(' ').length
     const charCount = newBio.length
 
-    setProfileData(prev => ({ ...prev, bio: newBio }))
-
-    logger.info('Bio updated', {
-      wordCount,
-      charCount,
-      previousLength: profileData.bio.length
-    })
-
-    setShowUpdateBioDialog(false)
-    toast.success('Bio Updated!', {
-      description: `${wordCount} words, ${charCount} characters`
+    setProfileData(prev => ({ ...prev, bio: newBio }))    setShowUpdateBioDialog(false)
+    toast.success('Bio Updated!' words, ${charCount} characters`
     })
   }
 
-  const handlePrintCV = () => {
-    logger.info('Printing CV', {
-      template: selectedTemplate,
-      completenessScore,
-      visibleSections: cvSections.filter(s => s.visible).length
-    })
-
-    toast.info('Print CV', {
-      description: 'Opening print dialog...'
-    })
+  const handlePrintCV = () => {    toast.info('Print CV')
 
     // In production: window.print()
   }
@@ -2654,7 +2168,6 @@ export default function CvPortfolioClient() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark p-6">
@@ -2688,7 +2201,6 @@ export default function CvPortfolioClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark p-6">

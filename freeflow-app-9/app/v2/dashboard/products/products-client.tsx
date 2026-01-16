@@ -428,28 +428,21 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
   // Handlers
   const handleCreateProduct = () => {
-    toast.info('Create Product', {
-      description: 'Opening product form...'
-    })
+    toast.info('Create Product')
     setShowCreateProduct(true)
   }
 
   const handleCreateCoupon = () => {
-    toast.info('Create Coupon', {
-      description: 'Opening coupon form...'
-    })
+    toast.info('Create Coupon')
     setShowCreateCoupon(true)
   }
 
   const handleExportProducts = () => {
-    toast.success('Export started', {
-      description: 'Your product catalog is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleArchiveProduct = (product: StripeProduct) => {
-    toast.success('Product archived', {
-      description: `${product.name} has been archived`
+    toast.success('Product archived' has been archived`
     })
   }
 
@@ -1786,7 +1779,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <AIInsightsPanel
               insights={mockProductsAIInsights}
               title="Product Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -1987,8 +1980,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   <Button variant="outline" className="flex-1" onClick={() => {
                     if (selectedCoupon) {
                       navigator.clipboard.writeText(selectedCoupon.name)
-                      toast.success('Coupon code copied!', {
-                        description: `${selectedCoupon.name} has been copied to clipboard`
+                      toast.success('Coupon code copied!' has been copied to clipboard`
                       })
                     }
                   }}>
@@ -2083,8 +2075,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 className="flex-1 bg-violet-600 hover:bg-violet-700"
                 disabled={!quickProductName || !quickProductPrice}
                 onClick={() => {
-                  toast.success('Product created successfully', {
-                    description: `${quickProductName} has been created as a draft`
+                  toast.success('Product created successfully' has been created as a draft`
                   })
                   setShowQuickNewProduct(false)
                   setQuickProductName('')
@@ -2207,8 +2198,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 disabled={!quickPricingProduct || !quickNewPrice}
                 onClick={() => {
                   const productName = mockProducts.find(p => p.id === quickPricingProduct)?.name
-                  toast.success('Pricing updated successfully', {
-                    description: `New ${quickPricingType === 'recurring' ? quickBillingInterval + 'ly' : 'one-time'} price of $${quickNewPrice} set for ${productName}`
+                  toast.success('Pricing updated successfully' price of $${quickNewPrice} set for ${productName}`
                   })
                   setShowQuickUpdatePricing(false)
                   setQuickPricingProduct('')
@@ -2379,8 +2369,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Export started', {
-                  description: `Exporting catalog as ${exportFormat.toUpperCase()}...`
+                toast.success('Export started'...`
                 })
                 setShowExportDialog(false)
               }}>
@@ -2434,8 +2423,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" disabled={!importFile} onClick={() => {
-                toast.success('Import started', {
-                  description: `Importing products from ${importFile?.name}...`
+                toast.success('Import started'...`
                 })
                 setShowImportDialog(false)
                 setImportFile(null)
@@ -2510,8 +2498,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Tax rate created', {
-                  description: `${newTaxRate.displayName} (${newTaxRate.percentage}%) has been created`
+                toast.success('Tax rate created' (${newTaxRate.percentage}%) has been created`
                 })
                 setShowAddTaxRateDialog(false)
                 setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
@@ -2582,8 +2569,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Tax rate updated', {
-                  description: `${newTaxRate.displayName} has been updated`
+                toast.success('Tax rate updated' has been updated`
                 })
                 setShowEditTaxRateDialog(false)
               }}>
@@ -2643,8 +2629,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Price updated', {
-                  description: `${editedPrice.nickname} price updated to $${editedPrice.unitAmount}`
+                toast.success('Price updated' price updated to $${editedPrice.unitAmount}`
                 })
                 setShowEditPriceDialog(false)
               }}>
@@ -2752,8 +2737,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Product updated', {
-                  description: `${editedProduct.name} has been updated`
+                toast.success('Product updated' has been updated`
                 })
                 setShowEditProductDialog(false)
               }}>
@@ -2791,9 +2775,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Product duplicated', {
-                  description: 'A copy has been created as a draft'
-                })
+                toast.success('Product duplicated')
                 setShowDuplicateProductDialog(false)
               }}>
                 <Copy className="w-4 h-4 mr-2" />
@@ -2832,8 +2814,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Product archived', {
-                  description: `${selectedProduct?.name || selectedActionProduct?.name} has been archived`
+                toast.success('Product archived' has been archived`
                 })
                 setShowArchiveProductDialog(false)
                 setSelectedProduct(null)
@@ -2869,8 +2850,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Coupon deleted', {
-                  description: `${selectedCoupon?.name} has been deleted`
+                toast.success('Coupon deleted' has been deleted`
                 })
                 setShowDeleteCouponDialog(false)
                 setSelectedCoupon(null)
@@ -2928,8 +2908,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Coupon updated', {
-                  description: `${editedCoupon.name} has been updated`
+                toast.success('Coupon updated' has been updated`
                 })
                 setShowEditCouponDialog(false)
               }}>
@@ -2964,7 +2943,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <Button variant="ghost" size="sm" onClick={() => {
                         const newRate = prompt(`Edit shipping rate for ${zone}:`, '$9.99')
                         if (newRate && newRate.trim()) {
-                          toast.success(`Updated ${zone} rate`, { description: `New rate: ${newRate}` })
+                          toast.success(`Updated ${zone} rate`` })
                         }
                       }}>
                         <Edit className="w-4 h-4" />
@@ -2976,7 +2955,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <Button variant="outline" className="w-full gap-2" onClick={() => {
                 const zoneName = prompt('Enter shipping zone name:', 'New Zone')
                 if (zoneName && zoneName.trim()) {
-                  toast.success('Shipping zone added', { description: zoneName })
+                  toast.success('Shipping zone added')
                 }
               }}>
                 <Plus className="w-4 h-4" />
@@ -3060,9 +3039,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Connecting to Shopify...', {
-                  description: 'Please wait while we verify your credentials'
-                })
+                toast.success('Connecting to Shopify...')
                 setShowConnectShopifyDialog(false)
               }}>
                 Connect
@@ -3101,9 +3078,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Connecting to Amazon...', {
-                  description: 'Please wait while we verify your credentials'
-                })
+                toast.success('Connecting to Amazon...')
                 setShowConnectAmazonDialog(false)
               }}>
                 Connect
@@ -3195,9 +3170,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Webhook configured', {
-                  description: 'Your webhook endpoint has been saved'
-                })
+                toast.success('Webhook configured')
                 setShowWebhookConfigDialog(false)
               }}>
                 Save Configuration
@@ -3250,9 +3223,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.success('Backup created', {
-                  description: 'Your catalog backup has been created successfully'
-                })
+                toast.success('Backup created')
                 setShowBackupDialog(false)
               }}>
                 <Archive className="w-4 h-4 mr-2" />
@@ -3299,9 +3270,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success('Sync started', {
-                  description: 'Synchronizing with connected services...'
-                })
+                toast.success('Sync started')
                 setShowSyncDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />

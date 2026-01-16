@@ -732,17 +732,14 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release created successfully', {
-        description: `${formData.release_name} (${formData.version}) has been created`
+      toast.success('Release created successfully' (${formData.version}) has been created`
       })
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchReleases()
     } catch (error: any) {
       console.error('Error creating release:', error)
-      toast.error('Failed to create release', {
-        description: error.message
-      })
+      toast.error('Failed to create release')
     } finally {
       setIsSaving(false)
     }
@@ -781,8 +778,7 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release updated successfully', {
-        description: `${formData.release_name} has been updated`
+      toast.success('Release updated successfully' has been updated`
       })
       setShowEditDialog(false)
       setReleaseToEdit(null)
@@ -790,9 +786,7 @@ export default function ReleasesClient() {
       fetchReleases()
     } catch (error: any) {
       console.error('Error updating release:', error)
-      toast.error('Failed to update release', {
-        description: error.message
-      })
+      toast.error('Failed to update release')
     } finally {
       setIsSaving(false)
     }
@@ -818,17 +812,14 @@ export default function ReleasesClient() {
 
       if (error) throw error
 
-      toast.success('Release deleted successfully', {
-        description: `${releaseToDelete.release_name} has been deleted`
+      toast.success('Release deleted successfully' has been deleted`
       })
       setShowDeleteDialog(false)
       setReleaseToDelete(null)
       fetchReleases()
     } catch (error: any) {
       console.error('Error deleting release:', error)
-      toast.error('Failed to delete release', {
-        description: error.message
-      })
+      toast.error('Failed to delete release')
     } finally {
       setIsSaving(false)
     }
@@ -876,8 +867,7 @@ export default function ReleasesClient() {
 
       if (releaseError) throw releaseError
 
-      toast.success('Deployment started', {
-        description: `${releaseToDeploy.release_name} deployment is in progress`
+      toast.success('Deployment started' deployment is in progress`
       })
       setShowDeployDialog(false)
       setReleaseToDeploy(null)
@@ -885,9 +875,7 @@ export default function ReleasesClient() {
       fetchDeployments()
     } catch (error: any) {
       console.error('Error deploying release:', error)
-      toast.error('Failed to deploy release', {
-        description: error.message
-      })
+      toast.error('Failed to deploy release')
     } finally {
       setIsDeploying(false)
     }
@@ -935,8 +923,7 @@ export default function ReleasesClient() {
 
       if (releaseError) throw releaseError
 
-      toast.success('Rollback initiated', {
-        description: `Rolling back ${releaseToRollback.version} to ${targetVersion}`
+      toast.success('Rollback initiated' to ${targetVersion}`
       })
       setShowRollbackDialog(false)
       setReleaseToRollback(null)
@@ -946,9 +933,7 @@ export default function ReleasesClient() {
       fetchRollbacks()
     } catch (error: any) {
       console.error('Error rolling back release:', error)
-      toast.error('Failed to rollback release', {
-        description: error.message
-      })
+      toast.error('Failed to rollback release')
     } finally {
       setIsRollingBack(false)
     }
@@ -1005,9 +990,7 @@ export default function ReleasesClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export successful', {
-        description: 'Release history has been downloaded'
-      })
+      toast.success('Export successful')
     } catch (error) {
       toast.error('Failed to export releases')
     }
@@ -1188,9 +1171,7 @@ export default function ReleasesClient() {
               />
             </div>
             <Button variant="outline" size="icon" onClick={() => {
-              toast.info('Filter Options', {
-                description: 'Filter by: Status (Draft, Beta, Stable), Type (Major, Minor, Patch), Environment (Dev, Staging, Prod)'
-              })
+              toast.info('Filter Options')
             }}>
               <Filter className="w-4 h-4" />
             </Button>
@@ -1315,13 +1296,13 @@ export default function ReleasesClient() {
                 { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
                   const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
                   if (scheduledRelease) openDeployDialog(scheduledRelease)
-                  else toast.info('No releases to deploy', { description: 'Create a new release first' })
+                  else toast.info('No releases to deploy')
                 }},
                 { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple', onClick: () => setShowCreateDialog(true) },
                 { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange', onClick: () => {
                   const deployedRelease = releases.find(r => r.status === 'deployed')
                   if (deployedRelease) openRollbackDialog(deployedRelease)
-                  else toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                  else toast.info('No deployed releases')
                 }},
                 { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue', onClick: () => setActiveTab('assets') },
                 { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan', onClick: () => setActiveTab('analytics') }
@@ -1598,7 +1579,7 @@ export default function ReleasesClient() {
                       if (scheduledRelease) {
                         openDeployDialog(scheduledRelease)
                       } else {
-                        toast.info('No releases to deploy', { description: 'Create a new release or schedule one first' })
+                        toast.info('No releases to deploy')
                       }
                     }}
                   >
@@ -1685,16 +1666,12 @@ export default function ReleasesClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.info('Active Branches', {
-                      description: 'main, develop, feature/v2-ui, feature/api-update, hotfix/security-patch'
-                    })
+                    toast.info('Active Branches')
                   }}>
                     <GitBranch className="w-4 h-4 mr-2" />Branches
                   </Button>
                   <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => {
-                    toast.info('Pull Requests', {
-                      description: '12 open PRs: 4 ready for review, 3 in progress, 5 drafts'
-                    })
+                    toast.info('Pull Requests')
                   }}>
                     <GitPullRequest className="w-4 h-4 mr-2" />Pull Requests
                   </Button>
@@ -1769,7 +1746,7 @@ export default function ReleasesClient() {
                     if (deployedRelease) {
                       openRollbackDialog(deployedRelease)
                     } else {
-                      toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                      toast.info('No deployed releases')
                     }
                   }}
                 >
@@ -2459,7 +2436,7 @@ export default function ReleasesClient() {
             <AIInsightsPanel
               insights={mockReleasesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2515,9 +2492,7 @@ export default function ReleasesClient() {
                     </div>
                   </div>
                   <Button variant="outline" size="icon" onClick={() => {
-                    toast.info('More Options', {
-                      description: 'Available: Edit release, Clone release, Archive, Export changelog, Delete'
-                    })
+                    toast.info('More Options')
                   }}>
                     <MoreVertical className="w-4 h-4" />
                   </Button>

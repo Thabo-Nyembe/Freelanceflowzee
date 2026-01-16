@@ -735,8 +735,7 @@ export default function HelpDocsClient() {
   }
 
   const handleBookmarkArticle = (articleTitle: string) => {
-    toast.success('Article bookmarked', {
-      description: `"${articleTitle}" saved to bookmarks`
+    toast.success('Article bookmarked'" saved to bookmarks`
     })
   }
 
@@ -1084,12 +1083,12 @@ export default function HelpDocsClient() {
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
                     const categoryName = prompt('Enter category name:', 'New Category')
                     if (categoryName && categoryName.trim()) {
-                      toast.success('Category created', { description: categoryName })
+                      toast.success('Category created')
                     }
                   }}>
                     <Plus className="w-4 h-4 mr-2" />Add Category
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => toast.info('Structure Manager', { description: 'Opening category structure editor...' })}>
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => toast.info('Structure Manager')}>
                     <Settings className="w-4 h-4 mr-2" />Manage Structure
                   </Button>
                 </div>
@@ -2263,7 +2262,7 @@ export default function HelpDocsClient() {
             <AIInsightsPanel
               insights={mockHelpDocsAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2329,8 +2328,8 @@ export default function HelpDocsClient() {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Was this article helpful?</h4>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" onClick={() => toast.success('Thanks for your feedback!', { description: 'Your vote helps us improve our documentation' })}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
-                    <Button variant="outline" onClick={() => toast.info('Feedback recorded', { description: 'We\'ll work on improving this article' })}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => toast.success('Thanks for your feedback!')}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => toast.info('Feedback recorded')}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
                   </div>
                 </div>
 

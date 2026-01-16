@@ -553,32 +553,25 @@ export default function CollaborationClient() {
 
   // Handlers
   const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening project wizard...'
-    })
+    toast.info('Create Project')
   }
 
   const handleInviteMember = (email: string) => {
-    toast.success('Invitation sent', {
-      description: `Invite sent to ${email}`
+    toast.success('Invitation sent'`
     })
   }
 
   const handleShareFile = (fileName: string) => {
-    toast.success('File shared', {
-      description: `${fileName} shared with team`
+    toast.success('File shared' shared with team`
     })
   }
 
   const handleStartMeeting = () => {
-    toast.info('Starting meeting', {
-      description: 'Video call is being initialized'
-    })
+    toast.info('Starting meeting')
   }
 
   const handleLeaveProject = (projectName: string) => {
-    toast.info('Left project', {
-      description: `You have left ${projectName}`
+    toast.info('Left project'`
     })
   }
 
@@ -1611,8 +1604,7 @@ export default function CollaborationClient() {
                                 style={{ backgroundColor: color }}
                                 onClick={() => {
                                   setSelectedWorkspaceColor(color);
-                                  toast.success('Workspace color updated', {
-                                    description: `Color changed to ${color}`
+                                  toast.success('Workspace color updated'`
                                   });
                                 }}
                               />
@@ -1880,8 +1872,7 @@ export default function CollaborationClient() {
                               style={{ backgroundColor: color }}
                               onClick={() => {
                                 setSelectedAccentColor(color);
-                                toast.success('Accent color updated', {
-                                  description: `Theme accent changed to ${color}`
+                                toast.success('Accent color updated'`
                                 });
                               }}
                             />
@@ -1929,7 +1920,7 @@ export default function CollaborationClient() {
             <AIInsightsPanel
               insights={mockCollabAIInsights}
               title="Collaboration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2117,7 +2108,7 @@ export default function CollaborationClient() {
                     }}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                    toast.success('Action added: Post to channel', { description: 'You can add more actions to this automation' });
+                    toast.success('Action added: Post to channel');
                   }}><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>
               </div>
@@ -2978,14 +2969,14 @@ export default function CollaborationClient() {
                     Copy Share Link
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
-                    toast.info('File renaming', { description: 'Opening rename dialog...' });
+                    toast.info('File renaming');
                     setShowFileOptionsDialog(false);
                   }}>
                     <FileText className="h-4 w-4 mr-2" />
                     Rename File
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
-                    toast.info('Move file', { description: 'Opening folder picker...' });
+                    toast.info('Move file');
                     setShowFileOptionsDialog(false);
                   }}>
                     <FolderOpen className="h-4 w-4 mr-2" />

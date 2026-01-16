@@ -589,7 +589,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Sending broadcast', { description: `"${broadcastTitle}" is being sent...` })
+      toast.success('Sending broadcast'" is being sent...` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -612,7 +612,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast scheduled', { description: `"${broadcastTitle}" has been scheduled` })
+      toast.success('Broadcast scheduled'" has been scheduled` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -634,7 +634,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.info('Broadcast paused', { description: `"${broadcastTitle}" delivery paused` })
+      toast.info('Broadcast paused'" delivery paused` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -667,7 +667,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast duplicated', { description: `Copy of "${broadcast.title}" created` })
+      toast.success('Broadcast duplicated'" created` })
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -2189,7 +2189,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <AIInsightsPanel
               insights={broadcastsAIInsights}
               title="Broadcast Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2442,7 +2442,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 input.accept = '.csv'
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0]
-                  if (file) toast.success(`Selected: ${file.name}`, { description: 'Ready to import' })
+                  if (file) toast.success(`Selected: ${file.name}`)
                 }
                 input.click()
               }}>Browse Files</Button>
@@ -2766,7 +2766,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowManageSubscriptionDialog(false)}>Close</Button>
               <Button variant="outline" onClick={() => {
-                toast.success('Payment form ready', { description: 'Update your card details' })
+                toast.success('Payment form ready')
               }}>Update Payment</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {

@@ -426,7 +426,7 @@ const mockSalesQuickActions = [
     action: () => {
       const taskTitle = prompt('Enter task title:')
       if (taskTitle) {
-        toast.success('Task created', { description: `Task "${taskTitle}" has been added to your task list` })
+        toast.success('Task created'" has been added to your task list` })
       } else {
         toast.error('Task creation cancelled')
       }
@@ -572,7 +572,7 @@ export default function SalesClient() {
   // Real Supabase Handlers
   const handleCreateDeal = async () => {
     if (!dealForm.title) {
-      toast.error('Validation Error', { description: 'Deal title is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -594,11 +594,11 @@ export default function SalesClient() {
         tags: [],
         metadata: {},
       })
-      toast.success('Deal Created', { description: `${dealForm.title} has been added to your pipeline` })
+      toast.success('Deal Created' has been added to your pipeline` })
       setShowCreateDealDialog(false)
       setDealForm(defaultDealForm)
     } catch (error: any) {
-      toast.error('Failed to create deal', { description: error.message })
+      toast.error('Failed to create deal')
     } finally {
       setIsSubmitting(false)
     }
@@ -622,12 +622,12 @@ export default function SalesClient() {
         expected_close_date: dealForm.expected_close_date || null,
         notes: dealForm.notes || null,
       })
-      toast.success('Deal Updated', { description: `${dealForm.title} has been updated` })
+      toast.success('Deal Updated' has been updated` })
       setShowEditDealDialog(false)
       setSelectedDeal(null)
       setDealForm(defaultDealForm)
     } catch (error: any) {
-      toast.error('Failed to update deal', { description: error.message })
+      toast.error('Failed to update deal')
     } finally {
       setIsSubmitting(false)
     }
@@ -639,11 +639,11 @@ export default function SalesClient() {
     setIsSubmitting(true)
     try {
       await deleteDeal(selectedDeal.id)
-      toast.success('Deal Deleted', { description: `${selectedDeal.title} has been removed` })
+      toast.success('Deal Deleted' has been removed` })
       setShowDeleteConfirm(false)
       setSelectedDeal(null)
     } catch (error: any) {
-      toast.error('Failed to delete deal', { description: error.message })
+      toast.error('Failed to delete deal')
     } finally {
       setIsSubmitting(false)
     }
@@ -664,9 +664,9 @@ export default function SalesClient() {
       }
       try {
         await moveDealToStage(dealId, nextStage, probabilities[nextStage])
-        toast.success('Stage Updated', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+        toast.success('Stage Updated'` })
       } catch (error: any) {
-        toast.error('Failed to advance stage', { description: error.message })
+        toast.error('Failed to advance stage')
       }
     }
   }
@@ -677,11 +677,11 @@ export default function SalesClient() {
     setIsSubmitting(true)
     try {
       await winDeal(selectedDeal.id)
-      toast.success('Congratulations!', { description: `${selectedDeal.title} has been marked as won!` })
+      toast.success('Congratulations!' has been marked as won!` })
       setShowWinLossDialog(null)
       setSelectedDeal(null)
     } catch (error: any) {
-      toast.error('Failed to mark deal as won', { description: error.message })
+      toast.error('Failed to mark deal as won')
     } finally {
       setIsSubmitting(false)
     }
@@ -693,13 +693,13 @@ export default function SalesClient() {
     setIsSubmitting(true)
     try {
       await loseDeal(selectedDeal.id, lossReason, competitor)
-      toast.info('Deal Closed', { description: `${selectedDeal.title} has been marked as lost` })
+      toast.info('Deal Closed' has been marked as lost` })
       setShowWinLossDialog(null)
       setSelectedDeal(null)
       setLossReason('')
       setCompetitor('')
     } catch (error: any) {
-      toast.error('Failed to mark deal as lost', { description: error.message })
+      toast.error('Failed to mark deal as lost')
     } finally {
       setIsSubmitting(false)
     }
@@ -717,18 +717,18 @@ export default function SalesClient() {
         outcome: activityForm.outcome || null,
         completed_at: new Date().toISOString(),
       })
-      toast.success('Activity Logged', { description: `${activityForm.activity_type} logged for ${selectedDeal.title}` })
+      toast.success('Activity Logged' logged for ${selectedDeal.title}` })
       setShowActivityDialog(false)
       setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' })
     } catch (error: any) {
-      toast.error('Failed to log activity', { description: error.message })
+      toast.error('Failed to log activity')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleExportSales = async () => {
-    toast.info('Preparing Export', { description: 'Your sales data is being prepared...' })
+    toast.info('Preparing Export')
     try {
       const csvContent = [
         ['Title', 'Company', 'Value', 'Stage', 'Probability', 'Close Date'].join(','),
@@ -750,16 +750,16 @@ export default function SalesClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export Complete', { description: `Exported ${deals.length} deals` })
+      toast.success('Export Complete' deals` })
     } catch (error) {
-      toast.error('Export Failed', { description: 'Could not export sales data' })
+      toast.error('Export Failed')
     }
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Fetching latest sales data...' })
+    toast.info('Refreshing')
     await fetchDeals()
-    toast.success('Refreshed', { description: 'Sales data is up to date' })
+    toast.success('Refreshed')
   }
 
   const openEditDialog = (deal: SalesDeal) => {
@@ -1542,7 +1542,7 @@ export default function SalesClient() {
                   const productCode = prompt('Enter product code (SKU):')
                   const productPrice = prompt('Enter product price:')
                   if (productCode && productPrice) {
-                    toast.success('Product added', { description: `${productName} (${productCode}) has been added to your catalog` })
+                    toast.success('Product added' (${productCode}) has been added to your catalog` })
                   }
                 }
               }}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
@@ -1774,7 +1774,7 @@ export default function SalesClient() {
                             <Button variant="ghost" size="icon" onClick={() => {
                               const newName = prompt('Edit stage name:', stage)
                               if (newName && newName.trim() && newName !== stage) {
-                                toast.success('Stage updated', { description: `${stage} renamed to ${newName.trim()}` })
+                                toast.success('Stage updated' renamed to ${newName.trim()}` })
                               }
                             }}>
                               <Edit className="w-4 h-4" />
@@ -1786,7 +1786,7 @@ export default function SalesClient() {
                           if (stageName) {
                             const stageOrder = prompt('Enter stage order (1-10):')
                             if (stageOrder) {
-                              toast.success('Stage added', { description: `${stageName} has been added to your pipeline` })
+                              toast.success('Stage added' has been added to your pipeline` })
                             }
                           }
                         }}>
@@ -2234,7 +2234,7 @@ export default function SalesClient() {
             <AIInsightsPanel
               insights={mockSalesAIInsights}
               title="Sales Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
 
@@ -2289,7 +2289,7 @@ export default function SalesClient() {
                 action: () => {
                   const taskTitle = prompt('Enter task title:')
                   if (taskTitle) {
-                    toast.success('Task created', { description: `Task "${taskTitle}" has been added to your task list` })
+                    toast.success('Task created'" has been added to your task list` })
                   } else {
                     toast.error('Task creation cancelled')
                   }
@@ -3006,9 +3006,9 @@ export default function SalesClient() {
                   const file = (e.target as HTMLInputElement).files?.[0]
                   if (file) {
                     if (file.size > 25 * 1024 * 1024) {
-                      toast.error('File too large', { description: 'Maximum file size is 25MB' })
+                      toast.error('File too large')
                     } else {
-                      toast.success('File attached', { description: file.name })
+                      toast.success('File attached')
                     }
                   }
                 }
@@ -3023,7 +3023,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailComposerDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Draft saved successfully!', { description: 'Email saved to drafts folder' })
+              toast.success('Draft saved successfully!')
             }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Email sent successfully')
@@ -3310,7 +3310,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuoteBuilderDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.success('Quote draft saved!', { description: 'Quote saved to drafts' })
+              toast.success('Quote draft saved!')
             }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Quote created successfully')
@@ -3367,13 +3367,13 @@ export default function SalesClient() {
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('CSV template downloaded!', { description: 'Check your downloads folder' })
+                  toast.success('CSV template downloaded!')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   CSV Template
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Excel template downloaded!', { description: 'Check your downloads folder' })
+                  toast.success('Excel template downloaded!')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Excel Template
