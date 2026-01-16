@@ -175,10 +175,8 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
 }
 
 // ============================================================================
-// MOCK DATA - Now imported from files-hub-utils.tsx
+// DATA LOADING FROM DATABASE
 // ============================================================================
-// Mock data is now managed in @/lib/files-hub-utils
-// Includes 60+ diverse files and 15+ folders with comprehensive metadata
 
 // ============================================================================
 // MAIN COMPONENT
@@ -555,7 +553,12 @@ export default function FilesHubPage() {
       return
     }
 
-    try {      // 1. Get file details from database to get storage_path
+    try {
+      // Create supabase client
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
         .from('files')
         .select('storage_path, storage_provider')
@@ -662,7 +665,12 @@ export default function FilesHubPage() {
       return
     }
 
-    try {      // 1. Get file details from database to get storage_path
+    try {
+      // Create supabase client
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
         .from('files')
         .select('storage_path, storage_provider')

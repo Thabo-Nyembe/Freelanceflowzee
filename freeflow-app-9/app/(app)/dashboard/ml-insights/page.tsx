@@ -211,108 +211,6 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
   }
 }
 
-// ============================================================================
-// MOCK DATA GENERATOR
-// ============================================================================
-
-function generateMockInsights(): MLInsight[] {
-  logger.debug('Generating mock ML insights data')
-
-  const types: InsightType[] = ['trend', 'anomaly', 'forecast', 'pattern', 'recommendation', 'alert']
-  const categories: InsightCategory[] = ['revenue', 'engagement', 'performance', 'retention', 'quality', 'growth']
-  const confidenceLevels: ConfidenceLevel[] = ['low', 'medium', 'high', 'very-high']
-  const impactLevels: ImpactLevel[] = ['low', 'medium', 'high', 'critical']
-  const severityLevels: SeverityLevel[] = ['info', 'warning', 'error', 'critical']
-  const modelStatuses: ModelStatus[] = ['ready', 'ready', 'ready', 'training', 'updating']
-
-  const insightTemplates = [
-    { title: 'Revenue Growth Acceleration', description: 'Revenue showing 23% month-over-month growth with strong customer acquisition', category: 'revenue', type: 'trend' },
-    { title: 'User Engagement Spike Detected', description: 'Unusual 45% increase in daily active users over past 7 days', category: 'engagement', type: 'anomaly' },
-    { title: 'Churn Risk Forecast', description: 'Predicted 8% increase in churn risk for premium subscribers next quarter', category: 'retention', type: 'forecast' },
-    { title: 'Weekend Usage Pattern Identified', description: 'Consistent 60% drop in engagement during weekends', category: 'engagement', type: 'pattern' },
-    { title: 'Optimize Pricing Strategy', description: 'A/B test suggests 15% conversion improvement with new pricing', category: 'revenue', type: 'recommendation' },
-    { title: 'API Response Time Critical', description: 'API latency exceeded 2s threshold, affecting user experience', category: 'performance', type: 'alert' },
-    { title: 'Conversion Rate Improving', description: 'Conversion funnel optimization resulted in 12% improvement', category: 'revenue', type: 'trend' },
-    { title: 'Payment Failure Anomaly', description: 'Payment failures up 35% in past 24 hours', category: 'revenue', type: 'anomaly' },
-    { title: 'Q4 Revenue Projection', description: 'Forecasting $2.4M revenue for Q4 based on current trends', category: 'revenue', type: 'forecast' },
-    { title: 'Mobile vs Desktop Patterns', description: 'Mobile users show 2x higher engagement than desktop', category: 'engagement', type: 'pattern' },
-    { title: 'Implement Push Notifications', description: 'Push notifications could increase retention by 18%', category: 'retention', type: 'recommendation' },
-    { title: 'Database Query Performance', description: 'Slow queries detected affecting load times', category: 'performance', type: 'alert' },
-    { title: 'Customer Lifetime Value Up', description: 'Average CLV increased from $450 to $580', category: 'revenue', type: 'trend' },
-    { title: 'Signup Flow Dropout Spike', description: 'Step 3 dropout rate increased from 15% to 28%', category: 'engagement', type: 'anomaly' },
-    { title: 'Feature Adoption Forecast', description: 'New feature projected to reach 40% adoption in 30 days', category: 'growth', type: 'forecast' },
-    { title: 'Geographic Usage Patterns', description: 'APAC region shows highest growth at 35% MoM', category: 'growth', type: 'pattern' },
-    { title: 'Add Onboarding Tutorial', description: 'Tutorial could reduce early churn by 22%', category: 'retention', type: 'recommendation' },
-    { title: 'Server Capacity Warning', description: 'Current capacity may be insufficient for projected growth', category: 'performance', type: 'alert' },
-    { title: 'Support Ticket Volume Rising', description: 'Support tickets up 40% indicating product issues', category: 'quality', type: 'trend' },
-    { title: 'Unusual Login Activity', description: 'Login attempts from new regions increased 120%', category: 'quality', type: 'anomaly' },
-    { title: 'User Growth Projection', description: 'Forecasting 10K new users by end of quarter', category: 'growth', type: 'forecast' },
-    { title: 'Power User Behavior Pattern', description: 'Top 10% of users generate 60% of engagement', category: 'engagement', type: 'pattern' },
-    { title: 'Optimize Email Campaigns', description: 'Personalized emails could improve open rates by 25%', category: 'engagement', type: 'recommendation' },
-    { title: 'Memory Usage Alert', description: 'Memory usage at 85% capacity, scaling recommended', category: 'performance', type: 'alert' },
-    { title: 'Trial Conversion Improving', description: 'Trial to paid conversion up from 18% to 24%', category: 'revenue', type: 'trend' },
-    { title: 'Feature Usage Anomaly', description: 'AI features showing unexpected 200% usage spike', category: 'engagement', type: 'anomaly' },
-    { title: 'Seasonal Demand Forecast', description: 'Holiday season expected to bring 50% traffic increase', category: 'growth', type: 'forecast' },
-    { title: 'Referral Source Patterns', description: 'Organic search drives 55% of high-value customers', category: 'growth', type: 'pattern' },
-    { title: 'Improve Search Functionality', description: 'Enhanced search could reduce bounce rate by 15%', category: 'engagement', type: 'recommendation' },
-    { title: 'SSL Certificate Expiring', description: 'SSL certificate expires in 14 days', category: 'quality', type: 'alert' },
-    { title: 'NPS Score Trending Up', description: 'Net Promoter Score improved from 42 to 58', category: 'quality', type: 'trend' },
-    { title: 'Refund Rate Spike Detected', description: 'Refund requests up 45% for enterprise plans', category: 'revenue', type: 'anomaly' },
-    { title: 'Market Expansion Forecast', description: 'European market could generate $800K ARR', category: 'growth', type: 'forecast' },
-    { title: 'Subscription Tier Patterns', description: 'Users upgrade to premium within 45 days on average', category: 'revenue', type: 'pattern' },
-    { title: 'Add Live Chat Support', description: 'Live chat could improve conversion by 20%', category: 'engagement', type: 'recommendation' },
-    { title: 'CDN Performance Issue', description: 'CDN latency increased in EMEA region', category: 'performance', type: 'alert' },
-    { title: 'Feature Engagement Rising', description: 'New dashboard feature at 65% adoption rate', category: 'engagement', type: 'trend' },
-    { title: 'Billing Error Anomaly', description: 'Billing failures increased 30% after latest update', category: 'revenue', type: 'anomaly' },
-    { title: 'Competitor Analysis Forecast', description: 'Competitive pricing could reduce churn by 12%', category: 'retention', type: 'forecast' },
-    { title: 'Support Response Patterns', description: 'Average response time under 2 hours drives 90% satisfaction', category: 'quality', type: 'pattern' }
-  ]
-
-  const insights: MLInsight[] = insightTemplates.map((template, index) => {
-    const randomConfidence = confidenceLevels[Math.floor(Math.random() * confidenceLevels.length)]
-    const randomImpact = impactLevels[Math.floor(Math.random() * impactLevels.length)]
-    const randomSeverity = severityLevels[Math.floor(Math.random() * severityLevels.length)]
-    const randomModelStatus = modelStatuses[Math.floor(Math.random() * modelStatuses.length)]
-
-    return {
-      id: `INS-${String(index + 1).padStart(3, '0')}`,
-      title: template.title,
-      type: template.type as InsightType,
-      category: template.category as InsightCategory,
-      description: template.description,
-      confidence: randomConfidence,
-      impact: randomImpact,
-      severity: randomSeverity,
-      actionable: Math.random() > 0.3,
-      recommendations: [
-        'Review historical data trends',
-        'Set up automated alerts',
-        'Schedule team review meeting',
-        'Update forecasting models',
-        'Implement recommended changes'
-      ].slice(0, Math.floor(Math.random() * 3) + 2),
-      dataSource: ['Analytics DB', 'User Events', 'Transaction Logs', 'API Metrics', 'Customer Data'][Math.floor(Math.random() * 5)],
-      modelName: ['Prophet', 'ARIMA', 'LSTM', 'Random Forest', 'XGBoost', 'Neural Network'][Math.floor(Math.random() * 6)],
-      modelVersion: `v${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}`,
-      modelStatus: randomModelStatus,
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      tags: ['ML', 'AI', 'Analytics', 'Predictive', 'Automated'].slice(0, Math.floor(Math.random() * 3) + 1),
-      metrics: {
-        accuracy: 0.7 + Math.random() * 0.28,
-        precision: 0.65 + Math.random() * 0.33,
-        recall: 0.6 + Math.random() * 0.38,
-        f1Score: 0.68 + Math.random() * 0.3
-      },
-      affectedUsers: Math.floor(Math.random() * 50000) + 1000,
-      potentialRevenue: Math.floor(Math.random() * 500000) + 10000,
-      priority: Math.floor(Math.random() * 10) + 1
-    }
-  })
-
-  logger.info('Generated mock ML insights', { count: insights.length })
-  return insights
-}
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -457,16 +355,13 @@ export default function MLInsightsPage() {
 
         if (insightsError) throw insightsError
 
-        // If no insights in database, use mock data
-        const insightsToUse = insights || []
-        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })
+        dispatch({ type: 'SET_INSIGHTS', insights: (insights || []) as MLInsight[] })
 
         logger.info('ML insights loaded successfully', {
           userId,
-          count: insightsToUse.length,
-          source: (insights && insights.length > 0) ? 'database' : 'mock'
+          count: insights?.length || 0
         })
-        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
+        announce(`${insights?.length || 0} ML insights loaded successfully`, 'polite')
 
         setIsLoading(false)
       } catch (err) {

@@ -116,156 +116,14 @@ export default function ResourceLibraryPage() {
   const [viewMode, setViewMode] = useState('grid')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  // Mock resources for UI display (will be replaced by database resources)
-  const mockResources = [
-    {
-      id: 1,
-      title: 'Complete UI/UX Design System',
-      description: 'Comprehensive design system with components, patterns, and guidelines for modern web applications',
-      type: 'design-system',
-      category: 'design',
-      format: 'figma',
-      size: '45.2 MB',
-      downloads: 1247,
-      rating: 4.9,
-      views: 3420,
-      likes: 234,
-      author: 'Sarah Johnson',
-      createdAt: '2024-01-15',
-      updatedAt: '2024-01-20',
-      tags: ['UI Kit', 'Design System', 'Components', 'Figma'],
-      thumbnail: '/resources/ui-design-system.jpg',
-      isPremium: true,
-      isFeatured: true,
-      isBookmarked: false,
-      price: 49.99,
-      license: 'Commercial'
-    },
-    {
-      id: 2,
-      title: 'React Component Library',
-      description: 'Pre-built React components with TypeScript support and comprehensive documentation',
-      type: 'code',
-      category: 'development',
-      format: 'zip',
-      size: '12.8 MB',
-      downloads: 892,
-      rating: 4.8,
-      views: 2156,
-      likes: 167,
-      author: 'Michael Chen',
-      createdAt: '2024-01-10',
-      updatedAt: '2024-01-18',
-      tags: ['React', 'TypeScript', 'Components', 'NPM'],
-      thumbnail: '/resources/react-components.jpg',
-      isPremium: false,
-      isFeatured: true,
-      isBookmarked: true,
-      price: 0,
-      license: 'MIT'
-    },
-    {
-      id: 3,
-      title: 'Brand Identity Templates Pack',
-      description: 'Collection of professional brand identity templates including logos, business cards, and stationery',
-      type: 'template',
-      category: 'branding',
-      format: 'ai',
-      size: '78.5 MB',
-      downloads: 567,
-      rating: 4.7,
-      views: 1890,
-      likes: 145,
-      author: 'Emma Rodriguez',
-      createdAt: '2024-01-05',
-      updatedAt: '2024-01-12',
-      tags: ['Branding', 'Logo', 'Templates', 'Adobe Illustrator'],
-      thumbnail: '/resources/brand-templates.jpg',
-      isPremium: true,
-      isFeatured: false,
-      isBookmarked: false,
-      price: 29.99,
-      license: 'Commercial'
-    },
-    {
-      id: 4,
-      title: 'Motion Graphics Assets',
-      description: 'High-quality motion graphics elements and animations for video projects',
-      type: 'video',
-      category: 'motion',
-      format: 'ae',
-      size: '156.3 MB',
-      downloads: 423,
-      rating: 4.6,
-      views: 1234,
-      likes: 98,
-      author: 'David Kim',
-      createdAt: '2023-12-28',
-      updatedAt: '2024-01-08',
-      tags: ['Motion Graphics', 'After Effects', 'Animation', 'Video'],
-      thumbnail: '/resources/motion-graphics.jpg',
-      isPremium: true,
-      isFeatured: true,
-      isBookmarked: true,
-      price: 39.99,
-      license: 'Commercial'
-    },
-    {
-      id: 5,
-      title: 'Photography Stock Collection',
-      description: 'Curated collection of high-resolution stock photos for commercial and personal use',
-      type: 'image',
-      category: 'photography',
-      format: 'jpg',
-      size: '234.7 MB',
-      downloads: 1156,
-      rating: 4.8,
-      views: 4567,
-      likes: 312,
-      author: 'Lisa Wang',
-      createdAt: '2023-12-20',
-      updatedAt: '2024-01-15',
-      tags: ['Stock Photos', 'Photography', 'Commercial', 'High-res'],
-      thumbnail: '/resources/stock-photos.jpg',
-      isPremium: false,
-      isFeatured: false,
-      isBookmarked: false,
-      price: 0,
-      license: 'CC0'
-    },
-    {
-      id: 6,
-      title: 'Web Development Starter Kit',
-      description: 'Complete starter kit for modern web development with best practices and tools',
-      type: 'code',
-      category: 'development',
-      format: 'zip',
-      size: '89.4 MB',
-      downloads: 734,
-      rating: 4.9,
-      views: 2890,
-      likes: 201,
-      author: 'Alex Thompson',
-      createdAt: '2023-12-15',
-      updatedAt: '2024-01-10',
-      tags: ['Web Development', 'Starter Kit', 'Best Practices', 'Tools'],
-      thumbnail: '/resources/web-starter.jpg',
-      isPremium: false,
-      isFeatured: true,
-      isBookmarked: true,
-      price: 0,
-      license: 'MIT'
-    }
-  ]
-
   const categories = [
-    { id: 'all', name: 'All Resources', icon: Database, count: 156 },
-    { id: 'design', name: 'Design', icon: Palette, count: 45 },
-    { id: 'development', name: 'Development', icon: Code, count: 32 },
-    { id: 'branding', name: 'Branding', icon: Award, count: 28 },
-    { id: 'photography', name: 'Photography', icon: Image, count: 23 },
-    { id: 'motion', name: 'Motion Graphics', icon: Video, count: 18 },
-    { id: 'templates', name: 'Templates', icon: FileText, count: 10 }
+    { id: 'all', name: 'All Resources', icon: Database, count: 0 },
+    { id: 'design', name: 'Design', icon: Palette, count: 0 },
+    { id: 'development', name: 'Development', icon: Code, count: 0 },
+    { id: 'branding', name: 'Branding', icon: Award, count: 0 },
+    { id: 'photography', name: 'Photography', icon: Image, count: 0 },
+    { id: 'motion', name: 'Motion Graphics', icon: Video, count: 0 },
+    { id: 'templates', name: 'Templates', icon: FileText, count: 0 }
   ]
 
   const getTypeIcon = (type: string) => {
@@ -371,7 +229,7 @@ export default function ResourceLibraryPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Resources</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.totalResources}</p>
-                  <p className="text-sm text-blue-600 dark:text-blue-400">+12 this month</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">Database ready</p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
                   <Database className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -386,7 +244,7 @@ export default function ResourceLibraryPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Downloads</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.totalDownloads.toLocaleString()}</p>
-                  <p className="text-sm text-green-600 dark:text-green-400">+18% this month</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">Database ready</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-xl">
                   <Download className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -401,7 +259,7 @@ export default function ResourceLibraryPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Avg Rating</p>
                   <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.avgRating}</p>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-400">⭐ Excellent</p>
+                  <p className="text-sm text-yellow-600 dark:text-yellow-400">Database ready</p>
                 </div>
                 <div className="p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl">
                   <Star className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />

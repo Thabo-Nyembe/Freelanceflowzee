@@ -28,98 +28,8 @@ import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-// Mock chat data
-const mockChats = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    company: 'Acme Corp',
-    lastMessage: 'Thanks for the brand guidelines! They look perfect.',
-    timestamp: '2 min ago',
-    unread: 2,
-    online: true,
-    avatar: '/placeholder-user.jpg',
-    type: 'client'
-  },
-  {
-    id: '2',
-    name: 'Design Team',
-    lastMessage: 'Mike: The new mockups are ready for review',
-    timestamp: '15 min ago',
-    unread: 0,
-    online: false,
-    avatar: '/placeholder-user.jpg',
-    type: 'team',
-    members: 4
-  },
-  {
-    id: '3',
-    name: 'Alex Chen',
-    company: 'Tech Startup',
-    lastMessage: 'When can we schedule the next meeting?',
-    timestamp: '1 hour ago',
-    unread: 1,
-    online: true,
-    avatar: '/placeholder-user.jpg',
-    type: 'client'
-  },
-  {
-    id: '4',
-    name: 'Project Alpha',
-    lastMessage: 'Emma: Updated the timeline in the project doc',
-    timestamp: '2 hours ago',
-    unread: 0,
-    online: false,
-    avatar: '/placeholder-user.jpg',
-    type: 'project',
-    members: 6
-  }
-]
-
-const mockMessages = [
-  {
-    id: '1',
-    sender: 'Sarah Johnson',
-    content: 'Hi! I wanted to follow up on the brand identity project. The initial concepts look amazing!',
-    timestamp: '10:30 AM',
-    type: 'received',
-    avatar: '/placeholder-user.jpg'
-  },
-  {
-    id: '2',
-    sender: 'You',
-    content: 'Thank you! I\'m glad you like them. I\'ve incorporated the feedback from our last meeting.',
-    timestamp: '10:32 AM',
-    type: 'sent'
-  },
-  {
-    id: '3',
-    sender: 'You',
-    content: 'I\'ve attached the revised logo concepts and color palette. Please take a look and let me know your thoughts.',
-    timestamp: '10:33 AM',
-    type: 'sent',
-    attachments: [
-      { name: 'Logo_Concepts_v2.pdf', size: '2.1 MB' },
-      { name: 'Color_Palette.png', size: '850 KB' }
-    ]
-  },
-  {
-    id: '4',
-    sender: 'Sarah Johnson',
-    content: 'Perfect! I love the direction we\'re heading. The blue variant is exactly what we were looking for.',
-    timestamp: '11:45 AM',
-    type: 'received',
-    avatar: '/placeholder-user.jpg'
-  },
-  {
-    id: '5',
-    sender: 'Sarah Johnson',
-    content: 'Thanks for the brand guidelines! They look perfect.',
-    timestamp: '2:15 PM',
-    type: 'received',
-    avatar: '/placeholder-user.jpg'
-  }
-]
+// MOCK DATA REMOVED - Migration #103
+// All chat data now comes directly from database
 
 export default function ChatPage() {
   // A+++ STATE MANAGEMENT
@@ -127,8 +37,9 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
-  const [selectedChat, setSelectedChat] = useState(mockChats[0])
-  const [messages, setMessages] = useState(mockMessages)
+  const [chats, setChats] = useState<any[]>([])
+  const [selectedChat, setSelectedChat] = useState<any>(null)
+  const [messages, setMessages] = useState<any[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [showChatList, setShowChatList] = useState(true)
@@ -193,12 +104,12 @@ export default function ChatPage() {
     }
   }
 
-  const filteredChats = mockChats.filter(chat =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredChats = (chats || []).filter(chat =>
+    chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chat.company?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const ChatListItem = ({ chat }: { chat: typeof mockChats[0] }) => (
+  const ChatListItem = ({ chat }: { chat: any }) => (
     <div
       onClick={() => {
         setSelectedChat(chat)
@@ -248,7 +159,7 @@ export default function ChatPage() {
     </div>
   )
 
-  const MessageBubble = ({ message }: { message: typeof mockMessages[0] }) => (
+  const MessageBubble = ({ message }: { message: any }) => (
     <div className={cn("flex gap-3 mb-4", message.type === 'sent' && "flex-row-reverse")}>
       {message.type === 'received' && (
         <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">

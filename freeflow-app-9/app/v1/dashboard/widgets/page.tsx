@@ -212,69 +212,6 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
 }
 
 // ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const generateMockWidgets = (): Widget[] => {
-  logger.debug('Generating mock widget data')
-
-  const types: WidgetType[] = ['metric', 'chart', 'table', 'activity', 'quick-actions', 'calendar']
-  const categories: WidgetCategory[] = ['analytics', 'productivity', 'finance', 'social', 'custom']
-  const sizes: WidgetSize[] = ['small', 'medium', 'large', 'full']
-
-  const widgetNames = {
-    metric: ['Total Revenue', 'Active Users', 'Conversion Rate', 'Sales Today', 'Tasks Completed', 'Storage Used'],
-    chart: ['Revenue Chart', 'User Growth', 'Sales Funnel', 'Traffic Sources', 'Project Timeline'],
-    table: ['Recent Orders', 'Top Clients', 'Latest Tasks', 'Transaction History', 'Team Activity'],
-    activity: ['Recent Activity', 'Team Updates', 'System Logs', 'Notifications Feed', 'Change Log'],
-    'quick-actions': ['Quick Actions', 'Common Tasks', 'Shortcuts', 'Tools', 'Create Menu'],
-    calendar: ['Calendar View', 'Upcoming Events', 'Schedule', 'Deadlines', 'Meetings']
-  }
-
-  const icons = {
-    metric: '📊',
-    chart: '📈',
-    table: '📋',
-    activity: '🔔',
-    'quick-actions': '⚡',
-    calendar: '📅'
-  }
-
-  const widgets: Widget[] = []
-
-  for (let i = 1; i <= 30; i++) {
-    const type = types[Math.floor(Math.random() * types.length)]
-    const category = categories[Math.floor(Math.random() * categories.length)]
-    const size = sizes[Math.floor(Math.random() * sizes.length)]
-    const nameOptions = widgetNames[type]
-    const name = nameOptions[Math.floor(Math.random() * nameOptions.length)] + ` ${i}`
-
-    widgets.push({
-      id: `W-${String(i).padStart(3, '0')}`,
-      name,
-      type,
-      category,
-      size,
-      icon: icons[type],
-      description: `${type.charAt(0).toUpperCase() + type.slice(1)} widget for tracking ${category} metrics`,
-      isVisible: Math.random() > 0.3,
-      isLocked: Math.random() > 0.8,
-      position: { x: Math.floor(i % 3), y: Math.floor(i / 3) },
-      config: {
-        refreshInterval: [30, 60, 300, 600][Math.floor(Math.random() * 4)],
-        color: ['blue', 'green', 'purple', 'orange', 'red'][Math.floor(Math.random() * 5)],
-        showLegend: Math.random() > 0.5,
-        dataSource: ['api', 'database', 'cache'][Math.floor(Math.random() * 3)]
-      },
-      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      lastRefreshed: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString() : undefined,
-      usageCount: Math.floor(Math.random() * 500) + 10
-    })
-  }  return widgets
-}
-
-// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 

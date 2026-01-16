@@ -277,90 +277,6 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
   }
 }
 
-// ============================================================================
-// A++++ MOCK DATA
-// ============================================================================
-
-function generateMockPlugins(): Plugin[] {
-  logger.debug('Generating mock plugins')
-
-  const categories: PluginCategory[] = ['productivity', 'creative', 'analytics', 'communication', 'integration', 'automation', 'ai', 'security', 'finance', 'marketing']
-  const pricingTypes: PricingType[] = ['free', 'one-time', 'subscription', 'freemium']
-  const statuses: PluginStatus[] = ['published', 'beta', 'coming-soon']
-
-  const pluginNames = [
-    'Slack Integration', 'Google Drive Sync', 'Advanced Analytics', 'AI Assistant Pro',
-    'Email Automation', 'PDF Generator', 'Video Conferencing', 'Time Tracker Plus',
-    'CRM Connect', 'Social Media Manager', 'Task Automator', 'Code Snippets',
-    'Design Tools', 'Invoice Generator', 'SEO Optimizer', 'Content Calendar',
-    'Live Chat Widget', 'Form Builder Pro', 'Database Manager', 'API Gateway',
-    'Webhook Handler', 'Payment Gateway', 'Email Templates', 'Backup Manager',
-    'Security Scanner', 'Performance Monitor', 'A/B Testing', 'User Feedback',
-    'Translation Tool', 'Image Optimizer', 'Video Editor', 'Audio Processor',
-    'Chart Builder', 'Data Exporter', 'Report Generator', 'Calendar Sync',
-    'Notification Center', 'File Uploader', 'QR Generator', 'Barcode Scanner',
-    'Weather Widget', 'Map Integration', 'Search Engine', 'Text Editor',
-    'Color Picker', 'Icon Library', 'Font Manager', 'Theme Switcher',
-    'Dark Mode Pro', 'Responsive Helper', 'Grid System', 'Animation Studio',
-    'Drag and Drop', 'Keyboard Shortcuts', 'Screen Recorder', 'Screenshot Tool',
-    'Version Control', 'Team Collaboration', 'Project Templates', 'Workflow Builder'
-  ]
-
-  const authors = [
-    { id: 'AU-001', name: 'TechCorp', avatar: '🏢', verified: true },
-    { id: 'AU-002', name: 'DevTools Inc', avatar: '👨‍💻', verified: true },
-    { id: 'AU-003', name: 'CreativeStudio', avatar: '🎨', verified: false },
-    { id: 'AU-004', name: 'AutomationPro', avatar: '🤖', verified: true },
-    { id: 'AU-005', name: 'DataViz Labs', avatar: '📊', verified: false }
-  ]
-
-  const plugins: Plugin[] = pluginNames.map((name, index) => {
-    const category = categories[index % categories.length]
-    const pricingType = pricingTypes[index % pricingTypes.length]
-    const status = statuses[index % statuses.length]
-    const author = authors[index % authors.length]
-
-    return {
-      id: `PLG-${String(index + 1).padStart(3, '0')}`,
-      name,
-      description: `Professional ${name} plugin with advanced features and seamless integration`,
-      longDescription: `${name} is a powerful plugin that helps you ${name.toLowerCase()} with ease. Features include automated workflows, real-time sync, advanced analytics, and comprehensive reporting. Perfect for teams of all sizes.`,
-      category,
-      icon: ['🔌', '⚡', '🚀', '🎯', '💡', '🔥'][index % 6],
-      author,
-      version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
-      rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 - 5.0
-      reviewCount: Math.floor(Math.random() * 500) + 50,
-      installCount: Math.floor(Math.random() * 100000) + 1000,
-      price: pricingType === 'free' ? 0 : Math.floor(Math.random() * 100) + 10,
-      pricingType,
-      status,
-      fileSize: Math.floor(Math.random() * 10000000) + 100000, // 100KB - 10MB
-      lastUpdated: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-      isVerified: author.verified,
-      isFeatured: Math.random() > 0.8,
-      isTrending: Math.random() > 0.7,
-      isPopular: Math.random() > 0.6,
-      tags: [
-        category,
-        pricingType,
-        ['integration', 'automation', 'productivity', 'analytics'][Math.floor(Math.random() * 4)]
-      ],
-      screenshots: Array.from({ length: 3 }, (_, i) => `https://picsum.photos/seed/${index + i}/800/600`),
-      compatibility: ['v1.0+', 'Chrome', 'Firefox', 'Safari'],
-      requirements: ['Min 2GB RAM', 'Storage: 100MB', 'Internet connection'],
-      changelog: [
-        'v2.0.0: Major redesign and performance improvements',
-        'v1.5.0: Added new features and bug fixes',
-        'v1.0.0: Initial release'
-      ]
-    }
-  })
-
-  logger.info('Mock plugins generated', { count: plugins.length })
-  return plugins
-}
 
 // ============================================================================
 // A++++ CATEGORIES
@@ -471,31 +387,14 @@ export default function PluginMarketplacePage() {
 
         if (pluginsError) throw pluginsError
 
-        // If no plugins in database, use mock data
-        const pluginsToUse = plugins || []
-        dispatch({ type: 'SET_PLUGINS', plugins: pluginsToUse as Plugin[] })
-
-        // Pre-install some plugins for demo (first 5)
-        const preInstalled = pluginsToUse.slice(0, 5).map(plugin => ({
-          pluginId: plugin.id,
-          installedAt: new Date().toISOString(),
-          installedVersion: plugin.version,
-          isActive: true,
-          settings: {}
-        }))
-
-        preInstalled.forEach(install => {
-          const plugin = pluginsToUse.find(p => p.id === install.pluginId)!
-          dispatch({ type: 'INSTALL_PLUGIN', plugin: plugin as Plugin })
-        })
+        dispatch({ type: 'SET_PLUGINS', plugins: (plugins || []) as Plugin[] })
 
         logger.info('Plugins loaded successfully', {
           userId,
-          count: pluginsToUse.length,
-          source: (plugins && plugins.length > 0) ? 'database' : 'mock'
+          count: plugins?.length || 0
         })
         setIsLoading(false)
-        announce(`${pluginsToUse.length} plugins loaded successfully`, 'polite')
+        announce(`${plugins?.length || 0} plugins loaded successfully`, 'polite')
       } catch (err) {
         logger.error('Failed to load plugins', {
           error: err instanceof Error ? err.message : String(err),

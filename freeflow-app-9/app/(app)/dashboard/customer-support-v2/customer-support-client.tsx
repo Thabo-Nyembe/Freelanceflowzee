@@ -178,90 +178,7 @@ const initialTicketForm: TicketFormState = {
   tags: [],
 }
 
-// Mock Data
-const mockCustomers: Customer[] = [
-  { id: 'c1', name: 'Sarah Johnson', email: 'sarah@techcorp.com', avatar: '/avatars/sarah.jpg', phone: '+1-555-0123', company: 'TechCorp Inc', tier: 'enterprise', totalTickets: 15, satisfactionScore: 4.8, lastContact: '2024-01-18', tags: ['vip', 'technical'], notes: 'Prefers email communication' },
-  { id: 'c2', name: 'Mike Chen', email: 'mike@startup.io', avatar: '/avatars/mike.jpg', company: 'StartupIO', tier: 'pro', totalTickets: 8, satisfactionScore: 4.5, lastContact: '2024-01-17', tags: ['billing'], notes: '' },
-  { id: 'c3', name: 'Emily Davis', email: 'emily@freelance.com', avatar: '/avatars/emily.jpg', tier: 'basic', totalTickets: 3, satisfactionScore: 5.0, lastContact: '2024-01-16', tags: ['new'], notes: 'First-time user' },
-]
-
-const mockAgents: Agent[] = [
-  { id: 'a1', name: 'Alex Rivera', email: 'alex@support.com', avatar: '/avatars/alex.jpg', status: 'online', role: 'supervisor', skills: ['technical', 'billing', 'enterprise'], activeTickets: 5, resolvedToday: 12, avgResponseTime: 45, avgResolutionTime: 180, satisfactionScore: 4.9, languages: ['English', 'Spanish'] },
-  { id: 'a2', name: 'Jordan Lee', email: 'jordan@support.com', avatar: '/avatars/jordan.jpg', status: 'online', role: 'agent', skills: ['technical', 'onboarding'], activeTickets: 8, resolvedToday: 8, avgResponseTime: 60, avgResolutionTime: 240, satisfactionScore: 4.7, languages: ['English'] },
-  { id: 'a3', name: 'Taylor Kim', email: 'taylor@support.com', avatar: '/avatars/taylor.jpg', status: 'busy', role: 'agent', skills: ['billing', 'refunds'], activeTickets: 6, resolvedToday: 10, avgResponseTime: 30, avgResolutionTime: 120, satisfactionScore: 4.8, languages: ['English', 'Korean'] },
-]
-
-const mockTickets: Ticket[] = [
-  {
-    id: 't1', subject: 'Unable to export data to CSV', description: 'When I try to export my project data, the CSV file is empty',
-    status: 'open', priority: 'high', channel: 'chat', customer: mockCustomers[0], assignee: mockAgents[0],
-    tags: ['bug', 'export', 'data'], messages: [
-      { id: 'm1', content: 'Hi, I\'m having trouble exporting my data. The CSV file comes out empty every time.', sender: 'customer', senderName: 'Sarah Johnson', timestamp: '10:30 AM', isInternal: false },
-      { id: 'm2', content: 'Hi Sarah! I\'m sorry to hear that. Let me look into this for you. Could you tell me which browser you\'re using?', sender: 'agent', senderName: 'Alex Rivera', timestamp: '10:32 AM', isInternal: false },
-      { id: 'm3', content: 'Checked the logs - seems like a timeout issue with large datasets', sender: 'agent', senderName: 'Alex Rivera', timestamp: '10:35 AM', isInternal: true },
-    ],
-    createdAt: '2024-01-18T10:30:00', updatedAt: '2024-01-18T10:35:00', firstResponseAt: '2024-01-18T10:32:00',
-    slaBreached: false, category: 'Technical'
-  },
-  {
-    id: 't2', subject: 'Billing question about annual subscription', description: 'I want to upgrade from monthly to annual',
-    status: 'pending', priority: 'normal', channel: 'email', customer: mockCustomers[1], assignee: mockAgents[2],
-    tags: ['billing', 'upgrade'], messages: [
-      { id: 'm4', content: 'Hello, I\'d like to switch my monthly subscription to annual. How does the pricing work?', sender: 'customer', senderName: 'Mike Chen', timestamp: 'Yesterday', isInternal: false },
-      { id: 'm5', content: 'Hi Mike! Great question. With annual billing, you save 20% compared to monthly...', sender: 'agent', senderName: 'Taylor Kim', timestamp: 'Yesterday', isInternal: false },
-    ],
-    createdAt: '2024-01-17T14:00:00', updatedAt: '2024-01-17T14:30:00', firstResponseAt: '2024-01-17T14:15:00',
-    slaBreached: false, category: 'Billing'
-  },
-  {
-    id: 't3', subject: 'Need help with API integration', description: 'Getting 401 errors when calling the API',
-    status: 'new', priority: 'urgent', channel: 'web', customer: mockCustomers[0],
-    tags: ['api', 'integration', 'error'], messages: [
-      { id: 'm6', content: 'I keep getting 401 Unauthorized errors when trying to use the API. My token should be valid.', sender: 'customer', senderName: 'Sarah Johnson', timestamp: '5 min ago', isInternal: false },
-    ],
-    createdAt: '2024-01-18T11:00:00', updatedAt: '2024-01-18T11:00:00',
-    slaBreached: true, category: 'Technical'
-  },
-]
-
-const mockSLAs: SLA[] = [
-  { id: 's1', name: 'Urgent', priority: 'urgent', firstResponseTarget: 15, resolutionTarget: 60, breachCount: 2, complianceRate: 95 },
-  { id: 's2', name: 'High', priority: 'high', firstResponseTarget: 60, resolutionTarget: 240, breachCount: 5, complianceRate: 92 },
-  { id: 's3', name: 'Normal', priority: 'normal', firstResponseTarget: 240, resolutionTarget: 1440, breachCount: 3, complianceRate: 98 },
-  { id: 's4', name: 'Low', priority: 'low', firstResponseTarget: 480, resolutionTarget: 2880, breachCount: 0, complianceRate: 100 },
-]
-
-const mockCannedResponses: CannedResponse[] = [
-  { id: 'cr1', title: 'Greeting - General', content: 'Hi {{customer_name}}! Thank you for reaching out. I\'d be happy to help you with that.', category: 'General', usageCount: 245 },
-  { id: 'cr2', title: 'Password Reset', content: 'To reset your password, please click on "Forgot Password" on the login page...', category: 'Account', usageCount: 189 },
-  { id: 'cr3', title: 'Billing Inquiry', content: 'I understand you have questions about your billing. Let me pull up your account...', category: 'Billing', usageCount: 156 },
-  { id: 'cr4', title: 'Closing - Resolved', content: 'I\'m glad I could help resolve this for you! Is there anything else you need?', category: 'General', usageCount: 312 },
-]
-
-// Competitive Upgrade Mock Data
-const mockSupportAIInsights = [
-  { id: '1', query: "Which tickets need urgent attention?", insight: "3 tickets are approaching SLA breach in the next hour. TKT-1234 (Enterprise client) has highest priority.", confidence: 0.95, category: 'engagement' as const, timestamp: new Date().toISOString() },
-  { id: '2', query: "What's causing ticket volume spike?", insight: "Payment processing issues account for 45% of today's tickets. Consider proactive status page update.", confidence: 0.88, category: 'conversion' as const, timestamp: new Date().toISOString() },
-  { id: '3', query: "How can we improve CSAT?", insight: "Tickets with first response under 5 minutes have 23% higher satisfaction. Focus on quick initial acknowledgment.", confidence: 0.86, category: 'revenue' as const, timestamp: new Date().toISOString() },
-]
-
-const mockSupportCollaborators = [
-  { id: '1', name: 'Support Team', avatar: '/avatars/support.jpg', status: 'active' as const, lastActive: 'Just now', role: 'On-call' },
-  { id: '2', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', status: 'active' as const, lastActive: '1m ago', role: 'Senior Agent' },
-  { id: '3', name: 'Jordan Kim', avatar: '/avatars/jordan.jpg', status: 'active' as const, lastActive: '3m ago', role: 'Agent' },
-]
-
-const mockSupportPredictions = [
-  { id: '1', metric: 'Daily Tickets', currentValue: 156, predictedValue: 180, confidence: 0.79, trend: 'up' as const, timeframe: 'Next 24 hours', factors: ['New feature release', 'Weekend approaching'] },
-  { id: '2', metric: 'CSAT Score', currentValue: 92, predictedValue: 94, confidence: 0.82, trend: 'up' as const, timeframe: 'This week', factors: ['New canned responses', 'Agent training'] },
-  { id: '3', metric: 'Avg Resolution Time', currentValue: 4.2, predictedValue: 3.5, confidence: 0.76, trend: 'down' as const, timeframe: 'Next 2 weeks', factors: ['AI suggestions', 'Knowledge base updates'] },
-]
-
-const mockSupportActivities = [
-  { id: '1', type: 'update' as const, title: 'Ticket resolved', description: 'TKT-1234 marked as solved by Alex Rivera', user: { name: 'Alex Rivera', avatar: '/avatars/alex.jpg' }, timestamp: new Date().toISOString(), metadata: {} },
-  { id: '2', type: 'assignment' as const, title: 'Ticket assigned', description: 'TKT-1235 assigned to Jordan Kim', user: { name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 900000).toISOString(), metadata: {} },
-  { id: '3', type: 'milestone' as const, title: 'SLA achieved', description: 'First response SLA met for all morning tickets', user: { name: 'Support Team', avatar: '/avatars/support.jpg' }, timestamp: new Date(Date.now() - 7200000).toISOString(), metadata: {} },
-]
+// All mock data removed - migration #98
 
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
@@ -382,11 +299,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     fetchTickets()
   }, [fetchTickets])
 
-  const tickets = mockTickets
-  const agents = mockAgents
-  const slas = mockSLAs
-  const cannedResponses = mockCannedResponses
-  const customers = mockCustomers
+  const tickets: Ticket[] = []
+  const agents: Agent[] = []
+  const slas: SLA[] = []
+  const cannedResponses: CannedResponse[] = []
+  const customers: Customer[] = []
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
@@ -1235,7 +1152,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               </CardHeader>
               <CardContent>
                 <div className="divide-y">
-                  {mockCustomers.map(customer => (
+                  {customers.map(customer => (
                     <div key={customer.id} className="py-4 flex items-center gap-4">
                       <Avatar className="h-12 w-12">
                         <AvatarImage src={customer.avatar} alt="User avatar" />
@@ -2404,16 +2321,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       {/* AI-Powered Support Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
-          insights={mockSupportAIInsights}
+          insights={[]}
           onAskQuestion={handleAIQuestion}
         />
-        <PredictiveAnalytics predictions={mockSupportPredictions} />
+        <PredictiveAnalytics predictions={[]} />
       </div>
 
       {/* Activity Feed */}
       <div className="mt-6">
         <ActivityFeed
-          activities={mockSupportActivities}
+          activities={[]}
           maxItems={5}
           showFilters={true}
         />
