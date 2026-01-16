@@ -48,7 +48,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -84,7 +83,6 @@ interface TeamStats {
 }
 
 export default function TeamManagementPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -149,21 +147,15 @@ export default function TeamManagementPage() {
     timezone: 'UTC'
   })
 
-  // A+++ LOAD REAL TEAM DATA FROM DATABASE
   useEffect(() => {
     const loadTeamData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading team management data from database', { userId, action: 'load_start' })
-
-        // Load real team members from database
+        setError(null)        // Load real team members from database
         const { getTeamMembers, getTeamOverview, getDepartments } = await import('@/lib/team-hub-queries')
 
         const [membersResult, overviewResult, departmentsResult] = await Promise.all([
@@ -203,10 +195,7 @@ export default function TeamManagementPage() {
           }
         }))
 
-        setTeamMembers(members)
-        logger.info('Team members loaded', { count: members.length })
-
-        // Calculate stats from real data
+        setTeamMembers(members)        // Calculate stats from real data
         const stats: TeamStats = {
           totalMembers: members.length,
           activeMembers: members.filter(m => m.status === 'online' || m.status === 'busy').length,
@@ -222,15 +211,7 @@ export default function TeamManagementPage() {
             ? Math.min(85 + Math.floor(overviewResult.data.average_rating * 3), 100)
             : 94
         }
-        setTeamStats(stats)
-
-        logger.info('Team management data loaded successfully', {
-          members_count: members.length,
-          departments_count: departmentsResult.data?.length || 0,
-          total_members: overviewResult.data?.total_members || 0
-        })
-
-        setIsLoading(false)
+        setTeamStats(stats)        setIsLoading(false)
         toast.success(`Team management loaded: ${members.length} members`)
         announce('Team management loaded successfully', 'polite')
       } catch (err) {
@@ -246,7 +227,6 @@ export default function TeamManagementPage() {
     loadTeamData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A+++ CRUD HANDLERS
   const handleAddMember = async () => {
     if (!userId) {
       toast.error('Authentication required')
@@ -258,10 +238,7 @@ export default function TeamManagementPage() {
       return
     }
 
-    try {
-      logger.info('Adding new team member', { action: 'add_member', member: newMember, userId })
-
-      const { createTeamMember } = await import('@/lib/team-hub-queries')
+    try {      const { createTeamMember } = await import('@/lib/team-hub-queries')
 
       const { data, error } = await createTeamMember(userId, {
         name: newMember.name,
@@ -296,9 +273,7 @@ export default function TeamManagementPage() {
       }
 
       setTeamMembers(prev => [newTeamMember, ...prev])
-      toast.success(`${data.name} added to team successfully`)
-      logger.info('Team member added successfully', { member_id: data.id, name: data.name })
-      announce(`${data.name} added to team`, 'polite')
+      toast.success(`${data.name} added to team successfully`)      announce(`${data.name} added to team`, 'polite')
 
       // Reset form
       setNewMember({
@@ -331,10 +306,7 @@ export default function TeamManagementPage() {
     if (!memberToRemove) return
 
     try {
-      setIsRemoving(true)
-      logger.info('Deleting team member', { action: 'delete_member', member_id: memberToRemove.id })
-
-      const { createClient } = await import('@/lib/supabase/client')
+      setIsRemoving(true)      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -351,9 +323,7 @@ export default function TeamManagementPage() {
       }
 
       setTeamMembers(prev => prev.filter(m => m.id !== memberToRemove.id))
-      toast.success(`${memberToRemove.name} removed from team`)
-      logger.info('Team member deleted successfully', { member_id: memberToRemove.id })
-      announce(`${memberToRemove.name} removed from team`, 'polite')
+      toast.success(`${memberToRemove.name} removed from team`)      announce(`${memberToRemove.name} removed from team`, 'polite')
     } catch (err) {
       logger.error('Failed to delete team member', { error: err })
       toast.error('Failed to remove team member')
@@ -366,10 +336,7 @@ export default function TeamManagementPage() {
   }
 
   const handleExportData = async () => {
-    try {
-      logger.info('Exporting team management data', { action: 'export' })
-
-      const exportData = {
+    try {      const exportData = {
         teamMembers,
         teamStats,
         exportedAt: new Date().toISOString(),
@@ -386,13 +353,7 @@ export default function TeamManagementPage() {
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      logger.info('Team management data exported successfully', {
-        members_count: teamMembers.length,
-        file_name: a.download
-      })
-      toast.success('Team data exported successfully')
+      URL.revokeObjectURL(url)      toast.success('Team data exported successfully')
       announce('Team data exported successfully', 'polite')
     } catch (err) {
       logger.error('Failed to export team data', { error: err })
@@ -401,15 +362,11 @@ export default function TeamManagementPage() {
     }
   }
 
-  const handleFilterMembers = useCallback(() => {
-    logger.info('Opening member filters', { action: 'filter' })
-    announce('Opening member filters', 'polite')
+  const handleFilterMembers = useCallback(() => {    announce('Opening member filters', 'polite')
     setIsFilterOpen(true)
   }, [announce])
 
-  const handleApplyFilters = useCallback(() => {
-    logger.info('Applying member filters', { filters: filterOptions })
-    setIsFilterOpen(false)
+  const handleApplyFilters = useCallback(() => {    setIsFilterOpen(false)
     toast.success('Filters applied')
     announce('Filters applied', 'polite')
   }, [filterOptions, announce])
@@ -423,13 +380,7 @@ export default function TeamManagementPage() {
     announce('Filters reset', 'polite')
   }, [announce])
 
-  const handleMessageMember = useCallback((member: TeamMember) => {
-    logger.info('Opening message to member', {
-      action: 'message',
-      member_id: member.id,
-      member_name: member.name
-    })
-    setSelectedMember(member)
+  const handleMessageMember = useCallback((member: TeamMember) => {    setSelectedMember(member)
     setMessageText('')
     setIsMessageOpen(true)
     announce(`Opening message to ${member.name}`, 'polite')
@@ -442,13 +393,7 @@ export default function TeamManagementPage() {
     }
 
     setIsProcessing(true)
-    try {
-      logger.info('Sending message to member', {
-        member_id: selectedMember.id,
-        message_length: messageText.length
-      })
-
-      // Open email client with message
+    try {      // Open email client with message
       const subject = encodeURIComponent(`Message from Team`)
       const body = encodeURIComponent(messageText)
       window.open(`mailto:${selectedMember.email}?subject=${subject}&body=${body}`, '_blank')
@@ -466,13 +411,7 @@ export default function TeamManagementPage() {
     }
   }, [selectedMember, messageText, announce])
 
-  const handleEditMember = useCallback((member: TeamMember) => {
-    logger.info('Opening member edit', {
-      action: 'edit',
-      member_id: member.id,
-      member_name: member.name
-    })
-    setSelectedMember(member)
+  const handleEditMember = useCallback((member: TeamMember) => {    setSelectedMember(member)
     setEditForm({
       name: member.name,
       role: member.role,
@@ -490,13 +429,7 @@ export default function TeamManagementPage() {
     if (!selectedMember) return
 
     setIsProcessing(true)
-    try {
-      logger.info('Saving member edits', {
-        member_id: selectedMember.id,
-        updates: editForm
-      })
-
-      // Dynamic import for code splitting
+    try {      // Dynamic import for code splitting
       const { updateTeamMember } = await import('@/lib/team-hub-queries')
       await updateTeamMember(selectedMember.id, {
         name: editForm.name,
@@ -523,13 +456,7 @@ export default function TeamManagementPage() {
     }
   }, [selectedMember, editForm, announce])
 
-  const handleMemberOptions = useCallback((member: TeamMember) => {
-    logger.info('Opening member options', {
-      action: 'options',
-      member_id: member.id,
-      member_name: member.name
-    })
-    setSelectedMember(member)
+  const handleMemberOptions = useCallback((member: TeamMember) => {    setSelectedMember(member)
     announce(`Opening options for ${member.name}`, 'polite')
     // Options are handled via DropdownMenu component
   }, [announce])
@@ -562,7 +489,6 @@ export default function TeamManagementPage() {
     (member.skills && member.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())))
   )
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -578,7 +504,6 @@ export default function TeamManagementPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
