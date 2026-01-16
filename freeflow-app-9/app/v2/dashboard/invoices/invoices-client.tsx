@@ -409,13 +409,10 @@ Best regards,
         status: 'sent',
         sent_date: new Date().toISOString()
       })
-      toast.success('Invoice sent', {
-        description: `Invoice #${invoice.invoice_number} sent to ${invoice.client_name}`
+      toast.success('Invoice sent' sent to ${invoice.client_name}`
       })
     } catch (error) {
-      toast.error('Failed to send invoice', {
-        description: 'An error occurred while sending the invoice'
-      })
+      toast.error('Failed to send invoice')
     }
   }
 
@@ -428,13 +425,10 @@ Best regards,
         amount_paid: invoice.total_amount,
         amount_due: 0
       })
-      toast.success('Invoice marked as paid', {
-        description: `Invoice #${invoice.invoice_number} has been marked as paid`
+      toast.success('Invoice marked as paid' has been marked as paid`
       })
     } catch (error) {
-      toast.error('Failed to mark invoice as paid', {
-        description: 'An error occurred while updating the invoice'
-      })
+      toast.error('Failed to mark invoice as paid')
     }
   }
 
@@ -442,13 +436,10 @@ Best regards,
   const handleDeleteInvoice = async (invoice: Invoice) => {
     try {
       await deleteInvoice(invoice.id)
-      toast.success('Invoice deleted', {
-        description: `Invoice #${invoice.invoice_number} has been deleted`
+      toast.success('Invoice deleted' has been deleted`
       })
     } catch (error) {
-      toast.error('Failed to delete invoice', {
-        description: 'An error occurred while deleting the invoice'
-      })
+      toast.error('Failed to delete invoice')
     }
   }
 
@@ -456,13 +447,10 @@ Best regards,
   const handleVoidInvoice = async (invoice: Invoice) => {
     try {
       await updateInvoice(invoice.id, { status: 'cancelled' })
-      toast.info('Invoice voided', {
-        description: `Invoice #${invoice.invoice_number} has been cancelled`
+      toast.info('Invoice voided' has been cancelled`
       })
     } catch (error) {
-      toast.error('Failed to void invoice', {
-        description: 'An error occurred while voiding the invoice'
-      })
+      toast.error('Failed to void invoice')
     }
   }
 
@@ -491,13 +479,10 @@ Best regards,
         terms_and_conditions: invoice.terms_and_conditions,
         issue_date: new Date().toISOString().split('T')[0]
       } as any)
-      toast.success('Invoice duplicated', {
-        description: `Copy of invoice #${invoice.invoice_number} created`
+      toast.success('Invoice duplicated' created`
       })
     } catch (error) {
-      toast.error('Failed to duplicate invoice', {
-        description: 'An error occurred while duplicating the invoice'
-      })
+      toast.error('Failed to duplicate invoice')
     }
   }
 
@@ -508,20 +493,15 @@ Best regards,
         reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
         last_reminder_sent_at: new Date().toISOString()
       })
-      toast.success('Reminder sent', {
-        description: `Payment reminder sent for invoice #${invoice.invoice_number}`
+      toast.success('Reminder sent'`
       })
     } catch (error) {
-      toast.error('Failed to send reminder', {
-        description: 'An error occurred while sending the reminder'
-      })
+      toast.error('Failed to send reminder')
     }
   }
 
   const handleExportInvoices = () => {
-    toast.success('Export started', {
-      description: 'Your invoices are being exported'
-    })
+    toast.success('Export started')
   }
 
   const getStatusColor = (status: string) => {
@@ -546,8 +526,7 @@ Best regards,
   ]
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.success('Downloading invoice', {
-      description: `PDF for invoice #${invoice.invoice_number} will be ready shortly`
+    toast.success('Downloading invoice' will be ready shortly`
     })
   }
 
@@ -728,9 +707,7 @@ Best regards,
                 inv.status === 'overdue' || inv.status === 'sent'
               )
               if (overdueInvoices.length === 0) {
-                toast.info('No invoices to remind', {
-                  description: 'All invoices are either paid or in draft status'
-                })
+                toast.info('No invoices to remind')
                 return
               }
               for (const inv of overdueInvoices) {
@@ -912,7 +889,7 @@ Best regards,
                               const invoiceUrl = `https://app.freeflow.io/invoices/${invoice.id}`
                               try {
                                 await navigator.clipboard.writeText(invoiceUrl)
-                                toast.success('Invoice link copied', { description: invoiceUrl })
+                                toast.success('Invoice link copied')
                               } catch (err) {
                                 // Fallback for older browsers
                                 const textArea = document.createElement('textarea')
@@ -923,9 +900,9 @@ Best regards,
                                 textArea.select()
                                 try {
                                   document.execCommand('copy')
-                                  toast.success('Invoice link copied', { description: invoiceUrl })
+                                  toast.success('Invoice link copied')
                                 } catch {
-                                  toast.error('Failed to copy link', { description: 'Please copy manually: ' + invoiceUrl })
+                                  toast.error('Failed to copy link')
                                 }
                                 document.body.removeChild(textArea)
                               }
@@ -1445,10 +1422,10 @@ Best regards,
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value={apiKey} readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey); toast.success('API key copied', { description: 'API key has been copied to clipboard' }) }}>
+                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey); toast.success('API key copied') }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) { const newKey = 'inv_live_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API key regenerated', { description: 'Your new API key is ready. Update your integrations.' }) } }}>
+                            <Button variant="outline" size="icon" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) { const newKey = 'inv_live_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API key regenerated') } }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1713,7 +1690,7 @@ Best regards,
                             <div className="font-medium">Reset Invoice Numbering</div>
                             <p className="text-sm text-gray-500">Reset invoice number sequence (currently at INV-{invoiceNumberSequence})</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset invoice numbering? This cannot be undone.')) { setInvoiceNumberSequence(1001); toast.success('Invoice numbering reset', { description: 'Next invoice will start from INV-1001' }) } }}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset invoice numbering? This cannot be undone.')) { setInvoiceNumberSequence(1001); toast.success('Invoice numbering reset') } }}>
                             Reset Numbers
                           </Button>
                         </div>
@@ -1722,7 +1699,7 @@ Best regards,
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive" onClick={() => { toast.info('Contact support', { description: 'Please contact support to permanently delete all invoice data.' }) }}>
+                          <Button variant="destructive" onClick={() => { toast.info('Contact support') }}>
                             Delete All Data
                           </Button>
                         </div>
@@ -1742,7 +1719,7 @@ Best regards,
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
 
@@ -2598,9 +2575,7 @@ Best regards,
             <Button
               className="bg-emerald-600 hover:bg-emerald-700"
               onClick={() => {
-                toast.success('Payment recorded', {
-                  description: 'The payment has been recorded successfully'
-                })
+                toast.success('Payment recorded')
                 setShowRecordPaymentDialog(false)
               }}
             >
@@ -2674,7 +2649,7 @@ Best regards,
             <Button variant="outline" onClick={() => { setFilterSettings({ status: 'all', minAmount: '', maxAmount: '', client: '', sortBy: 'date' }); toast.success('Filters cleared') }}>
               Clear Filters
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); const activeFilters = [filterSettings.status !== 'all' && 'status', filterSettings.minAmount && 'min amount', filterSettings.maxAmount && 'max amount', filterSettings.client && 'client'].filter(Boolean); toast.success('Filters applied', { description: activeFilters.length > 0 ? `Filtering by: ${activeFilters.join(', ')}` : 'Showing all invoices' }) }}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); const activeFilters = [filterSettings.status !== 'all' && 'status', filterSettings.minAmount && 'min amount', filterSettings.maxAmount && 'max amount', filterSettings.client && 'client'].filter(Boolean); toast.success('Filters applied'` : 'Showing all invoices' }) }}>
               Apply Filters
             </Button>
           </DialogFooter>
@@ -2891,7 +2866,7 @@ Best regards,
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailTemplateDialog(false)}>Cancel</Button>
-            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setShowEmailTemplateDialog(false); toast.success('Email template saved', { description: 'Your template changes have been saved' }) }}>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setShowEmailTemplateDialog(false); toast.success('Email template saved') }}>
               Save Template
             </Button>
           </DialogFooter>
@@ -2947,12 +2922,12 @@ Best regards,
           </div>
           <DialogFooter>
             {selectedGateway?.connected && (
-              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: false } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: false } : null); } setShowPaymentGatewayDialog(false); toast.info(`${selectedGateway?.name} disconnected`, { description: 'You can reconnect at any time' }) }}>
+              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: false } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: false } : null); } setShowPaymentGatewayDialog(false); toast.info(`${selectedGateway?.name} disconnected`) }}>
                 Disconnect
               </Button>
             )}
             <Button variant="outline" onClick={() => setShowPaymentGatewayDialog(false)}>Cancel</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: true } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: true } : null); } setShowPaymentGatewayDialog(false); toast.success(selectedGateway?.connected ? `${selectedGateway?.name} settings saved` : `${selectedGateway?.name} connected successfully`, { description: selectedGateway?.connected ? 'Configuration updated' : 'You can now accept payments via ' + selectedGateway?.name }) }}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: true } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: true } : null); } setShowPaymentGatewayDialog(false); toast.success(selectedGateway?.connected ? `${selectedGateway?.name} settings saved` : `${selectedGateway?.name} connected successfully`) }}>
               {selectedGateway?.connected ? 'Save Settings' : 'Connect'}
             </Button>
           </DialogFooter>
@@ -3013,7 +2988,7 @@ Best regards,
                 </p>
                 <div className="p-4 border rounded-lg text-center">
                   <p className="text-sm mb-3">You will be redirected to {selectedAccountingApp?.name} to authorize the connection.</p>
-                  <Button className="bg-green-600 hover:bg-green-700" onClick={() => { const oauthUrls: Record<string, string> = { QuickBooks: 'https://appcenter.intuit.com/connect/oauth2', Xero: 'https://login.xero.com/identity/connect/authorize', FreshBooks: 'https://my.freshbooks.com/service/auth/oauth/authorize', Wave: 'https://api.waveapps.com/oauth2/authorize' }; const url = oauthUrls[selectedAccountingApp?.name || ''] || 'https://example.com/oauth'; window.open(url, '_blank', 'width=600,height=700'); if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: true } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: true } : null); } setShowAccountingAppDialog(false); toast.success(`Connecting to ${selectedAccountingApp?.name}...`, { description: 'Complete authorization in the popup window' }) }}>
+                  <Button className="bg-green-600 hover:bg-green-700" onClick={() => { const oauthUrls: Record<string, string> = { QuickBooks: 'https://appcenter.intuit.com/connect/oauth2', Xero: 'https://login.xero.com/identity/connect/authorize', FreshBooks: 'https://my.freshbooks.com/service/auth/oauth/authorize', Wave: 'https://api.waveapps.com/oauth2/authorize' }; const url = oauthUrls[selectedAccountingApp?.name || ''] || 'https://example.com/oauth'; window.open(url, '_blank', 'width=600,height=700'); if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: true } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: true } : null); } setShowAccountingAppDialog(false); toast.success(`Connecting to ${selectedAccountingApp?.name}...`) }}>
                     Authorize with {selectedAccountingApp?.name}
                   </Button>
                 </div>
@@ -3022,7 +2997,7 @@ Best regards,
           </div>
           <DialogFooter>
             {selectedAccountingApp?.connected && (
-              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: false } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: false } : null); } setShowAccountingAppDialog(false); toast.info(`${selectedAccountingApp?.name} disconnected`, { description: 'Sync has been disabled' }) }}>
+              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: false } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: false } : null); } setShowAccountingAppDialog(false); toast.info(`${selectedAccountingApp?.name} disconnected`) }}>
                 Disconnect
               </Button>
             )}

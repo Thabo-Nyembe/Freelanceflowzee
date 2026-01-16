@@ -464,7 +464,7 @@ export default function AIDesignClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to generate images' })
+        toast.error('Authentication required')
         return
       }
 
@@ -492,12 +492,12 @@ export default function AIDesignClient() {
 
       if (error) throw error
 
-      toast.success('Generation started', { description: 'Your image is being created' })
+      toast.success('Generation started')
       setPrompt('')
       setNegativePrompt('')
       fetchGenerations()
     } catch (err: any) {
-      toast.error('Generation failed', { description: err.message })
+      toast.error('Generation failed')
     } finally {
       setIsGenerating(false)
     }
@@ -519,7 +519,7 @@ export default function AIDesignClient() {
       ))
       toast.success(newFavorite ? 'Added to favorites' : 'Removed from favorites')
     } catch (err: any) {
-      toast.error('Update failed', { description: err.message })
+      toast.error('Update failed')
     }
   }
 
@@ -537,7 +537,7 @@ export default function AIDesignClient() {
       setShowGenerationDialog(false)
       toast.success('Generation deleted')
     } catch (err: any) {
-      toast.error('Delete failed', { description: err.message })
+      toast.error('Delete failed')
     }
   }
 
@@ -559,9 +559,9 @@ export default function AIDesignClient() {
       setGenerations(prev => prev.map(g =>
         g.id === gen.id ? { ...g, downloads: g.downloads + 1 } : g
       ))
-      toast.success('Download started', { description: 'Your design is being downloaded' })
+      toast.success('Download started')
     } catch (err: any) {
-      toast.error('Download failed', { description: err.message })
+      toast.error('Download failed')
     }
   }
 
@@ -574,7 +574,7 @@ export default function AIDesignClient() {
     setSelectedRatio(gen.aspectRatio)
     setSelectedQuality(gen.quality)
     setActiveTab('generate')
-    toast.info('Settings loaded', { description: 'Click Generate to create a new variation' })
+    toast.info('Settings loaded')
   }
 
   // Create collection
@@ -594,9 +594,9 @@ export default function AIDesignClient() {
       }
 
       setCollections(prev => [newCollection, ...prev])
-      toast.success('Collection created', { description: `"${name}" is ready to use` })
+      toast.success('Collection created'" is ready to use` })
     } catch (err: any) {
-      toast.error('Failed to create collection', { description: err.message })
+      toast.error('Failed to create collection')
     }
   }
 
@@ -604,7 +604,7 @@ export default function AIDesignClient() {
   const handleExportDesigns = async () => {
     setIsLoading(true)
     try {
-      toast.success('Export started', { description: `Exporting ${generations.length} designs` })
+      toast.success('Export started' designs` })
     } finally {
       setIsLoading(false)
     }
@@ -1044,7 +1044,7 @@ export default function AIDesignClient() {
                           'Steampunk airship flying through clouds at golden hour, detailed illustration'
                         ]
                         setPrompt(randomPrompts[Math.floor(Math.random() * randomPrompts.length)])
-                        toast.success('Random prompt generated', { description: 'Feel free to modify it!' })
+                        toast.success('Random prompt generated')
                       }}>
                         <Shuffle className="w-4 h-4" />
                       </Button>
@@ -1303,7 +1303,7 @@ export default function AIDesignClient() {
                   <List className="w-4 h-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.info('Filter options', { description: 'Filter by style, date, status, or favorites' })
+                  toast.info('Filter options')
                 }}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
@@ -1549,7 +1549,7 @@ export default function AIDesignClient() {
                             setPrompt(item.prompt)
                             setSelectedStyle(item.style)
                             setActiveTab('generate')
-                            toast.info('Prompt loaded', { description: 'Ready to regenerate' })
+                            toast.info('Prompt loaded')
                           }}
                         >
                           <RefreshCw className="w-4 h-4" />
@@ -1968,7 +1968,7 @@ export default function AIDesignClient() {
                           <span>View History</span>
                         </Button>
                         <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => {
-                          toast.info('Help Center', { description: 'Visit docs.freeflow.ai for guides and tutorials' })
+                          toast.info('Help Center')
                         }}>
                           <HelpCircle className="w-6 h-6" />
                           <span>Get Help</span>
@@ -2012,7 +2012,7 @@ export default function AIDesignClient() {
             <AIInsightsPanel
               insights={mockAIDesignInsights}
               title="AI Design Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

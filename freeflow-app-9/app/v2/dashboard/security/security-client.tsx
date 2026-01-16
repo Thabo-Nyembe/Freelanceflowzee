@@ -623,7 +623,7 @@ export default function SecurityClient() {
   // Real Supabase handlers
   const handleRunScan = useCallback(async () => {
     setIsSaving(true)
-    toast.info('Security scan started', { description: 'Analyzing your security posture...' })
+    toast.info('Security scan started')
 
     try {
       // Log security scan event
@@ -637,9 +637,9 @@ export default function SecurityClient() {
         })
       }
       await fetchEvents()
-      toast.success('Security scan complete', { description: 'No critical issues found' })
+      toast.success('Security scan complete')
     } catch (err) {
-      toast.error('Scan failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Scan failed')
     } finally {
       setIsSaving(false)
     }
@@ -650,12 +650,12 @@ export default function SecurityClient() {
     try {
       const result = await enable2FA('app')
       if (result.success) {
-        toast.success('MFA enabled', { description: 'Two-factor authentication is now active' })
+        toast.success('MFA enabled')
       } else {
-        toast.error('Failed to enable MFA', { description: result.error })
+        toast.error('Failed to enable MFA')
       }
     } catch (err) {
-      toast.error('Failed to enable MFA', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to enable MFA')
     } finally {
       setIsSaving(false)
     }
@@ -666,12 +666,12 @@ export default function SecurityClient() {
     try {
       const result = await disable2FA()
       if (result.success) {
-        toast.success('MFA disabled', { description: 'Two-factor authentication has been disabled' })
+        toast.success('MFA disabled')
       } else {
-        toast.error('Failed to disable MFA', { description: result.error })
+        toast.error('Failed to disable MFA')
       }
     } catch (err) {
-      toast.error('Failed to disable MFA', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to disable MFA')
     } finally {
       setIsSaving(false)
     }
@@ -679,7 +679,7 @@ export default function SecurityClient() {
 
   const handleRotateKeys = useCallback(async () => {
     setIsSaving(true)
-    toast.info('Rotating keys...', { description: 'Generating new security keys' })
+    toast.info('Rotating keys...')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -691,16 +691,16 @@ export default function SecurityClient() {
           additional_data: { rotated_at: new Date().toISOString() }
         })
       }
-      toast.success('Keys rotated', { description: 'Security keys have been regenerated' })
+      toast.success('Keys rotated')
     } catch (err) {
-      toast.error('Key rotation failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Key rotation failed')
     } finally {
       setIsSaving(false)
     }
   }, [supabase])
 
   const handleExportReport = useCallback(async () => {
-    toast.info('Exporting report', { description: 'Security audit report is being generated' })
+    toast.info('Exporting report')
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -712,9 +712,9 @@ export default function SecurityClient() {
           additional_data: { exported_at: new Date().toISOString() }
         })
       }
-      toast.success('Report exported', { description: 'Security report has been generated' })
+      toast.success('Report exported')
     } catch (err) {
-      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Export failed')
     }
   }, [supabase])
 
@@ -723,12 +723,12 @@ export default function SecurityClient() {
     try {
       const result = await blockIPFromEvent(eventId)
       if (result.success) {
-        toast.success('Threat blocked', { description: `IP ${result.ip} has been blocked` })
+        toast.success('Threat blocked' has been blocked` })
       } else {
-        toast.error('Failed to block threat', { description: result.error })
+        toast.error('Failed to block threat')
       }
     } catch (err) {
-      toast.error('Failed to block threat', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to block threat')
     } finally {
       setIsSaving(false)
     }
@@ -739,12 +739,12 @@ export default function SecurityClient() {
     try {
       const result = await resolveEvent(eventId, notes)
       if (result.success) {
-        toast.success('Event resolved', { description: 'Security event has been marked as resolved' })
+        toast.success('Event resolved')
       } else {
-        toast.error('Failed to resolve event', { description: result.error })
+        toast.error('Failed to resolve event')
       }
     } catch (err) {
-      toast.error('Failed to resolve event', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to resolve event')
     } finally {
       setIsSaving(false)
     }
@@ -755,12 +755,12 @@ export default function SecurityClient() {
     try {
       const result = await terminateSession(sessionId)
       if (result.success) {
-        toast.success('Session terminated', { description: 'Device session has been revoked' })
+        toast.success('Session terminated')
       } else {
-        toast.error('Failed to terminate session', { description: result.error })
+        toast.error('Failed to terminate session')
       }
     } catch (err) {
-      toast.error('Failed to terminate session', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to terminate session')
     } finally {
       setIsSaving(false)
     }
@@ -771,12 +771,12 @@ export default function SecurityClient() {
     try {
       const result = await terminateAllOtherSessions()
       if (result.success) {
-        toast.success('All sessions revoked', { description: 'All other device sessions have been terminated' })
+        toast.success('All sessions revoked')
       } else {
-        toast.error('Failed to revoke sessions', { description: result.error })
+        toast.error('Failed to revoke sessions')
       }
     } catch (err) {
-      toast.error('Failed to revoke sessions', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to revoke sessions')
     } finally {
       setIsSaving(false)
     }
@@ -787,12 +787,12 @@ export default function SecurityClient() {
     try {
       const result = await updateSettings({ [key]: value })
       if (result.success) {
-        toast.success('Setting updated', { description: 'Security setting has been saved' })
+        toast.success('Setting updated')
       } else {
-        toast.error('Failed to update setting', { description: result.error })
+        toast.error('Failed to update setting')
       }
     } catch (err) {
-      toast.error('Failed to update setting', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to update setting')
     } finally {
       setIsSaving(false)
     }
@@ -827,9 +827,9 @@ export default function SecurityClient() {
     setIsRefreshing(true)
     try {
       await Promise.all([fetchSettings(), fetchEvents(), fetchSessions()])
-      toast.success('Vault synced', { description: 'All data has been refreshed' })
+      toast.success('Vault synced')
     } catch (err) {
-      toast.error('Sync failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Sync failed')
     } finally {
       setIsRefreshing(false)
     }
@@ -839,9 +839,9 @@ export default function SecurityClient() {
   const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success(`${label} copied`, { description: 'Copied to clipboard successfully' })
+      toast.success(`${label} copied`)
     } catch (err) {
-      toast.error('Copy failed', { description: 'Unable to copy to clipboard' })
+      toast.error('Copy failed')
     }
   }, [])
 
@@ -865,11 +865,11 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, deleted_at: new Date().toISOString() }
         })
       }
-      toast.success('Item deleted', { description: `${selectedItem.name} has been removed from your vault` })
+      toast.success('Item deleted' has been removed from your vault` })
       setShowDeleteConfirmDialog(false)
       setSelectedItem(null)
     } catch (err) {
-      toast.error('Delete failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Delete failed')
     } finally {
       setIsSaving(false)
     }
@@ -889,10 +889,10 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, shared_with: email, expires_in: expiresIn }
         })
       }
-      toast.success('Item shared', { description: `Share link sent to ${email}` })
+      toast.success('Item shared'` })
       setShowShareItemDialog(false)
     } catch (err) {
-      toast.error('Share failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Share failed')
     } finally {
       setIsSaving(false)
     }
@@ -927,10 +927,10 @@ export default function SecurityClient() {
           additional_data: { format, exported_at: new Date().toISOString() }
         })
       }
-      toast.success('Export complete', { description: 'Vault data has been downloaded' })
+      toast.success('Export complete')
       setShowExportVaultDialog(false)
     } catch (err) {
-      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Export failed')
     } finally {
       setIsSaving(false)
     }
@@ -951,10 +951,10 @@ export default function SecurityClient() {
           additional_data: { items_count: data.items?.length || 0, imported_at: new Date().toISOString() }
         })
       }
-      toast.success('Import complete', { description: `${data.items?.length || 0} items imported to vault` })
+      toast.success('Import complete' items imported to vault` })
       setShowImportVaultDialog(false)
     } catch (err) {
-      toast.error('Import failed', { description: err instanceof Error ? err.message : 'Invalid file format' })
+      toast.error('Import failed')
     } finally {
       setIsSaving(false)
     }
@@ -974,11 +974,11 @@ export default function SecurityClient() {
           additional_data: { key_id: selectedKey.id, revoked_at: new Date().toISOString() }
         })
       }
-      toast.success('Key revoked', { description: `${selectedKey.name} has been permanently revoked` })
+      toast.success('Key revoked' has been permanently revoked` })
       setShowRevokeKeyDialog(false)
       setSelectedKey(null)
     } catch (err) {
-      toast.error('Revoke failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Revoke failed')
     } finally {
       setIsSaving(false)
     }
@@ -997,10 +997,10 @@ export default function SecurityClient() {
           additional_data: { device_name: deviceName, initiated_at: new Date().toISOString() }
         })
       }
-      toast.success('Authorization sent', { description: 'Check your email to complete device authorization' })
+      toast.success('Authorization sent')
       setShowAddDeviceDialog(false)
     } catch (err) {
-      toast.error('Failed to add device', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to add device')
     } finally {
       setIsSaving(false)
     }
@@ -1020,10 +1020,10 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, updated_at: new Date().toISOString() }
         })
       }
-      toast.success('Item updated', { description: `${selectedItem.name} has been saved` })
+      toast.success('Item updated' has been saved` })
       setShowEditItemDialog(false)
     } catch (err) {
-      toast.error('Update failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Update failed')
     } finally {
       setIsSaving(false)
     }
@@ -2137,7 +2137,7 @@ export default function SecurityClient() {
             <AIInsightsPanel
               insights={mockSecurityAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

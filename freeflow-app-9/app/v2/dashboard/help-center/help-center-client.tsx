@@ -921,7 +921,7 @@ export default function HelpCenterClient() {
 
   const handleSubmitNewArticle = () => {
     if (!newArticleTitle.trim()) {
-      toast.error('Title Required', { description: 'Please enter an article title' })
+      toast.error('Title Required')
       return
     }
     setShowCreateArticleDialog(false)
@@ -940,7 +940,7 @@ export default function HelpCenterClient() {
 
   const handleSubmitNewCategory = () => {
     if (!newCategoryName.trim()) {
-      toast.error('Name Required', { description: 'Please enter a category name' })
+      toast.error('Name Required')
       return
     }
     setShowCreateCategoryDialog(false)
@@ -956,7 +956,7 @@ export default function HelpCenterClient() {
 
   const handleExecuteSmartSearch = () => {
     if (!smartSearchQuery.trim()) {
-      toast.error('Query Required', { description: 'Please enter a search term' })
+      toast.error('Query Required')
       return
     }
     setShowSmartSearchDialog(false)
@@ -1030,7 +1030,7 @@ export default function HelpCenterClient() {
 
   const handleSubmitNewCollection = () => {
     if (!newCollectionName.trim()) {
-      toast.error('Name Required', { description: 'Please enter a collection name' })
+      toast.error('Name Required')
       return
     }
     setShowNewCollectionDialog(false)
@@ -1091,7 +1091,7 @@ export default function HelpCenterClient() {
 
   const handleSendFollowUp = () => {
     if (!followUpMessage.trim()) {
-      toast.error('Message Required', { description: 'Please enter a follow-up message' })
+      toast.error('Message Required')
       return
     }
     setShowFollowUpDialog(false)
@@ -1113,7 +1113,7 @@ export default function HelpCenterClient() {
 
   const handleSaveSchedule = () => {
     if (!scheduleDate) {
-      toast.error('Date Required', { description: 'Please select a date' })
+      toast.error('Date Required')
       return
     }
     setShowScheduleDialog(false)
@@ -1144,7 +1144,7 @@ export default function HelpCenterClient() {
 
   const handleSendShare = () => {
     if (!shareEmail.trim()) {
-      toast.error('Email Required', { description: 'Please enter an email address' })
+      toast.error('Email Required')
       return
     }
     setShowShareDialog(false)
@@ -2002,7 +2002,7 @@ export default function HelpCenterClient() {
                           <p className="text-xs text-muted-foreground">{formatNumber(article.views)} views</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.success('Opening Article', { description: `Viewing "${article.title}"` })
+                          toast.success('Opening Article'"` })
                         }}>
                           <ExternalLink className="w-4 h-4" />
                         </Button>
@@ -2070,7 +2070,7 @@ export default function HelpCenterClient() {
             <AIInsightsPanel
               insights={mockHelpCenterAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2472,10 +2472,10 @@ export default function HelpCenterClient() {
               <Button onClick={() => {
                 const input = document.getElementById('new-tag-input') as HTMLInputElement
                 if (input?.value.trim()) {
-                  toast.success('Tag Added', { description: `Tag "${input.value}" has been created` })
+                  toast.success('Tag Added'" has been created` })
                   input.value = ''
                 } else {
-                  toast.error('Tag Required', { description: 'Please enter a tag name' })
+                  toast.error('Tag Required')
                 }
               }}>Add Tag</Button>
             </div>
@@ -2842,7 +2842,7 @@ export default function HelpCenterClient() {
             <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Close</Button>
             <Button onClick={() => {
               if (selectedCollectionForView) {
-                toast.success('Editing Collection', { description: `Editing "${selectedCollectionForView.name}"` })
+                toast.success('Editing Collection'"` })
                 setShowCollectionDialog(false)
               }
             }}>Edit Collection</Button>
@@ -2926,10 +2926,10 @@ export default function HelpCenterClient() {
                     {fb.comment && <p className="text-sm text-muted-foreground mt-2">"{fb.comment}"</p>}
                     <div className="flex gap-2 mt-3">
                       <Button size="sm" variant="outline" onClick={() => {
-                        toast.success('Responding', { description: 'Opening feedback response form...' })
+                        toast.success('Responding')
                       }}>Respond</Button>
                       <Button size="sm" variant="outline" onClick={() => {
-                        toast.success('Feedback Dismissed', { description: 'This feedback has been dismissed' })
+                        toast.success('Feedback Dismissed')
                       }}>Dismiss</Button>
                     </div>
                   </div>

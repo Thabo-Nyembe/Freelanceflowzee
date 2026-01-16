@@ -501,7 +501,7 @@ export default function WebinarsClient() {
   // Handlers with real functionality
   const handleCreateWebinar = () => {
     setShowScheduleDialog(true)
-    toast.info('Create Webinar', { description: 'Opening webinar scheduler...' })
+    toast.info('Create Webinar')
   }
 
   const handleStartWebinar = (webinarId: string, webinarTitle: string) => {
@@ -509,7 +509,7 @@ export default function WebinarsClient() {
       w.id === webinarId ? { ...w, status: 'live' as WebinarStatus } : w
     ))
     setIsLive(true)
-    toast.success('Webinar Started', { description: `"${webinarTitle}" is now live` })
+    toast.success('Webinar Started'" is now live` })
   }
 
   const handleEndWebinar = (webinarId: string, webinarTitle: string) => {
@@ -517,7 +517,7 @@ export default function WebinarsClient() {
       w.id === webinarId ? { ...w, status: 'ended' as WebinarStatus } : w
     ))
     setIsLive(false)
-    toast.info('Webinar Ended', { description: `"${webinarTitle}" has ended` })
+    toast.info('Webinar Ended'" has ended` })
   }
 
   const handleRegister = (webinarId: string) => {
@@ -532,9 +532,9 @@ export default function WebinarsClient() {
         registeredAt: new Date().toISOString().split('T')[0]
       }
       setRegistrations(prev => [...prev, newReg])
-      toast.success('Registered', { description: 'You have been registered for this webinar' })
+      toast.success('Registered')
     } else {
-      toast.info('Already Registered', { description: 'You are already registered for this webinar' })
+      toast.info('Already Registered')
     }
   }
 
@@ -544,7 +544,7 @@ export default function WebinarsClient() {
     link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('Name,Email,Status\n' + csvContent)
     link.download = 'attendees.csv'
     link.click()
-    toast.success('Exported', { description: `${registrations.length} attendees exported to CSV` })
+    toast.success('Exported' attendees exported to CSV` })
   }
 
   const handleViewRecording = (recording: Recording) => {
@@ -554,7 +554,7 @@ export default function WebinarsClient() {
 
   const handleDeleteRecording = (recordingId: string) => {
     setRecordings(prev => prev.filter(r => r.id !== recordingId))
-    toast.success('Recording Deleted', { description: 'Recording has been removed from library' })
+    toast.success('Recording Deleted')
   }
 
   const handleApproveRegistrations = () => {
@@ -562,7 +562,7 @@ export default function WebinarsClient() {
     setRegistrations(prev => prev.map(r =>
       r.status === 'pending' ? { ...r, status: 'approved' as RegistrationStatus } : r
     ))
-    toast.success('Registrations Approved', { description: `${pendingCount} registration(s) approved` })
+    toast.success('Registrations Approved' registration(s) approved` })
   }
 
   const handleDeclineRegistrations = () => {
@@ -570,7 +570,7 @@ export default function WebinarsClient() {
     setRegistrations(prev => prev.map(r =>
       r.status === 'pending' ? { ...r, status: 'declined' as RegistrationStatus } : r
     ))
-    toast.info('Registrations Declined', { description: `${pendingCount} registration(s) declined` })
+    toast.info('Registrations Declined' registration(s) declined` })
   }
 
   // Quick Actions for toolbar (defined inside component to access state)
@@ -581,7 +581,7 @@ export default function WebinarsClient() {
       if (scheduledWebinar) {
         handleStartWebinar(scheduledWebinar.id, scheduledWebinar.title)
       } else {
-        toast.info('No Scheduled Webinars', { description: 'Schedule a webinar first to go live' })
+        toast.info('No Scheduled Webinars')
       }
     }, variant: 'default' as const },
     { id: '3', label: 'Recordings', icon: 'film', action: () => setActiveTab('recordings'), variant: 'outline' as const },
@@ -608,7 +608,7 @@ export default function WebinarsClient() {
           <div className="flex items-center gap-3">
             <Button variant="outline" className="gap-2" onClick={() => {
               setShowCalendarDialog(true)
-              toast.info('Calendar View', { description: `Showing ${webinars.length} scheduled events` })
+              toast.info('Calendar View' scheduled events` })
             }}>
               <Calendar className="w-4 h-4" />
               View Calendar
@@ -776,7 +776,7 @@ export default function WebinarsClient() {
                   if (scheduledWebinar) {
                     handleStartWebinar(scheduledWebinar.id, scheduledWebinar.title)
                   } else {
-                    toast.info('No Scheduled Webinars', { description: 'Schedule a webinar first to go live' })
+                    toast.info('No Scheduled Webinars')
                   }
                 }},
                 { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => setActiveTab('registrations') },
@@ -935,7 +935,7 @@ export default function WebinarsClient() {
                             if (recording) {
                               handleViewRecording(recording)
                             } else {
-                              toast.info('No Recording', { description: 'Recording not available for this webinar' })
+                              toast.info('No Recording')
                             }
                           }}>
                             <PlayCircle className="w-4 h-4" />
@@ -997,7 +997,7 @@ export default function WebinarsClient() {
                   if (scheduledWebinar) {
                     handleRegister(scheduledWebinar.id)
                   } else {
-                    toast.info('No Upcoming Webinars', { description: 'Schedule a webinar to add registrations' })
+                    toast.info('No Upcoming Webinars')
                   }
                 }},
                 { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => setShowImportDialog(true) },
@@ -1008,7 +1008,7 @@ export default function WebinarsClient() {
                 { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
                 { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => {
                   setRegistrations([...mockRegistrations])
-                  toast.success('Registrations Refreshed', { description: `${mockRegistrations.length} total registrations` })
+                  toast.success('Registrations Refreshed' total registrations` })
                 }}
               ].map((action, idx) => (
                 <Button
@@ -1096,7 +1096,7 @@ export default function WebinarsClient() {
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
                                 navigator.clipboard.writeText(reg.email)
-                                toast.success('Email Copied', { description: `${reg.email} copied to clipboard` })
+                                toast.success('Email Copied' copied to clipboard` })
                               }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
@@ -1106,7 +1106,7 @@ export default function WebinarsClient() {
                                     setRegistrations(prev => prev.map(r =>
                                       r.id === reg.id ? { ...r, status: 'approved' as RegistrationStatus } : r
                                     ))
-                                    toast.success('Registration Approved', { description: `${reg.name} has been approved` })
+                                    toast.success('Registration Approved' has been approved` })
                                   }}>
                                     <UserCheck className="w-4 h-4" />
                                   </Button>
@@ -1114,7 +1114,7 @@ export default function WebinarsClient() {
                                     setRegistrations(prev => prev.map(r =>
                                       r.id === reg.id ? { ...r, status: 'declined' as RegistrationStatus } : r
                                     ))
-                                    toast.info('Registration Declined', { description: `${reg.name} has been declined` })
+                                    toast.info('Registration Declined' has been declined` })
                                   }}>
                                     <UserX className="w-4 h-4" />
                                   </Button>
@@ -1122,7 +1122,7 @@ export default function WebinarsClient() {
                               )}
                               <Button variant="ghost" size="sm" onClick={() => {
                                 setRegistrations(prev => prev.filter(r => r.id !== reg.id))
-                                toast.success('Registration Removed', { description: `${reg.name} has been removed` })
+                                toast.success('Registration Removed' has been removed` })
                               }}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -1179,24 +1179,24 @@ export default function WebinarsClient() {
                     totalAttendees: stats.totalAttendees,
                     avgAttendance: stats.avgAttendanceRate
                   }
-                  toast.success('Report Generated', { description: `${webinars.length} webinars analyzed` })
+                  toast.success('Report Generated' webinars analyzed` })
                 }},
                 { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => {
                   const trend = Math.round((Math.random() * 20) - 5)
-                  toast.success('Trend Analysis', { description: `Attendance ${trend >= 0 ? 'up' : 'down'} ${Math.abs(trend)}% this month` })
+                  toast.success('Trend Analysis' ${Math.abs(trend)}% this month` })
                 }},
                 { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => {
                   const types = webinars.reduce((acc, w) => { acc[w.type] = (acc[w.type] || 0) + 1; return acc }, {} as Record<string, number>)
-                  toast.success('Category Breakdown', { description: `${Object.keys(types).length} webinar types analyzed` })
+                  toast.success('Category Breakdown' webinar types analyzed` })
                 }},
                 { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
                 { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => {
                   const answered = mockQA.filter(q => q.status === 'answered').length
-                  toast.success('Q&A Statistics', { description: `${answered}/${mockQA.length} questions answered` })
+                  toast.success('Q&A Statistics'/${mockQA.length} questions answered` })
                 }},
                 { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => {
                   const totalVotes = mockPolls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
-                  toast.success('Poll Results', { description: `${totalVotes} total votes across ${mockPolls.length} polls` })
+                  toast.success('Poll Results' total votes across ${mockPolls.length} polls` })
                 }},
                 { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => {
                   const csvData = `Webinar,Registered,Attended,Rate\n${webinars.map(w => `${w.title},${w.registeredCount},${w.attendedCount},${w.registeredCount > 0 ? ((w.attendedCount/w.registeredCount)*100).toFixed(1) : 0}%`).join('\n')}`
@@ -1204,7 +1204,7 @@ export default function WebinarsClient() {
                   link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData)
                   link.download = 'webinar-analytics.csv'
                   link.click()
-                  toast.success('Analytics Exported', { description: 'CSV file downloaded' })
+                  toast.success('Analytics Exported')
                 }},
                 { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => setShowCalendarDialog(true) }
               ].map((action, idx) => (
@@ -1387,22 +1387,22 @@ export default function WebinarsClient() {
                   if (videoRecording) {
                     handleViewRecording(videoRecording)
                   } else {
-                    toast.info('No Recordings', { description: 'No video recordings available' })
+                    toast.info('No Recordings')
                   }
                 }},
                 { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => {
                   const readyRecordings = recordings.filter(r => r.status === 'ready')
                   if (readyRecordings.length > 0) {
                     const totalSize = readyRecordings.reduce((s, r) => s + r.size, 0)
-                    toast.success('Download Started', { description: `Downloading ${formatBytes(totalSize)} of recordings` })
+                    toast.success('Download Started' of recordings` })
                   } else {
-                    toast.info('No Downloads Available', { description: 'No ready recordings to download' })
+                    toast.info('No Downloads Available')
                   }
                 }},
                 { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => {
                   const shareLink = `${window.location.origin}/recordings`
                   navigator.clipboard.writeText(shareLink)
-                  toast.success('Link Copied', { description: 'Recording library link copied to clipboard' })
+                  toast.success('Link Copied')
                 }},
                 { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => setShowUploadDialog(true) },
                 { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => {
@@ -1411,7 +1411,7 @@ export default function WebinarsClient() {
                     setSelectedRecording(transcripts[0])
                     setShowRecordingDialog(true)
                   } else {
-                    toast.info('No Transcripts', { description: 'No transcripts available' })
+                    toast.info('No Transcripts')
                   }
                 }},
                 { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => {
@@ -1420,12 +1420,12 @@ export default function WebinarsClient() {
                     setSelectedRecording(audioRecordings[0])
                     setShowRecordingDialog(true)
                   } else {
-                    toast.info('No Audio', { description: 'No audio recordings available' })
+                    toast.info('No Audio')
                   }
                 }},
                 { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => {
                   setDeleteMode(!deleteMode)
-                  toast.info(deleteMode ? 'Delete Mode Off' : 'Delete Mode On', { description: deleteMode ? 'Selection cancelled' : 'Click recordings to delete' })
+                  toast.info(deleteMode ? 'Delete Mode Off' : 'Delete Mode On')
                 }},
                 { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -1507,7 +1507,7 @@ export default function WebinarsClient() {
                                   link.href = recording.url
                                   link.download = `${recording.webinarTitle}.${recording.type === 'video' ? 'mp4' : recording.type === 'audio' ? 'mp3' : 'txt'}`
                                   link.click()
-                                  toast.success('Download Started', { description: `Saving "${recording.webinarTitle}"` })
+                                  toast.success('Download Started'"` })
                                 }
                               }}>
                                 <Download className="w-4 h-4" />
@@ -1515,7 +1515,7 @@ export default function WebinarsClient() {
                               <Button variant="outline" size="sm" onClick={() => {
                                 const shareUrl = `${window.location.origin}/recordings/${recording.id}`
                                 navigator.clipboard.writeText(shareUrl)
-                                toast.success('Link Copied', { description: 'Share link copied to clipboard' })
+                                toast.success('Link Copied')
                               }}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
@@ -1595,32 +1595,32 @@ export default function WebinarsClient() {
                   if (selectedTemplate) {
                     const newTemplate = { ...selectedTemplate, id: `t${Date.now()}`, name: `${selectedTemplate.name} (Copy)` }
                     setTemplates(prev => [...prev, newTemplate])
-                    toast.success('Template Duplicated', { description: `${newTemplate.name} created` })
+                    toast.success('Template Duplicated' created` })
                   } else {
-                    toast.info('Select Template', { description: 'Select a template to duplicate' })
+                    toast.info('Select Template')
                   }
                 }},
                 { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => {
                   if (selectedTemplate) {
                     setShowTemplateDialog(true)
                   } else {
-                    toast.info('Select Template', { description: 'Select a template to preview' })
+                    toast.info('Select Template')
                   }
                 }},
                 { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => {
                   if (selectedTemplate) {
                     setShowTemplateDialog(true)
                   } else {
-                    toast.info('Select Template', { description: 'Select a template to edit' })
+                    toast.info('Select Template')
                   }
                 }},
                 { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => {
                   if (selectedTemplate) {
                     setTemplates(prev => prev.filter(t => t.id !== selectedTemplate.id))
                     setSelectedTemplate(null)
-                    toast.success('Template Deleted', { description: 'Template has been removed' })
+                    toast.success('Template Deleted')
                   } else {
-                    toast.info('Select Template', { description: 'Select a template to delete' })
+                    toast.info('Select Template')
                   }
                 }}
               ].map((action, idx) => (
@@ -1691,8 +1691,7 @@ export default function WebinarsClient() {
                               setTemplates(prev => prev.map(t =>
                                 t.id === template.id ? { ...t, enabled: checked } : t
                               ))
-                              toast.success(checked ? 'Template Enabled' : 'Template Disabled', {
-                                description: `${template.name} is now ${checked ? 'active' : 'inactive'}`
+                              toast.success(checked ? 'Template Enabled' : 'Template Disabled' is now ${checked ? 'active' : 'inactive'}`
                               })
                             }}
                             onClick={(e) => e.stopPropagation()}
@@ -1850,7 +1849,7 @@ export default function WebinarsClient() {
                           </div>
                         </div>
                         <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
-                          toast.success('Settings Saved', { description: 'General settings have been updated successfully' })
+                          toast.success('Settings Saved')
                         }}>
                           Save Settings
                         </Button>
@@ -1878,7 +1877,7 @@ export default function WebinarsClient() {
                             </div>
                             <Button variant="outline" onClick={() => {
                               setShowUploadDialog(true)
-                              toast.info('Upload Logo', { description: 'Select an image file for your logo' })
+                              toast.info('Upload Logo')
                             }}>Upload Logo</Button>
                           </div>
                         </div>
@@ -1898,7 +1897,7 @@ export default function WebinarsClient() {
                           <Input placeholder="Welcome to our webinar" className="mt-1" />
                         </div>
                         <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
-                          toast.success('Branding Saved', { description: 'Branding settings have been updated successfully' })
+                          toast.success('Branding Saved')
                         }}>
                           Save Branding
                         </Button>
@@ -1993,9 +1992,9 @@ export default function WebinarsClient() {
                             </div>
                             <Button variant="outline" size="sm" onClick={() => {
                               if (integration.status === 'connected') {
-                                toast.info('Configure Integration', { description: `Opening ${integration.name} configuration...` })
+                                toast.info('Configure Integration' configuration...` })
                               } else {
-                                toast.success('Connecting...', { description: `Initiating connection to ${integration.name}` })
+                                toast.success('Connecting...'` })
                               }
                             }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
@@ -2019,7 +2018,7 @@ export default function WebinarsClient() {
                             <Input type="password" value="sk_webinar_****************************" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
                               navigator.clipboard.writeText('sk_webinar_1234567890abcdef')
-                              toast.success('API Key Copied', { description: 'API key has been copied to clipboard' })
+                              toast.success('API Key Copied')
                             }}>
                               <Copy className="w-4 h-4" />
                             </Button>
@@ -2030,7 +2029,7 @@ export default function WebinarsClient() {
                           <Input defaultValue="https://api.yoursite.com/webhooks/webinar" className="mt-1 font-mono" />
                         </div>
                         <Button variant="outline" onClick={() => {
-                          toast.success('API Key Regenerated', { description: 'A new API key has been generated. Please update your integrations.' })
+                          toast.success('API Key Regenerated')
                         }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
@@ -2178,13 +2177,13 @@ export default function WebinarsClient() {
                             link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(exportData)
                             link.download = 'webinar-data-export.json'
                             link.click()
-                            toast.success('Data Exported', { description: 'All webinar data has been exported to JSON' })
+                            toast.success('Data Exported')
                           }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
                           <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => {
-                            toast.success('Cache Cleared', { description: 'Local cache has been cleared successfully' })
+                            toast.success('Cache Cleared')
                           }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
@@ -2208,7 +2207,7 @@ export default function WebinarsClient() {
                           </div>
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
                             setTemplates([...mockTemplates])
-                            toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+                            toast.success('Settings Reset')
                           }}>
                             Reset
                           </Button>
@@ -2222,7 +2221,7 @@ export default function WebinarsClient() {
                             setWebinars([])
                             setRegistrations([])
                             setRecordings([])
-                            toast.success('Data Deleted', { description: 'All webinar data has been permanently deleted' })
+                            toast.success('Data Deleted')
                           }}>
                             Delete
                           </Button>
@@ -2242,7 +2241,7 @@ export default function WebinarsClient() {
             <AIInsightsPanel
               insights={mockWebinarsAIInsights}
               title="Webinar Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2364,7 +2363,7 @@ export default function WebinarsClient() {
                         <span className="text-sm flex-1 truncate">{selectedWebinar.joinUrl}</span>
                         <Button variant="ghost" size="sm" onClick={() => {
                           navigator.clipboard.writeText(selectedWebinar.joinUrl || '')
-                          toast.success('Link Copied', { description: 'Join URL copied to clipboard' })
+                          toast.success('Link Copied')
                         }}>
                           <Copy className="w-4 h-4" />
                         </Button>
@@ -2375,7 +2374,7 @@ export default function WebinarsClient() {
                           <span className="text-sm flex-1 truncate">{selectedWebinar.registrationUrl}</span>
                           <Button variant="ghost" size="sm" onClick={() => {
                             navigator.clipboard.writeText(selectedWebinar.registrationUrl || '')
-                            toast.success('Link Copied', { description: 'Registration URL copied to clipboard' })
+                            toast.success('Link Copied')
                           }}>
                             <Copy className="w-4 h-4" />
                           </Button>
@@ -2419,7 +2418,7 @@ export default function WebinarsClient() {
                       if (recording) {
                         handleViewRecording(recording)
                       } else {
-                        toast.info('No Recording', { description: 'Recording not available for this webinar' })
+                        toast.info('No Recording')
                       }
                     }}>
                       <PlayCircle className="w-4 h-4" />
@@ -2427,7 +2426,7 @@ export default function WebinarsClient() {
                     </Button>
                   )}
                   <Button variant="outline" className="gap-2" onClick={() => {
-                    toast.info('Edit Webinar', { description: 'Update title, description, schedule, and registration settings' })
+                    toast.info('Edit Webinar')
                   }}>
                     <Edit className="w-4 h-4" />
                     Edit
@@ -2442,7 +2441,7 @@ export default function WebinarsClient() {
                   <Button variant="outline" className="gap-2" onClick={() => {
                     const shareUrl = `${window.location.origin}/webinars/${selectedWebinar.id}`
                     navigator.clipboard.writeText(shareUrl)
-                    toast.success('Link Copied', { description: 'Webinar link copied to clipboard' })
+                    toast.success('Link Copied')
                   }}>
                     <Share2 className="w-4 h-4" />
                     Share

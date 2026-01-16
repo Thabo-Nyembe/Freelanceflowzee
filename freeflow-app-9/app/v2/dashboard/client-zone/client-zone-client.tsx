@@ -80,7 +80,6 @@ import {
 } from 'lucide-react'
 import ClientZoneGallery from '@/components/client-zone-gallery'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -353,7 +352,6 @@ const clientZoneActivities = [
 // Quick actions are now defined inside the component to access state setters
 
 export default function ClientZoneClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -529,15 +527,7 @@ export default function ClientZoneClient() {
     if (!newItemName.trim()) {
       toast.error('Please enter a name for the item')
       return
-    }
-
-    logger.info('Creating new item', {
-      type: newItemType,
-      name: newItemName,
-      userId
-    })
-
-    toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
+    }    toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
       description: `"${newItemName}" has been added to your ${newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes'}`
     })
 
@@ -552,37 +542,15 @@ export default function ClientZoneClient() {
   }
 
   // Handler: Export Data
-  const handleExportData = () => {
-    logger.info('Exporting data', {
-      format: exportFormat,
-      dateRange: exportDateRange,
-      userId
-    })
-
-    toast.success('Export completed!', {
-      description: `Your ${exportFormat.toUpperCase()} file is ready for download`
+  const handleExportData = () => {    toast.success('Export completed!' file is ready for download`
     })
 
     // In production, this would trigger a file download
-    const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`
-    logger.info('Export file ready', { filename, userId })
-
-    setShowExportDialog(false)
+    const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`    setShowExportDialog(false)
   }
 
   // Handler: Save Settings
-  const handleSaveSettings = () => {
-    logger.info('Saving client zone settings', {
-      notifyProjectUpdates,
-      notifyMessages,
-      notifyInvoices,
-      emailDigest,
-      userId
-    })
-
-    toast.success('Settings saved!', {
-      description: 'Your notification preferences have been updated'
-    })
+  const handleSaveSettings = () => {    toast.success('Settings saved!')
 
     setShowSettingsDialog(false)
   }
@@ -590,35 +558,21 @@ export default function ClientZoneClient() {
   // Handler: Open Timeline Dialog
   const handleOpenTimeline = () => {
     setTimelineProject('all')
-    setShowTimelineDialog(true)
-    logger.info('Opening project timeline', { userId })
-  }
+    setShowTimelineDialog(true)  }
 
   // Handler: Open Reminders Dialog
   const handleOpenReminders = () => {
     setReminderType('deadline')
     setReminderDate('')
     setReminderNote('')
-    setShowRemindersDialog(true)
-    logger.info('Opening reminders dialog', { userId })
-  }
+    setShowRemindersDialog(true)  }
 
   // Handler: Create Reminder
   const handleCreateReminder = () => {
     if (!reminderDate) {
       toast.error('Please select a date for the reminder')
       return
-    }
-
-    logger.info('Creating reminder', {
-      type: reminderType,
-      date: reminderDate,
-      note: reminderNote,
-      userId
-    })
-
-    toast.success('Reminder created!', {
-      description: `You will be reminded on ${new Date(reminderDate).toLocaleDateString()}`
+    }    toast.success('Reminder created!'`
     })
 
     setShowRemindersDialog(false)
@@ -626,21 +580,15 @@ export default function ClientZoneClient() {
     setReminderNote('')
   }
 
-  // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
   useEffect(() => {
     const loadClientZoneData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading client zone data', { userId })
-
-        // Load dashboard data from database
+        setError(null)        // Load dashboard data from database
         const data = await getClientZoneDashboard()
 
         setDashboardData(data)
@@ -649,20 +597,11 @@ export default function ClientZoneClient() {
         setInvoices(data.pendingInvoices)
 
         setIsLoading(false)
-        announce('Client zone loaded successfully', 'polite')
-        logger.info('Client zone data loaded', {
-          projectCount: data.recentProjects.length,
-          messageCount: data.recentMessages.length,
-          invoiceCount: data.pendingInvoices.length,
-          userId
-        })
-      } catch (err) {
+        announce('Client zone loaded successfully', 'polite')      } catch (err) {
         logger.error('Failed to load client zone', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load client zone data')
         setIsLoading(false)
-        toast.error('Failed to load client zone', {
-          description: err instanceof Error ? err.message : 'Please try again'
-        })
+        toast.error('Failed to load client zone')
         announce('Error loading client zone', 'assertive')
       }
     }
@@ -674,15 +613,7 @@ export default function ClientZoneClient() {
   // HANDLER 1: NOTIFICATIONS
   // ============================================================================
 
-  const handleNotifications = async () => {
-    logger.info('Notifications opened', {
-      userId,
-      projectCount: projects.length,
-      unreadNotifications: dashboardData?.unreadNotifications || 0,
-      tab: activeTab
-    })
-
-    // Load and show notifications panel
+  const handleNotifications = async () => {    // Load and show notifications panel
     await handleLoadNotifications()
   }
 
@@ -690,16 +621,7 @@ export default function ClientZoneClient() {
   // HANDLER 2: CONTACT TEAM
   // ============================================================================
 
-  const handleContactTeam = () => {
-    logger.info('Team contact initiated', {
-      userId,
-      projectCount: projects.length,
-      activeProjects: dashboardData?.projectStats?.active || 0
-    })
-
-    toast.success('Team communication opened!', {
-      description: 'Send a message or schedule a call with your team'
-    })
+  const handleContactTeam = () => {    toast.success('Team communication opened!')
   }
 
   // ============================================================================
@@ -712,15 +634,7 @@ export default function ClientZoneClient() {
     if (!project) {
       toast.error('Project not found')
       return
-    }
-
-    logger.info('Revision request initiated', {
-      projectId,
-      projectName: project?.name,
-      userId
-    })
-
-    // Open dialog instead of using prompt()
+    }    // Open dialog instead of using prompt()
     setRevisionProjectId(projectId)
     setRevisionFeedback('')
     setShowRevisionDialog(true)
@@ -739,13 +653,7 @@ export default function ClientZoneClient() {
         deliverable_id: revisionProjectId,
         project_id: revisionProjectId,
         notes: revisionFeedback
-      })
-
-      logger.info('Revision request submitted', { projectId: revisionProjectId, userId })
-
-      toast.success('Revision request submitted!', {
-        description: 'Your team will review and respond within 24 hours'
-      })
+      })      toast.success('Revision request submitted!')
 
       // Reload dashboard data
       const data = await getClientZoneDashboard()
@@ -753,9 +661,7 @@ export default function ClientZoneClient() {
       setProjects(data.recentProjects)
     } catch (error: any) {
       logger.error('Failed to request revision', { error, projectId: revisionProjectId, userId })
-      toast.error('Failed to request revision', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to request revision')
     } finally {
       setShowRevisionDialog(false)
       setRevisionProjectId(null)
@@ -767,21 +673,9 @@ export default function ClientZoneClient() {
   // HANDLER 4: APPROVE DELIVERABLE
   // ============================================================================
 
-  const handleApproveDeliverable = async (deliverableId: string) => {
-    logger.info('Deliverable approval initiated', {
-      deliverableId,
-      userId
-    })
-
-    try {
+  const handleApproveDeliverable = async (deliverableId: string) => {    try {
       // Use database query instead of API endpoint
-      await approveDeliverable(deliverableId)
-
-      logger.info('Deliverable approved', { deliverableId, userId })
-
-      toast.success('Deliverable approved!', {
-        description: 'Milestone payment will be processed automatically'
-      })
+      await approveDeliverable(deliverableId)      toast.success('Deliverable approved!')
 
       // Reload dashboard data
       const data = await getClientZoneDashboard()
@@ -789,9 +683,7 @@ export default function ClientZoneClient() {
       setProjects(data.recentProjects)
     } catch (error: any) {
       logger.error('Failed to approve deliverable', { error, deliverableId, userId })
-      toast.error('Failed to approve deliverable', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to approve deliverable')
     }
   }
 
@@ -805,15 +697,7 @@ export default function ClientZoneClient() {
     if (!project) {
       toast.error('Project not found')
       return
-    }
-
-    logger.info('File download initiated', {
-      projectId,
-      projectName: project?.name,
-      userId
-    })
-
-    const downloadPromise = (async () => {
+    }    const downloadPromise = (async () => {
       // Get project files
       const projectFiles = await getProjectFiles(projectId)
 
@@ -874,24 +758,14 @@ export default function ClientZoneClient() {
     if (!currentProject || !currentProject.id) {
       toast.error('No active project found')
       return
-    }
-
-    logger.info('Message sent', {
-      userId,
-      projectId: currentProject.id,
-      messageLength: newMessage.length
-    })
-
-    try {
+    }    try {
       await sendMessage({
         project_id: currentProject.id,
         recipient_id: currentProject.user_id, // Send to project owner
         message: newMessage
       })
 
-      toast.success('Message sent successfully!', {
-        description: 'Your team will respond within 4-6 hours'
-      })
+      toast.success('Message sent successfully!')
       setNewMessage('')
 
       // Reload messages
@@ -899,9 +773,7 @@ export default function ClientZoneClient() {
       setMessages(data.recentMessages)
     } catch (error: any) {
       logger.error('Failed to send message', { error, userId })
-      toast.error('Failed to send message', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to send message')
     }
   }
 
@@ -921,27 +793,13 @@ export default function ClientZoneClient() {
     if (!currentProject || !currentProject.id) {
       toast.error('No active project found')
       return
-    }
-
-    logger.info('Feedback submission initiated', {
-      userId,
-      projectId: currentProject.id,
-      feedbackLength: newFeedback.length
-    })
-
-    try {
+    }    try {
       await submitFeedback({
         project_id: currentProject.id,
         rating: 5,
         feedback_text: newFeedback,
         would_recommend: true
-      })
-
-      logger.info('Feedback submitted successfully', { userId })
-
-      toast.success('Feedback submitted!', {
-        description: 'Your input helps us improve'
-      })
+      })      toast.success('Feedback submitted!')
       setNewFeedback('')
 
       // Reload dashboard
@@ -949,9 +807,7 @@ export default function ClientZoneClient() {
       setDashboardData(data)
     } catch (error: any) {
       logger.error('Failed to submit feedback', { error, userId })
-      toast.error('Failed to submit feedback', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to submit feedback')
     }
   }
 
@@ -959,14 +815,7 @@ export default function ClientZoneClient() {
   // HANDLER 8: PAY INVOICE
   // ============================================================================
 
-  const handlePayInvoice = async (invoiceNumber: string, amount: number) => {
-    logger.info('Payment initiated', {
-      invoiceNumber,
-      amount,
-      userId
-    })
-
-    // Find the invoice to get its ID
+  const handlePayInvoice = async (invoiceNumber: string, amount: number) => {    // Find the invoice to get its ID
     const invoice = invoices.find(inv => inv.number === invoiceNumber)
     if (!invoice) {
       toast.error('Invoice not found')
@@ -989,29 +838,14 @@ export default function ClientZoneClient() {
   // HANDLER 9: SCHEDULE MEETING
   // ============================================================================
 
-  const handleScheduleMeeting = () => {
-    logger.info('Meeting scheduler opened', {
-      userId,
-      projectCount: projects.length
-    })
-
-    toast.success('Opening calendar...', {
-      description: 'Schedule a meeting with your team'
-    })
+  const handleScheduleMeeting = () => {    toast.success('Opening calendar...')
   }
 
   // ============================================================================
   // HANDLER 10: VIEW INVOICE DETAILS
   // ============================================================================
 
-  const handleViewInvoiceDetails = (invoiceNumber: string) => {
-    logger.info('Invoice details viewed', {
-      invoiceNumber,
-      userId
-    })
-
-    toast.success('Loading invoice details...', {
-      description: `Invoice ${invoiceNumber}`
+  const handleViewInvoiceDetails = (invoiceNumber: string) => {    toast.success('Loading invoice details...'`
     })
   }
 
@@ -1019,28 +853,14 @@ export default function ClientZoneClient() {
   // HANDLER 11: CLIENT ONBOARDING
   // ============================================================================
 
-  const handleClientOnboarding = useCallback(() => {
-    logger.info('Client onboarding started', {
-      userId,
-      projectCount: projects.length
-    })
-
-    toast.success('Client onboarding started!', {
-      description: 'Setting up your personalized workspace and preferences'
-    })
+  const handleClientOnboarding = useCallback(() => {    toast.success('Client onboarding started!')
   }, [userId, projects])
 
   // ============================================================================
   // HANDLER 12: PROJECT PROPOSAL
   // ============================================================================
 
-  const handleProjectProposal = useCallback(async (projectId?: number) => {
-    logger.info('Project proposal initiated', {
-      projectId: projectId || 'New Proposal',
-      userId
-    })
-
-    try {
+  const handleProjectProposal = useCallback(async (projectId?: number) => {    try {
       const response = await fetch('/api/proposals/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1051,17 +871,11 @@ export default function ClientZoneClient() {
         })
       })
 
-      if (response.ok) {
-        logger.info('Proposal sent successfully', { projectId, userId })
-        toast.success('Project proposal sent!', {
-          description: 'Check your email for the detailed proposal document'
-        })
+      if (response.ok) {        toast.success('Project proposal sent!')
       }
     } catch (error: any) {
       logger.error('Failed to send proposal', { error, projectId, userId })
-      toast.error('Failed to send proposal', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to send proposal')
     }
   }, [userId])
 
@@ -1069,29 +883,14 @@ export default function ClientZoneClient() {
   // HANDLER 13: CONTRACT MANAGEMENT
   // ============================================================================
 
-  const handleContractManagement = useCallback(() => {
-    logger.info('Contract management accessed', {
-      userId,
-      totalProjects: dashboardData?.projectStats?.total || 0,
-      activeContracts: dashboardData?.projectStats?.active || 0
-    })
-
-    toast.info('Contract management loaded', {
-      description: 'View and manage all your project contracts'
-    })
+  const handleContractManagement = useCallback(() => {    toast.info('Contract management loaded')
   }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 14: MILESTONE APPROVAL
   // ============================================================================
 
-  const handleMilestoneApproval = useCallback(async (milestoneId: number) => {
-    logger.info('Milestone approval initiated', {
-      milestoneId,
-      userId
-    })
-
-    try {
+  const handleMilestoneApproval = useCallback(async (milestoneId: number) => {    try {
       const response = await fetch('/api/milestones/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1102,17 +901,11 @@ export default function ClientZoneClient() {
         })
       })
 
-      if (response.ok) {
-        logger.info('Milestone approved successfully', { milestoneId, userId })
-        toast.success('Milestone approved!', {
-          description: 'Payment has been released from escrow'
-        })
+      if (response.ok) {        toast.success('Milestone approved!')
       }
     } catch (error: any) {
       logger.error('Failed to approve milestone', { error, milestoneId, userId })
-      toast.error('Failed to approve milestone', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to approve milestone')
     }
   }, [userId])
 
@@ -1120,61 +913,28 @@ export default function ClientZoneClient() {
   // HANDLER 15: FEEDBACK REQUEST
   // ============================================================================
 
-  const handleFeedbackRequest = useCallback(() => {
-    logger.info('Feedback request initiated', {
-      userId,
-      activeProjects: dashboardData?.projectStats?.active || 0,
-      averageRating: dashboardData?.averageRating || 0
-    })
-
-    toast.info('Feedback request sent', {
-      description: 'Help us improve your experience'
-    })
+  const handleFeedbackRequest = useCallback(() => {    toast.info('Feedback request sent')
   }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 16: FILE SHARING
   // ============================================================================
 
-  const handleFileSharing = useCallback((fileId?: number) => {
-    logger.info('File sharing initiated', {
-      fileId: fileId || 'Multiple files',
-      userId,
-      projectCount: projects.length
-    })
-
-    toast.success('File sharing link generated', {
-      description: 'Secure download link copied to clipboard'
-    })
+  const handleFileSharing = useCallback((fileId?: number) => {    toast.success('File sharing link generated')
   }, [userId, projects])
 
   // ============================================================================
   // HANDLER 17: MEETING SCHEDULE
   // ============================================================================
 
-  const handleMeetingSchedule = useCallback(() => {
-    logger.info('Meeting scheduler opened', {
-      userId,
-      projectCount: projects.length,
-      nextMeeting: dashboardData?.nextMeeting
-    })
-
-    toast.info('Meeting scheduler opened', {
-      description: 'Schedule a call with your project team'
-    })
+  const handleMeetingSchedule = useCallback(() => {    toast.info('Meeting scheduler opened')
   }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 18: INVOICE DISPUTE
   // ============================================================================
 
-  const handleInvoiceDispute = useCallback((invoiceNumber: string) => {
-    logger.info('Invoice dispute initiated', {
-      invoiceNumber,
-      userId
-    })
-
-    // Open dialog instead of using prompt()
+  const handleInvoiceDispute = useCallback((invoiceNumber: string) => {    // Open dialog instead of using prompt()
     setDisputeInvoiceNumber(invoiceNumber)
     setDisputeReason('')
     setShowDisputeDialog(true)
@@ -1192,16 +952,7 @@ export default function ClientZoneClient() {
       const { disputeInvoice } = await import('@/lib/client-zone-queries')
       const { data, error } = await disputeInvoice(disputeInvoiceNumber, disputeReason)
 
-      if (error) throw error
-
-      logger.info('Dispute submitted successfully', {
-        invoiceNumber: disputeInvoiceNumber,
-        invoiceId: data?.id,
-        userId
-      })
-      toast.success('Dispute submitted', {
-        description: 'Our team will review and respond within 24 hours'
-      })
+      if (error) throw error      toast.success('Dispute submitted')
       announce('Invoice dispute submitted successfully', 'polite')
 
       // Reload dashboard data
@@ -1210,9 +961,7 @@ export default function ClientZoneClient() {
       setInvoices(dashboardData.pendingInvoices)
     } catch (error: any) {
       logger.error('Failed to submit dispute', { error, invoiceNumber: disputeInvoiceNumber, userId })
-      toast.error('Failed to submit dispute', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to submit dispute')
       announce('Error submitting invoice dispute', 'assertive')
     } finally {
       setShowDisputeDialog(false)
@@ -1225,156 +974,70 @@ export default function ClientZoneClient() {
   // HANDLER 19: PAYMENT REMINDER
   // ============================================================================
 
-  const handlePaymentReminder = useCallback(() => {
-    logger.info('Payment reminder sent', {
-      userId,
-      invoiceCount: invoices.length,
-      totalInvestment: dashboardData?.totalInvestment
-    })
-
-    toast.info('Payment reminder sent', {
-      description: 'Gentle reminder email sent to client'
-    })
+  const handlePaymentReminder = useCallback(() => {    toast.info('Payment reminder sent')
   }, [userId, invoices, dashboardData])
 
   // ============================================================================
   // HANDLER 20: CLIENT SURVEY
   // ============================================================================
 
-  const handleClientSurvey = useCallback(() => {
-    logger.info('Client survey initiated', {
-      userId,
-      projectCount: projects.length,
-      currentSatisfaction: dashboardData?.satisfaction
-    })
-
-    toast.success('Satisfaction survey sent!', {
-      description: 'Your feedback helps us serve you better'
-    })
+  const handleClientSurvey = useCallback(() => {    toast.success('Satisfaction survey sent!')
   }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 21: REFERRAL REQUEST
   // ============================================================================
 
-  const handleReferralRequest = useCallback(() => {
-    logger.info('Referral request sent', {
-      userId,
-      satisfaction: dashboardData?.satisfaction,
-      tier: dashboardData?.tier
-    })
-
-    toast.success('Referral program details sent!', {
-      description: 'Earn rewards for referring new clients'
-    })
+  const handleReferralRequest = useCallback(() => {    toast.success('Referral program details sent!')
   }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 22: CLIENT RETENTION
   // ============================================================================
 
-  const handleClientRetention = useCallback(() => {
-    logger.info('Retention campaign initiated', {
-      userId,
-      totalProjects: projects.length,
-      totalInvestment: dashboardData?.totalInvestment
-    })
-
-    toast.info('Exclusive offers available!', {
-      description: 'Special discounts for valued clients'
-    })
+  const handleClientRetention = useCallback(() => {    toast.info('Exclusive offers available!')
   }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 23: CLIENT SEGMENTATION
   // ============================================================================
 
-  const handleClientSegmentation = useCallback(() => {
-    logger.info('Client segmentation analyzed', {
-      userId,
-      tier: dashboardData?.tier,
-      totalInvestment: dashboardData?.totalInvestment,
-      satisfaction: dashboardData?.satisfaction
-    })
-
-    toast.info('Client profile analyzed', {
-      description: 'Premium tier benefits active'
-    })
+  const handleClientSegmentation = useCallback(() => {    toast.info('Client profile analyzed')
   }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 24: CLIENT REPORTS
   // ============================================================================
 
-  const handleClientReports = useCallback(() => {
-    logger.info('Client reports generated', {
-      userId,
-      projectCount: projects.length,
-      onTimeDelivery: dashboardData?.analytics?.onTimeDelivery,
-      firstTimeApproval: dashboardData?.analytics?.firstTimeApproval,
-      avgResponseTime: dashboardData?.analytics?.avgResponseTime
-    })
-
-    toast.success('Client reports generated!', {
-      description: 'Detailed analytics and insights ready to view'
-    })
+  const handleClientReports = useCallback(() => {    toast.success('Client reports generated!')
   }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 25: CLIENT ANALYTICS
   // ============================================================================
 
-  const handleClientAnalytics = useCallback(() => {
-    logger.info('Analytics dashboard opened', {
-      userId,
-      messagesExchanged: dashboardData?.analytics?.messagesExchanged,
-      meetingsHeld: dashboardData?.analytics?.meetingsHeld,
-      filesShared: dashboardData?.analytics?.filesShared
-    })
-
-    toast.info('Analytics dashboard loaded', {
-      description: 'Comprehensive project insights and metrics'
-    })
+  const handleClientAnalytics = useCallback(() => {    toast.info('Analytics dashboard loaded')
   }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 26: CLIENT EXPORT
   // ============================================================================
 
-  const handleClientExport = useCallback(() => {
-    logger.info('Client data export initiated', {
-      userId,
-      projectCount: projects.length,
-      email: dashboardData?.email
-    })
-
-    toast.success('Data export started', {
-      description: 'Download link will be sent to your email'
-    })
+  const handleClientExport = useCallback(() => {    toast.success('Data export started')
   }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 27: CLIENT NOTIFICATIONS MANAGEMENT
   // ============================================================================
 
-  const handleClientNotifications = useCallback(() => {
-    logger.info('Notification settings opened', {
-      userId,
-      activeProjects: projects.filter(p => p.status === 'active').length
-    })
-
-    toast.info('Notification settings loaded', {
-      description: 'Manage your communication preferences'
-    })
+  const handleClientNotifications = useCallback(() => {    toast.info('Notification settings loaded')
   }, [userId, projects])
 
   // ============================================================================
   // HELPER HANDLERS
   // ============================================================================
 
-  const handleUploadFile = () => {
-    logger.info('File upload initiated')
-    const input = document.createElement('input')
+  const handleUploadFile = () => {    const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
     input.onchange = async (e) => {
@@ -1417,10 +1080,7 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsSubmittingClient(true)
-    logger.info('Adding new client project', { name: clientFormData.name, userId })
-
-    const createPromise = createClientProject({
+    setIsSubmittingClient(true)    const createPromise = createClientProject({
       client_id: userId || '',
       name: clientFormData.name,
       description: clientFormData.description || undefined,
@@ -1457,10 +1117,7 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsSubmittingClient(true)
-    logger.info('Updating client project', { projectId: editingClientId, userId })
-
-    const updatePromise = updateClientProject(editingClientId, {
+    setIsSubmittingClient(true)    const updatePromise = updateClientProject(editingClientId, {
       name: clientFormData.name,
       description: clientFormData.description || null,
       budget: clientFormData.budget ? parseFloat(clientFormData.budget) : 0,
@@ -1494,10 +1151,7 @@ export default function ClientZoneClient() {
   const handleDeleteClient = async () => {
     if (!editingClientId) return
 
-    setIsDeletingClient(true)
-    logger.info('Deleting client project', { projectId: editingClientId, userId })
-
-    const deletePromise = deleteClientProject(editingClientId)
+    setIsDeletingClient(true)    const deletePromise = deleteClientProject(editingClientId)
 
     toast.promise(deletePromise, {
       loading: 'Deleting project...',
@@ -1540,17 +1194,13 @@ export default function ClientZoneClient() {
     if (!query.trim()) {
       setFilteredClients([])
       return
-    }
-
-    logger.info('Searching clients', { query, userId })
-
-    try {
+    }    try {
       const results = await searchClientZone(query)
       setFilteredClients(results.projects)
       toast.success(`Found ${results.projects.length} matching projects`)
     } catch (error: any) {
       logger.error('Search failed', { error, userId })
-      toast.error('Search failed', { description: error.message })
+      toast.error('Search failed')
     }
   }, [userId])
 
@@ -1558,10 +1208,7 @@ export default function ClientZoneClient() {
   // HANDLER: FILTER CLIENTS BY STATUS
   // ============================================================================
   const handleFilterByStatus = useCallback(async (status: string) => {
-    setClientStatusFilter(status)
-    logger.info('Filtering clients by status', { status, userId })
-
-    try {
+    setClientStatusFilter(status)    try {
       if (status === 'all') {
         const dashData = await getClientZoneDashboard()
         setProjects(dashData.recentProjects)
@@ -1582,10 +1229,7 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER: VIEW CLIENT HISTORY
   // ============================================================================
-  const handleViewClientHistory = async (clientId: string) => {
-    logger.info('Viewing client history', { clientId, userId })
-
-    const project = projects.find(p => p.id === clientId)
+  const handleViewClientHistory = async (clientId: string) => {    const project = projects.find(p => p.id === clientId)
     if (!project) {
       toast.error('Project not found')
       return
@@ -1622,9 +1266,7 @@ export default function ClientZoneClient() {
 
     try {
       const notifs = await getNotifications({ limit: 20 })
-      setNotifications(notifs)
-      logger.info('Notifications loaded', { count: notifs.length, userId })
-    } catch (error: any) {
+      setNotifications(notifs)    } catch (error: any) {
       logger.error('Failed to load notifications', { error, userId })
       toast.error('Failed to load notifications')
     } finally {
@@ -1649,10 +1291,7 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER: EXPORT CLIENT DATA
   // ============================================================================
-  const handleExportClientData = async () => {
-    logger.info('Exporting client data', { userId })
-
-    const exportPromise = exportClientDataToCSV()
+  const handleExportClientData = async () => {    const exportPromise = exportClientDataToCSV()
 
     toast.promise(exportPromise, {
       loading: 'Generating export...',
@@ -1684,11 +1323,7 @@ export default function ClientZoneClient() {
     if (!deliverableProject) {
       toast.error('Please select a project')
       return
-    }
-
-    logger.info('Uploading deliverable', { title: deliverableTitle, project: deliverableProject, userId })
-    toast.success('Deliverable uploaded successfully!', {
-      description: `"${deliverableTitle}" has been added to the project`
+    }    toast.success('Deliverable uploaded successfully!'" has been added to the project`
     })
     setShowUploadDeliverableDialog(false)
     setDeliverableTitle('')
@@ -1707,13 +1342,7 @@ export default function ClientZoneClient() {
     if (!messageContent.trim()) {
       toast.error('Please enter a message')
       return
-    }
-
-    logger.info('Sending message to client', { clientId: messageClientId, subject: messageSubject, userId })
-
-    toast.success('Message sent successfully!', {
-      description: 'Your client will be notified'
-    })
+    }    toast.success('Message sent successfully!')
     setShowMessageClientDialog(false)
     setMessageClientId('')
     setMessageSubject('')
@@ -1737,10 +1366,7 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsCreatingInvoice(true)
-    logger.info('Creating invoice', { clientId: invoiceClientId, amount: invoiceAmount, userId })
-
-    // Generate invoice number
+    setIsCreatingInvoice(true)    // Generate invoice number
     const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`
 
     const createInvoicePromise = createInvoice({
@@ -1781,12 +1407,7 @@ export default function ClientZoneClient() {
     if (aiReviewSelection === null) {
       toast.error('Please select a design option')
       return
-    }
-
-    logger.info('AI design approved', { selection: aiReviewSelection, feedback: aiReviewFeedback, userId })
-
-    toast.success('Design approved!', {
-      description: `Option ${aiReviewSelection + 1} has been selected and approved`
+    }    toast.success('Design approved!' has been selected and approved`
     })
     setShowAIReviewDialog(false)
     setAiReviewSelection(null)
@@ -1796,12 +1417,7 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER 32: UPDATE PREFERENCES
   // ============================================================================
-  const handleUpdatePreferences = () => {
-    logger.info('Updating preferences', { style: prefStyle, colors: prefColors, industry: prefIndustry, userId })
-
-    toast.success('Preferences updated!', {
-      description: 'Your style preferences have been saved'
-    })
+  const handleUpdatePreferences = () => {    toast.success('Preferences updated!')
     setShowPreferencesDialog(false)
   }
 
@@ -1812,13 +1428,7 @@ export default function ClientZoneClient() {
     if (!contactEmail.trim()) {
       toast.error('Please enter an email address')
       return
-    }
-
-    logger.info('Updating contact info', { email: contactEmail, phone: contactPhone, userId })
-
-    toast.success('Contact info updated!', {
-      description: 'Your contact information has been saved'
-    })
+    }    toast.success('Contact info updated!')
     setShowContactInfoDialog(false)
   }
 
@@ -1837,13 +1447,7 @@ export default function ClientZoneClient() {
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match')
       return
-    }
-
-    logger.info('Changing password', { userId })
-
-    toast.success('Password changed successfully!', {
-      description: 'Your password has been updated'
-    })
+    }    toast.success('Password changed successfully!')
     setShowPasswordDialog(false)
     setCurrentPassword('')
     setNewPassword('')
@@ -1853,16 +1457,11 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER 35: EXPORT DATA (Settings)
   // ============================================================================
-  const handleExportDataSettings = () => {
-    logger.info('Exporting data from settings', { type: dataExportType, userId })
-
-    toast.success('Data export ready!', {
-      description: `Your ${dataExportType} data has been exported`
+  const handleExportDataSettings = () => {    toast.success('Data export ready!' data has been exported`
     })
     setShowDataExportDialog(false)
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1890,7 +1489,6 @@ export default function ClientZoneClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1947,12 +1545,8 @@ export default function ClientZoneClient() {
                     <button
                       onClick={() => {
                         setUserRole('client')
-                        setShowRoleSwitcher(false)
-                        logger.info('Role switched to client')
-                        announce('Switched to client perspective')
-                        toast.success('Viewing as Client', {
-                          description: 'See your projects, approvals, and downloads'
-                        })
+                        setShowRoleSwitcher(false)                        announce('Switched to client perspective')
+                        toast.success('Viewing as Client')
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                         userRole === 'client'
@@ -1971,12 +1565,8 @@ export default function ClientZoneClient() {
                     <button
                       onClick={() => {
                         setUserRole('freelancer')
-                        setShowRoleSwitcher(false)
-                        logger.info('Role switched to freelancer')
-                        announce('Switched to freelancer perspective')
-                        toast.success('Viewing as Freelancer', {
-                          description: 'Manage clients, deliverables, and payments'
-                        })
+                        setShowRoleSwitcher(false)                        announce('Switched to freelancer perspective')
+                        toast.success('Viewing as Freelancer')
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                         userRole === 'freelancer'
@@ -2968,11 +2558,7 @@ export default function ClientZoneClient() {
       <ClientOnboardingTour
         userRole="client"
         clientId={userId || dashboardData?.email || 'guest'}
-        onComplete={(tourId) => {
-          logger.info('Onboarding tour completed', { tourId, userId })
-          toast.success('Tour completed! 🎉', {
-            description: 'You earned XP and unlocked new features'
-          })
+        onComplete={(tourId) => {          toast.success('Tour completed! 🎉')
         }}
       />
 

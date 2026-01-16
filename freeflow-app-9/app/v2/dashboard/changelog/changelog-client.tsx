@@ -527,9 +527,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   // CRUD Handlers for Changelog/Release entries
   const handleCreateRelease = useCallback(async () => {
     if (!changelogForm.title || !changelogForm.version) {
-      toast.error('Validation Error', {
-        description: 'Title and version are required'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -540,17 +538,14 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_date: new Date().toISOString(),
       })
       if (result) {
-        toast.success('Release Created', {
-          description: `Version ${changelogForm.version} has been created successfully`
+        toast.success('Release Created' has been created successfully`
         })
         setIsCreateDialogOpen(false)
         setChangelogForm(defaultChangelogForm)
         refetch()
       }
     } catch (err) {
-      toast.error('Error Creating Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Creating Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -563,8 +558,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await updateChange(changelogForm, editingChangelog.id)
       if (result) {
-        toast.success('Release Updated', {
-          description: `Version ${changelogForm.version || editingChangelog.version} has been updated`
+        toast.success('Release Updated' has been updated`
         })
         setIsEditDialogOpen(false)
         setEditingChangelog(null)
@@ -572,9 +566,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         refetch()
       }
     } catch (err) {
-      toast.error('Error Updating Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Updating Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -587,17 +579,14 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await deleteChange(deletingChangelog.id)
       if (result) {
-        toast.success('Release Deleted', {
-          description: `Version ${deletingChangelog.version} has been removed`
+        toast.success('Release Deleted' has been removed`
         })
         setIsDeleteDialogOpen(false)
         setDeletingChangelog(null)
         refetch()
       }
     } catch (err) {
-      toast.error('Error Deleting Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Deleting Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -612,15 +601,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         last_published_at: new Date().toISOString(),
       }, entry.id)
       if (result) {
-        toast.success('Release Published', {
-          description: `Version ${entry.version} is now live`
+        toast.success('Release Published' is now live`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Publishing Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Publishing Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -634,15 +620,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         scheduled_for: scheduledDate,
       }, entry.id)
       if (result) {
-        toast.success('Release Scheduled', {
-          description: `Version ${entry.version} scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
+        toast.success('Release Scheduled' scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Scheduling Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Scheduling Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -655,15 +638,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_status: 'archived',
       }, entry.id)
       if (result) {
-        toast.success('Release Archived', {
-          description: `Version ${entry.version} has been archived`
+        toast.success('Release Archived' has been archived`
         })
         refetch()
       }
     } catch (err) {
-      toast.error('Error Archiving Release', {
-        description: err instanceof Error ? err.message : 'An unexpected error occurred'
-      })
+      toast.error('Error Archiving Release')
     } finally {
       setIsSubmitting(false)
     }
@@ -699,26 +679,20 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   }, [])
 
   const handleDownloadRelease = useCallback((version: string) => {
-    toast.success('Downloading release', {
-      description: `${version} download starting...`
+    toast.success('Downloading release' download starting...`
     })
   }, [])
 
   const handleCompareVersions = useCallback(() => {
-    toast.info('Compare Versions', {
-      description: 'Opening version comparison tool...'
-    })
+    toast.info('Compare Versions')
   }, [])
 
   const handleSubscribeUpdates = useCallback(async () => {
-    toast.success('Subscribed to updates', {
-      description: 'You will receive notifications for new releases'
-    })
+    toast.success('Subscribed to updates')
   }, [])
 
   const handleViewReleaseNotes = useCallback((version: string) => {
-    toast.info('Loading release notes', {
-      description: `Opening notes for ${version}...`
+    toast.info('Loading release notes'...`
     })
   }, [])
 
@@ -1193,8 +1167,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                                       size="sm"
                                       variant="outline"
                                       onClick={() => {
-                                        toast.success('Download Started', {
-                                          description: `Downloading ${asset.name}...`
+                                        toast.success('Download Started'...`
                                         })
                                       }}
                                     >
@@ -1386,8 +1359,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                     className="capitalize"
                     onClick={() => {
                       setDiscussionCategoryFilter(cat)
-                      toast.info('Filter Applied', {
-                        description: cat === 'all' ? 'Showing all discussions' : `Showing ${cat} discussions`
+                      toast.info('Filter Applied' discussions`
                       })
                     }}
                   >
@@ -1447,9 +1419,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         Cancel
                       </Button>
                       <Button onClick={() => {
-                        toast.success('Discussion Created', {
-                          description: 'Your discussion has been posted'
-                        })
+                        toast.success('Discussion Created')
                         setIsDiscussionDialogOpen(false)
                         setDiscussionForm({ title: '', body: '', category: 'feedback' })
                       }}>
@@ -1604,11 +1574,10 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                       </Button>
                       <Button onClick={() => {
                         if (!webhookForm.name || !webhookForm.url) {
-                          toast.error('Validation Error', { description: 'Name and URL are required' })
+                          toast.error('Validation Error')
                           return
                         }
-                        toast.success('Webhook Created', {
-                          description: `${webhookForm.name} has been configured`
+                        toast.success('Webhook Created' has been configured`
                         })
                         setIsWebhookDialogOpen(false)
                         setWebhookForm({ name: '', url: '', events: [] })
@@ -1702,8 +1671,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              toast.success('Download Started', {
-                                description: `Downloading ${asset.name}...`
+                              toast.success('Download Started'...`
                               })
                             }}
                           >
@@ -1715,9 +1683,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                               size="sm"
                               onClick={() => {
                                 navigator.clipboard.writeText(asset.checksumSha256 || '')
-                                toast.success('Copied to Clipboard', {
-                                  description: 'SHA256 checksum copied successfully'
-                                })
+                                toast.success('Copied to Clipboard')
                               }}
                             >
                               <Copy className="h-4 w-4" />
@@ -2545,7 +2511,7 @@ Thanks to all contributors!`}
             <AIInsightsPanel
               insights={mockChangelogAIInsights}
               title="Changelog Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2823,8 +2789,7 @@ Thanks to all contributors!`}
                 </Button>
                 <Button
                   onClick={() => {
-                    toast.success('Comparison Ready', {
-                      description: `Comparing ${compareForm.baseVersion} to ${compareForm.targetVersion}`
+                    toast.success('Comparison Ready' to ${compareForm.targetVersion}`
                     })
                     setShowCompareDialog(false)
                     setCompareForm({ baseVersion: '', targetVersion: '' })
@@ -2904,8 +2869,7 @@ Thanks to all contributors!`}
                 </Button>
                 <Button
                   onClick={() => {
-                    toast.success('Notifications Sent', {
-                      description: `Notified ${notifyForm.notifyAll ? 'all users' : 'selected users'} successfully`
+                    toast.success('Notifications Sent' successfully`
                     })
                     setShowNotifyDialog(false)
                     setNotifyForm({ message: '', notifyAll: false, selectedUsers: [] })
@@ -2940,9 +2904,7 @@ Thanks to all contributors!`}
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Template Reset', {
-                    description: 'Release template has been reset to default'
-                  })
+                  toast.success('Template Reset')
                   setShowResetTemplateDialog(false)
                 }}
               >
@@ -3002,9 +2964,7 @@ Thanks to all contributors!`}
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Webhook Added', {
-                    description: 'Webhook has been configured successfully'
-                  })
+                  toast.success('Webhook Added')
                   setShowAddWebhookSettingsDialog(false)
                 }}
               >
@@ -3069,8 +3029,7 @@ Thanks to all contributors!`}
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('CI/CD Configured', {
-                    description: `${selectedCIProvider} has been configured successfully`
+                  toast.success('CI/CD Configured' has been configured successfully`
                   })
                   setShowCIConfigDialog(false)
                 }}
@@ -3112,9 +3071,7 @@ Thanks to all contributors!`}
               <Button
                 variant="destructive"
                 onClick={() => {
-                  toast.success('Token Regenerated', {
-                    description: 'Your new API token has been generated. Please copy it now.'
-                  })
+                  toast.success('Token Regenerated')
                   setShowRegenerateTokenDialog(false)
                 }}
               >
@@ -3150,9 +3107,7 @@ Thanks to all contributors!`}
               <Button
                 variant="destructive"
                 onClick={() => {
-                  toast.success('Drafts Deleted', {
-                    description: 'All draft releases have been removed'
-                  })
+                  toast.success('Drafts Deleted')
                   setShowDeleteDraftsDialog(false)
                 }}
               >
@@ -3188,9 +3143,7 @@ Thanks to all contributors!`}
               <Button
                 variant="destructive"
                 onClick={() => {
-                  toast.success('Settings Reset', {
-                    description: 'All settings have been reset to defaults'
-                  })
+                  toast.success('Settings Reset')
                   setShowResetSettingsDialog(false)
                 }}
               >
@@ -3267,13 +3220,10 @@ Thanks to all contributors!`}
               <Button
                 onClick={() => {
                   if (!newEnvironmentForm.name || !newEnvironmentForm.url) {
-                    toast.error('Validation Error', {
-                      description: 'Name and URL are required'
-                    })
+                    toast.error('Validation Error')
                     return
                   }
-                  toast.success('Environment Added', {
-                    description: `${newEnvironmentForm.name} environment has been configured`
+                  toast.success('Environment Added' environment has been configured`
                   })
                   setShowAddEnvironmentDialog(false)
                   setNewEnvironmentForm({ name: '', url: '', type: 'development' })
@@ -3411,8 +3361,7 @@ Thanks to all contributors!`}
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Export Started', {
-                    description: `Analytics data is being exported as ${exportFormat.toUpperCase()}`
+                  toast.success('Export Started'`
                   })
                   setShowExportAnalyticsDialog(false)
                 }}

@@ -33,13 +33,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// A++++ DYNAMIC IMPORTS - Lazy load heavy components for better performance
 const EnhancedDashboardWidget = dynamic(
   () => import('@/components/ui/enhanced-dashboard-widgets').then(mod => mod.EnhancedDashboardWidget),
   { loading: () => <CardSkeleton />, ssr: false }
@@ -158,7 +156,6 @@ const advancedMicroFeaturesActivities = [
 // Quick actions will be defined inside the component with proper dialog handlers
 
 export default function AdvancedMicroFeaturesClient() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -208,10 +205,7 @@ export default function AdvancedMicroFeaturesClient() {
       return
     }
 
-    setIsSubmitting(true)
-    logger.info('Creating new item', newItemForm)
-
-    try {
+    setIsSubmitting(true)    try {
       // Call API to create item
       const response = await fetch('/api/micro-features/items', {
         method: 'POST',
@@ -220,8 +214,7 @@ export default function AdvancedMicroFeaturesClient() {
       })
       if (!response.ok) throw new Error('Failed to create item')
 
-      toast.success('Item created successfully', {
-        description: `"${newItemForm.name}" has been added as a ${newItemForm.type}`
+      toast.success('Item created successfully'" has been added as a ${newItemForm.type}`
       })
 
       setNewItemDialogOpen(false)
@@ -235,9 +228,7 @@ export default function AdvancedMicroFeaturesClient() {
       })
       announce('New item created successfully', 'polite')
     } catch (err) {
-      toast.error('Failed to create item', {
-        description: 'Please try again later'
-      })
+      toast.error('Failed to create item')
     } finally {
       setIsSubmitting(false)
     }
@@ -245,10 +236,7 @@ export default function AdvancedMicroFeaturesClient() {
 
   // Handler for exporting data
   const handleExportData = useCallback(async () => {
-    setIsSubmitting(true)
-    logger.info('Exporting data', exportForm)
-
-    try {
+    setIsSubmitting(true)    try {
       // Call API to export data
       const response = await fetch('/api/micro-features/export', {
         method: 'POST',
@@ -270,8 +258,7 @@ export default function AdvancedMicroFeaturesClient() {
         }
       }
 
-      toast.success('Export completed', {
-        description: `${filename}.${exportForm.format} has been downloaded`
+      toast.success('Export completed'.${exportForm.format} has been downloaded`
       })
 
       setExportDialogOpen(false)
@@ -284,9 +271,7 @@ export default function AdvancedMicroFeaturesClient() {
       })
       announce('Data exported successfully', 'polite')
     } catch (err) {
-      toast.error('Export failed', {
-        description: 'Please try again later'
-      })
+      toast.error('Export failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -294,10 +279,7 @@ export default function AdvancedMicroFeaturesClient() {
 
   // Handler for saving settings
   const handleSaveSettings = useCallback(async () => {
-    setIsSubmitting(true)
-    logger.info('Saving settings', settingsForm)
-
-    try {
+    setIsSubmitting(true)    try {
       // Call API to save settings
       const response = await fetch('/api/micro-features/settings', {
         method: 'PUT',
@@ -306,16 +288,12 @@ export default function AdvancedMicroFeaturesClient() {
       })
       if (!response.ok) throw new Error('Failed to save settings')
 
-      toast.success('Settings saved', {
-        description: 'Your preferences have been updated'
-      })
+      toast.success('Settings saved')
 
       setSettingsDialogOpen(false)
       announce('Settings saved successfully', 'polite')
     } catch (err) {
-      toast.error('Failed to save settings', {
-        description: 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSubmitting(false)
     }
@@ -346,17 +324,11 @@ export default function AdvancedMicroFeaturesClient() {
     },
   ], [])
 
-  // A+++ LOAD ADVANCED MICRO FEATURES DATA
   React.useEffect(() => {
     const loadAdvancedMicroFeaturesData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
-      }
-
-      logger.info('Loading advanced micro features data', { userId })
-      try {
+      }      try {
         setIsLoading(true)
         setError(null)
 
@@ -376,7 +348,6 @@ export default function AdvancedMicroFeaturesClient() {
     loadAdvancedMicroFeaturesData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
   const mockUsers = useMemo(() => [
     { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Designer' },
     { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Developer', isTyping: true },
@@ -555,7 +526,6 @@ export default function AdvancedMicroFeaturesClient() {
     { title: 'Advanced Features', href: '/dashboard/advanced-micro-features', isActive: true }
   ], [])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -582,7 +552,6 @@ export default function AdvancedMicroFeaturesClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -752,7 +721,7 @@ export default function AdvancedMicroFeaturesClient() {
                     title="Revenue Trends"
                     description="Monthly revenue performance"
                     dateRange="Last 6 months"
-                    onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
+                    onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully') }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
                     onSettings={() => { logger.info('Opening chart settings'); setActiveTab('settings'); toast.success('Chart settings opened') }}
                     legend={[
@@ -827,13 +796,9 @@ export default function AdvancedMicroFeaturesClient() {
                   <EnhancedCommentSystem
                     comments={mockComments}
                     currentUser={mockUsers[0]}
-                    onAddComment={(content, mentions, attachments) => {
-                      logger.info('Adding comment', { contentLength: content.length, mentionsCount: mentions?.length || 0, attachmentsCount: attachments?.length || 0 })
-                      toast.success('Comment posted successfully')
+                    onAddComment={(content, mentions, attachments) => {                      toast.success('Comment posted successfully')
                     }}
-                    onReply={(commentId, content) => {
-                      logger.info('Replying to comment', { commentId, contentLength: content.length })
-                      toast.success('Reply posted successfully')
+                    onReply={(commentId, content) => {                      toast.success('Reply posted successfully')
                     }}
                     onLike={(commentId) => { logger.info('Liking comment', { commentId }); toast.success('Comment liked') }}
                     allowAttachments={true}
@@ -862,7 +827,7 @@ export default function AdvancedMicroFeaturesClient() {
                   <EnhancedThemeSelector
                     themes={mockThemes}
                     currentTheme="default"
-                    onThemeChange={(themeId) => { logger.info('Theme changed', { themeId }); toast.success(`Theme changed to ${themeId}`, { description: 'Your preferences have been saved' }) }}
+                    onThemeChange={(themeId) => { logger.info('Theme changed', { themeId }); toast.success(`Theme changed to ${themeId}`) }}
                   />
                 </div>
               </div>

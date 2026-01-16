@@ -192,11 +192,11 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const handleCreateBooking = async () => {
     const selectedService = serviceTypes.find(s => s.id === newBookingForm.serviceType)
     if (!selectedService) {
-      toast.error('Error', { description: 'Please select a service type' })
+      toast.error('Error')
       return
     }
     if (!newBookingForm.date || !newBookingForm.clientName || !newBookingForm.clientEmail) {
-      toast.error('Error', { description: 'Please fill in all required fields' })
+      toast.error('Error')
       return
     }
 
@@ -244,8 +244,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         meeting_url: newBookingForm.addVideoMeeting ? 'https://zoom.us/j/pending' : undefined
       })
 
-      toast.success('Booking Created', {
-        description: `Booking for ${newBookingForm.clientName} has been created successfully`
+      toast.success('Booking Created' has been created successfully`
       })
       setShowNewBooking(false)
       setNewBookingForm({
@@ -260,7 +259,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       })
       refetch()
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to create booking' })
+      toast.error('Error')
     }
   }
 
@@ -271,15 +270,14 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         confirmed_at: new Date().toISOString(),
         confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
       })
-      toast.success('Booking Confirmed', {
-        description: `Booking for ${booking.customer_name || 'client'} has been confirmed`
+      toast.success('Booking Confirmed' has been confirmed`
       })
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to confirm booking' })
+      toast.error('Error')
     }
   }
 
@@ -290,15 +288,14 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         cancelled_at: new Date().toISOString(),
         cancellation_reason: 'Cancelled by user'
       })
-      toast.success('Booking Cancelled', {
-        description: `Booking for ${booking.customer_name || 'client'} has been cancelled`
+      toast.success('Booking Cancelled' has been cancelled`
       })
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to cancel booking' })
+      toast.error('Error')
     }
   }
 
@@ -326,8 +323,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         end_time: endTime.toISOString(),
         status: 'rescheduled' as BookingStatus
       })
-      toast.success('Booking Rescheduled', {
-        description: `Booking has been rescheduled to ${startTime.toLocaleDateString()}`
+      toast.success('Booking Rescheduled'`
       })
       setShowRescheduleDialog(false)
       setRescheduleData(null)
@@ -336,7 +332,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         setSelectedBooking(null)
       }
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to reschedule booking' })
+      toast.error('Error')
     }
   }
 
@@ -347,15 +343,14 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
     try {
       await deleteBooking(booking.id)
-      toast.success('Booking Deleted', {
-        description: `Booking "${booking.title}" has been deleted`
+      toast.success('Booking Deleted'" has been deleted`
       })
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to delete booking' })
+      toast.error('Error')
     }
   }
 
@@ -387,14 +382,14 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Export Complete', { description: `${dataToExport.length} bookings exported to CSV` })
+    toast.success('Export Complete' bookings exported to CSV` })
   }
 
   // Confirm all pending bookings
   const handleConfirmAllPending = async () => {
     const pendingBookings = displayBookings.filter(b => b.status === 'pending')
     if (pendingBookings.length === 0) {
-      toast.info('No Pending Bookings', { description: 'There are no pending bookings to confirm' })
+      toast.info('No Pending Bookings')
       return
     }
 
@@ -420,7 +415,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const handleCancelAllPending = async () => {
     const pendingBookings = displayBookings.filter(b => b.status === 'pending')
     if (pendingBookings.length === 0) {
-      toast.info('No Pending Bookings', { description: 'There are no pending bookings to cancel' })
+      toast.info('No Pending Bookings')
       return
     }
 
@@ -445,7 +440,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // Send reminder to a client
   const handleSendReminder = async (booking: Booking) => {
     if (!booking.customer_email) {
-      toast.error('No Email', { description: 'This booking does not have a customer email address' })
+      toast.error('No Email')
       return
     }
     // In a real implementation, this would call an API to send an email
@@ -471,7 +466,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     )
 
     if (upcomingBookings.length === 0) {
-      toast.info('No Reminders Needed', { description: 'All upcoming bookings have already been sent reminders' })
+      toast.info('No Reminders Needed')
       return
     }
 
@@ -1337,7 +1332,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                               ••••••••••••••••••••
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" className="flex-1 gap-2" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxx'); toast.success('API Key Copied', { description: 'API key copied to clipboard' }) }}>
+                              <Button variant="outline" className="flex-1 gap-2" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxx'); toast.success('API Key Copied') }}>
                                 <Copy className="w-4 h-4" />
                                 Copy Key
                               </Button>
@@ -1488,7 +1483,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                   setCalendarView('week')
                                   setCurrentDate(new Date())
                                   setSearchQuery('')
-                                  toast.success('Settings Reset', { description: 'All booking settings have been reset to defaults' })
+                                  toast.success('Settings Reset')
                                 }
                               }}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -1542,7 +1537,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             { icon: Plus, label: 'New Booking', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setShowNewBooking(true) },
             { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setView('calendar') } },
             { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { window.location.href = '/v2/dashboard/clients' } },
-            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { window.open('https://meet.google.com/new', '_blank'); toast.success('Video Meeting', { description: 'Opening video meeting in new tab...' }) } },
+            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { window.open('https://meet.google.com/new', '_blank'); toast.success('Video Meeting') } },
             { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/v2/dashboard/billing' } },
             { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setShowSettings(true); setSettingsTab('notifications') } },
             { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { window.location.href = '/v2/dashboard/analytics' } },
@@ -1737,7 +1732,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: Calendar, label: 'Day View', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setCalendarView('day') },
                 { icon: CalendarClock, label: 'Week View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setCalendarView('week') },
                 { icon: Globe, label: 'Month View', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setCalendarView('month') },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { refetch(); toast.success('Calendar Synced', { description: 'Calendar has been refreshed' }) } },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { refetch(); toast.success('Calendar Synced') } },
                 { icon: Repeat, label: 'Recurring', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setShowSettings(true); setSettingsTab('availability') } },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleExportBookings('calendar') },
                 { icon: Filter, label: 'Filter', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.getElementById('status-filter')?.focus() } },
@@ -2270,7 +2265,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                       if (selectedBooking.meeting_url) {
                         window.open(selectedBooking.meeting_url, '_blank')
                       } else {
-                        toast.info('No Meeting Link', { description: 'This booking does not have a video meeting link.' })
+                        toast.info('No Meeting Link')
                       }
                     }}
                     className="w-full py-3 px-4 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2"
@@ -2430,7 +2425,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               <button
                 onClick={async () => {
                   if (!blockTimeForm.date) {
-                    toast.error('Date Required', { description: 'Please select a date to block' })
+                    toast.error('Date Required')
                     return
                   }
                   const startTime = new Date(`${blockTimeForm.date}T${blockTimeForm.startTime}:00`)
@@ -2464,12 +2459,12 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                       requirements: {},
                       metadata: { isBlockedTime: true }
                     })
-                    toast.success('Time Blocked', { description: `Time slot blocked on ${blockTimeForm.date}` })
+                    toast.success('Time Blocked'` })
                     setShowBlockTimeDialog(false)
                     setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to Block Time', { description: err.message || 'Could not block time slot' })
+                    toast.error('Failed to Block Time')
                   }
                 }}
                 className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
@@ -2922,7 +2917,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <AIInsightsPanel
               insights={mockBookingsAIInsights}
               title="Booking Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2962,7 +2957,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
               <button
                 className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center gap-2"
-                onClick={() => { navigator.clipboard.writeText('https://book.freeflow.app/your-company'); toast.success('Link Copied', { description: 'Booking page link copied to clipboard' }) }}
+                onClick={() => { navigator.clipboard.writeText('https://book.freeflow.app/your-company'); toast.success('Link Copied') }}
               >
                 <Copy className="h-4 w-4" />
                 Copy Link

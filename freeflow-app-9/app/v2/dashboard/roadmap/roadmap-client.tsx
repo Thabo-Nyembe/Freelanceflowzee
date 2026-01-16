@@ -724,7 +724,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   const handleRecalculateScores = () => {
     // Simulate score recalculation
-    toast.success('RICE Scores Updated', { description: 'All feature scores have been recalculated based on current data' })
+    toast.success('RICE Scores Updated')
   }
 
   const handleAddFeature = () => {
@@ -743,7 +743,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   const handleCopyPublicUrl = () => {
     navigator.clipboard.writeText('https://roadmap.yourcompany.com/public')
-    toast.success('URL Copied', { description: 'Public roadmap URL copied to clipboard' })
+    toast.success('URL Copied')
   }
 
   const handleManageIntegration = (integrationName: string) => {
@@ -780,82 +780,82 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   // Submit handlers for dialogs
   const submitNewFeature = () => {
     if (!newFeatureForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Feature title is required' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Feature Created', { description: `"${newFeatureForm.title}" has been added to the roadmap` })
+    toast.success('Feature Created'" has been added to the roadmap` })
     setIsNewFeatureDialogOpen(false)
   }
 
   const submitNewRelease = () => {
     if (!newReleaseForm.name.trim() || !newReleaseForm.version.trim()) {
-      toast.error('Validation Error', { description: 'Release name and version are required' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Release Created', { description: `Release ${newReleaseForm.version} "${newReleaseForm.name}" has been scheduled` })
+    toast.success('Release Created' "${newReleaseForm.name}" has been scheduled` })
     setIsNewReleaseDialogOpen(false)
   }
 
   const submitIdea = () => {
     if (!newIdeaForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Idea title is required' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Idea Submitted', { description: `Your idea "${newIdeaForm.title}" has been submitted for review` })
+    toast.success('Idea Submitted'" has been submitted for review` })
     setIsSubmitIdeaDialogOpen(false)
   }
 
   const submitOKR = () => {
     if (!newOKRForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Objective title is required' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('OKR Created', { description: `Objective "${newOKRForm.title}" has been set for ${newOKRForm.quarter}` })
+    toast.success('OKR Created'" has been set for ${newOKRForm.quarter}` })
     setIsSetOKRDialogOpen(false)
   }
 
   const submitComment = () => {
     if (!commentText.trim()) {
-      toast.error('Validation Error', { description: 'Comment cannot be empty' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Comment Posted', { description: `Your comment on "${selectedFeature?.title}" has been posted` })
+    toast.success('Comment Posted'" has been posted` })
     setIsCommentDialogOpen(false)
     setCommentText('')
   }
 
   const submitVote = () => {
-    toast.success('Vote Recorded', { description: `You voted for "${selectedFeature?.title}"` })
+    toast.success('Vote Recorded'"` })
     setIsVoteDialogOpen(false)
   }
 
   const copyShareUrl = () => {
     navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied', { description: 'Share link has been copied to clipboard' })
+    toast.success('Link Copied')
   }
 
   const exportRoadmap = () => {
-    toast.success('Export Started', { description: `Roadmap is being exported as ${exportFormat.toUpperCase()}` })
+    toast.success('Export Started'` })
     setIsExportDialogOpen(false)
   }
 
   const syncWithJira = () => {
-    toast.success('Jira Sync Started', { description: 'Syncing features with Jira. This may take a few moments.' })
+    toast.success('Jira Sync Started')
     setIsSyncJiraDialogOpen(false)
   }
 
   const confirmArchive = () => {
-    toast.success('Features Archived', { description: 'All released features have been archived' })
+    toast.success('Features Archived')
     setIsArchiveDialogOpen(false)
   }
 
   const confirmDelete = () => {
-    toast.success('Roadmap Deleted', { description: 'The roadmap has been permanently deleted' })
+    toast.success('Roadmap Deleted')
     setIsDeleteDialogOpen(false)
   }
 
   const handleImportFile = () => {
-    toast.success('Import Started', { description: 'Your features are being imported. This may take a moment.' })
+    toast.success('Import Started')
     setIsImportDialogOpen(false)
   }
 
@@ -2995,7 +2995,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
               <Button variant="outline" onClick={() => setIsInsightDialogOpen(false)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.success('Action Completed', { description: `Insight "${selectedInsight?.title}" has been processed` })
+                  toast.success('Action Completed'" has been processed` })
                   setIsInsightDialogOpen(false)
                 }}
                 className="bg-gradient-to-r from-blue-500 to-indigo-600"

@@ -707,7 +707,7 @@ export default function WorkflowBuilderClient() {
   // Submit new workflow creation
   const handleCreateWorkflowSubmit = useCallback(async () => {
     if (!newWorkflowForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Workflow name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -855,7 +855,7 @@ export default function WorkflowBuilderClient() {
         }
       )
     } catch {
-      toast.error('Invalid JSON', { description: 'Please provide valid workflow JSON data' })
+      toast.error('Invalid JSON')
     }
   }, [])
 
@@ -863,7 +863,7 @@ export default function WorkflowBuilderClient() {
   const handleRunAllWorkflows = useCallback(async () => {
     const activeWorkflows = workflows.filter(w => w.status === 'active')
     if (activeWorkflows.length === 0) {
-      toast.info('No active workflows', { description: 'There are no active workflows to run' })
+      toast.info('No active workflows')
       return
     }
 
@@ -975,7 +975,7 @@ export default function WorkflowBuilderClient() {
   // Apply filters
   const applyFilters = useCallback(() => {
     setShowFilterDialog(false)
-    toast.success('Filters applied', { description: 'Workflow list has been filtered' })
+    toast.success('Filters applied')
   }, [])
 
   // Workflow card settings
@@ -1070,7 +1070,7 @@ export default function WorkflowBuilderClient() {
     const failedExecutions = executions.filter(e => e.status === 'error')
 
     if (failedExecutions.length === 0) {
-      toast.info('No failed executions', { description: 'There are no failed executions to retry' })
+      toast.info('No failed executions')
       return
     }
 
@@ -1101,9 +1101,7 @@ export default function WorkflowBuilderClient() {
   const handleLiveView = useCallback(() => {
     setLiveViewEnabled(prev => {
       const newState = !prev
-      toast.success(newState ? 'Live View Enabled' : 'Live View Disabled', {
-        description: newState ? 'Real-time execution monitoring is now active' : 'Live monitoring paused'
-      })
+      toast.success(newState ? 'Live View Enabled' : 'Live View Disabled')
       return newState
     })
   }, [])
@@ -1172,75 +1170,75 @@ export default function WorkflowBuilderClient() {
 
   const handleImportNode = useCallback(() => {
     setShowImportDialog(true)
-    toast.info('Import Node', { description: 'Upload a JSON file containing node definitions' })
+    toast.info('Import Node')
   }, [])
 
   const handleCustomCode = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Custom Code', { description: 'Showing code nodes' })
+    toast.success('Custom Code')
   }, [])
 
   const handleWebhooks = useCallback(() => {
     setSelectedCategory('trigger')
-    toast.success('Webhooks', { description: 'Showing webhook triggers' })
+    toast.success('Webhooks')
   }, [])
 
   const handleDataNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Data Nodes', { description: 'Showing data integration nodes' })
+    toast.success('Data Nodes')
   }, [])
 
   const handleEmailNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('Email Nodes', { description: 'Showing email nodes' })
+    toast.success('Email Nodes')
   }, [])
 
   const handleHttpNodes = useCallback(() => {
     setSelectedCategory('action')
-    toast.success('HTTP Nodes', { description: 'Showing HTTP request nodes' })
+    toast.success('HTTP Nodes')
   }, [])
 
   const handleFavoriteNodes = useCallback(() => {
     setSelectedCategory('all')
     // Filter to show commonly used nodes (triggers and core actions)
-    toast.success('Favorites', { description: 'Showing frequently used nodes' })
+    toast.success('Favorites')
   }, [])
 
   // ============== TEMPLATES TAB HANDLERS ==============
 
   const handleFeaturedTemplates = useCallback(() => {
     setTemplateFilter('featured')
-    toast.success('Featured', { description: 'Showing featured templates' })
+    toast.success('Featured')
   }, [])
 
   const handlePopularTemplates = useCallback(() => {
     setTemplateFilter('popular')
-    toast.success('Popular', { description: 'Showing popular templates' })
+    toast.success('Popular')
   }, [])
 
   const handleRecentTemplates = useCallback(() => {
     setTemplateFilter('recent')
-    toast.success('Recent', { description: 'Showing recently used templates' })
+    toast.success('Recent')
   }, [])
 
   const handleEmailTemplates = useCallback(() => {
     setTemplateFilter('email')
-    toast.success('Email Templates', { description: 'Showing email automation templates' })
+    toast.success('Email Templates')
   }, [])
 
   const handleDataSyncTemplates = useCallback(() => {
     setTemplateFilter('data')
-    toast.success('Data Sync', { description: 'Showing data sync templates' })
+    toast.success('Data Sync')
   }, [])
 
   const handleChatTemplates = useCallback(() => {
     setTemplateFilter('chat')
-    toast.success('Chat Templates', { description: 'Showing chat automation templates' })
+    toast.success('Chat Templates')
   }, [])
 
   const handleCreateTemplate = useCallback(async () => {
     if (!selectedWorkflow) {
-      toast.info('Select a workflow', { description: 'First select a workflow to create a template from' })
+      toast.info('Select a workflow')
       return
     }
 
@@ -1259,7 +1257,7 @@ export default function WorkflowBuilderClient() {
 
   const handleShareTemplate = useCallback(async () => {
     if (!selectedWorkflow) {
-      toast.info('Select a workflow', { description: 'First select a workflow to share as template' })
+      toast.info('Select a workflow')
       return
     }
 
@@ -1330,12 +1328,12 @@ export default function WorkflowBuilderClient() {
 
   const handleApiKeys = useCallback(() => {
     setCredentialFilter('api_key')
-    toast.success('API Keys', { description: 'Showing API key credentials' })
+    toast.success('API Keys')
   }, [])
 
   const handleOAuth = useCallback(() => {
     setCredentialFilter('oauth2')
-    toast.success('OAuth', { description: 'Showing OAuth credentials' })
+    toast.success('OAuth')
   }, [])
 
   const handleSecuritySettings = useCallback(() => {
@@ -1346,7 +1344,7 @@ export default function WorkflowBuilderClient() {
   const handleShareCredentials = useCallback(async () => {
     const selectedCredentials = credentials.filter(c => c.isShared)
     if (selectedCredentials.length === 0) {
-      toast.info('No shared credentials', { description: 'Mark credentials as shared first to enable sharing' })
+      toast.info('No shared credentials')
       return
     }
 
@@ -1407,7 +1405,7 @@ export default function WorkflowBuilderClient() {
 
   const executeAddCredential = useCallback(async () => {
     if (!newCredentialForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Credential name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -1471,7 +1469,7 @@ export default function WorkflowBuilderClient() {
 
   const executeAddVariable = useCallback(async () => {
     if (!newVariableForm.key.trim()) {
-      toast.error('Validation Error', { description: 'Variable key is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -1501,7 +1499,7 @@ export default function WorkflowBuilderClient() {
 
   const handleImportVariables = useCallback(() => {
     setShowImportDialog(true)
-    toast.info('Import Variables', { description: 'Upload a JSON file containing variable definitions' })
+    toast.info('Import Variables')
   }, [])
 
   const handleExportVariables = useCallback(async () => {
@@ -1538,7 +1536,7 @@ export default function WorkflowBuilderClient() {
       setVariables(prev => [duplicate, ...prev])
       toast.success('Variable duplicated')
     } else {
-      toast.info('Select a variable', { description: 'First select a variable to duplicate' })
+      toast.info('Select a variable')
     }
   }, [variableToEdit])
 
@@ -1556,7 +1554,7 @@ export default function WorkflowBuilderClient() {
   const handleViewAllVariables = useCallback(() => {
     setActiveTab('variables')
     setShowVariablesDialog(true)
-    toast.success('All Variables', { description: `Showing all ${variables.length} variables` })
+    toast.success('All Variables' variables` })
   }, [variables.length])
 
   const handleVariableSettings = useCallback(() => {
@@ -1633,9 +1631,9 @@ export default function WorkflowBuilderClient() {
   const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('Copied', { description: `${label} copied to clipboard` })
+      toast.success('Copied' copied to clipboard` })
     } catch {
-      toast.error('Copy failed', { description: 'Unable to copy to clipboard' })
+      toast.error('Copy failed')
     }
   }, [])
 
@@ -1689,8 +1687,7 @@ export default function WorkflowBuilderClient() {
           : w
       ))
 
-      toast.success('Connection created', {
-        description: `Connected ${dragNodeRef.current.displayName} to ${dropTargetRef.current.nodeId}`
+      toast.success('Connection created' to ${dropTargetRef.current.nodeId}`
       })
     }
     dragNodeRef.current = null
@@ -2991,7 +2988,7 @@ export default function WorkflowBuilderClient() {
             <AIInsightsPanel
               insights={mockWorkflowAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

@@ -623,12 +623,12 @@ export default function FilesHubClient() {
       })
 
       if (error) throw error
-      toast.success('Folder created', { description: `"${newFolderName}" has been created` })
+      toast.success('Folder created'" has been created` })
       setNewFolderName('')
       setShowCreateFolderDialog(false)
       fetchData()
     } catch (error) {
-      toast.error('Failed to create folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create folder')
     } finally {
       setIsSubmitting(false)
     }
@@ -638,10 +638,10 @@ export default function FilesHubClient() {
     try {
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
-      toast.success('File deleted', { description: `${fileName} moved to trash` })
+      toast.success('File deleted' moved to trash` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to delete file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete file')
     }
   }
 
@@ -670,10 +670,10 @@ export default function FilesHubClient() {
       if (error) throw error
 
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
-      toast.success('File shared', { description: `Share link created for ${fileName}` })
+      toast.success('File shared'` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to share file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to share file')
     }
   }
 
@@ -681,11 +681,11 @@ export default function FilesHubClient() {
     try {
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
-      toast.success('Folder deleted', { description: `"${folderName}" has been deleted` })
+      toast.success('Folder deleted'" has been deleted` })
       if (currentFolderId === folderId) setCurrentFolderId(null)
       fetchData()
     } catch (error) {
-      toast.error('Failed to delete folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete folder')
     }
   }
 
@@ -890,7 +890,7 @@ export default function FilesHubClient() {
               <List className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={() => {
-              toast.info('Filter by: Type, Date, Size, Owner', { description: 'Select filters to narrow down results' })
+              toast.info('Filter by: Type, Date, Size, Owner')
             }}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
@@ -1049,7 +1049,7 @@ export default function FilesHubClient() {
                               document.body.removeChild(a)
                               toast.success(`${file.name} downloaded successfully!`)
                             } catch (error) {
-                              toast.error('Download failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                              toast.error('Download failed')
                             }
                           }}>
                             <Download className="w-4 h-4" />
@@ -1276,7 +1276,7 @@ export default function FilesHubClient() {
                           if (!response.ok) throw new Error('Failed to clear cache')
                           toast.success('Local cache cleared successfully!')
                         } catch (error) {
-                          toast.error('Failed to clear cache', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to clear cache')
                         }
                       }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
@@ -1294,7 +1294,7 @@ export default function FilesHubClient() {
                           const data = await response.json()
                           if (data.url) window.location.href = data.url
                         } catch (error) {
-                          toast.error('Failed to redirect', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to redirect')
                         }
                       }}>
                         Upgrade Storage Plan
@@ -1371,7 +1371,7 @@ export default function FilesHubClient() {
                               if (!response.ok) throw new Error('Failed to unlink device')
                               toast.success(`${device.name} has been unlinked`)
                             } catch (error) {
-                              toast.error('Failed to unlink device', { description: error instanceof Error ? error.message : 'Unknown error' })
+                              toast.error('Failed to unlink device')
                             }
                           } }}>Unlink</Button>
                         </div>
@@ -1514,7 +1514,7 @@ export default function FilesHubClient() {
                                   toast.success('Share link removed successfully!')
                                   fetchData()
                                 } catch (error) {
-                                  toast.error('Failed to remove share link', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                  toast.error('Failed to remove share link')
                                 }
                               } }}><Trash2 className="w-4 h-4" /></Button>
                             </div>
@@ -1738,7 +1738,7 @@ export default function FilesHubClient() {
                                   if (!response.ok) throw new Error('Failed to connect app')
                                   toast.success(`${app.name} connected successfully!`)
                                 } catch (error) {
-                                  toast.error('Failed to connect app', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                  toast.error('Failed to connect app')
                                 }
                               }}>Connect</Button>
                             )}
@@ -1794,14 +1794,12 @@ export default function FilesHubClient() {
                             size="icon"
                             onClick={() => {
                               setShowApiKey(!showApiKey)
-                              toast.success(showApiKey ? 'API key hidden' : 'API key revealed', {
-                                description: 'Remember to keep your API key secure'
-                              })
+                              toast.success(showApiKey ? 'API key hidden' : 'API key revealed')
                             }}
                           >
                             {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </Button>
-                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API key copied to clipboard', { description: 'Paste it in your integration settings' }); }}><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API key copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1820,7 +1818,7 @@ export default function FilesHubClient() {
                           if (!response.ok) throw new Error('Failed to regenerate API key')
                           toast.success('New API key generated! Update your integrations.')
                         } catch (error) {
-                          toast.error('Failed to regenerate API key', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to regenerate API key')
                         }
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
@@ -1924,9 +1922,7 @@ export default function FilesHubClient() {
                             size="icon"
                             onClick={() => {
                               setShowEncryptionKey(!showEncryptionKey)
-                              toast.success(showEncryptionKey ? 'Encryption key hidden' : 'Encryption key revealed', {
-                                description: 'Never share your encryption key - it cannot be recovered if lost'
-                              })
+                              toast.success(showEncryptionKey ? 'Encryption key hidden' : 'Encryption key revealed')
                             }}
                           >
                             {showEncryptionKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -1981,7 +1977,7 @@ export default function FilesHubClient() {
                           document.body.removeChild(a)
                           toast.success('Audit log exported to audit-log.csv')
                         } catch (error) {
-                          toast.error('Failed to export audit log', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to export audit log')
                         }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
@@ -1992,9 +1988,9 @@ export default function FilesHubClient() {
                         try {
                           const response = await fetch('/api/files-hub?action=get-audit-log')
                           if (!response.ok) throw new Error('Failed to load audit log')
-                          toast.success('Audit log loaded', { description: 'Displaying all activity records' })
+                          toast.success('Audit log loaded')
                         } catch (error) {
-                          toast.error('Failed to load audit log', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to load audit log')
                         }
                       }}>
                         <Eye className="w-4 h-4 mr-2" />
@@ -2103,7 +2099,7 @@ export default function FilesHubClient() {
                           document.body.removeChild(a)
                           toast.success('Data export ready for download!')
                         } catch (error) {
-                          toast.error('Failed to export data', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to export data')
                         }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
@@ -2121,7 +2117,7 @@ export default function FilesHubClient() {
                           toast.success('Trash emptied successfully!')
                           fetchData()
                         } catch (error) {
-                          toast.error('Failed to empty trash', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to empty trash')
                         }
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -2174,7 +2170,7 @@ export default function FilesHubClient() {
                           if (!response.ok) throw new Error('Failed to create backup')
                           toast.success('Backup created successfully!')
                         } catch (error) {
-                          toast.error('Failed to create backup', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to create backup')
                         }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
@@ -2259,7 +2255,7 @@ export default function FilesHubClient() {
                           toast.success('All files have been deleted permanently')
                           fetchData()
                         } catch (error) {
-                          toast.error('Failed to delete all files', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to delete all files')
                         }
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -2277,7 +2273,7 @@ export default function FilesHubClient() {
                           toast.success('All shared links have been revoked')
                           fetchData()
                         } catch (error) {
-                          toast.error('Failed to revoke shared links', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to revoke shared links')
                         }
                       } }}>
                         <Link2 className="w-4 h-4 mr-2" />
@@ -2294,7 +2290,7 @@ export default function FilesHubClient() {
                           if (!response.ok) throw new Error('Failed to reset settings')
                           toast.success('All settings have been reset to defaults')
                         } catch (error) {
-                          toast.error('Failed to reset settings', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to reset settings')
                         }
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
@@ -2311,7 +2307,7 @@ export default function FilesHubClient() {
                           if (!response.ok) throw new Error('Failed to disable Files Hub')
                           toast.success('Files Hub has been disabled')
                         } catch (error) {
-                          toast.error('Failed to disable Files Hub', { description: error instanceof Error ? error.message : 'Unknown error' })
+                          toast.error('Failed to disable Files Hub')
                         }
                       } }}>
                         <Lock className="w-4 h-4 mr-2" />
@@ -2331,7 +2327,7 @@ export default function FilesHubClient() {
             <AIInsightsPanel
               insights={mockFilesHubAIInsights}
               title="Files Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2426,7 +2422,7 @@ export default function FilesHubClient() {
                       toast.success(`${selectedFile.name} downloaded successfully!`)
                       setShowFileDialog(false)
                     } catch (error) {
-                      toast.error('Download failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                      toast.error('Download failed')
                     }
                   }}>
                     <Download className="w-4 h-4 mr-2" />
@@ -2524,7 +2520,7 @@ export default function FilesHubClient() {
                       setShowUploadDialog(false)
                       fetchData()
                     } catch (error) {
-                      toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                      toast.error('Upload failed')
                     }
                   }
                 }}
@@ -2551,7 +2547,7 @@ export default function FilesHubClient() {
                         setShowUploadDialog(false)
                         fetchData()
                       } catch (error) {
-                        toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        toast.error('Upload failed')
                       }
                     }
                   }}
@@ -2683,7 +2679,7 @@ export default function FilesHubClient() {
                     setShowShareDialog(false)
                     fetchData()
                   } catch (error) {
-                    toast.error('Failed to create share link', { description: error instanceof Error ? error.message : 'Unknown error' })
+                    toast.error('Failed to create share link')
                   }
                 }}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"

@@ -42,7 +42,6 @@ import { toast } from 'sonner'
 
 const logger = createFeatureLogger('Booking')
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -77,7 +76,6 @@ const bookingActivities = [
 ]
 
 export default function BookingClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -126,7 +124,6 @@ export default function BookingClient() {
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ]
 
-  // A+++ LOAD BOOKING DATA
   useEffect(() => {
     const loadBookingData = async () => {
       try {
@@ -149,12 +146,7 @@ export default function BookingClient() {
     loadBookingData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // Handler functions with real features
-  const handleNewBooking = () => {
-    logger.info('Opening new booking dialog', {
-      action: 'new-booking',
-      timestamp: new Date().toISOString()
-    })
-    setShowNewBookingDialog(true)
+  const handleNewBooking = () => {    setShowNewBookingDialog(true)
     announce('New booking dialog opened', 'polite')
   }
 
@@ -191,19 +183,7 @@ export default function BookingClient() {
           notes: bookingNotes
         })
       })
-      if (!res.ok) throw new Error('Failed to create booking')
-
-      logger.info('Booking created successfully', {
-        title: bookingTitle,
-        date: bookingDate,
-        time: bookingTime,
-        duration: bookingDuration,
-        service: bookingService,
-        client: clientName
-      })
-
-      toast.success('Booking created successfully', {
-        description: `${bookingTitle} scheduled for ${bookingDate} at ${bookingTime}`
+      if (!res.ok) throw new Error('Failed to create booking')      toast.success('Booking created successfully' scheduled for ${bookingDate} at ${bookingTime}`
       })
 
       setShowNewBookingDialog(false)
@@ -225,12 +205,7 @@ export default function BookingClient() {
     }
   }
 
-  const handleBookingSettings = () => {
-    logger.info('Opening booking settings dialog', {
-      action: 'settings',
-      timestamp: new Date().toISOString()
-    })
-    setShowSettingsDialog(true)
+  const handleBookingSettings = () => {    setShowSettingsDialog(true)
     announce('Booking settings dialog opened', 'polite')
   }
 
@@ -249,17 +224,7 @@ export default function BookingClient() {
           workingHours: `${workingHoursStart}-${workingHoursEnd}`
         })
       })
-      if (!res.ok) throw new Error('Failed to save settings')
-
-      logger.info('Settings saved successfully', {
-        autoConfirm,
-        bufferTime,
-        maxBookingsPerDay,
-        reminderHours,
-        workingHours: `${workingHoursStart}-${workingHoursEnd}`
-      })
-
-      toast.success('Booking settings saved successfully')
+      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Booking settings saved successfully')
       setShowSettingsDialog(false)
       announce('Settings saved successfully', 'polite')
     } catch (err) {
@@ -270,12 +235,7 @@ export default function BookingClient() {
     }
   }
 
-  const handleBookingReports = () => {
-    logger.info('Opening reports dialog', {
-      action: 'reports',
-      timestamp: new Date().toISOString()
-    })
-    setShowReportsDialog(true)
+  const handleBookingReports = () => {    setShowReportsDialog(true)
     announce('Reports dialog opened', 'polite')
   }
 
@@ -327,17 +287,7 @@ export default function BookingClient() {
       a.href = url
       a.download = fileName
       a.click()
-      URL.revokeObjectURL(url)
-
-      logger.info('Report generated successfully', {
-        ...reportData,
-        fileName,
-        period: reportPeriod,
-        type: reportType
-      })
-
-      toast.success('Report generated and downloaded', {
-        description: `${fileName} - ${reportData.totalBookings} bookings analyzed`
+      URL.revokeObjectURL(url)      toast.success('Report generated and downloaded' - ${reportData.totalBookings} bookings analyzed`
       })
 
       setShowReportsDialog(false)
@@ -393,16 +343,7 @@ export default function BookingClient() {
       a.href = url
       a.download = fileName
       a.click()
-      URL.revokeObjectURL(url)
-
-      logger.info('Export completed', {
-        format: exportFormat,
-        dateRange: exportDateRange,
-        fileName
-      })
-
-      toast.success('Export completed', {
-        description: `${fileName} downloaded successfully`
+      URL.revokeObjectURL(url)      toast.success('Export completed' downloaded successfully`
       })
 
       setShowExportDialog(false)
@@ -415,7 +356,6 @@ export default function BookingClient() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
@@ -437,7 +377,6 @@ export default function BookingClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">

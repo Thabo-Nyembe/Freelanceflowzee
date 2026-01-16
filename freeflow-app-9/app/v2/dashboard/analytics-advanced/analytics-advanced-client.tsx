@@ -49,7 +49,6 @@ import {
   TimeRange
 } from '@/lib/analytics-types'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -92,7 +91,6 @@ const analyticsAdvancedActivities = [
 // Quick actions will be defined inside the component to use state setters
 
 export default function AnalyticsAdvancedClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -130,21 +128,15 @@ export default function AnalyticsAdvancedClient() {
   const [timeRange, setTimeRange] = useState<TimeRange>('month')
   const [selectedMetrics, setSelectedMetrics] = useState<Metric[]>([])
 
-  // A+++ LOAD ADVANCED ANALYTICS DATA
   useEffect(() => {
     const loadAdvancedAnalyticsData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading advanced analytics data', { userId, timeRange })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const {
           getAnalyticsMetrics,
           getRevenueChart,
@@ -193,24 +185,13 @@ export default function AnalyticsAdvancedClient() {
         setAnalyticsStats(statsResult.data || null)
 
         setIsLoading(false)
-        announce('Advanced analytics loaded successfully', 'polite')
-        logger.info('Advanced analytics data loaded successfully', {
-          metricCount: metricsResult.data?.length || 0,
-          insightCount: insightsResult.data?.length || 0,
-          goalCount: goalsResult.data?.length || 0,
-          userId
-        })
-
-        toast.success('Analytics loaded', {
-          description: `${metricsResult.data?.length || 0} metrics analyzed`
+        announce('Advanced analytics loaded successfully', 'polite')        toast.success('Analytics loaded' metrics analyzed`
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load advanced analytics'
         logger.error('Failed to load analytics data', { error: errorMessage, userId })
         setError(errorMessage)
-        toast.error('Failed to load analytics', {
-          description: errorMessage
-        })
+        toast.error('Failed to load analytics')
         setIsLoading(false)
         announce('Error loading advanced analytics', 'assertive')
       }
@@ -739,7 +720,6 @@ export default function AnalyticsAdvancedClient() {
     </div>
   )
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900">
@@ -774,7 +754,6 @@ export default function AnalyticsAdvancedClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900">
@@ -896,8 +875,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Analytics item created', {
-                description: `"${newItemName || 'New Item'}" has been added to your dashboard`
+              toast.success('Analytics item created'" has been added to your dashboard`
               })
               setNewItemName('')
               setShowNewItemDialog(false)
@@ -971,8 +949,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Export started', {
-                description: `Your analytics data is being exported as ${exportFormat.toUpperCase()}`
+              toast.success('Export started'`
               })
               setShowExportDialog(false)
             }}>
@@ -1048,9 +1025,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Settings saved', {
-                description: 'Your analytics preferences have been updated'
-              })
+              toast.success('Settings saved')
               setShowSettingsDialog(false)
             }}>
               Save Settings
@@ -1133,8 +1108,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Goal created', {
-                description: `"${newGoalName || 'New Goal'}" has been added with target ${newGoalTarget || '0'}`
+              toast.success('Goal created'" has been added with target ${newGoalTarget || '0'}`
               })
               setNewGoalName('')
               setNewGoalTarget('')

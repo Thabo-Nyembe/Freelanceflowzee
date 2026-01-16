@@ -289,8 +289,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         record_number: `ACC-${newAccountForm.code}`
       } as any)
 
-      toast.success('Account created successfully!', {
-        description: `Account "${newAccountForm.name}" has been added to your chart of accounts.`
+      toast.success('Account created successfully!'" has been added to your chart of accounts.`
       })
       setShowNewAccountDialog(false)
       setNewAccountForm({
@@ -302,9 +301,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to create account', {
-        description: 'Please try again or contact support.'
-      })
+      toast.error('Failed to create account')
       console.error(error)
     } finally {
       setIsProcessing(false)
@@ -459,20 +456,16 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           status: 'approved' as FinancialStatus,
           approved_at: new Date().toISOString()
         })
-        toast.success('Transaction approved!', {
-          description: `"${transactionTitle}" has been approved.`
+        toast.success('Transaction approved!'" has been approved.`
         })
         refetch()
       } else {
         // Mock transaction - just show toast
-        toast.success('Transaction approved!', {
-          description: `"${transactionTitle}" has been approved.`
+        toast.success('Transaction approved!'" has been approved.`
         })
       }
     } catch (error) {
-      toast.error('Failed to approve transaction', {
-        description: 'Please try again.'
-      })
+      toast.error('Failed to approve transaction')
       console.error(error)
     } finally {
       setIsProcessing(false)
@@ -483,14 +476,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     setIsProcessing(true)
     try {
       await deleteRecord(transactionId)
-      toast.success('Transaction deleted!', {
-        description: 'The transaction has been removed.'
-      })
+      toast.success('Transaction deleted!')
       refetch()
     } catch (error) {
-      toast.error('Failed to delete transaction', {
-        description: 'Please try again.'
-      })
+      toast.error('Failed to delete transaction')
       console.error(error)
     } finally {
       setIsProcessing(false)
@@ -498,8 +487,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   }
 
   const handleSyncBankAccount = (accountId: string, accountName: string) => {
-    toast.success('Sync complete!', {
-      description: `${accountName} has been synchronized.`
+    toast.success('Sync complete!' has been synchronized.`
     })
     refetch()
   }
@@ -512,9 +500,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   ) => {
     const newValue = !currentValue
     setter(newValue)
-    toast.success(`${settingName} ${newValue ? 'enabled' : 'disabled'}`, {
-      description: newValue
-        ? `${settingName} is now active.`
+    toast.success(`${settingName} ${newValue ? 'enabled' : 'disabled'}` is now active.`
         : `${settingName} has been turned off.`
     })
   }
@@ -2251,12 +2237,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => toast.warning('Close Fiscal Year?', {
-                              description: 'This will lock all transactions from the previous fiscal year. This action cannot be undone.',
-                              action: {
-                                label: 'Close Year',
-                                onClick: () => toast.success('Fiscal year closed - Previous year transactions are now locked')
-                              }
+                            onClick={() => toast.warning('Close Fiscal Year?'
                             })}
                           >
                             Close Year
@@ -2461,7 +2442,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your financial question...') } })}
+            onAskQuestion={(q) => toast.info('Question Submitted' })}
           />
           <PredictiveAnalytics predictions={mockFinancialPredictions} />
         </div>
@@ -2527,7 +2508,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </button>
                     <button
                       onClick={() => {
-                        toast.success('Viewing transactions', { description: `Filtering by ${selectedBankAccount?.name}` })
+                        toast.success('Viewing transactions'` })
                         setShowBankAccountOptionsDialog(false)
                         setActiveTab('banking')
                       }}
