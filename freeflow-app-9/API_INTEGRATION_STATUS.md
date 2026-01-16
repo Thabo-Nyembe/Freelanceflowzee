@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 146/286 pages integrated (51.0%)
+**Overall Progress:** 149/286 pages integrated (52.1%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 140/223 using Supabase hooks (62.8%) 🚧
-  - **Mock → Database:** 17/157 migrated (10.8%) 🎉 NEW!
+- **V2 Pages:** 143/223 using Supabase hooks (64.1%) 🚧
+  - **Mock → Database:** 20/157 migrated (12.7%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -553,7 +553,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~3 minutes
    - **Complexity:** Medium (two fallback patterns with different handling approaches)
 
-17. `faq-v2` (app/(app)/dashboard) - ✅ **MIGRATED** - Commit: PENDING
+17. `faq-v2` (app/(app)/dashboard) - ✅ **MIGRATED** - Commit: 64780711
    - **Pattern:** Completion of partial integration - removed dual mock fallback patterns
    - **Tables:** faqs (via use-faqs hook)
    - **Hook Features:** Already integrated with useFAQs (createFAQ, updateFAQ, deleteFAQ, markHelpful mutations)
@@ -570,6 +570,46 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** Clean migration, no errors introduced, dual fallback pattern identical to surveys-v2
    - **Migration Time:** ~3 minutes
    - **Complexity:** Medium (two fallback patterns with consistent removal approach)
+
+18. `ai-design-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #1) - Commit: 7a3f81c4
+   - **Pattern:** Completion of partial integration - removed useEffect sync fallback pattern
+   - **Tables:** ai_designs (via use-ai-designs hook)
+   - **Hook Features:** Already integrated with useAIDesigns (fetchDesigns, createDesign mutations)
+   - **Mapping:** Already implemented - DB AIDesign → UI AIDesignGeneration with field transformations
+   - **Cleanup:** Removed useEffect sync fallback (lines 455-462):
+   - **Before:** `if (mappedDesigns.length > 0) { setGenerations(mappedDesigns) } else if (!isLoading && !designsError) { setGenerations(mockGenerations) }`
+   - **After:** `setGenerations(mappedDesigns)` - always sync mapped data without fallback
+   - **Impact:** Now uses 100% database data for AI design generations
+   - **Note:** Batch migration with api-keys-v2 and 3d-modeling-v2, ~4 lines removed
+   - **Migration Time:** ~2 minutes (batched)
+   - **Complexity:** Low (single useEffect pattern, straightforward removal)
+
+19. `api-keys-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #2) - Commit: 7a3f81c4
+   - **Pattern:** Completion of partial integration - removed useEffect sync fallback pattern
+   - **Tables:** api_keys (via use-api-keys hook)
+   - **Hook Features:** Already integrated with useApiKeys (fetchKeys, stats, filters)
+   - **Mapping:** Already implemented - DB ApiKey → UI ApiKey with comprehensive field transformations
+   - **Cleanup:** Removed useEffect sync fallback (lines 941-947):
+   - **Before:** `if (mappedKeys.length > 0) { setApiKeys(mappedKeys) } else if (!isLoading && !error) { setApiKeys(mockApiKeys) }`
+   - **After:** `setApiKeys(mappedKeys)` - always sync mapped data without fallback
+   - **Impact:** Now uses 100% database data for API keys management
+   - **Kept as Mock:** mockApplications, mockApiLogs, mockWebhooks (separate entities, will be migrated separately)
+   - **Note:** Batch migration with ai-design-v2 and 3d-modeling-v2, ~4 lines removed
+   - **Migration Time:** ~2 minutes (batched)
+   - **Complexity:** Low (single useEffect pattern, straightforward removal)
+
+20. `3d-modeling-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #3) - Commit: 7a3f81c4
+   - **Pattern:** Completion of partial integration - removed useEffect sync fallback pattern
+   - **Tables:** 3d_models (via use-3d-models hook)
+   - **Hook Features:** Already integrated with use3DModels (fetchModels, createModel mutations)
+   - **Mapping:** Already implemented - DB Model3D → UI Model3D with field transformations
+   - **Cleanup:** Removed useEffect sync fallback (lines 391-397):
+   - **Before:** `if (mappedModels.length > 0) { setModels(mappedModels) } else if (!isLoading) { setModels(mockModels) }`
+   - **After:** `setModels(mappedModels)` - always sync mapped data without fallback
+   - **Impact:** Now uses 100% database data for 3D model management
+   - **Note:** Batch migration with ai-design-v2 and api-keys-v2, ~4 lines removed. Pre-existing template literal errors (lines 1372, 1438, 2607) unrelated to migration.
+   - **Migration Time:** ~2 minutes (batched)
+   - **Complexity:** Low (single useEffect pattern, straightforward removal)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
