@@ -1196,6 +1196,47 @@ useEffect(() => {
 6. Call refetch() after mutations to update data
 7. Fix bugs discovered during migration (authentication, toast messages)
 
+### Lib Utility Cleanup Batches
+
+#### Batch #10: Comprehensive Mock Cleanup (20 files) - Commit: 420ea4b2
+**Date:** January 16, 2026
+**Files Migrated:**
+- **App Pages (8):** business-intelligence, faq-v2, gallery-v2, kazi-automations-v2, learning-v2, performance-v2, payments (v1), customers (v2)
+- **Lib Utilities (9):** audio-studio-utils, browser-extension-utils, client-portal-utils, crm-utils, escrow-utils, financial-hub-utils, lead-gen-utils, video-studio-utils
+- **Components (3):** database-block, community-hub, files-hub
+
+**Lines Removed:** 1,938 lines (340 insertions - migration comments)
+**MOCK Constants:** 60+ constants removed/migrated
+
+**Patterns:**
+- Empty arrays: `MOCK_X = []`
+- Zero values: `{ totalRevenue: 0 }`
+- Batch comments: `// MIGRATED: Batch #10 - Removed mock data, using database hooks`
+
+#### Batch #11: Lib Utility Files Mock Cleanup (9 files) - Commit: f8a895f5
+**Date:** January 17, 2026
+**Files Migrated:**
+- **reports-utils.tsx** (3 MOCK constants - updated batch #9 → #11)
+- **files-hub-utils.tsx** (3 MOCK constants - updated batch #9 → #11)
+- **ml-insights-utils.tsx** (2 MOCK constants - updated batch #9 → #11)
+- **invoice-utils.tsx** (4 MOCK constants - updated batch #9 → #11)
+- **real-time-translation-utils.ts** (154 lines - 6 MOCK constants)
+- **report-builder-utils.ts** (61 lines - 2 MOCK constants)
+- **reporting-utils.ts** (55 lines - 1 MOCK constant)
+- **motion-graphics-utils.ts** (83 lines - 3 MOCK constants)
+- **ai-voice-synthesis-utils.ts** (130 lines - 3 MOCK constants)
+
+**Lines Removed:** 537 lines (99 insertions - migration comments)
+**MOCK Constants:** 27 constants removed/migrated
+
+**Patterns:**
+- Empty arrays: `export const MOCK_X = []`
+- Zero value objects: `{ totalTranslations: 0, ... }`
+- Updated batch headers: #9 → #11 for consistency
+- Logger updates: `migrationStatus: 'BATCH_11_COMPLETE'`
+
+**Note:** Batch #11 focused on lib utilities only (no dashboard pages), so page count remains at 170/301 (56.5%)
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
