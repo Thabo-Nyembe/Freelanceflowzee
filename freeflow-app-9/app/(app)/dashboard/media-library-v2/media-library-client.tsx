@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -573,7 +572,7 @@ export default function MediaLibraryClient({
   initialAssets = mockAssets,
   initialFolders = mockFolders
 }: MediaLibraryClientProps) {
-  const supabase = createClient()
+
 
   // Supabase hooks for real data
   const { files: supabaseFiles, loading: filesLoading, refetch: refetchFiles } = useMediaFiles({ status: 'active' })
@@ -807,7 +806,7 @@ export default function MediaLibraryClient({
     } else {
       toast.warning(`Uploaded ${completedFiles} of ${totalFiles} files`)
     }
-  }, [supabase, fileMutation, refetchFiles])
+  }, [ fileMutation, refetchFiles])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()

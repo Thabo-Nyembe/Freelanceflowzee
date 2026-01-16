@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -549,7 +548,7 @@ const mockBugsActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function BugsClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('list')
@@ -682,6 +681,8 @@ export default function BugsClient() {
       // Find the matching DB bug if exists
       const dbBug = bugs.find(b => b.bug_code === bugToAssign.key)
       if (dbBug) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { error } = await supabase
           .from('bugs')
           .update({
@@ -881,9 +882,13 @@ export default function BugsClient() {
   const fetchBugs = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('bugs')
         .select('*')
@@ -899,18 +904,22 @@ export default function BugsClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create bug
   const handleCreateBug = async () => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create bugs')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('bugs').insert({
         user_id: user.id,
         bug_code: generateBugCode(),
@@ -949,6 +958,8 @@ export default function BugsClient() {
     if (!editingBug) return
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -987,6 +998,8 @@ export default function BugsClient() {
   // Delete bug
   const handleDeleteBug = async (bugId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({ deleted_at: new Date().toISOString() })
@@ -1005,6 +1018,8 @@ export default function BugsClient() {
   // Update bug status
   const handleUpdateStatus = async (bugId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -2253,6 +2268,8 @@ export default function BugsClient() {
                             if (confirm('Delete all test/demo bugs? This cannot be undone.')) {
                               toast.loading('Deleting test data...', { id: 'delete-test-data' });
                               try {
+                                const { createClient } = await import('@/lib/supabase/client')
+                                const supabase = createClient()
                                 const { data: { user } } = await supabase.auth.getUser()
                                 if (!user) {
                                   toast.error('Please sign in', { id: 'delete-test-data' })
@@ -2264,6 +2281,8 @@ export default function BugsClient() {
                                   b.title.toLowerCase().includes('demo')
                                 )
                                 for (const bug of testBugs) {
+                                  const { createClient } = await import('@/lib/supabase/client')
+                                  const supabase = createClient()
                                   await supabase
                                     .from('bugs')
                                     .update({ deleted_at: new Date().toISOString() })
@@ -2287,12 +2306,16 @@ export default function BugsClient() {
                             if (confirm('Reset project and delete all bugs? This cannot be undone.')) {
                               toast.loading('Resetting project...', { id: 'project-reset' });
                               try {
+                                const { createClient } = await import('@/lib/supabase/client')
+                                const supabase = createClient()
                                 const { data: { user } } = await supabase.auth.getUser()
                                 if (!user) {
                                   toast.error('Please sign in', { id: 'project-reset' })
                                   return
                                 }
                                 // Soft delete all bugs for this user
+                                const { createClient } = await import('@/lib/supabase/client')
+                                const supabase = createClient()
                                 const { error } = await supabase
                                   .from('bugs')
                                   .update({ deleted_at: new Date().toISOString() })

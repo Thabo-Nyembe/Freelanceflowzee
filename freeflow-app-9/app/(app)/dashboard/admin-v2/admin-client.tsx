@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Settings,
@@ -313,7 +312,7 @@ const getAdminQuickActions = (handlers: {
 ]
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
-  const supabase = createClient()
+
 
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
@@ -389,6 +388,8 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     const flag = featureFlags.find(f => f.id === flagId)
     if (!flag) return
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feature_flags')
         .update({ enabled: !flag.enabled, updated_at: new Date().toISOString() })
@@ -401,7 +402,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     } catch (err) {
       toast.error('Failed to toggle flag')
     }
-  }, [supabase, featureFlags])
+  }, [ featureFlags])
 
   // Run SQL query (mock)
   const runQuery = () => {
@@ -497,7 +498,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('admin_users').insert({
         name: newUserForm.name,
         email: newUserForm.email,
@@ -516,7 +521,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, newUserForm])
+  }, [ newUserForm])
 
   // Create Admin Setting
   const handleCreateSetting = useCallback(async () => {
@@ -596,7 +601,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('feature_flags').insert({
         name: newFlagForm.name,
         key: newFlagForm.key,
@@ -615,7 +624,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, newFlagForm])
+  }, [ newFlagForm])
 
   // Create Scheduled Job
   const handleCreateJob = useCallback(async () => {
@@ -625,7 +634,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('scheduled_jobs').insert({
         name: newJobForm.name,
         description: newJobForm.description,
@@ -644,12 +657,14 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, newJobForm])
+  }, [ newJobForm])
 
   // Export Logs
   const handleExportLogs = useCallback(async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(1000)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -665,7 +680,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Clear Cache - calls real API endpoint
   const handleClearCache = useCallback(async () => {
@@ -700,7 +715,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         error: (err) => `Diagnostics failed: ${(err as Error).message}`
       }
     )
-  }, [supabase])
+  }, [])
 
   // Copy Setting Key to clipboard
   const handleCopySetting = useCallback((setting: AdminSetting) => {
