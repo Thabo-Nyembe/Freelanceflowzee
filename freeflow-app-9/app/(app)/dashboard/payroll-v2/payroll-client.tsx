@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -659,7 +658,7 @@ const formatCurrencyDetailed = (amount: number) => {
 }
 
 export default function PayrollClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('pay-runs')
@@ -762,9 +761,13 @@ export default function PayrollClient() {
   // Fetch payroll runs from Supabase
   const fetchPayrollRuns = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('payroll_runs')
         .select('*')
@@ -780,7 +783,7 @@ export default function PayrollClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchPayrollRuns()
@@ -799,12 +802,16 @@ export default function PayrollClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create payroll runs')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('payroll_runs').insert({
         user_id: user.id,
         run_code: generateRunCode(),
@@ -843,6 +850,8 @@ export default function PayrollClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -875,6 +884,8 @@ export default function PayrollClient() {
   // Delete payroll run (soft delete)
   const handleDeletePayrollRun = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({ deleted_at: new Date().toISOString() })
@@ -908,7 +919,11 @@ export default function PayrollClient() {
   // Approve payroll run
   const handleApprovePayrollRunDb = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -933,6 +948,8 @@ export default function PayrollClient() {
   const handleProcessPayrollRunDb = async (id: string) => {
     try {
       const run = dbPayrollRuns.find(r => r.id === id)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({

@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
 import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Package,
@@ -372,7 +371,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const { mutate: updateInventoryItem, loading: updating } = useUpdateInventoryItem()
   const { mutate: deleteInventoryItem, loading: deleting } = useDeleteInventoryItem()
   const { locations: dbLocations } = useInventoryLocations()
-  const supabase = createClient()
+
 
   // Form state for new product
   const [newProductForm, setNewProductForm] = useState({
@@ -558,6 +557,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const handleExportInventory = useCallback(async () => {
     try {
       toast.info('Export started')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
@@ -595,7 +596,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       console.error('Export error:', error)
       toast.error('Failed to export inventory')
     }
-  }, [supabase])
+  }, [])
 
   const handleCreatePurchaseOrder = () => {
     setShowPODialog(true)
@@ -613,6 +614,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingTransfer(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('stock_transfers').insert({
         reference: `TRF-${Date.now()}`,
         origin_location_id: transferForm.originLocationId,
@@ -650,6 +653,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingPO(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('purchase_orders').insert({
         po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
         supplier_id: poForm.supplierId,
@@ -746,6 +751,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingLocation(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('inventory_locations').insert({
         name: locationForm.name,
         address: locationForm.address || null,
@@ -783,6 +790,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingSupplier(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('suppliers').insert({
         name: supplierForm.name,
         email: supplierForm.email || null,
@@ -872,6 +881,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const handlePrintLabels = async () => {
     setPrintingLabels(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('inventory')
         .select('id, product_name, sku, barcode')
