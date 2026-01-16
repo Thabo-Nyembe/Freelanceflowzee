@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
 import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Package,
