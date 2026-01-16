@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -440,7 +439,7 @@ const mockHelpDocsQuickActions = [
 ]
 
 export default function HelpDocsClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('home')
@@ -524,9 +523,13 @@ export default function HelpDocsClient() {
   const fetchArticles = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('help_articles')
         .select('*')
@@ -542,7 +545,7 @@ export default function HelpDocsClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create article
   const handleCreateArticle = async () => {
@@ -552,12 +555,16 @@ export default function HelpDocsClient() {
     }
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create articles')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('help_articles').insert({
         user_id: user.id,
         article_code: generateArticleCode(),
@@ -593,6 +600,8 @@ export default function HelpDocsClient() {
     if (!editingArticle) return
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -627,6 +636,8 @@ export default function HelpDocsClient() {
   // Delete article
   const handleDeleteArticle = async (articleId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('help_articles')
         .update({ deleted_at: new Date().toISOString() })
@@ -645,6 +656,8 @@ export default function HelpDocsClient() {
   // Update article status
   const handleUpdateStatus = async (articleId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -670,6 +683,8 @@ export default function HelpDocsClient() {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('help_articles')
         .update({
@@ -694,6 +709,8 @@ export default function HelpDocsClient() {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('help_articles')
         .update({ views: article.views + 1 })

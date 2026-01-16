@@ -56,7 +56,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
-import { createClient } from '@/lib/supabase/client'
 import { downloadAsCsv } from '@/lib/button-handlers'
 
 // Types
@@ -691,6 +690,8 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -856,6 +857,8 @@ export default function EscrowClient() {
       // In a real app, this would call a payouts API
       // For now, we'll simulate the payout creation
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -864,6 +867,8 @@ export default function EscrowClient() {
       }
 
       // Create a transaction record for the payout
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('escrow_transactions')
         .insert({
@@ -899,6 +904,8 @@ export default function EscrowClient() {
     try {
       // In a real app, this would send an invitation email
       // For now, we'll simulate the invitation
+      const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 

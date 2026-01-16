@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -444,7 +443,7 @@ interface DbTeamMember {
 }
 
 export default function TeamHubClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
@@ -532,9 +531,13 @@ export default function TeamHubClient() {
   const fetchMembers = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('team_members')
         .select('*')
@@ -549,7 +552,7 @@ export default function TeamHubClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Create team member
   const handleCreateMember = async () => {
@@ -559,12 +562,16 @@ export default function TeamHubClient() {
     }
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to add team members')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('team_members').insert({
         user_id: user.id,
         name: memberForm.name,
@@ -595,6 +602,8 @@ export default function TeamHubClient() {
   // Update member status
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -612,6 +621,8 @@ export default function TeamHubClient() {
   // Delete team member
   const handleDeleteMember = async (memberId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .delete()
