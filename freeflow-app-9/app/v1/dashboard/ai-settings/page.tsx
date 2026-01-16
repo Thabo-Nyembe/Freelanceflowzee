@@ -32,7 +32,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -172,7 +171,6 @@ const FEATURE_CONFIGS = [
 ]
 
 export default function AISettingsPage() {
-  // A+++ STATE MANAGEMENT
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce} = useAnnouncer()
@@ -255,36 +253,24 @@ export default function AISettingsPage() {
   // AI SETTINGS HANDLERS
   // ============================================
 
-  const handleConnectProvider = useCallback((providerName: string) => {
-    logger.info('Connect provider initiated', { providerName })
-    // Production ready
+  const handleConnectProvider = useCallback((providerName: string) => {    // Production ready
   }, [])
 
-  const handleTestConnection = useCallback((providerName: string) => {
-    logger.info('Test connection initiated', { providerName })
-    // Production ready
+  const handleTestConnection = useCallback((providerName: string) => {    // Production ready
   }, [])
 
-  const handleSaveSettings = useCallback((params?: any) => {
-    logger.info('Save settings initiated', { params })
-    // Handler ready
+  const handleSaveSettings = useCallback((params?: any) => {    // Handler ready
     // Production implementation - handler is functional
   }, [])
 
-  const handleToggleFeature = useCallback((featureName: string) => {
-    logger.info('Toggle feature initiated', { featureName })
-    // Production ready
+  const handleToggleFeature = useCallback((featureName: string) => {    // Production ready
   }, [])
 
-  const handleManageUsage = useCallback((params?: any) => {
-    logger.info('Manage usage initiated', { params })
-    // Handler ready
+  const handleManageUsage = useCallback((params?: any) => {    // Handler ready
     // Production implementation - handler is functional
   }, [])
 
-  const handleConfigureModel = useCallback((modelName: string) => {
-    logger.info('Configure model initiated', { modelName })
-    // Production ready
+  const handleConfigureModel = useCallback((modelName: string) => {    // Production ready
   }, [])
 
   const handleResetDefaults = useCallback((params?: any) => {
@@ -300,7 +286,7 @@ export default function AISettingsPage() {
   // Additional Handlers
   const handleImportConfig = () => {
     if (!userId) {
-      toast.error('Authentication Required', { description: 'Please log in to import configuration' })
+      toast.error('Authentication Required')
       return
     }
 
@@ -373,15 +359,10 @@ export default function AISettingsPage() {
         toast.success(`Configuration Imported Securely! ${file.name} - API keys saved to database`)
       } catch (error) {
         logger.error('Configuration import failed', { error })
-        toast.error('Import Failed', {
-          description: 'Invalid configuration file format'
-        })
+        toast.error('Import Failed')
       }
     }
-    input.click()
-
-    logger.info('Import configuration dialog opened', {})
-  }
+    input.click()  }
   const handleDeleteProvider = (providerId: string) => {
     const provider = providers.find(p => p.id === providerId)
     if (!provider) return
@@ -415,17 +396,10 @@ export default function AISettingsPage() {
       // Update provider status to disconnected
       setProviders(prev => prev.map(p =>
         p.id === providerToDelete ? { ...p, status: 'disconnected' as const } : p
-      ))
-
-      logger.info('Provider API key deleted from database', {
-        providerId: providerToDelete,
-        providerName: provider?.name
-      })
-
-      toast.success(`Provider Disconnected: ${provider?.name} API key removed securely`)
+      ))      toast.success(`Provider Disconnected: ${provider?.name} API key removed securely`)
     } catch (error) {
       logger.error('Failed to delete provider API key', { error, providerId: providerToDelete })
-      toast.error('Delete Failed', { description: 'Could not remove provider API key' })
+      toast.error('Delete Failed')
     }
 
     setShowDeleteProviderDialog(false)
@@ -433,14 +407,7 @@ export default function AISettingsPage() {
   }
 
   const handleRefreshProviders = async () => {
-    const connectedProviders = providers.filter(p => p.status === 'connected')
-
-    logger.info('Refreshing providers', {
-      totalProviders: providers.length,
-      connectedProviders: connectedProviders.length
-    })
-
-    // Test all connected providers
+    const connectedProviders = providers.filter(p => p.status === 'connected')    // Test all connected providers
     for (const provider of connectedProviders) {
       await testConnection(provider.id)
     }
@@ -453,17 +420,7 @@ export default function AISettingsPage() {
     const usage = usageData[providerId] || { tokens: Math.floor(Math.random() * 100000), cost: Math.random() * 50, requests: Math.floor(Math.random() * 1000) }
 
     // Store usage data
-    setUsageData(prev => ({ ...prev, [providerId]: usage }))
-
-    logger.info('Viewing usage analytics', {
-      providerId,
-      providerName: provider?.name,
-      tokens: usage.tokens,
-      cost: usage.cost,
-      requests: usage.requests
-    })
-
-    toast.success(`${provider?.name} Usage Analytics: ${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`)
+    setUsageData(prev => ({ ...prev, [providerId]: usage }))    toast.success(`${provider?.name} Usage Analytics: ${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`)
   }
 
   const handleSetBudget = () => {
@@ -474,7 +431,7 @@ export default function AISettingsPage() {
   const confirmSetBudget = async () => {
     const budgetAmount = parseFloat(newBudget)
     if (isNaN(budgetAmount) || budgetAmount <= 0) {
-      toast.error('Invalid Budget', { description: 'Please enter a valid amount' })
+      toast.error('Invalid Budget')
       return
     }
 
@@ -484,14 +441,7 @@ export default function AISettingsPage() {
         await updateAIBudget(userId, budgetAmount)
       }
 
-      setMonthlyBudget(budgetAmount)
-
-      logger.info('Monthly budget set', {
-        previousBudget: monthlyBudget,
-        newBudget: budgetAmount
-      })
-
-      toast.success(`Budget Set: Monthly limit $${budgetAmount}/month - Alerts at 80% usage`)
+      setMonthlyBudget(budgetAmount)      toast.success(`Budget Set: Monthly limit $${budgetAmount}/month - Alerts at 80% usage`)
       announce('Budget set successfully', 'polite')
     } catch (error) {
       logger.error('Failed to save budget', { error })
@@ -519,14 +469,7 @@ export default function AISettingsPage() {
         await updateAIRateLimits(userId, perMinute, perHour)
       }
 
-      setRateLimits(newLimits)
-
-      logger.info('Rate limiting configured', {
-        previousLimits: rateLimits,
-        newLimits
-      })
-
-      toast.success(`Rate Limiting Configured: ${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`)
+      setRateLimits(newLimits)      toast.success(`Rate Limiting Configured: ${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`)
       announce('Rate limiting configured successfully', 'polite')
     } catch (error) {
       logger.error('Failed to save rate limits', { error })
@@ -539,24 +482,11 @@ export default function AISettingsPage() {
   }
 
   const handleConfigureSecurity = () => {
-    const securityFeatures = ['API Key Encryption', 'Role-Based Access', 'Audit Logging', 'IP Whitelisting']
-
-    logger.info('Security settings accessed', {
-      availableFeatures: securityFeatures.length
-    })
-
-    toast.success(`Security Settings: ${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`)
+    const securityFeatures = ['API Key Encryption', 'Role-Based Access', 'Audit Logging', 'IP Whitelisting']    toast.success(`Security Settings: ${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`)
   }
 
   const handleTestAllConnections = async () => {
-    const providersWithKeys = providers.filter(p => apiKeys[p.id])
-
-    logger.info('Testing all connections', {
-      totalProviders: providers.length,
-      providersWithKeys: providersWithKeys.length
-    })
-
-    toast.loading('Testing all connections...')
+    const providersWithKeys = providers.filter(p => apiKeys[p.id])    toast.loading('Testing all connections...')
 
     for (const provider of providersWithKeys) {
       await testConnection(provider.id)
@@ -600,17 +530,10 @@ export default function AISettingsPage() {
       // Update provider status
       setProviders(prev => prev.map(p =>
         p.id === providerToRotate ? { ...p, status: 'disconnected' as const } : p
-      ))
-
-      logger.info('API key rotation initiated - old key deleted', {
-        providerId: providerToRotate,
-        providerName: provider?.name
-      })
-
-      toast.success(`Key Rotation Ready: ${provider?.name} old key removed - Please enter new key and test connection`)
+      ))      toast.success(`Key Rotation Ready: ${provider?.name} old key removed - Please enter new key and test connection`)
     } catch (error) {
       logger.error('Failed to rotate API key', { error, providerId: providerToRotate })
-      toast.error('Rotation Failed', { description: 'Could not delete old API key' })
+      toast.error('Rotation Failed')
     }
 
     setShowRotateKeyDialog(false)
@@ -631,15 +554,7 @@ export default function AISettingsPage() {
       } catch (error) {
         logger.error('Failed to save default provider', { error })
       }
-    }
-
-    logger.info('Default provider set', {
-      feature,
-      providerId,
-      providerName: provider.name
-    })
-
-    toast.success(`Default Provider Set: ${provider.name} is now default for ${feature}`)
+    }    toast.success(`Default Provider Set: ${provider.name} is now default for ${feature}`)
   }
 
   const handleViewApiDocs = (providerId: string) => {
@@ -654,15 +569,7 @@ export default function AISettingsPage() {
       huggingface: 'https://huggingface.co/docs'
     }
 
-    const url = docUrls[providerId] || '#'
-
-    logger.info('API documentation accessed', {
-      providerId,
-      providerName: provider.name,
-      docUrl: url
-    })
-
-    // Open documentation in new tab
+    const url = docUrls[providerId] || '#'    // Open documentation in new tab
     window.open(url, '_blank')
     toast.success(`Opening ${provider.name} documentation`)
   }
@@ -677,14 +584,7 @@ export default function AISettingsPage() {
       return
     }
 
-    const events = ['model.complete', 'model.error', 'quota.warning', 'quota.exceeded']
-
-    logger.info('Webhook configured', {
-      webhookUrl: webhookUrl.trim(),
-      events: events.length
-    })
-
-    toast.success(`Webhook Configured: ${events.length} events will notify ${webhookUrl.trim().slice(0, 30)}...`)
+    const events = ['model.complete', 'model.error', 'quota.warning', 'quota.exceeded']    toast.success(`Webhook Configured: ${events.length} events will notify ${webhookUrl.trim().slice(0, 30)}...`)
     announce('Webhook configured successfully', 'polite')
     setShowWebhookDialog(false)
     setWebhookUrl('')
@@ -702,14 +602,7 @@ export default function AISettingsPage() {
       } catch (error) {
         logger.error('Failed to save logging preference', { error })
       }
-    }
-
-    logger.info('Request logging enabled', {
-      logLevel: 'detailed',
-      includePayloads: true
-    })
-
-    toast.success('Request Logging Enabled: All AI API requests will be logged for debugging')
+    }    toast.success('Request Logging Enabled: All AI API requests will be logged for debugging')
 
     setShowEnableLoggingDialog(false)
   }
@@ -732,23 +625,12 @@ export default function AISettingsPage() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    logger.info('Settings backup created', {
-      keysCount: Object.keys(apiKeys).length,
-      featuresCount: features.length,
-      fileSize: blob.size
-    })
-
-    toast.success(`Backup Created: ${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`)
+    URL.revokeObjectURL(url)    toast.success(`Backup Created: ${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`)
   }
 
   const handleRestoreSettings = () => {
     // Trigger import config which handles restoration
-    handleImportConfig()
-
-    logger.info('Settings restore initiated', {})
-  }
+    handleImportConfig()  }
 
   const handleClearCache = () => {
     setShowClearCacheDialog(true)
@@ -757,13 +639,7 @@ export default function AISettingsPage() {
   const confirmClearCache = () => {
     // Clear cached responses from localStorage
     const cacheKeys = Object.keys(localStorage).filter(k => k.startsWith('kazi-ai-cache-'))
-    cacheKeys.forEach(key => localStorage.removeItem(key))
-
-    logger.info('Cache cleared successfully', {
-      itemsCleared: cacheKeys.length
-    })
-
-    toast.success(`Cache Cleared: ${cacheKeys.length} cached responses removed`)
+    cacheKeys.forEach(key => localStorage.removeItem(key))    toast.success(`Cache Cleared: ${cacheKeys.length} cached responses removed`)
 
     setShowClearCacheDialog(false)
   }
@@ -776,15 +652,7 @@ export default function AISettingsPage() {
 
   const confirmConfigureRetry = () => {
     const maxRetries = parseInt(newMaxRetries) || 3
-    const timeout = parseInt(newTimeout) || 30
-
-    logger.info('Retry configuration set', {
-      maxRetries,
-      timeout,
-      backoffStrategy: 'exponential'
-    })
-
-    toast.success(`Retry Configuration Set: Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`)
+    const timeout = parseInt(newTimeout) || 30    toast.success(`Retry Configuration Set: Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`)
     announce('Retry configuration set successfully', 'polite')
     setShowRetryDialog(false)
     setNewMaxRetries('')
@@ -792,13 +660,7 @@ export default function AISettingsPage() {
   }
 
   const handleEnableAnalytics = () => {
-    const analyticsTypes = ['Usage Patterns', 'Performance Metrics', 'Cost Analysis', 'Error Tracking']
-
-    logger.info('Analytics enabled', {
-      analyticsTypes: analyticsTypes.length
-    })
-
-    toast.success(`Analytics Enabled: ${analyticsTypes.length} analytics types - Usage, Performance, Cost, Errors`)
+    const analyticsTypes = ['Usage Patterns', 'Performance Metrics', 'Cost Analysis', 'Error Tracking']    toast.success(`Analytics Enabled: ${analyticsTypes.length} analytics types - Usage, Performance, Cost, Errors`)
   }
 
   const handleConfigureFallback = () => {
@@ -811,35 +673,22 @@ export default function AISettingsPage() {
     if (!newPrimaryProvider.trim() || !newFallbackProvider.trim()) {
       toast.error('Please select both primary and fallback providers')
       return
-    }
-
-    logger.info('Fallback provider configured', {
-      primaryProvider: newPrimaryProvider.trim(),
-      fallbackProvider: newFallbackProvider.trim()
-    })
-
-    toast.success(`Fallback Configured: ${newPrimaryProvider.trim()} -> ${newFallbackProvider.trim()} on failure`)
+    }    toast.success(`Fallback Configured: ${newPrimaryProvider.trim()} -> ${newFallbackProvider.trim()} on failure`)
     announce('Fallback configured successfully', 'polite')
     setShowFallbackDialog(false)
     setNewPrimaryProvider('')
     setNewFallbackProvider('')
   }
 
-  // A+++ LOAD AI SETTINGS DATA
   useEffect(() => {
     const loadAISettingsData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsPageLoading(false)
+      if (!userId) {        setIsPageLoading(false)
         return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)
-        logger.info('Loading AI settings data', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getProviders, getFeatures, getProviderStats } = await import('@/lib/ai-settings-queries')
 
         // Load AI settings data in parallel
@@ -860,18 +709,13 @@ export default function AISettingsPage() {
         }
 
         setIsPageLoading(false)
-        toast.success(`AI settings loaded: ${providersResult.data?.length || AI_PROVIDERS.length} providers configured`)
-        logger.info('AI settings data loaded successfully', {
-          providersCount: providersResult.data?.length,
-          featuresCount: featuresResult.data?.length
-        })
-        announce('AI settings loaded successfully', 'polite')
+        toast.success(`AI settings loaded: ${providersResult.data?.length || AI_PROVIDERS.length} providers configured`)        announce('AI settings loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI settings'
         setError(errorMessage)
         setIsPageLoading(false)
         logger.error('Failed to load AI settings data', { error: errorMessage, userId })
-        toast.error('Failed to load AI settings', { description: errorMessage })
+        toast.error('Failed to load AI settings')
         announce('Error loading AI settings', 'assertive')
       }
     }
@@ -884,7 +728,7 @@ export default function AISettingsPage() {
 
   const saveApiKey = async (providerId: string, key: string) => {
     if (!userId) {
-      toast.error('Authentication Required', { description: 'Please log in to save API keys' })
+      toast.error('Authentication Required')
       return
     }
 
@@ -915,15 +759,7 @@ export default function AISettingsPage() {
 
       // Update local state with masked key
       const maskedKey = key.length > 4 ? `****${key.slice(-4)}` : key
-      setApiKeys(prev => ({ ...prev, [providerId]: maskedKey }))
-
-      logger.info('API key saved to database', {
-        providerId,
-        providerName: provider?.name,
-        keyLength: key.length
-      })
-
-      // Update provider status
+      setApiKeys(prev => ({ ...prev, [providerId]: maskedKey }))      // Update provider status
       setProviders(prev => prev.map(p =>
         p.id === providerId
           ? { ...p, status: key ? 'connected' : 'disconnected' }
@@ -938,8 +774,7 @@ export default function AISettingsPage() {
         error
       })
 
-      toast.error('Save Failed', {
-        description: `Could not save ${provider?.name} API key to database`
+      toast.error('Save Failed' API key to database`
       })
     }
   }
@@ -947,15 +782,7 @@ export default function AISettingsPage() {
   const testConnection = async (providerId: string) => {
     if (!apiKeys[providerId]) return
 
-    const provider = providers.find(p => p.id === providerId)
-
-    logger.info('Testing connection', {
-      providerId,
-      providerName: provider?.name,
-      keyLength: apiKeys[providerId]?.length
-    })
-
-    setIsTestingConnection(providerId)
+    const provider = providers.find(p => p.id === providerId)    setIsTestingConnection(providerId)
     setProviders(prev => prev.map(p =>
       p.id === providerId
         ? { ...p, status: 'testing' }
@@ -967,13 +794,7 @@ export default function AISettingsPage() {
       const hasKey = apiKeys[providerId] && apiKeys[providerId].length > 10
       const isValid = hasKey // Key exists = connection valid
 
-      if (isValid) {
-        logger.info('Connection test successful', {
-          providerId,
-          providerName: provider?.name
-        })
-
-        setTestResults(prev => ({
+      if (isValid) {        setTestResults(prev => ({
           ...prev,
           [providerId]: { success: true, message: 'Connection successful!' }
         }))
@@ -1001,9 +822,7 @@ export default function AISettingsPage() {
             : p
         ))
 
-        toast.error(`${provider?.name} Connection Failed`, {
-          description: 'Invalid API key or connection error'
-        })
+        toast.error(`${provider?.name} Connection Failed`)
       }
     } catch (error) {
       logger.error('Connection test error', {
@@ -1038,15 +857,7 @@ export default function AISettingsPage() {
     setIsSaving(true)
 
     const keysCount = Object.keys(apiKeys).length
-    const enabledFeatures = features.filter(f => f.enabled).length
-
-    logger.info('Saving all settings', {
-      keysCount,
-      featuresCount: features.length,
-      enabledFeatures
-    })
-
-    try {
+    const enabledFeatures = features.filter(f => f.enabled).length    try {
       // Save to backend API
       const response = await fetch('/api/ai/settings', {
         method: 'POST',
@@ -1066,22 +877,14 @@ export default function AISettingsPage() {
         })
       })
 
-      if (response.ok) {
-        logger.info('Settings saved successfully', {
-          keysCount,
-          enabledFeatures
-        })
-
-        toast.success(`Settings Saved: ${keysCount} API keys • ${enabledFeatures} features enabled`)
+      if (response.ok) {        toast.success(`Settings Saved: ${keysCount} API keys • ${enabledFeatures} features enabled`)
       } else {
         throw new Error('Failed to save settings')
       }
     } catch (error) {
       logger.error('Failed to save settings', { error, keysCount, enabledFeatures })
 
-      toast.error('Save Failed', {
-        description: 'Could not save settings to server'
-      })
+      toast.error('Save Failed')
     } finally {
       setIsSaving(false)
     }
@@ -1111,7 +914,6 @@ export default function AISettingsPage() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isPageLoading) {
     return (
       <ErrorBoundary level="page" name="AI Settings">
@@ -1122,7 +924,6 @@ export default function AISettingsPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <ErrorBoundary level="page" name="AI Settings">
@@ -1207,13 +1008,7 @@ export default function AISettingsPage() {
                               <button
                                 className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-accent/10 rounded"
                                 onClick={() => {
-                                  setShowKeys(prev => ({ ...prev, [provider.id]: !prev[provider.id] }))
-                                  logger.info('API key visibility toggled', {
-                                    providerId: provider.id,
-                                    providerName: provider.name,
-                                    nowVisible: !showKeys[provider.id]
-                                  })
-                                }} data-testid={`toggle-key-visibility-${provider.id}-btn`}
+                                  setShowKeys(prev => ({ ...prev, [provider.id]: !prev[provider.id] }))                                }} data-testid={`toggle-key-visibility-${provider.id}-btn`}
                               >
                                 {showKeys[provider.id] ? (
                                   <EyeOff className="w-3 h-3" />
