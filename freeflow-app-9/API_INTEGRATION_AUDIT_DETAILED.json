@@ -1,0 +1,6221 @@
+{
+  "totalPages": 545,
+  "properlyIntegrated": [],
+  "usingExistingHooks": [
+    {
+      "path": "app",
+      "file": "admin-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAdminSettings",
+      "priority": "low",
+      "hooks": [
+        "useAdminSettings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-assistant-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAIAssistant",
+      "priority": "low",
+      "hooks": [
+        "useAIAssistant"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "allocation-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAllocations, useAllocationMutations",
+      "priority": "low",
+      "hooks": [
+        "useAllocations",
+        "useAllocationMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "analytics-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId, useAnalyticsDailyMetrics, useAnalyticsRealtimeMetrics...",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId",
+        "useAnalyticsDailyMetrics",
+        "useAnalyticsRealtimeMetrics",
+        "useAnalyticsPlatformMetrics",
+        "useAnalyticsInsights",
+        "useAnalyticsGoals",
+        "useAnalyticsUserActivity",
+        "useAnalyticsCohortData",
+        "useAnalyticsEvents",
+        "useAnalyticsRevenue"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "api-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useApiEndpoints, useApiKeys, useWebhooks",
+      "priority": "low",
+      "hooks": [
+        "useApiEndpoints",
+        "useApiKeys",
+        "useWebhooks"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "assets-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAssets, useAssetCollections, useAssetStats...",
+      "priority": "low",
+      "hooks": [
+        "useAssets",
+        "useAssetCollections",
+        "useAssetStats",
+        "useSupabaseMutation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "automations-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAutomations",
+      "priority": "low",
+      "hooks": [
+        "useAutomations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "billing-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useBilling, useCreateSubscription, useCreateCoupon...",
+      "priority": "low",
+      "hooks": [
+        "useBilling",
+        "useCreateSubscription",
+        "useCreateCoupon",
+        "useActiveSubscriptions",
+        "useCoupons",
+        "useInvoices",
+        "useTaxRates",
+        "useRefunds",
+        "useWebhooks",
+        "useActivePricingPlans",
+        "useSupabaseMutation",
+        "useSubscription"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "broadcasts-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useBroadcasts",
+      "priority": "low",
+      "hooks": [
+        "useBroadcasts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "canvas-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCanvas, useRouter",
+      "priority": "low",
+      "hooks": [
+        "useCanvas",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "certifications-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCertifications",
+      "priority": "low",
+      "hooks": [
+        "useCertifications"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "chat-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useChat",
+      "priority": "low",
+      "hooks": [
+        "useChat"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "clients-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useClients, useDeals",
+      "priority": "low",
+      "hooks": [
+        "useClients",
+        "useDeals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "cloud-storage-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCloudStorage",
+      "priority": "low",
+      "hooks": [
+        "useCloudStorage"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "community-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCommunity, useCommunityEvents, useCommunityMembers...",
+      "priority": "low",
+      "hooks": [
+        "useCommunity",
+        "useCommunityEvents",
+        "useCommunityMembers",
+        "useCommunityPosts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "content-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useContent",
+      "priority": "low",
+      "hooks": [
+        "useContent"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "courses-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCoursesExtended, useCreateCourse, useUpdateCourse...",
+      "priority": "low",
+      "hooks": [
+        "useCoursesExtended",
+        "useCreateCourse",
+        "useUpdateCourse",
+        "useDeleteCourse"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "crm-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useRealtimeSubscription",
+      "priority": "low",
+      "hooks": [
+        "useRealtimeSubscription"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "escrow-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useEscrow",
+      "priority": "low",
+      "hooks": [
+        "useEscrow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "feedback-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuth",
+      "priority": "low",
+      "hooks": [
+        "useAuth"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "forms-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useForms",
+      "priority": "low",
+      "hooks": [
+        "useForms"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "gallery-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useGalleryItems, useGalleryCollections",
+      "priority": "low",
+      "hooks": [
+        "useGalleryItems",
+        "useGalleryCollections"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "growth-hub-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId, useGrowthExperiments, useGrowthMetrics...",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId",
+        "useGrowthExperiments",
+        "useGrowthMetrics",
+        "useGrowthPlaybooks",
+        "useCohorts",
+        "useConversionFunnels",
+        "useConversionGoals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "inventory-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useInventory, useCreateInventoryItem, useUpdateInventoryItem...",
+      "priority": "low",
+      "hooks": [
+        "useInventory",
+        "useCreateInventoryItem",
+        "useUpdateInventoryItem",
+        "useDeleteInventoryItem",
+        "useInventoryLocations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "learning-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useLearning, useCourses, useUserProgress...",
+      "priority": "low",
+      "hooks": [
+        "useLearning",
+        "useCourses",
+        "useUserProgress",
+        "useCollections"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "logs-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "marketplace-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCreateCoupon, useCoupons",
+      "priority": "low",
+      "hooks": [
+        "useCreateCoupon",
+        "useCoupons"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "media-library-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useMediaFiles, useMediaFolders, useMediaStats...",
+      "priority": "low",
+      "hooks": [
+        "useMediaFiles",
+        "useMediaFolders",
+        "useMediaStats",
+        "useSupabaseMutation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "messaging-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useConversations, useMessagingMutations",
+      "priority": "low",
+      "hooks": [
+        "useConversations",
+        "useMessagingMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "mobile-app-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "notifications-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useRouter",
+      "priority": "low",
+      "hooks": [
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "performance-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "permissions-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useRoles, usePermissions, useRoleAssignments...",
+      "priority": "low",
+      "hooks": [
+        "useRoles",
+        "usePermissions",
+        "useRoleAssignments",
+        "useCreateRole",
+        "useUpdateRole",
+        "useDeleteRole",
+        "useCreatePermission",
+        "useCreateRoleAssignment"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "profile-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuth",
+      "priority": "low",
+      "hooks": [
+        "useAuth"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "qa-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useQATestCases, useQAMutations",
+      "priority": "low",
+      "hooks": [
+        "useQATestCases",
+        "useQAMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "resources-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useResources, useResourceMutations",
+      "priority": "low",
+      "hooks": [
+        "useResources",
+        "useResourceMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "sales-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useSalesDeals",
+      "priority": "low",
+      "hooks": [
+        "useSalesDeals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "security-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useSecurity",
+      "priority": "low",
+      "hooks": [
+        "useSecurity"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "team-management-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTeamManagement",
+      "priority": "low",
+      "hooks": [
+        "useTeamManagement"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "training-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTrainingPrograms, useTrainingMutations",
+      "priority": "low",
+      "hooks": [
+        "useTrainingPrograms",
+        "useTrainingMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "transactions-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTransactions",
+      "priority": "low",
+      "hooks": [
+        "useTransactions"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "user-management-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useUserManagement",
+      "priority": "low",
+      "hooks": [
+        "useUserManagement"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "webhooks-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useWebhooks",
+      "priority": "low",
+      "hooks": [
+        "useWebhooks"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/files-hub",
+      "file": "page.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAnnouncer, useReducer, useCurrentUser...",
+      "priority": "low",
+      "hooks": [
+        "useAnnouncer",
+        "useReducer",
+        "useCurrentUser",
+        "useStorageOnboarding",
+        "useDeferredValue"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "admin-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAdminSettings",
+      "priority": "low",
+      "hooks": [
+        "useAdminSettings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-assistant-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAIAssistant",
+      "priority": "low",
+      "hooks": [
+        "useAIAssistant"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "allocation-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAllocations, useAllocationMutations",
+      "priority": "low",
+      "hooks": [
+        "useAllocations",
+        "useAllocationMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "analytics-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "assets-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAssets, useAssetCollections, useAssetStats...",
+      "priority": "low",
+      "hooks": [
+        "useAssets",
+        "useAssetCollections",
+        "useAssetStats",
+        "useSupabaseMutation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "automations-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAutomations",
+      "priority": "low",
+      "hooks": [
+        "useAutomations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "billing-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useBilling, useCreateSubscription, useCreateCoupon...",
+      "priority": "low",
+      "hooks": [
+        "useBilling",
+        "useCreateSubscription",
+        "useCreateCoupon",
+        "useActiveSubscriptions",
+        "useCoupons",
+        "useInvoices",
+        "useSupabaseMutation",
+        "useSubscription"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "broadcasts-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useBroadcasts",
+      "priority": "low",
+      "hooks": [
+        "useBroadcasts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "canvas-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCanvas",
+      "priority": "low",
+      "hooks": [
+        "useCanvas"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "certifications-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCertifications",
+      "priority": "low",
+      "hooks": [
+        "useCertifications"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "chat-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useChat",
+      "priority": "low",
+      "hooks": [
+        "useChat"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "clients-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useClients, useDeals",
+      "priority": "low",
+      "hooks": [
+        "useClients",
+        "useDeals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "cloud-storage-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCloudStorage",
+      "priority": "low",
+      "hooks": [
+        "useCloudStorage"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "community-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCommunity, useCommunityEvents, useCommunityMembers...",
+      "priority": "low",
+      "hooks": [
+        "useCommunity",
+        "useCommunityEvents",
+        "useCommunityMembers",
+        "useCommunityPosts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "content-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useContent",
+      "priority": "low",
+      "hooks": [
+        "useContent"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "courses-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCoursesExtended",
+      "priority": "low",
+      "hooks": [
+        "useCoursesExtended"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "crm-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useRealtimeSubscription",
+      "priority": "low",
+      "hooks": [
+        "useRealtimeSubscription"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customers-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCustomers, useCustomerMutations, useTasks...",
+      "priority": "low",
+      "hooks": [
+        "useCustomers",
+        "useCustomerMutations",
+        "useTasks",
+        "useCampaigns",
+        "useSalesDeals",
+        "usePipelineStages"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "escrow-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useEscrow",
+      "priority": "low",
+      "hooks": [
+        "useEscrow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "feedback-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuth",
+      "priority": "low",
+      "hooks": [
+        "useAuth"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "forms-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useForms",
+      "priority": "low",
+      "hooks": [
+        "useForms"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "gallery-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useGalleryItems, useGalleryCollections",
+      "priority": "low",
+      "hooks": [
+        "useGalleryItems",
+        "useGalleryCollections"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "growth-hub-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId, useGrowthExperiments, useGrowthMetrics...",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId",
+        "useGrowthExperiments",
+        "useGrowthMetrics",
+        "useGrowthPlaybooks",
+        "useCohorts",
+        "useConversionFunnels",
+        "useConversionGoals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "inventory-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useInventory, useCreateInventoryItem, useUpdateInventoryItem...",
+      "priority": "low",
+      "hooks": [
+        "useInventory",
+        "useCreateInventoryItem",
+        "useUpdateInventoryItem",
+        "useDeleteInventoryItem",
+        "useInventoryLocations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "learning-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useLearning, useCourses, useUserProgress...",
+      "priority": "low",
+      "hooks": [
+        "useLearning",
+        "useCourses",
+        "useUserProgress",
+        "useCollections"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "logs-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "marketplace-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useCreateCoupon, useCoupons",
+      "priority": "low",
+      "hooks": [
+        "useCreateCoupon",
+        "useCoupons"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "media-library-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useMediaFiles, useMediaFolders, useMediaStats...",
+      "priority": "low",
+      "hooks": [
+        "useMediaFiles",
+        "useMediaFolders",
+        "useMediaStats",
+        "useSupabaseMutation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "messaging-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useConversations, useMessagingMutations",
+      "priority": "low",
+      "hooks": [
+        "useConversations",
+        "useMessagingMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "mobile-app-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "notifications-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useNotifications",
+      "priority": "low",
+      "hooks": [
+        "useNotifications"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "performance-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuthUserId",
+      "priority": "low",
+      "hooks": [
+        "useAuthUserId"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "permissions-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useRoles, usePermissions, useRoleAssignments...",
+      "priority": "low",
+      "hooks": [
+        "useRoles",
+        "usePermissions",
+        "useRoleAssignments",
+        "useCreateRole",
+        "useUpdateRole",
+        "useDeleteRole",
+        "useCreatePermission",
+        "useCreateRoleAssignment"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "profile-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useAuth",
+      "priority": "low",
+      "hooks": [
+        "useAuth"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "qa-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useQATestCases, useQAMutations",
+      "priority": "low",
+      "hooks": [
+        "useQATestCases",
+        "useQAMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "resources-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useResources, useResourceMutations",
+      "priority": "low",
+      "hooks": [
+        "useResources",
+        "useResourceMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "sales-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useSalesDeals",
+      "priority": "low",
+      "hooks": [
+        "useSalesDeals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "security-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useSecurity",
+      "priority": "low",
+      "hooks": [
+        "useSecurity"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "team-management-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTeamManagement",
+      "priority": "low",
+      "hooks": [
+        "useTeamManagement"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "training-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTrainingPrograms, useTrainingMutations",
+      "priority": "low",
+      "hooks": [
+        "useTrainingPrograms",
+        "useTrainingMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "transactions-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useTransactions",
+      "priority": "low",
+      "hooks": [
+        "useTransactions"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "user-management-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useUserManagement",
+      "priority": "low",
+      "hooks": [
+        "useUserManagement"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "webhooks-client.tsx",
+      "category": "usingExistingHooks",
+      "reason": "Using hooks: useWebhooks",
+      "priority": "low",
+      "hooks": [
+        "useWebhooks"
+      ],
+      "apiClients": []
+    }
+  ],
+  "needsIntegration": [
+    {
+      "path": "app",
+      "file": "3d-modeling-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/a-plus-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "activity-logs-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "add-ons-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/admin-overview",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/advanced-micro-features",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-code-completion",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCustomHook",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-create-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-enhanced",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-settings",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-video-generation",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-voice-synthesis",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "alerts-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAlerts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/analytics-advanced",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "announcements-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncements"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "api-keys-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ar-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audio-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/audit-trail",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audit-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAuditEvents",
+        "useComplianceChecks"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "automation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAutomation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "backups-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "badges-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/booking",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "bookings-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useBookings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/browser-extension",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "budgets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useBudgets",
+        "useTransactions"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "builds-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "calendar-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCalendarEvents"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "campaigns-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCampaigns",
+        "useCampaign"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/canvas-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "capacity-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCapacity"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "changelog-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useChangelog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/client-portal",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "collaboration-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/community-hub",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "compliance-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "component-library-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "connectors-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "content-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "contracts-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useContracts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/crypto-payments",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customer-success-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useEnrollment"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customers-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useClients"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/cv-portfolio",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "docs-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "documentation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDocumentationCRUD"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "documents-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDocuments",
+        "useDocumentMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "email-marketing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "employees-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useEmployees",
+        "useCreateEmployee",
+        "useUpdateEmployee",
+        "useDeleteEmployee",
+        "useToggleEmployeeStatus"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "events-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useEvents"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "expenses-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useExpenses",
+        "useCreateExpense",
+        "useUpdateExpense",
+        "useDeleteExpense"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "extensions-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "faq-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useFAQs"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "features-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/files",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer",
+        "useInfiniteScroll"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "financial-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useFinancial"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "help-center-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "integrations-marketplace-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useMarketplaceIntegrations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "integrations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useIntegrations",
+        "useWorkflows",
+        "useWebhooks",
+        "useWorkflow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "invoices-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useInvoices"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "kazi-automations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useKaziAutomations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "knowledge-articles-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "lead-generation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useLeads"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "marketing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCampaign"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "messages-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useMessages",
+        "useConversations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/micro-features-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useTransition",
+        "useDeferredValue"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ml-insights",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "my-day-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "orders-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "performance-analytics-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/plugin-marketplace",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "plugins-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "usePlugins"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "products-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useProducts",
+        "useProductStats"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/project-templates",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "projects-hub-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useProjects"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/real-time-translation",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "recruitment-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useJobPostings",
+        "useJobApplications",
+        "useRecruitmentMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "release-notes-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useReleaseNotes"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "renewals-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "reporting-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDashboards",
+        "useWorksheets",
+        "useReportDataSources",
+        "useScheduledReports"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "reports-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDashboards",
+        "useReportDataSources",
+        "useScheduledReports"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/resource-library",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "roadmap-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "roles-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useRoles"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "security-audit-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "seo-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/shadcn-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/shadcn-showcase.disabled",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "social-media-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "sprints-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSprints",
+        "useSprintTasks",
+        "useSprintMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "stock-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useStockMovements",
+        "useStockLevels",
+        "useStockMovementMutations",
+        "useStockLevelMutations",
+        "useDetailsDialog",
+        "useDetails"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "subscriptions-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDialog",
+        "usePromise"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "support-tickets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTicketReplies",
+        "useSupportTickets"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "support-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "surveys-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSurveys",
+        "useSurveyMutations",
+        "useSurvey"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tasks-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTasks"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/team",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "templates-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTemplates",
+        "useTemplateMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "theme-store-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "third-party-integrations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAllDialog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tickets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTickets",
+        "useTicketMutations",
+        "useTicketMessageMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "time-tracking-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTimeTracking"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tutorials-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useTutorials"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ui-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "upgrades-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "video-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/voice-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "warehouse-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useClient"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "webinars-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/white-label",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "widget-library-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWidgetLibrary"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/widgets",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "workflow-builder-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWorkflow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "workflows-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWorkflows",
+        "useWorkflow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/3d-modeling",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "usePosition"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/a-plus-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/admin-overview",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/advanced-micro-features",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-assistant",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser",
+        "useKaziAI"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-code-completion",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCustomHook",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-design",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-enhanced",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-settings",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-video-generation",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/analytics-advanced",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ar-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/audit-trail",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/bookings",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/browser-extension",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/calendar",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/canvas",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useReducer",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/canvas-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/client-portal",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/clients",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useLeadsData",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/cloud-storage",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/community-hub",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/crypto-payments",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/cv-portfolio",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/desktop-app",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/email-marketing",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/escrow",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/files",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/growth-hub",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useGrowthPlaybook",
+        "useAIRecommendations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/invoices",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/lead-generation",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ml-insights",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/mobile-app",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/performance-analytics",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/plugin-marketplace",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/project-templates",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/projects",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/referrals",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/reporting",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/reports",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/resource-library",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/shadcn-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/shadcn-showcase.disabled",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/team",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/team-hub",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ui-showcase",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "upgrades-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/voice-collaboration",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/widgets",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/workflow-builder",
+      "file": "page.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useWorkflow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "3d-modeling-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "a-plus-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "activity-logs-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "add-ons-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "admin-overview-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "advanced-features-demo-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAISuggestions",
+        "useContentGeneration",
+        "usePresence",
+        "useBroadcast"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "advanced-micro-features-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-business-advisor-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-code-completion-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCustomHook",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-collaborate-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-content-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-create-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-enhanced-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-image-generator-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-music-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-settings-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-video-generation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-video-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-voice-synthesis-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "alerts-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAlerts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "analytics-advanced-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "announcements-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncements"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "api-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useApiEndpoints",
+        "useApiKeys"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "api-keys-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ar-collaboration-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audio-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audit-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAuditEvents",
+        "useComplianceChecks"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audit-trail-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "automation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAutomation"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "backups-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useBackups"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "booking-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "bookings-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useBookings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "browser-extension-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "budgets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useBudgets",
+        "useTransactions"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "builds-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "calendar-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCalendarEvents"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "campaigns-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCampaigns",
+        "useCampaign"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "canvas-collaboration-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "capacity-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCapacity"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "changelog-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useChangelog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "client-portal-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "client-zone-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "collaboration-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "collaboration-demo-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useWebSocket"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "coming-soon-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "community-hub-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "compliance-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "component-library-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "comprehensive-testing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "connectors-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "content-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "contracts-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useContracts"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "crypto-payments-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "custom-reports-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customer-success-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "cv-portfolio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "docs-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "documentation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDocumentationCRUD"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "documents-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDocuments",
+        "useDocumentMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ecommerce-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "email-agent-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "email-marketing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "employees-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useEmployees",
+        "useCreateEmployee",
+        "useUpdateEmployee",
+        "useDeleteEmployee"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "enhanced-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "events-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useEvents"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "expenses-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useExpenses",
+        "useCreateExpense",
+        "useUpdateExpense",
+        "useDeleteExpense"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "extensions-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "faq-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useFAQs"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "feature-testing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter",
+        "useTransition"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "features-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "files-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "financial-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useFinancial"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "financial-hub-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useRevenueData",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "help-center-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "integrations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useIntegrations",
+        "useWorkflows",
+        "useWebhooks",
+        "useWorkflow",
+        "useAllZaps"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "integrations-marketplace-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useMarketplaceIntegrations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "invoices-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useInvoices"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "invoicing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "knowledge-articles-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "lead-generation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useLeads"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "marketing-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCampaign"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "messages-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useMessages"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "micro-features-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useTransition",
+        "useDeferredValue"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ml-insights-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "my-day-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "operations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "orders-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "payments-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "performance-analytics-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "plugin-marketplace-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "plugins-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "usePlugins"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "products-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useProducts",
+        "useProductStats"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "project-templates-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "projects-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "projects-hub-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useProjects"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "real-time-translation-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSessionDialog",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "recruitment-client.tsx",
+      "category": "needsIntegration",
+      "reason": "mock data imports, hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useJobPostings",
+        "useJobApplications",
+        "useRecruitmentMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "referrals-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "release-notes-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useReleaseNotes"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "renewals-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "reporting-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDashboards",
+        "useWorksheets",
+        "useReportDataSources",
+        "useScheduledReports"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "reports-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "resource-library-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "roadmap-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "roles-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useRoles"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "security-audit-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "seo-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "setup-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "shadcn-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "social-media-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "sprints-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSprints",
+        "useSprintTasks",
+        "useSprintMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "stock-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useDetailsDialog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "storage-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "support-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "support-tickets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSupportTickets"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "surveys-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useSurveys",
+        "useSurveyMutations",
+        "useSurvey"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "team-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "templates-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTemplates",
+        "useTemplateMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "theme-store-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "third-party-integrations-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAllDialog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tickets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTickets",
+        "useTicketMutations",
+        "useTicketMessageMutations"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "time-tracking-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTimeTracking"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tutorials-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useTutorials"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ui-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays, setTimeout data loading",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "upgrades-showcase-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "value-dashboard-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "video-studio-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "voice-collaboration-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "warehouse-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useClient"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "webinars-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "white-label-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "widget-library-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWidgetLibrary"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "widgets-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "workflow-builder-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWorkflow"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "workflows-client.tsx",
+      "category": "needsIntegration",
+      "reason": "hardcoded arrays",
+      "priority": "high",
+      "hooks": [
+        "useWorkflows",
+        "useWorkflow"
+      ],
+      "apiClients": []
+    }
+  ],
+  "hasSupabaseButNeedsUpgrade": [
+    {
+      "path": "app",
+      "file": "access-logs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-design-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "app-store-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audit-logs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "bugs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ci-cd-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customer-support-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "data-export-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "dependencies-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "deployments-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "desktop-app-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "files-hub-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "health-score-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "help-docs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "investor-metrics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "invoicing-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "knowledge-base-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "logistics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useEditDialog",
+        "useDialog",
+        "useTypeColor"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "maintenance-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "milestones-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "monitoring-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "motion-graphics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "onboarding-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "overview-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "payroll-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "polls-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "pricing-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "registrations-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "releases-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "settings-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useEvent",
+        "useSettings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "shipping-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "system-insights-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "team-hub-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "testing-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "vulnerability-scan-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "access-logs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-design-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "app-store-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "audit-logs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "bugs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ci-cd-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useAllDialog"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "customer-support-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "data-export-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useAllDialog",
+        "useJobsDialog",
+        "usePipeline",
+        "useAllJobs"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "dependencies-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "deployments-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "desktop-app-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "files-hub-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "health-score-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "help-docs-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "investor-metrics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "knowledge-base-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "logistics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useDialog",
+        "useTypeColor"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "maintenance-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "milestones-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "monitoring-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "motion-graphics-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [
+        "useRenderJob"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "onboarding-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "overview-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "payroll-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "polls-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "pricing-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "registrations-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "releases-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "settings-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "shipping-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "system-insights-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "team-hub-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "testing-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "vulnerability-scan-client.tsx",
+      "category": "hasSupabaseButNeedsUpgrade",
+      "reason": "Has Supabase queries but not using typed API clients",
+      "priority": "medium",
+      "hooks": [],
+      "apiClients": []
+    }
+  ],
+  "unknownStatus": [
+    {
+      "path": "app/(app)/dashboard/advanced-features-demo",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAISuggestions",
+        "useContentGeneration",
+        "usePresence",
+        "useBroadcast"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-business-advisor",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-code-builder-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCodeBuilder"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "ai-code-builder-v2-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCodeBuilder"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-content-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-create",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-image-generator",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-music-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/ai-video-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/bookings",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/business-intelligence",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useBusinessIntelligence",
+        "useProfitability",
+        "useClientValue",
+        "useRevenueForecast",
+        "useKPIGoals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "business-intelligence-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useBusinessIntelligence",
+        "useProfitability",
+        "useClientValue",
+        "useRevenueForecast",
+        "useKPIGoals"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/calendar",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/client-zone",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/collaboration",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/collaboration-demo",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useWebSocket"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/coming-soon",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/comprehensive-testing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/custom-reports",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/email-agent",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/example-modern",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/feature-testing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter",
+        "useTransition"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/financial-hub",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useRevenueData",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "kazi-workflows-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useKaziWorkflows"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/my-day",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/notifications",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/projects-hub",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/settings",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/(app)/dashboard/storage/integrated-page.tsx",
+      "file": "integrated-page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "tax-intelligence-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useTaxSummary",
+        "useTaxInsights",
+        "useTaxDeductions",
+        "useDeductionBreakdown",
+        "useTaxProfile",
+        "useTaxFilings"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "vendors-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useVendors"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/admin",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/advanced-features-demo",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAISuggestions",
+        "useContentGeneration",
+        "usePresence",
+        "useBroadcast"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-business-advisor",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-collaborate",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-content-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-create",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "usePathname"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-image-generator",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-music-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-video-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/ai-voice-synthesis",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/analytics",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/api-keys",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/audio-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/automation",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/booking",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/client-zone",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/collaboration-demo",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useWebSocket"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/coming-soon",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/community",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/comprehensive-testing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/crm",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/custom-reports",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/email-agent",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/enhanced",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/example-modern",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/feature-testing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useRouter",
+        "useTransition"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/feedback",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/financial",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/financial-hub",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useRevenueData",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/gallery",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/integrations",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/investor-metrics",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/invoicing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/knowledge-base",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/marketing",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/messages",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/micro-features-showcase",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useTransition",
+        "useDeferredValue"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/motion-graphics",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/my-day",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer",
+        "useRouter",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/notifications",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useReducer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/operations",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/payments",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/projects-hub",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useRevenueData",
+        "useRouter",
+        "useAnnouncer",
+        "useInfiniteScroll"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/real-time-translation",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/settings",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/setup",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useToast",
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/storage/integrated-page.tsx",
+      "file": "integrated-page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/system-insights",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/tasks",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/team-management",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/time-tracking",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser",
+        "useTimeEntry"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/user-management",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/value-dashboard",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useCurrentUser",
+        "useAnnouncer"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/video-studio",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useRouter",
+        "useCurrentUser",
+        "useAnnouncer",
+        "useScreenRecorder",
+        "useRecording"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app/v1/dashboard/white-label",
+      "file": "page.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [
+        "useAnnouncer",
+        "useCurrentUser"
+      ],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "code-repository-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    },
+    {
+      "path": "app",
+      "file": "example-modern-client.tsx",
+      "category": "unknownStatus",
+      "reason": "No clear integration pattern detected",
+      "priority": "investigate",
+      "hooks": [],
+      "apiClients": []
+    }
+  ]
+}
