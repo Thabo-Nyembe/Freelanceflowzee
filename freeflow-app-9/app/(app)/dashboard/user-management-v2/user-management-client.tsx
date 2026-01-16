@@ -293,16 +293,13 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         metadata: { sendWelcomeEmail: inviteForm.sendWelcomeEmail }
       } as any)
 
-      toast.success('User invited successfully!', {
-        description: `Invitation sent to ${inviteForm.email}`
+      toast.success('User invited successfully!'`
       })
       setShowInviteModal(false)
       setInviteForm({ email: '', role: 'user', full_name: '', sendWelcomeEmail: true })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to invite user', {
-        description: error.message || 'Could not send invitation'
-      })
+      toast.error('Failed to invite user')
     } finally {
       setInviting(false)
     }
@@ -312,14 +309,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'suspended' as UserStatus })
-      toast.success('User suspended', {
-        description: `"${user.full_name || user.email}" has been suspended`
+      toast.success('User suspended'" has been suspended`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to suspend user', {
-        description: error.message || 'Could not suspend user'
-      })
+      toast.error('Failed to suspend user')
     } finally {
       setSuspendingUser(null)
     }
@@ -329,14 +323,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'active' as UserStatus })
-      toast.success('User activated', {
-        description: `"${user.full_name || user.email}" has been activated`
+      toast.success('User activated'" has been activated`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to activate user', {
-        description: error.message || 'Could not activate user'
-      })
+      toast.error('Failed to activate user')
     } finally {
       setSuspendingUser(null)
     }
@@ -349,16 +340,13 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setDeletingUser(user.id)
     try {
       await deleteUser(user.id)
-      toast.success('User deleted', {
-        description: `"${user.full_name || user.email}" has been removed`
+      toast.success('User deleted'" has been removed`
       })
       setShowUserModal(false)
       setSelectedUser(null)
       refetch()
     } catch (error: any) {
-      toast.error('Failed to delete user', {
-        description: error.message || 'Could not delete user'
-      })
+      toast.error('Failed to delete user')
     } finally {
       setDeletingUser(null)
     }
@@ -384,13 +372,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         password_changed_at: new Date().toISOString()
       } as any)
 
-      toast.success('Password reset sent', {
-        description: `Reset link sent to ${user.email}`
+      toast.success('Password reset sent'`
       })
     } catch (error: any) {
-      toast.error('Failed to send password reset', {
-        description: error.message || 'Could not send reset link'
-      })
+      toast.error('Failed to send password reset')
     }
   }
 
@@ -429,13 +414,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'User list has been downloaded'
-      })
+      toast.success('Export complete')
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'Could not export users'
-      })
+      toast.error('Export failed')
     } finally {
       setExporting(false)
     }
@@ -445,14 +426,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setUpdatingRole(user.id)
     try {
       await updateUser({ id: user.id, role: newRole })
-      toast.success('Role assigned', {
-        description: `${newRole} role assigned to ${user.full_name || user.email}`
+      toast.success('Role assigned' role assigned to ${user.full_name || user.email}`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to assign role', {
-        description: error.message || 'Could not update user role'
-      })
+      toast.error('Failed to assign role')
     } finally {
       setUpdatingRole(null)
     }
@@ -466,15 +444,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await updateUser({ id: userId, status: 'suspended' as UserStatus })
       }
-      toast.success('Users suspended', {
-        description: `${selectedUsers.length} users have been suspended`
+      toast.success('Users suspended' users have been suspended`
       })
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
-      toast.error('Failed to suspend users', {
-        description: error.message || 'Could not suspend selected users'
-      })
+      toast.error('Failed to suspend users')
     }
   }
 
@@ -486,15 +461,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await deleteUser(userId)
       }
-      toast.success('Users deleted', {
-        description: `${selectedUsers.length} users have been deleted`
+      toast.success('Users deleted' users have been deleted`
       })
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
-      toast.error('Failed to delete users', {
-        description: error.message || 'Could not delete selected users'
-      })
+      toast.error('Failed to delete users')
     }
   }
 
@@ -518,15 +490,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
       if (error) throw error
 
-      toast.success('Role created', {
-        description: `"${roleForm.name}" role has been created`
+      toast.success('Role created'" role has been created`
       })
       setShowRoleModal(false)
       setRoleForm({ name: '', description: '', permissions: [] })
     } catch (error: any) {
-      toast.error('Failed to create role', {
-        description: error.message || 'Could not create role'
-      })
+      toast.error('Failed to create role')
     } finally {
       setCreatingRole(false)
     }
@@ -1045,12 +1014,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage SSO, social logins, and identity providers</p>
                 </div>
                 <Button className="gap-2" onClick={() => {
-                  toast.info('Connection wizard', {
-                    description: 'Configure SSO, SAML, or OAuth providers in Settings > Authentication',
-                    action: {
-                      label: 'Go to Settings',
-                      onClick: () => setActiveView('settings')
-                    }
+                  toast.info('Connection wizard'
                   })
                 }}>
                   <Plus className="w-4 h-4" />
@@ -1108,12 +1072,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               status: conn.status,
                               domains: conn.domains
                             }, null, 2))
-                            toast.success(`${conn.name} configuration copied`, {
-                              description: 'Connection details copied to clipboard'
-                            })
+                            toast.success(`${conn.name} configuration copied`)
                           } catch {
-                            toast.info(`Configure ${conn.name}`, {
-                              description: `Type: ${conn.type.toUpperCase()} | Status: ${conn.status}`
+                            toast.info(`Configure ${conn.name}` | Status: ${conn.status}`
                             })
                           }
                         }}>Configure</Button>
@@ -1198,12 +1159,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               enabled: policy.enabled,
                               settings: policy.settings
                             }, null, 2))
-                            toast.success(`${policy.name} settings copied`, {
-                              description: 'Policy configuration copied to clipboard'
-                            })
+                            toast.success(`${policy.name} settings copied`)
                           } catch {
-                            toast.info(`${policy.name} Settings`, {
-                              description: `Type: ${policy.type} | ${policy.enabled ? 'Enabled' : 'Disabled'}`
+                            toast.info(`${policy.name} Settings` | ${policy.enabled ? 'Enabled' : 'Disabled'}`
                             })
                           }
                         }}>
@@ -1259,8 +1217,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
                       a.click()
                       window.URL.revokeObjectURL(url)
-                      toast.success('Audit logs exported', {
-                        description: `${auditLogs.length} log entries exported to CSV`
+                      toast.success('Audit logs exported' log entries exported to CSV`
                       })
                     } catch (error) {
                       toast.error('Failed to export logs')
@@ -1713,14 +1670,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Email Template Editor', {
-                            description: 'Email templates can be customized in Settings > Notifications',
-                            action: {
-                              label: 'View Templates',
-                              onClick: () => {
-                                setSettingsTab('notifications')
-                                toast.success('Viewing notification settings')
-                              }
+                          toast.info('Email Template Editor'
                             }
                           })
                         }}>
@@ -1866,22 +1816,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                         <p className="text-sm text-gray-500">APIs protected by Auth0</p>
                       </div>
                       <Button className="ml-auto gap-2" onClick={() => {
-                        toast.info('Register New API', {
-                          description: 'API registration requires configuration in your Auth0/Supabase dashboard',
-                          action: {
-                            label: 'Copy Guide',
-                            onClick: async () => {
-                              const guide = `API Registration Guide:
-1. Go to your authentication provider dashboard
-2. Navigate to APIs or Applications section
-3. Create a new API/Resource Server
-4. Configure the identifier (audience)
-5. Set up permissions/scopes
-6. Copy credentials back to this dashboard`
-                              try {
-                                await navigator.clipboard.writeText(guide)
-                                toast.success('Registration guide copied to clipboard')
-                              } catch {
+                        toast.info('Register New API' catch {
                                 toast.error('Failed to copy guide')
                               }
                             }
@@ -1918,12 +1853,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                                   audience: api.audience,
                                   scopes: api.scopes
                                 }, null, 2))
-                                toast.success(`${api.name} configuration copied`, {
-                                  description: 'API details copied to clipboard'
-                                })
+                                toast.success(`${api.name} configuration copied`)
                               } catch {
-                                toast.info(`${api.name}`, {
-                                  description: `Identifier: ${api.identifier}`
+                                toast.info(`${api.name}``
                                 })
                               }
                             }}>Configure</Button>
@@ -2131,9 +2063,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             const response = await fetch('/api/admin/security/rotate-key', { method: 'POST' })
                             if (!response.ok) throw new Error('Failed to rotate key')
                             toast.dismiss()
-                            toast.success('Signing key rotated!', {
-                              description: 'All existing tokens have been invalidated. Users must re-authenticate.'
-                            })
+                            toast.success('Signing key rotated!')
                           } catch {
                             toast.dismiss()
                             toast.error('Failed to rotate signing key')
@@ -2200,7 +2130,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <AIInsightsPanel
               insights={mockUserMgmtAIInsights}
               title="User Management Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2267,8 +2197,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       <Button size="sm" variant="outline" onClick={() => {
                         if (selectedUser.email) {
                           window.location.href = `mailto:${selectedUser.email}`
-                          toast.success('Opening email client', {
-                            description: `Composing email to ${selectedUser.email}`
+                          toast.success('Opening email client'`
                           })
                         } else {
                           toast.error('No email address available')
@@ -2287,9 +2216,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             department: selectedUser.department,
                             job_title: selectedUser.job_title
                           }, null, 2))
-                          toast.success('User profile copied', {
-                            description: 'User details copied to clipboard for editing'
-                          })
+                          toast.success('User profile copied')
                         } catch {
                           toast.error('Failed to copy user profile')
                         }
@@ -2404,8 +2331,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               })
                               if (!response.ok) throw new Error('Failed to revoke sessions')
                               toast.dismiss()
-                              toast.success('All sessions revoked!', {
-                                description: `${selectedUser.full_name || selectedUser.email} will need to sign in again`
+                              toast.success('All sessions revoked!' will need to sign in again`
                               })
                             } catch {
                               toast.dismiss()

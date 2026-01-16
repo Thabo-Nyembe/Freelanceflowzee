@@ -557,7 +557,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
   const handleExportInventory = useCallback(async () => {
     try {
-      toast.info('Export started', { description: 'Fetching inventory data...' })
+      toast.info('Export started')
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
@@ -590,7 +590,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed', { description: `Exported ${items.length} items` })
+      toast.success('Export completed' items` })
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Failed to export inventory')
@@ -625,7 +625,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Stock transfer created', { description: 'Transfer is now pending' })
+      toast.success('Stock transfer created')
       setShowTransferDialog(false)
       setTransferForm({
         originLocationId: '',
@@ -664,7 +664,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Purchase order created', { description: 'PO saved as draft' })
+      toast.success('Purchase order created')
       setShowPODialog(false)
       setPoForm({
         supplierId: '',
@@ -703,7 +703,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Stock updated', { description: `Stock for "${product.title}" has been updated` })
+      toast.success('Stock updated'" has been updated` })
       refetch()
     } catch (error) {
       console.error('Stock update error:', error)
@@ -730,7 +730,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Product archived', { description: `"${product.title}" has been archived` })
+      toast.success('Product archived'" has been archived` })
       refetch()
     } catch (error) {
       console.error('Archive error:', error)
@@ -758,7 +758,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Location created', { description: `"${locationForm.name}" has been added` })
+      toast.success('Location created'" has been added` })
       setShowLocationDialog(false)
       setLocationForm({
         name: '',
@@ -798,7 +798,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Supplier created', { description: `"${supplierForm.name}" has been added` })
+      toast.success('Supplier created'" has been added` })
       setShowSupplierDialog(false)
       setSupplierForm({
         name: '',
@@ -818,15 +818,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   }
 
   const handleSyncInventory = async () => {
-    toast.info('Syncing...', { description: 'Refreshing inventory data' })
+    toast.info('Syncing...')
     await refetch()
-    toast.success('Sync complete', { description: 'Inventory data refreshed' })
+    toast.success('Sync complete')
   }
 
   // Handle barcode scanner - opens scanner dialog
   const handleScanBarcode = async () => {
     setShowBarcodeScannerDialog(true)
-    toast.info('Barcode Scanner', { description: 'Position barcode in camera view' })
+    toast.info('Barcode Scanner')
   }
 
   // Handle import inventory from file
@@ -850,11 +850,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       }
 
       const result = await response.json()
-      toast.success('Import completed', { description: `Imported ${result.count || 0} items` })
+      toast.success('Import completed' items` })
       refetch()
     } catch (error) {
       console.error('Import error:', error)
-      toast.error('Import failed', { description: error instanceof Error ? error.message : 'Failed to import inventory' })
+      toast.error('Import failed')
     } finally {
       setImportingInventory(false)
       // Reset file input
@@ -865,7 +865,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   // Handle stock count action
   const handleStockCount = () => {
     setShowStockCountDialog(true)
-    toast.info('Stock Count', { description: 'Scan barcodes or enter quantities manually' })
+    toast.info('Stock Count')
   }
 
   // Handle print labels
@@ -907,9 +907,9 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         `)
         printWindow.document.close()
         printWindow.print()
-        toast.success('Print ready', { description: `${items.length} labels ready to print` })
+        toast.success('Print ready' labels ready to print` })
       } else {
-        toast.error('Could not open print window', { description: 'Please allow popups for this site' })
+        toast.error('Could not open print window')
       }
     } catch (error) {
       console.error('Print labels error:', error)
@@ -2145,7 +2145,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             <AIInsightsPanel
               insights={mockInventoryAIInsights}
               title="Inventory Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
 
@@ -2718,7 +2718,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               </button>
               <button
                 onClick={() => {
-                  toast.success('Stock count saved', { description: 'Inventory counts have been updated' })
+                  toast.success('Stock count saved')
                   setShowStockCountDialog(false)
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
@@ -2762,7 +2762,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 />
                 <button
                   onClick={() => {
-                    toast.info('Looking up product...', { description: 'Searching inventory for barcode' })
+                    toast.info('Looking up product...')
                   }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
                 >

@@ -323,15 +323,13 @@ export default function ReportingClient() {
   }
 
   const handleShareDashboard = (dashboard: any) => {
-    toast.success('Share link copied', {
-      description: `Dashboard "${dashboard.name}" share link copied to clipboard`
+    toast.success('Share link copied'" share link copied to clipboard`
     })
     navigator.clipboard.writeText(`${window.location.origin}/shared/dashboard/${dashboard.id}`)
   }
 
   const handleExportDashboard = (dashboard: any) => {
-    toast.success('Export started', {
-      description: `Dashboard "${dashboard.name}" is being exported as PDF`
+    toast.success('Export started'" is being exported as PDF`
     })
   }
 
@@ -435,9 +433,7 @@ export default function ReportingClient() {
       refetchDataSources(),
       refetchScheduledReports()
     ])
-    toast.success('Data refreshed', {
-      description: 'All report data has been refreshed'
-    })
+    toast.success('Data refreshed')
   }
 
   return (
@@ -1654,7 +1650,7 @@ export default function ReportingClient() {
             <AIInsightsPanel
               insights={mockReportingAIInsights}
               title="Reporting Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

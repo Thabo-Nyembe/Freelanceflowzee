@@ -708,8 +708,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.info('Rendering started', {
-        description: `"${projectName}" added to render queue`
+      toast.info('Rendering started'" added to render queue`
       })
       fetchExports()
     } catch (error) {
@@ -737,8 +736,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Export started', {
-        description: `"${projectName}" will be ready shortly`
+      toast.success('Export started'" will be ready shortly`
       })
       fetchExports()
     } catch (error) {
@@ -777,8 +775,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project duplicated', {
-        description: `Copy of "${projectName}" created`
+      toast.success('Project duplicated'" created`
       })
       fetchProjects()
     } catch (error) {
@@ -815,8 +812,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project deleted', {
-        description: `"${projectName}" has been removed`
+      toast.success('Project deleted'" has been removed`
       })
       fetchProjects()
     } catch (error) {
@@ -1043,7 +1039,7 @@ export default function MotionGraphicsClient({
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full" onClick={(e) => {
                             e.stopPropagation()
-                            toast.success(`Playing "${animation.title}" preview`, { description: 'Preview loaded successfully' })
+                            toast.success(`Playing "${animation.title}" preview`)
                           }}>
                             <Play className="w-6 h-6" />
                           </Button>
@@ -2178,7 +2174,7 @@ export default function MotionGraphicsClient({
             <AIInsightsPanel
               insights={mockMotionGraphicsAIInsights}
               title="Motion Graphics Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

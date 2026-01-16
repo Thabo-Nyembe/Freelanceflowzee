@@ -388,7 +388,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   // Handlers - Real Supabase Operations (must be before any early returns)
   const handleCreateCanvas = useCallback(async () => {
     if (!newCanvasForm.canvas_name.trim()) {
-      toast.error('Canvas name required', { description: 'Please enter a name for your canvas' })
+      toast.error('Canvas name required')
       return
     }
 
@@ -423,15 +423,15 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       const result = await createCanvas(canvasData)
       if (result) {
-        toast.success('Canvas created', { description: `"${newCanvasForm.canvas_name}" has been created successfully` })
+        toast.success('Canvas created'" has been created successfully` })
         setShowNewBoard(false)
         setNewCanvasForm({ canvas_name: '', description: '', canvas_type: 'whiteboard' })
         refetch()
       } else {
-        toast.error('Failed to create canvas', { description: 'Please try again' })
+        toast.error('Failed to create canvas')
       }
     } catch (err) {
-      toast.error('Error creating canvas', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Error creating canvas')
     } finally {
       setIsSubmitting(false)
     }
@@ -444,12 +444,12 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
       const canvas = displayCanvases.find(c => c.id === selectedBoard.id)
       if (canvas) {
         await updateCanvas({ updated_at: new Date().toISOString() }, canvas.id)
-        toast.success('Canvas saved', { description: 'Your design has been saved' })
+        toast.success('Canvas saved')
       } else {
-        toast.success('Canvas saved', { description: 'Your design has been saved' })
+        toast.success('Canvas saved')
       }
     } catch (err) {
-      toast.error('Failed to save', { description: 'Could not save canvas' })
+      toast.error('Failed to save')
     }
   }, [selectedBoard, displayCanvases, updateCanvas])
 
@@ -457,7 +457,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Not authenticated', { description: 'Please sign in to delete' })
+        toast.error('Not authenticated')
         return
       }
 
@@ -469,24 +469,24 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (deleteError) throw deleteError
 
-      toast.success('Canvas deleted', { description: `"${canvasName}" has been deleted` })
+      toast.success('Canvas deleted'" has been deleted` })
       setSelectedBoard(null)
       refetch()
     } catch (err) {
-      toast.error('Error deleting canvas', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Error deleting canvas')
     }
   }, [supabase, refetch])
 
   const handleExportCanvas = useCallback(async () => {
     if (!selectedBoard) {
-      toast.info('Select a canvas', { description: 'Please select a canvas to export' })
+      toast.info('Select a canvas')
       return
     }
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Not authenticated', { description: 'Please sign in to export' })
+        toast.error('Not authenticated')
         return
       }
 
@@ -501,15 +501,15 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (exportError) throw exportError
 
-      toast.success('Export started', { description: 'Your canvas is being exported. You will be notified when complete.' })
+      toast.success('Export started')
     } catch (err) {
-      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Could not start export' })
+      toast.error('Export failed')
     }
   }, [selectedBoard, supabase])
 
   const handleShareCanvas = useCallback(async () => {
     if (!selectedBoard) {
-      toast.info('Select a canvas', { description: 'Please select a canvas to share' })
+      toast.info('Select a canvas')
       return
     }
 
@@ -522,9 +522,9 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
         await updateCanvas({ is_shared: true }, canvas.id)
       }
 
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Failed to copy', { description: 'Could not copy share link' })
+      toast.error('Failed to copy')
     }
   }, [selectedBoard, displayCanvases, updateCanvas])
 
@@ -540,13 +540,13 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
         refetch()
       }
     } catch (err) {
-      toast.error('Failed to update', { description: 'Could not update favorite status' })
+      toast.error('Failed to update')
     }
   }, [displayCanvases, updateCanvas, refetch])
 
   const handleInviteMember = useCallback(async () => {
     if (!inviteEmail.trim()) {
-      toast.error('Email required', { description: 'Please enter an email address' })
+      toast.error('Email required')
       return
     }
 
@@ -554,7 +554,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Not authenticated', { description: 'Please sign in to invite members' })
+        toast.error('Not authenticated')
         return
       }
 
@@ -569,10 +569,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (inviteError) throw inviteError
 
-      toast.success('Invitation sent', { description: `Invitation sent to ${inviteEmail}` })
+      toast.success('Invitation sent'` })
       setInviteEmail('')
     } catch (err) {
-      toast.error('Invitation failed', { description: err instanceof Error ? err.message : 'Could not send invitation' })
+      toast.error('Invitation failed')
     } finally {
       setIsInviting(false)
     }
@@ -587,9 +587,9 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (resolveError) throw resolveError
 
-      toast.success('Comment resolved', { description: 'The comment has been marked as resolved' })
+      toast.success('Comment resolved')
     } catch (err) {
-      toast.error('Failed to resolve', { description: 'Could not resolve comment' })
+      toast.error('Failed to resolve')
     }
   }, [supabase])
 
@@ -617,12 +617,12 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     // Enter fullscreen preview mode
     if (canvasRef.current) {
       canvasRef.current.requestFullscreen().then(() => {
-        toast.success('Preview mode activated', { description: 'Press Escape to exit' })
+        toast.success('Preview mode activated')
       }).catch(() => {
-        toast.info('Preview mode', { description: 'Viewing canvas in current window' })
+        toast.info('Preview mode')
       })
     } else {
-      toast.info('Preview mode', { description: 'Canvas preview enabled' })
+      toast.info('Preview mode')
     }
   }, [])
 
@@ -633,11 +633,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const handleMemberOptions = useCallback((memberName: string) => {
     // Show member options via toast with action
-    toast.info(`Options for ${memberName}`, {
-      description: 'Change role, remove access, or view activity',
-      action: {
-        label: 'View Profile',
-        onClick: () => toast.success(`Viewing ${memberName}'s profile`)
+    toast.info(`Options for ${memberName}`'s profile`)
       }
     })
   }, [])
@@ -677,14 +673,14 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       const result = await createCanvas(canvasData)
       if (result) {
-        toast.success('Canvas created from template', { description: `"${template.name}" template applied successfully` })
+        toast.success('Canvas created from template'" template applied successfully` })
         refetch()
         setActiveTab('boards')
       } else {
-        toast.error('Failed to use template', { description: 'Please try again' })
+        toast.error('Failed to use template')
       }
     } catch (err) {
-      toast.error('Error using template', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Error using template')
     } finally {
       setIsSubmitting(false)
     }
@@ -733,11 +729,11 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
       const validTypes = ['.fig', '.sketch', '.psd', '.svg', '.png', '.jpg', '.jpeg']
       const ext = '.' + file.name.split('.').pop()?.toLowerCase()
       if (validTypes.includes(ext)) {
-        toast.success(`Importing ${file.name}...`, { description: 'File ready for canvas' })
+        toast.success(`Importing ${file.name}...`)
         setNewCanvasForm(prev => ({ ...prev, canvas_name: file.name.replace(/\.[^.]+$/, '') }))
         setShowNewBoard(true)
       } else {
-        toast.error('Unsupported file type', { description: `Supported: ${validTypes.join(', ')}` })
+        toast.error('Unsupported file type'` })
       }
     }
     // Reset input
@@ -2141,7 +2137,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             <AIInsightsPanel
               insights={mockCanvasAIInsights}
               title="Canvas Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

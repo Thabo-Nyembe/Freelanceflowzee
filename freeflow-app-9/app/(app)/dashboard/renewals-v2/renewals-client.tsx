@@ -724,53 +724,42 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Handlers
   const handleSendProposal = () => {
     if (!selectedRenewal) return
-    toast.success('Proposal sent successfully', {
-      description: `Renewal proposal sent to ${selectedRenewal.customerName}`
+    toast.success('Proposal sent successfully'`
     })
     setIsRenewalDialogOpen(false)
   }
 
   const handleScheduleMeeting = () => {
     if (!selectedRenewal) return
-    toast.success('Meeting scheduled', {
-      description: `Meeting request sent to ${selectedRenewal.customerName}`
+    toast.success('Meeting scheduled'`
     })
   }
 
   const handleExport = () => {
-    toast.success('Export started', {
-      description: 'Your renewal data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleScheduleRenewal = () => {
-    toast.info('Schedule Renewal', {
-      description: 'Opening renewal scheduler...'
-    })
+    toast.info('Schedule Renewal')
   }
 
   const handleContactEmail = (email: string, name: string) => {
-    toast.success('Opening email', {
-      description: `Composing email to ${name}`
+    toast.success('Opening email'`
     })
   }
 
   const handleContactPhone = (phone: string, name: string) => {
-    toast.success('Initiating call', {
-      description: `Calling ${name}`
+    toast.success('Initiating call'`
     })
   }
 
   const handleProcessRenewal = (contractName: string) => {
-    toast.success('Processing renewal', {
-      description: `"${contractName}" renewal is being processed`
+    toast.success('Processing renewal'" renewal is being processed`
     })
   }
 
   const handleExportRenewals = () => {
-    toast.success('Exporting renewals', {
-      description: 'Renewal data will be downloaded shortly'
-    })
+    toast.success('Exporting renewals')
   }
 
   // Additional handlers for dialogs
@@ -789,8 +778,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
   const handleSaveEditRenewal = () => {
     if (!selectedRenewal) return
-    toast.success('Renewal updated', {
-      description: `${editFormData.customerName} renewal has been updated successfully`
+    toast.success('Renewal updated' renewal has been updated successfully`
     })
     setIsEditRenewalDialogOpen(false)
     setSelectedRenewal(null)
@@ -863,9 +851,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleSaveSettings = () => {
-    toast.success('Settings saved', {
-      description: 'Your renewal settings have been updated'
-    })
+    toast.success('Settings saved')
     setIsSettingsDialogOpen(false)
   }
 
@@ -920,8 +906,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     const activeFilters = Object.entries(filterCriteria).filter(([_, v]) =>
       typeof v === 'string' ? v !== 'all' : (v.start || v.end)
     ).length
-    toast.success('Filters applied', {
-      description: `${activeFilters} filter${activeFilters !== 1 ? 's' : ''} active`
+    toast.success('Filters applied' filter${activeFilters !== 1 ? 's' : ''} active`
     })
     setIsFiltersDialogOpen(false)
   }
@@ -988,9 +973,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleViewCustomerDetails = (customerName: string) => {
-    toast.info(`Viewing ${customerName}`, {
-      description: 'Loading customer details...'
-    })
+    toast.info(`Viewing ${customerName}`)
   }
 
   // Overview quick action handlers
@@ -1029,8 +1012,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleUsePlaybook = (playbook: Playbook) => {
-    toast.success(`Starting ${playbook.name}`, {
-      description: `${playbook.steps.length} steps to complete`
+    toast.success(`Starting ${playbook.name}` steps to complete`
     })
   }
 
@@ -1046,15 +1028,11 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleArchiveOldRenewals = () => {
-    toast.warning('Archiving old renewals', {
-      description: 'This will archive renewals older than 2 years'
-    })
+    toast.warning('Archiving old renewals')
   }
 
   const handleResetSettings = () => {
-    toast.warning('Settings reset', {
-      description: 'All settings have been reset to defaults'
-    })
+    toast.warning('Settings reset')
   }
 
   return (
@@ -1779,9 +1757,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                     variant="secondary"
                     className="bg-white/20 hover:bg-white/30 text-white"
                     onClick={() => {
-                      toast.success('Configuration exported', {
-                        description: 'Settings configuration has been downloaded'
-                      })
+                      toast.success('Configuration exported')
                     }}
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -2077,7 +2053,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             <AIInsightsPanel
               insights={mockRenewalsAIInsights}
               title="Renewal Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

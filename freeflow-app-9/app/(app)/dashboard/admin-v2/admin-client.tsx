@@ -399,7 +399,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       ))
       toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
     } catch (err) {
-      toast.error('Failed to toggle flag', { description: (err as Error).message })
+      toast.error('Failed to toggle flag')
     }
   }, [supabase, featureFlags])
 
@@ -508,11 +508,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('User created', { description: `${newUserForm.name} has been added` })
+      toast.success('User created' has been added` })
       setShowNewUserDialog(false)
       setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
     } catch (err) {
-      toast.error('Failed to create user', { description: (err as Error).message })
+      toast.error('Failed to create user')
     } finally {
       setIsLoading(false)
     }
@@ -545,12 +545,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         validation_rules: {},
         metadata: {}
       })
-      toast.success('Setting created', { description: `${newSettingForm.settingName} has been added` })
+      toast.success('Setting created' has been added` })
       setShowNewSettingDialog(false)
       setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
       refetch()
     } catch (err) {
-      toast.error('Failed to create setting', { description: (err as Error).message })
+      toast.error('Failed to create setting')
     } finally {
       setIsLoading(false)
     }
@@ -562,12 +562,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await updateSetting(selectedSetting.id, selectedSetting)
-      toast.success('Setting updated', { description: `${selectedSetting.setting_name} has been updated` })
+      toast.success('Setting updated' has been updated` })
       setShowEditSettingDialog(false)
       setSelectedSetting(null)
       refetch()
     } catch (err) {
-      toast.error('Failed to update setting', { description: (err as Error).message })
+      toast.error('Failed to update setting')
     } finally {
       setIsLoading(false)
     }
@@ -579,10 +579,10 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await deleteSetting(setting.id)
-      toast.success('Setting deleted', { description: `${setting.setting_name} has been removed` })
+      toast.success('Setting deleted' has been removed` })
       refetch()
     } catch (err) {
-      toast.error('Failed to delete setting', { description: (err as Error).message })
+      toast.error('Failed to delete setting')
     } finally {
       setIsLoading(false)
     }
@@ -607,11 +607,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Feature flag created', { description: `${newFlagForm.name} has been added` })
+      toast.success('Feature flag created' has been added` })
       setShowNewFlagDialog(false)
       setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
     } catch (err) {
-      toast.error('Failed to create flag', { description: (err as Error).message })
+      toast.error('Failed to create flag')
     } finally {
       setIsLoading(false)
     }
@@ -636,11 +636,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Job created', { description: `${newJobForm.name} has been scheduled` })
+      toast.success('Job created' has been scheduled` })
       setShowNewJobDialog(false)
       setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
     } catch (err) {
-      toast.error('Failed to create job', { description: (err as Error).message })
+      toast.error('Failed to create job')
     } finally {
       setIsLoading(false)
     }
@@ -659,9 +659,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Logs exported', { description: 'Download started' })
+      toast.success('Logs exported')
     } catch (err) {
-      toast.error('Failed to export logs', { description: (err as Error).message })
+      toast.error('Failed to export logs')
     } finally {
       setIsLoading(false)
     }
@@ -676,9 +676,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         const data = await response.json()
         throw new Error(data.error || 'Failed to clear cache')
       }
-      toast.success('Cache cleared', { description: 'All cached data has been purged' })
+      toast.success('Cache cleared')
     } catch (err) {
-      toast.error('Failed to clear cache', { description: (err as Error).message })
+      toast.error('Failed to clear cache')
     } finally {
       setIsLoading(false)
     }
@@ -1804,7 +1804,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <AIInsightsPanel
               insights={mockAdminAIInsights}
               title="Admin Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

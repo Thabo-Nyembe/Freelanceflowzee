@@ -2178,7 +2178,7 @@ export default function HealthScoreClient() {
             <AIInsightsPanel
               insights={mockHealthScoreAIInsights}
               title="Health Score Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

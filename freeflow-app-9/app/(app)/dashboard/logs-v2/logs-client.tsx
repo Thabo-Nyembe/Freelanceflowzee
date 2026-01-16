@@ -717,7 +717,7 @@ export default function LogsClient() {
   // Create a new system log (for testing/demo purposes)
   const handleCreateLog = async (level: string, message: string) => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create logs' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -734,10 +734,10 @@ export default function LogsClient() {
           logged_at: new Date().toISOString()
         })
       if (error) throw error
-      toast.success('Log created', { description: 'New log entry has been recorded' })
+      toast.success('Log created')
       fetchSystemLogs()
     } catch (err: any) {
-      toast.error('Error creating log', { description: err.message })
+      toast.error('Error creating log')
     } finally {
       setIsLoading(false)
     }
@@ -754,10 +754,10 @@ export default function LogsClient() {
         .in('id', logIds)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Logs archived', { description: `${logIds.length} logs have been archived` })
+      toast.success('Logs archived' logs have been archived` })
       fetchSystemLogs()
     } catch (err: any) {
-      toast.error('Error archiving logs', { description: err.message })
+      toast.error('Error archiving logs')
     } finally {
       setIsLoading(false)
     }
@@ -777,9 +777,9 @@ export default function LogsClient() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Log data has been downloaded' })
+      toast.success('Export complete')
     } catch (err: any) {
-      toast.error('Export failed', { description: err.message })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -796,10 +796,10 @@ export default function LogsClient() {
         .eq('user_id', userId)
         .is('deleted_at', null)
       if (error) throw error
-      toast.success('Logs cleared', { description: 'All logs have been cleared' })
+      toast.success('Logs cleared')
       fetchSystemLogs()
     } catch (err: any) {
-      toast.error('Error clearing logs', { description: err.message })
+      toast.error('Error clearing logs')
     } finally {
       setIsLoading(false)
     }
@@ -808,18 +808,17 @@ export default function LogsClient() {
   // Create log alert (store in local state with toast notification)
   const handleCreateAlert = async () => {
     if (!alertForm.name.trim()) {
-      toast.error('Error', { description: 'Alert name is required' })
+      toast.error('Error')
       return
     }
     if (!alertForm.query.trim()) {
-      toast.error('Error', { description: 'Alert query is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
       // For now, show success toast - in production this would save to a log_alerts table
-      toast.success('Alert created', {
-        description: `Alert "${alertForm.name}" has been configured with query: ${alertForm.query}`
+      toast.success('Alert created'" has been configured with query: ${alertForm.query}`
       })
       setAlertForm({
         name: '',
@@ -833,7 +832,7 @@ export default function LogsClient() {
       })
       setShowAlertDialog(false)
     } catch (err: any) {
-      toast.error('Error creating alert', { description: err.message })
+      toast.error('Error creating alert')
     } finally {
       setIsLoading(false)
     }
@@ -842,22 +841,21 @@ export default function LogsClient() {
   // Create log stream
   const handleCreateStream = async () => {
     if (!streamForm.name.trim()) {
-      toast.error('Error', { description: 'Stream name is required' })
+      toast.error('Error')
       return
     }
     if (!streamForm.query.trim()) {
-      toast.error('Error', { description: 'Stream query is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
-      toast.success('Stream created', {
-        description: `Stream "${streamForm.name}" is now active`
+      toast.success('Stream created'" is now active`
       })
       setStreamForm({ name: '', query: '', color: 'blue' })
       setShowStreamDialog(false)
     } catch (err: any) {
-      toast.error('Error creating stream', { description: err.message })
+      toast.error('Error creating stream')
     } finally {
       setIsLoading(false)
     }
@@ -866,22 +864,21 @@ export default function LogsClient() {
   // Create pipeline
   const handleCreatePipeline = async () => {
     if (!pipelineForm.name.trim()) {
-      toast.error('Error', { description: 'Pipeline name is required' })
+      toast.error('Error')
       return
     }
     if (!pipelineForm.filter.trim()) {
-      toast.error('Error', { description: 'Pipeline filter is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
-      toast.success('Pipeline created', {
-        description: `Pipeline "${pipelineForm.name}" has been configured`
+      toast.success('Pipeline created'" has been configured`
       })
       setPipelineForm({ name: '', filter: '', sample_rate: 100, processors: [] })
       setShowPipelineDialog(false)
     } catch (err: any) {
-      toast.error('Error creating pipeline', { description: err.message })
+      toast.error('Error creating pipeline')
     } finally {
       setIsLoading(false)
     }
@@ -890,17 +887,16 @@ export default function LogsClient() {
   // Create archive configuration
   const handleCreateArchive = async () => {
     if (!archiveForm.name.trim()) {
-      toast.error('Error', { description: 'Archive name is required' })
+      toast.error('Error')
       return
     }
     if (!archiveForm.bucket.trim()) {
-      toast.error('Error', { description: 'Bucket name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
-      toast.success('Archive configured', {
-        description: `Archive "${archiveForm.name}" to ${archiveForm.destination} has been set up`
+      toast.success('Archive configured'" to ${archiveForm.destination} has been set up`
       })
       setArchiveForm({
         name: '',
@@ -913,7 +909,7 @@ export default function LogsClient() {
       })
       setShowArchiveDialog(false)
     } catch (err: any) {
-      toast.error('Error creating archive', { description: err.message })
+      toast.error('Error creating archive')
     } finally {
       setIsLoading(false)
     }
@@ -922,22 +918,21 @@ export default function LogsClient() {
   // Create sensitive data rule
   const handleCreateSensitiveRule = async () => {
     if (!sensitiveRuleForm.name.trim()) {
-      toast.error('Error', { description: 'Rule name is required' })
+      toast.error('Error')
       return
     }
     if (!sensitiveRuleForm.pattern.trim()) {
-      toast.error('Error', { description: 'Pattern is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
-      toast.success('Sensitive data rule created', {
-        description: `Rule "${sensitiveRuleForm.name}" will ${sensitiveRuleForm.action} matching data`
+      toast.success('Sensitive data rule created'" will ${sensitiveRuleForm.action} matching data`
       })
       setSensitiveRuleForm({ name: '', pattern: '', type: 'custom', action: 'redact' })
       setShowSensitiveDialog(false)
     } catch (err: any) {
-      toast.error('Error creating rule', { description: err.message })
+      toast.error('Error creating rule')
     } finally {
       setIsLoading(false)
     }
@@ -946,18 +941,17 @@ export default function LogsClient() {
   // Save view
   const handleSaveView = async () => {
     if (!savedViewForm.name.trim()) {
-      toast.error('Error', { description: 'View name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
     try {
-      toast.success('View saved', {
-        description: `View "${savedViewForm.name}" has been saved${savedViewForm.is_shared ? ' and shared' : ''}`
+      toast.success('View saved'" has been saved${savedViewForm.is_shared ? ' and shared' : ''}`
       })
       setSavedViewForm({ name: '', query: '', is_default: false, is_shared: false })
       setShowSaveViewDialog(false)
     } catch (err: any) {
-      toast.error('Error saving view', { description: err.message })
+      toast.error('Error saving view')
     } finally {
       setIsLoading(false)
     }
@@ -1124,7 +1118,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                toast.info('Facets panel toggled', { description: 'Filter logs by severity, source, and time range' })
+                toast.info('Facets panel toggled')
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -1134,7 +1128,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                toast.info('AI Assistant activated', { description: 'Ask questions about your logs in natural language' })
+                toast.info('AI Assistant activated')
               }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
@@ -1835,7 +1829,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Manage log retention and filtering</p>
                 </div>
                 <Button onClick={() => {
-                  toast.info('Index Creation Wizard', { description: 'Configure retention, filters, and storage settings for your new index' })
+                  toast.info('Index Creation Wizard')
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Index
                 </Button>
@@ -2030,7 +2024,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Generate metrics from log data</p>
                 </div>
                 <Button onClick={() => {
-                  toast.info('Metric Creation Wizard', { description: 'Define custom metrics from your log patterns' })
+                  toast.info('Metric Creation Wizard')
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Metric
                 </Button>
@@ -2670,7 +2664,7 @@ export default function LogsClient() {
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Log Analytics Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

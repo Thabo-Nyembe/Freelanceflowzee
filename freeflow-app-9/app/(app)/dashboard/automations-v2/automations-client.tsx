@@ -517,8 +517,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation started', {
-        description: `${workflow.workflow_name} is now executing`
+      toast.success('Automation started' is now executing`
       })
       fetchWorkflows()
     } catch (err) {
@@ -542,8 +541,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
-        description: `${workflow.workflow_name} is now ${newStatus}`
+      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused' is now ${newStatus}`
       })
       fetchWorkflows()
     } catch (err) {
@@ -596,8 +594,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation duplicated', {
-        description: `Copy of ${workflow.workflow_name} created`
+      toast.success('Automation duplicated' created`
       })
       fetchWorkflows()
     } catch (err) {
@@ -620,8 +617,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation deleted', {
-        description: `${workflow.workflow_name} has been removed`
+      toast.success('Automation deleted' has been removed`
       })
       fetchWorkflows()
     } catch (err) {
@@ -2504,7 +2500,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <AIInsightsPanel
               insights={mockAutomationsAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

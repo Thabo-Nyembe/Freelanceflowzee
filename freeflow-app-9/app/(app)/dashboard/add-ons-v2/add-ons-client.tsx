@@ -1968,7 +1968,7 @@ export default function AddOnsClient() {
             <AIInsightsPanel
               insights={mockAddOnsAIInsights}
               title="Add-On Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

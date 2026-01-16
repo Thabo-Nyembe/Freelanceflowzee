@@ -625,7 +625,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   // CRUD Handlers
   const handleCreateCourse = useCallback(async () => {
     if (!courseForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Course title is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -642,21 +642,21 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Created', { description: `"${courseForm.title}" has been created successfully` })
+        toast.success('Course Created'" has been created successfully` })
         setShowCreateCourseDialog(false)
         setCourseForm(defaultCourseForm)
         refetch()
       } else {
-        toast.error('Failed to Create Course', { description: result.error || 'An error occurred' })
+        toast.error('Failed to Create Course')
       }
     } catch (error) {
-      toast.error('Error', { description: 'Failed to create course. Please try again.' })
+      toast.error('Error')
     }
   }, [courseForm, createProgram, refetch])
 
   const handleEditCourse = useCallback(async () => {
     if (!courseToEdit || !courseForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Course title is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -674,16 +674,16 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Updated', { description: `"${courseForm.title}" has been updated successfully` })
+        toast.success('Course Updated'" has been updated successfully` })
         setShowEditCourseDialog(false)
         setCourseToEdit(null)
         setCourseForm(defaultCourseForm)
         refetch()
       } else {
-        toast.error('Failed to Update Course', { description: result.error || 'An error occurred' })
+        toast.error('Failed to Update Course')
       }
     } catch (error) {
-      toast.error('Error', { description: 'Failed to update course. Please try again.' })
+      toast.error('Error')
     }
   }, [courseToEdit, courseForm, updateProgram, refetch])
 
@@ -694,15 +694,15 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       const result = await deleteProgram(courseToDelete.id)
 
       if (result.success) {
-        toast.success('Course Deleted', { description: `"${courseToDelete.program_name}" has been deleted` })
+        toast.success('Course Deleted'" has been deleted` })
         setShowDeleteCourseDialog(false)
         setCourseToDelete(null)
         refetch()
       } else {
-        toast.error('Failed to Delete Course', { description: result.error || 'An error occurred' })
+        toast.error('Failed to Delete Course')
       }
     } catch (error) {
-      toast.error('Error', { description: 'Failed to delete course. Please try again.' })
+      toast.error('Error')
     }
   }, [courseToDelete, deleteProgram, refetch])
 
@@ -714,7 +714,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleConfirmEnrollment = useCallback(async () => {
     if (!courseToEnroll || !enrollmentForm.trainee_name.trim()) {
-      toast.error('Validation Error', { description: 'Trainee name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -722,7 +722,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       // For the mock courses, we'll create a direct enrollment
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Not authenticated', { description: 'Please sign in to enroll' })
+        toast.error('Not authenticated')
         return
       }
 
@@ -738,17 +738,17 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
         })
 
       if (error) {
-        toast.error('Enrollment Failed', { description: error.message })
+        toast.error('Enrollment Failed')
         return
       }
 
-      toast.success('Enrolled Successfully', { description: `You are now enrolled in "${courseToEnroll.title}"` })
+      toast.success('Enrolled Successfully'"` })
       setShowEnrollDialog(false)
       setCourseToEnroll(null)
       setEnrollmentForm(defaultEnrollmentForm)
       refetch()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to enroll. Please try again.' })
+      toast.error('Error')
     }
   }, [courseToEnroll, enrollmentForm, supabase, refetch])
 
@@ -778,7 +778,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
         }
       )
     } else {
-      toast.error('Certificate Not Available', { description: 'No certificate available for this course' })
+      toast.error('Certificate Not Available')
     }
   }, [])
 
@@ -786,7 +786,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Not authenticated', { description: 'Please sign in to bookmark courses' })
+        toast.error('Not authenticated')
         return
       }
 
@@ -795,12 +795,12 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       if (!bookmarks.includes(course.id)) {
         bookmarks.push(course.id)
         localStorage.setItem('course_bookmarks', JSON.stringify(bookmarks))
-        toast.success('Course Bookmarked', { description: `"${course.title}" saved to your learning path` })
+        toast.success('Course Bookmarked'" saved to your learning path` })
       } else {
-        toast.info('Already Bookmarked', { description: `"${course.title}" is already in your bookmarks` })
+        toast.info('Already Bookmarked'" is already in your bookmarks` })
       }
     } catch (error) {
-      toast.error('Error', { description: 'Failed to bookmark course' })
+      toast.error('Error')
     }
   }, [supabase])
 
@@ -844,7 +844,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleConfirmStartPath = useCallback(() => {
     if (selectedLearningPath) {
-      toast.success('Learning Path Started', { description: `You've started "${selectedLearningPath.title}"` })
+      toast.success('Learning Path Started'"` })
       setShowLearningPathDialog(false)
       setSelectedLearningPath(null)
     }
@@ -862,7 +862,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleSaveChannelConfig = useCallback(() => {
-    toast.success('Channel Configured', { description: 'Slack channel settings have been updated' })
+    toast.success('Channel Configured')
     setShowConfigureChannelDialog(false)
   }, [])
 
@@ -873,7 +873,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleSaveIntegrationConfig = useCallback(() => {
-    toast.success('Integration Updated', { description: `${selectedIntegration} settings have been saved` })
+    toast.success('Integration Updated' settings have been saved` })
     setShowConfigureIntegrationDialog(false)
     setSelectedIntegration(null)
   }, [selectedIntegration])
@@ -885,7 +885,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmConnect = useCallback(() => {
-    toast.success('Integration Connected', { description: `${selectedIntegration} has been connected successfully` })
+    toast.success('Integration Connected' has been connected successfully` })
     setShowConnectIntegrationDialog(false)
     setSelectedIntegration(null)
   }, [selectedIntegration])
@@ -896,14 +896,14 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmRegenerateKey = useCallback(() => {
-    toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Copy it now.' })
+    toast.success('API Key Regenerated')
     setShowRegenerateApiKeyDialog(false)
   }, [])
 
   // Handler for Copy API Key
   const handleCopyApiKey = useCallback(() => {
     navigator.clipboard.writeText('lms_live_sk_1234567890abcdef')
-    toast.success('Copied', { description: 'API key copied to clipboard' })
+    toast.success('Copied')
   }, [])
 
   // Handler for View API Documentation
@@ -920,10 +920,10 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleConfirmAddWebhook = useCallback(() => {
     if (!webhookUrl) {
-      toast.error('Error', { description: 'Please enter a webhook URL' })
+      toast.error('Error')
       return
     }
-    toast.success('Webhook Added', { description: `Webhook for ${webhookUrl} has been created` })
+    toast.success('Webhook Added' has been created` })
     setShowAddWebhookDialog(false)
     setWebhookUrl('')
     setWebhookEvents('')
@@ -936,7 +936,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmDeleteWebhook = useCallback(() => {
-    toast.success('Webhook Deleted', { description: 'The webhook has been removed' })
+    toast.success('Webhook Deleted')
     setShowDeleteWebhookDialog(false)
     setWebhookToDelete(null)
   }, [])
@@ -981,7 +981,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmClearDownloads = useCallback(() => {
-    toast.success('Downloads Cleared', { description: 'All downloaded content has been removed' })
+    toast.success('Downloads Cleared')
     setShowClearDownloadsDialog(false)
   }, [])
 
@@ -991,7 +991,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmResetProgress = useCallback(() => {
-    toast.success('Progress Reset', { description: 'Your course progress has been reset (certificates retained)' })
+    toast.success('Progress Reset')
     setShowResetProgressDialog(false)
   }, [])
 
@@ -1001,7 +1001,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmDeleteHistory = useCallback(() => {
-    toast.success('History Deleted', { description: 'Your learning history has been permanently deleted' })
+    toast.success('History Deleted')
     setShowDeleteHistoryDialog(false)
   }, [])
 
@@ -1011,7 +1011,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmRevokeAllCerts = useCallback(() => {
-    toast.success('Certificates Revoked', { description: 'All your certifications have been revoked' })
+    toast.success('Certificates Revoked')
     setShowRevokeAllCertsDialog(false)
   }, [])
 
@@ -1024,8 +1024,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const handleConfirmContinueLearning = useCallback(() => {
     if (selectedEnrollment) {
       toast.success(
-        selectedEnrollment.status === 'completed' ? 'Reviewing Course' : 'Continuing Course',
-        { description: `Opening "${selectedEnrollment.course.title}"...` }
+        selectedEnrollment.status === 'completed' ? 'Reviewing Course' : 'Continuing Course'"...` }
       )
       setShowContinueLearningDialog(false)
       setSelectedEnrollment(null)
@@ -2512,7 +2511,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             <AIInsightsPanel
               insights={trainingAIInsights}
               title="Training Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -3037,7 +3036,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 Close
               </Button>
               <Button onClick={() => {
-                toast.success('Settings Saved', { description: 'Your preferences have been updated' })
+                toast.success('Settings Saved')
                 setShowSettingsDialog(false)
               }}>
                 Save Changes
@@ -3121,7 +3120,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 Close
               </Button>
               <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success('Great!', { description: 'Start the required courses to earn this certification' })
+                toast.success('Great!')
                 setShowCertRequirementsDialog(false)
               }}>
                 Start Earning
@@ -3312,7 +3311,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               </Button>
               <Button onClick={() => {
                 window.open('/docs/api', '_blank')
-                toast.success('Opening', { description: 'Full API documentation opening in new tab' })
+                toast.success('Opening')
               }}>
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Full Docs

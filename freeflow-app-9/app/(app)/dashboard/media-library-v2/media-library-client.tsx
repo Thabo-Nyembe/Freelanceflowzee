@@ -911,9 +911,7 @@ export default function MediaLibraryClient({
     const downloadUrl = asset.originalUrl
 
     if (!downloadUrl) {
-      toast.error('Download unavailable', {
-        description: 'No download URL available for this asset'
-      })
+      toast.error('Download unavailable')
       return
     }
 
@@ -975,14 +973,12 @@ export default function MediaLibraryClient({
     try {
       if (itemToDelete.type === 'file') {
         await fileMutation.remove(itemToDelete.id)
-        toast.success('File deleted', {
-          description: `"${itemToDelete.name}" has been deleted`
+        toast.success('File deleted'" has been deleted`
         })
         refetchFiles()
       } else {
         await folderMutation.remove(itemToDelete.id)
-        toast.success('Folder deleted', {
-          description: `"${itemToDelete.name}" has been deleted`
+        toast.success('Folder deleted'" has been deleted`
         })
         refetchFolders()
       }
@@ -1007,8 +1003,7 @@ export default function MediaLibraryClient({
     setIsSubmitting(true)
     try {
       await fileMutation.update(itemToMove.id, { folder_id: targetFolderId })
-      toast.success('Asset moved', {
-        description: `"${itemToMove.fileName}" has been moved`
+      toast.success('Asset moved'" has been moved`
       })
       setShowMoveDialog(false)
       setItemToMove(null)
@@ -1050,8 +1045,7 @@ export default function MediaLibraryClient({
         access_level: fileForm.access_level,
         is_public: fileForm.is_public,
       })
-      toast.success('Asset updated', {
-        description: `"${fileForm.file_name}" has been updated`
+      toast.success('Asset updated'" has been updated`
       })
       setShowEditDialog(false)
       setItemToEdit(null)
@@ -4038,7 +4032,7 @@ export default function MediaLibraryClient({
               <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 setShowPermissionsDialog(false)
-                toast.success('Permissions saved', { description: 'Access controls updated' })
+                toast.success('Permissions saved')
               }}>Save</Button>
             </DialogFooter>
           </DialogContent>
@@ -4087,7 +4081,7 @@ export default function MediaLibraryClient({
               <Button variant="outline" onClick={() => setShowPrivacyDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 setShowPrivacyDialog(false)
-                toast.success('Privacy settings saved', { description: 'Collection access controls updated' })
+                toast.success('Privacy settings saved')
               }}>Save</Button>
             </DialogFooter>
           </DialogContent>
@@ -4226,7 +4220,7 @@ export default function MediaLibraryClient({
                 <Card key={service.name} className="p-4 cursor-pointer hover:shadow-md flex items-center gap-4" onClick={() => {
                   window.open(service.url, '_blank')
                   setShowCloudImportDialog(false)
-                  toast.success(`Connecting to ${service.name}...`, { description: 'Complete authorization in the popup' })
+                  toast.success(`Connecting to ${service.name}...`)
                 }}>
                   <service.icon className={`h-8 w-8 ${service.color}`} />
                   <div>

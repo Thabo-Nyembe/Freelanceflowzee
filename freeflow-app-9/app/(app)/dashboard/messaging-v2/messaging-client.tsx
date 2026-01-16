@@ -569,17 +569,13 @@ export default function MessagingClient() {
   // Handlers
   const handleCreateChannel = async () => {
     if (!newChannelName.trim()) {
-      toast.error('Channel name required', {
-        description: 'Please enter a name for the channel'
-      })
+      toast.error('Channel name required')
       return
     }
 
     // Validate channel name (no spaces or periods)
     if (/[\s.]/.test(newChannelName)) {
-      toast.error('Invalid channel name', {
-        description: 'Channel names cannot have spaces or periods'
-      })
+      toast.error('Invalid channel name')
       return
     }
 
@@ -602,8 +598,7 @@ export default function MessagingClient() {
       })
 
       if (result) {
-        toast.success('Channel created', {
-          description: `#${newChannelName} has been created successfully`
+        toast.success('Channel created' has been created successfully`
         })
         setShowNewChannel(false)
         setNewChannelName('')
@@ -612,9 +607,7 @@ export default function MessagingClient() {
         refetchConversations()
       }
     } catch (error) {
-      toast.error('Failed to create channel', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to create channel')
     } finally {
       setIsCreatingChannel(false)
     }
@@ -634,19 +627,13 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success(message.isPinned ? 'Message unpinned' : 'Message pinned', {
-        description: message.isPinned
-          ? 'Message has been unpinned from this channel'
-          : 'Message has been pinned to this channel'
-      })
+      toast.success(message.isPinned ? 'Message unpinned' : 'Message pinned')
     } catch (error) {
       // Revert on error
       setMessages(prev => prev.map(m =>
         m.id === message.id ? { ...m, isPinned: message.isPinned } : m
       ))
-      toast.error('Failed to update pin status', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update pin status')
     }
   }
 
@@ -674,21 +661,16 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success('Reaction updated', {
-        description: `${emoji} reaction updated`
+      toast.success('Reaction updated' reaction updated`
       })
     } catch (error) {
-      toast.error('Failed to add reaction', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to add reaction')
     }
   }
 
   const handleSearchMessages = async () => {
     if (!searchQuery.trim()) {
-      toast.info('Enter search term', {
-        description: 'Type something to search for messages'
-      })
+      toast.info('Enter search term')
       return
     }
 
@@ -742,13 +724,10 @@ export default function MessagingClient() {
       }))
 
       setSearchResults(results)
-      toast.success('Search complete', {
-        description: `Found ${results.length} matching messages`
+      toast.success('Search complete' matching messages`
       })
     } catch (error) {
-      toast.error('Search failed', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Search failed')
     } finally {
       setIsSearching(false)
     }
@@ -775,13 +754,9 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success('Message updated', {
-        description: 'Your message has been edited'
-      })
+      toast.success('Message updated')
     } catch (error) {
-      toast.error('Failed to update message', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update message')
     } finally {
       setIsSavingEdit(false)
     }
@@ -798,13 +773,9 @@ export default function MessagingClient() {
         await deleteMessage.remove(messageId)
       }
 
-      toast.success('Message deleted', {
-        description: 'The message has been removed'
-      })
+      toast.success('Message deleted')
     } catch (error) {
-      toast.error('Failed to delete message', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to delete message')
     }
   }
 
@@ -821,18 +792,12 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success(message.isBookmarked ? 'Bookmark removed' : 'Message bookmarked', {
-        description: message.isBookmarked
-          ? 'Message removed from bookmarks'
-          : 'Message saved to your bookmarks'
-      })
+      toast.success(message.isBookmarked ? 'Bookmark removed' : 'Message bookmarked')
     } catch (error) {
       setMessages(prev => prev.map(m =>
         m.id === message.id ? { ...m, isBookmarked: message.isBookmarked } : m
       ))
-      toast.error('Failed to update bookmark', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update bookmark')
     }
   }
 
@@ -853,15 +818,9 @@ export default function MessagingClient() {
         refetchConversations()
       }
 
-      toast.success(selectedChannel.isMuted ? 'Channel unmuted' : 'Channel muted', {
-        description: selectedChannel.isMuted
-          ? 'You will now receive notifications from this channel'
-          : 'Notifications for this channel are now muted'
-      })
+      toast.success(selectedChannel.isMuted ? 'Channel unmuted' : 'Channel muted')
     } catch (error) {
-      toast.error('Failed to update channel settings', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update channel settings')
     }
   }
 
@@ -881,15 +840,9 @@ export default function MessagingClient() {
         refetchConversations()
       }
 
-      toast.success(selectedChannel.isPinned ? 'Channel unpinned' : 'Channel pinned', {
-        description: selectedChannel.isPinned
-          ? 'Channel removed from pinned list'
-          : 'Channel pinned to top of your list'
-      })
+      toast.success(selectedChannel.isPinned ? 'Channel unpinned' : 'Channel pinned')
     } catch (error) {
-      toast.error('Failed to update channel settings', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update channel settings')
     }
   }
 
@@ -909,15 +862,12 @@ export default function MessagingClient() {
         refetchConversations()
       }
 
-      toast.success('Left channel', {
-        description: `You have left #${selectedChannel.name}`
+      toast.success('Left channel'`
       })
       setShowChannelSettings(false)
       setSelectedChannel(null)
     } catch (error) {
-      toast.error('Failed to leave channel', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to leave channel')
     }
   }
 
@@ -2208,7 +2158,7 @@ export default function MessagingClient() {
           <AIInsightsPanel
             insights={messagingAIInsights}
             title="Messaging Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+            onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
           />
         </div>
         <div className="space-y-6">

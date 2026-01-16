@@ -1030,17 +1030,14 @@ export default function InvoicingClient() {
   }
 
   const handleExportInvoices = () => {
-    toast.success('Export started', {
-      description: 'Invoice data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleVoidInvoice = async () => {
     if (!selectedInvoice) return
     const success = await updateInvoice(selectedInvoice.id, { status: 'void' as InvoiceStatus })
     if (success) {
-      toast.success('Invoice voided', {
-        description: `Invoice ${selectedInvoice.invoiceNumber} has been voided`
+      toast.success('Invoice voided' has been voided`
       })
       setShowInvoiceDialog(false)
     }
@@ -1053,8 +1050,7 @@ export default function InvoicingClient() {
       paidDate: new Date().toISOString().split('T')[0]
     })
     if (success) {
-      toast.success('Payment recorded', {
-        description: `Payment recorded for ${selectedInvoice.invoiceNumber}`
+      toast.success('Payment recorded'`
       })
     }
   }
@@ -2195,7 +2191,7 @@ export default function InvoicingClient() {
             <AIInsightsPanel
               insights={mockInvoicingAIInsights}
               title="Invoicing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
