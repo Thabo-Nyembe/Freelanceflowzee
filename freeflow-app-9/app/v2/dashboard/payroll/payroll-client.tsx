@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { usePayrollRuns, usePayrollStats, usePendingPayrollRuns } from '@/lib/hooks/use-payroll-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -659,7 +660,14 @@ const formatCurrencyDetailed = (amount: number) => {
 }
 
 export default function PayrollClient() {
-  const supabase = createClient()
+  // Auth and Hooks
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Payroll Data Hooks
+  const { runs: dbPayrollRuns = [], isLoading: runsLoading, refresh: refreshRuns } = usePayrollRuns({ user_id: userId || undefined })
+  const { runs: dbPendingRuns = [], isLoading: pendingLoading, refresh: refreshPending } = usePendingPayrollRuns(userId || undefined)
+  const { stats: dbPayrollStats, isLoading: statsLoading, refresh: refreshStats } = usePayrollStats(userId || undefined, new Date().getFullYear())
 
   // UI State
   const [activeTab, setActiveTab] = useState('pay-runs')
@@ -721,42 +729,24 @@ export default function PayrollClient() {
   const [showEditEmployeeDetailsDialog, setShowEditEmployeeDetailsDialog] = useState(false)
   const [selectedTimeEntry, setSelectedTimeEntry] = useState<TimeEntry | null>(null)
 
-  // Database State
-  const [dbPayrollRuns, setDbPayrollRuns] = useState<DbPayrollRun[]>([])
-  const [loading, setLoading] = useState(true)
+  // Form State
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formState, setFormState] = useState<PayrollFormState>(initialFormState)
   const [editingId, setEditingId] = useState<string | null>(null)
 
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
   // Generate run code
   const generateRunCode = () => `PR-${Date.now().toString(36).toUpperCase()}`
 
-  // Fetch payroll runs from Supabase
-  const fetchPayrollRuns = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('payroll_runs')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbPayrollRuns(data || [])
-    } catch (error) {
-      console.error('Error fetching payroll runs:', error)
-      toast.error('Failed to load payroll runs')
-    } finally {
-      setLoading(false)
-    }
-  }, [supabase])
-
-  useEffect(() => {
-    fetchPayrollRuns()
-  }, [fetchPayrollRuns])
+  // Payroll runs auto-fetched by hooks (dbPayrollRuns, dbPendingRuns, dbPayrollStats)
 
   // Create payroll run
   const handleCreatePayrollRun = async () => {
@@ -768,17 +758,18 @@ export default function PayrollClient() {
       toast.error('Pay date is required')
       return
     }
+    if (!userId) {
+      toast.error('Please sign in to create payroll runs')
+      return
+    }
 
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create payroll runs')
-        return
-      }
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
       const { error } = await supabase.from('payroll_runs').insert({
-        user_id: user.id,
+        user_id: userId,
         run_code: generateRunCode(),
         period: formState.period,
         pay_date: formState.pay_date,
@@ -797,7 +788,9 @@ export default function PayrollClient() {
       toast.success('Payroll run created successfully')
       setShowCreateDialog(false)
       setFormState(initialFormState)
-      fetchPayrollRuns()
+      refreshRuns()
+      refreshPending()
+      refreshStats()
     } catch (error) {
       console.error('Error creating payroll run:', error)
       toast.error('Failed to create payroll run')
@@ -815,6 +808,9 @@ export default function PayrollClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -835,7 +831,7 @@ export default function PayrollClient() {
       setShowCreateDialog(false)
       setFormState(initialFormState)
       setEditingId(null)
-      fetchPayrollRuns()
+      refreshRuns(); refreshPending(); refreshStats()
     } catch (error) {
       console.error('Error updating payroll run:', error)
       toast.error('Failed to update payroll run')
@@ -847,6 +843,9 @@ export default function PayrollClient() {
   // Delete payroll run (soft delete)
   const handleDeletePayrollRun = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const { error } = await supabase
         .from('payroll_runs')
         .update({ deleted_at: new Date().toISOString() })
@@ -855,7 +854,7 @@ export default function PayrollClient() {
       if (error) throw error
 
       toast.success('Payroll run deleted')
-      fetchPayrollRuns()
+      refreshRuns(); refreshPending(); refreshStats()
     } catch (error) {
       console.error('Error deleting payroll run:', error)
       toast.error('Failed to delete payroll run')
@@ -880,7 +879,10 @@ export default function PayrollClient() {
   // Approve payroll run
   const handleApprovePayrollRunDb = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
+
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -894,7 +896,7 @@ export default function PayrollClient() {
       if (error) throw error
 
       toast.success('Payroll run approved')
-      fetchPayrollRuns()
+      refreshRuns(); refreshPending(); refreshStats()
     } catch (error) {
       console.error('Error approving payroll run:', error)
       toast.error('Failed to approve payroll run')
@@ -904,6 +906,9 @@ export default function PayrollClient() {
   // Process payroll run
   const handleProcessPayrollRunDb = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
       const run = dbPayrollRuns.find(r => r.id === id)
       const { error } = await supabase
         .from('payroll_runs')
@@ -918,7 +923,7 @@ export default function PayrollClient() {
       if (error) throw error
 
       toast.success('Payroll processing started')
-      fetchPayrollRuns()
+      refreshRuns(); refreshPending(); refreshStats()
     } catch (error) {
       console.error('Error processing payroll run:', error)
       toast.error('Failed to process payroll run')
@@ -990,7 +995,7 @@ export default function PayrollClient() {
   const handleRefresh = async () => {
     toast.info('Refreshing payroll data...')
     setLoading(true)
-    await fetchPayrollRuns()
+    await refreshRuns(); refreshPending(); refreshStats()
     toast.success('Payroll data refreshed')
   }
 
