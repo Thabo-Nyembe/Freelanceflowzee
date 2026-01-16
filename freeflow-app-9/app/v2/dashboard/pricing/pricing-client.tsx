@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { usePricingPlans, PricingPlan as DBPricingPlan, PricingPlanInput } from '@/lib/hooks/use-pricing-plans'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -478,10 +479,33 @@ export default function PricingClient({
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null)
 
-  // Supabase state
-  const [dbPlans, setDbPlans] = useState<DbPricingPlan[]>([])
+  // Integrate usePricingPlans hook with initial empty data
+  const initialStats = {
+    total: 0,
+    active: 0,
+    featured: 0,
+    totalSubscribers: 0,
+    totalRevenueMonthly: 0,
+    totalRevenueAnnual: 0,
+    avgChurnRate: 0,
+    avgUpgradeRate: 0,
+    arpu: 0
+  }
+  const {
+    plans: dbPlans,
+    stats: dbStats,
+    loading,
+    error: plansError,
+    createPlan,
+    updatePlan,
+    deletePlan,
+    toggleActive,
+    setFeatured,
+    updateSubscribers
+  } = usePricingPlans([], initialStats)
+
+  // Supabase state for coupons (separate table)
   const [dbCoupons, setDbCoupons] = useState<DbCoupon[]>([])
-  const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreatePlanDialog, setShowCreatePlanDialog] = useState(false)
   const [showCreateCouponDialog, setShowCreateCouponDialog] = useState(false)
@@ -520,27 +544,40 @@ export default function PricingClient({
   const [filterPlan, setFilterPlan] = useState<string>('all')
   const [logoFile, setLogoFile] = useState<File | null>(null)
 
-  // Fetch plans from Supabase
-  const fetchPlans = useCallback(async () => {
-    try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  // Map DB pricing plans to UI format
+  const mappedPlans: PricingPlan[] = useMemo(() => {
+    if (!dbPlans || dbPlans.length === 0) return []
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('pricing_plans')
-        .select('*')
-        .order('sort_order', { ascending: true })
-
-      if (error) throw error
-      setDbPlans(data || [])
-    } catch (error) {
-      console.error('Error fetching plans:', error)
-    }
-  }, [])
+    return dbPlans.map((dbPlan): PricingPlan => ({
+      id: dbPlan.id,
+      name: dbPlan.name,
+      slug: dbPlan.name.toLowerCase().replace(/\s+/g, '-'),
+      description: dbPlan.description || '',
+      model: 'flat' as PricingModel, // Default model
+      status: dbPlan.is_active ? 'active' : 'inactive',
+      prices: {
+        monthly: dbPlan.monthly_price,
+        annual: dbPlan.annual_price
+      },
+      currency: dbPlan.currency,
+      features: Array.isArray(dbPlan.features) ? dbPlan.features.map((f: any, idx: number) => ({
+        id: f.id || `feature-${idx}`,
+        name: f.name || '',
+        description: f.description,
+        included: f.included ?? true,
+        limit: f.limit
+      })) : [],
+      limits: dbPlan.limits || {},
+      isFeatured: dbPlan.is_featured,
+      isPopular: false, // Could be derived from subscriber count
+      trialDays: 0, // Not in DB schema
+      subscriberCount: dbPlan.subscribers_count,
+      revenue: dbPlan.revenue_monthly, // Use monthly revenue as default
+      churnRate: dbPlan.churn_rate,
+      createdAt: dbPlan.created_at,
+      updatedAt: dbPlan.updated_at
+    }))
+  }, [dbPlans])
 
   // Fetch coupons from Supabase
   const fetchCoupons = useCallback(async () => {
@@ -570,18 +607,18 @@ export default function PricingClient({
   }, [])
 
   useEffect(() => {
-    fetchPlans()
+    // Hook handles plan fetching automatically via real-time subscriptions
     fetchCoupons()
-  }, [fetchPlans, fetchCoupons])
+  }, [fetchCoupons])
 
   const stats = useMemo(() => {
-    const totalRevenue = initialPlans.reduce((sum, p) => sum + p.revenue, 0)
-    const totalSubscribers = initialPlans.reduce((sum, p) => sum + p.subscriberCount, 0)
-    const paidSubscribers = initialPlans.filter(p => p.prices.monthly > 0).reduce((sum, p) => sum + p.subscriberCount, 0)
+    const totalRevenue = mappedPlans.reduce((sum, p) => sum + p.revenue, 0)
+    const totalSubscribers = mappedPlans.reduce((sum, p) => sum + p.subscriberCount, 0)
+    const paidSubscribers = mappedPlans.filter(p => p.prices.monthly > 0).reduce((sum, p) => sum + p.subscriberCount, 0)
     const arpu = paidSubscribers > 0 ? totalRevenue / paidSubscribers : 0
-    const avgChurn = initialPlans.reduce((sum, p) => sum + p.churnRate, 0) / initialPlans.length
-    const activePlans = initialPlans.filter(p => p.status === 'active').length
-    const mrr = initialPlans.reduce((sum, p) => sum + (p.subscriberCount * p.prices.monthly), 0)
+    const avgChurn = mappedPlans.length > 0 ? mappedPlans.reduce((sum, p) => sum + p.churnRate, 0) / mappedPlans.length : 0
+    const activePlans = mappedPlans.filter(p => p.status === 'active').length
+    const mrr = mappedPlans.reduce((sum, p) => sum + (p.subscriberCount * p.prices.monthly), 0)
     const arr = mrr * 12
 
     return {
@@ -594,7 +631,7 @@ export default function PricingClient({
       mrr,
       arr
     }
-  }, [initialPlans])
+  }, [mappedPlans])
 
   const filteredSubscriptions = useMemo(() => {
     return mockSubscriptions.filter(sub =>
@@ -621,7 +658,7 @@ export default function PricingClient({
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
   ], [])
 
-  // CRUD: Create Plan
+  // CRUD: Create Plan (using hook mutation)
   const handleCreatePlan = async () => {
     if (!planForm.name.trim()) {
       toast.error('Plan name is required')
@@ -629,18 +666,7 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create plans')
-        return
-      }
-
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase.from('pricing_plans').insert({
-        user_id: user.id,
+      const result = await createPlan({
         name: planForm.name,
         description: planForm.description,
         monthly_price: planForm.monthly_price,
@@ -651,11 +677,11 @@ export default function PricingClient({
         sort_order: dbPlans.length,
       })
 
-      if (error) throw error
+      if (!result) throw new Error('Failed to create plan')
       toast.success('Plan created successfully')
       setShowCreatePlanDialog(false)
       setPlanForm(initialPlanForm)
-      fetchPlans()
+      // Hook handles automatic refetch via real-time subscriptions
     } catch (error) {
       console.error('Error creating plan:', error)
       toast.error('Failed to create plan')
@@ -664,30 +690,24 @@ export default function PricingClient({
     }
   }
 
-  // CRUD: Update Plan
+  // CRUD: Update Plan (using hook mutation)
   const handleUpdatePlan = async (planId: string) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('pricing_plans')
-        .update({
-          name: planForm.name,
-          description: planForm.description,
-          monthly_price: planForm.monthly_price,
-          annual_price: planForm.annual_price,
-          is_featured: planForm.is_featured,
-          features: planForm.features,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', planId)
+      const result = await updatePlan(planId, {
+        name: planForm.name,
+        description: planForm.description,
+        monthly_price: planForm.monthly_price,
+        annual_price: planForm.annual_price,
+        is_featured: planForm.is_featured,
+        features: planForm.features,
+      })
 
-      if (error) throw error
+      if (!result) throw new Error('Failed to update plan')
       toast.success('Plan updated successfully')
       setEditingPlanId(null)
       setPlanForm(initialPlanForm)
-      fetchPlans()
+      // Hook handles automatic refetch via real-time subscriptions
     } catch (error) {
       console.error('Error updating plan:', error)
       toast.error('Failed to update plan')
@@ -696,19 +716,13 @@ export default function PricingClient({
     }
   }
 
-  // CRUD: Delete/Archive Plan
+  // CRUD: Delete/Archive Plan (using hook mutation)
   const handleArchivePlan = async (planId: string, planName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('pricing_plans')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
-        .eq('id', planId)
-
-      if (error) throw error
+      const result = await updatePlan(planId, { is_active: false })
+      if (!result) throw new Error('Failed to archive plan')
       toast.success(`"${planName}" archived successfully`)
-      fetchPlans()
+      // Hook handles automatic refetch via real-time subscriptions
     } catch (error) {
       console.error('Error archiving plan:', error)
       toast.error('Failed to archive plan')
@@ -920,7 +934,7 @@ export default function PricingClient({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {initialPlans.map((plan, index) => (
+              {mappedPlans.map((plan, index) => (
                 <Card
                   key={plan.id}
                   className={`border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer relative ${plan.isFeatured ? 'ring-2 ring-violet-500' : ''}`}
@@ -1265,7 +1279,7 @@ export default function PricingClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {initialPlans.map((plan, index) => {
+                    {mappedPlans.map((plan, index) => {
                       const percentage = (plan.subscriberCount / stats.totalSubscribers) * 100
                       return (
                         <div key={plan.id}>
@@ -1287,7 +1301,7 @@ export default function PricingClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {initialPlans.filter(p => p.prices.monthly > 0).map((plan) => (
+                    {mappedPlans.filter(p => p.prices.monthly > 0).map((plan) => (
                       <div key={plan.id} className="flex items-center justify-between">
                         <span className="text-sm">{plan.name}</span>
                         <div className="flex items-center gap-2">
@@ -2537,7 +2551,7 @@ export default function PricingClient({
                     <CardTitle className="text-base">Revenue by Plan</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {initialPlans.map((plan) => {
+                    {mappedPlans.map((plan) => {
                       const percentage = stats.totalRevenue > 0 ? (plan.revenue / stats.totalRevenue) * 100 : 0
                       return (
                         <div key={plan.id}>
@@ -2560,7 +2574,7 @@ export default function PricingClient({
                     <CardTitle className="text-base">Subscriber Distribution</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {initialPlans.map((plan) => {
+                    {mappedPlans.map((plan) => {
                       const percentage = stats.totalSubscribers > 0 ? (plan.subscriberCount / stats.totalSubscribers) * 100 : 0
                       return (
                         <div key={plan.id}>
@@ -2586,7 +2600,7 @@ export default function PricingClient({
                     <CardTitle className="text-base">Churn Rate by Plan</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {initialPlans.filter(p => p.prices.monthly > 0).map((plan) => (
+                    {mappedPlans.filter(p => p.prices.monthly > 0).map((plan) => (
                       <div key={plan.id} className="flex items-center justify-between">
                         <span className="text-sm">{plan.name}</span>
                         <div className="flex items-center gap-2">
@@ -2710,7 +2724,7 @@ export default function PricingClient({
                   onChange={(e) => setFilterPlan(e.target.value)}
                 >
                   <option value="all">All Plans</option>
-                  {initialPlans.map((plan) => (
+                  {mappedPlans.map((plan) => (
                     <option key={plan.id} value={plan.id}>{plan.name}</option>
                   ))}
                 </select>
@@ -3406,7 +3420,7 @@ export default function PricingClient({
               <div>
                 <Label>New Plan</Label>
                 <select className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700">
-                  {initialPlans.map((plan) => (
+                  {mappedPlans.map((plan) => (
                     <option key={plan.id} value={plan.id}>{plan.name} - {formatCurrency(plan.prices.monthly)}/mo</option>
                   ))}
                 </select>
