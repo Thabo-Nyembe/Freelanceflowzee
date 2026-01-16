@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { usePerformanceMetrics, usePerformanceBenchmarks, usePerformanceAlerts } from '@/lib/hooks/use-performance-extended'
 import {
   Gauge,
   Zap,
@@ -450,9 +450,16 @@ const getQuickActions = (
 ]
 
 export default function PerformanceClient() {
-  // Supabase client and auth
-  const supabase = createClient()
+  // Get user ID
   const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Use hooks for data fetching
+  const { data: performanceMetrics, isLoading: metricsLoading } = usePerformanceMetrics()
+  const { data: performanceBenchmarks, isLoading: benchmarksLoading } = usePerformanceBenchmarks()
+  const { data: performanceAlerts, isLoading: alertsLoading } = usePerformanceAlerts(userId || undefined)
+
+  const isLoading = metricsLoading || benchmarksLoading || alertsLoading
 
   // UI State
   const [activeTab, setActiveTab] = useState('overview')
@@ -469,12 +476,6 @@ export default function PerformanceClient() {
   const [showAddBudgetDialog, setShowAddBudgetDialog] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
 
-  // Data State
-  const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([])
-  const [performanceBenchmarks, setPerformanceBenchmarks] = useState<any[]>([])
-  const [performanceAlerts, setPerformanceAlerts] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-
   // Form State for Add Budget Dialog
   const [budgetForm, setBudgetForm] = useState({
     name: '',
@@ -484,71 +485,14 @@ export default function PerformanceClient() {
     category: 'performance' as const
   })
 
-  // Fetch performance data from Supabase
-  const fetchPerformanceData = useCallback(async () => {
-    try {
-      const userId = await getUserId()
-      if (!userId) return
-
-      setIsLoading(true)
-
-      // Fetch performance metrics
-      const { data: metrics } = await supabase
-        .from('performance_metrics')
-        .select('*')
-        .eq('user_id', userId)
-        .order('metric_date', { ascending: false })
-        .limit(30)
-
-      // Fetch performance benchmarks (used as budgets)
-      const { data: benchmarks } = await supabase
-        .from('performance_benchmarks')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-
-      // Fetch performance alerts
-      const { data: alerts } = await supabase
-        .from('performance_alerts')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_resolved', false)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      setPerformanceMetrics(metrics || [])
-      setPerformanceBenchmarks(benchmarks || [])
-      setPerformanceAlerts(alerts || [])
-    } catch (err) {
-      console.error('Failed to fetch performance data:', err)
-    } finally {
-      setIsLoading(false)
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
     }
-  }, [supabase, getUserId])
-
-  // Initial data fetch
-  useEffect(() => {
-    fetchPerformanceData()
-  }, [fetchPerformanceData])
-
-  // Real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('performance_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_metrics' },
-        () => fetchPerformanceData()
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_benchmarks' },
-        () => fetchPerformanceData()
-      )
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_alerts' },
-        () => fetchPerformanceData()
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [supabase, fetchPerformanceData])
+    fetchUserId()
+  }, [getUserId])
 
   // Filter audits
   const filteredAudits = useMemo(() => {
@@ -609,6 +553,8 @@ export default function PerformanceClient() {
       }).catch(() => null) // Continue even if API fails
 
       // Store performance metric in Supabase
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_metrics')
         .insert({
@@ -627,8 +573,7 @@ export default function PerformanceClient() {
 
       setShowRunDialog(false)
       toast.success('Performance audit completed!')
-
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to run performance audit')
     } finally {
@@ -704,6 +649,8 @@ export default function PerformanceClient() {
       }
 
       // Create scheduled test record in Supabase
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_alerts')
         .insert({
@@ -722,7 +669,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       toast.success('Test scheduled successfully!')
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to schedule test')
     }
@@ -753,6 +700,8 @@ export default function PerformanceClient() {
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .insert({
@@ -772,10 +721,8 @@ export default function PerformanceClient() {
 
       setShowAddBudgetDialog(false)
       setBudgetForm({ name: '', metric: 'script', target: 300, unit: 'KB', category: 'performance' })
-      toast.success('Performance budget added!' budget has been created`
-      })
-
-      fetchPerformanceData()
+      toast.success('Performance budget added!')
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to add budget')
     }
@@ -784,6 +731,8 @@ export default function PerformanceClient() {
   // Delete performance budget
   const handleDeleteBudget = async (budgetId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -792,7 +741,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       toast.success('Budget removed')
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to remove budget')
     }
@@ -801,6 +750,8 @@ export default function PerformanceClient() {
   // Resolve performance alert
   const handleResolveAlert = async (alertId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_alerts')
         .update({
@@ -813,7 +764,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       toast.success('Alert resolved')
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to resolve alert')
     }
@@ -828,6 +779,8 @@ export default function PerformanceClient() {
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_metrics')
         .delete()
@@ -836,7 +789,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       toast.success('History deleted')
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to delete history')
     }
@@ -851,6 +804,8 @@ export default function PerformanceClient() {
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -859,7 +814,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       toast.success('Budgets reset')
-      fetchPerformanceData()
+      // Hooks will auto-refresh via real-time subscription
     } catch (err: any) {
       toast.error(err.message || 'Failed to reset budgets')
     }
