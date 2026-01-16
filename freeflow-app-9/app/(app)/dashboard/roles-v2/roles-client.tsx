@@ -512,13 +512,13 @@ export default function RolesClient() {
       childRoles: [],
       groups: []
     }))
-    // Return database roles if available, otherwise fallback to mock
-    return dbRolesMapped.length > 0 ? dbRolesMapped : mockRoles
+    // Return database roles
+    return dbRolesMapped
   }, [dbRoles])
 
   // Computed stats
   const stats = useMemo(() => {
-    const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles
+    const rolesData = combinedRoles
     const totalUsers = rolesData.reduce((sum, r) => sum + r.totalUsers, 0)
     const activeUsers = rolesData.reduce((sum, r) => sum + r.activeUsers, 0)
     const systemRoles = rolesData.filter(r => r.isSystem).length

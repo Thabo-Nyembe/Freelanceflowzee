@@ -776,7 +776,7 @@ export default function LogsClient() {
   const handleExportLogs = async () => {
     setIsLoading(true)
     try {
-      const logsToExport = dbSystemLogs.length > 0 ? dbSystemLogs : mockLogs
+      const logsToExport = dbSystemLogs
       const blob = new Blob([JSON.stringify(logsToExport, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
