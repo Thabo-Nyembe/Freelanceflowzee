@@ -2,7 +2,6 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import { shareContent, apiPost } from '@/lib/button-handlers'
 import {
@@ -164,7 +163,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
-  const supabase = createClient()
+
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -455,6 +454,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const handleDeleteCanvas = useCallback(async (canvasId: string, canvasName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -475,7 +476,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     } catch (err) {
       toast.error('Error deleting canvas')
     }
-  }, [supabase, refetch])
+  }, [ refetch])
 
   const handleExportCanvas = useCallback(async () => {
     if (!selectedBoard) {
@@ -484,6 +485,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -505,7 +508,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     } catch (err) {
       toast.error('Export failed')
     }
-  }, [selectedBoard, supabase])
+  }, [selectedBoard, ])
 
   const handleShareCanvas = useCallback(async () => {
     if (!selectedBoard) {
@@ -552,6 +555,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
     setIsInviting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -576,7 +581,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     } finally {
       setIsInviting(false)
     }
-  }, [inviteEmail, inviteRole, selectedBoard, supabase])
+  }, [inviteEmail, inviteRole, selectedBoard, ])
 
   const handleResolveComment = useCallback(async (commentId: string) => {
     try {
@@ -591,7 +596,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     } catch (err) {
       toast.error('Failed to resolve')
     }
-  }, [supabase])
+  }, [])
 
   const handleUndoAction = useCallback(() => {
     // Execute browser's native undo command

@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import {
   useGalleryItems,
   useGalleryCollections,
@@ -427,7 +426,7 @@ const mockGalleryActivities = [
 // See galleryQuickActions inside GalleryClient component
 
 export default function GalleryClient() {
-  const supabase = createClient()
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Hooks for Supabase data
@@ -597,6 +596,8 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -637,6 +638,8 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -847,6 +850,8 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
