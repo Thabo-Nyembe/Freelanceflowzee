@@ -372,25 +372,26 @@ export default function CampaignsClient() {
     }
   }
 
+  // MIGRATED: Batch #12 - Removed mock data, using database hooks
   const stats = useMemo(() => ({
     totalCampaigns: dbCampaigns.length,
     activeCampaigns: dbCampaigns.filter(c => c.status === 'running').length,
     scheduledCampaigns: dbCampaigns.filter(c => c.status === 'scheduled').length,
-    totalSubscribers: 0 => sum + a.stats.subscribed, 0),
-    avgOpenRate: 0,
-    avgClickRate: 0,
-    totalRevenue: dbCampaigns.reduce((sum, c) => sum + (c.revenue || 0), 0) => sum + c.stats.revenue, 0),
-    totalSent: dbCampaigns.reduce((sum, c) => sum + (c.sent_count || 0), 0) => sum + c.stats.sent, 0)
-  }), [])
+    totalSubscribers: dbCampaigns.reduce((sum, c) => sum + (c.audience_size || 0), 0),
+    avgOpenRate: dbCampaigns.length > 0 ? (dbCampaigns.reduce((sum, c) => sum + (c.open_rate || 0), 0) / dbCampaigns.length) : 0,
+    avgClickRate: dbCampaigns.length > 0 ? (dbCampaigns.reduce((sum, c) => sum + (c.click_rate || 0), 0) / dbCampaigns.length) : 0,
+    totalRevenue: dbCampaigns.reduce((sum, c) => sum + (c.revenue_generated || 0), 0),
+    totalSent: dbCampaigns.reduce((sum, c) => sum + (c.emails_sent || 0), 0)
+  }), [dbCampaigns])
 
   const filteredCampaigns = useMemo(() => {
     return dbCampaigns.filter(campaign => {
       if (statusFilter !== 'all' && campaign.status !== statusFilter) return false
-      if (typeFilter !== 'all' && campaign.type !== typeFilter) return false
-      if (searchQuery && !campaign.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      if (typeFilter !== 'all' && campaign.campaign_type !== typeFilter) return false
+      if (searchQuery && !campaign.campaign_name.toLowerCase().includes(searchQuery.toLowerCase())) return false
       return true
     })
-  }, [statusFilter, typeFilter, searchQuery])
+  }, [statusFilter, typeFilter, searchQuery, dbCampaigns])
 
   // Handlers - Real Supabase Operations
   const [operationLoading, setOperationLoading] = useState<string | null>(null)
@@ -484,37 +485,37 @@ export default function CampaignsClient() {
     setOperationLoading(campaign.id)
     try {
       await createCampaign({
-        campaign_name: `${campaign.name} (Copy)`,
-        campaign_type: (campaign.type === 'ab_test' ? 'email' : campaign.type) as CampaignTypeDB,
+        campaign_name: `${campaign.campaign_name} (Copy)`,
+        campaign_type: (campaign.campaign_type === 'ab_test' ? 'email' : campaign.campaign_type) as CampaignTypeDB,
         description: campaign.description || null,
         status: 'draft' as CampaignStatusDB,
         phase: 'planning',
-        budget_total: 0,
-        budget_spent: 0,
-        budget_remaining: 0,
-        currency: 'USD',
-        audience_size: campaign.audienceSize || 0,
-        impressions: 0,
-        clicks: 0,
-        conversions: 0,
-        leads_generated: 0,
-        sales_generated: 0,
-        revenue_generated: 0,
-        likes_count: 0,
-        shares_count: 0,
-        comments_count: 0,
-        followers_gained: 0,
-        emails_sent: 0,
-        emails_delivered: 0,
-        emails_opened: 0,
-        emails_clicked: 0,
-        is_ab_test: campaign.abTest ? true : false,
-        is_automated: campaign.automation ? true : false,
+        budget_total: campaign.budget_total || 0,
+        budget_spent: campaign.budget_spent || 0,
+        budget_remaining: campaign.budget_remaining || 0,
+        currency: campaign.currency || 'USD',
+        audience_size: campaign.audience_size || 0,
+        impressions: campaign.impressions || 0,
+        clicks: campaign.clicks || 0,
+        conversions: campaign.conversions || 0,
+        leads_generated: campaign.leads_generated || 0,
+        sales_generated: campaign.sales_generated || 0,
+        revenue_generated: campaign.revenue_generated || 0,
+        likes_count: campaign.likes_count || 0,
+        shares_count: campaign.shares_count || 0,
+        comments_count: campaign.comments_count || 0,
+        followers_gained: campaign.followers_gained || 0,
+        emails_sent: campaign.emails_sent || 0,
+        emails_delivered: campaign.emails_delivered || 0,
+        emails_opened: campaign.emails_opened || 0,
+        emails_clicked: campaign.emails_clicked || 0,
+        is_ab_test: campaign.is_ab_test || false,
+        is_automated: campaign.is_automated || false,
         requires_approval: false,
         approved: false
       } as any)
       toast.success('Campaign duplicated', {
-        description: `Copy of "${campaign.name}" created`
+        description: `Copy of "${campaign.campaign_name}" created`
       })
       refetch()
     } catch (error) {
@@ -884,43 +885,38 @@ export default function CampaignsClient() {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-lg ${getCampaignTypeColor(campaign.type)}`}>
-                          {getCampaignIcon(campaign.type)}
+                        <div className={`p-3 rounded-lg ${getCampaignTypeColor(campaign.campaign_type)}`}>
+                          {getCampaignIcon(campaign.campaign_type)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                            <h3 className="font-semibold text-lg">{campaign.campaign_name}</h3>
                             <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
-                            <Badge className={getCampaignTypeColor(campaign.type)}>{campaign.type}</Badge>
-                            {campaign.abTest && <Badge className="bg-amber-100 text-amber-700">A/B Test</Badge>}
+                            <Badge className={getCampaignTypeColor(campaign.campaign_type)}>{campaign.campaign_type}</Badge>
+                            {campaign.is_ab_test && <Badge className="bg-amber-100 text-amber-700">A/B Test</Badge>}
                           </div>
                           {campaign.description && (
                             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{campaign.description}</p>
                           )}
-                          {campaign.subject && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
-                              <span className="font-medium">Subject:</span> {campaign.subject}
-                            </p>
-                          )}
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-1">
                               <Users className="w-3 h-3" />
-                              {formatNumber(campaign.audienceSize)} subscribers
+                              {formatNumber(campaign.audience_size)} subscribers
                             </span>
                             <span className="flex items-center gap-1">
                               <Send className="w-3 h-3" />
-                              {formatNumber(campaign.stats.sent)} sent
+                              {formatNumber(campaign.emails_sent)} sent
                             </span>
-                            {campaign.sentAt && (
+                            {campaign.launched_at && (
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {campaign.sentAt.toLocaleDateString()}
+                                {new Date(campaign.launched_at).toLocaleDateString()}
                               </span>
                             )}
-                            {campaign.schedule && (
+                            {campaign.start_date && (
                               <span className="flex items-center gap-1 text-blue-600">
                                 <Clock className="w-3 h-3" />
-                                Scheduled: {campaign.schedule.sendAt.toLocaleDateString()}
+                                Scheduled: {new Date(campaign.start_date).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -928,21 +924,21 @@ export default function CampaignsClient() {
                       </div>
 
                       <div className="flex items-center gap-8">
-                        {campaign.stats.openRate > 0 && (
+                        {(campaign.open_rate || 0) > 0 && (
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{campaign.stats.openRate.toFixed(1)}%</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{(campaign.open_rate || 0).toFixed(1)}%</div>
                             <div className="text-xs text-gray-500">Open Rate</div>
                           </div>
                         )}
-                        {campaign.stats.clickRate > 0 && (
+                        {(campaign.click_rate || 0) > 0 && (
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{campaign.stats.clickRate.toFixed(1)}%</div>
+                            <div className="text-2xl font-bold text-blue-600">{(campaign.click_rate || 0).toFixed(1)}%</div>
                             <div className="text-xs text-gray-500">Click Rate</div>
                           </div>
                         )}
-                        {campaign.stats.revenue > 0 && (
+                        {(campaign.revenue_generated || 0) > 0 && (
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">${formatNumber(campaign.stats.revenue)}</div>
+                            <div className="text-2xl font-bold text-green-600">${formatNumber(campaign.revenue_generated)}</div>
                             <div className="text-xs text-gray-500">Revenue</div>
                           </div>
                         )}
@@ -952,7 +948,7 @@ export default function CampaignsClient() {
                               size="sm"
                               variant="outline"
                               className="text-green-600 border-green-600 hover:bg-green-50"
-                              onClick={() => handleLaunchCampaign(campaign.id, campaign.name)}
+                              onClick={() => handleLaunchCampaign(campaign.id, campaign.campaign_name)}
                               disabled={operationLoading === campaign.id}
                             >
                               <Play className="w-3 h-3 mr-1" />
@@ -964,7 +960,7 @@ export default function CampaignsClient() {
                                 size="sm"
                                 variant="outline"
                                 className="text-orange-600 border-orange-600 hover:bg-orange-50"
-                                onClick={() => handlePauseCampaign(campaign.id, campaign.name)}
+                                onClick={() => handlePauseCampaign(campaign.id, campaign.campaign_name)}
                                 disabled={operationLoading === campaign.id}
                               >
                                 <Pause className="w-3 h-3 mr-1" />
@@ -974,7 +970,7 @@ export default function CampaignsClient() {
                                 size="sm"
                                 variant="outline"
                                 className="text-purple-600 border-purple-600 hover:bg-purple-50"
-                                onClick={() => handleEndCampaign(campaign.id, campaign.name)}
+                                onClick={() => handleEndCampaign(campaign.id, campaign.campaign_name)}
                                 disabled={operationLoading === campaign.id}
                               >
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -994,7 +990,7 @@ export default function CampaignsClient() {
                             size="sm"
                             variant="ghost"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDeleteCampaign(campaign.id, campaign.name)}
+                            onClick={() => handleDeleteCampaign(campaign.id, campaign.campaign_name)}
                             disabled={operationLoading === campaign.id}
                           >
                             <Trash2 className="w-3 h-3" />
@@ -1004,29 +1000,14 @@ export default function CampaignsClient() {
                     </div>
 
                     {/* A/B Test Results */}
-                    {campaign.abTest && campaign.abTest.status === 'completed' && (
+                    {campaign.is_ab_test && campaign.ab_test_config && (
                       <div className="mt-4 pt-4 border-t">
                         <div className="flex items-center gap-2 mb-2">
                           <Split className="w-4 h-4 text-amber-600" />
-                          <span className="text-sm font-medium">A/B Test Results</span>
+                          <span className="text-sm font-medium">A/B Test</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          {campaign.abTest.variants.map(variant => (
-                            <div
-                              key={variant.id}
-                              className={`p-3 rounded-lg ${variant.isWinner ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800'}`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium">{variant.name}</span>
-                                {variant.isWinner && <Badge className="bg-green-100 text-green-700">Winner</Badge>}
-                              </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{variant.subject}</p>
-                              <div className="flex items-center gap-4 text-sm">
-                                <span>Open: {variant.stats.openRate.toFixed(1)}%</span>
-                                <span>Click: {variant.stats.clickRate.toFixed(1)}%</span>
-                              </div>
-                            </div>
-                          ))}
+                        <div className="text-sm text-gray-600">
+                          <p>Test Configuration: {typeof campaign.ab_test_config === 'object' ? JSON.stringify(campaign.ab_test_config) : campaign.ab_test_config}</p>
                         </div>
                       </div>
                     )}
@@ -1457,21 +1438,21 @@ export default function CampaignsClient() {
                       <div className="flex items-center gap-4">
                         <span className="text-lg font-bold text-gray-400">#{i + 1}</span>
                         <div>
-                          <p className="font-medium">{campaign.name}</p>
-                          <p className="text-sm text-gray-500">{campaign.sentAt?.toLocaleDateString()}</p>
+                          <p className="font-medium">{campaign.campaign_name}</p>
+                          <p className="text-sm text-gray-500">{campaign.launched_at ? new Date(campaign.launched_at).toLocaleDateString() : 'Not sent'}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6 text-sm">
                         <div className="text-center">
-                          <p className="font-semibold text-green-600">{campaign.stats.openRate.toFixed(1)}%</p>
+                          <p className="font-semibold text-green-600">{(campaign.open_rate || 0).toFixed(1)}%</p>
                           <p className="text-xs text-gray-500">Opens</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-semibold text-blue-600">{campaign.stats.clickRate.toFixed(1)}%</p>
+                          <p className="font-semibold text-blue-600">{(campaign.click_rate || 0).toFixed(1)}%</p>
                           <p className="text-xs text-gray-500">Clicks</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-semibold text-green-600">${formatNumber(campaign.stats.revenue)}</p>
+                          <p className="font-semibold text-green-600">${formatNumber(campaign.revenue_generated || 0)}</p>
                           <p className="text-xs text-gray-500">Revenue</p>
                         </div>
                       </div>
@@ -2397,7 +2378,7 @@ export default function CampaignsClient() {
               <select className="w-full mt-1 px-3 py-2 border rounded-md bg-background">
                 <option value="">Select a campaign...</option>
                 {dbCampaigns.filter(c => c.status === 'draft' || c.status === 'scheduled').map(campaign => (
-                  <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                  <option key={campaign.id} value={campaign.id}>{campaign.campaign_name}</option>
                 ))}
               </select>
             </div>
@@ -2471,12 +2452,12 @@ export default function CampaignsClient() {
                 {dbCampaigns.slice(0, 3).map(campaign => (
                   <div key={campaign.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                     <div>
-                      <p className="font-medium">{campaign.name}</p>
-                      <p className="text-sm text-gray-500">{campaign.stats.sent} sent</p>
+                      <p className="font-medium">{campaign.campaign_name}</p>
+                      <p className="text-sm text-gray-500">{campaign.emails_sent} sent</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-green-600">{campaign.stats.openRate.toFixed(1)}% opens</p>
-                      <p className="text-sm text-gray-500">{campaign.stats.clickRate.toFixed(1)}% clicks</p>
+                      <p className="text-sm font-medium text-green-600">{(campaign.open_rate || 0).toFixed(1)}% opens</p>
+                      <p className="text-sm text-gray-500">{(campaign.click_rate || 0).toFixed(1)}% clicks</p>
                     </div>
                   </div>
                 ))}

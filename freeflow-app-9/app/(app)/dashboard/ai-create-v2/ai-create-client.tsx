@@ -1,8 +1,11 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
+
+import React, { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { copyToClipboard, downloadAsJson, shareContent, apiPost } from '@/lib/button-handlers'
+import { useAICreate } from '@/lib/hooks/use-ai-create'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -180,290 +183,25 @@ interface UsageStats {
 }
 
 // ============================================================================
-// MOCK DATA
+// MIGRATED DATA - Using database hooks instead of mock data
 // ============================================================================
 
-const mockGenerations: Generation[] = [
-  {
-    id: '1',
-    prompt: 'A majestic dragon flying over a medieval castle at sunset, dramatic lighting, highly detailed scales',
-    negativePrompt: 'blurry, low quality, distorted',
-    type: 'image',
-    status: 'completed',
-    style: 'fantasy',
-    aspectRatio: '16:9',
-    quality: 'ultra',
-    model: 'Midjourney V6',
-    seed: 42857291,
-    steps: 50,
-    guidance: 7.5,
-    imageUrl: '/api/placeholder/1920/1080',
-    thumbnailUrl: '/api/placeholder/400/225',
-    likes: 342,
-    downloads: 89,
-    views: 1250,
-    isPublic: true,
-    isFavorite: true,
-    variations: 4,
-    createdAt: '2024-07-10T14:30:00Z',
-    completedAt: '2024-07-10T14:31:45Z',
-    processingTime: 105,
-    cost: 0.08,
-    userId: 'user1',
-    userName: 'Sarah Chen',
-    userAvatar: '',
-    tags: ['dragon', 'fantasy', 'castle', 'sunset']
-  },
-  {
-    id: '2',
-    prompt: 'Cyberpunk city street at night with neon signs, rain-soaked pavement, futuristic vehicles',
-    type: 'image',
-    status: 'completed',
-    style: 'cyberpunk',
-    aspectRatio: '21:9',
-    quality: 'high',
-    model: 'SDXL Turbo',
-    seed: 98234567,
-    steps: 30,
-    guidance: 8.0,
-    imageUrl: '/api/placeholder/2560/1080',
-    thumbnailUrl: '/api/placeholder/400/170',
-    likes: 567,
-    downloads: 234,
-    views: 3450,
-    isPublic: true,
-    isFavorite: false,
-    variations: 6,
-    createdAt: '2024-07-10T12:15:00Z',
-    completedAt: '2024-07-10T12:15:45Z',
-    processingTime: 45,
-    cost: 0.05,
-    userId: 'user1',
-    userName: 'Sarah Chen',
-    userAvatar: '',
-    tags: ['cyberpunk', 'neon', 'city', 'night']
-  },
-  {
-    id: '3',
-    prompt: 'Serene Japanese garden with cherry blossoms, koi pond, traditional architecture',
-    type: 'image',
-    status: 'processing',
-    style: 'watercolor',
-    aspectRatio: '4:3',
-    quality: 'ultra',
-    model: 'Midjourney V6',
-    seed: 55678901,
-    steps: 50,
-    guidance: 7.0,
-    likes: 0,
-    downloads: 0,
-    views: 0,
-    isPublic: false,
-    isFavorite: false,
-    variations: 0,
-    createdAt: '2024-07-10T15:00:00Z',
-    cost: 0.08,
-    userId: 'user1',
-    userName: 'Sarah Chen',
-    userAvatar: '',
-    tags: ['japan', 'garden', 'peaceful', 'nature']
-  },
-  {
-    id: '4',
-    prompt: 'Portrait of a wise old wizard with long beard, magical staff, mystical aura',
-    type: 'image',
-    status: 'completed',
-    style: 'oil-painting',
-    aspectRatio: '3:4',
-    quality: 'high',
-    model: 'DALL-E 3',
-    seed: 12345678,
-    steps: 40,
-    guidance: 7.5,
-    imageUrl: '/api/placeholder/900/1200',
-    thumbnailUrl: '/api/placeholder/300/400',
-    likes: 189,
-    downloads: 45,
-    views: 890,
-    isPublic: true,
-    isFavorite: true,
-    variations: 3,
-    createdAt: '2024-07-09T16:20:00Z',
-    completedAt: '2024-07-09T16:21:30Z',
-    processingTime: 90,
-    cost: 0.04,
-    userId: 'user1',
-    userName: 'Sarah Chen',
-    userAvatar: '',
-    tags: ['wizard', 'portrait', 'magical', 'fantasy']
-  },
-  {
-    id: '5',
-    prompt: 'Modern minimalist interior design, Scandinavian style living room, natural light',
-    type: 'image',
-    status: 'completed',
-    style: 'realistic',
-    aspectRatio: '16:9',
-    quality: 'standard',
-    model: 'Stable Diffusion 3',
-    seed: 87654321,
-    steps: 25,
-    guidance: 6.5,
-    imageUrl: '/api/placeholder/1920/1080',
-    thumbnailUrl: '/api/placeholder/400/225',
-    likes: 423,
-    downloads: 156,
-    views: 2100,
-    isPublic: true,
-    isFavorite: false,
-    variations: 2,
-    createdAt: '2024-07-08T10:45:00Z',
-    completedAt: '2024-07-08T10:45:30Z',
-    processingTime: 30,
-    cost: 0.02,
-    userId: 'user1',
-    userName: 'Sarah Chen',
-    userAvatar: '',
-    tags: ['interior', 'minimalist', 'modern', 'scandinavian']
-  }
-]
-
-const mockTemplates: Template[] = [
-  {
-    id: '1',
-    name: 'Epic Fantasy Landscape',
-    description: 'Create stunning fantasy landscapes with dramatic lighting',
-    prompt: 'Epic fantasy landscape, mountains, waterfalls, magical forest, dramatic sunset sky, highly detailed, cinematic',
-    negativePrompt: 'blurry, low quality, modern elements',
-    style: 'fantasy',
-    category: 'Landscapes',
-    thumbnail: '/api/placeholder/400/300',
-    uses: 12450,
-    likes: 3456,
-    author: 'AI Studio',
-    authorAvatar: '',
-    isPremium: false,
-    tags: ['fantasy', 'landscape', 'epic']
-  },
-  {
-    id: '2',
-    name: 'Cyberpunk Portrait',
-    description: 'Futuristic cyberpunk-style character portraits',
-    prompt: 'Cyberpunk portrait, neon lights, futuristic implants, dark atmosphere, high detail',
-    style: 'cyberpunk',
-    category: 'Portraits',
-    thumbnail: '/api/placeholder/400/300',
-    uses: 8920,
-    likes: 2890,
-    author: 'NeonArtist',
-    authorAvatar: '',
-    isPremium: true,
-    tags: ['cyberpunk', 'portrait', 'neon']
-  },
-  {
-    id: '3',
-    name: 'Anime Character Design',
-    description: 'Create beautiful anime-style character illustrations',
-    prompt: 'Anime character, detailed eyes, flowing hair, dynamic pose, studio quality',
-    style: 'anime',
-    category: 'Characters',
-    thumbnail: '/api/placeholder/400/300',
-    uses: 25600,
-    likes: 8450,
-    author: 'AnimeStudio',
-    authorAvatar: '',
-    isPremium: false,
-    tags: ['anime', 'character', 'illustration']
-  },
-  {
-    id: '4',
-    name: 'Product Photography',
-    description: 'Professional product photography with studio lighting',
-    prompt: 'Professional product photography, studio lighting, clean background, high detail, commercial quality',
-    style: 'realistic',
-    category: 'Commercial',
-    thumbnail: '/api/placeholder/400/300',
-    uses: 15800,
-    likes: 4560,
-    author: 'ProStudio',
-    authorAvatar: '',
-    isPremium: true,
-    tags: ['product', 'commercial', 'photography']
-  }
-]
-
-const mockModels: AIModel[] = [
-  {
-    id: '1',
-    name: 'Midjourney V6',
-    description: 'Latest Midjourney model with exceptional quality and creativity',
-    version: '6.0',
-    tier: 'pro',
-    type: 'image',
-    speed: 75,
-    quality: 98,
-    costPerGeneration: 0.08,
-    maxResolution: '4096x4096',
-    features: ['Upscaling', 'Variations', 'Pan & Zoom', 'Style Tuning'],
-    isDefault: true
-  },
-  {
-    id: '2',
-    name: 'DALL-E 3',
-    description: 'OpenAI\'s most advanced text-to-image model',
-    version: '3.0',
-    tier: 'pro',
-    type: 'image',
-    speed: 85,
-    quality: 95,
-    costPerGeneration: 0.04,
-    maxResolution: '1792x1024',
-    features: ['Natural Language', 'Text Rendering', 'Content Safety'],
-    isDefault: false
-  },
-  {
-    id: '3',
-    name: 'Stable Diffusion 3',
-    description: 'Open-source model with excellent customization',
-    version: '3.0',
-    tier: 'free',
-    type: 'image',
-    speed: 90,
-    quality: 88,
-    costPerGeneration: 0.02,
-    maxResolution: '2048x2048',
-    features: ['ControlNet', 'LoRA', 'Custom Training'],
-    isDefault: false
-  },
-  {
-    id: '4',
-    name: 'SDXL Turbo',
-    description: 'Ultra-fast generation with real-time preview',
-    version: '1.0',
-    tier: 'free',
-    type: 'image',
-    speed: 99,
-    quality: 80,
-    costPerGeneration: 0.01,
-    maxResolution: '1024x1024',
-    features: ['Real-time', 'Low Latency', 'Batch Generation'],
-    isDefault: false
-  }
-]
-
+const mockGenerations: Generation[] = []
+const mockTemplates: Template[] = []
+const mockModels: AIModel[] = []
 const mockUsageStats: UsageStats = {
-  totalGenerations: 1245,
-  completedGenerations: 1198,
-  failedGenerations: 47,
-  totalCredits: 500,
-  usedCredits: 342,
-  remainingCredits: 158,
-  avgProcessingTime: 45,
-  totalLikes: 15890,
-  totalDownloads: 4567,
-  totalViews: 89450,
-  favoriteStyle: 'fantasy',
-  generationsThisMonth: 234
+  totalGenerations: 0,
+  completedGenerations: 0,
+  failedGenerations: 0,
+  totalCredits: 0,
+  usedCredits: 0,
+  remainingCredits: 0,
+  avgProcessingTime: 0,
+  totalLikes: 0,
+  totalDownloads: 0,
+  totalViews: 0,
+  favoriteStyle: 'realistic',
+  generationsThisMonth: 0
 }
 
 // ============================================================================
@@ -536,29 +274,11 @@ const formatNumber = (num: number) => {
   return num.toString()
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockAICreateInsights = [
-  { id: '1', type: 'success' as const, title: 'Creative Boost', description: 'Your creations got 2.5K views this week. 40% more than last week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '2', type: 'info' as const, title: 'Style Trending', description: 'Anime style is trending. Consider creating more in this style.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-  { id: '3', type: 'warning' as const, title: 'Credits Running Low', description: 'You have 50 credits remaining. Consider upgrading your plan.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-]
-
-const mockAICreateCollaborators = [
-  { id: '1', name: 'Creative Lead', avatar: '/avatars/creative.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'AI Artist', avatar: '/avatars/artist.jpg', status: 'online' as const, role: 'Artist' },
-  { id: '3', name: 'Content Creator', avatar: '/avatars/content.jpg', status: 'away' as const, role: 'Creator' },
-]
-
-const mockAICreatePredictions = [
-  { id: '1', title: 'Style Forecast', prediction: 'Cyberpunk aesthetics will trend next month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'Usage Pattern', prediction: 'Peak generation times are 2-4 PM your timezone', confidence: 85, trend: 'stable' as const, impact: 'low' as const },
-]
-
-const mockAICreateActivities = [
-  { id: '1', user: 'You', action: 'Generated', target: 'stunning landscape image', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'AI Model', action: 'Completed', target: 'batch of 4 variations', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Saved', target: 'creation to gallery', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Competitive Upgrade Data - Empty arrays, using database hooks
+const mockAICreateInsights = []
+const mockAICreateCollaborators = []
+const mockAICreatePredictions = []
+const mockAICreateActivities = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -567,6 +287,9 @@ const mockAICreateActivities = [
 // ============================================================================
 
 export default function AICreateClient() {
+  // Database hook for AI creations
+  const { generations, isLoading, fetchGenerations } = useAICreate()
+
   const [activeTab, setActiveTab] = useState('generator')
   const [prompt, setPrompt] = useState('')
   const [negativePrompt, setNegativePrompt] = useState('')
@@ -592,15 +315,40 @@ export default function AICreateClient() {
   const [importedFile, setImportedFile] = useState<File | null>(null)
   const [templateForm, setTemplateForm] = useState({ name: '', description: '', prompt: '', style: 'realistic' })
 
-  // Filtered generations
+  // Fetch generations on component mount
+  useEffect(() => {
+    fetchGenerations()
+  }, [])
+
+  // Calculate stats from hook data
+  const calculatedStats = useMemo(() => {
+    const completed = generations.filter(g => g.status === 'completed').length
+    const total = generations.length
+    return {
+      totalGenerations: total,
+      completedGenerations: completed,
+      generationsThisMonth: generations.filter(g => {
+        const d = new Date(g.created_at)
+        const now = new Date()
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      }).length,
+      remainingCredits: mockUsageStats.remainingCredits,
+      usedCredits: total,
+      avgProcessingTime: generations.length > 0
+        ? Math.round(generations.reduce((sum, g) => sum + g.latency_ms, 0) / generations.length / 1000)
+        : 0
+    }
+  }, [generations])
+
+  // Filtered generations from database hook
   const filteredGenerations = useMemo(() => {
-    return mockGenerations.filter(gen => {
+    return generations.filter(gen => {
       const matchesSearch = gen.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
         gen.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || gen.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [generations, searchQuery, statusFilter])
 
   const styles: { value: StylePreset; label: string }[] = [
     { value: 'realistic', label: 'Realistic' },
@@ -781,7 +529,7 @@ export default function AICreateClient() {
             <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <div className="flex items-center gap-2">
                 <Gem className="w-4 h-4 text-purple-500" />
-                <span className="font-semibold text-gray-900 dark:text-white">{mockUsageStats.remainingCredits}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{calculatedStats.remainingCredits}</span>
                 <span className="text-sm text-gray-500">credits</span>
               </div>
             </div>
@@ -798,14 +546,14 @@ export default function AICreateClient() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
-            { label: 'Generations', value: formatNumber(mockUsageStats.totalGenerations), change: 18.5, icon: Sparkles, color: 'from-violet-500 to-purple-500' },
-            { label: 'This Month', value: mockUsageStats.generationsThisMonth.toString(), change: 24.3, icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
-            { label: 'Credits Used', value: mockUsageStats.usedCredits.toString(), change: -5.2, icon: Zap, color: 'from-amber-500 to-orange-500' },
-            { label: 'Avg Time', value: `${mockUsageStats.avgProcessingTime}s`, change: -12.4, icon: Clock, color: 'from-green-500 to-emerald-500' },
+            { label: 'Generations', value: formatNumber(calculatedStats.totalGenerations), change: 18.5, icon: Sparkles, color: 'from-violet-500 to-purple-500' },
+            { label: 'This Month', value: calculatedStats.generationsThisMonth.toString(), change: 24.3, icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
+            { label: 'Credits Used', value: calculatedStats.usedCredits.toString(), change: -5.2, icon: Zap, color: 'from-amber-500 to-orange-500' },
+            { label: 'Avg Time', value: `${calculatedStats.avgProcessingTime}s`, change: -12.4, icon: Clock, color: 'from-green-500 to-emerald-500' },
             { label: 'Total Views', value: formatNumber(mockUsageStats.totalViews), change: 45.7, icon: Eye, color: 'from-pink-500 to-rose-500' },
             { label: 'Total Likes', value: formatNumber(mockUsageStats.totalLikes), change: 32.1, icon: Heart, color: 'from-red-500 to-pink-500' },
             { label: 'Downloads', value: formatNumber(mockUsageStats.totalDownloads), change: 28.9, icon: Download, color: 'from-teal-500 to-cyan-500' },
-            { label: 'Success Rate', value: `${((mockUsageStats.completedGenerations / mockUsageStats.totalGenerations) * 100).toFixed(0)}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
+            { label: 'Success Rate', value: `${calculatedStats.totalGenerations > 0 ? ((calculatedStats.completedGenerations / calculatedStats.totalGenerations) * 100).toFixed(0) : 0}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
           ].map((stat, idx) => (
             <Card key={idx} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -868,7 +616,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockUsageStats.remainingCredits}</p>
+                    <p className="text-3xl font-bold">{calculatedStats.remainingCredits}</p>
                     <p className="text-violet-200 text-sm">Credits Available</p>
                   </div>
                 </div>
@@ -905,7 +653,7 @@ export default function AICreateClient() {
                     } else if (action.label === 'Import') {
                       setShowImportDialog(true)
                     } else if (action.label === 'Export') {
-                      downloadAsJson(mockGenerations, 'ai-creations-export')
+                      downloadAsJson(generations, 'ai-creations-export')
                     } else if (action.label === 'Templates') {
                       setActiveTab('templates')
                     } else if (action.label === 'History') {
@@ -1148,7 +896,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockGenerations.length}</p>
+                    <p className="text-3xl font-bold">{generations.length}</p>
                     <p className="text-blue-200 text-sm">Total Creations</p>
                   </div>
                 </div>
@@ -1177,10 +925,10 @@ export default function AICreateClient() {
                       setViewMode('list')
                       toast.success('Switched to list view')
                     } else if (action.label === 'Favorites') {
-                      const favorites = mockGenerations.filter(g => g.isFavorite)
+                      const favorites = generations.filter(g => g.isFavorite)
                       toast.info(`You have ${favorites.length} favorite creations`)
                     } else if (action.label === 'Batch Export') {
-                      downloadAsJson(mockGenerations.filter(g => g.status === 'completed'), 'ai-creations-batch-export')
+                      downloadAsJson(generations.filter(g => g.status === 'completed'), 'ai-creations-batch-export')
                     } else if (action.label === 'Share') {
                       shareContent({
                         title: 'My AI Creations',
@@ -1190,9 +938,9 @@ export default function AICreateClient() {
                     } else if (action.label === 'Filter') {
                       toast.info('Use the filter buttons below to filter creations')
                     } else if (action.label === 'Archive') {
-                      const selectedCount = mockGenerations.filter(g => g.status === 'completed' && !archivedItems.includes(g.id)).length
+                      const selectedCount = generations.filter(g => g.status === 'completed' && !archivedItems.includes(g.id)).length
                       if (selectedCount > 0) {
-                        const toArchive = mockGenerations.filter(g => g.status === 'completed' && !archivedItems.includes(g.id)).map(g => g.id)
+                        const toArchive = generations.filter(g => g.status === 'completed' && !archivedItems.includes(g.id)).map(g => g.id)
                         setArchivedItems([...archivedItems, ...toArchive])
                         toast.success(`${selectedCount} creations archived`)
                       } else {
@@ -1435,7 +1183,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockUsageStats.totalGenerations}</p>
+                    <p className="text-3xl font-bold">{generations.length}</p>
                     <p className="text-orange-200 text-sm">Total Generations</p>
                   </div>
                 </div>
@@ -1462,15 +1210,15 @@ export default function AICreateClient() {
                     } else if (action.label === 'Duplicate') {
                       toast.info('Select a generation to duplicate')
                     } else if (action.label === 'Export') {
-                      downloadAsJson(mockGenerations, 'generation-history-export')
+                      downloadAsJson(generations, 'generation-history-export')
                     } else if (action.label === 'Filter') {
                       setShowFilterDialog(true)
                     } else if (action.label === 'Today') {
                       const today = new Date().toDateString()
-                      const todayCount = mockGenerations.filter(g => new Date(g.createdAt).toDateString() === today).length
+                      const todayCount = generations.filter(g => new Date(g.createdAt).toDateString() === today).length
                       toast.info(`${todayCount} generations today`)
                     } else if (action.label === 'This Week') {
-                      toast.info(`${mockGenerations.length} generations this week`)
+                      toast.info(`${generations.length} generations this week`)
                     } else if (action.label === 'Archive') {
                       if (archivedItems.length > 0) {
                         toast.info(`${archivedItems.length} items in archive`)
@@ -1722,24 +1470,24 @@ export default function AICreateClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Generations</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(mockUsageStats.totalGenerations)}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(calculatedStats.totalGenerations)}</p>
                       <p className="text-xs text-green-600">+18.5% this month</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Success Rate</p>
                       <p className="text-2xl font-bold text-green-600">
-                        {((mockUsageStats.completedGenerations / mockUsageStats.totalGenerations) * 100).toFixed(1)}%
+                        {calculatedStats.totalGenerations > 0 ? ((calculatedStats.completedGenerations / calculatedStats.totalGenerations) * 100).toFixed(1) : 0}%
                       </p>
                       <p className="text-xs text-green-600">+2.1% vs last month</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Credits Remaining</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockUsageStats.remainingCredits}</p>
-                      <Progress value={(mockUsageStats.remainingCredits / mockUsageStats.totalCredits) * 100} className="h-2 mt-2" />
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{calculatedStats.remainingCredits}</p>
+                      <Progress value={(calculatedStats.remainingCredits / mockUsageStats.totalCredits) * 100} className="h-2 mt-2" />
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Avg Processing</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockUsageStats.avgProcessingTime}s</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{calculatedStats.avgProcessingTime}s</p>
                       <p className="text-xs text-green-600">-12.4% faster</p>
                     </div>
                   </div>

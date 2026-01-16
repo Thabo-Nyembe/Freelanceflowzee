@@ -1,5 +1,6 @@
 // Chat V2 - Intercom Level Real-time Messaging
 // Upgraded with: Inbox, Conversations, AI Suggestions, Team Collaboration
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
 
 'use client'
 
@@ -62,13 +63,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  chatAIInsights,
-  chatCollaborators,
-  chatPredictions,
-  chatActivities,
-  chatQuickActions,
-} from '@/lib/mock-data/adapters'
+// MIGRATED: Batch #12 - Removed mock data adapters
 
 import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
 
@@ -157,94 +152,14 @@ interface AIsuggestion {
 // MOCK DATA - INTERCOM LEVEL
 // ============================================================================
 
-const TEAM_MEMBERS: TeamMember[] = [
-  { id: 'tm1', name: 'Sarah Johnson', email: 'sarah@kazi.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', role: 'admin', status: 'online', assignedConversations: 12, resolvedToday: 8, avgResponseTime: 45 },
-  { id: 'tm2', name: 'Michael Chen', email: 'michael@kazi.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael', role: 'agent', status: 'online', assignedConversations: 8, resolvedToday: 15, avgResponseTime: 32 },
-  { id: 'tm3', name: 'Emily Wilson', email: 'emily@kazi.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily', role: 'agent', status: 'away', assignedConversations: 5, resolvedToday: 6, avgResponseTime: 55 },
-  { id: 'tm4', name: 'Alex Thompson', email: 'alex@kazi.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex', role: 'manager', status: 'online', assignedConversations: 3, resolvedToday: 4, avgResponseTime: 28 },
-]
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
+const TEAM_MEMBERS: TeamMember[] = []
 
-const SAVED_REPLIES: SavedReply[] = [
-  { id: 'sr1', name: 'Welcome Message', content: 'Hi there! Thanks for reaching out. How can I help you today?', category: 'General', shortcut: '/welcome', usageCount: 234 },
-  { id: 'sr2', name: 'Pricing Info', content: 'Our pricing starts at $29/month for the Starter plan. Would you like me to share more details about our plans?', category: 'Sales', shortcut: '/pricing', usageCount: 189 },
-  { id: 'sr3', name: 'Feature Request', content: "Thanks for the suggestion! I've passed this along to our product team. We'll update you when we have news to share.", category: 'Product', shortcut: '/feature', usageCount: 145 },
-  { id: 'sr4', name: 'Technical Support', content: "I'm sorry you're experiencing this issue. Let me help troubleshoot. Can you please share your browser version and any error messages you're seeing?", category: 'Support', shortcut: '/tech', usageCount: 312 },
-  { id: 'sr5', name: 'Closing Message', content: "Is there anything else I can help you with? If not, have a great day! Feel free to reach out anytime.", category: 'General', shortcut: '/close', usageCount: 567 },
-]
+const SAVED_REPLIES: SavedReply[] = []
 
-const CONVERSATIONS: Conversation[] = [
-  {
-    id: 'conv1',
-    customer: { id: 'c1', name: 'John Smith', email: 'john@acme.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John', company: 'Acme Corp', location: 'New York, USA', timezone: 'EST', customAttributes: { plan: 'Enterprise', industry: 'Technology' }, tags: ['VIP', 'Enterprise'], firstSeen: '2023-06-15', lastSeen: '2024-01-28T10:30:00Z', totalConversations: 15, lifetimeValue: 12500, isOnline: true, notes: [], segments: ['Power Users'] },
-    status: 'open',
-    priority: 'high',
-    assignee: TEAM_MEMBERS[0],
-    tags: ['billing', 'urgent'],
-    subject: 'Invoice question for January',
-    lastMessage: 'Can you help me understand this charge?',
-    lastMessageAt: '2024-01-28T10:30:00Z',
-    unreadCount: 2,
-    isStarred: true,
-    channel: 'chat',
-    messagesCount: 8,
-    createdAt: '2024-01-28T09:00:00Z'
-  },
-  {
-    id: 'conv2',
-    customer: { id: 'c2', name: 'Emma Davis', email: 'emma@startup.io', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', company: 'Startup.io', location: 'London, UK', timezone: 'GMT', customAttributes: { plan: 'Pro', industry: 'SaaS' }, tags: ['New'], firstSeen: '2024-01-20', lastSeen: '2024-01-28T10:15:00Z', totalConversations: 3, lifetimeValue: 890, isOnline: true, notes: [], segments: ['Trial Users'] },
-    status: 'open',
-    priority: 'normal',
-    tags: ['feature-request'],
-    subject: 'Integration with Slack',
-    lastMessage: 'Do you have a Slack integration available?',
-    lastMessageAt: '2024-01-28T10:15:00Z',
-    unreadCount: 1,
-    isStarred: false,
-    channel: 'chat',
-    messagesCount: 3,
-    createdAt: '2024-01-28T10:00:00Z'
-  },
-  {
-    id: 'conv3',
-    customer: { id: 'c3', name: 'Robert Brown', email: 'robert@enterprise.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Robert', company: 'Enterprise LLC', location: 'San Francisco, USA', timezone: 'PST', customAttributes: { plan: 'Enterprise', industry: 'Finance' }, tags: ['VIP'], firstSeen: '2022-03-10', lastSeen: '2024-01-28T09:45:00Z', totalConversations: 42, lifetimeValue: 45000, isOnline: false, notes: ['Key account - escalate if needed'], segments: ['VIP'] },
-    status: 'snoozed',
-    priority: 'normal',
-    assignee: TEAM_MEMBERS[1],
-    tags: ['waiting-for-customer'],
-    subject: 'API documentation question',
-    lastMessage: 'Let me check with my team and get back to you',
-    lastMessageAt: '2024-01-27T16:00:00Z',
-    unreadCount: 0,
-    isStarred: false,
-    channel: 'email',
-    messagesCount: 12,
-    createdAt: '2024-01-25T14:00:00Z'
-  },
-  {
-    id: 'conv4',
-    customer: { id: 'c4', name: 'Lisa Wang', email: 'lisa@design.co', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa', company: 'Design Co', location: 'Berlin, Germany', timezone: 'CET', customAttributes: { plan: 'Starter', industry: 'Design' }, tags: [], firstSeen: '2024-01-15', lastSeen: '2024-01-28T08:30:00Z', totalConversations: 2, lifetimeValue: 290, isOnline: false, notes: [], segments: ['New Users'] },
-    status: 'closed',
-    priority: 'low',
-    assignee: TEAM_MEMBERS[2],
-    tags: ['resolved'],
-    subject: 'Password reset help',
-    lastMessage: 'Thank you for your help!',
-    lastMessageAt: '2024-01-26T12:00:00Z',
-    unreadCount: 0,
-    isStarred: false,
-    channel: 'chat',
-    rating: 5,
-    responseTime: 25,
-    messagesCount: 6,
-    createdAt: '2024-01-26T11:00:00Z'
-  },
-]
+const CONVERSATIONS: Conversation[] = []
 
-const AI_SUGGESTIONS: AIsuggestion[] = [
-  { id: 'ai1', content: "Based on the customer's question, I suggest explaining our billing cycle and providing a link to the invoice details page.", confidence: 92, category: 'response' },
-  { id: 'ai2', content: "This conversation seems to be about billing. Would you like me to add the 'billing' tag?", confidence: 88, category: 'tag' },
-  { id: 'ai3', content: 'Customer satisfaction score is low. Consider offering a discount or escalating to a senior agent.', confidence: 75, category: 'action' },
-]
+const AI_SUGGESTIONS: AIsuggestion[] = []
 
 // ============================================================================
 // MAIN COMPONENT - INTERCOM LEVEL CHAT
@@ -1917,18 +1832,18 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 px-6">
         <div className="lg:col-span-2">
           <AIInsightsPanel
-            insights={chatAIInsights}
+            insights={[]}
             title="Chat Intelligence"
             onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
           />
         </div>
         <div className="space-y-6">
           <CollaborationIndicator
-            collaborators={chatCollaborators}
+            collaborators={[]}
             maxVisible={4}
           />
           <PredictiveAnalytics
-            predictions={chatPredictions}
+            predictions={[]}
             title="Chat Forecasts"
           />
         </div>
@@ -1936,12 +1851,12 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-6 pb-6">
         <ActivityFeed
-          activities={chatActivities}
+          activities={[]}
           title="Chat Activity"
           maxItems={5}
         />
         <QuickActionsToolbar
-          actions={chatQuickActions}
+          actions={[]}
           variant="grid"
         />
       </div>

@@ -1,4 +1,5 @@
 'use client'
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
 import { useState, useMemo, useCallback } from 'react'
 import {
   CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye,
@@ -179,29 +180,14 @@ interface PricingPlan {
   subscribers: number
 }
 
-// Competitive Upgrade Mock Data - Stripe/Chargebee-level Billing Intelligence
-const mockBillingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Revenue Growth', description: 'MRR increased 12% month-over-month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '2', type: 'warning' as const, title: 'Churn Risk', description: '15 accounts showing payment failure patterns.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Annual billing conversion could increase by offering 20% discount.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Competitive Upgrade AI Insights - Database driven
+const mockBillingAIInsights: any[] = []
 
-const mockBillingCollaborators = [
-  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'online' as const, role: 'Ops' },
-  { id: '3', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'away' as const, role: 'Accountant' },
-]
+const mockBillingCollaborators: any[] = []
 
-const mockBillingPredictions = [
-  { id: '1', title: 'Monthly Revenue', prediction: 'Next month revenue projected at $125K based on current pipeline', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Dunning Recovery', prediction: 'Smart retry strategy will recover 65% of failed payments', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockBillingPredictions: any[] = []
 
-const mockBillingActivities = [
-  { id: '1', user: 'Finance Lead', action: 'Processed', target: '47 subscription renewals', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Revenue Ops', action: 'Updated', target: 'enterprise pricing tiers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Accountant', action: 'Reconciled', target: 'Q4 revenue report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockBillingActivities: any[] = []
 
 // Quick actions are defined inside the component to access state setters and handlers
 
@@ -642,7 +628,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
     }
   }
 
-  // Transform database subscriptions to UI format with fallback to mock data
+  // Transform database subscriptions to UI format
   const subscriptions: Subscription[] = useMemo(() => {
     if (dbSubscriptions && dbSubscriptions.length > 0) {
       return dbSubscriptions.map((sub: any) => ({
@@ -663,22 +649,10 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         created_at: sub.created_at
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
-        plan: 'Pro Monthly', status: 'active', amount: 99, interval: 'month',
-        current_period_start: '2024-12-01', current_period_end: '2025-01-01', cancel_at_period_end: false, trial_end: null,
-        payment_method: { id: 'pm_1', type: 'card', brand: 'visa', last4: '4242', exp_month: 12, exp_year: 2025, is_default: true, fingerprint: 'abc123' },
-        metadata: { company_size: '50-100' }, created_at: '2024-06-15' },
-      { id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
-        plan: 'Enterprise Annual', status: 'active', amount: 999, interval: 'year',
-        current_period_start: '2024-01-15', current_period_end: '2025-01-15', cancel_at_period_end: false, trial_end: null,
-        payment_method: { id: 'pm_2', type: 'card', brand: 'mastercard', last4: '5555', exp_month: 3, exp_year: 2026, is_default: true, fingerprint: 'def456' },
-        metadata: { company_size: '100-500' }, created_at: '2024-01-15' }
-    ]
+    return []
   }, [dbSubscriptions])
 
-  // Transform database invoices to UI format with fallback to mock data
+  // Transform database invoices to UI format
   const invoices: Invoice[] = useMemo(() => {
     if (dbInvoices && dbInvoices.length > 0) {
       return dbInvoices.map((inv: any) => ({
@@ -703,20 +677,10 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         discount: inv.discount
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'inv_1', number: 'INV-2024-001', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
-        status: 'paid', amount_due: 99, amount_paid: 99, amount_remaining: 0, subtotal: 99, tax: 0, total: 99,
-        due_date: '2024-12-15', created_at: '2024-12-01', paid_at: '2024-12-03', hosted_invoice_url: 'https://pay.stripe.com/inv_1',
-        line_items: [{ id: 'li_1', description: 'Pro Monthly Plan - Dec 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-12-01', end: '2025-01-01' } }] },
-      { id: 'inv_2', number: 'INV-2024-002', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
-        status: 'paid', amount_due: 999, amount_paid: 999, amount_remaining: 0, subtotal: 999, tax: 0, total: 999,
-        due_date: '2024-12-20', created_at: '2024-12-05', paid_at: '2024-12-05', hosted_invoice_url: 'https://pay.stripe.com/inv_2',
-        line_items: [{ id: 'li_2', description: 'Enterprise Annual Plan - 2024', quantity: 1, unit_amount: 999, amount: 999, period: { start: '2024-01-15', end: '2025-01-15' } }] }
-    ]
+    return []
   }, [dbInvoices])
 
-  // Transform database coupons to UI format with fallback to mock data
+  // Transform database coupons to UI format
   const coupons: Coupon[] = useMemo(() => {
     if (dbCoupons && dbCoupons.length > 0) {
       return dbCoupons.map((coupon: any) => ({
@@ -735,16 +699,10 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         created_at: coupon.created_at
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'coup_1', name: 'First Month 10% Off', code: 'WELCOME10', type: 'percent_off', value: 10, duration: 'once',
-        max_redemptions: 100, times_redeemed: 47, valid: true, expires_at: '2025-03-31', created_at: '2024-01-01' },
-      { id: 'coup_2', name: 'Annual Discount', code: 'ANNUAL20', type: 'percent_off', value: 20, duration: 'forever',
-        times_redeemed: 23, valid: true, created_at: '2024-02-15' }
-    ]
+    return []
   }, [dbCoupons])
 
-  // Transform database tax rates to UI format with fallback to mock data
+  // Transform database tax rates to UI format
   const taxRates: TaxRate[] = useMemo(() => {
     if (dbTaxRates && dbTaxRates.length > 0) {
       return dbTaxRates.map((tax: any) => ({
@@ -758,15 +716,10 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         active: tax.is_active !== false
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'txr_1', name: 'US Sales Tax', percentage: 8.25, jurisdiction: 'California', country: 'US', state: 'CA', inclusive: false, active: true },
-      { id: 'txr_2', name: 'EU VAT', percentage: 20, jurisdiction: 'European Union', country: 'EU', inclusive: true, active: true },
-      { id: 'txr_3', name: 'UK VAT', percentage: 20, jurisdiction: 'United Kingdom', country: 'GB', inclusive: true, active: true }
-    ]
+    return []
   }, [dbTaxRates])
 
-  // Transform database refunds to UI format with fallback to mock data
+  // Transform database refunds to UI format
   const refunds: Refund[] = useMemo(() => {
     if (dbRefunds && dbRefunds.length > 0) {
       return dbRefunds.map((ref: any) => ({
@@ -780,22 +733,13 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         metadata: ref.metadata
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'ref_1', payment_id: 'pay_123', amount: 99, currency: 'USD', status: 'succeeded', reason: 'requested_by_customer', created_at: '2024-12-20' },
-      { id: 'ref_2', payment_id: 'pay_456', amount: 49, currency: 'USD', status: 'pending', reason: 'duplicate', created_at: '2024-12-22' }
-    ]
+    return []
   }, [dbRefunds])
 
-  // Mock usage records
-  const usageRecords: UsageRecord[] = [
-    { id: 'use_1', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 15000, timestamp: '2024-12-23', unit_price: 0.001, total: 15, action: 'set' },
-    { id: 'use_2', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 12000, timestamp: '2024-12-22', unit_price: 0.001, total: 12, action: 'increment' },
-    { id: 'use_3', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 45000, timestamp: '2024-12-23', unit_price: 0.001, total: 45, action: 'set' },
-    { id: 'use_4', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 38000, timestamp: '2024-12-22', unit_price: 0.001, total: 38, action: 'increment' }
-  ]
+  // Usage records from database
+  const usageRecords: UsageRecord[] = []
 
-  // Transform database webhooks to UI format with fallback to mock data
+  // Transform database webhooks to UI format
   const webhooks: WebhookEndpoint[] = useMemo(() => {
     if (dbWebhooks && dbWebhooks.length > 0) {
       return dbWebhooks.map((wh: any) => ({
@@ -809,16 +753,10 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         success_rate: wh.success_rate || 100
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'we_1', url: 'https://api.yourapp.com/webhooks/stripe', events: ['invoice.paid', 'invoice.payment_failed', 'customer.subscription.updated'],
-        status: 'enabled', secret: 'whsec_xxxxx', created_at: '2024-01-01', last_delivery: '2024-12-23T15:30:00Z', success_rate: 99.8 },
-      { id: 'we_2', url: 'https://slack.yourapp.com/billing-alerts', events: ['invoice.payment_failed', 'customer.subscription.deleted'],
-        status: 'enabled', secret: 'whsec_yyyyy', created_at: '2024-03-15', last_delivery: '2024-12-20T10:00:00Z', success_rate: 100 }
-    ]
+    return []
   }, [dbWebhooks])
 
-  // Transform database pricing plans to UI format with fallback to mock data
+  // Transform database pricing plans to UI format
   const pricingPlans: PricingPlan[] = useMemo(() => {
     if (dbPricingPlans && dbPricingPlans.length > 0) {
       return dbPricingPlans.map((plan: any) => ({
@@ -834,17 +772,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         subscribers: plan.subscribers_count || 0
       }))
     }
-    // Fallback to mock data when no real data available
-    return [
-      { id: 'plan_1', name: 'Starter', description: 'For individuals and small teams', amount: 0, currency: 'USD', interval: 'month',
-        features: ['Up to 3 users', '1GB storage', 'Basic support'], is_active: true, trial_days: 0, subscribers: 156 },
-      { id: 'plan_2', name: 'Team', description: 'For growing teams', amount: 49, currency: 'USD', interval: 'month',
-        features: ['Up to 10 users', '10GB storage', 'Priority support', 'API access'], is_active: true, trial_days: 14, subscribers: 89 },
-      { id: 'plan_3', name: 'Pro', description: 'For professionals', amount: 99, currency: 'USD', interval: 'month',
-        features: ['Unlimited users', '100GB storage', 'Premium support', 'API access', 'Custom integrations'], is_active: true, trial_days: 14, subscribers: 234 },
-      { id: 'plan_4', name: 'Enterprise', description: 'For large organizations', amount: 999, currency: 'USD', interval: 'year',
-        features: ['Unlimited everything', 'Dedicated support', 'Custom contracts', 'SLA guarantee', 'SSO'], is_active: true, trial_days: 30, subscribers: 45 }
-    ]
+    return []
   }, [dbPricingPlans])
 
   const stats = useMemo(() => {

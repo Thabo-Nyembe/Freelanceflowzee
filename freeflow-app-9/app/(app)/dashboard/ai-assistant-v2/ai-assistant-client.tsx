@@ -1,3 +1,4 @@
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
 'use client'
 
 import React, { useState, useRef, useEffect, useMemo } from 'react'

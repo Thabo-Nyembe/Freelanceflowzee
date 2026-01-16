@@ -56,21 +56,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
-import {
-  analyticsMetrics,
-  analyticsFunnels,
-  analyticsCohorts,
-  analyticsReports,
-  analyticsDashboards,
-  analyticsAIInsights,
-  analyticsCollaborators,
-  analyticsPredictions,
-  analyticsActivities,
-  analyticsQuickActions,
-  analyticsRealtimeMetrics,
-  companyInfo,
-} from '@/lib/mock-data/adapters'
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
+// Mock data imports removed - replaced with database hooks
+import { companyInfo } from '@/lib/mock-data/adapters'
 
 // Type definitions
 interface AnalyticsMetric {
@@ -145,17 +133,18 @@ interface Dashboard {
   sharedWith: string[]
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-const mockMetrics = analyticsMetrics
-const mockFunnels = analyticsFunnels
-const mockCohorts = analyticsCohorts
-const mockReports = analyticsReports
-const mockDashboards = analyticsDashboards
-const mockAIInsights = analyticsAIInsights
-const mockCollaborators = analyticsCollaborators
-const mockPredictions = analyticsPredictions
-const mockActivities = analyticsActivities
-const mockQuickActions = analyticsQuickActions
+// MIGRATED: Mock data constants replaced with empty arrays/objects
+// Using database hooks for real data (useAnalyticsDailyMetrics, useAnalyticsRealtimeMetrics, etc.)
+const mockMetrics: any[] = []
+const mockFunnels: any[] = []
+const mockCohorts: any[] = []
+const mockReports: any[] = []
+const mockDashboards: any[] = []
+const mockAIInsights: any[] = []
+const mockCollaborators: any[] = []
+const mockPredictions: any[] = []
+const mockActivities: any[] = []
+const mockQuickActions: any[] = []
 
 export default function AnalyticsClient() {
   const { getUserId } = useAuthUserId()
@@ -1332,12 +1321,12 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
       ]
     }
 
-    // Fallback to mock realtime metrics
+    // MIGRATED: Fallback to empty realtime metrics (no mock data)
     return [
-      { label: 'Active Users', value: analyticsRealtimeMetrics.activeUsersNow || 0, icon: Users, trend: 12 },
-      { label: 'Page Views/min', value: analyticsRealtimeMetrics.pageViewsPerMin || 0, icon: Eye, trend: 8 },
-      { label: 'AI Requests/min', value: analyticsRealtimeMetrics.aiRequestsPerMin || 0, icon: Activity, trend: 15 },
-      { label: 'Conversions', value: analyticsRealtimeMetrics.currentConversions || 0, icon: ShoppingCart, trend: 2 }
+      { label: 'Active Users', value: 0, icon: Users, trend: 0 },
+      { label: 'Page Views/min', value: 0, icon: Eye, trend: 0 },
+      { label: 'Requests/min', value: 0, icon: Activity, trend: 0 },
+      { label: 'Events/min', value: 0, icon: ShoppingCart, trend: 0 }
     ]
   }, [realtimeMetricsDb, analyticsEvents])
 

@@ -144,68 +144,20 @@ interface AutomationVersion {
 // MOCK DATA - ZAPIER-LEVEL INTEGRATIONS & TEMPLATES
 // ============================================================================
 
-const INTEGRATIONS: Integration[] = [
-  { id: 'slack', name: 'Slack', icon: '💬', category: 'Communication', description: 'Team messaging platform', isConnected: true, isPremium: false, triggers: ['New message', 'New channel', 'Reaction added'], actions: ['Send message', 'Create channel', 'Add reaction'], authType: 'oauth' },
-  { id: 'gmail', name: 'Gmail', icon: '📧', category: 'Email', description: 'Email service by Google', isConnected: true, isPremium: false, triggers: ['New email', 'New attachment', 'Email labeled'], actions: ['Send email', 'Create draft', 'Add label'], authType: 'oauth' },
-  { id: 'github', name: 'GitHub', icon: '🐙', category: 'Development', description: 'Code hosting platform', isConnected: true, isPremium: false, triggers: ['New PR', 'New issue', 'Push event'], actions: ['Create issue', 'Comment on PR', 'Merge PR'], authType: 'oauth' },
-  { id: 'stripe', name: 'Stripe', icon: '💳', category: 'Payments', description: 'Payment processing', isConnected: true, isPremium: false, triggers: ['New payment', 'Subscription created', 'Refund issued'], actions: ['Create invoice', 'Create customer', 'Issue refund'], authType: 'api_key' },
-  { id: 'notion', name: 'Notion', icon: '📝', category: 'Productivity', description: 'All-in-one workspace', isConnected: false, isPremium: false, triggers: ['New page', 'Database updated', 'Comment added'], actions: ['Create page', 'Update database', 'Add comment'], authType: 'oauth' },
-  { id: 'airtable', name: 'Airtable', icon: '📊', category: 'Database', description: 'Spreadsheet-database hybrid', isConnected: false, isPremium: false, triggers: ['New record', 'Record updated', 'Record deleted'], actions: ['Create record', 'Update record', 'Delete record'], authType: 'api_key' },
-  { id: 'salesforce', name: 'Salesforce', icon: '☁️', category: 'CRM', description: 'Customer relationship management', isConnected: false, isPremium: true, triggers: ['New lead', 'Deal closed', 'Contact updated'], actions: ['Create lead', 'Update opportunity', 'Send email'], authType: 'oauth' },
-  { id: 'hubspot', name: 'HubSpot', icon: '🧡', category: 'CRM', description: 'Inbound marketing platform', isConnected: false, isPremium: true, triggers: ['New contact', 'Form submitted', 'Deal created'], actions: ['Create contact', 'Update deal', 'Send email'], authType: 'oauth' },
-  { id: 'jira', name: 'Jira', icon: '🎯', category: 'Project Management', description: 'Issue tracking software', isConnected: true, isPremium: false, triggers: ['New issue', 'Issue updated', 'Sprint started'], actions: ['Create issue', 'Update issue', 'Add comment'], authType: 'oauth' },
-  { id: 'twilio', name: 'Twilio', icon: '📱', category: 'Communication', description: 'Cloud communications', isConnected: false, isPremium: true, triggers: ['SMS received', 'Call completed', 'Voicemail received'], actions: ['Send SMS', 'Make call', 'Send WhatsApp'], authType: 'api_key' },
-  { id: 'shopify', name: 'Shopify', icon: '🛒', category: 'E-commerce', description: 'E-commerce platform', isConnected: false, isPremium: false, triggers: ['New order', 'Product updated', 'Customer created'], actions: ['Create product', 'Update inventory', 'Send notification'], authType: 'oauth' },
-  { id: 'google_sheets', name: 'Google Sheets', icon: '📈', category: 'Productivity', description: 'Spreadsheet application', isConnected: true, isPremium: false, triggers: ['New row', 'Row updated', 'New spreadsheet'], actions: ['Add row', 'Update row', 'Create spreadsheet'], authType: 'oauth' },
-  { id: 'dropbox', name: 'Dropbox', icon: '📦', category: 'Storage', description: 'Cloud file storage', isConnected: false, isPremium: false, triggers: ['New file', 'File updated', 'Folder created'], actions: ['Upload file', 'Create folder', 'Share file'], authType: 'oauth' },
-  { id: 'zapier_webhook', name: 'Webhooks', icon: '🔗', category: 'Developer', description: 'Custom HTTP webhooks', isConnected: true, isPremium: false, triggers: ['Catch hook', 'Scheduled trigger'], actions: ['POST request', 'GET request', 'Custom request'], authType: 'webhook' },
-  { id: 'openai', name: 'OpenAI', icon: '🤖', category: 'AI', description: 'AI language models', isConnected: true, isPremium: true, triggers: ['None'], actions: ['Generate text', 'Analyze sentiment', 'Translate text'], authType: 'api_key' },
-  { id: 'discord', name: 'Discord', icon: '🎮', category: 'Communication', description: 'Community platform', isConnected: false, isPremium: false, triggers: ['New message', 'Member joined', 'Reaction added'], actions: ['Send message', 'Create channel', 'Assign role'], authType: 'oauth' },
-]
+const INTEGRATIONS = [] // MIGRATED: Batch #12 - Removed mock data
 
-const TEMPLATES: AutomationTemplate[] = [
-  { id: 't1', name: 'New Lead to Slack Alert', description: 'Get notified in Slack when a new lead comes in from any source', category: 'Sales', icon: '💼', trigger: 'New form submission', actions: ['Send Slack message', 'Create CRM contact'], popularity: 98, usageCount: 45230, isNew: false, isPremium: false },
-  { id: 't2', name: 'GitHub PR to Jira', description: 'Automatically create Jira tickets from GitHub pull requests', category: 'Development', icon: '🔧', trigger: 'New PR created', actions: ['Create Jira issue', 'Send notification'], popularity: 95, usageCount: 32100, isNew: false, isPremium: false },
-  { id: 't3', name: 'Email to Task', description: 'Convert starred emails into tasks automatically', category: 'Productivity', icon: '✅', trigger: 'Email starred', actions: ['Create task', 'Set reminder'], popularity: 92, usageCount: 28500, isNew: false, isPremium: false },
-  { id: 't4', name: 'New Order Notifications', description: 'Send SMS and email when new orders arrive', category: 'E-commerce', icon: '🛍️', trigger: 'New Shopify order', actions: ['Send SMS', 'Send email', 'Update spreadsheet'], popularity: 96, usageCount: 51200, isNew: false, isPremium: false },
-  { id: 't5', name: 'AI Content Generator', description: 'Generate content ideas using AI and save to Notion', category: 'Marketing', icon: '✨', trigger: 'Daily schedule', actions: ['Generate with OpenAI', 'Create Notion page'], popularity: 89, usageCount: 18900, isNew: true, isPremium: true },
-  { id: 't6', name: 'Customer Feedback Loop', description: 'Collect and analyze customer feedback automatically', category: 'Customer Success', icon: '💬', trigger: 'Survey completed', actions: ['Analyze sentiment', 'Create ticket', 'Send follow-up'], popularity: 87, usageCount: 15600, isNew: false, isPremium: false },
-  { id: 't7', name: 'Invoice Reminder Workflow', description: 'Automated payment reminders for overdue invoices', category: 'Finance', icon: '💰', trigger: 'Invoice overdue', actions: ['Send reminder email', 'Update CRM', 'Escalate if needed'], popularity: 94, usageCount: 41000, isNew: false, isPremium: false },
-  { id: 't8', name: 'Team Standup Bot', description: 'Automate daily standup collection and reporting', category: 'Team', icon: '👥', trigger: 'Daily at 9 AM', actions: ['Send survey', 'Collect responses', 'Post summary'], popularity: 91, usageCount: 22300, isNew: false, isPremium: false },
-]
+const TEMPLATES = [] // MIGRATED: Batch #12 - Removed mock data
 
-const RUN_LOGS: RunLog[] = [
-  { id: 'run1', automationId: 'auto1', status: 'success', startedAt: '2024-01-28T10:30:00Z', completedAt: '2024-01-28T10:30:02Z', duration: 2000, stepsExecuted: 3, totalSteps: 3, dataProcessed: 1, triggerData: { email: 'john@example.com' } },
-  { id: 'run2', automationId: 'auto1', status: 'success', startedAt: '2024-01-28T10:25:00Z', completedAt: '2024-01-28T10:25:01Z', duration: 1200, stepsExecuted: 3, totalSteps: 3, dataProcessed: 1, triggerData: { email: 'jane@example.com' } },
-  { id: 'run3', automationId: 'auto2', status: 'failed', startedAt: '2024-01-28T10:20:00Z', completedAt: '2024-01-28T10:20:05Z', duration: 5000, stepsExecuted: 2, totalSteps: 4, error: 'API rate limit exceeded', dataProcessed: 0, triggerData: { webhook: 'data_sync' } },
-  { id: 'run4', automationId: 'auto3', status: 'running', startedAt: '2024-01-28T10:35:00Z', stepsExecuted: 1, totalSteps: 5, dataProcessed: 15, triggerData: { scheduled: true } },
-  { id: 'run5', automationId: 'auto1', status: 'success', startedAt: '2024-01-28T10:15:00Z', completedAt: '2024-01-28T10:15:03Z', duration: 3000, stepsExecuted: 3, totalSteps: 3, dataProcessed: 2, triggerData: { email: 'mike@example.com' } },
-]
+const RUN_LOGS = [] // MIGRATED: Batch #12 - Removed mock data
 
 // Enhanced Automation Mock Data
-const mockAutomationAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Automation Efficiency', description: 'Automations saved 124 hours this month. ROI at 340%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'info' as const, title: 'Popular Trigger', description: 'Form submission triggers used most. Consider adding templates.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Insights' },
-  { id: '3', type: 'warning' as const, title: 'Failed Runs', description: '5 automations failed in last 24h. Check API connections.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
-]
+const mockAutomationAIInsights = [] // MIGRATED: Batch #12 - Removed mock data
 
-const mockAutomationCollaborators = [
-  { id: '1', name: 'Automation Lead', avatar: '/avatars/auto.jpg', status: 'online' as const, role: 'Workflows', lastActive: 'Now' },
-  { id: '2', name: 'Integration Dev', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'Integrations', lastActive: '5m ago' },
-  { id: '3', name: 'Ops Manager', avatar: '/avatars/ops.jpg', status: 'away' as const, role: 'Operations', lastActive: '20m ago' },
-]
+const mockAutomationCollaborators = [] // MIGRATED: Batch #12 - Removed mock data
 
-const mockAutomationPredictions = [
-  { id: '1', label: 'Tasks Automated', current: 8450, target: 10000, predicted: 9200, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Success Rate', current: 96, target: 99, predicted: 98, confidence: 82, trend: 'up' as const },
-  { id: '3', label: 'Time Saved (hrs)', current: 124, target: 150, predicted: 140, confidence: 78, trend: 'up' as const },
-]
+const mockAutomationPredictions = [] // MIGRATED: Batch #12 - Removed mock data
 
-const mockAutomationActivities = [
-  { id: '1', user: 'Automation Lead', action: 'created', target: 'lead nurturing workflow', timestamp: '30m ago', type: 'success' as const },
-  { id: '2', user: 'Integration Dev', action: 'connected', target: 'Salesforce integration', timestamp: '2h ago', type: 'info' as const },
-  { id: '3', user: 'Ops Manager', action: 'optimized', target: 'invoice processing flow', timestamp: '1d ago', type: 'info' as const },
-]
+const mockAutomationActivities = [] // MIGRATED: Batch #12 - Removed mock data
 
 // Quick actions will be defined inside the component to access state setters
 

@@ -69,29 +69,12 @@ interface TeamMember {
   bookingsToday: number
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockBookingsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Demand', description: 'Consultation bookings up 45% this week. Consider adding more slots.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
-  { id: '2', type: 'warning' as const, title: 'No-Show Alert', description: '3 no-shows yesterday. Send reminder SMS 2 hours before appointments.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Attendance' },
-  { id: '3', type: 'info' as const, title: 'Popular Time', description: '10-11 AM slots are most booked. 87% utilization rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockBookingsCollaborators = [
-  { id: '1', name: 'Scheduler', avatar: '/avatars/scheduler.jpg', status: 'online' as const, role: 'Scheduling' },
-  { id: '2', name: 'Consultant', avatar: '/avatars/consultant.jpg', status: 'online' as const, role: 'Consultant' },
-  { id: '3', name: 'Support', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockBookingsPredictions = [
-  { id: '1', title: 'Weekly Forecast', prediction: 'Expect 35% more bookings next week based on seasonal trends', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cancellation Risk', prediction: '5 bookings have high cancellation probability', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
-]
-
-const mockBookingsActivities = [
-  { id: '1', user: 'Client', action: 'Booked', target: 'Strategy Consultation for tomorrow', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Scheduler', action: 'Rescheduled', target: 'Weekly sync meeting', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Sent', target: 'reminder to 12 clients', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Batch #12 - Removed mock data, using database hooks
+// Mock data for AI-powered competitive upgrade components (replaced with empty arrays)
+const mockBookingsAIInsights: any[] = []
+const mockBookingsCollaborators: any[] = []
+const mockBookingsPredictions: any[] = []
+const mockBookingsActivities: any[] = []
 
 // Quick actions are defined inside the component to access state setters
 
