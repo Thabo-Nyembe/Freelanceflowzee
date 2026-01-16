@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { shareContent, downloadAsCsv, apiCall } from '@/lib/button-handlers'
 import {
@@ -649,7 +648,7 @@ const mockHealthScoreActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function HealthScoreClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('overview')
@@ -695,9 +694,13 @@ export default function HealthScoreClient() {
   // Fetch health scores from Supabase
   const fetchHealthScores = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('health_scores')
         .select('*')
@@ -713,7 +716,7 @@ export default function HealthScoreClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchHealthScores()
@@ -728,12 +731,16 @@ export default function HealthScoreClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create health scores')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('health_scores').insert({
         user_id: user.id,
         health_code: generateHealthCode(),
@@ -774,6 +781,8 @@ export default function HealthScoreClient() {
     setIsSubmitting(true)
     try {
       const current = dbHealthScores.find(h => h.id === editingId)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('health_scores')
         .update({
@@ -812,6 +821,8 @@ export default function HealthScoreClient() {
   // Delete health score (soft delete)
   const handleDeleteHealthScore = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('health_scores')
         .update({ deleted_at: new Date().toISOString() })
@@ -985,6 +996,8 @@ export default function HealthScoreClient() {
   // Save settings with real persistence
   const handleSaveSettings = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to save settings')
@@ -1019,6 +1032,8 @@ export default function HealthScoreClient() {
   // Save alert configuration with real persistence
   const handleSaveAlertConfig = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to save alert configuration')
