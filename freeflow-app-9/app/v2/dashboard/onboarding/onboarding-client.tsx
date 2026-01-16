@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -419,7 +418,7 @@ const formatDuration = (seconds: number) => {
 }
 
 export default function OnboardingClient() {
-  const supabase = createClient()
+
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -475,6 +474,8 @@ export default function OnboardingClient() {
   useEffect(() => {
     const fetchUserAndData = async () => {
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
@@ -553,7 +554,7 @@ export default function OnboardingClient() {
       }
     }
     fetchUserAndData()
-  }, [supabase])
+  }, [])
 
   // Calculate stats
   const stats: OnboardingStats = useMemo(() => ({
@@ -609,6 +610,8 @@ export default function OnboardingClient() {
     }
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_flows').insert({
         user_id: userId,
         name: flowForm.name || 'New Flow',
@@ -658,6 +661,8 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('onboarding_flows')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -680,6 +685,8 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('onboarding_flows')
         .delete()
@@ -703,6 +710,8 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_flows').insert({
         user_id: userId,
         name: `${flow.name} (Copy)`,
@@ -746,6 +755,8 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_checklists').insert({
         user_id: userId,
         name: 'New Checklist',
@@ -784,6 +795,8 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('user_segments').insert({
         user_id: userId,
         name: 'New Segment',
@@ -2533,6 +2546,8 @@ export default function OnboardingClient() {
                   <Button className="flex-1" onClick={async () => {
                     setIsSaving(true)
                     try {
+                      const { createClient } = await import('@/lib/supabase/client')
+                      const supabase = createClient()
                       const { error } = await supabase
                         .from('onboarding_flows')
                         .update({
@@ -2615,6 +2630,8 @@ export default function OnboardingClient() {
                   <Button className="flex-1" onClick={async () => {
                     setIsSaving(true)
                     try {
+                      const { createClient } = await import('@/lib/supabase/client')
+                      const supabase = createClient()
                       const { error } = await supabase
                         .from('onboarding_checklists')
                         .update({

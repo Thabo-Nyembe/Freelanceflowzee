@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useSupabaseQuery, useSupabaseMutation } from '@/lib/hooks/use-supabase-helpers'
 import { type Dependency } from '@/lib/hooks/use-dependencies'
 import {
@@ -356,7 +355,7 @@ const mockDependenciesActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
-  const supabase = createClient()
+
 
   // Supabase queries for dependencies
   const { data: dbDependencies, isLoading: dependenciesLoading, refetch: refetchDependencies } = useSupabaseQuery<any>({
@@ -558,10 +557,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
     // Simulate scan process
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create a scan record
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_scans')
         .insert({
@@ -685,10 +688,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Exporting dependencies')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create export record
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_exports')
         .insert({
@@ -724,10 +731,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Generating SBOM')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create SBOM export record
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_exports')
         .insert({
@@ -773,10 +784,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Record PR creation
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_update_prs')
         .insert({
@@ -801,10 +816,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Clearing cache')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Clear cached scan data (soft delete old scans)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_scans')
         .update({ deleted_at: new Date().toISOString() })
@@ -823,10 +842,14 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Resetting policies')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Soft delete all custom policies
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('security_policies')
         .update({ deleted_at: new Date().toISOString() })
@@ -849,6 +872,8 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Deleting history')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 

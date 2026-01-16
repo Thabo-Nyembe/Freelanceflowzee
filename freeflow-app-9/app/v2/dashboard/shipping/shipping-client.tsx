@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -775,7 +774,7 @@ const formatTime = (dateString: string) => {
 // ============================================================================
 
 export default function ShippingClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('shipments')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)
@@ -811,9 +810,13 @@ export default function ShippingClient() {
   // Fetch shipments from Supabase
   const fetchShipments = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('shipments')
         .select('*')
@@ -827,7 +830,7 @@ export default function ShippingClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchShipments()
@@ -854,12 +857,16 @@ export default function ShippingClient() {
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create shipments')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert({
         user_id: user.id,
         recipient_name: formState.recipient_name,
@@ -896,6 +903,8 @@ export default function ShippingClient() {
   // Update shipment status
   const handleUpdateStatus = async (shipmentId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -914,6 +923,8 @@ export default function ShippingClient() {
   // Delete shipment
   const handleDeleteShipment = async (shipmentId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .delete()
@@ -934,6 +945,8 @@ export default function ShippingClient() {
     try {
       // Update status to label_created if pending
       if (shipment.status === 'pending') {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('shipments')
           .update({ status: 'label_created', updated_at: new Date().toISOString() })
@@ -952,6 +965,8 @@ export default function ShippingClient() {
   const handleTrackShipment = async (shipment: Shipment) => {
     try {
       // Add tracking event
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('shipment_tracking').insert({
         shipment_id: shipment.id,
         status: 'Tracking viewed',
@@ -972,6 +987,8 @@ export default function ShippingClient() {
       return
     }
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -985,6 +1002,8 @@ export default function ShippingClient() {
         tracking_number: `BATCH${Date.now()}${orderId}`,
       }))
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
       if (error) throw error
 
@@ -1001,6 +1020,8 @@ export default function ShippingClient() {
   // Cancel shipment
   const handleCancelShipment = async (trackingNumber: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -1020,6 +1041,8 @@ export default function ShippingClient() {
   // Export shipments
   const handleExportShipments = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('shipments')
         .select('*')
