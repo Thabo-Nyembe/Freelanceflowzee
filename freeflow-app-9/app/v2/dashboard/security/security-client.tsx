@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -513,8 +512,6 @@ const mockSecurityActivities = [
 // ============================================================================
 
 export default function SecurityClient() {
-  const supabase = createClient()
-
   // Use security hook for real CRUD operations
   const {
     settings,
@@ -627,7 +624,7 @@ export default function SecurityClient() {
 
     try {
       // Log security scan event
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -643,7 +640,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase, fetchEvents])
+  }, [fetchEvents])
 
   const handleEnableMFA = useCallback(async () => {
     setIsSaving(true)
@@ -682,7 +679,7 @@ export default function SecurityClient() {
     toast.info('Rotating keys...')
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -697,13 +694,13 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   const handleExportReport = useCallback(async () => {
     toast.info('Exporting report')
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -716,7 +713,7 @@ export default function SecurityClient() {
     } catch (err) {
       toast.error('Export failed')
     }
-  }, [supabase])
+  }, [])
 
   const handleBlockThreat = useCallback(async (eventId: string) => {
     setIsSaving(true)
@@ -820,7 +817,7 @@ export default function SecurityClient() {
       success: 'Deletion request submitted. Our support team will contact you within 24-48 hours to verify your identity and process the request.',
       error: 'Failed to submit deletion request. Please try again or contact support directly.'
     })
-  }, [supabase])
+  }, [])
 
   // Refresh vault data handler
   const handleRefreshVault = useCallback(async () => {
@@ -856,7 +853,7 @@ export default function SecurityClient() {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -873,14 +870,14 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [selectedItem, supabase])
+  }, [selectedItem])
 
   // Share vault item handler
   const handleShareVaultItem = useCallback(async (email: string, expiresIn: string) => {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -896,7 +893,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [selectedItem, supabase])
+  }, [selectedItem])
 
   // Export vault data handler
   const handleExportVaultData = useCallback(async (format: string) => {
@@ -918,7 +915,7 @@ export default function SecurityClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -934,7 +931,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Import vault data handler
   const handleImportVaultData = useCallback(async (file: File) => {
@@ -942,7 +939,7 @@ export default function SecurityClient() {
     try {
       const text = await file.text()
       const data = JSON.parse(text)
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -958,14 +955,14 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Revoke secret key handler
   const handleRevokeKey = useCallback(async () => {
     if (!selectedKey) return
     setIsSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -982,13 +979,13 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [selectedKey, supabase])
+  }, [selectedKey])
 
   // Add new device handler
   const handleAddDevice = useCallback(async (deviceName: string) => {
     setIsSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -1004,14 +1001,14 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Save edited vault item handler
   const handleSaveEditedItem = useCallback(async (updatedItem: Partial<VaultItem>) => {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -1027,7 +1024,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [selectedItem, supabase])
+  }, [selectedItem])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900">
