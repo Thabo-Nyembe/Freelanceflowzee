@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useAccessLogs, type AccessLog as HookAccessLog } from '@/lib/hooks/use-access-logs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -486,7 +486,9 @@ interface DbAccessLog {
 }
 
 export default function AccessLogsClient() {
-  const supabase = createClient()
+  // Use hook for data fetching
+  const { logs: hookLogs, stats: hookStats, isLoading, refetch } = useAccessLogs()
+
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -494,14 +496,94 @@ export default function AccessLogsClient() {
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedLog, setSelectedLog] = useState<AccessLog | null>(null)
   const [showLogDialog, setShowLogDialog] = useState(false)
-  const [isLiveTail, setIsLiveTail] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'compact'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Supabase state
-  const [logs, setLogs] = useState<AccessLog[]>(mockLogs)
-  const [isLoading, setIsLoading] = useState(false)
-  const [stats, setStats] = useState<LogStats>(mockStats)
+  // Map hook logs to component format
+  const logs: AccessLog[] = useMemo(() => {
+    return hookLogs.map(log => {
+      const getLogMessage = (status: string, accessType: string, blockedReason?: string | null): string => {
+        if (blockedReason) return blockedReason
+        switch (status) {
+          case 'success':
+            return accessType === 'login' ? 'Login successful' :
+                   accessType === 'logout' ? 'Logout successful' :
+                   accessType === 'api' ? 'API request completed' :
+                   accessType === 'file' ? 'File access granted' :
+                   accessType === 'database' ? 'Database query executed' :
+                   'Access granted'
+          case 'failed':
+            return accessType === 'login' ? 'Login failed' :
+                   accessType === 'api' ? 'API request failed' :
+                   'Access failed'
+          case 'blocked':
+            return 'Access denied'
+          case 'warning':
+            return 'Suspicious activity detected'
+          default:
+            return 'Access logged'
+        }
+      }
+
+      const status = (log.status as LogStatus) || 'info'
+      const accessType = (log.access_type as AccessType) || 'api'
+
+      return {
+        id: log.id,
+        timestamp: log.created_at,
+        status,
+        level: log.threat_level === 'high' ? 'error' : log.threat_level === 'medium' ? 'warn' : 'info' as LogLevel,
+        accessType,
+        user: log.user_id ? {
+          id: log.user_id,
+          name: log.user_name || 'Unknown',
+          email: log.user_email || '',
+          avatar: ''
+        } : null,
+        resource: log.resource || '',
+        method: log.method || 'GET',
+        statusCode: log.status_code || 200,
+        ipAddress: log.ip_address || '',
+        location: {
+          city: log.location?.split(',')[0] || 'Unknown',
+          country: log.location?.split(',')[1]?.trim() || 'Unknown',
+          coordinates: ''
+        },
+        device: {
+          type: (log.device_type as DeviceType) || 'desktop',
+          browser: log.browser || 'Unknown',
+          os: '',
+          version: ''
+        },
+        duration: log.duration || 0,
+        requestSize: 0,
+        responseSize: 0,
+        userAgent: log.user_agent || '',
+        referrer: null,
+        sessionId: '',
+        requestId: log.log_code,
+        errorMessage: log.blocked_reason,
+        stackTrace: null,
+        tags: [],
+        isSuspicious: log.is_suspicious || false,
+        isBot: log.device_type === 'bot',
+        message: getLogMessage(status, accessType, log.blocked_reason)
+      }
+    })
+  }, [hookLogs])
+
+  const stats: LogStats = useMemo(() => ({
+    total: hookStats.total,
+    success: hookStats.success,
+    failed: hookStats.failed,
+    blocked: hookStats.blocked,
+    warning: hookStats.suspicious,
+    info: hookStats.total - hookStats.success - hookStats.failed - hookStats.blocked,
+    suspicious: hookStats.suspicious,
+    avgDuration: hookStats.avgDuration,
+    successRate: hookStats.successRate,
+    errorRate: hookStats.total > 0 ? Math.round(((hookStats.failed / hookStats.total) * 100) * 10) / 10 : 0
+  }), [hookStats])
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showCustomFieldsDialog, setShowCustomFieldsDialog] = useState(false)
   const [showContextDialog, setShowContextDialog] = useState(false)
@@ -513,120 +595,12 @@ export default function AccessLogsClient() {
   ])
   const [savedLogIds, setSavedLogIds] = useState<Set<string>>(new Set())
 
-  // Fetch logs from Supabase
-  const fetchLogs = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('access_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-
-      if (error) throw error
-
-      if (data && data.length > 0) {
-        const mappedLogs: AccessLog[] = data.map((log: DbAccessLog) => {
-          // Generate appropriate message based on status and access type
-          const getLogMessage = (status: string, accessType: string, blockedReason?: string | null): string => {
-            if (blockedReason) return blockedReason
-            switch (status) {
-              case 'success':
-                return accessType === 'login' ? 'Login successful' :
-                       accessType === 'logout' ? 'Logout successful' :
-                       accessType === 'api' ? 'API request completed' :
-                       accessType === 'file' ? 'File access granted' :
-                       accessType === 'database' ? 'Database query executed' :
-                       'Access granted'
-              case 'failed':
-                return accessType === 'login' ? 'Login failed' :
-                       accessType === 'api' ? 'API request failed' :
-                       'Access failed'
-              case 'blocked':
-                return 'Access denied'
-              case 'warning':
-                return 'Suspicious activity detected'
-              case 'info':
-              default:
-                return 'Access logged'
-            }
-          }
-
-          const status = (log.status as LogStatus) || 'info'
-          const accessType = (log.access_type as AccessType) || 'api'
-
-          return {
-            id: log.id,
-            timestamp: log.created_at,
-            status,
-            level: log.threat_level === 'high' ? 'error' : log.threat_level === 'medium' ? 'warn' : 'info' as LogLevel,
-            accessType,
-            user: log.user_id ? {
-              id: log.user_id,
-              name: log.user_name || 'Unknown',
-              email: log.user_email || '',
-              avatar: ''
-            } : null,
-            resource: log.resource || '',
-            method: log.method || 'GET',
-            statusCode: log.status_code || 200,
-            ipAddress: log.ip_address || '',
-            location: {
-              city: log.location?.split(',')[0] || 'Unknown',
-              country: log.location?.split(',')[1]?.trim() || 'Unknown',
-              coordinates: ''
-            },
-            device: {
-              type: (log.device_type as DeviceType) || 'desktop',
-              browser: log.browser || 'Unknown',
-              os: '',
-              version: ''
-            },
-            duration: log.duration || 0,
-            requestSize: 0,
-            responseSize: 0,
-            userAgent: log.user_agent || '',
-            referrer: null,
-            sessionId: '',
-            requestId: log.log_code,
-            errorMessage: log.blocked_reason,
-            stackTrace: null,
-            tags: [],
-            isSuspicious: log.is_suspicious || false,
-            isBot: log.device_type === 'bot',
-            message: getLogMessage(status, accessType, log.blocked_reason)
-          }
-        })
-        setLogs(mappedLogs)
-
-        // Calculate stats
-        const total = mappedLogs.length
-        const success = mappedLogs.filter(l => l.status === 'success').length
-        const failed = mappedLogs.filter(l => l.status === 'failed').length
-        const blocked = mappedLogs.filter(l => l.status === 'blocked').length
-        const suspicious = mappedLogs.filter(l => l.isSuspicious).length
-        setStats({
-          ...mockStats,
-          total,
-          success,
-          failed,
-          blocked,
-          suspicious,
-          successRate: total > 0 ? Math.round((success / total) * 100 * 10) / 10 : 0,
-          errorRate: total > 0 ? Math.round((failed / total) * 100 * 10) / 10 : 0
-        })
-      }
-    } catch (err) {
-      console.error('Error fetching logs:', err)
-      toast.error('Failed to fetch logs')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
 
   // Create access log
   const createAccessLog = useCallback(async (logData: Partial<DbAccessLog>) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .insert([{
@@ -648,14 +622,14 @@ export default function AccessLogsClient() {
 
       if (error) throw error
       toast.success('Access log created')
-      fetchLogs()
+      refetch()
       return data
     } catch (err) {
       console.error('Error creating log:', err)
       toast.error('Failed to create access log')
       return null
     }
-  }, [supabase, fetchLogs])
+  }, [refetch])
 
   // Block IP address
   const blockIP = useCallback(async (ip: string) => {
@@ -668,7 +642,7 @@ export default function AccessLogsClient() {
         is_suspicious: true,
         metadata: { action: 'ip_blocked', blocked_ip: ip }
       })
-      toast.success('IP blocked' has been added to blocklist` })
+      toast.success(`IP ${ip} has been added to blocklist`)
     } catch (err) {
       toast.error('Failed to block IP')
     }
@@ -677,6 +651,8 @@ export default function AccessLogsClient() {
   // Export logs
   const exportLogs = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -697,7 +673,7 @@ export default function AccessLogsClient() {
       console.error('Export error:', err)
       toast.error('Failed to export logs')
     }
-  }, [supabase])
+  }, [])
 
   // Clear/archive old logs
   const clearLogs = useCallback(async () => {
@@ -705,6 +681,8 @@ export default function AccessLogsClient() {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('access_logs')
         .delete()
@@ -712,33 +690,12 @@ export default function AccessLogsClient() {
 
       if (error) throw error
       toast.success('Old logs archived')
-      fetchLogs()
+      refetch()
     } catch (err) {
       console.error('Clear logs error:', err)
       toast.error('Failed to clear logs')
     }
-  }, [supabase, fetchLogs])
-
-  // Initial fetch
-  useEffect(() => {
-    fetchLogs()
-  }, [fetchLogs])
-
-  // Real-time subscription for live tail
-  useEffect(() => {
-    if (!isLiveTail) return
-
-    const channel = supabase
-      .channel('access_logs_realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'access_logs' }, () => {
-        fetchLogs()
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [isLiveTail, supabase, fetchLogs])
+  }, [refetch])
 
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
@@ -853,7 +810,7 @@ export default function AccessLogsClient() {
   }
 
   const handleRefresh = () => {
-    fetchLogs()
+    refetch()
     toast.info('Logs refreshed')
   }
 
