@@ -101,52 +101,36 @@ const voiceCollaborationReducer = (
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_ROOMS':
-      logger.info('Setting rooms', { count: action.rooms.length })
-      return { ...state, rooms: action.rooms, isLoading: false }
+    case 'SET_ROOMS':      return { ...state, rooms: action.rooms, isLoading: false }
 
-    case 'ADD_ROOM':
-      logger.info('Room added', { roomName: action.room.name, roomId: action.room.id })
-      return {
+    case 'ADD_ROOM':      return {
         ...state,
         rooms: [action.room, ...state.rooms],
         isLoading: false
       }
 
-    case 'UPDATE_ROOM':
-      logger.info('Room updated', { roomId: action.room.id, roomName: action.room.name })
-      return {
+    case 'UPDATE_ROOM':      return {
         ...state,
         rooms: state.rooms.map(r => r.id === action.room.id ? action.room : r),
         selectedRoom: state.selectedRoom?.id === action.room.id ? action.room : state.selectedRoom
       }
 
-    case 'DELETE_ROOM':
-      logger.info('Room deleted', { roomId: action.roomId })
-      return {
+    case 'DELETE_ROOM':      return {
         ...state,
         rooms: state.rooms.filter(r => r.id !== action.roomId),
         selectedRoom: state.selectedRoom?.id === action.roomId ? null : state.selectedRoom
       }
 
-    case 'SELECT_ROOM':
-      logger.info('Room selected', { roomName: action.room?.name, roomId: action.room?.id })
-      return { ...state, selectedRoom: action.room }
+    case 'SELECT_ROOM':      return { ...state, selectedRoom: action.room }
 
-    case 'SET_RECORDINGS':
-      logger.info('Setting recordings', { count: action.recordings.length })
-      return { ...state, recordings: action.recordings }
+    case 'SET_RECORDINGS':      return { ...state, recordings: action.recordings }
 
-    case 'ADD_RECORDING':
-      logger.info('Recording added', { title: action.recording.title, recordingId: action.recording.id })
-      return {
+    case 'ADD_RECORDING':      return {
         ...state,
         recordings: [action.recording, ...state.recordings]
       }
 
-    case 'SELECT_RECORDING':
-      logger.info('Recording selected', { title: action.recording?.title, recordingId: action.recording?.id })
-      return { ...state, selectedRecording: action.recording }
+    case 'SELECT_RECORDING':      return { ...state, selectedRecording: action.recording }
 
     case 'SET_SEARCH':
       logger.debug('Search term updated', { searchTerm: action.searchTerm })
@@ -175,9 +159,7 @@ const voiceCollaborationReducer = (
       logger.error('Error occurred', { error: action.error })
       return { ...state, error: action.error, isLoading: false }
 
-    case 'JOIN_ROOM':
-      logger.info('Participant joined room', { roomId: action.roomId, participantName: action.participant.name })
-      return {
+    case 'JOIN_ROOM':      return {
         ...state,
         rooms: state.rooms.map(r =>
           r.id === action.roomId
@@ -199,10 +181,7 @@ const voiceCollaborationReducer = (
 // MAIN COMPONENT
 // ========================================
 
-export default function VoiceCollaborationPage() {
-  logger.info('Voice collaboration page mounting')
-
-  const announce = useAnnouncer()
+export default function VoiceCollaborationPage() {  const announce = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
   // State Management
@@ -251,18 +230,13 @@ export default function VoiceCollaborationPage() {
   // Load voice collaboration data from database
   useEffect(() => {
     const loadVoiceCollaborationData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        dispatch({ type: 'SET_LOADING', isLoading: false })
+      if (!userId) {        dispatch({ type: 'SET_LOADING', isLoading: false })
         return
       }
 
       try {
         dispatch({ type: 'SET_LOADING', isLoading: true })
-        dispatch({ type: 'SET_ERROR', error: null })
-        logger.info('Loading voice collaboration data', { userId })
-
-        const { getVoiceRooms, getVoiceRecordings } = await import('@/lib/voice-collaboration-queries')
+        dispatch({ type: 'SET_ERROR', error: null })        const { getVoiceRooms, getVoiceRecordings } = await import('@/lib/voice-collaboration-queries')
 
         const [roomsResult, recordingsResult] = await Promise.all([
           getVoiceRooms(userId),
@@ -325,16 +299,11 @@ export default function VoiceCollaborationPage() {
         dispatch({ type: 'SET_ROOMS', rooms: mappedRooms })
         dispatch({ type: 'SET_RECORDINGS', recordings: mappedRecordings })
 
-        toast.success(`Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`)
-        logger.info('Voice collaboration data loaded successfully', {
-          roomsCount: mappedRooms.length,
-          recordingsCount: mappedRecordings.length
-        })
-        announce('Voice collaboration page loaded', 'polite')
+        toast.success(`Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`)        announce('Voice collaboration page loaded', 'polite')
       } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load voice collaboration data'
         logger.error('Failed to load voice collaboration data', { error: errorMessage, userId })
-        toast.error('Failed to load voice collaboration', { description: errorMessage })
+        toast.error('Failed to load voice collaboration')
         dispatch({ type: 'SET_ERROR', error: errorMessage })
         announce('Error loading voice collaboration', 'assertive')
       }
@@ -423,17 +392,7 @@ export default function VoiceCollaborationPage() {
   // HANDLERS
   // ========================================
 
-  const handleCreateRoom = async () => {
-    logger.info('Creating new voice room', {
-      name: roomName,
-      type: roomType,
-      capacity: roomCapacity,
-      quality: roomQuality,
-      isLocked: roomIsLocked,
-      userId
-    })
-
-    if (!roomName.trim()) {
+  const handleCreateRoom = async () => {    if (!roomName.trim()) {
       logger.warn('Room creation validation failed', { reason: 'Name required' })
       toast.error('Room name is required')
       announce('Room name is required', 'assertive')
@@ -499,17 +458,7 @@ export default function VoiceCollaborationPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'ADD_ROOM', room: newRoom })
-
-      logger.info('Voice room created in database', {
-        roomId: newRoom.id,
-        name: newRoom.name,
-        type: newRoom.type,
-        capacity: newRoom.capacity,
-        userId
-      })
-
-      // Reset form
+      dispatch({ type: 'ADD_ROOM', room: newRoom })      // Reset form
       setRoomName('')
       setRoomDescription('')
       setRoomType('team')
@@ -523,47 +472,25 @@ export default function VoiceCollaborationPage() {
       announce('Voice room created', 'polite')
     } catch (error: any) {
       logger.error('Room creation failed', { error: error.message, userId })
-      toast.error('Failed to create room', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create room')
       announce('Failed to create room', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create room' })
     }
   }
 
-  const handleViewRoom = (room: VoiceRoom) => {
-    logger.info('Opening room view', {
-      roomId: room.id,
-      roomName: room.name,
-      roomType: room.type,
-      status: room.status,
-      participants: room.currentParticipants,
-      capacity: room.capacity
-    })
-
-    dispatch({ type: 'SELECT_ROOM', room })
+  const handleViewRoom = (room: VoiceRoom) => {    dispatch({ type: 'SELECT_ROOM', room })
     setViewRoomTab('overview')
     setShowViewRoomModal(true)
     announce(`Viewing room ${room.name}`, 'polite')
   }
 
-  const handleJoinRoom = async (room: VoiceRoom) => {
-    logger.info('Attempting to join room', {
-      roomId: room.id,
-      roomName: room.name,
-      roomType: room.type,
-      currentParticipants: room.currentParticipants,
-      capacity: room.capacity
-    })
-
-    if (room.currentParticipants >= room.capacity) {
+  const handleJoinRoom = async (room: VoiceRoom) => {    if (room.currentParticipants >= room.capacity) {
       logger.warn('Room join failed - room is full', {
         roomId: room.id,
         roomName: room.name,
         capacity: room.capacity
       })
-      toast.error('Room is full', {
-        description: `${room.name} - ${room.currentParticipants}/${room.capacity} participants`
+      toast.error('Room is full' - ${room.currentParticipants}/${room.capacity} participants`
       })
       announce('Room is full', 'assertive')
       return
@@ -574,20 +501,13 @@ export default function VoiceCollaborationPage() {
         roomId: room.id,
         roomName: room.name
       })
-      toast.error('Room is locked', {
-        description: `${room.name} requires a password to join`
+      toast.error('Room is locked' requires a password to join`
       })
       announce('Room is locked', 'assertive')
       return
     }
 
-    try {
-      logger.info('Joining room - creating participant', {
-        roomId: room.id,
-        roomName: room.name
-      })
-
-      let participantId = `PART-${Date.now()}`
+    try {      let participantId = `PART-${Date.now()}`
 
       // Create participant in database
       if (userId) {
@@ -600,9 +520,7 @@ export default function VoiceCollaborationPage() {
         })
         if (result.data?.id) {
           participantId = result.data.id
-        }
-        logger.info('Participant created in database', { participantId, roomId: room.id })
-      }
+        }      }
 
       const newParticipant: VoiceParticipant = {
         id: participantId,
@@ -620,18 +538,7 @@ export default function VoiceCollaborationPage() {
 
       dispatch({ type: 'JOIN_ROOM', roomId: room.id, participant: newParticipant })
 
-      const newParticipantCount = room.currentParticipants + 1
-
-      logger.info('Joined room successfully', {
-        roomId: room.id,
-        roomName: room.name,
-        participantRole: newParticipant.role,
-        newParticipantCount,
-        capacity: room.capacity,
-        quality: room.quality
-      })
-
-      toast.success(`Joined call - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants`)
+      const newParticipantCount = room.currentParticipants + 1      toast.success(`Joined call - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants`)
       announce(`Joined ${room.name}`, 'polite')
     } catch (error: any) {
       logger.error('Join room failed', {
@@ -639,17 +546,12 @@ export default function VoiceCollaborationPage() {
         roomName: room.name,
         error: error.message
       })
-      toast.error('Failed to join room', {
-        description: 'Could not connect to voice channel'
-      })
+      toast.error('Failed to join room')
       announce('Failed to join room', 'assertive')
     }
   }
 
-  const handleDeleteRoom = (roomId: string) => {
-    logger.info('Attempting to delete room', { roomId })
-
-    const room = state.rooms.find(r => r.id === roomId)
+  const handleDeleteRoom = (roomId: string) => {    const room = state.rooms.find(r => r.id === roomId)
     if (!room) {
       logger.warn('Room deletion failed - room not found', { roomId })
       toast.error('Room not found')
@@ -660,16 +562,7 @@ export default function VoiceCollaborationPage() {
   }
 
   const handleConfirmDeleteRoom = async () => {
-    if (!deleteRoom || !userId) return
-
-    logger.info('User confirmed room deletion', {
-      roomId: deleteRoom.id,
-      roomName: deleteRoom.name,
-      roomType: deleteRoom.type,
-      userId
-    })
-
-    try {
+    if (!deleteRoom || !userId) return    try {
       // Dynamic import for code splitting
       const { deleteVoiceRoom } = await import('@/lib/voice-collaboration-queries')
 
@@ -680,15 +573,7 @@ export default function VoiceCollaborationPage() {
       }
 
       dispatch({ type: 'DELETE_ROOM', roomId: deleteRoom.id })
-      setShowViewRoomModal(false)
-
-      logger.info('Room deleted from database', {
-        roomId: deleteRoom.id,
-        roomName: deleteRoom.name,
-        userId
-      })
-
-      toast.success(`Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`)
+      setShowViewRoomModal(false)      toast.success(`Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`)
       announce('Room deleted', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete room', {
@@ -696,31 +581,17 @@ export default function VoiceCollaborationPage() {
         roomId: deleteRoom.id,
         userId
       })
-      toast.error('Failed to delete room', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete room')
       announce('Error deleting room', 'assertive')
     } finally {
       setDeleteRoom(null)
     }
   }
 
-  const handleDownloadRecording = async (recording: VoiceRecording) => {
-    logger.info('Downloading recording', {
-      recordingId: recording.id,
-      title: recording.title,
-      format: recording.format,
-      fileSize: recording.fileSize,
-      duration: recording.duration,
-      quality: recording.quality
-    })
-
-    // Track download count in database
+  const handleDownloadRecording = async (recording: VoiceRecording) => {    // Track download count in database
     if (userId) {
       const { incrementDownloadCount } = await import('@/lib/voice-collaboration-queries')
-      await incrementDownloadCount(recording.id)
-      logger.info('Download count incremented in database', { recordingId: recording.id })
-    }
+      await incrementDownloadCount(recording.id)    }
 
     // Download the recording (uses mock data if no actual file URL)
     const blob = new Blob(['Mock audio data'], { type: `audio/${recording.format}` })
@@ -741,22 +612,10 @@ export default function VoiceCollaborationPage() {
     announce(`Downloading ${recording.title}`, 'polite')
   }
 
-  const handlePlayRecording = async (recording: VoiceRecording) => {
-    logger.info('Playing recording', {
-      recordingId: recording.id,
-      title: recording.title,
-      duration: recording.duration,
-      quality: recording.quality,
-      format: recording.format,
-      participants: recording.participants
-    })
-
-    // Track play count in database
+  const handlePlayRecording = async (recording: VoiceRecording) => {    // Track play count in database
     if (userId) {
       const { incrementPlayCount } = await import('@/lib/voice-collaboration-queries')
-      await incrementPlayCount(recording.id)
-      logger.info('Play count incremented in database', { recordingId: recording.id })
-    }
+      await incrementPlayCount(recording.id)    }
 
     // Update local view count
     const updatedRecording = { ...recording, viewCount: recording.viewCount + 1 }
@@ -928,13 +787,7 @@ export default function VoiceCollaborationPage() {
                 <Button
                   key={mode.id}
                   variant={state.viewMode === mode.id ? "default" : "outline"}
-                  onClick={() => {
-                    logger.info('Changing view mode', {
-                      fromMode: state.viewMode,
-                      toMode: mode.id,
-                      label: mode.label
-                    })
-                    dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
+                  onClick={() => {                    dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
                     announce(`Switched to ${mode.label}`, 'polite')
                   }}
                   className={state.viewMode === mode.id ? "bg-gradient-to-r from-purple-600 to-pink-600" : "border-gray-700 hover:bg-slate-800"}
@@ -969,12 +822,7 @@ export default function VoiceCollaborationPage() {
                     />
                   </div>
                   <Button
-                    onClick={() => {
-                      logger.info('Opening create room modal', {
-                        currentRoomsCount: state.rooms.length,
-                        activeRoomsCount: stats.activeRooms
-                      })
-                      setShowCreateRoomModal(true)
+                    onClick={() => {                      setShowCreateRoomModal(true)
                     }}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
@@ -983,14 +831,7 @@ export default function VoiceCollaborationPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      logger.info('Opening analytics modal', {
-                        activeRooms: stats.activeRooms,
-                        totalParticipants: stats.totalParticipants,
-                        totalRecordings: stats.totalRecordings,
-                        totalStorage: stats.totalStorage
-                      })
-                      setShowAnalyticsModal(true)
+                    onClick={() => {                      setShowAnalyticsModal(true)
                     }}
                     className="border-gray-700 hover:bg-slate-800"
                   >
@@ -1328,12 +1169,7 @@ export default function VoiceCollaborationPage() {
                       <Button
                         key={quality}
                         variant={roomQuality === quality ? "default" : "outline"}
-                        onClick={() => {
-                          logger.info('Audio quality setting changed', {
-                            previousQuality: roomQuality,
-                            newQuality: quality
-                          })
-                          setRoomQuality(quality)
+                        onClick={() => {                          setRoomQuality(quality)
                           toast.success(`Audio quality set to ${quality.toUpperCase()}`)
                         }}
                         className={roomQuality === quality ? 'bg-purple-600' : 'border-gray-700 hover:bg-slate-800'}
@@ -1351,13 +1187,7 @@ export default function VoiceCollaborationPage() {
                       <Label className="text-gray-300 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
                       <Checkbox
                         checked={value}
-                        onCheckedChange={(checked) => {
-                          logger.info('Audio feature toggled', {
-                            feature: key,
-                            enabled: checked,
-                            previousValue: value
-                          })
-                          setRoomFeatures(prev => ({ ...prev, [key]: checked as boolean }))
+                        onCheckedChange={(checked) => {                          setRoomFeatures(prev => ({ ...prev, [key]: checked as boolean }))
                           toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${checked ? 'enabled' : 'disabled'}`)
                         }}
                       />
@@ -1381,15 +1211,7 @@ export default function VoiceCollaborationPage() {
                   onClick={() => {
                     const enabledFeatures = Object.entries(roomFeatures)
                       .filter(([_, enabled]) => enabled)
-                      .map(([feature]) => feature)
-
-                    logger.info('Saving voice settings', {
-                      quality: roomQuality,
-                      enabledFeatures,
-                      featuresCount: enabledFeatures.length
-                    })
-
-                    // Note: Using local state - in production, this would PUT to /api/voice-collaboration/settings
+                      .map(([feature]) => feature)                    // Note: Using local state - in production, this would PUT to /api/voice-collaboration/settings
                     toast.success(`Voice settings saved - ${roomQuality.toUpperCase()} quality - ${enabledFeatures.length} features enabled`)
                     announce('Settings saved', 'polite')
                   }}
