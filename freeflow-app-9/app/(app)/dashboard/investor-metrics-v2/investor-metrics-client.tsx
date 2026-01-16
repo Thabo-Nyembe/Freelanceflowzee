@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -353,7 +352,7 @@ const mockInvestorMetricsActivities = [
 // QuickActions are defined inside the component to access state setters
 
 export default function InvestorMetricsClient() {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRound, setSelectedRound] = useState<FundingRound | null>(null)
@@ -419,6 +418,8 @@ export default function InvestorMetricsClient() {
   const fetchMetrics = async () => {
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('investor_metrics')
         .select('*')
@@ -436,6 +437,8 @@ export default function InvestorMetricsClient() {
   const handleCreateMetric = async () => {
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -446,6 +449,8 @@ export default function InvestorMetricsClient() {
         ? ((formData.current_value - formData.previous_value) / formData.previous_value) * 100
         : 0
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('investor_metrics')
         .insert({
@@ -483,6 +488,8 @@ export default function InvestorMetricsClient() {
         ? ((formData.current_value - formData.previous_value) / formData.previous_value) * 100
         : 0
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('investor_metrics')
         .update({
@@ -517,6 +524,8 @@ export default function InvestorMetricsClient() {
   const handleDeleteMetric = async (id: string) => {
     setLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('investor_metrics')
         .delete()
@@ -804,6 +813,8 @@ export default function InvestorMetricsClient() {
 
   const handleSetAlert = async (metric: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')

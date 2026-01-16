@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -720,7 +719,7 @@ export default function InvoicingClient() {
   const [selectedGateway, setSelectedGateway] = useState<string | null>(null)
 
   // Supabase client
-  const supabase = createClient()
+
 
   // Transform database invoice to frontend Invoice type
   const transformInvoice = useCallback((dbInvoice: Record<string, unknown>): Invoice => {
@@ -761,6 +760,8 @@ export default function InvoicingClient() {
   // Fetch invoices from Supabase
   const fetchInvoices = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
@@ -787,7 +788,7 @@ export default function InvoicingClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase, transformInvoice])
+  }, [ transformInvoice])
 
   // Fetch clients (simplified - using mock for now as clients table may differ)
   const fetchClients = useCallback(async () => {
@@ -804,6 +805,8 @@ export default function InvoicingClient() {
         return null
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('invoices')
         .insert({
@@ -840,7 +843,7 @@ export default function InvoicingClient() {
       toast.error('Failed to create invoice')
       return null
     }
-  }, [supabase])
+  }, [])
 
   // Update invoice in Supabase
   const updateInvoice = useCallback(async (invoiceId: string, updates: Partial<Invoice>) => {
@@ -858,6 +861,8 @@ export default function InvoicingClient() {
       if (updates.terms) dbUpdates.terms = updates.terms
       if (updates.paidDate) dbUpdates.paid_date = updates.paidDate
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('invoices')
         .update(dbUpdates)
@@ -875,11 +880,13 @@ export default function InvoicingClient() {
       toast.error('Failed to update invoice')
       return false
     }
-  }, [supabase])
+  }, [])
 
   // Delete invoice from Supabase
   const deleteInvoice = useCallback(async (invoiceId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('invoices')
         .delete()
@@ -897,7 +904,7 @@ export default function InvoicingClient() {
       toast.error('Failed to delete invoice')
       return false
     }
-  }, [supabase])
+  }, [])
 
   // Initial data fetch and real-time subscription
   useEffect(() => {
@@ -925,7 +932,7 @@ export default function InvoicingClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, fetchInvoices, fetchClients, transformInvoice])
+  }, [ fetchInvoices, fetchClients, transformInvoice])
 
   // Quick Actions with proper dialog handlers
   const invoicingQuickActions = [
