@@ -37,7 +37,6 @@ import {
   Building
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -112,7 +111,6 @@ interface TeamOverview {
 const logger = createFeatureLogger('TeamHub')
 
 export default function TeamHubPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -176,21 +174,15 @@ export default function TeamHubPage() {
     averageRating: teamOverview?.averageRating || (teamMembers.length > 0 ? teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length : 0)
   }
 
-  // A+++ LOAD TEAM DATA FROM SUPABASE
   useEffect(() => {
     const loadTeamData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Team data loading initiated', { userId })
-
-        // Dynamic imports for code splitting
+        setError(null)        // Dynamic imports for code splitting
         const [
           { getTeamMembers },
           { getDepartments },
@@ -272,14 +264,7 @@ export default function TeamHubPage() {
 
         setIsLoading(false)
         announce('Team data loaded successfully', 'polite')
-        toast.success(`${transformedMembers.length} team members loaded`)
-        logger.info('Team data loaded successfully', {
-          totalMembers: transformedMembers.length,
-          onlineMembers: transformedMembers.filter(m => m.status === 'online').length,
-          departments: transformedDepartments.length,
-          userId
-        })
-      } catch (err) {
+        toast.success(`${transformedMembers.length} team members loaded`)      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load team data'
         setError(errorMessage)
         setIsLoading(false)
@@ -299,16 +284,9 @@ export default function TeamHubPage() {
   // REAL FEATURE: Add Team Member
   const handleAddMember = useCallback(() => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to add team members' })
+      toast.error('Authentication required')
       return
-    }
-
-    logger.info('Add team member initiated', {
-      currentTeamSize: teamMembers.length,
-      departments: departments.length
-    })
-
-    setAddMemberForm({ name: '', email: '', role: 'Team Member', department: 'development' })
+    }    setAddMemberForm({ name: '', email: '', role: 'Team Member', department: 'development' })
     setShowAddMemberDialog(true)
   }, [userId, teamMembers, departments])
 
@@ -363,33 +341,20 @@ export default function TeamHubPage() {
         currentProjects: []
       }
 
-      setTeamMembers(prev => [...prev, transformedMember])
-
-      logger.info('Team member added successfully', {
-        memberId: newMember.id,
-        memberName: newMember.name,
-        role: newMember.role,
-        department: newMember.department,
-        newTeamSize: teamMembers.length + 1
-      })
-
-      toast.success('Team Member Added', {
-        description: `${memberName} added as ${memberRole} in ${memberDept}`
+      setTeamMembers(prev => [...prev, transformedMember])      toast.success('Team Member Added' added as ${memberRole} in ${memberDept}`
       })
       announce(`${memberName} added to team`, 'polite')
       setShowAddMemberDialog(false)
     } catch (error) {
       logger.error('Failed to add team member', { error })
-      toast.error('Failed to add team member', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to add team member')
     }
   }, [userId, addMemberForm, teamMembers, announce])
 
   // REAL FEATURE: Remove Team Member (opens confirmation dialog)
   const handleRemoveMember = useCallback((memberId: string, memberName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to remove team members' })
+      toast.error('Authentication required')
       return
     }
     setRemoveMember({ id: memberId, name: memberName })
@@ -408,23 +373,12 @@ export default function TeamHubPage() {
         throw new Error(error?.message || 'Failed to delete team member')
       }
 
-      setTeamMembers(prev => prev.filter(m => m.id !== removeMember.id))
-
-      logger.info('Team member removed', {
-        memberId: removeMember.id,
-        memberName: removeMember.name,
-        newTeamSize: teamMembers.length - 1
-      })
-
-      toast.success('Team Member Removed', {
-        description: `${removeMember.name} has been removed from the team`
+      setTeamMembers(prev => prev.filter(m => m.id !== removeMember.id))      toast.success('Team Member Removed' has been removed from the team`
       })
       announce(`${removeMember.name} removed from team`, 'polite')
     } catch (error) {
       logger.error('Failed to remove team member', { error, memberId: removeMember.id })
-      toast.error('Failed to remove team member', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to remove team member')
     } finally {
       setRemoveMember(null)
     }
@@ -433,7 +387,7 @@ export default function TeamHubPage() {
   // REAL FEATURE: Update Member Role
   const handleUpdateRole = useCallback((memberId: string, currentRole: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to update roles' })
+      toast.error('Authentication required')
       return
     }
 
@@ -467,17 +421,7 @@ export default function TeamHubPage() {
 
       setTeamMembers(prev => prev.map(m =>
         m.id === updateRoleMember.id ? { ...m, role: newRoleValue } : m
-      ))
-
-      logger.info('Member role updated', {
-        memberId: updateRoleMember.id,
-        memberName: updateRoleMember.name,
-        oldRole: updateRoleMember.currentRole,
-        newRole: newRoleValue
-      })
-
-      toast.success('Role Updated', {
-        description: `${updateRoleMember.name}'s role changed to ${newRoleValue}`
+      ))      toast.success('Role Updated''s role changed to ${newRoleValue}`
       })
       announce(`${updateRoleMember.name} role updated to ${newRoleValue}`, 'polite')
       setShowUpdateRoleDialog(false)
@@ -485,16 +429,14 @@ export default function TeamHubPage() {
       setNewRoleValue('')
     } catch (error) {
       logger.error('Failed to update member role', { error, memberId: updateRoleMember.id })
-      toast.error('Failed to update role', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to update role')
     }
   }, [userId, updateRoleMember, newRoleValue, announce])
 
   // REAL FEATURE: Assign Task to Member
   const handleAssignTask = useCallback((memberId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to assign tasks' })
+      toast.error('Authentication required')
       return
     }
 
@@ -532,17 +474,7 @@ export default function TeamHubPage() {
           projects: m.projects + 1,
           currentProjects: [...m.currentProjects, taskNameValue]
         } : m
-      ))
-
-      logger.info('Task assigned to team member', {
-        memberId: assignTaskMember.id,
-        memberName: assignTaskMember.name,
-        taskName: taskNameValue,
-        newProjectCount: member ? member.projects + 1 : 1
-      })
-
-      toast.success('Task Assigned', {
-        description: `"${taskNameValue}" assigned to ${assignTaskMember.name}`
+      ))      toast.success('Task Assigned'" assigned to ${assignTaskMember.name}`
       })
       announce(`Task assigned to ${assignTaskMember.name}`, 'polite')
       setShowAssignTaskDialog(false)
@@ -550,23 +482,12 @@ export default function TeamHubPage() {
       setTaskNameValue('')
     } catch (error) {
       logger.error('Failed to assign task', { error, memberId: assignTaskMember.id })
-      toast.error('Failed to assign task', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred'
-      })
+      toast.error('Failed to assign task')
     }
   }, [userId, assignTaskMember, taskNameValue, teamMembers, announce])
 
   // REAL FEATURE: Export Team Data
-  const handleTeamExport = useCallback((format: 'csv' | 'json' = 'csv') => {
-    logger.info('Team data export initiated', {
-      format,
-      memberCount: teamMembers.length,
-      departments: departments.length,
-      totalProjects: teamStats.activeProjects,
-      completedTasks: teamStats.completedTasks
-    })
-
-    try {
+  const handleTeamExport = useCallback((format: 'csv' | 'json' = 'csv') => {    try {
       if (format === 'csv') {
         const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'Projects', 'Tasks Completed', 'Rating', 'Location', 'Timezone']
         const rows = teamMembers.map(m => [
@@ -638,161 +559,74 @@ export default function TeamHubPage() {
         })
       }
 
-      toast.success('Export Complete', {
-        description: `Team data exported as ${format.toUpperCase()} - ${teamMembers.length} members, ${departments.length} departments`
+      toast.success('Export Complete' - ${teamMembers.length} members, ${departments.length} departments`
       })
     } catch (error) {
       logger.error('Team data export failed', { error, format })
-      toast.error('Export Failed', {
-        description: 'Unable to export team data'
-      })
+      toast.error('Export Failed')
     }
   }, [teamMembers, teamStats, departments])
 
   // Handler 1: Team Performance Metrics
-  const handleTeamPerformance = useCallback(() => {
-    logger.info('Team performance metrics accessed', {
-      totalMembers: teamStats.totalMembers,
-      averageRating: teamStats.averageRating.toFixed(2),
-      completedTasks: teamStats.completedTasks,
-      onlineMembers: teamStats.onlineMembers
-    })
-    setShowPerformanceDialog(true)
+  const handleTeamPerformance = useCallback(() => {    setShowPerformanceDialog(true)
   }, [teamStats])
 
   // Handler 2: Team Goals Management
-  const handleTeamGoals = useCallback(() => {
-    logger.info('Team goals management accessed', {
-      activeProjects: teamStats.activeProjects,
-      totalMembers: teamStats.totalMembers
-    })
-    setShowGoalsDialog(true)
+  const handleTeamGoals = useCallback(() => {    setShowGoalsDialog(true)
   }, [teamStats])
 
   // Handler 3: Team Milestones Tracking
-  const handleTeamMilestones = useCallback(() => {
-    logger.info('Team milestones tracking accessed', {
-      projectsTracked: teamStats.activeProjects,
-      tasksCompleted: teamStats.completedTasks,
-      teamSize: teamStats.totalMembers
-    })
-    setShowMilestonesDialog(true)
+  const handleTeamMilestones = useCallback(() => {    setShowMilestonesDialog(true)
   }, [teamStats])
 
   // Handler 4: Team Budget Management
-  const handleTeamBudget = useCallback(() => {
-    logger.info('Team budget management accessed', {
-      departments: departments.length,
-      teamMembers: teamStats.totalMembers,
-      activeProjects: teamStats.activeProjects
-    })
-    setShowBudgetDialog(true)
+  const handleTeamBudget = useCallback(() => {    setShowBudgetDialog(true)
   }, [departments, teamStats])
 
   // Handler 5: Team Resources Allocation
-  const handleTeamResources = useCallback(() => {
-    logger.info('Team resources allocation accessed', {
-      availableMembers: teamStats.totalMembers,
-      onlineMembers: teamStats.onlineMembers,
-      projectsNeedingResources: teamStats.activeProjects
-    })
-    setShowResourcesDialog(true)
+  const handleTeamResources = useCallback(() => {    setShowResourcesDialog(true)
   }, [teamStats])
 
   // Handler 6: Team Training & Development
-  const handleTeamTraining = useCallback(() => {
-    logger.info('Team training schedule accessed', {
-      membersToTrain: teamStats.totalMembers,
-      departments: departments.length
-    })
-    setShowTrainingDialog(true)
+  const handleTeamTraining = useCallback(() => {    setShowTrainingDialog(true)
   }, [teamStats, departments])
 
   // Handler 7: Team Feedback Collection
-  const handleTeamFeedback = useCallback(() => {
-    logger.info('Team feedback collection initiated', {
-      membersCount: teamStats.totalMembers,
-      currentAverageRating: teamStats.averageRating.toFixed(2)
-    })
+  const handleTeamFeedback = useCallback(() => {    })
     setShowFeedbackDialog(true)
   }, [teamStats])
 
   // Handler 8: Team Recognition & Awards
-  const handleTeamRecognition = useCallback(() => {
-    logger.info('Team recognition system accessed', {
-      teamMembers: teamStats.totalMembers,
-      tasksCompleted: teamStats.completedTasks,
-      averageRating: teamStats.averageRating.toFixed(2)
-    })
+  const handleTeamRecognition = useCallback(() => {    })
     setShowRecognitionDialog(true)
   }, [teamStats])
 
   // Handler 9: Team Onboarding Process
-  const handleTeamOnboarding = useCallback(() => {
-    logger.info('Team onboarding process accessed', {
-      currentTeamSize: teamStats.totalMembers,
-      departmentsAvailable: departments.length
-    })
-    setShowOnboardingDialog(true)
+  const handleTeamOnboarding = useCallback(() => {    setShowOnboardingDialog(true)
   }, [teamStats, departments])
 
   // Handler 10: Team Offboarding Process
-  const handleTeamOffboarding = useCallback(() => {
-    logger.info('Team offboarding process accessed', {
-      currentMembers: teamStats.totalMembers,
-      activeProjects: teamStats.activeProjects
-    })
-    setShowOffboardingDialog(true)
+  const handleTeamOffboarding = useCallback(() => {    setShowOffboardingDialog(true)
   }, [teamStats])
 
   // Handler 11: Team Directory Access
-  const handleTeamDirectory = useCallback(() => {
-    logger.info('Team directory accessed', {
-      totalMembers: teamStats.totalMembers,
-      departments: departments.length,
-      onlineMembers: teamStats.onlineMembers
-    })
-    setShowDirectoryDialog(true)
+  const handleTeamDirectory = useCallback(() => {    setShowDirectoryDialog(true)
   }, [teamStats, departments])
 
   // Handler 12: Team Calendar View
-  const handleTeamCalendar = useCallback(() => {
-    logger.info('Team calendar accessed', {
-      membersScheduled: teamStats.totalMembers,
-      activeProjects: teamStats.activeProjects,
-      onlineMembers: teamStats.onlineMembers
-    })
-    setShowCalendarDialog(true)
+  const handleTeamCalendar = useCallback(() => {    setShowCalendarDialog(true)
   }, [teamStats])
 
   // Handler 13: Team Files Management
-  const handleTeamFiles = useCallback(() => {
-    logger.info('Team files management accessed', {
-      membersWithAccess: teamStats.totalMembers,
-      departments: departments.length,
-      projectFiles: teamStats.activeProjects
-    })
-    setShowFilesDialog(true)
+  const handleTeamFiles = useCallback(() => {    setShowFilesDialog(true)
   }, [teamStats, departments])
 
   // Handler 14: Team Projects Overview
-  const handleTeamProjects = useCallback(() => {
-    logger.info('Team projects overview accessed', {
-      activeProjects: teamStats.activeProjects,
-      membersAssigned: teamStats.totalMembers,
-      completedTasks: teamStats.completedTasks
-    })
-    setShowProjectsDialog(true)
+  const handleTeamProjects = useCallback(() => {    setShowProjectsDialog(true)
   }, [teamStats])
 
   // Handler 15: Team Tasks Assignment
-  const handleTeamTasks = useCallback(() => {
-    logger.info('Team tasks assignment accessed', {
-      availableMembers: teamStats.totalMembers,
-      onlineMembers: teamStats.onlineMembers,
-      completedTasks: teamStats.completedTasks
-    })
-    setShowTasksDialog(true)
+  const handleTeamTasks = useCallback(() => {    setShowTasksDialog(true)
   }, [teamStats])
 
   // Save handlers for dialogs - WIRED TO DATABASE
@@ -816,18 +650,13 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to create goal')
-      }
-
-      logger.info('Goal saved to database', { goalId: data.id, goal: newGoal })
-      toast.success('Goal Created', { description: `"${newGoal.title}" has been added to team goals` })
+      }      toast.success('Goal Created'" has been added to team goals` })
       announce(`Goal "${newGoal.title}" created`, 'polite')
       setNewGoal({ title: '', target: '', deadline: '' })
       setShowGoalsDialog(false)
     } catch (err) {
       logger.error('Failed to save goal', { error: err })
-      toast.error('Failed to create goal', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to create goal')
     }
   }, [newGoal, userId, announce])
 
@@ -851,18 +680,13 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to create milestone')
-      }
-
-      logger.info('Milestone saved to database', { milestoneId: data.id, milestone: newMilestone })
-      toast.success('Milestone Created', { description: `"${newMilestone.title}" has been added` })
+      }      toast.success('Milestone Created'" has been added` })
       announce(`Milestone "${newMilestone.title}" created`, 'polite')
       setNewMilestone({ title: '', project: '', date: '' })
       setShowMilestonesDialog(false)
     } catch (err) {
       logger.error('Failed to save milestone', { error: err })
-      toast.error('Failed to create milestone', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to create milestone')
     }
   }, [newMilestone, userId, announce])
 
@@ -895,18 +719,13 @@ export default function TeamHubPage() {
         m.id === feedbackForm.memberId
           ? { ...m, rating: feedbackForm.rating }
           : m
-      ))
-
-      logger.info('Feedback saved to database', { feedbackId: data.id, memberName: member?.name })
-      toast.success('Feedback Submitted', { description: `Feedback sent for ${member?.name}` })
+      ))      toast.success('Feedback Submitted'` })
       announce(`Feedback submitted for ${member?.name}`, 'polite')
       setFeedbackForm({ memberId: '', rating: 5, comments: '' })
       setShowFeedbackDialog(false)
     } catch (err) {
       logger.error('Failed to submit feedback', { error: err })
-      toast.error('Failed to submit feedback', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to submit feedback')
     }
   }, [feedbackForm, teamMembers, userId, announce])
 
@@ -932,18 +751,13 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to give recognition')
-      }
-
-      logger.info('Recognition saved to database', { recognitionId: data.id, memberName: member?.name })
-      toast.success('Recognition Sent', { description: `${recognitionForm.award} award given to ${member?.name}` })
+      }      toast.success('Recognition Sent' award given to ${member?.name}` })
       announce(`${recognitionForm.award} awarded to ${member?.name}`, 'polite')
       setRecognitionForm({ memberId: '', award: '', reason: '' })
       setShowRecognitionDialog(false)
     } catch (err) {
       logger.error('Failed to give recognition', { error: err })
-      toast.error('Failed to send recognition', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to send recognition')
     }
   }, [recognitionForm, teamMembers, userId, announce])
 
@@ -977,18 +791,13 @@ export default function TeamHubPage() {
         m.id === taskForm.memberId
           ? { ...m, projects: m.projects + 1 }
           : m
-      ))
-
-      logger.info('Task saved to database', { taskId: data.id, memberName: member?.name })
-      toast.success('Task Assigned', { description: `"${taskForm.title}" assigned to ${member?.name}` })
+      ))      toast.success('Task Assigned'" assigned to ${member?.name}` })
       announce(`Task "${taskForm.title}" assigned to ${member?.name}`, 'polite')
       setTaskForm({ memberId: '', title: '', priority: 'medium', dueDate: '' })
       setShowTasksDialog(false)
     } catch (err) {
       logger.error('Failed to assign task', { error: err })
-      toast.error('Failed to assign task', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      toast.error('Failed to assign task')
     }
   }, [taskForm, teamMembers, userId, announce])
 
@@ -1020,7 +829,6 @@ export default function TeamHubPage() {
     return matchesSearch && matchesStatus && matchesDepartment
   })
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative p-6">
@@ -1039,7 +847,6 @@ export default function TeamHubPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative p-6">
@@ -1053,7 +860,6 @@ export default function TeamHubPage() {
     )
   }
 
-  // A+++ EMPTY STATE
   if (filteredMembers.length === 0 && !isLoading) {
     return (
       <div className="min-h-screen relative p-6">
@@ -1109,13 +915,7 @@ export default function TeamHubPage() {
             data-testid="team-settings-btn"
             variant="outline"
             size="sm"
-            onClick={() => {
-              logger.info('Team settings accessed', {
-                totalMembers: teamStats.totalMembers,
-                activeProjects: teamStats.activeProjects,
-                onlineMembers: teamStats.onlineMembers
-              })
-              toast.success('Team Settings - Configure team preferences and permissions')
+            onClick={() => {              toast.success('Team Settings - Configure team preferences and permissions')
             }}
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -1263,12 +1063,7 @@ export default function TeamHubPage() {
                     data-testid="team-chat-btn"
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
-                    onClick={() => {
-                      logger.info('Team chat initiated', {
-                        onlineMembers: teamStats.onlineMembers,
-                        totalMembers: teamStats.totalMembers
-                      })
-                      toast.success(`Opening Team Chat - ${teamStats.onlineMembers} members online`)
+                    onClick={() => {                      toast.success(`Opening Team Chat - ${teamStats.onlineMembers} members online`)
                       router.push('/dashboard/messages?channel=team-general')
                     }}
                   >
@@ -1279,12 +1074,7 @@ export default function TeamHubPage() {
                     data-testid="schedule-btn"
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
-                    onClick={() => {
-                      logger.info('Team schedule accessed', {
-                        activeProjects: teamStats.activeProjects,
-                        membersScheduled: teamStats.totalMembers
-                      })
-                      toast.success(`Opening Team Calendar - View availability for ${teamStats.totalMembers} team members`)
+                    onClick={() => {                      toast.success(`Opening Team Calendar - View availability for ${teamStats.totalMembers} team members`)
                       router.push('/dashboard/calendar?view=team')
                     }}
                   >
@@ -1295,12 +1085,7 @@ export default function TeamHubPage() {
                     data-testid="video-call-btn"
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
-                    onClick={() => {
-                      logger.info('Video call initiated', {
-                        availableParticipants: teamStats.onlineMembers,
-                        totalMembers: teamStats.totalMembers
-                      })
-                      toast.success(`Starting Video Meeting - Connecting with ${teamStats.onlineMembers} online members`)
+                    onClick={() => {                      toast.success(`Starting Video Meeting - Connecting with ${teamStats.onlineMembers} online members`)
                       router.push('/dashboard/collaboration/meetings?action=new')
                     }}
                   >
@@ -1311,12 +1096,7 @@ export default function TeamHubPage() {
                     data-testid="reports-btn"
                     variant="outline"
                     className="h-20 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
-                    onClick={() => {
-                      logger.info('Team reports accessed', {
-                        membersAnalyzed: teamStats.totalMembers,
-                        activeProjects: teamStats.activeProjects
-                      })
-                      toast.success('Opening Team Reports - Team analytics and performance metrics')
+                    onClick={() => {                      toast.success('Opening Team Reports - Team analytics and performance metrics')
                       router.push('/dashboard/analytics?filter=team')
                     }}
                   >
@@ -1347,13 +1127,7 @@ export default function TeamHubPage() {
                 data-testid="filter-members-btn"
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  logger.info('Filter panel accessed', {
-                    departments: departments.length,
-                    totalMembers: teamMembers.length,
-                    currentFilters: { status: filterStatus, department: filterDepartment }
-                  })
-                  toast.success('Filter Options - Filter by status, department, or role')
+                onClick={() => {                  toast.success('Filter Options - Filter by status, department, or role')
                 }}
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -1412,15 +1186,7 @@ export default function TeamHubPage() {
                       size="sm"
                       variant="outline"
                       className="flex-1 hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                      onClick={() => {
-                        logger.info('Member chat initiated', {
-                          memberId: member.id,
-                          memberName: member.name,
-                          role: member.role,
-                          department: member.department,
-                          status: member.status
-                        })
-                        toast.success(`Opening Chat - Starting conversation with ${member.name}`)
+                      onClick={() => {                        toast.success(`Opening Chat - Starting conversation with ${member.name}`)
                         router.push(`/dashboard/messages?dm=${member.id}&name=${encodeURIComponent(member.name)}`)
                       }}
                     >
@@ -1431,9 +1197,7 @@ export default function TeamHubPage() {
                       size="sm"
                       variant="outline"
                       className="hover:bg-green-50 hover:border-green-200 transition-colors"
-                      onClick={() => {
-                        logger.info('Email member', { memberId: member.id, memberName: member.name, email: member.email })
-                        window.open(`mailto:${member.email}`, '_blank')
+                      onClick={() => {                        window.open(`mailto:${member.email}`, '_blank')
                       }}
                     >
                       <Mail className="h-4 w-4" />
@@ -1442,9 +1206,7 @@ export default function TeamHubPage() {
                       size="sm"
                       variant="outline"
                       className="hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
-                      onClick={() => {
-                        logger.info('Call member', { memberId: member.id, memberName: member.name, phone: member.phone })
-                        window.open(`tel:${member.phone}`, '_blank')
+                      onClick={() => {                        window.open(`tel:${member.phone}`, '_blank')
                       }}
                     >
                       <Phone className="h-4 w-4" />
@@ -1590,13 +1352,7 @@ export default function TeamHubPage() {
                   <Button
                     variant="outline"
                     className="justify-start h-auto p-4"
-                    onClick={() => {
-                      logger.info('Generate team report initiated', {
-                        totalMembers: teamStats.totalMembers,
-                        activeProjects: teamStats.activeProjects,
-                        completedTasks: teamStats.completedTasks
-                      })
-                      toast.success('Report Generated - Team analytics exported successfully')
+                    onClick={() => {                      toast.success('Report Generated - Team analytics exported successfully')
                       handleTeamExport('csv')
                     }}
                   >
@@ -1612,12 +1368,7 @@ export default function TeamHubPage() {
                   <Button
                     variant="outline"
                     className="justify-start h-auto p-4"
-                    onClick={() => {
-                      logger.info('Set team goals initiated', {
-                        activeProjects: teamStats.activeProjects,
-                        totalMembers: teamStats.totalMembers
-                      })
-                      toast.success('Goals Manager - Define and track team objectives')
+                    onClick={() => {                      toast.success('Goals Manager - Define and track team objectives')
                       setShowGoalsDialog(true)
                     }}
                   >
