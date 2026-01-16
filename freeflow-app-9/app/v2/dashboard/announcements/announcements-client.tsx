@@ -426,9 +426,6 @@ export default function AnnouncementsClient() {
 
   // Convert DB announcements to local format for display
   const announcements: Announcement[] = useMemo(() => {
-    if (!dbAnnouncements || dbAnnouncements.length === 0) {
-      return mockAnnouncements // Fallback to mock data if no DB data
-    }
     return dbAnnouncements.map((dbAnn): Announcement => ({
       id: dbAnn.id,
       title: dbAnn.title,
