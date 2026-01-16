@@ -99,13 +99,10 @@ const SORT_OPTIONS = [
   { value: 'updated_at', label: 'Recently Updated' }
 ]
 
-// Mock team members for assignment - in production this would come from API
-const TEAM_MEMBERS = [
-  { id: 'user-1', name: 'John Doe', email: 'john@example.com', avatar_url: null },
-  { id: 'user-2', name: 'Jane Smith', email: 'jane@example.com', avatar_url: null },
-  { id: 'user-3', name: 'Mike Johnson', email: 'mike@example.com', avatar_url: null },
-  { id: 'user-4', name: 'Sarah Williams', email: 'sarah@example.com', avatar_url: null }
-]
+// Team members - to be fetched from real API endpoint /api/team/members
+// Using hook-based data fetching pattern for team members
+const TEAM_MEMBERS: Array<{ id: string; name: string; email: string; avatar_url: string | null }> = []
+// TODO: Replace with useTeamMembers() hook when available
 
 // ============================================================================
 // LOADING SKELETON

@@ -126,228 +126,6 @@ interface AddOnStats {
   paidCount: number
 }
 
-// Mock data
-const mockAddOns: AddOn[] = [
-  {
-    id: '1',
-    name: 'AI Assistant Pro',
-    description: 'Advanced AI-powered assistant that helps with content generation, code completion, data analysis, and automated workflows. Integrates seamlessly with your existing tools.',
-    shortDescription: 'AI-powered productivity assistant',
-    version: '3.2.1',
-    author: 'TechFlow Labs',
-    category: 'ai',
-    status: 'installed',
-    pricingType: 'subscription',
-    price: 19.99,
-    currency: 'USD',
-    rating: 4.8,
-    reviewCount: 2847,
-    downloadCount: 156000,
-    installedCount: 89000,
-    lastUpdated: '2024-12-20',
-    createdAt: '2023-06-15',
-    size: '24.5 MB',
-    permissions: 'elevated',
-    features: ['Content generation', 'Code completion', 'Data analysis', 'Workflow automation', 'Natural language processing'],
-    tags: ['ai', 'productivity', 'automation'],
-    isFeatured: true,
-    isVerified: true,
-    hasFreeTrial: true,
-    trialDays: 14
-  },
-  {
-    id: '2',
-    name: 'Slack Integration',
-    description: 'Connect your workspace with Slack for real-time notifications, channel syncing, and seamless collaboration across teams.',
-    shortDescription: 'Real-time Slack notifications',
-    version: '2.1.0',
-    author: 'Integration Hub',
-    category: 'integration',
-    status: 'installed',
-    pricingType: 'free',
-    price: 0,
-    currency: 'USD',
-    rating: 4.6,
-    reviewCount: 1523,
-    downloadCount: 234000,
-    installedCount: 178000,
-    lastUpdated: '2024-12-18',
-    createdAt: '2022-03-10',
-    size: '8.2 MB',
-    permissions: 'standard',
-    features: ['Channel sync', 'Real-time notifications', 'Message threading', 'File sharing'],
-    tags: ['slack', 'communication', 'team'],
-    isFeatured: true,
-    isVerified: true,
-    hasFreeTrial: false
-  },
-  {
-    id: '3',
-    name: 'Advanced Security Suite',
-    description: 'Enterprise-grade security with 2FA, SSO integration, audit logs, and threat detection. Protect your data with military-grade encryption.',
-    shortDescription: 'Enterprise security solution',
-    version: '4.0.0',
-    author: 'SecureStack',
-    category: 'security',
-    status: 'available',
-    pricingType: 'subscription',
-    price: 29.99,
-    currency: 'USD',
-    rating: 4.9,
-    reviewCount: 892,
-    downloadCount: 67000,
-    installedCount: 45000,
-    lastUpdated: '2024-12-22',
-    createdAt: '2023-01-20',
-    size: '18.7 MB',
-    permissions: 'full_access',
-    features: ['Two-factor authentication', 'SSO integration', 'Audit logging', 'Threat detection', 'Data encryption'],
-    tags: ['security', 'enterprise', 'compliance'],
-    isFeatured: true,
-    isVerified: true,
-    hasFreeTrial: true,
-    trialDays: 30
-  },
-  {
-    id: '4',
-    name: 'Analytics Dashboard Pro',
-    description: 'Comprehensive analytics with custom dashboards, real-time metrics, and advanced reporting capabilities.',
-    shortDescription: 'Advanced analytics & reporting',
-    version: '2.8.5',
-    author: 'DataViz Inc',
-    category: 'analytics',
-    status: 'update_available',
-    pricingType: 'freemium',
-    price: 14.99,
-    currency: 'USD',
-    rating: 4.5,
-    reviewCount: 1234,
-    downloadCount: 98000,
-    installedCount: 62000,
-    lastUpdated: '2024-12-15',
-    createdAt: '2022-08-05',
-    size: '15.3 MB',
-    permissions: 'standard',
-    features: ['Custom dashboards', 'Real-time metrics', 'Export reports', 'Team sharing', 'API access'],
-    tags: ['analytics', 'dashboard', 'reporting'],
-    isFeatured: false,
-    isVerified: true,
-    hasFreeTrial: true,
-    trialDays: 7
-  },
-  {
-    id: '5',
-    name: 'Email Campaign Manager',
-    description: 'Create, send, and track email campaigns with advanced automation and personalization features.',
-    shortDescription: 'Email marketing automation',
-    version: '1.9.2',
-    author: 'MailFlow',
-    category: 'marketing',
-    status: 'available',
-    pricingType: 'subscription',
-    price: 24.99,
-    currency: 'USD',
-    rating: 4.4,
-    reviewCount: 756,
-    downloadCount: 54000,
-    installedCount: 32000,
-    lastUpdated: '2024-12-10',
-    createdAt: '2023-04-18',
-    size: '12.8 MB',
-    permissions: 'standard',
-    features: ['Email templates', 'A/B testing', 'Automation workflows', 'Analytics', 'Segmentation'],
-    tags: ['email', 'marketing', 'automation'],
-    isFeatured: false,
-    isVerified: true,
-    hasFreeTrial: true,
-    trialDays: 14
-  },
-  {
-    id: '6',
-    name: 'Cloud Storage Connector',
-    description: 'Connect to AWS S3, Google Cloud Storage, and Azure Blob for seamless file management and backup.',
-    shortDescription: 'Multi-cloud storage integration',
-    version: '3.1.0',
-    author: 'CloudBridge',
-    category: 'storage',
-    status: 'installed',
-    pricingType: 'paid',
-    price: 9.99,
-    currency: 'USD',
-    rating: 4.7,
-    reviewCount: 567,
-    downloadCount: 78000,
-    installedCount: 56000,
-    lastUpdated: '2024-12-12',
-    createdAt: '2022-11-30',
-    size: '6.4 MB',
-    permissions: 'elevated',
-    features: ['Multi-cloud support', 'Auto-sync', 'Version control', 'Encryption', 'Backup scheduling'],
-    tags: ['storage', 'cloud', 'backup'],
-    isFeatured: true,
-    isVerified: true,
-    hasFreeTrial: false
-  },
-  {
-    id: '7',
-    name: 'Developer Toolkit',
-    description: 'Essential tools for developers including code snippets, API testing, debugging tools, and documentation generator.',
-    shortDescription: 'Developer productivity tools',
-    version: '2.5.4',
-    author: 'DevTools Pro',
-    category: 'developer',
-    status: 'disabled',
-    pricingType: 'free',
-    price: 0,
-    currency: 'USD',
-    rating: 4.3,
-    reviewCount: 1892,
-    downloadCount: 145000,
-    installedCount: 98000,
-    lastUpdated: '2024-11-28',
-    createdAt: '2022-05-12',
-    size: '22.1 MB',
-    permissions: 'basic',
-    features: ['Code snippets', 'API testing', 'Debugging', 'Documentation', 'Git integration'],
-    tags: ['developer', 'tools', 'productivity'],
-    isFeatured: false,
-    isVerified: true,
-    hasFreeTrial: false
-  },
-  {
-    id: '8',
-    name: 'Design System Kit',
-    description: 'Complete design system with UI components, color palettes, typography, and Figma integration.',
-    shortDescription: 'UI components & design assets',
-    version: '1.4.0',
-    author: 'DesignFlow',
-    category: 'design',
-    status: 'available',
-    pricingType: 'one_time',
-    price: 49.99,
-    currency: 'USD',
-    rating: 4.6,
-    reviewCount: 423,
-    downloadCount: 34000,
-    installedCount: 28000,
-    lastUpdated: '2024-12-05',
-    createdAt: '2023-09-22',
-    size: '45.2 MB',
-    permissions: 'basic',
-    features: ['UI components', 'Color palettes', 'Typography system', 'Figma plugin', 'Icon library'],
-    tags: ['design', 'ui', 'components'],
-    isFeatured: true,
-    isVerified: true,
-    hasFreeTrial: false
-  }
-]
-
-const mockReviews: Review[] = [
-  { id: '1', addOnId: '1', userId: '1', userName: 'Sarah Chen', rating: 5, title: 'Game changer for productivity', content: 'This AI assistant has completely transformed how I work. The content generation is incredibly accurate.', createdAt: '2024-12-20', helpful: 45, isVerifiedPurchase: true },
-  { id: '2', addOnId: '1', userId: '2', userName: 'Mike Johnson', rating: 4, title: 'Great but room for improvement', content: 'Very useful tool overall. Would love to see better integration with external APIs.', createdAt: '2024-12-18', helpful: 23, isVerifiedPurchase: true },
-  { id: '3', addOnId: '2', userId: '3', userName: 'Emily Davis', rating: 5, title: 'Perfect Slack integration', content: 'Exactly what we needed for our team. Real-time notifications work flawlessly.', createdAt: '2024-12-15', helpful: 67, isVerifiedPurchase: true },
-  { id: '4', addOnId: '3', userId: '4', userName: 'Alex Thompson', rating: 5, title: 'Enterprise-grade security', content: 'Finally a security solution that meets our compliance requirements. Excellent support team.', createdAt: '2024-12-22', helpful: 34, isVerifiedPurchase: true }
-]
 
 // Helper functions
 const getStatusColor = (status: AddOnStatus) => {
@@ -425,29 +203,6 @@ const formatDate = (date: string) => {
   })
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockAddOnsAIInsights = [
-  { id: '1', type: 'opportunity' as const, title: 'Add-On Performance', description: 'Slack integration saving 4 hours/week in communication overhead.', impact: 'low' as const, createdAt: new Date() },
-  { id: '2', type: 'recommendation' as const, title: 'New Releases', description: '3 new add-ons available matching your workflow patterns.', impact: 'medium' as const, createdAt: new Date() },
-  { id: '3', type: 'alert' as const, title: 'Update Required', description: 'Security update available for 2 installed add-ons.', impact: 'high' as const, createdAt: new Date() },
-]
-
-const mockAddOnsCollaborators = [
-  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', color: '#ef4444', status: 'online' as const },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', color: '#8b5cf6', status: 'online' as const },
-  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', color: '#22c55e', status: 'away' as const },
-]
-
-const mockAddOnsPredictions = [
-  { label: 'Cost Savings', currentValue: 0, predictedValue: 500, confidence: 76, trend: 'up' as const, timeframe: 'Monthly', factors: [{ name: 'Bundle discounts', impact: 'positive' as const, weight: 0.5 }, { name: 'Usage optimization', impact: 'positive' as const, weight: 0.5 }] },
-  { label: 'Adoption Rate', currentValue: 60, predictedValue: 85, confidence: 82, trend: 'up' as const, timeframe: '3 months', factors: [{ name: 'Team training', impact: 'positive' as const, weight: 0.6 }, { name: 'Integration ease', impact: 'positive' as const, weight: 0.4 }] },
-]
-
-const mockAddOnsActivities = [
-  { id: '1', type: 'create' as const, title: 'Installed Slack Integration', user: { id: '1', name: 'System' }, timestamp: new Date() },
-  { id: '2', type: 'update' as const, title: 'Updated GitHub Connector v2.1', user: { id: '2', name: 'Auto-Update' }, timestamp: new Date(Date.now() - 3600000) },
-  { id: '3', type: 'integration' as const, title: 'Configured Jira Sync settings', user: { id: '3', name: 'Admin' }, timestamp: new Date(Date.now() - 7200000) },
-]
 
 export default function AddOnsClient() {
   const [activeTab, setActiveTab] = useState('discover')
@@ -2014,18 +1769,18 @@ export default function AddOnsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAddOnsAIInsights}
+              insights={[]}
               title="Add-On Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAddOnsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAddOnsPredictions}
+              predictions={[]}
               title="Add-On Forecasts"
             />
           </div>
@@ -2033,7 +1788,7 @@ export default function AddOnsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAddOnsActivities}
+            activities={[]}
             title="Add-On Activity"
             maxItems={5}
           />

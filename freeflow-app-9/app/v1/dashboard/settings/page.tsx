@@ -85,8 +85,8 @@ export default function SettingsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Initialize notification settings
-        const notifications: NotificationSetting[] = [
+        // Define default notification settings
+        const defaultNotifications: NotificationSetting[] = [
           {
             id: 'project-updates',
             label: 'Project Updates',
@@ -153,8 +153,8 @@ export default function SettingsPage() {
           }
         ]
 
-        // Initialize privacy settings
-        const privacy: PrivacySetting[] = [
+        // Define default privacy settings
+        const defaultPrivacy: PrivacySetting[] = [
           {
             id: 'profile-visibility',
             label: 'Profile Visibility',
@@ -185,42 +185,50 @@ export default function SettingsPage() {
           }
         ]
 
-        setNotificationSettings(notifications)
-        setPrivacySettings(privacy)
-        setEmail(KAZI_CLIENT_DATA.clientInfo.email)
-        setPhone(KAZI_CLIENT_DATA.clientInfo.phone)
-
-        // Fetch settings from API
+        // Try to fetch from database/API first, fallback to defaults
         try {
           const response = await fetch('/api/settings')
           if (response.ok) {
             const data = await response.json()
-            if (data.settings) {
-              // Apply fetched settings if available
-              if (data.settings.email) setEmail(data.settings.email)
-              if (data.settings.phone) setPhone(data.settings.phone)
-              if (data.settings.language) setLanguage(data.settings.language)
-              if (data.settings.timezone) setTimezone(data.settings.timezone)
-              if (data.settings.notifications) {
-                setNotificationSettings(prev => prev.map(n => ({
+
+            // Use database settings if available, otherwise use defaults
+            setNotificationSettings(data.settings?.notifications
+              ? defaultNotifications.map(n => ({
                   ...n,
                   enabled: data.settings.notifications[n.id] ?? n.enabled
-                })))
-              }
-              if (data.settings.privacy) {
-                setPrivacySettings(prev => prev.map(p => ({
+                }))
+              : defaultNotifications
+            )
+
+            setPrivacySettings(data.settings?.privacy
+              ? defaultPrivacy.map(p => ({
                   ...p,
                   enabled: data.settings.privacy[p.id] ?? p.enabled
-                })))
-              }
-            }
+                }))
+              : defaultPrivacy
+            )
+
+            setEmail(data.settings?.email || KAZI_CLIENT_DATA.clientInfo.email)
+            setPhone(data.settings?.phone || KAZI_CLIENT_DATA.clientInfo.phone)
+            setLanguage(data.settings?.language || 'en')
+            setTimezone(data.settings?.timezone || 'UTC')
+
+            logger.info('Settings loaded from database')
+          } else {
+            throw new Error('API response not OK')
           }
         } catch (apiError) {
+          // Fallback to default settings with KAZI client data
           logger.warn('Could not fetch settings from API, using defaults', { error: apiError })
+          setNotificationSettings(defaultNotifications)
+          setPrivacySettings(defaultPrivacy)
+          setEmail(KAZI_CLIENT_DATA.clientInfo.email)
+          setPhone(KAZI_CLIENT_DATA.clientInfo.phone)
         }
 
         setIsLoading(false)
-        announce('Settings loaded successfully', 'polite')      } catch (err) {
+        announce('Settings loaded successfully', 'polite')
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load settings')
         setIsLoading(false)
         announce('Error loading settings', 'assertive')

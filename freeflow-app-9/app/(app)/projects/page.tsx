@@ -30,70 +30,6 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// Mock data for projects
-const mockProjects = [
-  {
-    id: '1',
-    name: 'Brand Identity Package',
-    client: 'Acme Corporation',
-    description: 'Complete brand identity design including logo, typography, and brand guidelines',
-    status: 'In Progress',
-    progress: 75,
-    value: 2500,
-    deadline: '2024-01-15',
-    priority: 'high',
-    tags: ['Design', 'Branding', 'Logo'],
-    createdAt: '2023-12-01',
-    lastUpdated: '2024-01-08',
-    team: ['John Doe', 'Jane Smith']
-  },
-  {
-    id: '2',
-    name: 'E-commerce Website',
-    client: 'Tech Startup Inc',
-    description: 'Modern e-commerce platform with advanced features and mobile optimization',
-    status: 'In Review',
-    progress: 90,
-    value: 8500,
-    deadline: '2024-01-20',
-    priority: 'urgent',
-    tags: ['Development', 'E-commerce', 'React'],
-    createdAt: '2023-11-15',
-    lastUpdated: '2024-01-07',
-    team: ['Alice Johnson', 'Bob Wilson']
-  },
-  {
-    id: '3',
-    name: 'Mobile App Design',
-    client: 'Digital Agency',
-    description: 'UI/UX design for iOS and Android mobile application',
-    status: 'Completed',
-    progress: 100,
-    value: 4200,
-    deadline: '2023-12-30',
-    priority: 'medium',
-    tags: ['Mobile', 'UI/UX', 'iOS', 'Android'],
-    createdAt: '2023-11-01',
-    lastUpdated: '2023-12-30',
-    team: ['Sarah Lee']
-  },
-  {
-    id: '4',
-    name: 'Marketing Campaign',
-    client: 'Local Business',
-    description: 'Digital marketing campaign including social media and content strategy',
-    status: 'Planning',
-    progress: 25,
-    value: 1800,
-    deadline: '2024-02-15',
-    priority: 'low',
-    tags: ['Marketing', 'Social Media', 'Content'],
-    createdAt: '2024-01-05',
-    lastUpdated: '2024-01-06',
-    team: ['Mike Davis', 'Emma Brown']
-  }
-]
-
 export default function ProjectsPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
@@ -102,7 +38,7 @@ export default function ProjectsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
 
   const router = useRouter()
-  const [projects, setProjects] = useState(mockProjects)
+  const [projects, setProjects] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')

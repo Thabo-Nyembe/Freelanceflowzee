@@ -23,181 +23,29 @@ import {
 const logger = createFeatureLogger('InvoiceUtils')
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - REMOVED (Migration Batch #9)
 // ============================================================================
+// All mock data has been migrated to use database queries.
+// Data now comes from Supabase via invoice-queries.ts
+// Migration completed: 2026-01-17
 
-export const MOCK_INVOICES: Invoice[] = [
-  {
-    id: 'inv-001',
-    userId: 'user-1',
-    invoiceNumber: 'INV-2024-001',
-    clientName: 'TechCorp Inc.',
-    clientEmail: 'billing@techcorp.com',
-    clientAddress: '123 Tech Street, San Francisco, CA 94105',
-    items: [
-      {
-        id: 'item-1',
-        description: 'Website Design & Development',
-        quantity: 1,
-        unitPrice: 5000,
-        total: 5000
-      },
-      {
-        id: 'item-2',
-        description: 'SEO Optimization',
-        quantity: 3,
-        unitPrice: 500,
-        total: 1500
-      }
-    ],
-    subtotal: 6500,
-    taxRate: 10,
-    taxAmount: 650,
-    discount: 0,
-    total: 7150,
-    currency: 'USD',
-    status: 'paid',
-    issueDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    paidDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    notes: 'Thank you for your business!',
-    terms: 'Net 30',
-    createdAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'inv-002',
-    userId: 'user-1',
-    invoiceNumber: 'INV-2024-002',
-    clientName: 'StartupXYZ',
-    clientEmail: 'founder@startupxyz.com',
-    items: [
-      {
-        id: 'item-3',
-        description: 'Logo Design',
-        quantity: 1,
-        unitPrice: 1500,
-        total: 1500
-      }
-    ],
-    subtotal: 1500,
-    taxRate: 10,
-    taxAmount: 150,
-    discount: 150,
-    discountType: 'fixed',
-    total: 1500,
-    currency: 'USD',
-    status: 'overdue',
-    issueDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    notes: 'Early payment discount applied',
-    createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'inv-003',
-    userId: 'user-1',
-    invoiceNumber: 'INV-2024-003',
-    clientName: 'Global Enterprises',
-    clientEmail: 'accounts@global-ent.com',
-    items: [
-      {
-        id: 'item-4',
-        description: 'Monthly Consulting - January',
-        quantity: 20,
-        unitPrice: 150,
-        total: 3000
-      }
-    ],
-    subtotal: 3000,
-    taxRate: 10,
-    taxAmount: 300,
-    discount: 0,
-    total: 3300,
-    currency: 'USD',
-    status: 'sent',
-    issueDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-    recurringConfig: {
-      enabled: true,
-      cycle: 'monthly',
-      startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-      nextInvoiceDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
-  }
-]
-
-export const MOCK_PAYMENTS: Payment[] = [
-  {
-    id: 'pay-001',
-    invoiceId: 'inv-001',
-    userId: 'user-1',
-    amount: 7150,
-    currency: 'USD',
-    method: 'credit_card',
-    status: 'completed',
-    transactionId: 'txn_1234567890',
-    paidAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
-  }
-]
-
-export const MOCK_INVOICE_TEMPLATES: InvoiceTemplate[] = [
-  {
-    id: 'tpl-001',
-    userId: 'user-1',
-    name: 'Website Development',
-    description: 'Standard website development package',
-    items: [
-      {
-        id: 'item-tpl-1',
-        description: 'Website Design & Development',
-        quantity: 1,
-        unitPrice: 5000,
-        total: 5000
-      }
-    ],
-    defaultTerms: 'Net 30',
-    defaultNotes: 'Thank you for your business!',
-    taxRate: 10,
-    currency: 'USD',
-    isDefault: true,
-    usageCount: 5,
-    createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
-  }
-]
-
+export const MOCK_INVOICES: Invoice[] = []
+export const MOCK_PAYMENTS: Payment[] = []
+export const MOCK_INVOICE_TEMPLATES: InvoiceTemplate[] = []
 export const MOCK_BILLING_STATS: BillingStats = {
-  userId: 'user-1',
-  totalRevenue: 45000,
-  pendingAmount: 8500,
-  overdueAmount: 1500,
-  averageInvoiceValue: 2500,
-  totalInvoices: 18,
-  paidInvoices: 12,
-  pendingInvoices: 4,
-  overdueInvoices: 2,
+  userId: '',
+  totalRevenue: 0,
+  pendingAmount: 0,
+  overdueAmount: 0,
+  averageInvoiceValue: 0,
+  totalInvoices: 0,
+  paidInvoices: 0,
+  pendingInvoices: 0,
+  overdueInvoices: 0,
   cancelledInvoices: 0,
-  revenueByMonth: [
-    { month: 'Jan', revenue: 5000, invoiceCount: 3 },
-    { month: 'Feb', revenue: 7500, invoiceCount: 4 },
-    { month: 'Mar', revenue: 6000, invoiceCount: 2 },
-    { month: 'Apr', revenue: 8000, invoiceCount: 5 },
-    { month: 'May', revenue: 9500, invoiceCount: 4 }
-  ],
-  revenueByClient: [
-    { clientId: 'client-1', clientName: 'TechCorp Inc.', revenue: 15000, invoiceCount: 5 },
-    { clientId: 'client-2', clientName: 'Global Enterprises', revenue: 12000, invoiceCount: 4 },
-    { clientId: 'client-3', clientName: 'StartupXYZ', revenue: 8000, invoiceCount: 3 }
-  ],
-  paymentMethods: [
-    { method: 'credit_card', count: 8, totalAmount: 25000 },
-    { method: 'bank_transfer', count: 4, totalAmount: 15000 },
-    { method: 'paypal', count: 2, totalAmount: 5000 }
-  ]
+  revenueByMonth: [],
+  revenueByClient: [],
+  paymentMethods: []
 }
 
 // ============================================================================
@@ -458,8 +306,8 @@ export function validateInvoice(invoice: Partial<Invoice>): { valid: boolean; er
 }
 
 logger.info('Invoice utilities initialized', {
-  mockInvoices: MOCK_INVOICES.length,
-  mockPayments: MOCK_PAYMENTS.length,
-  mockTemplates: MOCK_INVOICE_TEMPLATES.length,
+  migrationStatus: 'BATCH_9_COMPLETE',
+  mockDataRemoved: true,
+  dataSource: 'Supabase via invoice-queries.ts',
   utilityFunctions: 20
 })

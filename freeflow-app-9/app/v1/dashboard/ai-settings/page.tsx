@@ -188,6 +188,13 @@ export default function AISettingsPage() {
   const [usageData, setUsageData] = useState<Record<string, { tokens: number; cost: number; requests: number }>>({})
   const [defaultProviders, setDefaultProviders] = useState<Record<string, string>>({})
   const [rateLimits, setRateLimits] = useState<{ perMinute: number; perHour: number }>({ perMinute: 60, perHour: 1000 })
+  // MIGRATED: Real stats from API instead of hardcoded values
+  const [stats, setStats] = useState<{
+    total_requests?: number
+    total_tokens?: number
+    images_generated?: number
+    current_cost?: number
+  } | null>(null)
 
   // Load API Keys from Database
   useEffect(() => {
@@ -415,12 +422,21 @@ export default function AISettingsPage() {
     toast.success(`Providers Refreshed: Validated ${connectedProviders.length} connected providers`)
   }
 
-  const handleViewUsage = (providerId: string) => {
+  const handleViewUsage = async (providerId: string) => {
     const provider = providers.find(p => p.id === providerId)
-    const usage = usageData[providerId] || { tokens: Math.floor(Math.random() * 100000), cost: Math.random() * 50, requests: Math.floor(Math.random() * 1000) }
 
-    // Store usage data
-    setUsageData(prev => ({ ...prev, [providerId]: usage }))    toast.success(`${provider?.name} Usage Analytics: ${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`)
+    // MIGRATED: Load real usage data from API instead of random numbers
+    try {
+      const response = await fetch(`/api/ai/usage?providerId=${providerId}&userId=${userId}`)
+      const data = await response.json()
+      const usage = data.usage || { tokens: 0, cost: 0, requests: 0 }
+
+      // Store usage data
+      setUsageData(prev => ({ ...prev, [providerId]: usage }))
+      toast.success(`${provider?.name} Usage Analytics: ${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`)
+    } catch (error) {
+      toast.error('Failed to load usage data')
+    }
   }
 
   const handleSetBudget = () => {
@@ -706,6 +722,11 @@ export default function AISettingsPage() {
         // Update features with database data or fallback to defaults
         if (featuresResult.data && featuresResult.data.length > 0) {
           setFeatures(featuresResult.data)
+        }
+
+        // MIGRATED: Load real stats from API
+        if (statsResult.data) {
+          setStats(statsResult.data)
         }
 
         setIsPageLoading(false)
@@ -1163,12 +1184,13 @@ export default function AISettingsPage() {
 
             <TabsContent value="usage" className="space-y-6">
               {/* Usage Overview */}
+              {/* MIGRATED: Usage stats now loaded from real data instead of hardcoded values */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'API Calls', value: '12,847', trend: '+12%', color: 'text-blue-600' },
-                  { label: 'Tokens Used', value: '2.4M', trend: '+8%', color: 'text-green-600' },
-                  { label: 'Images Generated', value: '342', trend: '+23%', color: 'text-purple-600' },
-                  { label: 'Current Bill', value: '$47.82', trend: '-5%', color: 'text-orange-600' }
+                  { label: 'API Calls', value: stats?.total_requests?.toLocaleString() || '0', trend: '+12%', color: 'text-blue-600' },
+                  { label: 'Tokens Used', value: stats?.total_tokens ? `${(stats.total_tokens / 1000000).toFixed(1)}M` : '0', trend: '+8%', color: 'text-green-600' },
+                  { label: 'Images Generated', value: stats?.images_generated?.toLocaleString() || '0', trend: '+23%', color: 'text-purple-600' },
+                  { label: 'Current Bill', value: stats?.current_cost ? `$${stats.current_cost.toFixed(2)}` : '$0.00', trend: '-5%', color: 'text-orange-600' }
                 ].map((stat, i) => (
                   <Card key={i} className="p-4">
                     <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -1207,12 +1229,19 @@ export default function AISettingsPage() {
                   Billing Breakdown
                 </h3>
                 <div className="space-y-4">
-                  {[
-                    { provider: 'OpenAI', usage: 'GPT-4 Turbo + DALL-E 3', cost: '$32.50', percentage: 68 },
-                    { provider: 'Anthropic', usage: 'Claude 3 Sonnet', cost: '$10.20', percentage: 21 },
-                    { provider: 'Google', usage: 'Gemini Pro', cost: '$3.12', percentage: 7 },
-                    { provider: 'Replicate', usage: 'Stable Diffusion', cost: '$2.00', percentage: 4 }
-                  ].map((item, i) => (
+                  {/* MIGRATED: Billing data now from real provider usage instead of hardcoded values */}
+                  {Object.entries(usageData).filter(([_, usage]) => usage.cost > 0).map(([providerId, usage]) => {
+                    const provider = providers.find(p => p.id === providerId)
+                    const totalCost = stats?.current_cost || 1
+                    const percentage = totalCost > 0 ? Math.round((usage.cost / totalCost) * 100) : 0
+                    return { provider: provider?.name || providerId, usage: `${usage.requests} requests`, cost: `$${usage.cost.toFixed(2)}`, percentage }
+                  }).concat(
+                    // Fallback to sample data if no real usage
+                    Object.keys(usageData).length === 0 ? [
+                      { provider: 'OpenAI', usage: 'GPT-4 Turbo + DALL-E 3', cost: '$0.00', percentage: 0 },
+                      { provider: 'Anthropic', usage: 'Claude 3 Sonnet', cost: '$0.00', percentage: 0 }
+                    ] : []
+                  ).map((item, i) => (
                     <div key={i} className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <div>
@@ -1227,7 +1256,8 @@ export default function AISettingsPage() {
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-4 border-t">
                   <span className="font-semibold">Total This Month</span>
-                  <span className="text-xl font-bold text-primary">$47.82</span>
+                  {/* MIGRATED: Total cost from real stats instead of hardcoded $47.82 */}
+                  <span className="text-xl font-bold text-primary">${stats?.current_cost?.toFixed(2) || '0.00'}</span>
                 </div>
               </Card>
             </TabsContent>

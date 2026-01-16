@@ -108,167 +108,6 @@ interface BadgeStats {
   completion_rate: number
 }
 
-// Mock data for available badges
-const mockBadges: BadgeData[] = [
-  {
-    id: 'b1',
-    name: 'Early Adopter',
-    description: 'Joined during the platform beta phase and helped shape the product',
-    image_url: '/badges/early-adopter.png',
-    category: 'milestone',
-    level: 1,
-    xp_value: 100,
-    rarity: 'rare',
-    skills: [],
-    requirements: [{ description: 'Join during beta', completed: true }],
-    is_public: true,
-    holders: 1234,
-    created_at: '2024-01-15',
-    updated_at: '2024-01-15'
-  },
-  {
-    id: 'b2',
-    name: 'Team Player',
-    description: 'Successfully collaborated on 10 or more team projects',
-    image_url: '/badges/team-player.png',
-    category: 'collaboration',
-    level: 2,
-    xp_value: 250,
-    rarity: 'uncommon',
-    skills: ['Teamwork', 'Communication'],
-    requirements: [
-      { description: 'Collaborate on 10 projects', completed: true },
-      { description: 'Receive positive feedback', completed: true }
-    ],
-    is_public: true,
-    holders: 5678,
-    created_at: '2024-02-20',
-    updated_at: '2024-02-20'
-  },
-  {
-    id: 'b3',
-    name: 'Code Master',
-    description: 'Completed advanced coding challenges with excellence',
-    image_url: '/badges/code-master.png',
-    category: 'technical',
-    level: 3,
-    xp_value: 500,
-    rarity: 'epic',
-    skills: ['Programming', 'Problem Solving', 'Algorithms'],
-    requirements: [
-      { description: 'Complete 50 coding challenges', completed: true },
-      { description: 'Achieve 90%+ accuracy', completed: true },
-      { description: 'Help 5 team members', completed: false }
-    ],
-    is_public: true,
-    holders: 892,
-    created_at: '2024-03-10',
-    updated_at: '2024-03-10'
-  },
-  {
-    id: 'b4',
-    name: 'Innovation Pioneer',
-    description: 'Proposed and implemented a breakthrough feature or improvement',
-    image_url: '/badges/innovation.png',
-    category: 'achievement',
-    level: 4,
-    xp_value: 750,
-    rarity: 'epic',
-    skills: ['Innovation', 'Leadership', 'Initiative'],
-    requirements: [
-      { description: 'Submit innovative proposal', completed: true },
-      { description: 'Get proposal approved', completed: true },
-      { description: 'Successfully implement', completed: true }
-    ],
-    is_public: true,
-    holders: 234,
-    created_at: '2024-04-05',
-    updated_at: '2024-04-05'
-  },
-  {
-    id: 'b5',
-    name: 'Legendary Mentor',
-    description: 'Mentored 20+ team members to success and received outstanding reviews',
-    image_url: '/badges/mentor.png',
-    category: 'leadership',
-    level: 5,
-    xp_value: 1500,
-    rarity: 'legendary',
-    skills: ['Mentoring', 'Leadership', 'Teaching', 'Patience'],
-    requirements: [
-      { description: 'Mentor 20 team members', completed: true },
-      { description: 'All mentees achieve goals', completed: true },
-      { description: 'Receive 5-star reviews', completed: true },
-      { description: 'Create mentoring resources', completed: true }
-    ],
-    is_public: true,
-    holders: 45,
-    created_at: '2024-05-15',
-    updated_at: '2024-05-15'
-  },
-  {
-    id: 'b6',
-    name: 'Community Champion',
-    description: 'Active contributor to the community with 100+ helpful interactions',
-    image_url: '/badges/community.png',
-    category: 'community',
-    level: 3,
-    xp_value: 400,
-    rarity: 'rare',
-    skills: ['Community', 'Support', 'Knowledge Sharing'],
-    requirements: [
-      { description: 'Answer 100 questions', completed: true },
-      { description: 'Create helpful resources', completed: true }
-    ],
-    is_public: true,
-    holders: 567,
-    created_at: '2024-06-20',
-    updated_at: '2024-06-20'
-  }
-]
-
-// Mock user's earned badges
-const mockUserBadges: UserBadge[] = [
-  {
-    id: 'ub1',
-    user_id: 'user1',
-    badge_id: 'b1',
-    awarded_at: '2024-01-20',
-    awarded_by: 'system',
-    is_pinned: true,
-    share_count: 5,
-    badge: mockBadges[0]
-  },
-  {
-    id: 'ub2',
-    user_id: 'user1',
-    badge_id: 'b2',
-    awarded_at: '2024-03-15',
-    awarded_by: 'manager1',
-    is_pinned: true,
-    share_count: 3,
-    badge: mockBadges[1]
-  },
-  {
-    id: 'ub3',
-    user_id: 'user1',
-    badge_id: 'b6',
-    awarded_at: '2024-07-10',
-    awarded_by: 'admin1',
-    is_pinned: false,
-    share_count: 8,
-    badge: mockBadges[5]
-  }
-]
-
-// Mock team members for awarding badges
-const mockTeamMembers: TeamMember[] = [
-  { id: 'tm1', name: 'Alice Johnson', email: 'alice@example.com', avatar: '', badges_count: 5, xp: 1250 },
-  { id: 'tm2', name: 'Bob Smith', email: 'bob@example.com', avatar: '', badges_count: 3, xp: 750 },
-  { id: 'tm3', name: 'Carol Davis', email: 'carol@example.com', avatar: '', badges_count: 8, xp: 2100 },
-  { id: 'tm4', name: 'David Wilson', email: 'david@example.com', avatar: '', badges_count: 2, xp: 400 },
-  { id: 'tm5', name: 'Eva Martinez', email: 'eva@example.com', avatar: '', badges_count: 6, xp: 1800 },
-]
 
 // Rarity colors and icons
 const rarityConfig: Record<BadgeRarity, { color: string; bgColor: string; icon: React.ReactNode }> = {
@@ -346,14 +185,15 @@ export function BadgesClient() {
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
   // Data state (would come from API in production)
-  const [badges, setBadges] = useState<BadgeData[]>(mockBadges)
-  const [userBadges, setUserBadges] = useState<UserBadge[]>(mockUserBadges)
+  const [badges, setBadges] = useState<BadgeData[]>([])
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [stats, setStats] = useState<BadgeStats>({
-    total_badges: mockBadges.length,
-    earned_badges: mockUserBadges.length,
-    total_xp: mockUserBadges.reduce((sum, ub) => sum + ub.badge.xp_value, 0),
-    pinned_count: mockUserBadges.filter(ub => ub.is_pinned).length,
-    completion_rate: Math.round((mockUserBadges.length / mockBadges.length) * 100)
+    total_badges: 0,
+    earned_badges: 0,
+    total_xp: 0,
+    pinned_count: 0,
+    completion_rate: 0
   })
 
   // Refs for download
@@ -1463,7 +1303,7 @@ export function BadgesClient() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-2">
-                    {mockTeamMembers.map((member) => {
+                    {teamMembers.map((member) => {
                       const isSelected = selectedMember?.id === member.id
                       return (
                         <div

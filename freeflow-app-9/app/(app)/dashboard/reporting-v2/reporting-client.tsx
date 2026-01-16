@@ -102,39 +102,6 @@ const DATA_SOURCE_TYPES: { type: DataSourceType; label: string; icon: typeof Dat
 // Use CHART_TYPES for backward compatibility
 const chartTypes = CHART_TYPES
 
-// Enhanced Reporting Mock Data
-const mockReportingAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Report Trend', description: 'Dashboard views up 23% this week. Sales Overview is the most viewed.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'success' as const, title: 'Data Freshness', description: 'All data sources synced successfully. Last refresh 5 minutes ago.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Data' },
-  { id: '3', type: 'warning' as const, title: 'Query Performance', description: '3 worksheets have slow queries. Consider optimizing aggregations.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-]
-
-const mockReportingCollaborators = [
-  { id: '1', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'online' as const, role: 'Analytics Lead', lastActive: 'Now' },
-  { id: '2', name: 'BI Developer', avatar: '/avatars/bi.jpg', status: 'online' as const, role: 'Dashboard Builder', lastActive: '10m ago' },
-  { id: '3', name: 'Data Engineer', avatar: '/avatars/engineer.jpg', status: 'away' as const, role: 'Data Pipeline', lastActive: '30m ago' },
-]
-
-const mockReportingPredictions = [
-  { id: '1', label: 'Report Views', current: 2450, target: 3000, predicted: 2800, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Data Quality', current: 94, target: 98, predicted: 96, confidence: 88, trend: 'up' as const },
-  { id: '3', label: 'Query Speed', current: 2.1, target: 1.5, predicted: 1.8, confidence: 75, trend: 'up' as const },
-]
-
-const mockReportingActivities = [
-  { id: '1', user: 'Data Analyst', action: 'created', target: 'Q4 Revenue Dashboard', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'BI Developer', action: 'scheduled', target: 'Weekly Sales Report', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'Data Engineer', action: 'connected', target: 'Snowflake data source', timestamp: '1h ago', type: 'info' as const },
-]
-
-// Quick actions - handlers will be set in component
-const mockReportingQuickActionsConfig = [
-  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D' },
-  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W' },
-  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S' },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E' },
-]
-
 export default function ReportingClient() {
   // Hooks for data
   const {
@@ -1648,18 +1615,18 @@ export default function ReportingClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockReportingAIInsights}
+              insights={[]}
               title="Reporting Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockReportingCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockReportingPredictions}
+              predictions={[]}
               title="Analytics Forecasts"
             />
           </div>
@@ -1667,22 +1634,12 @@ export default function ReportingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockReportingActivities}
+            activities={[]}
             title="Report Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReportingQuickActionsConfig.map(action => ({
-              ...action,
-              action: () => {
-                switch(action.id) {
-                  case '1': setShowCreateDashboard(true); break
-                  case '2': setShowCreateWorksheet(true); break
-                  case '3': setShowScheduleDialog(true); break
-                  case '4': handleExportData(); break
-                }
-              }
-            }))}
+            actions={[]}
             variant="grid"
           />
         </div>

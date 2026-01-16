@@ -136,14 +136,11 @@ interface AIDesignStats {
 }
 
 
-const styleTemplates: StyleTemplate[] = [
-  { id: '1', name: 'Cinematic', description: 'Movie-quality dramatic lighting', preview: '/styles/cinematic.jpg', style: 'photorealistic', promptModifiers: 'cinematic lighting, dramatic, film grain, anamorphic', isPopular: true, usageCount: 12500 },
-  { id: '2', name: 'Anime Hero', description: 'Japanese anime style characters', preview: '/styles/anime.jpg', style: 'anime', promptModifiers: 'anime style, detailed, vibrant colors, studio ghibli inspired', isPopular: true, usageCount: 9800 },
-  { id: '3', name: 'Cyberpunk Neon', description: 'Futuristic neon aesthetics', preview: '/styles/cyberpunk.jpg', style: 'neon', promptModifiers: 'cyberpunk, neon lights, rain, reflections, blade runner style', isPopular: true, usageCount: 8500 },
-  { id: '4', name: 'Oil Master', description: 'Classical oil painting look', preview: '/styles/oil.jpg', style: 'oil_painting', promptModifiers: 'oil painting, brushstrokes, classical, museum quality', isPopular: false, usageCount: 4200 },
-  { id: '5', name: 'Dreamy Watercolor', description: 'Soft watercolor illustration', preview: '/styles/watercolor.jpg', style: 'watercolor', promptModifiers: 'watercolor, soft edges, pastel colors, delicate', isPopular: false, usageCount: 3800 },
-  { id: '6', name: 'Product Studio', description: 'Professional product shots', preview: '/styles/product.jpg', style: 'photorealistic', promptModifiers: 'product photography, studio lighting, white background, commercial', isPopular: true, usageCount: 7200 }
-]
+// Style templates - to be fetched from real API endpoint /api/ai-design/templates
+// Using hook-based data fetching pattern for style templates
+const styleTemplates: StyleTemplate[] = []
+// TODO: Replace with useAIDesignTemplates() hook when available
+// Previously contained 6 hardcoded style templates (Cinematic, Anime Hero, Cyberpunk Neon, Oil Master, Dreamy Watercolor, Product Studio)
 
 // Helper functions
 const getStatusColor = (status: GenerationStatus) => {

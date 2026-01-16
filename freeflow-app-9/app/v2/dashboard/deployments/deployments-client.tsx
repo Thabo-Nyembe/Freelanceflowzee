@@ -202,126 +202,6 @@ interface BuildPlugin {
   installCount: number
 }
 
-// Mock Data
-const mockDeployments: Deployment[] = [
-  { id: '1', name: 'Production', status: 'success', environment: 'production', branch: 'main', commit: 'a3b2c1d', commitMessage: 'feat: Add new dashboard components', author: 'Sarah Chen', authorAvatar: 'sarah', createdAt: '2024-01-15T14:30:00Z', duration: 45, previewUrl: 'https://app-a3b2c1d.vercel.app', productionUrl: 'https://freeflow.app', buildCache: true, isProtected: true },
-  { id: '2', name: 'Preview', status: 'in_progress', environment: 'preview', branch: 'feature/new-ui', commit: 'b4c3d2e', commitMessage: 'wip: Update UI components', author: 'Mike Johnson', authorAvatar: 'mike', createdAt: '2024-01-15T15:00:00Z', duration: 0, previewUrl: 'https://app-b4c3d2e.vercel.app', prNumber: 234, prTitle: 'New UI Components', buildCache: true, isProtected: false },
-  { id: '3', name: 'Staging', status: 'success', environment: 'staging', branch: 'develop', commit: 'c5d4e3f', commitMessage: 'fix: Resolve API issues', author: 'Emily Davis', authorAvatar: 'emily', createdAt: '2024-01-15T12:00:00Z', duration: 38, previewUrl: 'https://staging.freeflow.app', buildCache: true, isProtected: true },
-  { id: '4', name: 'Preview', status: 'failed', environment: 'preview', branch: 'fix/auth-bug', commit: 'd6e5f4g', commitMessage: 'fix: Auth token refresh', author: 'Alex Kim', authorAvatar: 'alex', createdAt: '2024-01-15T10:00:00Z', duration: 23, previewUrl: '', prNumber: 235, prTitle: 'Fix Auth Bug', buildCache: false, isProtected: false },
-  { id: '5', name: 'Production', status: 'success', environment: 'production', branch: 'main', commit: 'e7f6g5h', commitMessage: 'chore: Update dependencies', author: 'Sarah Chen', authorAvatar: 'sarah', createdAt: '2024-01-14T18:00:00Z', duration: 52, previewUrl: 'https://app-e7f6g5h.vercel.app', productionUrl: 'https://freeflow.app', buildCache: true, isProtected: true },
-  { id: '6', name: 'Preview', status: 'queued', environment: 'preview', branch: 'feature/payments', commit: 'f8g7h6i', commitMessage: 'feat: Add Stripe integration', author: 'Jordan Lee', authorAvatar: 'jordan', createdAt: '2024-01-15T15:15:00Z', duration: 0, previewUrl: '', prNumber: 236, prTitle: 'Stripe Integration', buildCache: false, isProtected: false }
-]
-
-const mockBuildLogs: BuildLog[] = [
-  { id: '1', timestamp: '10:23:01', level: 'info', message: 'Cloning repository...', step: 'clone' },
-  { id: '2', timestamp: '10:23:03', level: 'success', message: 'Repository cloned successfully', step: 'clone' },
-  { id: '3', timestamp: '10:23:04', level: 'info', message: 'Installing dependencies...', step: 'install' },
-  { id: '4', timestamp: '10:23:15', level: 'warn', message: 'npm WARN deprecated package@1.0.0', step: 'install' },
-  { id: '5', timestamp: '10:23:25', level: 'success', message: 'Dependencies installed (1,247 packages)', step: 'install' },
-  { id: '6', timestamp: '10:23:26', level: 'info', message: 'Building application...', step: 'build' },
-  { id: '7', timestamp: '10:23:30', level: 'info', message: 'Compiling TypeScript...', step: 'build' },
-  { id: '8', timestamp: '10:23:45', level: 'info', message: 'Generating static pages (0/24)...', step: 'build' },
-  { id: '9', timestamp: '10:23:50', level: 'success', message: 'Build completed in 24s', step: 'build' },
-  { id: '10', timestamp: '10:23:51', level: 'info', message: 'Uploading build artifacts...', step: 'deploy' },
-  { id: '11', timestamp: '10:23:55', level: 'info', message: 'Deploying to edge network (12 regions)...', step: 'deploy' },
-  { id: '12', timestamp: '10:24:00', level: 'success', message: 'Deployment ready!', step: 'deploy' }
-]
-
-const mockDomains: DeploymentDomain[] = [
-  { id: '1', domain: 'freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-01' },
-  { id: '2', domain: 'www.freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-01', redirectTo: 'freeflow.app' },
-  { id: '3', domain: 'staging.freeflow.app', type: 'preview', verified: true, ssl: true, createdAt: '2024-01-05' },
-  { id: '4', domain: 'api.freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-10' }
-]
-
-const mockEnvVars: EnvironmentVariable[] = [
-  { id: '1', key: 'DATABASE_URL', value: '••••••••••••', environment: 'all', encrypted: true, createdAt: '2024-01-01' },
-  { id: '2', key: 'NEXT_PUBLIC_API_URL', value: 'https://api.freeflow.app', environment: 'production', encrypted: false, createdAt: '2024-01-01' },
-  { id: '3', key: 'STRIPE_SECRET_KEY', value: '••••••••••••', environment: 'production', encrypted: true, createdAt: '2024-01-10' },
-  { id: '4', key: 'REDIS_URL', value: '••••••••••••', environment: 'all', encrypted: true, createdAt: '2024-01-15' },
-  { id: '5', key: 'SENTRY_DSN', value: 'https://xxx@sentry.io/123', environment: 'all', encrypted: false, createdAt: '2024-01-15' }
-]
-
-const mockFunctions: ServerlessFunction[] = [
-  { id: '1', name: '/api/auth/login', runtime: 'Node.js 20', region: 'iad1', invocations: 45230, avgDuration: 124, errors: 23, memory: 256 },
-  { id: '2', name: '/api/projects', runtime: 'Node.js 20', region: 'iad1', invocations: 28450, avgDuration: 89, errors: 5, memory: 256 },
-  { id: '3', name: '/api/webhooks/stripe', runtime: 'Node.js 20', region: 'iad1', invocations: 12340, avgDuration: 234, errors: 12, memory: 512 },
-  { id: '4', name: '/api/ai/generate', runtime: 'Node.js 20', region: 'sfo1', invocations: 8920, avgDuration: 2340, errors: 45, memory: 1024 },
-  { id: '5', name: '/api/upload', runtime: 'Node.js 20', region: 'iad1', invocations: 5670, avgDuration: 567, errors: 8, memory: 512 }
-]
-
-const mockEdgeConfigs: EdgeConfig[] = [
-  { id: '1', name: 'feature-flags', itemCount: 24, reads: 125000, writes: 45, createdAt: '2024-01-01' },
-  { id: '2', name: 'rate-limits', itemCount: 8, reads: 89000, writes: 12, createdAt: '2024-01-10' },
-  { id: '3', name: 'geo-config', itemCount: 15, reads: 45000, writes: 5, createdAt: '2024-01-15' }
-]
-
-const mockBlobs: StorageBlob[] = [
-  { id: '1', name: 'uploads/avatar-001.png', size: 245000, contentType: 'image/png', uploadedAt: '2024-01-15T10:00:00Z', downloadCount: 156, isPublic: true },
-  { id: '2', name: 'uploads/document.pdf', size: 1245000, contentType: 'application/pdf', uploadedAt: '2024-01-14T14:00:00Z', downloadCount: 45, isPublic: false },
-  { id: '3', name: 'assets/logo.svg', size: 12000, contentType: 'image/svg+xml', uploadedAt: '2024-01-10T09:00:00Z', downloadCount: 890, isPublic: true },
-  { id: '4', name: 'backups/db-2024-01-15.sql', size: 52400000, contentType: 'application/sql', uploadedAt: '2024-01-15T06:00:00Z', downloadCount: 2, isPublic: false }
-]
-
-const mockProtections: DeploymentProtection[] = [
-  { id: '1', name: 'Password Protection', type: 'password', enabled: true, config: { password: '••••••' } },
-  { id: '2', name: 'Vercel Authentication', type: 'vercel_auth', enabled: false, config: {} },
-  { id: '3', name: 'Trusted IPs', type: 'trusted_ips', enabled: true, config: { ips: ['192.168.1.0/24', '10.0.0.0/8'] } }
-]
-
-const mockWebhooks: DeploymentWebhook[] = [
-  { id: '1', name: 'Slack Notifications', url: 'https://hooks.slack.com/services/xxx', events: ['deployment.created', 'deployment.succeeded', 'deployment.failed'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, secret: 'whsec_xxxxxx' },
-  { id: '2', name: 'Discord Bot', url: 'https://discord.com/api/webhooks/xxx', events: ['deployment.succeeded'], status: 'active', lastTriggered: '2024-01-16 09:00', successRate: 98.5, secret: 'whsec_yyyyyy' },
-  { id: '3', name: 'CI/CD Trigger', url: 'https://api.internal.io/webhooks/deploy', events: ['deployment.promoted', 'deployment.rolled_back'], status: 'failed', lastTriggered: '2024-01-14 15:30', successRate: 78.0, secret: 'whsec_zzzzzz' }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'GitHub', type: 'ci_cd', status: 'connected', icon: 'github', lastSync: '2024-01-16 09:00', config: { repo: 'freeflow-app/freeflow', branch: 'main' } },
-  { id: '2', name: 'Datadog', type: 'monitoring', status: 'connected', icon: 'datadog', lastSync: '2024-01-16 08:45', config: { apiKey: '••••••' } },
-  { id: '3', name: 'Slack', type: 'notification', status: 'connected', icon: 'slack', lastSync: '2024-01-16 09:15', config: { channel: '#deployments' } },
-  { id: '4', name: 'LogDNA', type: 'logging', status: 'disconnected', icon: 'logdna', lastSync: '2024-01-10 12:00', config: {} },
-  { id: '5', name: 'Sentry', type: 'monitoring', status: 'connected', icon: 'sentry', lastSync: '2024-01-16 08:30', config: { org: 'freeflow', project: 'main' } },
-  { id: '6', name: 'Amplitude', type: 'analytics', status: 'connected', icon: 'amplitude', lastSync: '2024-01-16 08:00', config: { apiKey: '••••••' } }
-]
-
-const mockTeamMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@freeflow.app', role: 'owner', avatar: 'SC', lastActive: '2024-01-16 09:23', deploymentsThisMonth: 45 },
-  { id: '2', name: 'Mike Johnson', email: 'mike@freeflow.app', role: 'admin', avatar: 'MJ', lastActive: '2024-01-16 09:15', deploymentsThisMonth: 38 },
-  { id: '3', name: 'Emily Davis', email: 'emily@freeflow.app', role: 'developer', avatar: 'ED', lastActive: '2024-01-16 08:45', deploymentsThisMonth: 32 },
-  { id: '4', name: 'Alex Kim', email: 'alex@freeflow.app', role: 'developer', avatar: 'AK', lastActive: '2024-01-15 18:30', deploymentsThisMonth: 28 },
-  { id: '5', name: 'Jordan Lee', email: 'jordan@freeflow.app', role: 'viewer', avatar: 'JL', lastActive: '2024-01-15 14:00', deploymentsThisMonth: 0 }
-]
-
-const mockBuildPlugins: BuildPlugin[] = [
-  { id: '1', name: 'Lighthouse Audit', version: '2.3.1', enabled: true, description: 'Run Lighthouse performance audits on each deployment', author: 'Vercel', installCount: 125000 },
-  { id: '2', name: 'Bundle Analyzer', version: '1.5.0', enabled: true, description: 'Analyze JavaScript bundle size', author: 'Vercel', installCount: 89000 },
-  { id: '3', name: 'Image Optimizer', version: '3.0.2', enabled: true, description: 'Automatically optimize images during build', author: 'Vercel', installCount: 156000 },
-  { id: '4', name: 'Cache Warmer', version: '1.2.0', enabled: false, description: 'Pre-populate CDN cache after deployment', author: 'Community', installCount: 34000 }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockDeploymentsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Deploy Success', description: '100% deployment success rate this week. Zero rollbacks needed.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Reliability' },
-  { id: '2', type: 'info' as const, title: 'Build Time', description: 'Average build time reduced to 45 seconds with new caching.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '3', type: 'warning' as const, title: 'Resource Usage', description: 'Production memory at 82%. Consider scaling before next deploy.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-]
-
-const mockDeploymentsCollaborators = [
-  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'SRE', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
-  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'busy' as const, role: 'Dev' },
-]
-
-const mockDeploymentsPredictions = [
-  { id: '1', title: 'Deploy Window', prediction: 'Next safe deploy window: 2 PM', confidence: 92, trend: 'stable' as const, impact: 'high' as const },
-  { id: '2', title: 'Uptime Goal', prediction: '99.99% uptime achievable this month', confidence: 88, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockDeploymentsActivities = [
-  { id: '1', user: 'CI/CD Pipeline', action: 'Deployed to', target: 'Production v2.4.1', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Auto-Scale', action: 'Scaled up', target: 'API servers (3 → 5)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Monitor', action: 'Health check passed for', target: 'All endpoints', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -650,10 +530,10 @@ export default function DeploymentsClient() {
   })
 
   // Protection rules state
-  const [protectionRules, setProtectionRules] = useState(mockProtections)
+  const [protectionRules, setProtectionRules] = useState([])
 
   // Plugins state
-  const [plugins, setPlugins] = useState(mockBuildPlugins)
+  const [plugins, setPlugins] = useState([])
 
   // Alert settings state
   const [alertSettings, setAlertSettings] = useState({
@@ -746,8 +626,8 @@ export default function DeploymentsClient() {
     { id: '3', label: 'View Logs', icon: 'file-text', action: () => setShowQuickLogsDialog(true), variant: 'outline' as const },
   ]
   const [settingsTab, setSettingsTab] = useState('general')
-  const [buildLogs, setBuildLogs] = useState<BuildLog[]>(mockBuildLogs)
-  const [envVars, setEnvVars] = useState<EnvironmentVariable[]>(mockEnvVars)
+  const [buildLogs, setBuildLogs] = useState<BuildLog[]>([])
+  const [envVars, setEnvVars] = useState<EnvironmentVariable[]>([])
   const [newEnvKey, setNewEnvKey] = useState('')
   const [newEnvValue, setNewEnvValue] = useState('')
 
@@ -769,18 +649,18 @@ export default function DeploymentsClient() {
     return {
       total,
       successful,
-      successRate: ((successful / total) * 100).toFixed(1),
+      successRate: total > 0 ? ((successful / total) * 100).toFixed(1) : '0',
       avgDuration: avgDuration.toFixed(0),
-      totalFunctions: mockFunctions.length,
-      totalInvocations: mockFunctions.reduce((sum, f) => sum + f.invocations, 0),
-      totalDomains: mockDomains.length,
-      totalStorage: mockBlobs.reduce((sum, b) => sum + b.size, 0),
+      totalFunctions: 0,
+      totalInvocations: 0,
+      totalDomains: 0,
+      totalStorage: 0,
       // Additional stats for the banner
-      totalDeployments: total + dbDeployments.length,
+      totalDeployments: total + (dbDeploymentsData?.length || 0),
       avgBuildTime: Math.round(avgDuration),
-      activeDeployments: activeDeployments + dbDeployments.filter(d => d.status === 'in_progress' || d.status === 'pending').length,
+      activeDeployments: activeDeployments + (dbDeploymentsData?.filter(d => d.status === 'in_progress' || d.status === 'pending').length || 0),
     }
-  }, [dbDeployments])
+  }, [mappedDeployments, dbDeploymentsData])
 
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {

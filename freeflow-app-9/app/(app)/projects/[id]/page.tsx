@@ -33,57 +33,6 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// Mock project data
-const mockProject = {
-  id: '1',
-  name: 'Brand Identity Package',
-  client: 'Acme Corporation',
-  description: 'Complete brand identity design including logo, typography, color palette, and comprehensive brand guidelines for a modern tech company.',
-  status: 'In Progress',
-  progress: 75,
-  value: 2500,
-  deadline: '2024-01-15',
-  priority: 'high',
-  tags: ['Design', 'Branding', 'Logo', 'Typography'],
-  createdAt: '2023-12-01',
-  lastUpdated: '2024-01-08',
-  team: [
-    { id: '1', name: 'John Doe', role: 'Lead Designer', avatar: '/placeholder-user.jpg' },
-    { id: '2', name: 'Jane Smith', role: 'Brand Strategist', avatar: '/placeholder-user.jpg' }
-  ],
-  client_info: {
-    name: 'Acme Corporation',
-    contact: 'Sarah Johnson',
-    email: 'sarah@acme.com',
-    phone: '+1 (555) 123-4567'
-  },
-  milestones: [
-    { id: '1', title: 'Research & Discovery', status: 'completed', date: '2023-12-05', amount: 500 },
-    { id: '2', title: 'Concept Development', status: 'completed', date: '2023-12-15', amount: 750 },
-    { id: '3', title: 'Design Refinement', status: 'in_progress', date: '2024-01-10', amount: 750 },
-    { id: '4', title: 'Final Delivery', status: 'pending', date: '2024-01-15', amount: 500 }
-  ],
-  files: [
-    { id: '1', name: 'Logo_Concepts_v1.pdf', type: 'pdf', size: '2.4 MB', uploaded: '2023-12-10' },
-    { id: '2', name: 'Brand_Colors.sketch', type: 'sketch', size: '1.1 MB', uploaded: '2023-12-12' },
-    { id: '3', name: 'Typography_Guide.pdf', type: 'pdf', size: '3.2 MB', uploaded: '2023-12-14' }
-  ],
-  activities: [
-    { id: '1', type: 'file_upload', message: 'Uploaded Typography_Guide.pdf', user: 'John Doe', time: '2 hours ago' },
-    { id: '2', type: 'comment', message: 'Added feedback on logo concepts', user: 'Sarah Johnson', time: '5 hours ago' },
-    { id: '3', type: 'milestone', message: 'Completed Concept Development milestone', user: 'Jane Smith', time: '1 day ago' }
-  ],
-  timeTracking: {
-    totalHours: 42,
-    thisWeek: 12,
-    breakdown: [
-      { task: 'Logo Design', hours: 18 },
-      { task: 'Brand Strategy', hours: 14 },
-      { task: 'Documentation', hours: 10 }
-    ]
-  }
-}
-
 export default function ProjectDetailPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
@@ -93,7 +42,7 @@ export default function ProjectDetailPage() {
 
   const params = useParams()
   const router = useRouter()
-  const [project, setProject] = useState(mockProject)
+  const [project, setProject] = useState(null)
 
   // A+++ LOAD PROJECT DATA
   useEffect(() => {

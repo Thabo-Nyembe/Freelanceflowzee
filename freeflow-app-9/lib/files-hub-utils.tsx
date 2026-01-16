@@ -146,25 +146,22 @@ export interface StorageStats {
 }
 
 // ============================================================================
-// MOCK DATA - USERS
+// MOCK DATA - USERS (Migration Batch #9)
 // ============================================================================
 
-const MOCK_USERS = [
-  { id: 'user-001', name: 'Alice Johnson', avatar: '/avatars/alice.jpg' },
-  { id: 'user-002', name: 'Bob Smith', avatar: '/avatars/bob.jpg' },
-  { id: 'user-003', name: 'Charlie Brown', avatar: '/avatars/charlie.jpg' },
-  { id: 'user-004', name: 'Diana Prince', avatar: '/avatars/diana.jpg' },
-  { id: 'user-005', name: 'Ethan Hunt', avatar: '/avatars/ethan.jpg' },
-  { id: 'user-006', name: 'Fiona Green', avatar: '/avatars/fiona.jpg' },
-  { id: 'user-007', name: 'George Miller', avatar: '/avatars/george.jpg' },
-  { id: 'user-008', name: 'Hannah Lee', avatar: '/avatars/hannah.jpg' },
-]
+// MOCK DATA - REMOVED (Migration Batch #9)
+// All mock user data replaced with database queries via user management hooks
+const MOCK_USERS: Array<{ id: string; name: string; avatar: string }> = []
 
 // ============================================================================
-// MOCK DATA - FOLDERS (15+ folders with hierarchy)
+// MOCK DATA - FOLDERS (Migration Batch #9)
 // ============================================================================
 
-export const MOCK_FOLDERS: FolderStructure[] = [
+// MOCK DATA - REMOVED (Migration Batch #9)
+// All mock folder data replaced with database queries via files hub hooks
+export const MOCK_FOLDERS: FolderStructure[] = []
+
+/* ORIGINAL MOCK DATA REMOVED - Previously contained 15 folders:
   {
     id: 'folder-001',
     name: 'All Files',
@@ -379,13 +376,17 @@ export const MOCK_FOLDERS: FolderStructure[] = [
     permissions: { canRead: true, canWrite: false, canDelete: false, canShare: false },
     description: 'System backups and snapshots'
   },
-]
+*/
 
 // ============================================================================
-// MOCK DATA - FILES (60+ diverse files)
+// MOCK DATA - FILES (Migration Batch #9)
 // ============================================================================
 
-export const MOCK_FILES: FileItem[] = [
+// MOCK DATA - REMOVED (Migration Batch #9)
+// All mock file data replaced with database queries via files hub hooks
+export const MOCK_FILES: FileItem[] = []
+
+/* ORIGINAL MOCK DATA REMOVED - Previously contained 60+ files:
   // DOCUMENTS (15 files)
   {
     id: 'FILE-001',
@@ -2281,7 +2282,7 @@ export const MOCK_FILES: FileItem[] = [
     archivedAt: '2024-04-01T00:00:00.000Z',
     lastAccessedAt: '2024-09-15T10:30:00.000Z'
   },
-]
+*/
 
 // ============================================================================
 // HELPER FUNCTIONS - FILE OPERATIONS

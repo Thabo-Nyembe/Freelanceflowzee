@@ -251,96 +251,6 @@ interface Automation {
   lastTriggered?: string
 }
 
-// Mock Data
-const mockMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@example.com', role: 'admin', presence: 'online', cursorColor: '#3B82F6', lastActive: '2024-01-15T14:30:00Z', department: 'Product', title: 'Product Manager' },
-  { id: '2', name: 'Mike Johnson', email: 'mike@example.com', role: 'member', presence: 'online', cursorColor: '#10B981', lastActive: '2024-01-15T14:28:00Z', department: 'Engineering', title: 'Senior Developer' },
-  { id: '3', name: 'Emily Davis', email: 'emily@example.com', role: 'member', presence: 'away', cursorColor: '#F59E0B', lastActive: '2024-01-15T12:00:00Z', department: 'Design', title: 'UX Designer' },
-  { id: '4', name: 'Alex Kim', email: 'alex@example.com', role: 'member', presence: 'busy', cursorColor: '#EF4444', lastActive: '2024-01-15T14:25:00Z', department: 'Engineering', title: 'Developer' },
-  { id: '5', name: 'Jordan Lee', email: 'jordan@example.com', role: 'guest', presence: 'offline', cursorColor: '#8B5CF6', lastActive: '2024-01-14T18:00:00Z', department: 'Marketing', title: 'Marketing Lead' }
-]
-
-const mockBoards: Board[] = [
-  { id: '1', name: 'Product Roadmap 2024', description: 'Strategic planning and feature prioritization', type: 'kanban', status: 'active', createdAt: '2024-01-10T10:00:00Z', updatedAt: '2024-01-15T14:30:00Z', createdBy: mockMembers[0], members: mockMembers.slice(0, 4), isStarred: true, isLocked: false, isPublic: false, viewCount: 245, commentCount: 32, elementCount: 156, version: 47, tags: ['roadmap', 'planning'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
-  { id: '2', name: 'User Flow Diagrams', description: 'Main user journeys and flows', type: 'flowchart', status: 'active', createdAt: '2024-01-08T09:00:00Z', updatedAt: '2024-01-15T11:20:00Z', createdBy: mockMembers[2], members: mockMembers.slice(0, 3), isStarred: true, isLocked: false, isPublic: true, viewCount: 189, commentCount: 18, elementCount: 89, version: 23, tags: ['ux', 'design'], teamId: 't2', teamName: 'Design Team', channelId: 'c2' },
-  { id: '3', name: 'Sprint Retrospective', description: 'Team reflection on Sprint 24', type: 'retrospective', status: 'active', createdAt: '2024-01-14T15:00:00Z', updatedAt: '2024-01-15T10:00:00Z', createdBy: mockMembers[1], members: mockMembers, isStarred: false, isLocked: false, isPublic: false, viewCount: 56, commentCount: 45, elementCount: 67, version: 12, tags: ['agile', 'retro'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
-  { id: '4', name: 'Architecture Diagram', description: 'System architecture overview', type: 'flowchart', status: 'active', createdAt: '2024-01-05T10:00:00Z', updatedAt: '2024-01-14T16:00:00Z', createdBy: mockMembers[3], members: mockMembers.slice(1, 4), isStarred: false, isLocked: true, isPublic: false, viewCount: 312, commentCount: 23, elementCount: 198, version: 56, tags: ['architecture', 'technical'], teamId: 't3', teamName: 'Engineering', channelId: 'c3' }
-]
-
-const mockChannels: Channel[] = [
-  { id: 'c1', name: 'general', type: 'public', description: 'General team discussions', memberCount: 45, unreadCount: 12, isPinned: true, isMuted: false, createdAt: '2024-01-01', lastMessage: { id: 'm1', channelId: 'c1', author: mockMembers[0], content: 'Great work on the release everyone!', timestamp: '2024-01-15T14:30:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '🎉', count: 5, users: ['1', '2', '3', '4', '5'] }], attachments: [], mentions: [] } },
-  { id: 'c2', name: 'design-team', type: 'private', description: 'Design discussions and reviews', memberCount: 8, unreadCount: 3, isPinned: false, isMuted: false, createdAt: '2024-01-05', lastMessage: { id: 'm2', channelId: 'c2', author: mockMembers[2], content: 'New mockups are ready for review', timestamp: '2024-01-15T12:00:00Z', isEdited: false, isPinned: true, reactions: [], attachments: [], mentions: ['1'] } },
-  { id: 'c3', name: 'engineering', type: 'private', description: 'Engineering team channel', memberCount: 25, unreadCount: 0, isPinned: true, isMuted: false, createdAt: '2024-01-02' },
-  { id: 'c4', name: 'random', type: 'public', description: 'Off-topic fun', memberCount: 40, unreadCount: 8, isPinned: false, isMuted: true, createdAt: '2024-01-01' },
-  { id: 'c5', name: 'announcements', type: 'public', description: 'Company-wide announcements', memberCount: 120, unreadCount: 1, isPinned: true, isMuted: false, createdAt: '2024-01-01' }
-]
-
-const mockMessages: Message[] = [
-  { id: 'm1', channelId: 'c1', author: mockMembers[0], content: 'Hey team! Just pushed the latest updates to the roadmap board. Please review when you get a chance.', timestamp: '2024-01-15T14:30:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '👍', count: 3, users: ['2', '3', '4'] }], attachments: [], mentions: [] },
-  { id: 'm2', channelId: 'c1', author: mockMembers[1], content: 'Looks great @Sarah! I have a few suggestions for the Q2 timeline.', timestamp: '2024-01-15T14:32:00Z', isEdited: false, isPinned: false, reactions: [], attachments: [], mentions: ['1'] },
-  { id: 'm3', channelId: 'c1', author: mockMembers[2], content: 'I\'ve attached the updated wireframes for the new feature.', timestamp: '2024-01-15T14:35:00Z', isEdited: false, isPinned: true, reactions: [{ emoji: '🎨', count: 2, users: ['1', '3'] }], attachments: [{ id: 'a1', name: 'wireframes-v2.fig', type: 'document', size: 2456000, url: '#' }], mentions: [] },
-  { id: 'm4', channelId: 'c1', author: mockMembers[3], content: 'Sprint planning meeting in 30 minutes. Don\'t forget!', timestamp: '2024-01-15T14:40:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '⏰', count: 4, users: ['1', '2', '3', '4'] }], attachments: [], mentions: [] },
-  { id: 'm5', channelId: 'c1', author: mockMembers[0], content: 'Great work on the release everyone! 🎉', timestamp: '2024-01-15T15:00:00Z', isEdited: false, isPinned: false, reactions: [{ emoji: '🎉', count: 5, users: ['1', '2', '3', '4', '5'] }, { emoji: '🚀', count: 3, users: ['1', '2', '4'] }], attachments: [], mentions: [] }
-]
-
-const mockMeetings: Meeting[] = [
-  { id: 'mt1', title: 'Sprint Planning', description: 'Plan Sprint 25 backlog', status: 'scheduled', startTime: '2024-01-16T10:00:00Z', duration: 60, organizer: mockMembers[0], participants: mockMembers.slice(0, 4), isRecurring: true, recurrence: 'Every 2 weeks', hasRecording: false, meetingUrl: 'https://meet.example.com/sprint-planning', channelId: 'c1' },
-  { id: 'mt2', title: 'Design Review', description: 'Review new feature designs', status: 'live', startTime: '2024-01-15T14:00:00Z', duration: 45, organizer: mockMembers[2], participants: mockMembers.slice(0, 3), isRecurring: false, hasRecording: true, meetingUrl: 'https://meet.example.com/design-review' },
-  { id: 'mt3', title: 'Team Standup', description: 'Daily standup meeting', status: 'ended', startTime: '2024-01-15T09:00:00Z', endTime: '2024-01-15T09:15:00Z', duration: 15, organizer: mockMembers[1], participants: mockMembers, isRecurring: true, recurrence: 'Every weekday', hasRecording: true, recordingUrl: '#', meetingUrl: 'https://meet.example.com/standup', channelId: 'c3' },
-  { id: 'mt4', title: 'Product Demo', description: 'Demo new features to stakeholders', status: 'scheduled', startTime: '2024-01-17T15:00:00Z', duration: 90, organizer: mockMembers[0], participants: mockMembers, isRecurring: false, hasRecording: false, meetingUrl: 'https://meet.example.com/product-demo' }
-]
-
-const mockFiles: SharedFile[] = [
-  { id: 'f1', name: 'Product Roadmap 2024.pdf', type: 'document', size: 2456000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-10T10:00:00Z', modifiedAt: '2024-01-15T14:00:00Z', sharedWith: ['c1'], downloadCount: 45, version: 3, isStarred: true },
-  { id: 'f2', name: 'Design System.fig', type: 'document', size: 15678000, uploadedBy: mockMembers[2], uploadedAt: '2024-01-08T09:00:00Z', modifiedAt: '2024-01-14T16:00:00Z', sharedWith: ['c2'], downloadCount: 28, version: 12, isStarred: true },
-  { id: 'f3', name: 'Sprint Review Recording.mp4', type: 'video', size: 156780000, uploadedBy: mockMembers[1], uploadedAt: '2024-01-12T15:00:00Z', modifiedAt: '2024-01-12T15:00:00Z', sharedWith: ['c1', 'c3'], downloadCount: 12, version: 1, isStarred: false },
-  { id: 'f4', name: 'Q1 Budget.xlsx', type: 'spreadsheet', size: 345000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-05T10:00:00Z', modifiedAt: '2024-01-10T11:00:00Z', sharedWith: ['c1'], downloadCount: 8, version: 2, isStarred: false },
-  { id: 'f5', name: 'Brand Guidelines.pdf', type: 'document', size: 8900000, uploadedBy: mockMembers[2], uploadedAt: '2024-01-02T14:00:00Z', modifiedAt: '2024-01-02T14:00:00Z', sharedWith: ['c1', 'c2'], downloadCount: 67, version: 1, isStarred: true },
-  { id: 'f6', name: 'Product Demo.pptx', type: 'presentation', size: 12340000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-14T09:00:00Z', modifiedAt: '2024-01-15T10:00:00Z', sharedWith: ['c1'], downloadCount: 23, version: 4, isStarred: false }
-]
-
-const mockTeams: Team[] = [
-  { id: 't1', name: 'Product Team', description: 'Product management and strategy', memberCount: 12, boardCount: 24, channelCount: 5, plan: 'business', role: 'admin', createdAt: '2023-06-01' },
-  { id: 't2', name: 'Design Team', description: 'UX and visual design', memberCount: 8, boardCount: 18, channelCount: 3, plan: 'business', role: 'member', createdAt: '2023-06-01' },
-  { id: 't3', name: 'Engineering', description: 'Development and infrastructure', memberCount: 25, boardCount: 42, channelCount: 8, plan: 'enterprise', role: 'member', createdAt: '2023-01-15' }
-]
-
-const mockActivities: Activity[] = [
-  { id: 'a1', type: 'board', user: mockMembers[0], action: 'updated', description: 'Updated roadmap timeline', resourceId: '1', resourceName: 'Product Roadmap 2024', timestamp: '2024-01-15T14:30:00Z' },
-  { id: 'a2', type: 'message', user: mockMembers[1], action: 'sent', description: 'Sent a message', resourceId: 'c1', resourceName: '#general', timestamp: '2024-01-15T14:32:00Z' },
-  { id: 'a3', type: 'file', user: mockMembers[2], action: 'uploaded', description: 'Uploaded wireframes', resourceId: 'f2', resourceName: 'Design System.fig', timestamp: '2024-01-15T12:00:00Z' },
-  { id: 'a4', type: 'meeting', user: mockMembers[0], action: 'scheduled', description: 'Scheduled a meeting', resourceId: 'mt4', resourceName: 'Product Demo', timestamp: '2024-01-15T11:00:00Z' },
-  { id: 'a5', type: 'member', user: mockMembers[0], action: 'invited', description: 'Invited Jordan Lee', resourceId: '5', resourceName: 'Jordan Lee', timestamp: '2024-01-14T16:00:00Z' }
-]
-
-const mockTemplates: Template[] = [
-  { id: 'tmp1', name: 'Sprint Planning Board', description: 'Kanban board for sprint planning with backlog and status columns', category: 'agile', preview: '/templates/sprint.png', usageCount: 1245, createdBy: 'Collaboration Team', isOfficial: true },
-  { id: 'tmp2', name: 'Design Brainstorm', description: 'Visual brainstorming canvas with sticky notes and mood boards', category: 'brainstorm', preview: '/templates/brainstorm.png', usageCount: 892, createdBy: 'Design Team', isOfficial: true },
-  { id: 'tmp3', name: 'Weekly Standup', description: 'Meeting template for weekly team standups with agenda sections', category: 'meeting', preview: '/templates/standup.png', usageCount: 2156, createdBy: 'Collaboration Team', isOfficial: true },
-  { id: 'tmp4', name: 'Product Roadmap', description: 'Timeline-based roadmap for product planning and releases', category: 'planning', preview: '/templates/roadmap.png', usageCount: 1567, createdBy: 'Product Team', isOfficial: true },
-  { id: 'tmp5', name: 'User Flow Diagram', description: 'Template for mapping user journeys and application flows', category: 'design', preview: '/templates/userflow.png', usageCount: 734, createdBy: 'Design Team', isOfficial: true },
-  { id: 'tmp6', name: 'Project Kickoff', description: 'Comprehensive template for new project kickoff meetings', category: 'project', preview: '/templates/kickoff.png', usageCount: 1089, createdBy: 'Collaboration Team', isOfficial: true }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: 'int1', name: 'Google Calendar', type: 'calendar', status: 'connected', icon: 'calendar', lastSync: '2024-01-15T14:00:00Z' },
-  { id: 'int2', name: 'Slack', type: 'communication', status: 'connected', icon: 'slack', lastSync: '2024-01-15T14:30:00Z' },
-  { id: 'int3', name: 'Google Drive', type: 'storage', status: 'connected', icon: 'drive', lastSync: '2024-01-15T13:00:00Z' },
-  { id: 'int4', name: 'Jira', type: 'productivity', status: 'connected', icon: 'jira', lastSync: '2024-01-15T12:00:00Z' },
-  { id: 'int5', name: 'GitHub', type: 'development', status: 'disconnected', icon: 'github', lastSync: '2024-01-10T09:00:00Z' },
-  { id: 'int6', name: 'Figma', type: 'productivity', status: 'connected', icon: 'figma', lastSync: '2024-01-15T14:15:00Z' },
-  { id: 'int7', name: 'Dropbox', type: 'storage', status: 'error', icon: 'dropbox', lastSync: '2024-01-14T16:00:00Z' },
-  { id: 'int8', name: 'Microsoft Teams', type: 'communication', status: 'disconnected', icon: 'teams', lastSync: '2024-01-05T10:00:00Z' }
-]
-
-const mockAutomations: Automation[] = [
-  { id: 'aut1', name: 'Auto-assign new tasks', trigger: 'When task is created', actions: ['Assign to project lead', 'Notify team channel'], isActive: true, lastTriggered: '2024-01-15T14:30:00Z' },
-  { id: 'aut2', name: 'Meeting reminder', trigger: '15 minutes before meeting', actions: ['Send desktop notification', 'Post in meeting channel'], isActive: true, lastTriggered: '2024-01-15T09:45:00Z' },
-  { id: 'aut3', name: 'Weekly digest', trigger: 'Every Monday at 9:00 AM', actions: ['Generate activity report', 'Send email to team'], isActive: true, lastTriggered: '2024-01-15T09:00:00Z' },
-  { id: 'aut4', name: 'File backup', trigger: 'When file is uploaded', actions: ['Sync to Google Drive', 'Create version history'], isActive: false },
-  { id: 'aut5', name: 'Sprint completion', trigger: 'When sprint ends', actions: ['Generate sprint report', 'Create retrospective board', 'Notify stakeholders'], isActive: true, lastTriggered: '2024-01-12T18:00:00Z' },
-  { id: 'aut6', name: 'Overdue task alert', trigger: 'Daily at 10:00 AM', actions: ['Check for overdue tasks', 'Send reminder to assignees', 'Update manager'], isActive: true, lastTriggered: '2024-01-15T10:00:00Z' }
-]
 
 // ============================================================================
 // REAL ACTION HANDLERS
@@ -499,38 +409,6 @@ async function handleRemoveAction(automationId: string, actionIndex: number) {
   return result.success
 }
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Miro/Figma Level
-// ============================================================================
-
-const mockCollabAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Active Collaboration', description: '15 team members actively editing boards. Peak collaboration time!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '2', type: 'warning' as const, title: 'Meeting Conflict', description: 'You have overlapping meetings scheduled for tomorrow at 2pm.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
-  { id: '3', type: 'info' as const, title: 'Board Insights', description: 'Product Roadmap board has highest engagement this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockCollabCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '2', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'Design' },
-  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'away' as const, role: 'Dev' },
-]
-
-const mockCollabPredictions = [
-  { id: '1', title: 'Meeting Efficiency', prediction: 'Standups running 15% shorter with new format', confidence: 93, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Board Usage', prediction: 'Whiteboard usage expected to double during planning week', confidence: 86, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockCollabActivities = [
-  { id: '1', user: 'Product Manager', action: 'Created', target: 'Q1 Planning whiteboard', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'UX Designer', action: 'Shared', target: 'new wireframes in Design Board', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Developer', action: 'Joined', target: 'Sprint Retro meeting', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
-
-const mockCollabQuickActions = [
-  { id: '1', label: 'New Board', icon: 'plus', action: () => handleCreateBoard(), variant: 'default' as const },
-  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => handleScheduleMeeting(), variant: 'default' as const },
-  { id: '3', label: 'Start Call', icon: 'video', action: () => handleStartCall(), variant: 'outline' as const },
-]
 
 export default function CollaborationClient() {
   const [activeTab, setActiveTab] = useState('boards')

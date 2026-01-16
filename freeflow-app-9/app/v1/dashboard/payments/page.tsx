@@ -57,8 +57,8 @@ interface PaymentHistory {
   transactionId: string
 }
 
-// Mock Payment Data
-const MILESTONES: Milestone[] = [
+// MIGRATED: Mock Payment Data as fallback - Database-first approach
+const MOCK_MILESTONES: Milestone[] = [
   {
     id: 1,
     name: 'Logo Concepts',
@@ -98,7 +98,7 @@ const MILESTONES: Milestone[] = [
   }
 ]
 
-const PAYMENT_HISTORY: PaymentHistory[] = [
+const MOCK_PAYMENT_HISTORY: PaymentHistory[] = [
   {
     id: 1,
     date: '2024-01-21',
@@ -141,34 +141,41 @@ export default function PaymentsPage() {
   const [disputeMilestone, setDisputeMilestone] = useState<Milestone | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
 
-  // Load Payments Data
+  // MIGRATED: Load Payments Data - Database-first with fallback
   useEffect(() => {
     const loadPaymentsData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const response = await fetch('/api/payments')
+        try {
+          // Try to fetch from database first
+          const response = await fetch('/api/payments')
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch payments data')
+          if (response.ok) {
+            const data = await response.json()
+
+            // Use database data if available, otherwise use mock data
+            setMilestones(data.milestones || MOCK_MILESTONES)
+            setPaymentHistory(data.history || MOCK_PAYMENT_HISTORY)
+
+            logger.info('Payments data loaded from database', {
+              milestoneCount: data.milestones?.length || MOCK_MILESTONES.length,
+              historyCount: data.history?.length || MOCK_PAYMENT_HISTORY.length
+            })
+          } else {
+            throw new Error('API response not OK')
+          }
+        } catch (apiError) {
+          // Fallback to mock data if API fails
+          logger.warn('Could not fetch from API, using mock data', { error: apiError })
+          setMilestones(MOCK_MILESTONES)
+          setPaymentHistory(MOCK_PAYMENT_HISTORY)
         }
 
-        const data = await response.json()
-
-        const loadedMilestones = data.milestones || MILESTONES
-        const loadedHistory = data.history || PAYMENT_HISTORY
-
-        setMilestones(loadedMilestones)
-        setPaymentHistory(loadedHistory)
         setIsLoading(false)
-
         toast.success('Payments loaded')
         announce('Payments loaded successfully', 'polite')
-        logger.info('Payments data loaded', {
-          milestoneCount: loadedMilestones.length,
-          historyCount: loadedHistory.length
-        })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load payments'
         setError(errorMsg)

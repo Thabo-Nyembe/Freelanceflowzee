@@ -498,8 +498,8 @@ export default function PluginsClient() {
   const [showFiltersPanel, setShowFiltersPanel] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [configurePluginName, setConfigurePluginName] = useState<string | null>(null)
-  // State for managing mock plugins locally
-  const [localPlugins, setLocalPlugins] = useState<Plugin[]>(mockPlugins)
+  // State for managing plugins locally - migrated from mock data
+  const [localPlugins, setLocalPlugins] = useState<Plugin[]>(plugins || [])
   const [showConfigDialog, setShowConfigDialog] = useState(false)
   const [showChangelogDialog, setShowChangelogDialog] = useState(false)
   const [changelogPlugin, setChangelogPlugin] = useState<Plugin | null>(null)

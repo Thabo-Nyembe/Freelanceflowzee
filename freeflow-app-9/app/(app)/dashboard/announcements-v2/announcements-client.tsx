@@ -198,200 +198,6 @@ interface ChangelogEntry {
   author: Author
 }
 
-// Mock Data
-const mockAuthors: Author[] = [
-  { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Product Manager' },
-  { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', role: 'Engineering Lead' },
-  { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Marketing Director' },
-]
-
-const mockSegments: Segment[] = [
-  { id: '1', name: 'All Users', description: 'Everyone', rules: [], userCount: 50000 },
-  { id: '2', name: 'Pro Users', description: 'Pro plan subscribers', rules: [{ attribute: 'plan', operator: '=', value: 'pro' }], userCount: 12500 },
-  { id: '3', name: 'Enterprise', description: 'Enterprise customers', rules: [{ attribute: 'plan', operator: '=', value: 'enterprise' }], userCount: 850 },
-  { id: '4', name: 'New Users', description: 'Signed up in last 30 days', rules: [{ attribute: 'created_at', operator: '>', value: '-30d' }], userCount: 3200 },
-]
-
-const mockAnnouncements: Announcement[] = [
-  {
-    id: '1',
-    title: 'Introducing AI Copilot - Your New Productivity Partner',
-    content: 'We are thrilled to announce the launch of AI Copilot, our most requested feature! AI Copilot uses advanced machine learning to help you work smarter, not harder.',
-    excerpt: 'Meet your new AI-powered productivity assistant',
-    type: 'feature',
-    status: 'published',
-    priority: 'high',
-    author: mockAuthors[0],
-    createdAt: '2024-03-15',
-    updatedAt: '2024-03-18',
-    publishedAt: '2024-03-18T10:00:00',
-    isPinned: true,
-    isFeatured: true,
-    reactions: [
-      { type: 'like', count: 234, hasReacted: false },
-      { type: 'love', count: 156, hasReacted: true },
-      { type: 'celebrate', count: 89, hasReacted: false }
-    ],
-    comments: [
-      { id: '1', userId: '1', userName: 'John Doe', userAvatar: '/avatars/john.jpg', content: 'This is amazing! Been waiting for this.', createdAt: '2024-03-18T11:00:00', likes: 12 }
-    ],
-    metrics: { views: 12450, uniqueViews: 8920, clicks: 3456, ctr: 38.7, avgTimeOnPost: 45, shares: 234 },
-    targetSegments: ['1'],
-    channels: ['web', 'mobile', 'email', 'push'],
-    media: [{ type: 'image', url: '/announcements/ai-copilot.png' }],
-    labels: ['AI', 'New Feature', 'Productivity'],
-    version: '3.0.0',
-    relatedAnnouncements: ['2']
-  },
-  {
-    id: '2',
-    title: 'Performance Improvements - 40% Faster Load Times',
-    content: 'We have been working hard to optimize our infrastructure. You will now experience significantly faster load times across the entire platform.',
-    excerpt: 'Major performance boost across the platform',
-    type: 'improvement',
-    status: 'published',
-    priority: 'normal',
-    author: mockAuthors[1],
-    createdAt: '2024-03-10',
-    updatedAt: '2024-03-12',
-    publishedAt: '2024-03-12T09:00:00',
-    isPinned: false,
-    isFeatured: false,
-    reactions: [
-      { type: 'like', count: 178, hasReacted: false },
-      { type: 'celebrate', count: 45, hasReacted: false }
-    ],
-    comments: [],
-    metrics: { views: 8920, uniqueViews: 6540, clicks: 1234, ctr: 18.9, avgTimeOnPost: 28, shares: 89 },
-    targetSegments: ['1'],
-    channels: ['web', 'mobile'],
-    labels: ['Performance', 'Infrastructure'],
-    version: '2.9.5',
-    relatedAnnouncements: []
-  },
-  {
-    id: '3',
-    title: 'Scheduled Maintenance - March 25th',
-    content: 'We will be performing scheduled maintenance on March 25th from 2:00 AM to 4:00 AM UTC. During this time, the platform may be temporarily unavailable.',
-    excerpt: 'Brief downtime for system maintenance',
-    type: 'maintenance',
-    status: 'scheduled',
-    priority: 'urgent',
-    author: mockAuthors[1],
-    createdAt: '2024-03-18',
-    updatedAt: '2024-03-18',
-    scheduledAt: '2024-03-24T18:00:00',
-    isPinned: false,
-    isFeatured: false,
-    reactions: [],
-    comments: [],
-    metrics: { views: 0, uniqueViews: 0, clicks: 0, ctr: 0, avgTimeOnPost: 0, shares: 0 },
-    targetSegments: ['1'],
-    channels: ['web', 'email', 'push'],
-    labels: ['Maintenance', 'Downtime'],
-    relatedAnnouncements: []
-  },
-  {
-    id: '4',
-    title: 'Spring Sale - 30% Off Annual Plans',
-    content: 'Celebrate spring with our biggest sale of the year! Get 30% off all annual plans. Use code SPRING30 at checkout.',
-    excerpt: 'Limited time offer on annual plans',
-    type: 'promotion',
-    status: 'published',
-    priority: 'high',
-    author: mockAuthors[2],
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-01',
-    publishedAt: '2024-03-01T00:00:00',
-    expiresAt: '2024-03-31T23:59:59',
-    isPinned: false,
-    isFeatured: true,
-    reactions: [
-      { type: 'love', count: 567, hasReacted: false },
-      { type: 'celebrate', count: 234, hasReacted: false }
-    ],
-    comments: [],
-    metrics: { views: 24560, uniqueViews: 18900, clicks: 8920, ctr: 47.2, avgTimeOnPost: 62, shares: 456 },
-    targetSegments: ['1', '4'],
-    channels: ['web', 'mobile', 'email'],
-    media: [{ type: 'image', url: '/announcements/spring-sale.png' }],
-    labels: ['Promotion', 'Sale', 'Limited Time'],
-    relatedAnnouncements: []
-  },
-  {
-    id: '5',
-    title: 'Bug Fix: Export Function Now Working',
-    content: 'We have fixed an issue where the export function was failing for large datasets. Thank you for your patience.',
-    excerpt: 'Export functionality restored',
-    type: 'fix',
-    status: 'published',
-    priority: 'normal',
-    author: mockAuthors[1],
-    createdAt: '2024-03-08',
-    updatedAt: '2024-03-08',
-    publishedAt: '2024-03-08T14:00:00',
-    isPinned: false,
-    isFeatured: false,
-    reactions: [
-      { type: 'like', count: 45, hasReacted: false }
-    ],
-    comments: [],
-    metrics: { views: 2340, uniqueViews: 1890, clicks: 234, ctr: 12.4, avgTimeOnPost: 15, shares: 12 },
-    targetSegments: ['2', '3'],
-    channels: ['web'],
-    labels: ['Bug Fix', 'Export'],
-    version: '2.9.4',
-    relatedAnnouncements: []
-  }
-]
-
-const mockChangelog: ChangelogEntry[] = [
-  {
-    id: '1',
-    version: '3.0.0',
-    title: 'AI Copilot Release',
-    description: 'Major release introducing AI-powered features',
-    type: 'feature',
-    changes: [
-      'Added AI Copilot for smart suggestions',
-      'New AI-powered search functionality',
-      'Automated task prioritization',
-      'Smart scheduling recommendations'
-    ],
-    publishedAt: '2024-03-18',
-    author: mockAuthors[0]
-  },
-  {
-    id: '2',
-    version: '2.9.5',
-    title: 'Performance Update',
-    description: 'Major performance improvements',
-    type: 'improvement',
-    changes: [
-      '40% faster load times',
-      'Reduced memory usage by 25%',
-      'Optimized database queries',
-      'Improved caching strategy'
-    ],
-    publishedAt: '2024-03-12',
-    author: mockAuthors[1]
-  },
-  {
-    id: '3',
-    version: '2.9.4',
-    title: 'Bug Fixes',
-    description: 'Various bug fixes and improvements',
-    type: 'fix',
-    changes: [
-      'Fixed export function for large datasets',
-      'Resolved login issues on mobile',
-      'Fixed notification delivery delays',
-      'Corrected timezone display issues'
-    ],
-    publishedAt: '2024-03-08',
-    author: mockAuthors[1]
-  }
-]
 
 const typeIcons: Record<AnnouncementType, React.ReactNode> = {
   feature: <Sparkles className="h-4 w-4" />,
@@ -434,7 +240,7 @@ export default function AnnouncementsClient() {
       type: mapDbTypeToLocal(dbAnn.announcement_type),
       status: dbAnn.status as AnnouncementStatus,
       priority: dbAnn.priority as AnnouncementPriority,
-      author: mockAuthors[0], // Default author
+      author: { id: '1', name: 'System', avatar: '', role: 'Admin' },
       createdAt: dbAnn.created_at,
       updatedAt: dbAnn.updated_at,
       publishedAt: dbAnn.published_at || undefined,
@@ -459,8 +265,8 @@ export default function AnnouncementsClient() {
     }))
   }, [dbAnnouncements])
 
-  const [changelog] = useState<ChangelogEntry[]>(mockChangelog)
-  const [segments] = useState<Segment[]>(mockSegments)
+  const [changelog] = useState<ChangelogEntry[]>([])
+  const [segments] = useState<Segment[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<AnnouncementStatus | 'all'>('all')
   const [selectedType, setSelectedType] = useState<AnnouncementType | 'all'>('all')

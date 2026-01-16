@@ -344,7 +344,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [templateFilter, setTemplateFilter] = useState<'all' | 'document' | 'spreadsheet' | 'presentation'>('all')
   const [sharingFilter, setSharingFilter] = useState<'all' | 'team' | 'public' | 'private'>('all')
   const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
-  const [folderOrder, setFolderOrder] = useState<DocumentFolder[]>(mockFolders)
+  const [folderOrder, setFolderOrder] = useState<DocumentFolder[]>([])
 
   // Quick actions with real functionality
   const mockDocumentsQuickActions = [

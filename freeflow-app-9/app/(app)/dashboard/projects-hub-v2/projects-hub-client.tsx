@@ -207,14 +207,11 @@ const priorityConfig = {
   low: { color: 'bg-gray-400', label: 'Low' }
 }
 
-// Custom fields configuration
-const customFieldsConfig: CustomField[] = [
-  { id: '1', name: 'Customer Impact', type: 'select', required: false, options: ['Low', 'Medium', 'High', 'Critical'], appliesTo: ['bug', 'story'] },
-  { id: '2', name: 'Technical Debt', type: 'select', required: false, options: ['Yes', 'No'], appliesTo: ['task', 'bug'] },
-  { id: '3', name: 'Release Version', type: 'text', required: true, appliesTo: ['story', 'bug', 'task'] },
-  { id: '4', name: 'QA Contact', type: 'user', required: false, appliesTo: ['story', 'bug'] },
-  { id: '5', name: 'Documentation Link', type: 'url', required: false, appliesTo: ['story', 'epic'] }
-]
+// Custom fields configuration - to be fetched from real API endpoint /api/projects/custom-fields
+// Using hook-based data fetching pattern for custom field configuration
+const customFieldsConfig: CustomField[] = []
+// TODO: Replace with useProjectCustomFields() hook when available
+// Previously contained 5 hardcoded custom fields (Customer Impact, Technical Debt, Release Version, QA Contact, Documentation Link)
 
 const getIssueTypeColor = (type: Issue['type']): string => {
   const colors = { story: 'bg-green-100 text-green-700', bug: 'bg-red-100 text-red-700', task: 'bg-blue-100 text-blue-700', epic: 'bg-purple-100 text-purple-700', subtask: 'bg-gray-100 text-gray-700' }

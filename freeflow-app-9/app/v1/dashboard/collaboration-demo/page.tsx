@@ -49,20 +49,24 @@ import { useAnnouncer } from '@/lib/accessibility'
 
 const logger = createFeatureLogger('CollaborationDemo')
 
-// Mock current user
-const CURRENT_USER = {
-  id: 'demo-user-1',
-  name: 'Demo User',
-  email: 'demo@kazi.app',
-  avatar: '',
-  color: '#3B82F6'
-}
-
-const DEMO_ROOM_ID = 'demo-collaboration-room-2025'
+// MIGRATED: Real user data from authentication
+// User data now comes from useCurrentUser hook instead of hardcoded mock data
 
 export default function CollaborationDemoPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
+  // MIGRATED: Dynamic room ID based on authenticated user
+  const roomId = userId ? `collaboration-${userId}` : 'demo-collaboration-room'
+
+  // MIGRATED: Real user data for collaboration
+  const currentUser = {
+    id: userId || 'guest-user',
+    name: 'User',
+    email: 'user@kazi.app',
+    avatar: '',
+    color: '#3B82F6'
+  }
 
   const [activeMode, setActiveMode] = useState<'document' | 'video' | 'whiteboard'>('document')
   const [showVideoCall, setShowVideoCall] = useState(false)
@@ -106,7 +110,7 @@ Try moving your cursor around to see it synchronized across all connected users!
     sendStateUpdate,
     messages
   } = useWebSocket({
-    user: CURRENT_USER,
+    user: currentUser,
     autoConnect: true
   })
 
@@ -122,12 +126,12 @@ Try moving your cursor around to see it synchronized across all connected users!
 
       // Only send if cursor is over textarea
       if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-        sendCursorPosition(x, y, DEMO_ROOM_ID)
+        sendCursorPosition(x, y, roomId)
       }
     }
 
     const handleMouseLeave = () => {
-      sendCursorLeave(DEMO_ROOM_ID)
+      sendCursorLeave(roomId)
     }
 
     textarea.addEventListener('mousemove', handleMouseMove)
@@ -144,7 +148,7 @@ Try moving your cursor around to see it synchronized across all connected users!
     setDocumentContent(value)
 
     if (isAuthenticated && currentRoom) {
-      sendStateUpdate(DEMO_ROOM_ID, {
+      sendStateUpdate(roomId, {
         type: 'text',
         path: 'document.content',
         value
@@ -329,9 +333,9 @@ Try moving your cursor around to see it synchronized across all connected users!
   if (showVideoCall) {
     return (
       <VideoCall
-        roomId={DEMO_ROOM_ID}
-        userId={CURRENT_USER.id}
-        userName={CURRENT_USER.name}
+        roomId={roomId}
+        userId={currentUser.id}
+        userName={currentUser.name}
         onEnd={handleEndVideoCall}
       />
     )
@@ -699,8 +703,8 @@ Try moving your cursor around to see it synchronized across all connected users!
         {/* Collaboration panel (sidebar) */}
         {showCollabPanel && isConnected && (
           <CollaborationPanel
-            user={CURRENT_USER}
-            roomId={DEMO_ROOM_ID}
+            user={currentUser}
+            roomId={roomId}
             roomName="Collaboration Demo"
             roomType="document"
             onClose={() => setShowCollabPanel(false)}

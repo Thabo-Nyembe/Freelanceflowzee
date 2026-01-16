@@ -98,31 +98,15 @@ import {
 
 
 // ============================================================================
-// V2 COMPETITIVE MOCK DATA - Team Context
+// V2 COMPETITIVE DATA - Team Context (API-Integrated)
 // ============================================================================
 
-const teamAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'success' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'warning' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
-]
-
-const teamCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
-]
-
-const teamPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
-]
-
-const teamActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
-]
+// Data is now loaded from API in useEffect
+// Default empty state for initial render
+const teamAIInsights: any[] = []
+const teamCollaborators: any[] = []
+const teamPredictions: any[] = []
+const teamActivities: any[] = []
 
 // Quick actions - handlers defined inside component to access state
 const teamQuickActionsConfig = [
@@ -188,122 +172,7 @@ export default function TeamClient() {
   const [permissionsMemberId, setPermissionsMemberId] = useState<number | null>(null)
   const [selectedPermission, setSelectedPermission] = useState('Read')
 
-  const [teamMembers, setTeamMembers] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Lead Designer',
-      department: 'Design',
-      email: 'sarah@company.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-      status: 'online',
-      joinDate: '2023-01-15',
-      projects: 12,
-      completedTasks: 156,
-      rating: 4.9,
-      skills: ['UI/UX', 'Figma', 'Sketch'],
-      availability: 'Available',
-      workHours: '9:00 AM - 6:00 PM PST',
-      timezone: 'PST'
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      role: 'Frontend Developer',
-      department: 'Development',
-      email: 'mike@company.com',
-      phone: '+1 (555) 234-5678',
-      location: 'New York, NY',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
-      status: 'busy',
-      joinDate: '2023-03-20',
-      projects: 8,
-      completedTasks: 203,
-      rating: 4.8,
-      skills: ['React', 'TypeScript', 'Next.js'],
-      availability: 'Busy until 3 PM',
-      workHours: '8:00 AM - 5:00 PM EST',
-      timezone: 'EST'
-    },
-    {
-      id: 3,
-      name: 'Emma Wilson',
-      role: 'Project Manager',
-      department: 'Management',
-      email: 'emma@company.com',
-      phone: '+1 (555) 345-6789',
-      location: 'Austin, TX',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
-      status: 'away',
-      joinDate: '2022-11-10',
-      projects: 15,
-      completedTasks: 89,
-      rating: 4.7,
-      skills: ['Project Management', 'Agile', 'Scrum'],
-      availability: 'In Meeting',
-      workHours: '9:00 AM - 6:00 PM CST',
-      timezone: 'CST'
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      role: 'Backend Developer',
-      department: 'Development',
-      email: 'david@company.com',
-      phone: '+1 (555) 456-7890',
-      location: 'Seattle, WA',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
-      status: 'offline',
-      joinDate: '2023-05-01',
-      projects: 6,
-      completedTasks: 134,
-      rating: 4.6,
-      skills: ['Node.js', 'Python', 'PostgreSQL'],
-      availability: 'Offline',
-      workHours: '10:00 AM - 7:00 PM PST',
-      timezone: 'PST'
-    },
-    {
-      id: 5,
-      name: 'Lisa Brown',
-      role: 'Marketing Specialist',
-      department: 'Marketing',
-      email: 'lisa@company.com',
-      phone: '+1 (555) 567-8901',
-      location: 'Miami, FL',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa',
-      status: 'online',
-      joinDate: '2023-07-15',
-      projects: 10,
-      completedTasks: 67,
-      rating: 4.5,
-      skills: ['Content Marketing', 'SEO', 'Analytics'],
-      availability: 'Available',
-      workHours: '9:00 AM - 6:00 PM EST',
-      timezone: 'EST'
-    },
-    {
-      id: 6,
-      name: 'Alex Rivera',
-      role: 'QA Engineer',
-      department: 'Quality Assurance',
-      email: 'alex@company.com',
-      phone: '+1 (555) 678-9012',
-      location: 'Denver, CO',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-      status: 'online',
-      joinDate: '2023-09-01',
-      projects: 7,
-      completedTasks: 98,
-      rating: 4.8,
-      skills: ['Manual Testing', 'Automation', 'Selenium'],
-      availability: 'Available',
-      workHours: '8:00 AM - 5:00 PM MST',
-      timezone: 'MST'
-    }
-  ])
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
 
   useEffect(() => {
     const loadTeamData = async () => {

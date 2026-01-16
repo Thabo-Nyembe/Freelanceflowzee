@@ -133,53 +133,6 @@ export default function AdvancedMicroFeaturesPage() {
   const [error, setError] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState('widgets')
 
-  // Default data definitions (moved here for useState initialization)
-  const mockWidgetDataDefault: WidgetDataType = {
-    id: 'revenue',
-    title: 'Monthly Revenue',
-    value: '$45,230',
-    change: { value: 12.5, type: 'increase', period: 'last month' },
-    progress: 75,
-    status: 'success',
-    trend: [
-      { label: 'Week 1', value: 8500 },
-      { label: 'Week 2', value: 12300 },
-      { label: 'Week 3', value: 15200 },
-      { label: 'Week 4', value: 9230 }
-    ]
-  }
-
-  const mockNotificationsDefault: NotificationType[] = [
-    {
-      id: '1',
-      title: 'New project assigned',
-      message: 'You have been assigned to the KAZI redesign project',
-      type: 'info',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      read: false,
-      actions: [
-        { label: 'View Project', onClick: () => {}, variant: 'primary' },
-        { label: 'Dismiss', onClick: () => {} }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Payment received',
-      message: 'Client payment of $2,500 has been processed',
-      type: 'success',
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      read: true
-    },
-    {
-      id: '3',
-      title: 'Deadline approaching',
-      message: 'Project "Mobile App Design" is due in 2 days',
-      type: 'warning',
-      timestamp: new Date(Date.now() - 60 * 60 * 1000),
-      read: false
-    }
-  ]
-
   // Additional state for real functionality
   const [widgetData, setWidgetData] = React.useState<WidgetDataType | null>(null)
   const [showWidgetSettings, setShowWidgetSettings] = React.useState(false)
@@ -207,10 +160,6 @@ export default function AdvancedMicroFeaturesPage() {
         const response = await fetch('/api/dashboard/micro-features')
         if (!response.ok) throw new Error('Failed to load advanced micro features')
 
-        // Initialize data after load
-        setWidgetData(mockWidgetDataDefault)
-        setNotifications(mockNotificationsDefault)
-
         setIsLoading(false)
         announce('Advanced micro features loaded successfully', 'polite')
       } catch (err) {
@@ -223,13 +172,6 @@ export default function AdvancedMicroFeaturesPage() {
     loadAdvancedMicroFeaturesData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const mockUsers = useMemo(() => [
-    { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Designer' },
-    { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Developer', isTyping: true },
-    { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', status: 'busy' as const, role: 'Manager' },
-    { id: '4', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Analyst' },
-    { id: '5', name: 'Lisa Wong', avatar: '/avatars/lisa.jpg', status: 'offline' as const, role: 'Writer', lastSeen: new Date(Date.now() - 30 * 60 * 1000) }
-  ], [])
 
   // ============================================================================
   // REAL HANDLERS - No fake toast.promise patterns
@@ -326,7 +268,7 @@ export default function AdvancedMicroFeaturesPage() {
   // Comment handlers
   const handleAddComment = useCallback((content: string, mentions?: string[], attachments?: any[]) => {    const newComment = {
       id: `comment-${Date.now()}`,
-      user: mockUsers[0],
+      user: { id: '1', name: 'Current User', avatar: '/avatars/default.jpg' },
       content,
       timestamp: new Date(),
       likes: 0,
@@ -336,13 +278,13 @@ export default function AdvancedMicroFeaturesPage() {
     }
     setComments(prev => [newComment, ...prev])
     toast.success('Comment posted successfully')
-  }, [mockUsers])
+  }, [])
 
   const handleReply = useCallback((commentId: string, content: string) => {    setComments(prev => prev.map(comment => {
       if (comment.id === commentId) {
         const reply = {
           id: `reply-${Date.now()}`,
-          user: mockUsers[0],
+          user: { id: '1', name: 'Current User', avatar: '/avatars/default.jpg' },
           content,
           timestamp: new Date(),
           likes: 0
@@ -352,7 +294,7 @@ export default function AdvancedMicroFeaturesPage() {
       return comment
     }))
     toast.success('Reply posted successfully')
-  }, [mockUsers])
+  }, [])
 
   const handleLikeComment = useCallback((commentId: string) => {    setComments(prev => prev.map(comment => {
       if (comment.id === commentId) {
@@ -378,120 +320,11 @@ export default function AdvancedMicroFeaturesPage() {
     toast.success(`Theme changed to ${themeId}`)
   }, [])
 
-  const mockWidgetData = useMemo(() => ({
-    id: 'revenue',
-    title: 'Monthly Revenue',
-    value: '$45,230',
-    change: { value: 12.5, type: 'increase' as const, period: 'last month' },
-    progress: 75,
-    status: 'success' as const,
-    trend: [
-      { label: 'Week 1', value: 8500 },
-      { label: 'Week 2', value: 12300 },
-      { label: 'Week 3', value: 15200 },
-      { label: 'Week 4', value: 9230 }
-    ]
-  }), [])
 
-  const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => {}, variant: 'primary' as const, shortcut: '⌘N' },
-    { id: '2', label: 'Upload Files', icon: Download, onClick: () => {}, badge: '5' },
-    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => {}, badge: 3 },
-    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => {} },
-    { id: '5', label: 'Settings', icon: Settings, onClick: () => {} },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => {}, disabled: true }
-  ], [])
 
-  const mockNotifications = useMemo(() => [
-    {
-      id: '1',
-      title: 'New project assigned',
-      message: 'You have been assigned to the KAZI redesign project',
-      type: 'info' as const,
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      actions: [
-        { label: 'View Project', onClick: () => {}, variant: 'primary' as const },
-        { label: 'Dismiss', onClick: () => {} }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Payment received',
-      message: 'Client payment of $2,500 has been processed',
-      type: 'success' as const,
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      read: true
-    },
-    {
-      id: '3',
-      title: 'Deadline approaching',
-      message: 'Project "Mobile App Design" is due in 2 days',
-      type: 'warning' as const,
-      timestamp: new Date(Date.now() - 60 * 60 * 1000)
-    }
-  ], [])
 
-  const mockActivities = useMemo(() => [
-    {
-      id: '1',
-      user: mockUsers[0],
-      type: 'comment' as const,
-      content: 'commented on',
-      target: 'Homepage Design',
-      timestamp: new Date(Date.now() - 10 * 60 * 1000)
-    },
-    {
-      id: '2',
-      user: mockUsers[1],
-      type: 'edit' as const,
-      content: 'updated',
-      target: 'User Dashboard',
-      timestamp: new Date(Date.now() - 25 * 60 * 1000)
-    },
-    {
-      id: '3',
-      user: mockUsers[2],
-      type: 'share' as const,
-      content: 'shared',
-      target: 'Project Files',
-      timestamp: new Date(Date.now() - 45 * 60 * 1000)
-    }
-  ], [mockUsers])
 
-  const mockComments = useMemo(() => [
-    {
-      id: '1',
-      user: mockUsers[0],
-      content: 'This looks great! I love the new color scheme and the improved typography. The user experience feels much more intuitive now.',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      likes: 5,
-      isLiked: true,
-      replies: [
-        {
-          id: '1-1',
-          user: mockUsers[1],
-          content: 'Thanks Sarah! I spent a lot of time on the typography pairing.',
-          timestamp: new Date(Date.now() - 20 * 60 * 1000),
-          likes: 2
-        }
-      ]
-    },
-    {
-      id: '2',
-      user: mockUsers[2],
-      content: 'Should we consider adding more interactive elements to increase engagement?',
-      timestamp: new Date(Date.now() - 60 * 60 * 1000),
-      likes: 3,
-      isPinned: true
-    }
-  ], [mockUsers])
 
-  const mockTableData = useMemo(() => [
-    { id: 1, project: 'KAZI Redesign', client: 'TechCorp', status: 'Active', revenue: '$15,000', completion: '75%' },
-    { id: 2, project: 'Mobile App', client: 'StartupXYZ', status: 'Review', revenue: '$8,500', completion: '90%' },
-    { id: 3, project: 'Website Refresh', client: 'LocalBiz', status: 'Planning', revenue: '$5,200', completion: '25%' },
-    { id: 4, project: 'Brand Identity', client: 'Creative Co', status: 'Complete', revenue: '$12,000', completion: '100%' }
-  ], [])
 
   const tableColumns = useMemo(() => [
     { key: 'project', label: 'Project', sortable: true },
@@ -509,39 +342,7 @@ export default function AdvancedMicroFeaturesPage() {
     { key: 'completion', label: 'Progress' }
   ], [])
 
-  const mockSettingsCategories = useMemo(() => [
-    { id: 'general', label: 'General', icon: Settings, description: 'Basic app settings' },
-    { id: 'theme', label: 'Appearance', icon: Palette, description: 'Themes and display', badge: 'New' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts and sounds', badge: 3 },
-    { id: 'shortcuts', label: 'Shortcuts', icon: Zap, description: 'Keyboard shortcuts' }
-  ], [])
 
-  const mockThemes = useMemo(() => [
-    {
-      id: 'default',
-      name: 'KAZI Default',
-      description: 'Professional blue theme',
-      colors: { primary: '#3b82f6', secondary: '#6366f1', background: '#ffffff', foreground: '#000000' }
-    },
-    {
-      id: 'dark',
-      name: 'Dark Mode',
-      description: 'Easy on the eyes',
-      colors: { primary: '#3b82f6', secondary: '#6366f1', background: '#000000', foreground: '#ffffff' }
-    },
-    {
-      id: 'purple',
-      name: 'Purple Accent',
-      description: 'Creative and modern',
-      colors: { primary: '#8b5cf6', secondary: '#a855f7', background: '#ffffff', foreground: '#000000' }
-    },
-    {
-      id: 'green',
-      name: 'Nature Green',
-      description: 'Calm and focused',
-      colors: { primary: '#10b981', secondary: '#059669', background: '#ffffff', foreground: '#000000' }
-    }
-  ], [])
 
   const breadcrumbItems = useMemo(() => [
     { title: 'Dashboard', href: '/dashboard' },
@@ -690,7 +491,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Dashboard Widget</h3>
                   <EnhancedDashboardWidget
-                    data={widgetData || mockWidgetData}
+                    data={widgetData || null}
                     size="large"
                     variant="detailed"
                     onRefresh={handleWidgetRefresh}
@@ -703,7 +504,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Quick Actions</h3>
                   <EnhancedQuickActions
-                    actions={mockQuickActions}
+                    actions={[]}
                     title="Quick Actions"
                     layout="grid"
                   />
@@ -713,7 +514,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Notifications</h3>
                   <EnhancedNotifications
-                    notifications={notifications.length > 0 ? notifications : mockNotifications}
+                    notifications={notifications || []}
                     maxItems={5}
                     onMarkAsRead={handleMarkAsRead}
                     onClearAll={handleClearAllNotifications}
@@ -755,7 +556,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Data Table</h3>
                   <EnhancedDataTable
-                    data={mockTableData}
+                    data={[]}
                     columns={tableColumns}
                     title="Project Overview"
                     searchable={true}
@@ -777,7 +578,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <Card className="p-6">
                     <div className="space-y-4">
                       <EnhancedPresenceIndicator
-                        users={mockUsers}
+                        users={[]}
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
@@ -794,7 +595,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Activity Feed</h3>
                   <EnhancedActivityFeed
-                    activities={mockActivities}
+                    activities={[]}
                     maxItems={5}
                     showTimestamps={true}
                     onActivityClick={handleActivityClick}
@@ -805,8 +606,8 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Comment System</h3>
                   <EnhancedCommentSystem
-                    comments={comments.length > 0 ? comments : mockComments}
-                    currentUser={mockUsers[0]}
+                    comments={comments || []}
+                    currentUser={{ id: '1', name: 'Current User', avatar: '/avatars/default.jpg' }}
                     onAddComment={handleAddComment}
                     onReply={handleReply}
                     onLike={handleLikeComment}
@@ -824,7 +625,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Settings Categories</h3>
                   <EnhancedSettingsCategories
-                    categories={mockSettingsCategories}
+                    categories={[]}
                     activeCategory={activeSettingsCategory}
                     onCategoryChange={handleCategoryChange}
                   />
@@ -834,7 +635,7 @@ export default function AdvancedMicroFeaturesPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Enhanced Theme Selector</h3>
                   <EnhancedThemeSelector
-                    themes={mockThemes}
+                    themes={[]}
                     currentTheme={currentTheme}
                     onThemeChange={handleThemeChange}
                   />

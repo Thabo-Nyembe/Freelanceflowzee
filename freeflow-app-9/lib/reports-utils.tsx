@@ -306,10 +306,16 @@ export interface PerformanceMetrics {
 }
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - REMOVED (Migration Batch #9)
 // ============================================================================
+// All mock data has been migrated to use database queries.
+// Data now comes from Supabase via reports-queries.ts
+// Migration completed: 2026-01-17
 
-export const MOCK_REPORTS: Report[] = [
+export const MOCK_REPORTS: Report[] = []
+/*
+// Original MOCK_REPORTS data removed - now using Supabase
+export const MOCK_REPORTS_OLD: Report[] = [
   {
     id: 'RPT-001',
     userId: 'USR-001',
@@ -744,8 +750,12 @@ export const MOCK_REPORTS: Report[] = [
     }
   }
 ]
+*/
 
-export const MOCK_REPORT_TEMPLATES: ReportTemplate[] = [
+export const MOCK_REPORT_TEMPLATES: ReportTemplate[] = []
+/*
+// Original MOCK_REPORT_TEMPLATES data removed - now using Supabase
+export const MOCK_REPORT_TEMPLATES_OLD: ReportTemplate[] = [
   {
     id: 'TPL-001',
     name: 'Monthly Financial Summary',
@@ -823,8 +833,22 @@ export const MOCK_REPORT_TEMPLATES: ReportTemplate[] = [
     }
   }
 ]
+*/
 
 export const MOCK_FINANCIAL_ANALYTICS: FinancialAnalytics = {
+  revenueData: { monthly: [], quarterly: [], yearly: [], byCategory: [], byClient: [], byProject: [] },
+  expenseData: { monthly: [], quarterly: [], yearly: [], byCategory: [], byVendor: [], byProject: [] },
+  profitData: { monthly: [], quarterly: [], yearly: [], margins: [], grossProfit: 0, netProfit: 0, operatingProfit: 0, ebitda: 0 },
+  cashFlowData: { operating: [], investing: [], financing: [], total: [], projections: [] },
+  clientData: { topClients: [], churnRate: 0, acquisitionCost: 0, lifetimeValue: 0, segmentation: [] },
+  projectData: { byStatus: [], byType: [], byProfitability: [], completionRate: 0, averageValue: 0, totalActive: 0 },
+  teamData: { byMember: [], productivity: [], utilization: [], billableHours: 0, nonBillableHours: 0 },
+  forecastData: { revenue: [], expenses: [], profit: [], confidenceLevel: 'low', lastUpdated: new Date() },
+  insights: { trends: [], anomalies: [], recommendations: [] }
+}
+/*
+// Original MOCK_FINANCIAL_ANALYTICS data removed - now using Supabase
+export const MOCK_FINANCIAL_ANALYTICS_OLD: FinancialAnalytics = {
   revenueData: {
     monthly: [
       { month: 'January', year: 2024, revenue: 24500, growth: 12, projects: 8, clients: 12 },
@@ -1027,6 +1051,7 @@ export const MOCK_FINANCIAL_ANALYTICS: FinancialAnalytics = {
     ]
   }
 }
+*/
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -1757,6 +1782,7 @@ export function generateReportSummary(report: Report): string {
 }
 
 logger.info('Reports utilities initialized', {
-  mockReports: MOCK_REPORTS.length,
-  mockTemplates: MOCK_REPORT_TEMPLATES.length
+  migrationStatus: 'BATCH_9_COMPLETE',
+  mockDataRemoved: true,
+  dataSource: 'Supabase via reports-queries.ts'
 })

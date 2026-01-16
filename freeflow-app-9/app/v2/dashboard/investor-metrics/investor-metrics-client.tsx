@@ -159,195 +159,20 @@ interface KPIMetric {
   description?: string
 }
 
-// Mock Data
-const mockFundingRounds: FundingRound[] = [
-  {
-    id: '1',
-    name: 'Series A',
-    stage: 'series-a',
-    targetAmount: 10000000,
-    raisedAmount: 10000000,
-    preMoneyValuation: 40000000,
-    postMoneyValuation: 50000000,
-    pricePerShare: 12.50,
-    sharesIssued: 800000,
-    leadInvestor: 'Sequoia Capital',
-    closeDate: '2024-01-15',
-    status: 'closed',
-    documents: [
-      { name: 'Term Sheet', status: 'executed' },
-      { name: 'Stock Purchase Agreement', status: 'executed' },
-      { name: 'Investor Rights Agreement', status: 'executed' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Seed Round',
-    stage: 'seed',
-    targetAmount: 3000000,
-    raisedAmount: 3000000,
-    preMoneyValuation: 12000000,
-    postMoneyValuation: 15000000,
-    pricePerShare: 5.00,
-    sharesIssued: 600000,
-    leadInvestor: 'Y Combinator',
-    closeDate: '2023-06-01',
-    status: 'closed',
-    documents: [
-      { name: 'SAFE Agreement', status: 'executed' },
-      { name: 'Pro Rata Side Letter', status: 'executed' }
-    ]
-  },
-  {
-    id: '3',
-    name: 'Series B',
-    stage: 'series-b',
-    targetAmount: 30000000,
-    raisedAmount: 18500000,
-    preMoneyValuation: 120000000,
-    postMoneyValuation: 150000000,
-    pricePerShare: 25.00,
-    sharesIssued: 0,
-    leadInvestor: 'Andreessen Horowitz',
-    closeDate: '2024-06-30',
-    status: 'open',
-    documents: [
-      { name: 'Term Sheet', status: 'pending' },
-      { name: 'Due Diligence Checklist', status: 'draft' }
-    ]
-  }
-]
+// Database data - ready for integration
+const fundingRounds: FundingRound[] = []
 
-const mockInvestors: Investor[] = [
-  {
-    id: '1',
-    name: 'Sequoia Capital',
-    type: 'vc',
-    company: 'Sequoia Capital',
-    email: 'investments@sequoia.com',
-    website: 'sequoia.com',
-    totalInvested: 5000000,
-    ownership: 10.0,
-    shareClass: 'preferred',
-    sharesOwned: 400000,
-    rounds: ['Series A'],
-    boardSeat: true,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Andreessen Horowitz',
-    type: 'vc',
-    company: 'a16z',
-    email: 'deals@a16z.com',
-    website: 'a16z.com',
-    totalInvested: 8000000,
-    ownership: 8.5,
-    shareClass: 'preferred',
-    sharesOwned: 340000,
-    rounds: ['Series A', 'Series B'],
-    boardSeat: true,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  },
-  {
-    id: '3',
-    name: 'Y Combinator',
-    type: 'accelerator',
-    company: 'Y Combinator',
-    email: 'partners@ycombinator.com',
-    website: 'ycombinator.com',
-    totalInvested: 500000,
-    ownership: 7.0,
-    shareClass: 'safe',
-    sharesOwned: 280000,
-    rounds: ['Seed Round'],
-    boardSeat: false,
-    proRataRights: true,
-    joinedDate: '2023-06-01'
-  },
-  {
-    id: '4',
-    name: 'Sarah Chen',
-    type: 'angel',
-    email: 'sarah@angelinvestor.com',
-    totalInvested: 250000,
-    ownership: 2.5,
-    shareClass: 'preferred',
-    sharesOwned: 100000,
-    rounds: ['Seed Round'],
-    boardSeat: false,
-    proRataRights: false,
-    joinedDate: '2023-06-01'
-  },
-  {
-    id: '5',
-    name: 'Google Ventures',
-    type: 'corporate',
-    company: 'GV',
-    email: 'investments@gv.com',
-    website: 'gv.com',
-    totalInvested: 3000000,
-    ownership: 6.0,
-    shareClass: 'preferred',
-    sharesOwned: 240000,
-    rounds: ['Series A'],
-    boardSeat: false,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  }
-]
+const investors: Investor[] = []
 
-const mockCapTable: CapTableEntry[] = [
-  { id: '1', stakeholder: 'John Founder (CEO)', stakeholderType: 'founder', shareClass: 'common', shares: 2000000, ownership: 40.0, fullyDiluted: 33.3, vestedShares: 1500000, vestingSchedule: '4 years, 1 year cliff' },
-  { id: '2', stakeholder: 'Jane Founder (CTO)', stakeholderType: 'founder', shareClass: 'common', shares: 1500000, ownership: 30.0, fullyDiluted: 25.0, vestedShares: 1125000, vestingSchedule: '4 years, 1 year cliff' },
-  { id: '3', stakeholder: 'Sequoia Capital', stakeholderType: 'investor', shareClass: 'preferred', shares: 400000, ownership: 8.0, fullyDiluted: 6.7, investmentAmount: 5000000, pricePerShare: 12.50 },
-  { id: '4', stakeholder: 'Andreessen Horowitz', stakeholderType: 'investor', shareClass: 'preferred', shares: 340000, ownership: 6.8, fullyDiluted: 5.7, investmentAmount: 8000000, pricePerShare: 23.53 },
-  { id: '5', stakeholder: 'Y Combinator', stakeholderType: 'investor', shareClass: 'safe', shares: 280000, ownership: 5.6, fullyDiluted: 4.7, investmentAmount: 500000 },
-  { id: '6', stakeholder: 'Employee Option Pool', stakeholderType: 'employee', shareClass: 'options', shares: 600000, ownership: 12.0, fullyDiluted: 10.0, vestedShares: 180000 },
-  { id: '7', stakeholder: 'Google Ventures', stakeholderType: 'investor', shareClass: 'preferred', shares: 240000, ownership: 4.8, fullyDiluted: 4.0, investmentAmount: 3000000, pricePerShare: 12.50 },
-  { id: '8', stakeholder: 'Angel Investors', stakeholderType: 'investor', shareClass: 'preferred', shares: 140000, ownership: 2.8, fullyDiluted: 2.3, investmentAmount: 750000 }
-]
+const capTable: CapTableEntry[] = []
 
-const mockKPIs: KPIMetric[] = [
-  { id: '1', name: 'Annual Recurring Revenue', category: 'revenue', currentValue: 4200000, previousValue: 2800000, unit: 'currency', period: 'annual', target: 5000000 },
-  { id: '2', name: 'Monthly Recurring Revenue', category: 'revenue', currentValue: 350000, previousValue: 280000, unit: 'currency', period: 'monthly', target: 420000 },
-  { id: '3', name: 'Revenue Growth Rate', category: 'growth', currentValue: 25, previousValue: 18, unit: 'percent', period: 'monthly' },
-  { id: '4', name: 'Customer Acquisition Cost', category: 'efficiency', currentValue: 450, previousValue: 520, unit: 'currency', period: 'monthly', target: 400 },
-  { id: '5', name: 'Customer Lifetime Value', category: 'revenue', currentValue: 4500, previousValue: 3800, unit: 'currency', period: 'annual' },
-  { id: '6', name: 'LTV:CAC Ratio', category: 'efficiency', currentValue: 10, previousValue: 7.3, unit: 'ratio', period: 'quarterly', target: 12 },
-  { id: '7', name: 'Net Revenue Retention', category: 'growth', currentValue: 125, previousValue: 118, unit: 'percent', period: 'annual', target: 130 },
-  { id: '8', name: 'Gross Margin', category: 'efficiency', currentValue: 78, previousValue: 72, unit: 'percent', period: 'quarterly', target: 80 },
-  { id: '9', name: 'Burn Rate', category: 'efficiency', currentValue: 420000, previousValue: 380000, unit: 'currency', period: 'monthly', target: 350000 },
-  { id: '10', name: 'Runway (months)', category: 'efficiency', currentValue: 24, previousValue: 18, unit: 'number', period: 'monthly', target: 18 },
-  { id: '11', name: 'Active Users', category: 'engagement', currentValue: 45000, previousValue: 32000, unit: 'number', period: 'monthly', target: 50000 },
-  { id: '12', name: 'Churn Rate', category: 'engagement', currentValue: 2.1, previousValue: 3.2, unit: 'percent', period: 'monthly', target: 2.0 }
-]
+const kpis: KPIMetric[] = []
 
-// Mock data for AI-powered competitive upgrade components
-const mockInvestorMetricsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Metrics Strong', description: 'All key metrics trending above board expectations. Great quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Burn Rate Alert', description: 'Burn rate increased 15% this month. Review spending.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Finance' },
-  { id: '3', type: 'info' as const, title: 'Investor Update', description: 'Q4 investor report due in 5 days. Data ready for review.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Reporting' },
-]
-
-const mockInvestorMetricsCollaborators = [
-  { id: '1', name: 'CFO', avatar: '/avatars/cfo.jpg', status: 'online' as const, role: 'Finance' },
-  { id: '2', name: 'CEO', avatar: '/avatars/ceo.jpg', status: 'online' as const, role: 'Executive' },
-  { id: '3', name: 'Board Member', avatar: '/avatars/board.jpg', status: 'away' as const, role: 'Board' },
-]
-
-const mockInvestorMetricsPredictions = [
-  { id: '1', title: 'Runway Forecast', prediction: 'Current runway extends to 26 months with Q1 revenue projections', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Series B Timeline', prediction: 'Metrics support Series B raise by Q3 at $150M+ valuation', confidence: 75, trend: 'up' as const, impact: 'high' as const },
-]
-
-const mockInvestorMetricsActivities = [
-  { id: '1', user: 'CFO', action: 'Updated', target: 'monthly financial metrics', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'CEO', action: 'Shared', target: 'investor deck with advisors', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Generated', target: 'automated KPI report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// AI-powered competitive upgrade components data
+const investorMetricsAIInsights: any[] = []
+const investorMetricsCollaborators: any[] = []
+const investorMetricsPredictions: any[] = []
+const investorMetricsActivities: any[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -568,15 +393,15 @@ export default function InvestorMetricsClient() {
 
   // Stats calculations
   const stats = useMemo(() => {
-    const totalRaised = mockFundingRounds.reduce((sum, r) => sum + r.raisedAmount, 0)
-    const currentValuation = mockFundingRounds.find(r => r.status === 'open')?.postMoneyValuation ||
-      mockFundingRounds.filter(r => r.status === 'closed').sort((a, b) => new Date(b.closeDate).getTime() - new Date(a.closeDate).getTime())[0]?.postMoneyValuation || 0
-    const totalInvestors = mockInvestors.length
-    const totalShares = mockCapTable.reduce((sum, e) => sum + e.shares, 0)
-    const arr = mockKPIs.find(k => k.name === 'Annual Recurring Revenue')?.currentValue || 0
-    const mrr = mockKPIs.find(k => k.name === 'Monthly Recurring Revenue')?.currentValue || 0
-    const runway = mockKPIs.find(k => k.name === 'Runway (months)')?.currentValue || 0
-    const burnRate = mockKPIs.find(k => k.name === 'Burn Rate')?.currentValue || 0
+    const totalRaised = fundingRounds.reduce((sum, r) => sum + r.raisedAmount, 0)
+    const currentValuation = fundingRounds.find(r => r.status === 'open')?.postMoneyValuation ||
+      fundingRounds.filter(r => r.status === 'closed').sort((a, b) => new Date(b.closeDate).getTime() - new Date(a.closeDate).getTime())[0]?.postMoneyValuation || 0
+    const totalInvestors = investors.length
+    const totalShares = capTable.reduce((sum, e) => sum + e.shares, 0)
+    const arr = kpis.find(k => k.name === 'Annual Recurring Revenue')?.currentValue || 0
+    const mrr = kpis.find(k => k.name === 'Monthly Recurring Revenue')?.currentValue || 0
+    const runway = kpis.find(k => k.name === 'Runway (months)')?.currentValue || 0
+    const burnRate = kpis.find(k => k.name === 'Burn Rate')?.currentValue || 0
 
     return {
       totalRaised,
@@ -652,9 +477,9 @@ export default function InvestorMetricsClient() {
     try {
       const exportData = {
         metrics: dbMetrics,
-        kpis: mockKPIs,
-        capTable: mockCapTable,
-        fundingRounds: mockFundingRounds,
+        kpis: kpis,
+        capTable: capTable,
+        fundingRounds: fundingRounds,
         exportedAt: new Date().toISOString()
       }
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -761,13 +586,13 @@ export default function InvestorMetricsClient() {
         })
       }
       if (investorReportForm.includeKPIs) {
-        reportData.sections.push({ name: 'Key Performance Indicators', data: mockKPIs })
+        reportData.sections.push({ name: 'Key Performance Indicators', data: kpis })
       }
       if (investorReportForm.includeCapTable) {
-        reportData.sections.push({ name: 'Cap Table Summary', data: mockCapTable })
+        reportData.sections.push({ name: 'Cap Table Summary', data: capTable })
       }
       if (investorReportForm.includeFundingProgress) {
-        reportData.sections.push({ name: 'Funding Progress', data: mockFundingRounds })
+        reportData.sections.push({ name: 'Funding Progress', data: fundingRounds })
       }
       if (investorReportForm.additionalNotes) {
         reportData.notes = investorReportForm.additionalNotes
@@ -782,9 +607,9 @@ export default function InvestorMetricsClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      const recipientCount = investorReportForm.recipientType === 'all' ? mockInvestors.length :
-        investorReportForm.recipientType === 'board' ? mockInvestors.filter(i => i.boardSeat).length :
-        investorReportForm.recipientType === 'investors' ? mockInvestors.length :
+      const recipientCount = investorReportForm.recipientType === 'all' ? investors.length :
+        investorReportForm.recipientType === 'board' ? investors.filter(i => i.boardSeat).length :
+        investorReportForm.recipientType === 'investors' ? investors.length :
         investorReportForm.customRecipients.split(',').filter(e => e.trim()).length
 
       toast.success('Investor report generated' report ready for ${recipientCount} recipient(s)`
@@ -810,20 +635,20 @@ export default function InvestorMetricsClient() {
 
       if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'cap-table') {
         exportData.capTable = exportDataForm.anonymizeData
-          ? mockCapTable.map(e => ({ ...e, stakeholder: `Stakeholder ${e.id}` }))
-          : mockCapTable
+          ? capTable.map(e => ({ ...e, stakeholder: `Stakeholder ${e.id}` }))
+          : capTable
       }
       if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'kpis') {
-        exportData.kpis = mockKPIs
+        exportData.kpis = kpis
         exportData.customMetrics = dbMetrics
       }
       if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'funding') {
-        exportData.fundingRounds = mockFundingRounds
+        exportData.fundingRounds = fundingRounds
       }
       if (exportDataForm.dataType === 'all' || exportDataForm.dataType === 'investors') {
         exportData.investors = exportDataForm.anonymizeData
-          ? mockInvestors.map(i => ({ ...i, name: `Investor ${i.id}`, email: 'redacted@example.com' }))
-          : mockInvestors
+          ? investors.map(i => ({ ...i, name: `Investor ${i.id}`, email: 'redacted@example.com' }))
+          : investors
       }
 
       // Determine file extension
@@ -843,7 +668,7 @@ export default function InvestorMetricsClient() {
       } else if (exportDataForm.format === 'csv') {
         // Simple CSV export for cap table
         const csvData = exportDataForm.dataType === 'cap-table' || exportDataForm.dataType === 'all'
-          ? mockCapTable.map(e => `${e.stakeholder},${e.stakeholderType},${e.shareClass},${e.shares},${e.ownership}%`).join('\n')
+          ? capTable.map(e => `${e.stakeholder},${e.stakeholderType},${e.shareClass},${e.shares},${e.ownership}%`).join('\n')
           : 'Data export in CSV format'
         const csvHeader = 'Stakeholder,Type,Share Class,Shares,Ownership\n'
         const blob = new Blob([csvHeader + csvData], { type: 'text/csv' })
@@ -1030,15 +855,15 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">${Math.round(mockCapTable.reduce((s, c) => s + (c.shares * c.sharePrice), 0) / 1000000)}M</p>
+                      <p className="text-3xl font-bold">${Math.round(capTable.reduce((s, c) => s + (c.shares * c.sharePrice), 0) / 1000000)}M</p>
                       <p className="text-emerald-200 text-sm">Valuation</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">${Math.round(mockFundingRounds.reduce((s, r) => s + r.raisedAmount, 0) / 1000000)}M</p>
+                      <p className="text-3xl font-bold">${Math.round(fundingRounds.reduce((s, r) => s + r.raisedAmount, 0) / 1000000)}M</p>
                       <p className="text-emerald-200 text-sm">Total Raised</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-3xl font-bold">{investors.length}</p>
                       <p className="text-emerald-200 text-sm">Investors</p>
                     </div>
                   </div>
@@ -1074,7 +899,7 @@ export default function InvestorMetricsClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {mockFundingRounds.map(round => (
+                    {fundingRounds.map(round => (
                       <div key={round.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1115,7 +940,7 @@ export default function InvestorMetricsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockCapTable.slice(0, 6).map(entry => (
+                      {capTable.slice(0, 6).map(entry => (
                         <div key={entry.id} className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full" style={{
                             backgroundColor: entry.stakeholderType === 'founder' ? '#f59e0b' :
@@ -1133,7 +958,7 @@ export default function InvestorMetricsClient() {
 
               {/* Key Metrics Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {mockKPIs.slice(0, 8).map(kpi => {
+                {kpis.slice(0, 8).map(kpi => {
                   const change = calculateChange(kpi.currentValue, kpi.previousValue)
                   const isInverse = kpi.name.includes('Churn') || kpi.name.includes('CAC') || kpi.name.includes('Burn')
                   return (
@@ -1179,11 +1004,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockCapTable.length}</p>
+                      <p className="text-3xl font-bold">{capTable.length}</p>
                       <p className="text-blue-200 text-sm">Shareholders</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockCapTable.reduce((s, c) => s + c.shares, 0).toLocaleString()}</p>
+                      <p className="text-3xl font-bold">{capTable.reduce((s, c) => s + c.shares, 0).toLocaleString()}</p>
                       <p className="text-blue-200 text-sm">Total Shares</p>
                     </div>
                   </div>
@@ -1205,7 +1030,7 @@ export default function InvestorMetricsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {mockCapTable.map(entry => (
+                      {capTable.map(entry => (
                         <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1251,10 +1076,10 @@ export default function InvestorMetricsClient() {
                     <tfoot className="bg-gray-50 dark:bg-gray-700/50 font-medium">
                       <tr>
                         <td className="px-6 py-3" colSpan={3}>Total</td>
-                        <td className="px-6 py-3 text-right">{mockCapTable.reduce((sum, e) => sum + e.shares, 0).toLocaleString()}</td>
+                        <td className="px-6 py-3 text-right">{capTable.reduce((sum, e) => sum + e.shares, 0).toLocaleString()}</td>
                         <td className="px-6 py-3 text-right">100.00%</td>
                         <td className="px-6 py-3 text-right">100.00%</td>
-                        <td className="px-6 py-3 text-right">{formatCurrency(mockCapTable.reduce((sum, e) => sum + (e.investmentAmount || 0), 0), true)}</td>
+                        <td className="px-6 py-3 text-right">{formatCurrency(capTable.reduce((sum, e) => sum + (e.investmentAmount || 0), 0), true)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -1274,11 +1099,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockFundingRounds.length}</p>
+                      <p className="text-3xl font-bold">{fundingRounds.length}</p>
                       <p className="text-amber-200 text-sm">Rounds</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockFundingRounds.filter(r => r.status === 'closed').length}</p>
+                      <p className="text-3xl font-bold">{fundingRounds.filter(r => r.status === 'closed').length}</p>
                       <p className="text-amber-200 text-sm">Closed</p>
                     </div>
                   </div>
@@ -1286,7 +1111,7 @@ export default function InvestorMetricsClient() {
               </div>
 
               <div className="grid gap-6">
-                {mockFundingRounds.map(round => (
+                {fundingRounds.map(round => (
                   <Card key={round.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRound(round)}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -1363,11 +1188,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-3xl font-bold">{investors.length}</p>
                       <p className="text-purple-200 text-sm">Investors</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.filter(i => i.type === 'lead').length}</p>
+                      <p className="text-3xl font-bold">{investors.filter(i => i.type === 'lead').length}</p>
                       <p className="text-purple-200 text-sm">Lead</p>
                     </div>
                   </div>
@@ -1375,7 +1200,7 @@ export default function InvestorMetricsClient() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockInvestors.map(investor => (
+                {investors.map(investor => (
                   <Card key={investor.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedInvestor(investor)}>
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
@@ -1444,11 +1269,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockKPIs.length}</p>
+                      <p className="text-3xl font-bold">{kpis.length}</p>
                       <p className="text-rose-200 text-sm">Metrics</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockKPIs.filter(k => k.trend === 'up').length}</p>
+                      <p className="text-3xl font-bold">{kpis.filter(k => k.trend === 'up').length}</p>
                       <p className="text-rose-200 text-sm">Improving</p>
                     </div>
                   </div>
@@ -1492,7 +1317,7 @@ export default function InvestorMetricsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {mockKPIs.filter(k => k.category === category).map(kpi => {
+                      {kpis.filter(k => k.category === category).map(kpi => {
                         const change = calculateChange(kpi.currentValue, kpi.previousValue)
                         const isInverse = kpi.name.includes('Churn') || kpi.name.includes('CAC') || kpi.name.includes('Burn')
                         return (
@@ -2261,18 +2086,18 @@ export default function InvestorMetricsClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockInvestorMetricsAIInsights}
+                insights={investorMetricsAIInsights}
                 title="Investor Intelligence"
                 onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockInvestorMetricsCollaborators}
+                collaborators={investorMetricsCollaborators}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockInvestorMetricsPredictions}
+                predictions={investorMetricsPredictions}
                 title="Financial Forecasts"
               />
             </div>
@@ -2280,7 +2105,7 @@ export default function InvestorMetricsClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockInvestorMetricsActivities}
+              activities={investorMetricsActivities}
               title="Investor Activity"
               maxItems={5}
             />

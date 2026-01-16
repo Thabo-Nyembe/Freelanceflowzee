@@ -722,12 +722,21 @@ export default function StockClient() {
   const { createStockLevel, updateStockLevel } = useStockLevelMutations()
 
   const [activeTab, setActiveTab] = useState('inventory')
-  const [products] = useState<Product[]>(mockProducts)
-  const [movements] = useState<StockMovement[]>(mockMovements)
-  const [warehouses] = useState<Warehouse[]>(mockWarehouses)
-  const [alerts] = useState<Alert[]>(mockAlerts)
-  const [stockCounts] = useState<StockCount[]>(mockStockCounts)
-  const [analytics] = useState<Analytics>(mockAnalytics)
+  const [products] = useState<Product[]>(stockLevels || [])
+  const [movements] = useState<StockMovement[]>(dbMovements || [])
+  const [warehouses] = useState<Warehouse[]>([])
+  const [alerts] = useState<Alert[]>(lowStockItems || [])
+  const [stockCounts] = useState<StockCount[]>([])
+  const [analytics] = useState<Analytics>({
+    totalValue: levelStats?.totalValue || 0,
+    totalItems: levelStats?.totalItems || 0,
+    lowStockCount: levelStats?.lowStockItems || 0,
+    outOfStockCount: levelStats?.outOfStock || 0,
+    turnoverRate: movementStats?.averageValue || 0,
+    growthRate: 0,
+    topProducts: [],
+    categoryBreakdown: []
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StockStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ProductCategory | 'all'>('all')

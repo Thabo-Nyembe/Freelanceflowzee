@@ -184,127 +184,39 @@ interface Workspace {
   createdAt: string
 }
 
-// Mock Data
-const mockProjects: Project[] = [
-  { id: '1', name: 'Website Redesign', client: 'Acme Corp', color: 'indigo', status: 'active', billable: true, hourlyRate: 150, budget: 20000, spent: 12500, totalHours: 83.3 },
-  { id: '2', name: 'Mobile App Dev', client: 'TechStart', color: 'purple', status: 'active', billable: true, hourlyRate: 175, budget: 35000, spent: 28000, totalHours: 160 },
-  { id: '3', name: 'Brand Strategy', client: 'Global Inc', color: 'pink', status: 'active', billable: true, hourlyRate: 200, budget: 15000, spent: 8000, totalHours: 40 },
-  { id: '4', name: 'Internal Training', client: 'Internal', color: 'gray', status: 'active', billable: false, hourlyRate: 0, totalHours: 24, spent: 0 },
-  { id: '5', name: 'Marketing Campaign', client: 'Acme Corp', color: 'emerald', status: 'completed', billable: true, hourlyRate: 125, budget: 10000, spent: 9500, totalHours: 76 }
-]
+// Database data - ready for integration
+const projects: Project[] = []
 
-const mockEntries: TimeEntry[] = [
-  { id: '1', title: 'Homepage design review', projectId: '1', projectName: 'Website Redesign', startTime: '2024-01-16T09:00:00', endTime: '2024-01-16T11:30:00', durationSeconds: 9000, durationHours: 2.5, status: 'stopped', isBillable: true, billableAmount: 375, hourlyRate: 150, tags: ['design', 'review'] },
-  { id: '2', title: 'API integration work', projectId: '2', projectName: 'Mobile App Dev', startTime: '2024-01-16T13:00:00', endTime: '2024-01-16T17:00:00', durationSeconds: 14400, durationHours: 4, status: 'stopped', isBillable: true, billableAmount: 700, hourlyRate: 175, tags: ['development', 'api'] },
-  { id: '3', title: 'Client meeting', projectId: '3', projectName: 'Brand Strategy', startTime: '2024-01-16T10:00:00', endTime: '2024-01-16T11:00:00', durationSeconds: 3600, durationHours: 1, status: 'approved', isBillable: true, billableAmount: 200, hourlyRate: 200, tags: ['meeting'] },
-  { id: '4', title: 'Bug fixing session', projectId: '2', projectName: 'Mobile App Dev', startTime: '2024-01-15T14:00:00', endTime: '2024-01-15T18:00:00', durationSeconds: 14400, durationHours: 4, status: 'stopped', isBillable: true, billableAmount: 700, hourlyRate: 175, tags: ['bug-fix'] },
-  { id: '5', title: 'Working on feature X', projectId: '1', projectName: 'Website Redesign', startTime: '2024-01-16T14:00:00', durationSeconds: 3600, durationHours: 1, status: 'running', isBillable: true, billableAmount: 150, hourlyRate: 150, tags: ['feature'] }
-]
+const entries: TimeEntry[] = []
 
-const mockTeam: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', role: 'Lead Developer', todayHours: 6.5, weekHours: 32, activeProject: 'Website Redesign', isOnline: true },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', role: 'Designer', todayHours: 4.2, weekHours: 28, activeProject: 'Brand Strategy', isOnline: true },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'Developer', todayHours: 7.0, weekHours: 35, activeProject: 'Mobile App Dev', isOnline: false },
-  { id: '4', name: 'Alex Kim', email: 'alex@company.com', role: 'Project Manager', todayHours: 5.5, weekHours: 30, isOnline: true }
-]
+const team: TeamMember[] = []
 
-const mockInvoices: Invoice[] = [
-  { id: '1', number: 'INV-001', client: 'Acme Corp', project: 'Website Redesign', amount: 12500, hours: 83.3, status: 'paid', dueDate: '2024-01-15', createdAt: '2024-01-01' },
-  { id: '2', number: 'INV-002', client: 'TechStart', project: 'Mobile App Dev', amount: 28000, hours: 160, status: 'sent', dueDate: '2024-02-01', createdAt: '2024-01-16' },
-  { id: '3', number: 'INV-003', client: 'Global Inc', project: 'Brand Strategy', amount: 8000, hours: 40, status: 'draft', dueDate: '2024-02-15', createdAt: '2024-01-16' },
-  { id: '4', number: 'INV-004', client: 'Acme Corp', project: 'Marketing Campaign', amount: 9500, hours: 76, status: 'overdue', dueDate: '2024-01-10', createdAt: '2023-12-15' }
-]
+const invoices: Invoice[] = []
 
-const mockGoals: Goal[] = [
-  { id: '1', label: 'Daily Hours', target: 8, current: 6.5, unit: 'h' },
-  { id: '2', label: 'Weekly Hours', target: 40, current: 32, unit: 'h' },
-  { id: '3', label: 'Billable %', target: 80, current: 75, unit: '%' },
-  { id: '4', label: 'Monthly Revenue', target: 15000, current: 12500, unit: '$' }
-]
+const goals: Goal[] = []
 
-const mockClients: Client[] = [
-  { id: '1', name: 'Acme Corp', email: 'billing@acme.com', phone: '+1 555-0101', address: '123 Business Ave, NYC', currency: 'USD', projects: 3, totalBilled: 125000, outstandingBalance: 12500, status: 'active', createdAt: '2023-01-15', color: 'blue' },
-  { id: '2', name: 'TechStart', email: 'finance@techstart.io', phone: '+1 555-0102', address: '456 Innovation Blvd, SF', currency: 'USD', projects: 2, totalBilled: 85000, outstandingBalance: 28000, status: 'active', createdAt: '2023-03-22', color: 'purple' },
-  { id: '3', name: 'Global Inc', email: 'accounts@global.com', phone: '+1 555-0103', address: '789 Enterprise Dr, LA', currency: 'USD', projects: 1, totalBilled: 45000, outstandingBalance: 8000, status: 'active', createdAt: '2023-06-10', color: 'green' },
-  { id: '4', name: 'StartupXYZ', email: 'hello@startupxyz.com', phone: '+1 555-0104', address: '321 Launch St, Austin', currency: 'USD', projects: 1, totalBilled: 15000, outstandingBalance: 0, status: 'inactive', createdAt: '2022-11-05', color: 'orange' }
-]
+const clients: Client[] = []
 
-const mockTags: Tag[] = [
-  { id: '1', name: 'design', color: 'pink', usageCount: 45, createdAt: '2023-01-10' },
-  { id: '2', name: 'development', color: 'blue', usageCount: 128, createdAt: '2023-01-10' },
-  { id: '3', name: 'meeting', color: 'purple', usageCount: 67, createdAt: '2023-01-10' },
-  { id: '4', name: 'review', color: 'amber', usageCount: 34, createdAt: '2023-01-15' },
-  { id: '5', name: 'bug-fix', color: 'red', usageCount: 89, createdAt: '2023-02-01' },
-  { id: '6', name: 'research', color: 'green', usageCount: 23, createdAt: '2023-02-15' },
-  { id: '7', name: 'planning', color: 'indigo', usageCount: 56, createdAt: '2023-03-01' },
-  { id: '8', name: 'documentation', color: 'cyan', usageCount: 41, createdAt: '2023-03-10' }
-]
+const tags: Tag[] = []
 
-const mockTimeOff: TimeOffRequest[] = [
-  { id: '1', userId: '1', userName: 'Sarah Chen', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', hours: 40, status: 'approved', notes: 'Family vacation', createdAt: '2024-01-10' },
-  { id: '2', userId: '2', userName: 'Mike Johnson', type: 'sick', startDate: '2024-01-18', endDate: '2024-01-19', hours: 16, status: 'approved', notes: 'Medical appointment', createdAt: '2024-01-17' },
-  { id: '3', userId: '3', userName: 'Emily Davis', type: 'personal', startDate: '2024-02-01', endDate: '2024-02-01', hours: 8, status: 'pending', notes: 'Personal matter', createdAt: '2024-01-16' },
-  { id: '4', userId: '4', userName: 'Alex Kim', type: 'holiday', startDate: '2024-02-19', endDate: '2024-02-19', hours: 8, status: 'approved', notes: 'Presidents Day', createdAt: '2024-01-05' }
-]
+const timeOff: TimeOffRequest[] = []
 
-const mockSavedReports: SavedReport[] = [
-  { id: '1', name: 'Weekly Team Summary', type: 'weekly', dateRange: 'week', filters: ['all-projects'], schedule: 'Monday 9am', lastRun: '2024-01-15', createdAt: '2023-06-01', createdBy: 'Admin' },
-  { id: '2', name: 'Monthly Client Billing', type: 'client', dateRange: 'month', filters: ['billable-only'], schedule: '1st of month', lastRun: '2024-01-01', createdAt: '2023-07-15', createdBy: 'Admin' },
-  { id: '3', name: 'Project Budget Analysis', type: 'project', dateRange: 'quarter', filters: ['active-projects'], lastRun: '2024-01-10', createdAt: '2023-08-20', createdBy: 'Sarah Chen' },
-  { id: '4', name: 'Team Utilization Report', type: 'team', dateRange: 'month', filters: ['all-members'], lastRun: '2024-01-12', createdAt: '2023-09-01', createdBy: 'Alex Kim' }
-]
+const savedReports: SavedReport[] = []
 
-const mockAutomations: Automation[] = [
-  { id: '1', name: 'Auto-stop timer at midnight', trigger: 'daily', actions: ['Stop running timers', 'Send notification'], conditions: ['Timer running > 8 hours'], isActive: true, lastTriggered: '2024-01-15', createdAt: '2023-06-15' },
-  { id: '2', name: 'Weekly reminder to submit hours', trigger: 'weekly', actions: ['Email reminder', 'Slack notification'], conditions: ['Friday 4pm'], isActive: true, lastTriggered: '2024-01-12', createdAt: '2023-07-01' },
-  { id: '3', name: 'Auto-tag based on project', trigger: 'on_entry', actions: ['Add project default tags'], conditions: ['New time entry created'], isActive: false, createdAt: '2023-08-10' },
-  { id: '4', name: 'Monthly invoice generation', trigger: 'monthly', actions: ['Generate draft invoices', 'Notify admin'], conditions: ['Last day of month'], isActive: true, lastTriggered: '2024-01-31', createdAt: '2023-09-20' }
-]
+const automations: Automation[] = []
 
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'Google Calendar', type: 'calendar', icon: 'calendar', status: 'connected', lastSync: '2024-01-16 09:00', syncedItems: 156 },
-  { id: '2', name: 'Jira', type: 'project', icon: 'folder', status: 'connected', lastSync: '2024-01-16 08:45', syncedItems: 89 },
-  { id: '3', name: 'QuickBooks', type: 'accounting', icon: 'receipt', status: 'connected', lastSync: '2024-01-15 18:00', syncedItems: 234 },
-  { id: '4', name: 'Slack', type: 'communication', icon: 'message', status: 'connected', lastSync: '2024-01-16 09:15', syncedItems: 45 },
-  { id: '5', name: 'Salesforce', type: 'crm', icon: 'users', status: 'disconnected', lastSync: '2024-01-10 12:00', syncedItems: 0 },
-  { id: '6', name: 'Asana', type: 'project', icon: 'check', status: 'error', lastSync: '2024-01-14 15:30', syncedItems: 67 }
-]
+const integrations: Integration[] = []
 
-const mockWorkspaces: Workspace[] = [
-  { id: '1', name: 'Main Workspace', slug: 'main', members: 12, projects: 8, totalHours: 4560, plan: 'premium', createdAt: '2023-01-01' },
-  { id: '2', name: 'Design Team', slug: 'design', members: 4, projects: 3, totalHours: 1200, plan: 'starter', createdAt: '2023-03-15' }
-]
+const workspaces: Workspace[] = []
 
-// Competitive Upgrade Mock Data - Toggl/Harvest Level Time Tracking Intelligence
-const mockTimeTrackingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Productivity Peak', description: 'Team logged 156 billable hours this week—highest this quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
-  { id: '2', type: 'warning' as const, title: 'Overtime Alert', description: '3 team members approaching 45+ hour threshold this week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Auto-categorization could save 2.5 hours/week in time entry admin.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
-
-const mockTimeTrackingCollaborators = [
-  { id: '1', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Senior Dev', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Designer', avatar: '/avatars/design.jpg', status: 'away' as const, role: 'Designer' },
-]
-
-const mockTimeTrackingPredictions = [
-  { id: '1', title: 'Billable Utilization', prediction: 'Team utilization rate on track for 85% this month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Project Hours', prediction: 'Client X project will exceed budget by 12 hours at current pace', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockTimeTrackingActivities = [
-  { id: '1', user: 'Project Manager', action: 'Approved', target: 'Weekly timesheet for Design Team', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Senior Dev', action: 'Logged', target: '6.5 hours on API Development', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Designer', action: 'Started', target: 'Timer for UI mockups task', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Competitive Upgrade Data - Toggl/Harvest Level Time Tracking Intelligence
+const timeTrackingAIInsights: any[] = []
+const timeTrackingCollaborators: any[] = []
+const timeTrackingPredictions: any[] = []
+const timeTrackingActivities: any[] = []
 
 // Quick actions will be defined inside the component to access state setters
-const mockTimeTrackingQuickActionsBase = [
-  { id: '1', label: 'Start Timer', icon: 'play', variant: 'default' as const },
-  { id: '2', label: 'Manual Entry', icon: 'plus', variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'barChart', variant: 'outline' as const },
-]
+const timeTrackingQuickActionsBase: any[] = []
 
 export default function TimeTrackingClient() {
   const [activeTab, setActiveTab] = useState('timer')
@@ -401,7 +313,7 @@ export default function TimeTrackingClient() {
         durationSeconds = parseFloat(durationStr || '0') * 3600
       }
 
-      const project = mockProjects.find(p => p.id === newEntryForm.projectId)
+      const project = projects.find(p => p.id === newEntryForm.projectId)
 
       await createEntry({
         title: newEntryForm.description,
@@ -441,7 +353,7 @@ export default function TimeTrackingClient() {
       return
     }
     try {
-      const project = mockProjects.find(p => p.id === timerProject)
+      const project = projects.find(p => p.id === timerProject)
       const result = await dbStartTimer({
         title: timerDescription,
         description: timerDescription,
@@ -469,7 +381,7 @@ export default function TimeTrackingClient() {
       return
     }
     try {
-      const project = mockProjects.find(p => p.id === timerProject)
+      const project = projects.find(p => p.id === timerProject)
       const durationSeconds = timerSeconds
       const billableAmount = timerBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
 
@@ -559,19 +471,19 @@ export default function TimeTrackingClient() {
   }, [isTimerRunning])
 
   const stats = useMemo(() => {
-    const totalHours = mockEntries.reduce((sum, e) => sum + e.durationHours, 0)
-    const billableHours = mockEntries.filter(e => e.isBillable).reduce((sum, e) => sum + e.durationHours, 0)
-    const totalRevenue = mockEntries.reduce((sum, e) => sum + e.billableAmount, 0)
-    const running = mockEntries.filter(e => e.status === 'running').length
+    const totalHours = entries.reduce((sum, e) => sum + e.durationHours, 0)
+    const billableHours = entries.filter(e => e.isBillable).reduce((sum, e) => sum + e.durationHours, 0)
+    const totalRevenue = entries.reduce((sum, e) => sum + e.billableAmount, 0)
+    const running = entries.filter(e => e.status === 'running').length
     return {
       totalHours: totalHours.toFixed(1),
       billableHours: billableHours.toFixed(1),
       billablePercent: totalHours > 0 ? ((billableHours / totalHours) * 100).toFixed(0) : '0',
       totalRevenue,
-      entries: mockEntries.length,
+      entries: entries.length,
       running,
-      projects: mockProjects.filter(p => p.status === 'active').length,
-      teamOnline: mockTeam.filter(t => t.isOnline).length
+      projects: projects.filter(p => p.status === 'active').length,
+      teamOnline: team.filter(t => t.isOnline).length
     }
   }, [])
 
@@ -583,7 +495,7 @@ export default function TimeTrackingClient() {
     { label: 'Entries', value: stats.entries.toString(), icon: FileText, color: 'from-indigo-500 to-indigo-600', trend: '+3' },
     { label: 'Running', value: stats.running.toString(), icon: Play, color: 'from-green-500 to-green-600', trend: '' },
     { label: 'Projects', value: stats.projects.toString(), icon: Briefcase, color: 'from-pink-500 to-pink-600', trend: '' },
-    { label: 'Team Online', value: `${stats.teamOnline}/${mockTeam.length}`, icon: Users, color: 'from-cyan-500 to-cyan-600', trend: '' }
+    { label: 'Team Online', value: `${stats.teamOnline}/${team.length}`, icon: Users, color: 'from-cyan-500 to-cyan-600', trend: '' }
   ]
 
   const formatTimer = (seconds: number) => {
@@ -636,7 +548,7 @@ export default function TimeTrackingClient() {
 
   // Real Export Handler - generates actual CSV/JSON files
   const handleExportTimesheet = () => {
-    const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
+    const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : entries.map(e => ({
       id: e.id,
       title: e.title,
       project_name: e.projectName,
@@ -694,7 +606,7 @@ export default function TimeTrackingClient() {
   const [integrationToRemove, setIntegrationToRemove] = useState<string | null>(null)
 
   // Real Quick Actions with actual functionality
-  const timeTrackingQuickActions = mockTimeTrackingQuickActionsBase.map(action => ({
+  const timeTrackingQuickActions = timeTrackingQuickActionsBase.map(action => ({
     ...action,
     action: action.id === '1'
       ? () => { if (timerDescription) handleStartTimerDB(); else toast.info('Enter a description to start the timer') }
@@ -723,7 +635,7 @@ export default function TimeTrackingClient() {
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               <Input value={timerDescription} onChange={(e) => setTimerDescription(e.target.value)} placeholder="What are you working on?" className="flex-1 text-lg" />
-              <Select value={timerProject} onValueChange={setTimerProject}><SelectTrigger className="w-48"><SelectValue placeholder="Project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select>
+              <Select value={timerProject} onValueChange={setTimerProject}><SelectTrigger className="w-48"><SelectValue placeholder="Project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select>
               <Button variant={timerBillable ? 'default' : 'outline'} size="icon" onClick={() => setTimerBillable(!timerBillable)} className={timerBillable ? 'bg-emerald-500 hover:bg-emerald-600' : ''}><DollarSign className="h-5 w-5" /></Button>
               <div className="text-4xl font-mono font-bold min-w-[160px] text-center">{formatTimer(timerSeconds)}</div>
               {isTimerRunning ? (
@@ -776,11 +688,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h</p>
+                    <p className="text-3xl font-bold">{entries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h</p>
                     <p className="text-amber-200 text-sm">Today</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${mockEntries.filter(e => e.isBillable).reduce((sum, e) => sum + e.billableAmount, 0).toFixed(0)}</p>
+                    <p className="text-3xl font-bold">${entries.filter(e => e.isBillable).reduce((sum, e) => sum + e.billableAmount, 0).toFixed(0)}</p>
                     <p className="text-amber-200 text-sm">Billable</p>
                   </div>
                 </div>
@@ -819,12 +731,12 @@ export default function TimeTrackingClient() {
                   Total: {dbTimeEntries && dbTimeEntries.length > 0
                     ? dbTimeEntries.filter((e: any) => new Date(e.start_time).toDateString() === new Date().toDateString())
                         .reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0).toFixed(1)
-                    : mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h
+                    : entries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h
                 </span>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {/* Show database entries if available, otherwise show mock data */}
-                {(dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
+                {(dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : entries.map(e => ({
                   id: e.id,
                   title: e.title,
                   status: e.status,
@@ -835,7 +747,7 @@ export default function TimeTrackingClient() {
                   duration_hours: e.durationHours,
                   billable_amount: e.billableAmount
                 }))).map((entry: any) => {
-                  const project = mockProjects.find(p => p.id === entry.project_id)
+                  const project = projects.find(p => p.id === entry.project_id)
                   return (
                     <div key={entry.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
                       <div className="flex items-center justify-between">
@@ -897,7 +809,7 @@ export default function TimeTrackingClient() {
                     <p className="text-blue-200 text-sm">This Week</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Projects</p>
                   </div>
                 </div>
@@ -986,7 +898,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full min-w-[800px]">
                   <thead><tr className="bg-gray-50 dark:bg-gray-800"><th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase w-48">Project</th>{weekDays.map((day, idx) => <th key={idx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><div className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div><div className={`text-lg font-bold ${day.toDateString() === new Date().toDateString() ? 'text-amber-600' : ''}`}>{day.getDate()}</div></th>)}<th className="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Total</th></tr></thead>
                   <tbody>
-                    {mockProjects.filter(p => p.status === 'active').slice(0, 4).map(project => (
+                    {projects.filter(p => p.status === 'active').slice(0, 4).map(project => (
                       <tr key={project.id} className="border-t dark:border-gray-700">
                         <td className="py-3 px-4"><div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full bg-${project.color}-500`}></div><span className="font-medium text-sm">{project.name}</span></div><p className="text-xs text-gray-500">{project.client}</p></td>
                         {weekDays.map((day, dayIdx) => <td key={dayIdx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><Input type="text" className="w-16 text-center" placeholder="-" defaultValue={Math.random() > 0.6 ? (Math.random() * 4 + 1).toFixed(1) : ''} /></td>)}
@@ -1056,7 +968,7 @@ export default function TimeTrackingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: BarChart3, label: 'Summary', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => {
-                  const summaryData = mockProjects.map(p => ({
+                  const summaryData = projects.map(p => ({
                     Project: p.name,
                     Client: p.client,
                     Hours: p.totalHours,
@@ -1075,7 +987,7 @@ export default function TimeTrackingClient() {
                   downloadAsCsv(trendsData, `trends-report-${new Date().toISOString().split('T')[0]}`)
                 } },
                 { icon: Users, label: 'By Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
-                  const teamData = mockTeam.map(m => ({
+                  const teamData = team.map(m => ({
                     Name: m.name,
                     Role: m.role,
                     'Today Hours': m.todayHours,
@@ -1086,7 +998,7 @@ export default function TimeTrackingClient() {
                   downloadAsCsv(teamData, `team-report-${new Date().toISOString().split('T')[0]}`)
                 } },
                 { icon: Briefcase, label: 'By Project', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => {
-                  const projectData = mockProjects.map(p => ({
+                  const projectData = projects.map(p => ({
                     Project: p.name,
                     Client: p.client,
                     Status: p.status,
@@ -1097,7 +1009,7 @@ export default function TimeTrackingClient() {
                   downloadAsCsv(projectData, `project-report-${new Date().toISOString().split('T')[0]}`)
                 } },
                 { icon: Building2, label: 'By Client', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => {
-                  const clientData = mockClients.map(c => ({
+                  const clientData = clients.map(c => ({
                     Client: c.name,
                     Email: c.email,
                     Projects: c.projects,
@@ -1108,7 +1020,7 @@ export default function TimeTrackingClient() {
                   downloadAsCsv(clientData, `client-report-${new Date().toISOString().split('T')[0]}`)
                 } },
                 { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
-                  const revenueData = mockInvoices.map(inv => ({
+                  const revenueData = invoices.map(inv => ({
                     Invoice: inv.number,
                     Client: inv.client,
                     Project: inv.project,
@@ -1120,7 +1032,7 @@ export default function TimeTrackingClient() {
                   downloadAsCsv(revenueData, `revenue-report-${new Date().toISOString().split('T')[0]}`)
                 } },
                 { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {
-                  const scheduleData = mockTimeOff.map(t => ({
+                  const scheduleData = timeOff.map(t => ({
                     Employee: t.userName,
                     Type: t.type,
                     'Start Date': t.startDate,
@@ -1163,7 +1075,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockProjects.map(project => {
+                    {projects.map(project => {
                       const percentage = (project.totalHours / 160) * 100
                       return (
                         <div key={project.id}>
@@ -1177,7 +1089,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Goals Progress</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockGoals.map(goal => {
+                    {goals.map(goal => {
                       const percentage = (goal.current / goal.target) * 100
                       return (
                         <div key={goal.id}>
@@ -1219,7 +1131,7 @@ export default function TimeTrackingClient() {
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Report Name</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Range</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Schedule</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Run</th><th className="px-4 py-3"></th></tr></thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {mockSavedReports.map(report => (
+                      {savedReports.map(report => (
                         <tr key={report.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-4 py-4"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-amber-500" /><span className="font-medium">{report.name}</span></div></td>
                           <td className="px-4 py-4"><Badge variant="outline">{report.type}</Badge></td>
@@ -1229,12 +1141,12 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => {
                             // Run the report - generate data based on report type
                             const reportData = report.type === 'summary'
-                              ? mockProjects.map(p => ({ Project: p.name, Hours: p.totalHours, Revenue: p.spent }))
+                              ? projects.map(p => ({ Project: p.name, Hours: p.totalHours, Revenue: p.spent }))
                               : report.type === 'team'
-                              ? mockTeam.map(m => ({ Name: m.name, Hours: m.weekHours }))
+                              ? team.map(m => ({ Name: m.name, Hours: m.weekHours }))
                               : report.type === 'project'
-                              ? mockProjects.map(p => ({ Project: p.name, Budget: p.budget, Spent: p.spent }))
-                              : mockClients.map(c => ({ Client: c.name, Billed: c.totalBilled }))
+                              ? projects.map(p => ({ Project: p.name, Budget: p.budget, Spent: p.spent }))
+                              : clients.map(c => ({ Client: c.name, Billed: c.totalBilled }))
                             downloadAsCsv(reportData, `${report.name.toLowerCase().replace(/ /g, '-')}-${new Date().toISOString().split('T')[0]}`)
                           }} title="Run report"><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet} title="Download"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => { setSelectedReport(report); setShowReportDialog(true) }} title="Edit report"><Edit2 className="h-4 w-4" /></Button></div></td>
                         </tr>
@@ -1252,7 +1164,7 @@ export default function TimeTrackingClient() {
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Projects</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Billed</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Outstanding</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {mockClients.map(client => (
+                      {clients.map(client => (
                         <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-4 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg bg-${client.color}-100 dark:bg-${client.color}-900/30 flex items-center justify-center`}><Building2 className={`h-5 w-5 text-${client.color}-600`} /></div><div><h4 className="font-medium">{client.name}</h4><p className="text-sm text-gray-500">{client.email}</p></div></div></td>
                           <td className="px-4 py-4 font-medium">{client.projects}</td>
@@ -1273,7 +1185,7 @@ export default function TimeTrackingClient() {
                 <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Tags Usage</CardTitle><Button onClick={() => setShowTagDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Tag</Button></CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                    {mockTags.map(tag => (
+                    {tags.map(tag => (
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
@@ -1303,11 +1215,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{projects.length}</p>
                     <p className="text-pink-200 text-sm">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1321,7 +1233,7 @@ export default function TimeTrackingClient() {
                 { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setActiveTab('team') },
                 { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {
                   // Export budget data
-                  const budgetData = mockProjects.filter(p => p.budget).map(p => ({
+                  const budgetData = projects.filter(p => p.budget).map(p => ({
                     Project: p.name,
                     Client: p.client,
                     Budget: p.budget,
@@ -1333,7 +1245,7 @@ export default function TimeTrackingClient() {
                 } },
                 { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowMilestoneDialog(true) },
                 { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
-                  const archivedProjects = mockProjects.filter(p => p.status === 'completed' || p.status === 'archived')
+                  const archivedProjects = projects.filter(p => p.status === 'completed' || p.status === 'archived')
                   if (archivedProjects.length > 0) {
                     toast.info('Archived projects' archived projects found` })
                   } else {
@@ -1342,7 +1254,7 @@ export default function TimeTrackingClient() {
                 } },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => {
                   // Export analytics data
-                  const analyticsData = mockProjects.map(p => ({
+                  const analyticsData = projects.map(p => ({
                     Project: p.name,
                     Client: p.client,
                     Status: p.status,
@@ -1374,7 +1286,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {mockProjects.map(project => (
+                    {projects.map(project => (
                       <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="px-4 py-4"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="font-medium">{project.name}</span></div></td>
                         <td className="px-4 py-4 text-gray-500">{project.client}</td>
@@ -1413,11 +1325,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeam.length}</p>
+                    <p className="text-3xl font-bold">{team.length}</p>
                     <p className="text-violet-200 text-sm">Members</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeam.filter(m => m.isOnline).length}</p>
+                    <p className="text-3xl font-bold">{team.filter(m => m.isOnline).length}</p>
                     <p className="text-violet-200 text-sm">Online</p>
                   </div>
                 </div>
@@ -1430,7 +1342,7 @@ export default function TimeTrackingClient() {
                 { icon: Users, label: 'All Members', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setTeamTab('activity') },
                 { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {
                   // Export team time logs
-                  const timeLogsData = mockTeam.map(m => ({
+                  const timeLogsData = team.map(m => ({
                     Name: m.name,
                     Role: m.role,
                     Email: m.email,
@@ -1470,7 +1382,7 @@ export default function TimeTrackingClient() {
               </div>
               <Button variant="outline" onClick={() => {
                 // Export team management data
-                const teamExport = mockTeam.map(m => ({
+                const teamExport = team.map(m => ({
                   Name: m.name,
                   Email: m.email,
                   Role: m.role,
@@ -1486,7 +1398,7 @@ export default function TimeTrackingClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Team Activity</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {mockTeam.map(member => (
+                  {team.map(member => (
                     <div key={member.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="relative">
                         <Avatar className="h-12 w-12"><AvatarFallback className="bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
@@ -1529,7 +1441,7 @@ export default function TimeTrackingClient() {
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {mockTimeOff.map(request => (
+                      {timeOff.map(request => (
                         <tr key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-4 py-4"><div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-100 text-amber-700 text-xs">{request.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="font-medium">{request.userName}</span></div></td>
                           <td className="px-4 py-4"><Badge variant="outline" className={request.type === 'vacation' ? 'bg-blue-50 text-blue-700' : request.type === 'sick' ? 'bg-red-50 text-red-700' : 'bg-gray-50'}>{request.type}</Badge></td>
@@ -1558,7 +1470,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Utilization</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockTeam.map(member => {
+                    {team.map(member => {
                       const utilization = (member.weekHours / 40) * 100
                       return (
                         <div key={member.id}>
@@ -1576,12 +1488,12 @@ export default function TimeTrackingClient() {
                   <CardHeader><CardTitle>Team Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{mockTeam.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
-                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{mockTeam.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
-                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((mockTeam.reduce((sum, m) => sum + m.weekHours, 0) / (mockTeam.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
+                      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{team.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{team.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{team.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((team.reduce((sum, m) => sum + m.weekHours, 0) / (team.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
                     </div>
-                    <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{mockTimeOff.filter(t => t.status === 'approved').length > 0 ? mockTimeOff.filter(t => t.status === 'approved').map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>) : <span className="text-gray-500">No time off scheduled</span>}</div></div>
+                    <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{timeOff.filter(t => t.status === 'approved').length > 0 ? timeOff.filter(t => t.status === 'approved').map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>) : <span className="text-gray-500">No time off scheduled</span>}</div></div>
                   </CardContent>
                 </Card>
               </div>
@@ -1599,15 +1511,15 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInvoices.length}</p>
+                    <p className="text-3xl font-bold">{invoices.length}</p>
                     <p className="text-emerald-200 text-sm">Total Invoices</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${mockInvoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">${invoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()}</p>
                     <p className="text-emerald-200 text-sm">Total Billed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInvoices.filter(i => i.status === 'paid').length}</p>
+                    <p className="text-3xl font-bold">{invoices.filter(i => i.status === 'paid').length}</p>
                     <p className="text-emerald-200 text-sm">Paid</p>
                   </div>
                 </div>
@@ -1647,7 +1559,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Draft</p>
-                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{mockInvoices.filter(i => i.status === 'draft').length}</p>
+                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{invoices.filter(i => i.status === 'draft').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1660,7 +1572,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Sent</p>
-                      <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{mockInvoices.filter(i => i.status === 'sent').length}</p>
+                      <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{invoices.filter(i => i.status === 'sent').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1673,7 +1585,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
-                      <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{mockInvoices.filter(i => i.status === 'pending').length}</p>
+                      <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{invoices.filter(i => i.status === 'pending').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1686,7 +1598,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Paid</p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">{mockInvoices.filter(i => i.status === 'paid').length}</p>
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">{invoices.filter(i => i.status === 'paid').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1699,7 +1611,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {mockInvoices.map(invoice => (
+                    {invoices.map(invoice => (
                       <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="px-4 py-4 font-mono">{invoice.number}</td>
                         <td className="px-4 py-4">{invoice.client}</td>
@@ -2184,7 +2096,7 @@ export default function TimeTrackingClient() {
                         <Button onClick={() => setShowAddIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add</Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockIntegrations.map(integration => (
+                        {integrations.map(integration => (
                           <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
@@ -2323,7 +2235,7 @@ export default function TimeTrackingClient() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" className="flex-1" onClick={() => {
-                            const exportData = { entries: mockTimeEntries, projects: mockProjects, exportDate: new Date().toISOString() }
+                            const exportData = { entries: mockTimeEntries, projects: projects, exportDate: new Date().toISOString() }
                             downloadAsJson(exportData, `time-tracking-export-${new Date().toISOString().split('T')[0]}`)
                             toast.success('Data exported successfully')
                           }}><Download className="h-4 w-4 mr-2" />Export All</Button>
@@ -2355,18 +2267,18 @@ export default function TimeTrackingClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockTimeTrackingAIInsights}
+              insights={timeTrackingAIInsights}
               title="Time Intelligence"
               onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockTimeTrackingCollaborators}
+              collaborators={timeTrackingCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockTimeTrackingPredictions}
+              predictions={timeTrackingPredictions}
               title="Time Forecasts"
             />
           </div>
@@ -2374,7 +2286,7 @@ export default function TimeTrackingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockTimeTrackingActivities}
+            activities={timeTrackingActivities}
             title="Time Activity"
             maxItems={5}
           />
@@ -2389,7 +2301,7 @@ export default function TimeTrackingClient() {
           <DialogContent><DialogHeader><DialogTitle>Add Time Entry</DialogTitle><DialogDescription>Manually log a time entry</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
-              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
@@ -2402,8 +2314,8 @@ export default function TimeTrackingClient() {
         <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
           <DialogContent><DialogHeader><DialogTitle>Create Invoice</DialogTitle><DialogDescription>Generate invoice from tracked time</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-              <div><Label>Project</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(projects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Project</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>From Date</Label><Input type="date" className="mt-1" /></div><div><Label>To Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Due Date</Label><Input type="date" className="mt-1" /></div>
             </div>
@@ -2474,7 +2386,7 @@ export default function TimeTrackingClient() {
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Create New Project</DialogTitle><DialogDescription>Add a new project for time tracking</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Project Name</Label><Input placeholder="e.g., Website Redesign" className="mt-1" /></div>
-              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(projects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
                 <div><Label>Budget</Label><Input type="number" placeholder="20000" className="mt-1" /></div>
@@ -2553,7 +2465,7 @@ export default function TimeTrackingClient() {
                   <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Revenue</p><p className="text-2xl font-bold">$21,300</p></div>
                 </div>
                 <div className="space-y-2">
-                  {mockProjects.slice(0, 3).map(p => (
+                  {projects.slice(0, 3).map(p => (
                     <div key={p.id} className="flex justify-between p-2 bg-white dark:bg-gray-700 rounded"><span>{p.name}</span><span className="font-medium">{Math.floor(Math.random() * 40 + 10)}h</span></div>
                   ))}
                 </div>
@@ -2570,7 +2482,7 @@ export default function TimeTrackingClient() {
         <Dialog open={showArchiveProjectsDialog} onOpenChange={setShowArchiveProjectsDialog}>
           <DialogContent><DialogHeader><DialogTitle>Archive Projects</DialogTitle><DialogDescription>Select projects to archive. Archived projects will be hidden but not deleted.</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              {mockProjects.filter(p => p.status === 'completed').slice(0, 4).map(p => (
+              {projects.filter(p => p.status === 'completed').slice(0, 4).map(p => (
                 <div key={p.id} className="flex items-center gap-3 p-3 border rounded-lg">
                   <input type="checkbox" className="w-4 h-4 rounded" />
                   <div className="flex-1"><p className="font-medium">{p.name}</p><p className="text-sm text-gray-500">{p.client} • Completed</p></div>

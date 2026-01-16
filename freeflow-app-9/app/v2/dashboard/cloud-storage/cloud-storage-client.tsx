@@ -201,270 +201,29 @@ interface StorageQuota {
   }[]
 }
 
-// Mock data
-const mockFiles: CloudFile[] = [
-  {
-    id: '1',
-    name: 'Q4 Financial Report.xlsx',
-    type: 'spreadsheet',
-    size: 2456789,
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    path: '/Documents/Finance',
-    parentId: '1',
-    isFolder: false,
-    isStarred: true,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: null,
-    owner: { id: '1', name: 'Current User', avatar: '' },
-    sharedWith: [
-      { id: '2', name: 'Sarah Miller', avatar: '', permission: 'edit' },
-      { id: '3', name: 'Mike Johnson', avatar: '', permission: 'view' }
-    ],
-    versions: 8,
-    currentVersion: 8,
-    createdAt: '2024-10-15T10:30:00Z',
-    modifiedAt: '2024-12-22T14:30:00Z',
-    lastAccessedAt: '2024-12-24T09:15:00Z',
-    downloadCount: 45,
-    viewCount: 234
-  },
-  {
-    id: '2',
-    name: 'Product Demo Video.mp4',
-    type: 'video',
-    size: 156789012,
-    mimeType: 'video/mp4',
-    path: '/Marketing/Videos',
-    parentId: '2',
-    isFolder: false,
-    isStarred: false,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: '/thumbnails/video-1.jpg',
-    owner: { id: '2', name: 'Sarah Miller', avatar: '' },
-    sharedWith: [{ id: '1', name: 'Current User', avatar: '', permission: 'edit' }],
-    versions: 3,
-    currentVersion: 3,
-    createdAt: '2024-11-20T16:00:00Z',
-    modifiedAt: '2024-12-18T11:45:00Z',
-    lastAccessedAt: '2024-12-23T16:30:00Z',
-    downloadCount: 89,
-    viewCount: 456
-  },
-  {
-    id: '3',
-    name: 'Brand Guidelines.pdf',
-    type: 'document',
-    size: 8945678,
-    mimeType: 'application/pdf',
-    path: '/Marketing/Branding',
-    parentId: '3',
-    isFolder: false,
-    isStarred: true,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: '/thumbnails/pdf-1.jpg',
-    owner: { id: '3', name: 'Mike Johnson', avatar: '' },
-    sharedWith: [],
-    versions: 5,
-    currentVersion: 5,
-    createdAt: '2024-06-10T09:00:00Z',
-    modifiedAt: '2024-12-01T10:30:00Z',
-    lastAccessedAt: '2024-12-22T11:00:00Z',
-    downloadCount: 234,
-    viewCount: 890
-  },
-  {
-    id: '4',
-    name: 'Project Assets.zip',
-    type: 'archive',
-    size: 456789012,
-    mimeType: 'application/zip',
-    path: '/Projects/Alpha',
-    parentId: '4',
-    isFolder: false,
-    isStarred: false,
-    isShared: false,
-    syncStatus: 'syncing',
-    thumbnail: null,
-    owner: { id: '1', name: 'Current User', avatar: '' },
-    sharedWith: [],
-    versions: 1,
-    currentVersion: 1,
-    createdAt: '2024-12-20T15:30:00Z',
-    modifiedAt: '2024-12-20T15:30:00Z',
-    lastAccessedAt: '2024-12-20T15:30:00Z',
-    downloadCount: 5,
-    viewCount: 12
-  },
-  {
-    id: '5',
-    name: 'Team Photo.jpg',
-    type: 'image',
-    size: 4567890,
-    mimeType: 'image/jpeg',
-    path: '/Photos/Team',
-    parentId: '5',
-    isFolder: false,
-    isStarred: false,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: '/thumbnails/img-1.jpg',
-    owner: { id: '4', name: 'Emma Wilson', avatar: '' },
-    sharedWith: [
-      { id: '1', name: 'Current User', avatar: '', permission: 'view' },
-      { id: '2', name: 'Sarah Miller', avatar: '', permission: 'view' }
-    ],
-    versions: 2,
-    currentVersion: 2,
-    createdAt: '2024-08-15T14:00:00Z',
-    modifiedAt: '2024-08-20T09:15:00Z',
-    lastAccessedAt: '2024-12-10T16:45:00Z',
-    downloadCount: 67,
-    viewCount: 345
-  },
-  {
-    id: '6',
-    name: 'App Source Code',
-    type: 'folder',
-    size: 89012345,
-    mimeType: 'folder',
-    path: '/Development',
-    parentId: null,
-    isFolder: true,
-    isStarred: true,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: null,
-    owner: { id: '1', name: 'Current User', avatar: '' },
-    sharedWith: [{ id: '5', name: 'Alex Chen', avatar: '', permission: 'edit' }],
-    versions: 0,
-    currentVersion: 0,
-    createdAt: '2024-01-10T08:00:00Z',
-    modifiedAt: '2024-12-24T10:00:00Z',
-    lastAccessedAt: '2024-12-24T10:00:00Z',
-    downloadCount: 0,
-    viewCount: 567
-  },
-  {
-    id: '7',
-    name: 'Presentation Deck.pptx',
-    type: 'presentation',
-    size: 12345678,
-    mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    path: '/Presentations',
-    parentId: '6',
-    isFolder: false,
-    isStarred: false,
-    isShared: true,
-    syncStatus: 'synced',
-    thumbnail: '/thumbnails/ppt-1.jpg',
-    owner: { id: '2', name: 'Sarah Miller', avatar: '' },
-    sharedWith: [{ id: '1', name: 'Current User', avatar: '', permission: 'comment' }],
-    versions: 12,
-    currentVersion: 12,
-    createdAt: '2024-09-05T11:00:00Z',
-    modifiedAt: '2024-12-19T15:20:00Z',
-    lastAccessedAt: '2024-12-23T09:30:00Z',
-    downloadCount: 156,
-    viewCount: 678
-  },
-  {
-    id: '8',
-    name: 'config.json',
-    type: 'code',
-    size: 4567,
-    mimeType: 'application/json',
-    path: '/Development/Config',
-    parentId: '6',
-    isFolder: false,
-    isStarred: false,
-    isShared: false,
-    syncStatus: 'error',
-    thumbnail: null,
-    owner: { id: '1', name: 'Current User', avatar: '' },
-    sharedWith: [],
-    versions: 23,
-    currentVersion: 23,
-    createdAt: '2024-03-20T10:00:00Z',
-    modifiedAt: '2024-12-24T08:45:00Z',
-    lastAccessedAt: '2024-12-24T08:45:00Z',
-    downloadCount: 12,
-    viewCount: 89
-  }
-]
+// Database data is fetched via useCloudStorage hook
 
-const mockFolders: Folder[] = [
-  { id: '1', name: 'Documents', path: '/Documents', parentId: null, color: 'blue', icon: '📄', isTeamFolder: false, itemCount: 45, size: 234567890, createdAt: '2024-01-01', modifiedAt: '2024-12-24' },
-  { id: '2', name: 'Marketing', path: '/Marketing', parentId: null, color: 'purple', icon: '🎨', isTeamFolder: true, itemCount: 89, size: 567890123, createdAt: '2024-02-15', modifiedAt: '2024-12-23' },
-  { id: '3', name: 'Development', path: '/Development', parentId: null, color: 'green', icon: '💻', isTeamFolder: true, itemCount: 234, size: 890123456, createdAt: '2024-01-10', modifiedAt: '2024-12-24' },
-  { id: '4', name: 'Projects', path: '/Projects', parentId: null, color: 'orange', icon: '📁', isTeamFolder: false, itemCount: 67, size: 345678901, createdAt: '2024-03-01', modifiedAt: '2024-12-22' },
-  { id: '5', name: 'Photos', path: '/Photos', parentId: null, color: 'pink', icon: '📷', isTeamFolder: false, itemCount: 456, size: 1234567890, createdAt: '2024-04-15', modifiedAt: '2024-12-20' },
-  { id: '6', name: 'Presentations', path: '/Presentations', parentId: null, color: 'red', icon: '📊', isTeamFolder: true, itemCount: 23, size: 123456789, createdAt: '2024-05-20', modifiedAt: '2024-12-19' }
-]
+const folders: Folder[] = []
 
-const mockShareLinks: ShareLink[] = [
-  { id: '1', fileId: '3', fileName: 'Brand Guidelines.pdf', url: 'https://cloud.example.com/s/abc123', permission: 'view', password: null, expiresAt: '2025-01-15', accessCount: 45, maxAccess: 100, createdAt: '2024-12-01', createdBy: { id: '3', name: 'Mike Johnson' } },
-  { id: '2', fileId: '7', fileName: 'Presentation Deck.pptx', url: 'https://cloud.example.com/s/def456', permission: 'comment', password: 'secure123', expiresAt: null, accessCount: 12, maxAccess: null, createdAt: '2024-12-15', createdBy: { id: '2', name: 'Sarah Miller' } },
-  { id: '3', fileId: '2', fileName: 'Product Demo Video.mp4', url: 'https://cloud.example.com/s/ghi789', permission: 'view', password: null, expiresAt: '2024-12-31', accessCount: 89, maxAccess: null, createdAt: '2024-11-20', createdBy: { id: '2', name: 'Sarah Miller' } }
-]
+const shareLinks: ShareLink[] = []
 
-const mockVersions: FileVersion[] = [
-  { id: '1', fileId: '1', version: 8, size: 2456789, modifiedBy: { id: '1', name: 'Current User', avatar: '' }, changes: 'Updated Q4 projections', createdAt: '2024-12-22T14:30:00Z', isCurrent: true },
-  { id: '2', fileId: '1', version: 7, size: 2345678, modifiedBy: { id: '2', name: 'Sarah Miller', avatar: '' }, changes: 'Added expense breakdown', createdAt: '2024-12-20T10:15:00Z', isCurrent: false },
-  { id: '3', fileId: '1', version: 6, size: 2234567, modifiedBy: { id: '1', name: 'Current User', avatar: '' }, changes: 'Fixed formulas in revenue sheet', createdAt: '2024-12-18T16:45:00Z', isCurrent: false },
-  { id: '4', fileId: '7', version: 12, size: 12345678, modifiedBy: { id: '2', name: 'Sarah Miller', avatar: '' }, changes: 'Added new product slides', createdAt: '2024-12-19T15:20:00Z', isCurrent: true },
-  { id: '5', fileId: '7', version: 11, size: 11234567, modifiedBy: { id: '1', name: 'Current User', avatar: '' }, changes: 'Updated branding colors', createdAt: '2024-12-17T11:00:00Z', isCurrent: false }
-]
+const versions: FileVersion[] = []
 
-const mockComments: FileComment[] = [
-  { id: '1', fileId: '1', content: 'Great work on the Q4 numbers! Can we add a comparison to Q3?', author: { id: '2', name: 'Sarah Miller', avatar: '' }, likes: 3, replies: [], createdAt: '2024-12-22T15:00:00Z' },
-  { id: '2', fileId: '7', content: 'Love the new design! The animations are smooth.', author: { id: '3', name: 'Mike Johnson', avatar: '' }, likes: 5, replies: [], createdAt: '2024-12-20T10:30:00Z' },
-  { id: '3', fileId: '3', content: 'Should we update the logo on page 5?', author: { id: '4', name: 'Emma Wilson', avatar: '' }, likes: 2, replies: [], createdAt: '2024-12-01T11:15:00Z' }
-]
+const comments: FileComment[] = []
 
-const mockTransfers: TransferItem[] = [
-  { id: '1', fileName: 'Large_Video.mp4', fileSize: 1234567890, type: 'upload', status: 'in_progress', progress: 67, speed: 5678901, startedAt: '2024-12-24T10:00:00Z', completedAt: null },
-  { id: '2', fileName: 'Project_Backup.zip', fileSize: 567890123, type: 'download', status: 'completed', progress: 100, speed: 0, startedAt: '2024-12-24T09:30:00Z', completedAt: '2024-12-24T09:45:00Z' },
-  { id: '3', fileName: 'Design_Assets.psd', fileSize: 234567890, type: 'upload', status: 'paused', progress: 34, speed: 0, startedAt: '2024-12-24T09:00:00Z', completedAt: null }
-]
+const transfers: TransferItem[] = []
 
-const mockQuota: StorageQuota = {
-  used: 45.6 * 1024 * 1024 * 1024,
+const quota: StorageQuota = {
+  used: 0,
   total: 100 * 1024 * 1024 * 1024,
-  breakdown: [
-    { type: 'Documents', size: 12.3 * 1024 * 1024 * 1024, count: 456, color: 'bg-blue-500' },
-    { type: 'Images', size: 8.7 * 1024 * 1024 * 1024, count: 1234, color: 'bg-purple-500' },
-    { type: 'Videos', size: 18.2 * 1024 * 1024 * 1024, count: 89, color: 'bg-red-500' },
-    { type: 'Audio', size: 3.4 * 1024 * 1024 * 1024, count: 234, color: 'bg-green-500' },
-    { type: 'Other', size: 3.0 * 1024 * 1024 * 1024, count: 567, color: 'bg-gray-500' }
-  ]
+  breakdown: []
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockStorageAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Storage Health', description: 'All files synced successfully. 99.99% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sync' },
-  { id: '2', type: 'warning' as const, title: 'Storage Quota', description: 'Using 78% of storage. Consider cleanup or upgrade.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Storage' },
-  { id: '3', type: 'info' as const, title: 'Duplicate Files', description: '23 potential duplicate files detected. Review to save space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
-
-const mockStorageCollaborators = [
-  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'away' as const, role: 'Dev' },
-]
-
-const mockStoragePredictions = [
-  { id: '1', title: 'Storage Forecast', prediction: 'At current rate, quota reached in 45 days', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Activity Pattern', prediction: 'Peak usage Tuesdays. Schedule backups accordingly.', confidence: 91, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockStorageActivities = [
-  { id: '1', user: 'You', action: 'Uploaded', target: '15 files to Projects folder', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Team Lead', action: 'Shared', target: 'Q4 Report with team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'automatic backup', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Enhanced Competitive Upgrade Data
+const storageAIInsights: any[] = []
+const storageCollaborators: any[] = []
+const storagePredictions: any[] = []
+const storageActivities: any[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -511,7 +270,7 @@ export default function CloudStorageClient() {
   const [commentText, setCommentText] = useState('')
 
   const filteredFiles = useMemo(() => {
-    return mockFiles.filter(file => {
+    return dbFiles.filter(file => {
       const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = selectedType === 'all' || file.type === selectedType
       return matchesSearch && matchesType
@@ -523,11 +282,11 @@ export default function CloudStorageClient() {
     })
   }, [searchQuery, selectedType, sortBy])
 
-  const starredFiles = useMemo(() => mockFiles.filter(f => f.isStarred), [])
+  const starredFiles = useMemo(() => dbFiles.filter(f => f.isStarred), [])
   const recentFiles = useMemo(() =>
-    [...mockFiles].sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()).slice(0, 5),
+    [...dbFiles].sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()).slice(0, 5),
   [])
-  const sharedFiles = useMemo(() => mockFiles.filter(f => f.isShared), [])
+  const sharedFiles = useMemo(() => dbFiles.filter(f => f.isShared), [])
 
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
@@ -595,7 +354,7 @@ export default function CloudStorageClient() {
     setShowFileDialog(true)
   }
 
-  const usedPercentage = (mockQuota.used / mockQuota.total) * 100
+  const usedPercentage = (quota.used / quota.total) * 100
 
   // ============ REAL SUPABASE HANDLERS ============
 
@@ -1124,17 +883,17 @@ export default function CloudStorageClient() {
         dateRange: reportDateRange,
         generatedAt: new Date().toISOString(),
         summary: {
-          totalStorage: formatSize(mockQuota.total),
-          usedStorage: formatSize(mockQuota.used),
-          availableStorage: formatSize(mockQuota.total - mockQuota.used),
-          usagePercentage: ((mockQuota.used / mockQuota.total) * 100).toFixed(1) + '%',
-          totalFiles: mockFiles.length,
-          totalFolders: mockFolders.length,
+          totalStorage: formatSize(quota.total),
+          usedStorage: formatSize(quota.used),
+          availableStorage: formatSize(quota.total - quota.used),
+          usagePercentage: ((quota.used / quota.total) * 100).toFixed(1) + '%',
+          totalFiles: dbFiles.length,
+          totalFolders: folders.length,
           sharedFiles: sharedFiles.length,
           starredFiles: starredFiles.length
         },
-        breakdown: mockQuota.breakdown,
-        files: reportType === 'detailed' ? mockFiles : undefined
+        breakdown: quota.breakdown,
+        files: reportType === 'detailed' ? dbFiles : undefined
       }
 
       // Export as JSON
@@ -1166,14 +925,14 @@ export default function CloudStorageClient() {
   ]
 
   const stats = [
-    { label: 'Storage Used', value: formatSize(mockQuota.used), icon: HardDrive, change: '+2.3 GB', color: 'text-blue-600' },
-    { label: 'Total Files', value: mockFiles.length.toString(), icon: File, change: '+12', color: 'text-indigo-600' },
+    { label: 'Storage Used', value: formatSize(quota.used), icon: HardDrive, change: '+2.3 GB', color: 'text-blue-600' },
+    { label: 'Total Files', value: dbFiles.length.toString(), icon: File, change: '+12', color: 'text-indigo-600' },
     { label: 'Shared Files', value: sharedFiles.length.toString(), icon: Share2, change: '+5', color: 'text-green-600' },
-    { label: 'Team Folders', value: mockFolders.filter(f => f.isTeamFolder).length.toString(), icon: Users, change: '+1', color: 'text-purple-600' },
-    { label: 'Active Shares', value: mockShareLinks.length.toString(), icon: LinkIcon, change: '+3', color: 'text-cyan-600' },
+    { label: 'Team Folders', value: folders.filter(f => f.isTeamFolder).length.toString(), icon: Users, change: '+1', color: 'text-purple-600' },
+    { label: 'Active Shares', value: shareLinks.length.toString(), icon: LinkIcon, change: '+3', color: 'text-cyan-600' },
     { label: 'Downloads', value: '1.2K', icon: Download, change: '+156', color: 'text-pink-600' },
     { label: 'Sync Status', value: '98%', icon: RefreshCw, change: '+2%', color: 'text-orange-600' },
-    { label: 'Comments', value: mockComments.length.toString(), icon: MessageSquare, change: '+8', color: 'text-teal-600' }
+    { label: 'Comments', value: comments.length.toString(), icon: MessageSquare, change: '+8', color: 'text-teal-600' }
   ]
 
   return (
@@ -1234,14 +993,14 @@ export default function CloudStorageClient() {
                 <HardDrive className="w-5 h-5 text-sky-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Storage</h3>
-                  <p className="text-sm text-gray-500">{formatSize(mockQuota.used)} of {formatSize(mockQuota.total)} used</p>
+                  <p className="text-sm text-gray-500">{formatSize(quota.used)} of {formatSize(quota.total)} used</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" onClick={handleUpgrade}>Upgrade</Button>
             </div>
             <Progress value={usedPercentage} className="h-3 mb-4" />
             <div className="flex items-center gap-4 flex-wrap">
-              {mockQuota.breakdown.map(item => (
+              {quota.breakdown.map(item => (
                 <div key={item.type} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${item.color}`} />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -1354,7 +1113,7 @@ export default function CloudStorageClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  {mockFolders.map(folder => (
+                  {folders.map(folder => (
                     <button
                       key={folder.id}
                       className="w-full px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 text-left transition-colors"
@@ -1600,7 +1359,7 @@ export default function CloudStorageClient() {
                     <p className="text-sm text-green-200">Shared</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFiles.filter(f => f.sharedWith.length > 0).length}</p>
+                    <p className="text-3xl font-bold">{dbFiles.filter(f => f.sharedWith.length > 0).length}</p>
                     <p className="text-sm text-green-200">By Me</p>
                   </div>
                 </div>
@@ -1642,7 +1401,7 @@ export default function CloudStorageClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockShareLinks.map(link => (
+                  {shareLinks.map(link => (
                     <div key={link.id} className="p-3 rounded-lg border dark:border-gray-700">
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-medium text-sm truncate">{link.fileName}</div>
@@ -1681,7 +1440,7 @@ export default function CloudStorageClient() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold">{mockFiles.length}</p>
+                  <p className="text-3xl font-bold">{dbFiles.length}</p>
                   <p className="text-sm text-purple-200">Recent</p>
                 </div>
               </div>
@@ -1733,11 +1492,11 @@ export default function CloudStorageClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTransfers.filter(t => t.status === 'uploading' || t.status === 'downloading').length}</p>
+                    <p className="text-3xl font-bold">{transfers.filter(t => t.status === 'uploading' || t.status === 'downloading').length}</p>
                     <p className="text-sm text-orange-200">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTransfers.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{transfers.filter(t => t.status === 'completed').length}</p>
                     <p className="text-sm text-orange-200">Completed</p>
                   </div>
                 </div>
@@ -1752,7 +1511,7 @@ export default function CloudStorageClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockTransfers.map(transfer => (
+                {transfers.map(transfer => (
                   <div key={transfer.id} className="p-4 rounded-lg border dark:border-gray-700">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
@@ -2252,18 +2011,18 @@ export default function CloudStorageClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockStorageAIInsights}
+              insights={storageAIInsights}
               title="Storage Intelligence"
               onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockStorageCollaborators}
+              collaborators={storageCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockStoragePredictions}
+              predictions={storagePredictions}
               title="Storage Forecasts"
             />
           </div>
@@ -2271,7 +2030,7 @@ export default function CloudStorageClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockStorageActivities}
+            activities={storageActivities}
             title="Storage Activity"
             maxItems={5}
           />
@@ -2413,7 +2172,7 @@ export default function CloudStorageClient() {
                         Version History
                       </h3>
                       <div className="space-y-2">
-                        {mockVersions.filter(v => v.fileId === selectedFile.id).map(version => (
+                        {versions.filter(v => v.fileId === selectedFile.id).map(version => (
                           <div key={version.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                             <Avatar className="w-8 h-8">
                               <AvatarFallback>{version.modifiedBy.name.charAt(0)}</AvatarFallback>
@@ -2439,7 +2198,7 @@ export default function CloudStorageClient() {
                       Comments
                     </h3>
                     <div className="space-y-3">
-                      {mockComments.filter(c => c.fileId === selectedFile.id).map(comment => (
+                      {comments.filter(c => c.fileId === selectedFile.id).map(comment => (
                         <div key={comment.id} className="flex gap-3">
                           <Avatar>
                             <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
@@ -2628,7 +2387,7 @@ export default function CloudStorageClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="/">Root</SelectItem>
-                  {mockFolders.map(folder => (
+                  {folders.map(folder => (
                     <SelectItem key={folder.id} value={folder.path}>
                       {folder.icon} {folder.name}
                     </SelectItem>
@@ -2710,15 +2469,15 @@ export default function CloudStorageClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 text-sm">
                 <div>
                   <p className="text-gray-500">Storage Used</p>
-                  <p className="font-semibold">{formatSize(mockQuota.used)}</p>
+                  <p className="font-semibold">{formatSize(quota.used)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Total Storage</p>
-                  <p className="font-semibold">{formatSize(mockQuota.total)}</p>
+                  <p className="font-semibold">{formatSize(quota.total)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Total Files</p>
-                  <p className="font-semibold">{mockFiles.length}</p>
+                  <p className="font-semibold">{dbFiles.length}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Shared Files</p>

@@ -106,31 +106,15 @@ interface Statistics {
 
 
 // ============================================================================
-// V2 COMPETITIVE MOCK DATA - EmailAgent Context
+// V2 COMPETITIVE DATA - EmailAgent Context (API-Integrated)
 // ============================================================================
 
-const emailAgentAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'success' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'warning' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
-]
-
-const emailAgentCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
-]
-
-const emailAgentPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
-]
-
-const emailAgentActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
-]
+// Data is now loaded from API in useEffect
+// Default empty state for initial render
+const emailAgentAIInsights: any[] = []
+const emailAgentCollaborators: any[] = []
+const emailAgentPredictions: any[] = []
+const emailAgentActivities: any[] = []
 
 export default function EmailAgentClient() {
   const { toast } = useToast();
@@ -363,46 +347,19 @@ export default function EmailAgentClient() {
   };
 
   const loadEmails = async () => {
-    // Mock data for demonstration
-    setEmails([
-      {
-        id: '1',
-        from: 'john@example.com',
-        subject: 'Need a quote for web development',
-        body: 'Hi, I need a website for my business...',
-        receivedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        analysis: {
-          intent: 'quote_request',
-          sentiment: 'positive',
-          priority: 'high',
-          category: 'Sales',
-          summary: 'Client requesting web development quotation',
-          requiresQuotation: true,
-          requiresHumanReview: false,
-        },
-        hasResponse: true,
-        hasQuotation: true,
-        status: 'processed',
-      },
-      {
-        id: '2',
-        from: 'sarah@company.com',
-        subject: 'Book a consultation',
-        body: 'I would like to schedule a consultation for next week...',
-        receivedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-        analysis: {
-          intent: 'inquiry',
-          sentiment: 'neutral',
-          priority: 'medium',
-          category: 'Booking',
-          summary: 'Client requesting consultation booking',
-          requiresQuotation: false,
-          requiresHumanReview: false,
-        },
-        hasResponse: true,
-        status: 'processed',
-      },
-    ]);
+    try {
+      const response = await fetch('/api/email-agent/emails');
+      const data = await response.json();
+      if (data.success && Array.isArray(data.emails)) {
+        setEmails(data.emails);
+      } else {
+        // Fallback to empty array if API fails
+        setEmails([]);
+      }
+    } catch (error) {
+      logger.error('Error loading emails', { error });
+      setEmails([]);
+    }
   };
 
   const loadApprovals = async () => {

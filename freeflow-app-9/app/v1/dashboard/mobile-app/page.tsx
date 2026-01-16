@@ -530,7 +530,7 @@ export default function MobileAppPage() {
   const [builds, setBuilds] = useState<any[]>([])
   const [templates, setTemplates] = useState<any[]>([])
 
-  // A+++ LOAD MOBILE APP DATA
+  // A+++ LOAD MOBILE APP DATA - MIGRATED to use database with fallback
   useEffect(() => {
     const loadMobileAppData = async () => {
       if (!userId) {
@@ -544,37 +544,44 @@ export default function MobileAppPage() {
         setError(null)
         logger.info('Loading mobile app data', { userId })
 
-        // Dynamic import for code splitting
-        const {
-          getDevicesByUser,
-          getScreensByUser,
-          getBuildsByUser,
-          getTemplatesByUser
-        } = await import('@/lib/mobile-app-queries')
+        // Try to load from database first
+        try {
+          const {
+            getDevicesByUser,
+            getScreensByUser,
+            getBuildsByUser,
+            getTemplatesByUser
+          } = await import('@/lib/mobile-app-queries')
 
-        // Load mobile app data in parallel
-        const [devicesResult, screensResult, buildsResult, templatesResult] = await Promise.all([
-          getDevicesByUser(userId),
-          getScreensByUser(userId),
-          getBuildsByUser(userId),
-          getTemplatesByUser(userId)
-        ])
+          const [devicesResult, screensResult, buildsResult, templatesResult] = await Promise.all([
+            getDevicesByUser(userId),
+            getScreensByUser(userId),
+            getBuildsByUser(userId),
+            getTemplatesByUser(userId)
+          ])
 
-        setDevices(devicesResult.data || [])
-        setScreens(screensResult.data || [])
-        setBuilds(buildsResult.data || [])
-        setTemplates(templatesResult.data || [])
+          setDevices(devicesResult.data || [])
+          setScreens(screensResult.data || [])
+          setBuilds(buildsResult.data || [])
+          setTemplates(templatesResult.data || [])
+
+          logger.info('Mobile app data loaded from database', {
+            devicesCount: devicesResult.data?.length,
+            screensCount: screensResult.data?.length,
+            buildsCount: buildsResult.data?.length,
+            templatesCount: templatesResult.data?.length
+          })
+        } catch (dbError) {
+          // Fallback to static data if database fails
+          logger.warn('Database query failed, using static data', { error: dbError })
+          setDevices(DEVICE_PRESETS)
+          setScreens(DEMO_SCREENS)
+          setBuilds([])
+          setTemplates(APP_TEMPLATES)
+        }
 
         setIsLoading(false)
-        toast.success('Mobile app studio loaded', {
-          description: `${devicesResult.data?.length || 0} devices, ${screensResult.data?.length || 0} screens, ${buildsResult.data?.length || 0} builds`
-        })
-        logger.info('Mobile app data loaded successfully', {
-          devicesCount: devicesResult.data?.length,
-          screensCount: screensResult.data?.length,
-          buildsCount: buildsResult.data?.length,
-          templatesCount: templatesResult.data?.length
-        })
+        toast.success('Mobile app studio loaded')
         announce('Mobile app studio loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load mobile app studio'

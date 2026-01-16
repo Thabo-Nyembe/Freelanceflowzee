@@ -55,7 +55,35 @@ export default function WhiteLabelPage() {
   const { userId, loading: userLoading } = useCurrentUser()
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
-  const [config, setConfig] = useState<WhiteLabelConfig>(MOCK_WHITE_LABEL_CONFIG)
+  // MIGRATED: Config loaded from API instead of MOCK_WHITE_LABEL_CONFIG
+  const [config, setConfig] = useState<WhiteLabelConfig>({
+    id: '',
+    brandName: '',
+    displayName: '',
+    tagline: '',
+    description: '',
+    colors: {
+      light: DEFAULT_LIGHT_COLORS,
+      dark: DEFAULT_DARK_COLORS
+    },
+    typography: {
+      fontFamily: 'inter',
+      headingFontFamily: 'inter',
+      fontSize: {
+        base: '16px',
+        scale: 1.2
+      }
+    },
+    features: {
+      hideKaziBranding: false,
+      showPoweredBy: true,
+      customFooter: false,
+      customEmails: false
+    },
+    isActive: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  })
   const [selectedPreset, setSelectedPreset] = useState<BrandingPreset | null>(null)
   const [customDomain, setCustomDomain] = useState(config.customDomain?.domain || '')
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
@@ -63,14 +91,27 @@ export default function WhiteLabelPage() {
   // A+++ LOAD WHITE LABEL DATA
   useEffect(() => {
     const loadWhiteLabelData = async () => {
+      if (!userId || userLoading) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Load white label configuration from API
-        const response = await fetch('/api/white-label/config')
+        // MIGRATED: Load white label configuration from API
+        const response = await fetch(`/api/white-label/config?userId=${userId}`)
         if (!response.ok) {
           throw new Error('Failed to load white label configuration')
+        }
+
+        const data = await response.json()
+        if (data.config) {
+          setConfig(data.config)
+          if (data.config.customDomain?.domain) {
+            setCustomDomain(data.config.customDomain.domain)
+          }
         }
 
         setIsLoading(false)
@@ -83,10 +124,15 @@ export default function WhiteLabelPage() {
     }
 
     loadWhiteLabelData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingScore = calculateBrandingScore(config)
-  const domainStatus = config.customDomain ? formatDomainStatus(MOCK_DOMAIN_VERIFICATION.status) : null
+  // MIGRATED: Domain status now from real config instead of MOCK_DOMAIN_VERIFICATION
+  const domainStatus = config.customDomain?.isVerified
+    ? formatDomainStatus('verified')
+    : config.customDomain
+      ? formatDomainStatus('pending')
+      : null
 
   const handleColorChange = (key: keyof ColorScheme, value: string, theme: 'light' | 'dark') => {
     setConfig(prev => ({
@@ -590,11 +636,12 @@ export default function WhiteLabelPage() {
                   </div>
 
                   {/* DNS Records */}
-                  {MOCK_DOMAIN_VERIFICATION.status !== 'pending' && (
+                  {/* MIGRATED: DNS records now from API instead of MOCK_DOMAIN_VERIFICATION */}
+                  {config.customDomain?.dnsRecords && config.customDomain.dnsRecords.length > 0 && (
                     <div>
                       <h4 className="font-medium text-white mb-4">DNS Configuration</h4>
                       <div className="space-y-3">
-                        {MOCK_DOMAIN_VERIFICATION.records.map((record, index) => (
+                        {config.customDomain.dnsRecords.map((record, index) => (
                           <div key={index} className="p-4 bg-slate-900/50 rounded-lg border border-gray-700">
                             <div className="flex items-start justify-between mb-2">
                               <div>

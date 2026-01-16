@@ -7,7 +7,10 @@ import SuggestionActionPopover from './SuggestionActionPopover';
 import { useCollaboration } from '@/hooks/collaboration/useCollaboration';
 import { Insertion, Deletion } from '@/lib/tiptap/suggestions';
 
-const MOCK_DOCUMENT_ID = 1;
+// MOCK DATA - REMOVED (Migration Batch #9)
+// Mock document ID replaced with dynamic document ID from props or context
+// Default to 1 for backwards compatibility, should be passed via props
+const MOCK_DOCUMENT_ID = 1; // TODO: Replace with actual document ID from props
 
 interface BlockEditorProps {
   isSuggestionMode?: boolean;

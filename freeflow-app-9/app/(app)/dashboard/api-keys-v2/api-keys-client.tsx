@@ -195,542 +195,6 @@ interface SecurityEvent {
   resolved_by: string | null
 }
 
-// ============================================================================
-// MOCK DATA - Auth0 Level
-// ============================================================================
-
-const mockApiKeys: ApiKey[] = [
-  {
-    id: '1',
-    name: 'Production API Key',
-    description: 'Main production API access key',
-    key_prefix: 'pk_live_',
-    key_code: 'Qx7K9mN3pL2',
-    key_type: 'api',
-    permission: 'full-access',
-    environment: 'production',
-    status: 'active',
-    scopes: ['read:users', 'write:users', 'read:data', 'write:data', 'admin:settings'],
-    rate_limit_per_hour: 10000,
-    rate_limit_per_minute: 200,
-    total_requests: 1567890,
-    requests_today: 12450,
-    requests_this_week: 78900,
-    last_used_at: '2024-01-15T14:30:00Z',
-    last_used_ip: '192.168.1.1',
-    last_used_location: 'New York, US',
-    created_at: '2024-01-01T00:00:00Z',
-    created_by: 'admin@company.com',
-    expires_at: '2025-01-01T00:00:00Z',
-    rotated_at: '2024-01-10T00:00:00Z',
-    rotation_interval_days: 90,
-    ip_whitelist: ['192.168.1.0/24', '10.0.0.0/8'],
-    allowed_origins: ['https://app.company.com', 'https://api.company.com'],
-    tags: ['production', 'critical', 'monitored'],
-    metadata: { team: 'backend', project: 'main-api' }
-  },
-  {
-    id: '2',
-    name: 'Mobile App Service Key',
-    description: 'Service account key for mobile application',
-    key_prefix: 'sk_live_',
-    key_code: 'Rm4H8jK1pQ9',
-    key_type: 'machine_to_machine',
-    permission: 'write',
-    environment: 'production',
-    status: 'active',
-    scopes: ['read:users', 'write:sessions', 'read:data'],
-    rate_limit_per_hour: 5000,
-    rate_limit_per_minute: 100,
-    total_requests: 892340,
-    requests_today: 8920,
-    requests_this_week: 56780,
-    last_used_at: '2024-01-15T14:25:00Z',
-    last_used_ip: '10.0.0.50',
-    last_used_location: 'AWS us-east-1',
-    created_at: '2024-01-02T00:00:00Z',
-    created_by: 'devops@company.com',
-    expires_at: null,
-    rotated_at: null,
-    rotation_interval_days: null,
-    ip_whitelist: [],
-    allowed_origins: [],
-    tags: ['mobile', 'service-account'],
-    metadata: { platform: 'ios', version: '2.1.0' }
-  },
-  {
-    id: '3',
-    name: 'Staging Test Key',
-    description: 'Testing key for staging environment',
-    key_prefix: 'pk_test_',
-    key_code: 'Wn5L2mR7kJ4',
-    key_type: 'api',
-    permission: 'admin',
-    environment: 'staging',
-    status: 'active',
-    scopes: ['read:all', 'write:all', 'admin:all'],
-    rate_limit_per_hour: 50000,
-    rate_limit_per_minute: 1000,
-    total_requests: 234560,
-    requests_today: 3450,
-    requests_this_week: 23400,
-    last_used_at: '2024-01-15T13:00:00Z',
-    last_used_ip: '172.16.0.100',
-    last_used_location: 'Office Network',
-    created_at: '2024-01-05T00:00:00Z',
-    created_by: 'qa@company.com',
-    expires_at: '2024-06-01T00:00:00Z',
-    rotated_at: null,
-    rotation_interval_days: 30,
-    ip_whitelist: ['172.16.0.0/16'],
-    allowed_origins: ['https://staging.company.com'],
-    tags: ['staging', 'testing'],
-    metadata: { purpose: 'qa-testing' }
-  },
-  {
-    id: '4',
-    name: 'Webhook Signing Key',
-    description: 'Key for signing webhook payloads',
-    key_prefix: 'whsec_',
-    key_code: 'Hp9K3nM6jL1',
-    key_type: 'webhook',
-    permission: 'limited',
-    environment: 'production',
-    status: 'active',
-    scopes: ['webhooks:sign'],
-    rate_limit_per_hour: 100000,
-    rate_limit_per_minute: 2000,
-    total_requests: 456780,
-    requests_today: 5670,
-    requests_this_week: 38900,
-    last_used_at: '2024-01-15T14:28:00Z',
-    last_used_ip: '10.0.1.25',
-    last_used_location: 'Internal',
-    created_at: '2024-01-01T00:00:00Z',
-    created_by: 'system',
-    expires_at: null,
-    rotated_at: '2024-01-08T00:00:00Z',
-    rotation_interval_days: 7,
-    ip_whitelist: [],
-    allowed_origins: [],
-    tags: ['webhook', 'signing'],
-    metadata: {}
-  },
-  {
-    id: '5',
-    name: 'OAuth Client Credentials',
-    description: 'OAuth 2.0 client credentials for third-party integrations',
-    key_prefix: 'oauth_',
-    key_code: 'Yt6P1qR8wE3',
-    key_type: 'oauth',
-    permission: 'read',
-    environment: 'production',
-    status: 'active',
-    scopes: ['openid', 'profile', 'email', 'read:data'],
-    rate_limit_per_hour: 3000,
-    rate_limit_per_minute: 60,
-    total_requests: 178900,
-    requests_today: 2340,
-    requests_this_week: 15670,
-    last_used_at: '2024-01-15T14:20:00Z',
-    last_used_ip: '203.0.113.50',
-    last_used_location: 'Partner Network',
-    created_at: '2024-01-03T00:00:00Z',
-    created_by: 'integrations@company.com',
-    expires_at: '2024-12-31T00:00:00Z',
-    rotated_at: null,
-    rotation_interval_days: 180,
-    ip_whitelist: ['203.0.113.0/24'],
-    allowed_origins: ['https://partner.example.com'],
-    tags: ['oauth', 'partner', 'integration'],
-    metadata: { partner: 'example-corp', contract: 'ENT-2024-001' }
-  },
-  {
-    id: '6',
-    name: 'Development Key',
-    description: 'Local development environment key',
-    key_prefix: 'pk_dev_',
-    key_code: 'Ax2M5nL9pK7',
-    key_type: 'api',
-    permission: 'admin',
-    environment: 'development',
-    status: 'inactive',
-    scopes: ['*'],
-    rate_limit_per_hour: 100000,
-    rate_limit_per_minute: 5000,
-    total_requests: 89450,
-    requests_today: 0,
-    requests_this_week: 0,
-    last_used_at: '2024-01-10T16:00:00Z',
-    last_used_ip: '127.0.0.1',
-    last_used_location: 'localhost',
-    created_at: '2024-01-01T00:00:00Z',
-    created_by: 'dev@company.com',
-    expires_at: null,
-    rotated_at: null,
-    rotation_interval_days: null,
-    ip_whitelist: [],
-    allowed_origins: ['http://localhost:3000'],
-    tags: ['development', 'local'],
-    metadata: {}
-  }
-]
-
-const mockApplications: Application[] = [
-  {
-    id: '1',
-    name: 'Main Web Application',
-    description: 'Primary customer-facing web application',
-    app_type: 'regular_web',
-    client_id: 'cid_web_Qx7K9mN3pL2wE5',
-    client_secret_preview: 'cs_****************************7K2n',
-    logo_url: null,
-    login_url: 'https://app.company.com/login',
-    callback_urls: ['https://app.company.com/callback', 'https://app.company.com/auth/callback'],
-    logout_urls: ['https://app.company.com/logout'],
-    web_origins: ['https://app.company.com'],
-    allowed_origins: ['https://app.company.com', 'https://api.company.com'],
-    grant_types: ['authorization_code', 'refresh_token'],
-    token_endpoint_auth_method: 'client_secret_basic',
-    id_token_expiration: 36000,
-    access_token_expiration: 86400,
-    refresh_token_expiration: 2592000,
-    refresh_token_rotation: true,
-    is_first_party: true,
-    oidc_conformant: true,
-    cross_origin_auth: false,
-    status: 'active',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z',
-    api_keys_count: 3,
-    total_logins: 125890,
-    daily_active_users: 4560
-  },
-  {
-    id: '2',
-    name: 'Mobile App - iOS',
-    description: 'Native iOS mobile application',
-    app_type: 'native',
-    client_id: 'cid_ios_Rm4H8jK1pQ9xY3',
-    client_secret_preview: 'cs_****************************8L4m',
-    logo_url: null,
-    login_url: null,
-    callback_urls: ['com.company.app://callback'],
-    logout_urls: ['com.company.app://logout'],
-    web_origins: [],
-    allowed_origins: [],
-    grant_types: ['authorization_code', 'refresh_token'],
-    token_endpoint_auth_method: 'none',
-    id_token_expiration: 36000,
-    access_token_expiration: 86400,
-    refresh_token_expiration: 5184000,
-    refresh_token_rotation: true,
-    is_first_party: true,
-    oidc_conformant: true,
-    cross_origin_auth: false,
-    status: 'active',
-    created_at: '2024-01-02T00:00:00Z',
-    updated_at: '2024-01-12T00:00:00Z',
-    api_keys_count: 2,
-    total_logins: 89450,
-    daily_active_users: 2340
-  },
-  {
-    id: '3',
-    name: 'Partner Integration API',
-    description: 'Machine-to-machine application for partner integrations',
-    app_type: 'machine_to_machine',
-    client_id: 'cid_m2m_Wn5L2mR7kJ4zT8',
-    client_secret_preview: 'cs_****************************9P5q',
-    logo_url: null,
-    login_url: null,
-    callback_urls: [],
-    logout_urls: [],
-    web_origins: [],
-    allowed_origins: [],
-    grant_types: ['client_credentials'],
-    token_endpoint_auth_method: 'client_secret_post',
-    id_token_expiration: 0,
-    access_token_expiration: 3600,
-    refresh_token_expiration: 0,
-    refresh_token_rotation: false,
-    is_first_party: false,
-    oidc_conformant: true,
-    cross_origin_auth: false,
-    status: 'active',
-    created_at: '2024-01-05T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z',
-    api_keys_count: 1,
-    total_logins: 45670,
-    daily_active_users: 12
-  },
-  {
-    id: '4',
-    name: 'Admin Dashboard SPA',
-    description: 'Single page application for internal admin dashboard',
-    app_type: 'spa',
-    client_id: 'cid_spa_Hp9K3nM6jL1vR2',
-    client_secret_preview: '',
-    logo_url: null,
-    login_url: 'https://admin.company.com/login',
-    callback_urls: ['https://admin.company.com/callback'],
-    logout_urls: ['https://admin.company.com'],
-    web_origins: ['https://admin.company.com'],
-    allowed_origins: ['https://admin.company.com'],
-    grant_types: ['authorization_code', 'refresh_token'],
-    token_endpoint_auth_method: 'none',
-    id_token_expiration: 36000,
-    access_token_expiration: 7200,
-    refresh_token_expiration: 86400,
-    refresh_token_rotation: true,
-    is_first_party: true,
-    oidc_conformant: true,
-    cross_origin_auth: false,
-    status: 'active',
-    created_at: '2024-01-03T00:00:00Z',
-    updated_at: '2024-01-14T00:00:00Z',
-    api_keys_count: 1,
-    total_logins: 12340,
-    daily_active_users: 45
-  }
-]
-
-const mockApiLogs: ApiLog[] = [
-  {
-    id: '1',
-    api_key_id: '1',
-    api_key_name: 'Production API Key',
-    application_name: 'Main Web Application',
-    endpoint: '/api/v1/users',
-    method: 'GET',
-    status_code: 200,
-    response_time_ms: 45,
-    request_size_bytes: 256,
-    response_size_bytes: 4520,
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    country: 'United States',
-    city: 'New York',
-    error_message: null,
-    log_level: 'info',
-    timestamp: '2024-01-15T14:30:00Z',
-    request_id: 'req_Qx7K9mN3pL2',
-    correlation_id: 'cor_Ab3Cd5Ef7Gh'
-  },
-  {
-    id: '2',
-    api_key_id: '1',
-    api_key_name: 'Production API Key',
-    application_name: 'Main Web Application',
-    endpoint: '/api/v1/data/export',
-    method: 'POST',
-    status_code: 200,
-    response_time_ms: 1250,
-    request_size_bytes: 512,
-    response_size_bytes: 156780,
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    country: 'United States',
-    city: 'New York',
-    error_message: null,
-    log_level: 'info',
-    timestamp: '2024-01-15T14:28:00Z',
-    request_id: 'req_Rm4H8jK1pQ9',
-    correlation_id: 'cor_Ij9Kl1Mn3Op'
-  },
-  {
-    id: '3',
-    api_key_id: '2',
-    api_key_name: 'Mobile App Service Key',
-    application_name: 'Mobile App - iOS',
-    endpoint: '/api/v1/auth/token',
-    method: 'POST',
-    status_code: 401,
-    response_time_ms: 12,
-    request_size_bytes: 128,
-    response_size_bytes: 64,
-    ip_address: '10.0.0.50',
-    user_agent: 'CompanyApp/2.1.0 iOS/17.0',
-    country: 'United States',
-    city: 'San Francisco',
-    error_message: 'Invalid refresh token',
-    log_level: 'warning',
-    timestamp: '2024-01-15T14:25:00Z',
-    request_id: 'req_Wn5L2mR7kJ4',
-    correlation_id: 'cor_Qr5St7Uv9Wx'
-  },
-  {
-    id: '4',
-    api_key_id: '5',
-    api_key_name: 'OAuth Client Credentials',
-    application_name: 'Partner Integration API',
-    endpoint: '/api/v1/partners/sync',
-    method: 'PUT',
-    status_code: 500,
-    response_time_ms: 5000,
-    request_size_bytes: 8192,
-    response_size_bytes: 128,
-    ip_address: '203.0.113.50',
-    user_agent: 'PartnerAPI/1.0',
-    country: 'United Kingdom',
-    city: 'London',
-    error_message: 'Internal server error: Database connection timeout',
-    log_level: 'error',
-    timestamp: '2024-01-15T14:20:00Z',
-    request_id: 'req_Hp9K3nM6jL1',
-    correlation_id: 'cor_Yz1Ab3Cd5Ef'
-  },
-  {
-    id: '5',
-    api_key_id: '1',
-    api_key_name: 'Production API Key',
-    application_name: 'Main Web Application',
-    endpoint: '/api/v1/webhooks',
-    method: 'POST',
-    status_code: 201,
-    response_time_ms: 89,
-    request_size_bytes: 1024,
-    response_size_bytes: 256,
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    country: 'United States',
-    city: 'New York',
-    error_message: null,
-    log_level: 'info',
-    timestamp: '2024-01-15T14:15:00Z',
-    request_id: 'req_Yt6P1qR8wE3',
-    correlation_id: 'cor_Gh7Ij9Kl1Mn'
-  },
-  {
-    id: '6',
-    api_key_id: '3',
-    api_key_name: 'Staging Test Key',
-    application_name: 'Admin Dashboard SPA',
-    endpoint: '/api/v1/admin/users',
-    method: 'DELETE',
-    status_code: 403,
-    response_time_ms: 8,
-    request_size_bytes: 64,
-    response_size_bytes: 96,
-    ip_address: '172.16.0.100',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    country: 'United States',
-    city: 'Chicago',
-    error_message: 'Insufficient permissions for this operation',
-    log_level: 'warning',
-    timestamp: '2024-01-15T13:00:00Z',
-    request_id: 'req_Ax2M5nL9pK7',
-    correlation_id: 'cor_Op3Qr5St7Uv'
-  }
-]
-
-const mockWebhooks: WebhookEndpoint[] = [
-  {
-    id: '1',
-    name: 'Payment Events',
-    url: 'https://api.company.com/webhooks/payments',
-    description: 'Webhook for all payment-related events',
-    events: ['payment.created', 'payment.succeeded', 'payment.failed', 'refund.created'],
-    secret: 'whsec_Qx7K9mN3pL2wE5rT8yU1',
-    status: 'active',
-    version: 'v2',
-    content_type: 'application/json',
-    retry_policy: 'exponential',
-    max_retries: 5,
-    timeout_seconds: 30,
-    total_deliveries: 15678,
-    successful_deliveries: 15234,
-    failed_deliveries: 444,
-    last_delivery_at: '2024-01-15T14:28:00Z',
-    last_success_at: '2024-01-15T14:28:00Z',
-    last_failure_at: '2024-01-15T12:45:00Z',
-    last_failure_reason: 'Connection timeout',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'User Events',
-    url: 'https://api.company.com/webhooks/users',
-    description: 'Webhook for user lifecycle events',
-    events: ['user.created', 'user.updated', 'user.deleted', 'user.verified'],
-    secret: 'whsec_Rm4H8jK1pQ9xY3zT6',
-    status: 'active',
-    version: 'v2',
-    content_type: 'application/json',
-    retry_policy: 'linear',
-    max_retries: 3,
-    timeout_seconds: 15,
-    total_deliveries: 8945,
-    successful_deliveries: 8920,
-    failed_deliveries: 25,
-    last_delivery_at: '2024-01-15T14:25:00Z',
-    last_success_at: '2024-01-15T14:25:00Z',
-    last_failure_at: '2024-01-14T08:30:00Z',
-    last_failure_reason: 'HTTP 502 Bad Gateway',
-    created_at: '2024-01-02T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z'
-  },
-  {
-    id: '3',
-    name: 'Security Alerts',
-    url: 'https://security.company.com/alerts',
-    description: 'Critical security event notifications',
-    events: ['security.breach', 'security.suspicious_login', 'security.rate_limit'],
-    secret: 'whsec_Wn5L2mR7kJ4zT8vR2',
-    status: 'active',
-    version: 'v2',
-    content_type: 'application/json',
-    retry_policy: 'exponential',
-    max_retries: 10,
-    timeout_seconds: 10,
-    total_deliveries: 234,
-    successful_deliveries: 234,
-    failed_deliveries: 0,
-    last_delivery_at: '2024-01-15T10:00:00Z',
-    last_success_at: '2024-01-15T10:00:00Z',
-    last_failure_at: null,
-    last_failure_reason: null,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-05T00:00:00Z'
-  },
-  {
-    id: '4',
-    name: 'Partner Sync',
-    url: 'https://partner.example.com/api/sync',
-    description: 'Partner data synchronization webhook',
-    events: ['data.sync', 'data.export', 'data.import'],
-    secret: 'whsec_Hp9K3nM6jL1vR2pK5',
-    status: 'failing',
-    version: 'v1',
-    content_type: 'application/json',
-    retry_policy: 'exponential',
-    max_retries: 5,
-    timeout_seconds: 60,
-    total_deliveries: 456,
-    successful_deliveries: 412,
-    failed_deliveries: 44,
-    last_delivery_at: '2024-01-15T14:00:00Z',
-    last_success_at: '2024-01-14T22:00:00Z',
-    last_failure_at: '2024-01-15T14:00:00Z',
-    last_failure_reason: 'SSL certificate expired',
-    created_at: '2024-01-05T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z'
-  }
-]
-
-const mockScopes: Scope[] = [
-  { id: '1', name: 'read:users', description: 'Read user profiles and data', category: 'Users', is_sensitive: false, requires_consent: false, api_count: 12 },
-  { id: '2', name: 'write:users', description: 'Create and update user profiles', category: 'Users', is_sensitive: true, requires_consent: true, api_count: 8 },
-  { id: '3', name: 'delete:users', description: 'Delete user accounts', category: 'Users', is_sensitive: true, requires_consent: true, api_count: 2 },
-  { id: '4', name: 'read:data', description: 'Read application data', category: 'Data', is_sensitive: false, requires_consent: false, api_count: 25 },
-  { id: '5', name: 'write:data', description: 'Create and update data', category: 'Data', is_sensitive: false, requires_consent: true, api_count: 18 },
-  { id: '6', name: 'admin:settings', description: 'Manage application settings', category: 'Admin', is_sensitive: true, requires_consent: true, api_count: 5 },
-  { id: '7', name: 'openid', description: 'OpenID Connect scope', category: 'OAuth', is_sensitive: false, requires_consent: false, api_count: 4 },
-  { id: '8', name: 'profile', description: 'User profile information', category: 'OAuth', is_sensitive: false, requires_consent: true, api_count: 3 },
-  { id: '9', name: 'email', description: 'User email address', category: 'OAuth', is_sensitive: false, requires_consent: true, api_count: 3 },
-  { id: '10', name: 'webhooks:manage', description: 'Create and manage webhooks', category: 'Webhooks', is_sensitive: true, requires_consent: true, api_count: 4 }
-]
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -808,39 +272,6 @@ const formatDate = (dateString: string): string => {
   })
 }
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Auth0/Stripe Level
-// ============================================================================
-
-const mockApiKeysAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Healthy Usage', description: 'API usage within normal parameters. 99.9% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Key Expiring', description: 'Production API key expires in 7 days. Rotation recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'Rate Limit', description: 'Mobile app approaching 80% of rate limit. Consider upgrade.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-]
-
-const mockApiKeysCollaborators = [
-  { id: '1', name: 'API Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
-  { id: '3', name: 'Security', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
-
-const mockApiKeysPredictions = [
-  { id: '1', title: 'API Growth', prediction: 'API calls expected to increase 30% next month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Forecast', prediction: 'Current usage will cost $450/month at current tier', confidence: 92, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockApiKeysActivities = [
-  { id: '1', user: 'API Admin', action: 'Created', target: 'new production API key', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'DevOps Lead', action: 'Rotated', target: 'staging API credentials', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Revoked', target: 'expired development key', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
-
-// Quick actions - actions are set in component to access state setters
-const mockApiKeysQuickActions = [
-  { id: '1', label: 'Create Key', icon: 'plus', action: () => {}, variant: 'default' as const },
-  { id: '2', label: 'View Usage', icon: 'chart', action: () => {}, variant: 'default' as const },
-  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => {}, variant: 'outline' as const },
-]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -937,7 +368,7 @@ export default function ApiKeysClient() {
   })), [dbKeys])
 
   // Sync mapped data to local state
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys)
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   useEffect(() => {
     setApiKeys(mappedKeys)
   }, [mappedKeys])
@@ -958,9 +389,9 @@ export default function ApiKeysClient() {
       const days = Math.ceil((new Date(k.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       return days > 0 && days <= 30
     }).length,
-    totalApps: mockApplications.length,
-    totalWebhooks: mockWebhooks.length,
-    failingWebhooks: mockWebhooks.filter(w => w.status === 'failing').length
+    totalApps: 0,
+    totalWebhooks: 0,
+    failingWebhooks: 0
   }), [apiKeys])
 
   // Filtered data
@@ -973,17 +404,11 @@ export default function ApiKeysClient() {
   }, [apiKeys, searchQuery])
 
   const filteredApps = useMemo(() => {
-    return mockApplications.filter(app =>
-      app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.client_id.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    return []
   }, [searchQuery])
 
   const filteredLogs = useMemo(() => {
-    return mockApiLogs.filter(log =>
-      log.endpoint.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.api_key_name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    return []
   }, [searchQuery])
 
   // Handlers
@@ -1256,7 +681,7 @@ export default function ApiKeysClient() {
                     <p className="text-slate-300 text-sm">API Keys</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiLogs.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-slate-300 text-sm">Requests Today</p>
                   </div>
                   <div className="text-center">
@@ -1297,7 +722,7 @@ export default function ApiKeysClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockApiLogs.slice(0, 5).map(log => (
+                    {[].map((log: any) => (
                       <div key={log.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                         <div className="flex items-center gap-3">
                           <Badge className={getLogLevelColor(log.log_level)}>{log.method}</Badge>
@@ -1550,11 +975,11 @@ export default function ApiKeysClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApplications.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-blue-200 text-sm">Apps</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApplications.filter(a => a.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1651,15 +1076,15 @@ export default function ApiKeysClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiLogs.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Logs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiLogs.filter(l => l.status_code >= 400).length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Errors</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{Math.round(mockApiLogs.reduce((s, l) => s + l.response_time_ms, 0) / mockApiLogs.length)}ms</p>
+                    <p className="text-3xl font-bold">0ms</p>
                     <p className="text-emerald-200 text-sm">Avg Latency</p>
                   </div>
                 </div>
@@ -1746,11 +1171,11 @@ export default function ApiKeysClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWebhooks.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-purple-200 text-sm">Endpoints</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWebhooks.filter(w => w.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-purple-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
@@ -1770,7 +1195,7 @@ export default function ApiKeysClient() {
             </div>
 
             <div className="space-y-4">
-              {mockWebhooks.map(webhook => (
+              {[].map((webhook: any) => (
                 <Card
                   key={webhook.id}
                   className="border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer dark:bg-gray-800"
@@ -1963,7 +1388,7 @@ export default function ApiKeysClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {mockScopes.map(scope => (
+                    {[].map((scope: any) => (
                       <div key={scope.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
                         <div className="flex items-start justify-between mb-2">
                           <code className="text-sm font-medium text-gray-900 dark:text-white">{scope.name}</code>
@@ -2212,7 +1637,7 @@ export default function ApiKeysClient() {
               <div className="space-y-2">
                 <Label>Scopes</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-32 overflow-y-auto p-2 border rounded-lg">
-                  {mockScopes.map(scope => (
+                  {[].map((scope: any) => (
                     <div key={scope.id} className="flex items-center space-x-2">
                       <Checkbox id={scope.id} checked={selectedScopes.includes(scope.name)} onCheckedChange={(checked) => {
                         if (checked) setSelectedScopes([...selectedScopes, scope.name])
@@ -2419,7 +1844,7 @@ export default function ApiKeysClient() {
               <div className="space-y-2">
                 <Label>Available Scopes</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 max-h-48 overflow-y-auto p-2 border rounded-lg">
-                  {mockScopes.map(scope => (
+                  {[].map((scope: any) => (
                     <div key={scope.id} className="flex items-center space-x-2">
                       <Checkbox id={`perm-${scope.id}`} defaultChecked={keyToAction?.scopes.includes(scope.name)} />
                       <Label htmlFor={`perm-${scope.id}`} className="text-xs">{scope.name}</Label>
@@ -2439,7 +1864,7 @@ export default function ApiKeysClient() {
                 try {
                   // Collect selected scopes from checkboxes
                   const selectedScopes: string[] = []
-                  mockScopes.forEach(scope => {
+                  ;[].forEach((scope: any) => {
                     const checkbox = document.getElementById(`perm-${scope.id}`) as HTMLInputElement
                     if (checkbox?.checked) {
                       selectedScopes.push(scope.name)
@@ -3104,7 +2529,7 @@ console.log(user);`}</code>
             </DialogHeader>
             <ScrollArea className="max-h-96">
               <div className="py-4 space-y-2">
-                {mockApiLogs.map((log, i) => (
+                {[].map((log: any, i: number) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 animate-fade-in">
                     <div className="flex items-center gap-3">
                       <Badge className={getLogLevelColor(log.log_level)}>{log.method}</Badge>
