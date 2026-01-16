@@ -147,103 +147,21 @@ export const MOTION_PRESETS: MotionPreset[] = [
   }
 ]
 
-export const MOCK_MOTION_PROJECTS: MotionProject[] = [
-  {
-    id: 'proj-1',
-    name: 'Product Launch Video',
-    description: 'Animated promo for new product',
-    width: 1920,
-    height: 1080,
-    frameRate: 30,
-    duration: 15,
-    backgroundColor: '#000000',
-    layers: [],
-    timeline: {
-      currentTime: 0,
-      duration: 15,
-      playbackSpeed: 1,
-      markers: [],
-      isPlaying: false,
-      loop: false
-    },
-    exportSettings: {
-      format: 'mp4',
-      quality: 'high',
-      fps: 30,
-      resolution: { width: 1920, height: 1080 },
-      transparent: false
-    },
-    createdAt: new Date(Date.now() - 86400000 * 3),
-    updatedAt: new Date(Date.now() - 3600000),
-    createdBy: 'user-1',
-    tags: ['product', 'promo', 'commercial']
-  },
-  {
-    id: 'proj-2',
-    name: 'Social Media Ad',
-    description: 'Square format for Instagram',
-    width: 1080,
-    height: 1080,
-    frameRate: 30,
-    duration: 10,
-    backgroundColor: '#ffffff',
-    layers: [],
-    timeline: {
-      currentTime: 0,
-      duration: 10,
-      playbackSpeed: 1,
-      markers: [],
-      isPlaying: false,
-      loop: false
-    },
-    exportSettings: {
-      format: 'mp4',
-      quality: 'high',
-      fps: 30,
-      resolution: { width: 1080, height: 1080 },
-      transparent: false
-    },
-    createdAt: new Date(Date.now() - 86400000 * 7),
-    updatedAt: new Date(Date.now() - 7200000),
-    createdBy: 'user-1',
-    tags: ['social', 'instagram', 'ad']
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_MOTION_PROJECTS: MotionProject[] = []
 
-export const MOCK_MOTION_ASSETS: MotionAsset[] = [
-  {
-    id: 'asset-1',
-    name: 'Company Logo',
-    type: 'image',
-    url: '/assets/logo.png',
-    size: 524288,
-    format: 'PNG',
-    dimensions: { width: 1000, height: 500 },
-    createdAt: new Date(Date.now() - 86400000 * 15),
-    tags: ['logo', 'branding']
-  },
-  {
-    id: 'asset-2',
-    name: 'Background Video',
-    type: 'video',
-    url: '/assets/bg-video.mp4',
-    size: 10485760,
-    format: 'MP4',
-    dimensions: { width: 1920, height: 1080 },
-    duration: 20,
-    createdAt: new Date(Date.now() - 86400000 * 10),
-    tags: ['background', 'video']
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_MOTION_ASSETS: MotionAsset[] = []
 
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_MOTION_STATS: MotionStats = {
-  totalProjects: 12,
-  totalAnimations: 87,
-  totalExports: 34,
-  storageUsed: 1258291200,
-  storageLimit: 5368709120,
-  renderTime: 3420,
-  popularTemplates: ['template-1', 'template-3', 'template-2']
+  totalProjects: 0,
+  totalAnimations: 0,
+  totalExports: 0,
+  storageUsed: 0,
+  storageLimit: 0,
+  renderTime: 0,
+  popularTemplates: []
 }
 
 // Helper Functions

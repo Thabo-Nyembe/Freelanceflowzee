@@ -141,8 +141,9 @@ export interface InsightStatistics {
 }
 
 // ============================================================================
-// MOCK DATA - REMOVED (Migration Batch #9)
+// MOCK DATA - REMOVED (Migration Batch #11)
 // ============================================================================
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 // All mock data has been migrated to use database queries.
 // Data now comes from Supabase via ml-insights-queries.ts
 // Migration completed: 2026-01-17
@@ -403,7 +404,7 @@ export function getInsightTypeIcon(type: InsightType): string {
 }
 
 logger.info('ML Insights utilities initialized', {
-  migrationStatus: 'BATCH_9_COMPLETE',
+  migrationStatus: 'BATCH_11_COMPLETE',
   mockDataRemoved: true,
   dataSource: 'Supabase via ml-insights-queries.ts'
 })

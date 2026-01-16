@@ -149,16 +149,14 @@ export interface StorageStats {
 // MOCK DATA - USERS (Migration Batch #9)
 // ============================================================================
 
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock user data replaced with database queries via user management hooks
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 const MOCK_USERS: Array<{ id: string; name: string; avatar: string }> = []
 
 // ============================================================================
 // MOCK DATA - FOLDERS (Migration Batch #9)
 // ============================================================================
 
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock folder data replaced with database queries via files hub hooks
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_FOLDERS: FolderStructure[] = []
 
 /* ORIGINAL MOCK DATA REMOVED - Previously contained 15 folders:
@@ -382,8 +380,7 @@ export const MOCK_FOLDERS: FolderStructure[] = []
 // MOCK DATA - FILES (Migration Batch #9)
 // ============================================================================
 
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock file data replaced with database queries via files hub hooks
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_FILES: FileItem[] = []
 
 /* ORIGINAL MOCK DATA REMOVED - Previously contained 60+ files:

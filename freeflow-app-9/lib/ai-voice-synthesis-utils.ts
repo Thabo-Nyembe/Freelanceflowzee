@@ -24,93 +24,8 @@ export const VOICE_CATEGORIES: VoiceCategory[] = [
   { id: 'multilingual', name: 'Multilingual', description: 'Multiple language support', icon: '🌍', voiceCount: 45 }
 ]
 
-export const MOCK_VOICES: Voice[] = [
-  {
-    id: 'voice-1',
-    name: 'emma-professional',
-    displayName: 'Emma',
-    language: 'English',
-    languageCode: 'en-US',
-    gender: 'female',
-    age: 'adult',
-    accent: 'American',
-    description: 'Professional and clear voice, perfect for business presentations',
-    isPremium: false,
-    popularity: 95,
-    tags: ['professional', 'business', 'clear']
-  },
-  {
-    id: 'voice-2',
-    name: 'james-narrative',
-    displayName: 'James',
-    language: 'English',
-    languageCode: 'en-GB',
-    gender: 'male',
-    age: 'adult',
-    accent: 'British',
-    description: 'Rich narrative voice ideal for audiobooks and storytelling',
-    isPremium: true,
-    popularity: 92,
-    tags: ['narrative', 'storytelling', 'audiobook']
-  },
-  {
-    id: 'voice-3',
-    name: 'sophia-friendly',
-    displayName: 'Sophia',
-    language: 'English',
-    languageCode: 'en-US',
-    gender: 'female',
-    age: 'young-adult',
-    accent: 'American',
-    description: 'Warm and friendly voice for conversational content',
-    isPremium: false,
-    isNew: true,
-    popularity: 88,
-    tags: ['friendly', 'conversational', 'warm']
-  },
-  {
-    id: 'voice-4',
-    name: 'david-authoritative',
-    displayName: 'David',
-    language: 'English',
-    languageCode: 'en-US',
-    gender: 'male',
-    age: 'senior',
-    accent: 'American',
-    description: 'Deep authoritative voice for educational content',
-    isPremium: true,
-    popularity: 90,
-    tags: ['authoritative', 'educational', 'deep']
-  },
-  {
-    id: 'voice-5',
-    name: 'maria-multilingual',
-    displayName: 'Maria',
-    language: 'Spanish',
-    languageCode: 'es-ES',
-    gender: 'female',
-    age: 'adult',
-    accent: 'Spanish',
-    description: 'Natural Spanish voice with excellent pronunciation',
-    isPremium: true,
-    popularity: 85,
-    tags: ['multilingual', 'spanish', 'natural']
-  },
-  {
-    id: 'voice-6',
-    name: 'thomas-calm',
-    displayName: 'Thomas',
-    language: 'English',
-    languageCode: 'en-AU',
-    gender: 'male',
-    age: 'adult',
-    accent: 'Australian',
-    description: 'Calm and soothing voice for meditation and relaxation',
-    isPremium: false,
-    popularity: 82,
-    tags: ['calm', 'soothing', 'relaxation']
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_VOICES: Voice[] = []
 
 export const SSML_TAGS: SSMLTag[] = [
   {
@@ -168,50 +83,18 @@ export const SSML_TAGS: SSMLTag[] = [
   }
 ]
 
-export const MOCK_RECENT_SYNTHESES: VoiceSynthesisResult[] = [
-  {
-    id: 'synth-1',
-    audioUrl: '/audio/synthesis-1.mp3',
-    duration: 45.2,
-    format: 'mp3',
-    quality: 'high',
-    fileSize: 1048576,
-    text: 'Welcome to our AI voice synthesis platform. Experience natural-sounding voices...',
-    voiceId: 'voice-1',
-    synthesizedAt: new Date(Date.now() - 3600000),
-    processingTime: 2.3,
-    characterCount: 156,
-    cost: 0.15
-  },
-  {
-    id: 'synth-2',
-    audioUrl: '/audio/synthesis-2.mp3',
-    duration: 120.5,
-    format: 'wav',
-    quality: 'ultra',
-    fileSize: 5242880,
-    text: 'In a world where technology meets creativity, AI voice synthesis opens new possibilities...',
-    voiceId: 'voice-2',
-    synthesizedAt: new Date(Date.now() - 7200000),
-    processingTime: 5.8,
-    characterCount: 487,
-    cost: 0.48
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_RECENT_SYNTHESES: VoiceSynthesisResult[] = []
 
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_VOICE_STATS: VoiceSynthesisStats = {
-  totalSyntheses: 234,
-  totalCharacters: 45678,
-  totalDuration: 3420.5,
-  totalCost: 45.67,
-  favoriteVoices: ['voice-1', 'voice-2', 'voice-3'],
-  recentSyntheses: MOCK_RECENT_SYNTHESES,
-  monthlyUsage: [
-    { month: 'Jan', characters: 8500, cost: 8.50 },
-    { month: 'Feb', characters: 12300, cost: 12.30 },
-    { month: 'Mar', characters: 15400, cost: 15.40 },
-    { month: 'Apr', characters: 9478, cost: 9.48 }
-  ]
+  totalSyntheses: 0,
+  totalCharacters: 0,
+  totalDuration: 0,
+  totalCost: 0,
+  favoriteVoices: [],
+  recentSyntheses: [],
+  monthlyUsage: []
 }
 
 // Helper Functions

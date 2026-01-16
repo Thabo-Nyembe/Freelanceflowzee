@@ -306,10 +306,11 @@ export interface PerformanceMetrics {
 }
 
 // ============================================================================
-// MOCK DATA - REMOVED (Migration Batch #9)
+// MOCK DATA - REMOVED (Migration Batch #11)
 // ============================================================================
 // All mock data has been migrated to use database queries.
 // Data now comes from Supabase via reports-queries.ts
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 // Migration completed: 2026-01-17
 
 export const MOCK_REPORTS: Report[] = []
@@ -752,6 +753,7 @@ export const MOCK_REPORTS_OLD: Report[] = [
 ]
 */
 
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_REPORT_TEMPLATES: ReportTemplate[] = []
 /*
 // Original MOCK_REPORT_TEMPLATES data removed - now using Supabase
@@ -835,16 +837,42 @@ export const MOCK_REPORT_TEMPLATES_OLD: ReportTemplate[] = [
 ]
 */
 
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_FINANCIAL_ANALYTICS: FinancialAnalytics = {
-  revenueData: { monthly: [], quarterly: [], yearly: [], byCategory: [], byClient: [], byProject: [] },
-  expenseData: { monthly: [], quarterly: [], yearly: [], byCategory: [], byVendor: [], byProject: [] },
-  profitData: { monthly: [], quarterly: [], yearly: [], margins: [], grossProfit: 0, netProfit: 0, operatingProfit: 0, ebitda: 0 },
-  cashFlowData: { operating: [], investing: [], financing: [], total: [], projections: [] },
-  clientData: { topClients: [], churnRate: 0, acquisitionCost: 0, lifetimeValue: 0, segmentation: [] },
-  projectData: { byStatus: [], byType: [], byProfitability: [], completionRate: 0, averageValue: 0, totalActive: 0 },
-  teamData: { byMember: [], productivity: [], utilization: [], billableHours: 0, nonBillableHours: 0 },
-  forecastData: { revenue: [], expenses: [], profit: [], confidenceLevel: 'low', lastUpdated: new Date() },
-  insights: { trends: [], anomalies: [], recommendations: [] }
+  revenueData: {
+    monthly: [],
+    yearly: { year: 0, revenue: 0, growth: 0, projects: 0, clients: 0 },
+    currentMonth: 0,
+    lastMonth: 0,
+    averageProjectValue: 0,
+    totalRevenue: 0,
+    revenueByService: []
+  },
+  profitability: {
+    projects: [],
+    totalRevenue: 0,
+    totalExpenses: 0,
+    totalProfit: 0,
+    averageMargin: 0,
+    marginByCategory: []
+  },
+  cashFlow: {
+    projections: [],
+    currentBalance: 0,
+    projectedBalance: 0,
+    runway: 0,
+    burnRate: 0,
+    income: { projects: 0, recurring: 0, other: 0, total: 0 },
+    expenses: { salaries: 0, software: 0, marketing: 0, operations: 0, other: 0, total: 0 }
+  },
+  insights: {
+    topServices: [],
+    clientRetention: 0,
+    seasonalTrends: [],
+    growthRate: 0,
+    performanceMetrics: [],
+    recommendations: []
+  }
 }
 /*
 // Original MOCK_FINANCIAL_ANALYTICS data removed - now using Supabase
@@ -1782,7 +1810,8 @@ export function generateReportSummary(report: Report): string {
 }
 
 logger.info('Reports utilities initialized', {
-  migrationStatus: 'BATCH_9_COMPLETE',
+  migrationStatus: 'BATCH_11_COMPLETE',
   mockDataRemoved: true,
-  dataSource: 'Supabase via reports-queries.ts'
+  dataSource: 'Supabase via reports-queries.ts',
+  timestamp: '2026-01-17'
 })

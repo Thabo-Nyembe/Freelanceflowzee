@@ -50,187 +50,30 @@ export const QUALITY_PRESETS: Array<{ id: TranslationQuality; name: string; desc
   { id: 'native', name: 'Native', description: 'Human-like natural translations', processingTime: '4-8s' }
 ]
 
-export const MOCK_TRANSLATION_RESULTS: TranslationResult[] = [
-  {
-    id: 'trans-1',
-    requestId: 'req-1',
-    sourceText: 'Hello, how are you today?',
-    translatedText: 'Hola, ¿cómo estás hoy?',
-    sourceLanguage: 'en',
-    targetLanguage: 'es',
-    confidence: 0.98,
-    processingTime: 245,
-    engine: 'kazi-ai',
-    quality: 'accurate',
-    metadata: {
-      wordCount: 5,
-      characterCount: 25
-    }
-  },
-  {
-    id: 'trans-2',
-    requestId: 'req-2',
-    sourceText: 'Thank you for your help',
-    translatedText: 'Merci pour votre aide',
-    sourceLanguage: 'en',
-    targetLanguage: 'fr',
-    confidence: 0.96,
-    processingTime: 198,
-    engine: 'kazi-ai',
-    quality: 'accurate',
-    metadata: {
-      wordCount: 5,
-      characterCount: 23
-    }
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_TRANSLATION_RESULTS: TranslationResult[] = []
 
-export const MOCK_LIVE_SESSIONS: LiveTranslation[] = [
-  {
-    id: 'live-1',
-    sessionId: 'session-1',
-    participants: [
-      {
-        id: 'user-1',
-        name: 'John Smith',
-        language: 'en',
-        role: 'speaker',
-        isActive: true,
-        joinedAt: new Date(Date.now() - 15 * 60000)
-      },
-      {
-        id: 'user-2',
-        name: 'Maria Garcia',
-        language: 'es',
-        role: 'listener',
-        isActive: true,
-        joinedAt: new Date(Date.now() - 12 * 60000)
-      }
-    ],
-    sourceLanguage: 'en',
-    targetLanguages: ['es', 'fr'],
-    mode: 'video',
-    status: 'active',
-    startTime: new Date(Date.now() - 15 * 60000),
-    duration: 900,
-    transcripts: [],
-    settings: {
-      autoDetectLanguage: true,
-      showOriginalText: true,
-      enableSubtitles: true,
-      subtitlePosition: 'bottom',
-      fontSize: 'medium',
-      highlightSpeaker: true,
-      saveTranscript: true,
-      translationDelay: 0,
-      filterProfanity: false
-    }
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_LIVE_SESSIONS: LiveTranslation[] = []
 
-export const MOCK_DOCUMENTS: DocumentTranslation[] = [
-  {
-    id: 'doc-1',
-    fileName: 'Business_Proposal.pdf',
-    fileSize: 2457600,
-    fileType: 'pdf',
-    sourceLanguage: 'en',
-    targetLanguages: ['es', 'fr', 'de'],
-    status: 'completed',
-    progress: 100,
-    pageCount: 15,
-    estimatedTime: 0,
-    preserveFormatting: true,
-    createdAt: new Date(Date.now() - 3600000),
-    completedAt: new Date(Date.now() - 1800000),
-    downloadUrl: '#'
-  },
-  {
-    id: 'doc-2',
-    fileName: 'Marketing_Strategy.docx',
-    fileSize: 1024000,
-    fileType: 'docx',
-    sourceLanguage: 'en',
-    targetLanguages: ['zh', 'ja'],
-    status: 'processing',
-    progress: 65,
-    pageCount: 8,
-    estimatedTime: 180,
-    preserveFormatting: true,
-    createdAt: new Date(Date.now() - 600000)
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_DOCUMENTS: DocumentTranslation[] = []
 
-export const MOCK_TRANSLATION_MEMORY: TranslationMemory[] = [
-  {
-    id: 'mem-1',
-    sourceText: 'Machine learning model',
-    translatedText: 'Modelo de aprendizaje automático',
-    sourceLanguage: 'en',
-    targetLanguage: 'es',
-    domain: 'technology',
-    usageCount: 12,
-    quality: 0.95,
-    createdAt: new Date(Date.now() - 86400000 * 7),
-    lastUsed: new Date(Date.now() - 3600000),
-    isApproved: true,
-    createdBy: 'user-1'
-  },
-  {
-    id: 'mem-2',
-    sourceText: 'Customer satisfaction',
-    translatedText: 'Satisfaction client',
-    sourceLanguage: 'en',
-    targetLanguage: 'fr',
-    domain: 'business',
-    usageCount: 8,
-    quality: 0.92,
-    createdAt: new Date(Date.now() - 86400000 * 5),
-    lastUsed: new Date(Date.now() - 7200000),
-    isApproved: true,
-    createdBy: 'user-1'
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_TRANSLATION_MEMORY: TranslationMemory[] = []
 
-export const MOCK_GLOSSARIES: TranslationGlossary[] = [
-  {
-    id: 'gloss-1',
-    name: 'Tech Terms - EN to ES',
-    description: 'Technical terminology for software projects',
-    sourceLanguage: 'en',
-    targetLanguage: 'es',
-    terms: [
-      { id: 'term-1', sourceTerm: 'API', targetTerm: 'API', caseSensitive: true, category: 'Development' },
-      { id: 'term-2', sourceTerm: 'Dashboard', targetTerm: 'Panel de control', caseSensitive: false, category: 'UI' },
-      { id: 'term-3', sourceTerm: 'Backend', targetTerm: 'Backend', caseSensitive: false, category: 'Architecture' }
-    ],
-    isPublic: true,
-    createdBy: 'user-1',
-    createdAt: new Date(Date.now() - 86400000 * 30),
-    updatedAt: new Date(Date.now() - 86400000 * 2)
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_GLOSSARIES: TranslationGlossary[] = []
 
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_TRANSLATION_STATS: TranslationStats = {
-  totalTranslations: 1247,
-  charactersTranslated: 45892,
-  languagePairs: [
-    { from: 'en', to: 'es', count: 342 },
-    { from: 'en', to: 'fr', count: 287 },
-    { from: 'en', to: 'de', count: 198 },
-    { from: 'es', to: 'en', count: 156 },
-    { from: 'zh', to: 'en', count: 124 }
-  ],
-  popularLanguages: [
-    { language: 'en', percentage: 45 },
-    { language: 'es', percentage: 28 },
-    { language: 'fr', percentage: 15 },
-    { language: 'de', percentage: 8 },
-    { language: 'zh', percentage: 4 }
-  ],
-  averageConfidence: 0.94,
-  averageProcessingTime: 1250,
-  successRate: 0.98
+  totalTranslations: 0,
+  charactersTranslated: 0,
+  languagePairs: [],
+  popularLanguages: [],
+  averageConfidence: 0,
+  averageProcessingTime: 0,
+  successRate: 0
 }
 
 // Helper Functions

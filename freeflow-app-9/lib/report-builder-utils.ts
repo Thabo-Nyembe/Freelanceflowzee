@@ -230,69 +230,13 @@ export const EXPORT_FORMATS = [
   { value: 'svg' as ExportFormat, label: 'SVG Vector', icon: 'FileImage', description: 'Scalable vector graphic' }
 ]
 
-// Mock Metric Cards Data
-export const MOCK_METRICS: MetricCard[] = [
-  {
-    id: '1',
-    label: 'Total Revenue',
-    value: '$127,450',
-    change: 12.5,
-    changeLabel: 'vs last month',
-    trend: 'up',
-    icon: 'DollarSign',
-    color: 'green'
-  },
-  {
-    id: '2',
-    label: 'Active Projects',
-    value: 24,
-    change: 8,
-    changeLabel: 'vs last month',
-    trend: 'up',
-    icon: 'Briefcase',
-    color: 'blue'
-  },
-  {
-    id: '3',
-    label: 'Client Satisfaction',
-    value: '94%',
-    change: 2.3,
-    changeLabel: 'vs last month',
-    trend: 'up',
-    icon: 'Star',
-    color: 'yellow'
-  },
-  {
-    id: '4',
-    label: 'Team Utilization',
-    value: '87%',
-    change: -3.1,
-    changeLabel: 'vs last month',
-    trend: 'down',
-    icon: 'Users',
-    color: 'purple'
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_METRICS: MetricCard[] = []
 
-// Mock Chart Data
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 export const MOCK_CHART_DATA: ChartData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: 'Revenue',
-      data: [12000, 19000, 15000, 25000, 22000, 30000],
-      borderColor: 'rgb(99, 102, 241)',
-      backgroundColor: 'rgba(99, 102, 241, 0.1)',
-      fill: true
-    },
-    {
-      label: 'Expenses',
-      data: [8000, 11000, 9000, 15000, 14000, 18000],
-      borderColor: 'rgb(239, 68, 68)',
-      backgroundColor: 'rgba(239, 68, 68, 0.1)',
-      fill: true
-    }
-  ]
+  labels: [],
+  datasets: []
 }
 
 /**

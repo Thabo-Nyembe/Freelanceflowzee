@@ -74,62 +74,8 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
 ]
 
 // Mock Reports
-export const MOCK_REPORTS: Report[] = [
-  {
-    id: 'report-1',
-    name: 'Q1 Financial Report',
-    description: 'Quarterly financial performance and analysis',
-    type: 'financial',
-    status: 'generated',
-    template: REPORT_TEMPLATES[0],
-    sections: [],
-    schedule: {
-      frequency: 'quarterly',
-      time: '09:00',
-      timezone: 'UTC',
-      enabled: true,
-      nextRun: new Date('2025-04-01')
-    },
-    recipients: ['ceo@company.com', 'cfo@company.com'],
-    lastGenerated: new Date('2025-01-15'),
-    createdAt: new Date('2025-01-01'),
-    createdBy: 'Admin'
-  },
-  {
-    id: 'report-2',
-    name: 'Weekly Sales Pipeline',
-    description: 'Sales pipeline status and deal progression',
-    type: 'sales',
-    status: 'scheduled',
-    template: REPORT_TEMPLATES[1],
-    sections: [],
-    schedule: {
-      frequency: 'weekly',
-      time: '08:00',
-      dayOfWeek: 1,
-      timezone: 'UTC',
-      enabled: true,
-      nextRun: new Date('2025-01-27')
-    },
-    recipients: ['sales@company.com'],
-    lastGenerated: new Date('2025-01-20'),
-    createdAt: new Date('2025-01-01'),
-    createdBy: 'Sales Manager'
-  },
-  {
-    id: 'report-3',
-    name: 'Marketing Campaign Performance',
-    description: 'Email campaigns, leads, and conversion metrics',
-    type: 'marketing',
-    status: 'generated',
-    template: REPORT_TEMPLATES[2],
-    sections: [],
-    recipients: ['marketing@company.com'],
-    lastGenerated: new Date('2025-01-21'),
-    createdAt: new Date('2025-01-15'),
-    createdBy: 'Marketing Director'
-  }
-]
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
+export const MOCK_REPORTS: Report[] = []
 
 // Report Metrics
 export const REPORT_METRICS: ReportMetrics = {

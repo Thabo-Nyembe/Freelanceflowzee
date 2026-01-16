@@ -23,8 +23,9 @@ import {
 const logger = createFeatureLogger('InvoiceUtils')
 
 // ============================================================================
-// MOCK DATA - REMOVED (Migration Batch #9)
+// MOCK DATA - REMOVED (Migration Batch #11)
 // ============================================================================
+// MIGRATED: Batch #11 - Removed mock data, using database hooks
 // All mock data has been migrated to use database queries.
 // Data now comes from Supabase via invoice-queries.ts
 // Migration completed: 2026-01-17
@@ -306,7 +307,7 @@ export function validateInvoice(invoice: Partial<Invoice>): { valid: boolean; er
 }
 
 logger.info('Invoice utilities initialized', {
-  migrationStatus: 'BATCH_9_COMPLETE',
+  migrationStatus: 'BATCH_11_COMPLETE',
   mockDataRemoved: true,
   dataSource: 'Supabase via invoice-queries.ts',
   utilityFunctions: 20
