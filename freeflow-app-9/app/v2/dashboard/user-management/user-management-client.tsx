@@ -319,16 +319,13 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         metadata: { sendWelcomeEmail: inviteForm.sendWelcomeEmail }
       } as any)
 
-      toast.success('User invited successfully!', {
-        description: `Invitation sent to ${inviteForm.email}`
+      toast.success('User invited successfully!'`
       })
       setShowInviteModal(false)
       setInviteForm({ email: '', role: 'user', full_name: '', sendWelcomeEmail: true })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to invite user', {
-        description: error.message || 'Could not send invitation'
-      })
+      toast.error('Failed to invite user')
     } finally {
       setInviting(false)
     }
@@ -338,14 +335,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'suspended' as UserStatus })
-      toast.success('User suspended', {
-        description: `"${user.full_name || user.email}" has been suspended`
+      toast.success('User suspended'" has been suspended`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to suspend user', {
-        description: error.message || 'Could not suspend user'
-      })
+      toast.error('Failed to suspend user')
     } finally {
       setSuspendingUser(null)
     }
@@ -355,14 +349,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'active' as UserStatus })
-      toast.success('User activated', {
-        description: `"${user.full_name || user.email}" has been activated`
+      toast.success('User activated'" has been activated`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to activate user', {
-        description: error.message || 'Could not activate user'
-      })
+      toast.error('Failed to activate user')
     } finally {
       setSuspendingUser(null)
     }
@@ -375,16 +366,13 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setDeletingUser(user.id)
     try {
       await deleteUser(user.id)
-      toast.success('User deleted', {
-        description: `"${user.full_name || user.email}" has been removed`
+      toast.success('User deleted'" has been removed`
       })
       setShowUserModal(false)
       setSelectedUser(null)
       refetch()
     } catch (error: any) {
-      toast.error('Failed to delete user', {
-        description: error.message || 'Could not delete user'
-      })
+      toast.error('Failed to delete user')
     } finally {
       setDeletingUser(null)
     }
@@ -410,13 +398,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         password_changed_at: new Date().toISOString()
       } as any)
 
-      toast.success('Password reset sent', {
-        description: `Reset link sent to ${user.email}`
+      toast.success('Password reset sent'`
       })
     } catch (error: any) {
-      toast.error('Failed to send password reset', {
-        description: error.message || 'Could not send reset link'
-      })
+      toast.error('Failed to send password reset')
     }
   }
 
@@ -455,13 +440,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'User list has been downloaded'
-      })
+      toast.success('Export complete')
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'Could not export users'
-      })
+      toast.error('Export failed')
     } finally {
       setExporting(false)
     }
@@ -471,14 +452,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setUpdatingRole(user.id)
     try {
       await updateUser({ id: user.id, role: newRole })
-      toast.success('Role assigned', {
-        description: `${newRole} role assigned to ${user.full_name || user.email}`
+      toast.success('Role assigned' role assigned to ${user.full_name || user.email}`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to assign role', {
-        description: error.message || 'Could not update user role'
-      })
+      toast.error('Failed to assign role')
     } finally {
       setUpdatingRole(null)
     }
@@ -492,15 +470,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await updateUser({ id: userId, status: 'suspended' as UserStatus })
       }
-      toast.success('Users suspended', {
-        description: `${selectedUsers.length} users have been suspended`
+      toast.success('Users suspended' users have been suspended`
       })
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
-      toast.error('Failed to suspend users', {
-        description: error.message || 'Could not suspend selected users'
-      })
+      toast.error('Failed to suspend users')
     }
   }
 
@@ -512,15 +487,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await deleteUser(userId)
       }
-      toast.success('Users deleted', {
-        description: `${selectedUsers.length} users have been deleted`
+      toast.success('Users deleted' users have been deleted`
       })
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
-      toast.error('Failed to delete users', {
-        description: error.message || 'Could not delete selected users'
-      })
+      toast.error('Failed to delete users')
     }
   }
 
@@ -544,15 +516,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
       if (error) throw error
 
-      toast.success('Role created', {
-        description: `"${roleForm.name}" role has been created`
+      toast.success('Role created'" role has been created`
       })
       setShowRoleModal(false)
       setRoleForm({ name: '', description: '', permissions: [] })
     } catch (error: any) {
-      toast.error('Failed to create role', {
-        description: error.message || 'Could not create role'
-      })
+      toast.error('Failed to create role')
     } finally {
       setCreatingRole(false)
     }
@@ -2080,7 +2049,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <AIInsightsPanel
               insights={mockUserMgmtAIInsights}
               title="User Management Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2421,7 +2390,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   input.onchange = (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.success(`File selected: ${file.name}`, { description: 'Ready to import' })
+                      toast.success(`File selected: ${file.name}`)
                     }
                   }
                   input.click()
@@ -2455,7 +2424,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBulkImportDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Import started', { description: 'Processing your file...' })
+                toast.success('Import started')
                 setShowBulkImportDialog(false)
               }}>
                 Start Import
@@ -2764,7 +2733,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRevokeUserSessionsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('All sessions revoked', { description: `${selectedUser?.full_name || selectedUser?.email} has been logged out from all devices` })
+                toast.success('All sessions revoked' has been logged out from all devices` })
                 setShowRevokeUserSessionsDialog(false)
               }}>
                 Revoke All Sessions
@@ -2873,7 +2842,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddConnectionDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Connection created', { description: 'Configure the connection to complete setup' })
+                toast.success('Connection created')
                 setShowAddConnectionDialog(false)
               }}>
                 Create Connection
@@ -3315,7 +3284,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRotateKeyDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Signing key rotated', { description: 'All tokens have been invalidated' })
+                toast.success('Signing key rotated')
                 setShowRotateKeyDialog(false)
               }}>
                 Rotate Key
@@ -3351,7 +3320,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRevokeSessionsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('All sessions revoked', { description: 'All users have been logged out' })
+                toast.success('All sessions revoked')
                 setShowRevokeSessionsDialog(false)
               }}>
                 Revoke All Sessions
@@ -3393,7 +3362,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteTenantDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.error('Tenant deletion initiated', { description: 'This process cannot be stopped' })
+                toast.error('Tenant deletion initiated')
                 setShowDeleteTenantDialog(false)
               }}>
                 Delete Tenant

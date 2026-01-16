@@ -721,15 +721,12 @@ export default function OrdersClient() {
 
   const handleSubmitNewOrder = () => {
     if (!newOrderForm.customerName || !newOrderForm.customerEmail || !newOrderForm.productName || !newOrderForm.unitPrice) {
-      toast.error('Missing required fields', {
-        description: 'Please fill in customer name, email, product name, and price'
-      })
+      toast.error('Missing required fields')
       return
     }
 
     const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-    toast.success('Order Created Successfully', {
-      description: `Order ${orderNumber} has been created for ${newOrderForm.customerName}`
+    toast.success('Order Created Successfully' has been created for ${newOrderForm.customerName}`
     })
 
     setNewOrderForm({
@@ -757,19 +754,15 @@ export default function OrdersClient() {
   const handleSubmitBulkShip = () => {
     const unfulfilled = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled')
     if (unfulfilled.length === 0) {
-      toast.error('No orders to ship', {
-        description: 'All orders have already been fulfilled'
-      })
+      toast.error('No orders to ship')
       return
     }
 
-    toast.success('Bulk Shipment Processed', {
-      description: `${unfulfilled.length} orders shipped via ${bulkShipForm.carrier} (${bulkShipForm.shippingSpeed})`
+    toast.success('Bulk Shipment Processed' orders shipped via ${bulkShipForm.carrier} (${bulkShipForm.shippingSpeed})`
     })
 
     if (bulkShipForm.notifyCustomers) {
-      toast.info('Customer Notifications', {
-        description: `Shipping notifications sent to ${unfulfilled.length} customers`
+      toast.info('Customer Notifications' customers`
       })
     }
 
@@ -809,19 +802,15 @@ export default function OrdersClient() {
     if (!orderToFulfill) return
 
     if (!fulfillForm.trackingNumber) {
-      toast.error('Tracking number required', {
-        description: 'Please enter a tracking number for this shipment'
-      })
+      toast.error('Tracking number required')
       return
     }
 
-    toast.success('Order Fulfilled', {
-      description: `Order ${orderToFulfill.order_number} fulfilled with tracking: ${fulfillForm.trackingNumber}`
+    toast.success('Order Fulfilled' fulfilled with tracking: ${fulfillForm.trackingNumber}`
     })
 
     if (fulfillForm.notifyCustomer) {
-      toast.info('Customer Notified', {
-        description: `Shipping confirmation sent to ${orderToFulfill.customer_email}`
+      toast.info('Customer Notified'`
       })
     }
 
@@ -1012,9 +1001,9 @@ export default function OrdersClient() {
                 { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('fulfillment') },
                 { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowBulkShipDialog(true) },
                 { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('returns') },
-                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Invoice', { description: 'Select an order to generate invoice' }) },
+                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Invoice') },
                 { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowExportDialog(true) },
-                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Print', { description: 'Select orders to print packing slips' }) },
+                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Print') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('analytics') },
               ].map((action, idx) => (
                 <Button
@@ -1156,13 +1145,13 @@ export default function OrdersClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowBulkShipDialog(true) },
-                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Packing Slips', { description: 'Printing packing slips for unfulfilled orders...' }) },
-                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Schedule Pickup', { description: 'Contact your carrier to schedule a pickup' }) },
-                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Barcode Scanner', { description: 'Connect a barcode scanner to scan items' }) },
-                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Print Labels', { description: 'Generating shipping labels for unfulfilled orders' }) },
-                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Tracking', { description: 'View tracking for all shipped orders' }) },
-                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('No Issues', { description: 'All orders are processing normally' }) },
-                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Fulfillment History', { description: 'Viewing recent fulfillment activity' }) },
+                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Packing Slips') },
+                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Schedule Pickup') },
+                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Barcode Scanner') },
+                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Print Labels') },
+                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Tracking') },
+                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('No Issues') },
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Fulfillment History') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1972,7 +1961,7 @@ export default function OrdersClient() {
             <AIInsightsPanel
               insights={mockOrdersAIInsights}
               title="Order Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

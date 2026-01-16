@@ -727,14 +727,11 @@ export default function CampaignsClient() {
         status: 'running' as CampaignStatusDB,
         launched_at: new Date().toISOString()
       })
-      toast.success('Campaign launched', {
-        description: `"${campaignName}" is now live`
+      toast.success('Campaign launched'" is now live`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to launch campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to launch campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -748,14 +745,11 @@ export default function CampaignsClient() {
         id: campaignId,
         status: 'paused' as CampaignStatusDB
       })
-      toast.success('Campaign paused', {
-        description: `"${campaignName}" has been paused`
+      toast.success('Campaign paused'" has been paused`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to pause campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to pause campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -770,14 +764,11 @@ export default function CampaignsClient() {
         status: 'completed' as CampaignStatusDB,
         completed_at: new Date().toISOString()
       })
-      toast.success('Campaign ended', {
-        description: `"${campaignName}" has been completed`
+      toast.success('Campaign ended'" has been completed`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to end campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to end campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -788,16 +779,13 @@ export default function CampaignsClient() {
     setOperationLoading(campaignId)
     try {
       await deleteCampaign({ id: campaignId })
-      toast.success('Campaign deleted', {
-        description: `"${campaignName}" has been deleted`
+      toast.success('Campaign deleted'" has been deleted`
       })
       refetch()
       setShowCampaignDialog(false)
       setSelectedCampaign(null)
     } catch (error) {
-      toast.error('Failed to delete campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to delete campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -837,14 +825,11 @@ export default function CampaignsClient() {
         requires_approval: false,
         approved: false
       } as any)
-      toast.success('Campaign duplicated', {
-        description: `Copy of "${campaign.name}" created`
+      toast.success('Campaign duplicated'" created`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to duplicate campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to duplicate campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -863,9 +848,7 @@ export default function CampaignsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Export started', {
-      description: 'Campaign data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleArchiveCampaign = async (campaignId: string, campaignName: string) => {
@@ -875,14 +858,11 @@ export default function CampaignsClient() {
         id: campaignId,
         status: 'archived' as CampaignStatusDB
       })
-      toast.success('Campaign archived', {
-        description: `"${campaignName}" has been archived`
+      toast.success('Campaign archived'" has been archived`
       })
       refetch()
     } catch (error) {
-      toast.error('Failed to archive campaign', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to archive campaign')
       console.error(error)
     } finally {
       setOperationLoading(null)
@@ -1111,7 +1091,7 @@ export default function CampaignsClient() {
                     if (selectedCampaign) {
                       handleDuplicateCampaign(selectedCampaign)
                     } else {
-                      toast.info('Select a campaign first', { description: 'Click on a campaign to select it, then duplicate' })
+                      toast.info('Select a campaign first')
                     }
                   }}
                 >
@@ -1132,7 +1112,7 @@ export default function CampaignsClient() {
                   onClick={() => {
                     setNewCampaignForm(prev => ({ ...prev, type: 'email' }))
                     setShowNewCampaignDialog(true)
-                    toast.info('A/B Test Campaign', { description: 'Create your campaign and enable A/B testing in settings' })
+                    toast.info('A/B Test Campaign')
                   }}
                 >
                   <Split className="w-5 h-5 text-purple-500" />
@@ -1398,11 +1378,11 @@ export default function CampaignsClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
                 {[
                   { icon: Plus, label: 'New Flow', color: 'text-indigo-500', action: () => setShowCreateAutomationDialog(true) },
-                  { icon: GitBranch, label: 'Branches', color: 'text-purple-500', action: () => toast.info('Branches', { description: 'Configure workflow branches and decision paths' }) },
-                  { icon: Timer, label: 'Delays', color: 'text-amber-500', action: () => toast.info('Delays', { description: 'Set up time delays between automation steps' }) },
-                  { icon: Split, label: 'A/B Split', color: 'text-pink-500', action: () => toast.info('A/B Split', { description: 'Create A/B split tests in your automation' }) },
-                  { icon: Target, label: 'Triggers', color: 'text-green-500', action: () => toast.info('Triggers', { description: 'Configure automation triggers and entry points' }) },
-                  { icon: Filter, label: 'Conditions', color: 'text-blue-500', action: () => toast.info('Conditions', { description: 'Add conditional logic to your workflows' }) },
+                  { icon: GitBranch, label: 'Branches', color: 'text-purple-500', action: () => toast.info('Branches') },
+                  { icon: Timer, label: 'Delays', color: 'text-amber-500', action: () => toast.info('Delays') },
+                  { icon: Split, label: 'A/B Split', color: 'text-pink-500', action: () => toast.info('A/B Split') },
+                  { icon: Target, label: 'Triggers', color: 'text-green-500', action: () => toast.info('Triggers') },
+                  { icon: Filter, label: 'Conditions', color: 'text-blue-500', action: () => toast.info('Conditions') },
                   { icon: BarChart3, label: 'Analytics', color: 'text-cyan-500', action: () => setActiveTab('analytics') },
                   { icon: Copy, label: 'Templates', color: 'text-rose-500', action: () => setActiveTab('templates') },
                 ].map((action, i) => (
@@ -1521,12 +1501,12 @@ export default function CampaignsClient() {
                 {[
                   { icon: Plus, label: 'New Template', color: 'text-emerald-500', action: () => setShowCreateTemplateDialog(true) },
                   { icon: Wand2, label: 'AI Generate', color: 'text-purple-500', action: () => setShowAIContentDialog(true) },
-                  { icon: Image, label: 'Media', color: 'text-blue-500', action: () => toast.info('Media Library', { description: 'Browse and upload images for your templates' }) },
-                  { icon: Type, label: 'Typography', color: 'text-amber-500', action: () => toast.info('Typography', { description: 'Customize fonts and text styles' }) },
-                  { icon: Palette, label: 'Colors', color: 'text-pink-500', action: () => toast.info('Colors', { description: 'Set your brand color palette' }) },
-                  { icon: Code, label: 'HTML Edit', color: 'text-gray-500', action: () => toast.info('HTML Editor', { description: 'Edit template HTML directly' }) },
-                  { icon: Copy, label: 'Duplicate', color: 'text-indigo-500', action: () => toast.info('Duplicate', { description: 'Select a template to duplicate' }) },
-                  { icon: Download, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started', { description: 'Templates are being exported' }) },
+                  { icon: Image, label: 'Media', color: 'text-blue-500', action: () => toast.info('Media Library') },
+                  { icon: Type, label: 'Typography', color: 'text-amber-500', action: () => toast.info('Typography') },
+                  { icon: Palette, label: 'Colors', color: 'text-pink-500', action: () => toast.info('Colors') },
+                  { icon: Code, label: 'HTML Edit', color: 'text-gray-500', action: () => toast.info('HTML Editor') },
+                  { icon: Copy, label: 'Duplicate', color: 'text-indigo-500', action: () => toast.info('Duplicate') },
+                  { icon: Download, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started') },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1573,7 +1553,7 @@ export default function CampaignsClient() {
                         variant="outline"
                         className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => {
-                          toast.success(`Template "${template.name}" selected`, { description: 'Starting campaign with this template' })
+                          toast.success(`Template "${template.name}" selected`)
                           setShowNewCampaignDialog(true)
                         }}
                       >
@@ -1621,12 +1601,12 @@ export default function CampaignsClient() {
                 {[
                   { icon: Plus, label: 'New List', color: 'text-violet-500', action: () => setShowAudienceDialog(true) },
                   { icon: Download, label: 'Import CSV', color: 'text-blue-500', action: () => setShowImportDialog(true) },
-                  { icon: Target, label: 'New Segment', color: 'text-green-500', action: () => toast.info('New Segment', { description: 'Create a new audience segment with custom filters' }) },
-                  { icon: Tag, label: 'Manage Tags', color: 'text-amber-500', action: () => toast.info('Manage Tags', { description: 'Organize your subscribers with tags' }) },
-                  { icon: UserPlus, label: 'Add Subscriber', color: 'text-pink-500', action: () => toast.info('Add Subscriber', { description: 'Manually add a new subscriber to your list' }) },
-                  { icon: UserMinus, label: 'Clean List', color: 'text-red-500', action: () => toast.info('Clean List', { description: 'Remove invalid and bounced email addresses' }) },
-                  { icon: RefreshCw, label: 'Sync CRM', color: 'text-indigo-500', action: () => toast.info('Sync CRM', { description: 'Synchronize contacts with your CRM' }) },
-                  { icon: Share2, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started', { description: 'Audience data is being exported' }) },
+                  { icon: Target, label: 'New Segment', color: 'text-green-500', action: () => toast.info('New Segment') },
+                  { icon: Tag, label: 'Manage Tags', color: 'text-amber-500', action: () => toast.info('Manage Tags') },
+                  { icon: UserPlus, label: 'Add Subscriber', color: 'text-pink-500', action: () => toast.info('Add Subscriber') },
+                  { icon: UserMinus, label: 'Clean List', color: 'text-red-500', action: () => toast.info('Clean List') },
+                  { icon: RefreshCw, label: 'Sync CRM', color: 'text-indigo-500', action: () => toast.info('Sync CRM') },
+                  { icon: Share2, label: 'Export', color: 'text-cyan-500', action: () => toast.success('Export started') },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -2215,9 +2195,9 @@ export default function CampaignsClient() {
                                 size="sm"
                                 onClick={() => {
                                   if (integration.connected) {
-                                    toast.info(`${integration.name} Settings`, { description: 'Managing integration settings' })
+                                    toast.info(`${integration.name} Settings`)
                                   } else {
-                                    toast.success(`Connecting to ${integration.name}`, { description: 'Opening OAuth authorization' })
+                                    toast.success(`Connecting to ${integration.name}`)
                                   }
                                 }}
                               >
@@ -2362,13 +2342,13 @@ export default function CampaignsClient() {
                               // Archive all completed campaigns older than 30 days
                               const completedCampaigns = dbCampaigns?.filter(c => c.status === 'completed') || []
                               if (completedCampaigns.length === 0) {
-                                toast.info('No campaigns to archive', { description: 'There are no completed campaigns to archive' })
+                                toast.info('No campaigns to archive')
                                 return
                               }
                               for (const campaign of completedCampaigns) {
                                 await updateCampaign({ id: campaign.id, status: 'archived' as CampaignStatusDB })
                               }
-                              toast.success('Campaigns archived', { description: `${completedCampaigns.length} completed campaigns have been archived` })
+                              toast.success('Campaigns archived' completed campaigns have been archived` })
                               refetch()
                             }}
                           >
@@ -2379,7 +2359,7 @@ export default function CampaignsClient() {
                             variant="outline"
                             className="h-auto py-4 flex flex-col items-center gap-2"
                             onClick={() => {
-                              toast.info('Reset Statistics', { description: 'This feature resets campaign analytics data' })
+                              toast.info('Reset Statistics')
                             }}
                           >
                             <RefreshCw className="w-5 h-5" />
@@ -2392,13 +2372,13 @@ export default function CampaignsClient() {
                               // Delete all draft campaigns (test emails)
                               const draftCampaigns = dbCampaigns?.filter(c => c.status === 'draft') || []
                               if (draftCampaigns.length === 0) {
-                                toast.info('No test emails to purge', { description: 'There are no draft campaigns to delete' })
+                                toast.info('No test emails to purge')
                                 return
                               }
                               for (const campaign of draftCampaigns) {
                                 await deleteCampaign({ id: campaign.id })
                               }
-                              toast.success('Test emails purged', { description: `${draftCampaigns.length} draft campaigns have been deleted` })
+                              toast.success('Test emails purged' draft campaigns have been deleted` })
                               refetch()
                             }}
                           >
@@ -2430,7 +2410,7 @@ export default function CampaignsClient() {
                             size="sm"
                             onClick={async () => {
                               if (!dbCampaigns || dbCampaigns.length === 0) {
-                                toast.info('No campaigns to delete', { description: 'There are no campaigns in the database' })
+                                toast.info('No campaigns to delete')
                                 return
                               }
                               // Confirm before deleting all
@@ -2440,7 +2420,7 @@ export default function CampaignsClient() {
                               for (const campaign of dbCampaigns) {
                                 await deleteCampaign({ id: campaign.id })
                               }
-                              toast.success('All campaigns deleted', { description: `${dbCampaigns.length} campaigns have been permanently deleted` })
+                              toast.success('All campaigns deleted' campaigns have been permanently deleted` })
                               refetch()
                             }}
                           >
@@ -3324,7 +3304,7 @@ export default function CampaignsClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockCampaignAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your campaign question...') } })}
+          onAskQuestion={(q) => toast.info('Question Submitted' })}
         />
         <PredictiveAnalytics predictions={mockCampaignPredictions} />
       </div>

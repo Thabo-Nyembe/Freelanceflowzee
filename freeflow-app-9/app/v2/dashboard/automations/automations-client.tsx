@@ -566,8 +566,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation started', {
-        description: `${workflow.workflow_name} is now executing`
+      toast.success('Automation started' is now executing`
       })
       fetchWorkflows()
     } catch (err) {
@@ -591,8 +590,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
-        description: `${workflow.workflow_name} is now ${newStatus}`
+      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused' is now ${newStatus}`
       })
       fetchWorkflows()
     } catch (err) {
@@ -645,8 +643,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation duplicated', {
-        description: `Copy of ${workflow.workflow_name} created`
+      toast.success('Automation duplicated' created`
       })
       fetchWorkflows()
     } catch (err) {
@@ -665,8 +662,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation deleted', {
-        description: `${workflow.workflow_name} has been removed`
+      toast.success('Automation deleted' has been removed`
       })
       setShowDeleteConfirmDialog(false)
       setWorkflowToDelete(null)
@@ -733,8 +729,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Workflow updated successfully', {
-        description: `${editFormState.workflow_name} has been saved`
+      toast.success('Workflow updated successfully' has been saved`
       })
       setShowEditWorkflowDialog(false)
       setWorkflowToEdit(null)
@@ -753,13 +748,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleInsightAction = async (insight: { id: string; type: string; title: string; description: string }) => {
     try {
       if (insight.type === 'warning') {
-        toast.warning(`Addressing: ${insight.title}`, {
-          description: 'Taking action to resolve this issue'
-        })
+        toast.warning(`Addressing: ${insight.title}`)
       } else if (insight.type === 'info') {
-        toast.info(`Viewing: ${insight.title}`, {
-          description: insight.description
-        })
+        toast.info(`Viewing: ${insight.title}`)
       } else {
         toast.success(`Insight acknowledged: ${insight.title}`)
       }
@@ -786,9 +777,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       })
 
       if (workflowsToRun.length === 0) {
-        toast.error('No workflows to run', {
-          description: 'Adjust your filters or enable inactive workflows'
-        })
+        toast.error('No workflows to run')
         return
       }
 
@@ -805,11 +794,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(`Started ${workflowsToRun.length} workflow${workflowsToRun.length > 1 ? 's' : ''}`, {
-        description: runAllConfig.parallelExecution
-          ? 'Running in parallel mode'
-          : 'Running sequentially'
-      })
+      toast.success(`Started ${workflowsToRun.length} workflow${workflowsToRun.length > 1 ? 's' : ''}`)
 
       setShowRunAllDialog(false)
       fetchWorkflows()
@@ -919,8 +904,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Logs exported successfully', {
-        description: `Downloaded as ${exportLogsConfig.format.toUpperCase()} file`
+      toast.success('Logs exported successfully' file`
       })
 
       setShowExportLogsDialog(false)
@@ -1070,9 +1054,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     setIsRefreshingExecutions(true)
     try {
       await fetchWorkflows()
-      toast.success('Executions refreshed', {
-        description: 'Latest execution data loaded'
-      })
+      toast.success('Executions refreshed')
     } catch (err) {
       console.error('Error refreshing executions:', err)
       toast.error('Failed to refresh executions')
@@ -1101,8 +1083,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       return
     }
 
-    toast.success('Connection settings updated', {
-      description: `${connectionEditForm.name} has been updated`
+    toast.success('Connection settings updated' has been updated`
     })
     setShowConnectionSettingsDialog(false)
     setSelectedConnection(null)
@@ -1112,8 +1093,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleDisconnectConnection = () => {
     if (!selectedConnection) return
 
-    toast.success('Connection removed', {
-      description: `${selectedConnection.name} has been disconnected`
+    toast.success('Connection removed' has been disconnected`
     })
     setShowConnectionSettingsDialog(false)
     setSelectedConnection(null)
@@ -1123,8 +1103,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleReconnectConnection = () => {
     if (!selectedConnection) return
 
-    toast.success('Connection refreshed', {
-      description: `${selectedConnection.name} credentials have been renewed`
+    toast.success('Connection refreshed' credentials have been renewed`
     })
   }
 
@@ -1135,8 +1114,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       return
     }
 
-    toast.success('Connection created successfully', {
-      description: `${newConnectionForm.name} is now connected`
+    toast.success('Connection created successfully' is now connected`
     })
     setShowNewConnectionDialog(false)
     setNewConnectionForm({ name: '', app: '', apiKey: '' })
@@ -1150,8 +1128,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     }
 
     const webhookUrl = `https://hook.freeflow.app/${Math.random().toString(36).substring(7)}`
-    toast.success('Webhook created successfully', {
-      description: `URL: ${webhookUrl}`
+    toast.success('Webhook created successfully'`
     })
     setShowNewWebhookDialog(false)
     setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
@@ -1163,9 +1140,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Template submitted for review', {
-      description: 'We will review your template and publish it soon'
-    })
+    toast.success('Template submitted for review')
     setShowSubmitTemplateDialog(false)
     setSubmitTemplateForm({ name: '', description: '', category: 'Productivity' })
   }
@@ -1351,9 +1326,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     try {
       const shareUrl = `${window.location.origin}/shared/workflow/${Math.random().toString(36).substring(7)}`
       await navigator.clipboard.writeText(shareUrl)
-      toast.success('Share link copied to clipboard', {
-        description: 'Anyone with this link can view the workflow'
-      })
+      toast.success('Share link copied to clipboard')
       setShowShareDialog(false)
     } catch (err) {
       console.error('Error sharing workflow:', err)
@@ -1368,9 +1341,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     try {
       const newKey = `mk_live_${Math.random().toString(36).substring(2, 34)}`
       await navigator.clipboard.writeText(newKey)
-      toast.success('New API key generated and copied to clipboard', {
-        description: 'Make sure to update your integrations'
-      })
+      toast.success('New API key generated and copied to clipboard')
     } catch (err) {
       console.error('Error regenerating API key:', err)
       toast.error('Failed to regenerate API key')
@@ -1385,8 +1356,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       if (workflow) {
         await handleRunAutomation(workflow)
       }
-      toast.success('Execution retried', {
-        description: `${execution.workflowName} is now running`
+      toast.success('Execution retried' is now running`
       })
     } catch (err) {
       console.error('Error retrying execution:', err)
@@ -1441,8 +1411,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Template applied successfully', {
-        description: `"${template.name}" scenario created`
+      toast.success('Template applied successfully'" scenario created`
       })
       setSelectedTemplate(null)
       fetchWorkflows()
@@ -1486,9 +1455,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     try {
       const text = await file.text()
       setImportJsonContent(text)
-      toast.success('File loaded', {
-        description: 'Click Import to create the scenario'
-      })
+      toast.success('File loaded')
     } catch (err) {
       console.error('Error reading file:', err)
       toast.error('Failed to read file')
@@ -3714,7 +3681,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 Cancel
               </Button>
               <Button onClick={() => {
-                toast.success('Automation generated!', { description: 'Your AI-powered workflow is ready to use' })
+                toast.success('Automation generated!')
                 setShowAIAutomationDialog(false)
               }} className="bg-pink-600 hover:bg-pink-700">
                 <Sparkles className="h-4 w-4 mr-2" />
@@ -3936,7 +3903,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 Reset
               </Button>
               <Button onClick={() => {
-                toast.success('Filters applied', { description: 'Showing filtered scenarios' })
+                toast.success('Filters applied')
                 setShowFiltersDialog(false)
               }} className="bg-purple-600 hover:bg-purple-700">
                 Apply Filters
@@ -4463,7 +4430,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Email support</li>
                   </ul>
                   <Button variant="outline" className="w-full" onClick={() => {
-                    toast.success('Starter plan selected', { description: 'Redirecting to checkout...' })
+                    toast.success('Starter plan selected')
                     setShowUpgradePlanDialog(false)
                   }}>
                     Select Starter
@@ -4481,7 +4448,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- AI automation features</li>
                   </ul>
                   <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                    toast.success('Pro plan activated!', { description: 'Redirecting to checkout for payment...' })
+                    toast.success('Pro plan activated!')
                     setShowUpgradePlanDialog(false)
                   }}>
                     Upgrade to Pro
@@ -4498,7 +4465,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Custom integrations</li>
                   </ul>
                   <Button variant="outline" className="w-full" onClick={() => {
-                    toast.success('Sales team notified', { description: 'We\'ll contact you within 24 hours' })
+                    toast.success('Sales team notified')
                     setShowUpgradePlanDialog(false)
                   }}>
                     Contact Sales
@@ -4822,7 +4789,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 Close
               </Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Workflow saved', { description: 'All changes have been saved' })
+                toast.success('Workflow saved')
                 setShowEditorDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />

@@ -656,12 +656,12 @@ export default function MonitoringClient() {
 
       if (error) throw error
 
-      toast.success('Server added', { description: `${serverForm.server_name} has been registered` })
+      toast.success('Server added' has been registered` })
       setShowAddServerDialog(false)
       setServerForm(initialServerForm)
       fetchServers()
     } catch (error) {
-      toast.error('Failed to add server', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to add server')
     } finally {
       setIsLoading(false)
     }
@@ -677,10 +677,10 @@ export default function MonitoringClient() {
 
       if (error) throw error
 
-      toast.success('Server removed', { description: 'Server has been unregistered' })
+      toast.success('Server removed')
       fetchServers()
     } catch (error) {
-      toast.error('Failed to remove server', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to remove server')
     }
   }
 
@@ -703,12 +703,12 @@ export default function MonitoringClient() {
 
       if (error) throw error
 
-      toast.success('Alert created', { description: alertForm.title })
+      toast.success('Alert created')
       setShowAddAlertDialog(false)
       setAlertForm(initialAlertForm)
       fetchAlerts()
     } catch (error) {
-      toast.error('Failed to create alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create alert')
     } finally {
       setIsLoading(false)
     }
@@ -733,7 +733,7 @@ export default function MonitoringClient() {
       toast.success('Alert acknowledged')
       fetchAlerts()
     } catch (error) {
-      toast.error('Failed to acknowledge alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to acknowledge alert')
     }
   }
 
@@ -756,7 +756,7 @@ export default function MonitoringClient() {
       toast.success('Alert resolved')
       fetchAlerts()
     } catch (error) {
-      toast.error('Failed to resolve alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to resolve alert')
     }
   }
 
@@ -765,9 +765,9 @@ export default function MonitoringClient() {
     setIsLoading(true)
     try {
       await Promise.all([fetchServers(), fetchAlerts()])
-      toast.success('Metrics refreshed', { description: 'Infrastructure data updated' })
+      toast.success('Metrics refreshed')
     } catch (error) {
-      toast.error('Failed to refresh', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to refresh')
     } finally {
       setIsLoading(false)
     }
@@ -1533,7 +1533,7 @@ export default function MonitoringClient() {
                               <Copy className="w-4 h-4" />
                             </Button>
                             <Button variant="outline" size="icon" onClick={() => {
-                              toast.info('Regenerating API key...', { description: 'This would regenerate your API key in production' })
+                              toast.info('Regenerating API key...')
                             }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
@@ -2107,7 +2107,7 @@ export default function MonitoringClient() {
             <AIInsightsPanel
               insights={mockMonitoringAIInsights}
               title="Monitoring Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2656,7 +2656,7 @@ export default function MonitoringClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowConfigureChannelDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Channel configuration updated', { description: selectedChannel })
+                toast.success('Channel configuration updated')
                 setShowConfigureChannelDialog(false)
               }}>Save Changes</Button>
             </div>
@@ -2748,7 +2748,7 @@ export default function MonitoringClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowCloudIntegrationDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Cloud integration configured', { description: selectedIntegration })
+                toast.success('Cloud integration configured')
                 setShowCloudIntegrationDialog(false)
               }}>Connect</Button>
             </div>
@@ -2798,7 +2798,7 @@ export default function MonitoringClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowDatabaseIntegrationDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Database connected', { description: selectedIntegration })
+                toast.success('Database connected')
                 setShowDatabaseIntegrationDialog(false)
               }}>Connect</Button>
             </div>
@@ -2879,7 +2879,7 @@ export default function MonitoringClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowDeleteOrgDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.error('Organization deleted', { description: 'This would delete the organization in production' })
+                toast.error('Organization deleted')
                 setShowDeleteOrgDialog(false)
               }}>Delete Organization</Button>
             </div>

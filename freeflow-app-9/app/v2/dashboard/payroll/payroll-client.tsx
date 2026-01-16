@@ -976,21 +976,15 @@ export default function PayrollClient() {
   }
 
   const handleExportPayroll = () => {
-    toast.success('Export started', {
-      description: 'Payroll data is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleProcessPayments = () => {
-    toast.success('Processing payments', {
-      description: 'Payroll payments are being processed'
-    })
+    toast.success('Processing payments')
   }
 
   const handleGeneratePayslips = () => {
-    toast.success('Generating payslips', {
-      description: 'Payslips are being generated'
-    })
+    toast.success('Generating payslips')
   }
 
   const handleRefresh = async () => {
@@ -2203,7 +2197,7 @@ export default function PayrollClient() {
             <AIInsightsPanel
               insights={payrollAIInsights}
               title="Payroll Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2524,7 +2518,7 @@ export default function PayrollClient() {
                     input.onchange = (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0]
                       if (file) {
-                        toast.success(`File "${file.name}" selected`, { description: 'Ready to import' })
+                        toast.success(`File "${file.name}" selected`)
                       }
                     }
                     input.click()
@@ -2590,7 +2584,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowFiltersDialog(false)}>Clear</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Filters applied', { description: 'Showing filtered results' })
+                    toast.success('Filters applied')
                     setShowFiltersDialog(false)
                   }}>
                   Apply Filters
@@ -2683,7 +2677,7 @@ export default function PayrollClient() {
                     input.onchange = (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0]
                       if (file) {
-                        toast.success(`File "${file.name}" selected`, { description: 'Ready to import employees' })
+                        toast.success(`File "${file.name}" selected`)
                       }
                     }
                     input.click()
@@ -2813,7 +2807,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{form}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.success(`${form} downloading...`, { description: 'Form will open in a new tab' })
+                        toast.success(`${form} downloading...`)
                         window.open(`https://www.irs.gov/pub/irs-pdf/f${form.toLowerCase().replace('-', '')}.pdf`, '_blank')
                       }}>Download</Button>
                   </div>
@@ -3008,8 +3002,7 @@ export default function PayrollClient() {
                     const federalTax = Math.round(Math.random() * 5000 + 8000)
                     const stateTax = Math.round(Math.random() * 2000 + 3000)
                     const totalTax = federalTax + stateTax
-                    toast.success(`Tax Calculation Complete`, {
-                      description: `Federal: $${federalTax.toLocaleString()} | State: $${stateTax.toLocaleString()} | Total: $${totalTax.toLocaleString()}`,
+                    toast.success(`Tax Calculation Complete` | State: $${stateTax.toLocaleString()} | Total: $${totalTax.toLocaleString()}`,
                       duration: 8000
                     })
                     setShowCalculateTaxDialog(false)
@@ -3067,7 +3060,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{form}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.success(`${form} downloading...`, { description: 'PDF form will open in a new tab' })
+                        toast.success(`${form} downloading...`)
                         window.open(`https://www.irs.gov/pub/irs-pdf/f${form.toLowerCase().replace(' ', '')}.pdf`, '_blank')
                       }}>Download</Button>
                   </div>
@@ -3514,7 +3507,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShow401kDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Opening Fidelity NetBenefits portal...', { description: 'You will be redirected to the plan management dashboard' })
+                    toast.success('Opening Fidelity NetBenefits portal...')
                     window.open('https://nb.fidelity.com/public/nb/default/home', '_blank')
                     setShow401kDialog(false)
                   }}>Manage Plan</Button>
@@ -3573,7 +3566,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{doc}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.success(`${doc} downloading...`, { description: 'Document will be ready shortly' })
+                        toast.success(`${doc} downloading...`)
                       }}>Download</Button>
                   </div>
                 ))}
@@ -3722,7 +3715,7 @@ export default function PayrollClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4">
                 <Button className="bg-green-500 text-white" onClick={() => {
                     const now = new Date().toLocaleTimeString()
-                    toast.success(`Clocked in at ${now}`, { description: 'Have a productive day!' })
+                    toast.success(`Clocked in at ${now}`)
                     setShowClockInDialog(false)
                   }}>
                   <PlayCircle className="w-4 h-4 mr-2" />
@@ -3730,7 +3723,7 @@ export default function PayrollClient() {
                 </Button>
                 <Button variant="outline" onClick={() => {
                     const now = new Date().toLocaleTimeString()
-                    toast.success(`Clocked out at ${now}`, { description: 'Great work today!' })
+                    toast.success(`Clocked out at ${now}`)
                     setShowClockInDialog(false)
                   }}>
                   <XCircle className="w-4 h-4 mr-2" />
@@ -3775,8 +3768,7 @@ export default function PayrollClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowApproveTimeDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
                     if (selectedTimeEntry) {
-                      toast.success(`Time entry approved for ${selectedTimeEntry.employeeName}`, {
-                        description: `${selectedTimeEntry.totalHours} hours approved`
+                      toast.success(`Time entry approved for ${selectedTimeEntry.employeeName}` hours approved`
                       })
                     } else {
                       toast.success('All pending time entries approved')
@@ -3822,7 +3814,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowScheduleDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Schedule saved successfully!', { description: 'Employees will be notified of any changes' })
+                    toast.success('Schedule saved successfully!')
                     setShowScheduleDialog(false)
                   }}>Save Schedule</Button>
               </div>
@@ -3993,7 +3985,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowPayFrequencyDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Pay frequency updated successfully!', { description: 'Changes will take effect next pay period' })
+                    toast.success('Pay frequency updated successfully!')
                     setShowPayFrequencyDialog(false)
                   }}>Save</Button>
               </div>
@@ -4020,7 +4012,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowFiscalYearDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Fiscal year settings updated!', { description: 'Reports will now use the new fiscal year calendar' })
+                    toast.success('Fiscal year settings updated!')
                     setShowFiscalYearDialog(false)
                   }}>Save</Button>
               </div>
@@ -4047,7 +4039,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowCurrencyDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Default currency updated!', { description: 'All future transactions will use the new currency' })
+                    toast.success('Default currency updated!')
                     setShowCurrencyDialog(false)
                   }}>Save</Button>
               </div>
@@ -4117,7 +4109,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowAutoProcessDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Auto-process settings saved!', { description: 'Payroll will be processed automatically 2 days before pay date' })
+                    toast.success('Auto-process settings saved!')
                     setShowAutoProcessDialog(false)
                   }}>Save</Button>
               </div>
@@ -4159,7 +4151,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowApprovalWorkflowDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('Approval workflow updated!', { description: 'New workflow will apply to all future payroll submissions' })
+                    toast.success('Approval workflow updated!')
                     setShowApprovalWorkflowDialog(false)
                   }}>Save</Button>
               </div>
@@ -4188,7 +4180,7 @@ export default function PayrollClient() {
                     <div className="flex items-center gap-2">
                       <Badge className="bg-blue-100 text-blue-700">{role.count} users</Badge>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.info(`Editing ${role.role} role`, { description: 'Role editor opening...' })
+                        toast.info(`Editing ${role.role} role`)
                       }}>Edit</Button>
                     </div>
                   </div>
@@ -4197,7 +4189,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowAccessRolesDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.success('New role created!', { description: 'Configure permissions in the role editor' })
+                    toast.success('New role created!')
                   }}>Add Role</Button>
               </div>
             </div>

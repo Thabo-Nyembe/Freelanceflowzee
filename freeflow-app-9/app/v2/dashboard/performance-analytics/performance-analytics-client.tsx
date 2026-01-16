@@ -439,11 +439,9 @@ export default function PerformanceAnalyticsClient() {
     try {
       const res = await fetch('/api/performance-analytics?type=stats')
       if (!res.ok) throw new Error('Failed to refresh metrics')
-      toast.success('Metrics Refreshed', {
-        description: 'All performance data has been updated'
-      })
+      toast.success('Metrics Refreshed')
     } catch (error) {
-      toast.error('Refresh Failed', { description: 'Could not refresh metrics. Please try again.' })
+      toast.error('Refresh Failed')
     } finally {
       setIsRefreshing(false)
     }
@@ -451,11 +449,10 @@ export default function PerformanceAnalyticsClient() {
 
   const handleCreateAlert = () => {
     if (!newAlertForm.name || !newAlertForm.threshold) {
-      toast.error('Validation Error', { description: 'Please fill in all required fields' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('Alert Created', {
-      description: `Alert "${newAlertForm.name}" has been configured`
+    toast.success('Alert Created'" has been configured`
     })
     setShowNewAlertDialog(false)
     setNewAlertForm({
@@ -505,11 +502,10 @@ export default function PerformanceAnalyticsClient() {
 
   const handleCreateSLO = () => {
     if (!newSLOForm.name || !newSLOForm.target) {
-      toast.error('Validation Error', { description: 'Please fill in all required fields' })
+      toast.error('Validation Error')
       return
     }
-    toast.success('SLO Created', {
-      description: `SLO "${newSLOForm.name}" with ${newSLOForm.target}% target has been created`
+    toast.success('SLO Created'" with ${newSLOForm.target}% target has been created`
     })
     setShowNewSLODialog(false)
     setNewSLOForm({
@@ -522,15 +518,12 @@ export default function PerformanceAnalyticsClient() {
   }
 
   const handleTraceSearch = () => {
-    toast.success('Search Executed', {
-      description: `Found traces matching your criteria`
-    })
+    toast.success('Search Executed')
     setShowTraceSearchDialog(false)
   }
 
   const handleLogsFilter = () => {
-    toast.success('Logs Filtered', {
-      description: `Showing ${logsFilterForm.level === 'all' ? 'all' : logsFilterForm.level} logs`
+    toast.success('Logs Filtered' logs`
     })
     setShowLogsDialog(false)
   }
@@ -1896,7 +1889,7 @@ export default function PerformanceAnalyticsClient() {
             <AIInsightsPanel
               insights={mockPerfAnalyticsAIInsights}
               title="Performance Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

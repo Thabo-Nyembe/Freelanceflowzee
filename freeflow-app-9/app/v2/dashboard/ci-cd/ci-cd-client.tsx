@@ -772,9 +772,7 @@ export default function CiCdClient() {
 
       if (error) throw error
 
-      toast.success(`Pipeline "${pipelineName}" triggered`, {
-        description: 'Build started...'
-      })
+      toast.success(`Pipeline "${pipelineName}" triggered`)
       fetchPipelines()
     } catch (error) {
       console.error('Error triggering pipeline:', error)
@@ -854,20 +852,17 @@ export default function CiCdClient() {
 
   // Mock workflow handlers (for demo workflows)
   const handleTriggerWorkflow = (workflow: Workflow) => {
-    toast.info('Workflow triggered', {
-      description: `Starting ${workflow.name}...`
+    toast.info('Workflow triggered'...`
     })
   }
 
   const handleCancelRun = (run: WorkflowRun) => {
-    toast.success('Run cancelled', {
-      description: `Workflow run #${run.runNumber} cancelled`
+    toast.success('Run cancelled' cancelled`
     })
   }
 
   const handleRerunWorkflow = (run: WorkflowRun) => {
-    toast.info('Rerunning workflow', {
-      description: `Restarting run #${run.runNumber}`
+    toast.info('Rerunning workflow'`
     })
   }
 
@@ -929,21 +924,15 @@ export default function CiCdClient() {
   // Real handler: Open YAML editor (toggle state)
   const handleEditYaml = () => {
     setYamlEditorOpen(true)
-    toast.success('YAML editor opened', {
-      description: 'You can now edit workflow configuration'
-    })
+    toast.success('YAML editor opened')
   }
 
   // Real handler: Duplicate pipeline selection notice
   const handleDuplicatePipeline = () => {
     if (dbPipelines.length === 0) {
-      toast.info('No pipelines to duplicate', {
-        description: 'Create a pipeline first'
-      })
+      toast.info('No pipelines to duplicate')
     } else {
-      toast.info('Select a pipeline to duplicate', {
-        description: 'Click on a pipeline card to select it'
-      })
+      toast.info('Select a pipeline to duplicate')
     }
   }
 
@@ -1006,13 +995,10 @@ export default function CiCdClient() {
         const deployPipeline = dbPipelines.find(p => p.pipeline_type === 'deployment' && p.status === 'active')
         if (deployPipeline) {
           handleTriggerPipeline(deployPipeline.id, deployPipeline.pipeline_name)
-          toast.success('Deployment initiated', {
-            description: `Deploying via ${deployPipeline.pipeline_name}`
+          toast.success('Deployment initiated'`
           })
         } else {
-          toast.info('No deployment pipeline configured', {
-            description: 'Create a deployment pipeline first'
-          })
+          toast.info('No deployment pipeline configured')
         }
       },
       variant: 'default' as const
@@ -2242,9 +2228,9 @@ export default function CiCdClient() {
                                 size="sm"
                                 onClick={() => {
                                   if (integration.connected) {
-                                    toast.info(`${integration.name} integration settings`, { description: 'Click to manage your integration' })
+                                    toast.info(`${integration.name} integration settings`)
                                   } else {
-                                    toast.success(`Connecting to ${integration.name}...`, { description: 'Please follow the OAuth flow' })
+                                    toast.success(`Connecting to ${integration.name}...`)
                                   }
                                 }}
                               >
@@ -2429,7 +2415,7 @@ export default function CiCdClient() {
             <AIInsightsPanel
               insights={mockCiCdAIInsights}
               title="Pipeline Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2741,7 +2727,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunNewDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Workflow started', { description: 'Build pipeline is now running' })
+                  toast.success('Workflow started')
                   setShowRunNewDialog(false)
                 }}>Run Workflow</Button>
               </div>
@@ -2771,7 +2757,7 @@ export default function CiCdClient() {
                 <Button variant="outline" onClick={() => setShowRerunAllDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
                   const failedCount = mockRuns.filter(r => r.conclusion === 'failure').length
-                  toast.success('Re-run triggered', { description: `${failedCount} workflow(s) queued for re-run` })
+                  toast.success('Re-run triggered' workflow(s) queued for re-run` })
                   setShowRerunAllDialog(false)
                 }}>Re-run All</Button>
               </div>
@@ -2801,7 +2787,7 @@ export default function CiCdClient() {
                 <Button variant="outline" onClick={() => setShowCancelAllDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
                   const runningCount = mockRuns.filter(r => r.status === 'in_progress').length
-                  toast.success('All workflows cancelled', { description: `${runningCount} running workflow(s) stopped` })
+                  toast.success('All workflows cancelled' running workflow(s) stopped` })
                   setShowCancelAllDialog(false)
                 }}>Cancel All</Button>
               </div>
@@ -2853,7 +2839,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
                 <Button onClick={() => {
-                  toast.success('Filters applied', { description: 'Showing filtered workflow runs' })
+                  toast.success('Filters applied')
                   setShowFilterDialog(false)
                 }}>Apply Filters</Button>
               </div>
@@ -2964,7 +2950,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowUploadArtifactDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Artifact uploaded', { description: 'Build artifact saved successfully' })
+                  toast.success('Artifact uploaded')
                   setShowUploadArtifactDialog(false)
                 }}>Upload</Button>
               </div>
@@ -3004,7 +2990,7 @@ export default function CiCdClient() {
                   a.download = `all-artifacts-${new Date().toISOString().split('T')[0]}.zip`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Download started', { description: `Downloading ${mockArtifacts.length} artifacts (${formatBytes(totalSize)})` })
+                  toast.success('Download started' artifacts (${formatBytes(totalSize)})` })
                   setShowDownloadAllDialog(false)
                 }}>Download All</Button>
               </div>
@@ -3037,7 +3023,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Artifacts archived', { description: 'Old artifacts moved to cold storage' })
+                  toast.success('Artifacts archived')
                   setShowArchiveDialog(false)
                 }}>Archive</Button>
               </div>
@@ -3075,7 +3061,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowCleanUpDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Cleanup complete', { description: 'Expired artifacts have been removed' })
+                  toast.success('Cleanup complete')
                   setShowCleanUpDialog(false)
                 }}>Clean Up</Button>
               </div>
@@ -3112,7 +3098,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArtifactFilterDialog(false)}>Reset</Button>
                 <Button onClick={() => {
-                  toast.success('Filters applied', { description: 'Showing filtered artifacts' })
+                  toast.success('Filters applied')
                   setShowArtifactFilterDialog(false)
                 }}>Apply</Button>
               </div>
@@ -3213,7 +3199,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowNewEnvDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Environment created', { description: 'New environment is ready for deployments' })
+                  toast.success('Environment created')
                   setShowNewEnvDialog(false)
                 }}>Create</Button>
               </div>
@@ -3250,7 +3236,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowAddSecretDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Secret added', { description: 'Secret is now available for workflows' })
+                  toast.success('Secret added')
                   setShowAddSecretDialog(false)
                 }}>Add Secret</Button>
               </div>
@@ -3287,7 +3273,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowVariablesDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Variable added', { description: 'Environment variable saved' })
+                  toast.success('Variable added')
                   setShowVariablesDialog(false)
                 }}>Add Variable</Button>
               </div>
@@ -3332,7 +3318,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowProtectionDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Protection updated', { description: 'Environment protection rules saved' })
+                  toast.success('Protection updated')
                   setShowProtectionDialog(false)
                 }}>Save</Button>
               </div>
@@ -3419,7 +3405,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeployDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Deployment started', { description: 'Deployment pipeline is now running' })
+                  toast.success('Deployment started')
                   setShowDeployDialog(false)
                 }}>Deploy</Button>
               </div>
@@ -3463,7 +3449,7 @@ export default function CiCdClient() {
                   a.download = `environments-config-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Configuration exported', { description: 'Environment config downloaded' })
+                  toast.success('Configuration exported')
                   setShowEnvExportDialog(false)
                 }}>Export</Button>
               </div>
@@ -3503,7 +3489,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowEnvSyncDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Sync complete', { description: 'Variables and settings synchronized' })
+                  toast.success('Sync complete')
                   setShowEnvSyncDialog(false)
                 }}>Sync</Button>
               </div>
@@ -3542,7 +3528,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowEnvSettingsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Settings saved', { description: 'Environment settings updated' })
+                  toast.success('Settings saved')
                   setShowEnvSettingsDialog(false)
                 }}>Save</Button>
               </div>
@@ -3571,7 +3557,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowSecretSettingsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Secret updated', { description: 'Secret value has been changed' })
+                  toast.success('Secret updated')
                   setShowSecretSettingsDialog(false)
                 }}>Update</Button>
               </div>
@@ -3600,7 +3586,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeleteSecretDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Secret deleted', { description: `${selectedSecret?.name} has been removed` })
+                  toast.success('Secret deleted' has been removed` })
                   setShowDeleteSecretDialog(false)
                 }}>Delete</Button>
               </div>
@@ -3641,7 +3627,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowAddRunnerDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Runner added', { description: 'Runner registered and waiting for connection' })
+                  toast.success('Runner added')
                   setShowAddRunnerDialog(false)
                 }}>Add Runner</Button>
               </div>
@@ -3681,7 +3667,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowConfigureRunnerDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Configuration saved', { description: 'Runner settings updated' })
+                  toast.success('Configuration saved')
                   setShowConfigureRunnerDialog(false)
                 }}>Save</Button>
               </div>
@@ -3752,7 +3738,7 @@ export default function CiCdClient() {
                 <Button variant="outline" onClick={() => setShowRestartAllDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
                   const runnerCount = mockRunners.filter(r => r.status !== 'offline').length
-                  toast.success('Runners restarting', { description: `${runnerCount} runner(s) are restarting` })
+                  toast.success('Runners restarting' runner(s) are restarting` })
                   setShowRestartAllDialog(false)
                 }}>Restart All</Button>
               </div>
@@ -3776,7 +3762,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowPauseAllDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Runners paused', { description: 'No new jobs will be accepted' })
+                  toast.success('Runners paused')
                   setShowPauseAllDialog(false)
                 }}>Pause All</Button>
               </div>
@@ -3846,7 +3832,7 @@ export default function CiCdClient() {
                   a.download = `runner-config-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Configuration exported', { description: 'Runner config downloaded' })
+                  toast.success('Configuration exported')
                   setShowRunnerExportDialog(false)
                 }}>Export</Button>
               </div>
@@ -3876,7 +3862,7 @@ export default function CiCdClient() {
                 <Button variant="outline" onClick={() => setShowRunnerCleanUpDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
                   const offlineCount = mockRunners.filter(r => r.status === 'offline').length
-                  toast.success('Runners cleaned up', { description: `${offlineCount} offline runner(s) have been removed` })
+                  toast.success('Runners cleaned up' offline runner(s) have been removed` })
                   setShowRunnerCleanUpDialog(false)
                 }}>Clean Up</Button>
               </div>
@@ -3912,7 +3898,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunnerSettingsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Settings saved', { description: `${selectedRunner?.name} settings updated` })
+                  toast.success('Settings saved' settings updated` })
                   setShowRunnerSettingsDialog(false)
                 }}>Save</Button>
               </div>
@@ -3977,7 +3963,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArchiveOldRunsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Runs archived', { description: 'Old workflow runs moved to archive' })
+                  toast.success('Runs archived')
                   setShowArchiveOldRunsDialog(false)
                 }}>Archive</Button>
               </div>
@@ -4006,7 +3992,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowResetStatsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Statistics reset', { description: 'All metrics have been cleared' })
+                  toast.success('Statistics reset')
                   setShowResetStatsDialog(false)
                 }}>Reset</Button>
               </div>
@@ -4036,7 +4022,7 @@ export default function CiCdClient() {
                 <Button variant="outline" onClick={() => setShowPurgeArtifactsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
                   const totalSize = mockArtifacts.reduce((sum, a) => sum + a.size, 0)
-                  toast.success('Artifacts purged', { description: `${formatBytes(totalSize)} of storage freed` })
+                  toast.success('Artifacts purged' of storage freed` })
                   setShowPurgeArtifactsDialog(false)
                 }}>Purge All</Button>
               </div>
@@ -4065,7 +4051,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDisableWorkflowsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Workflows disabled', { description: `${mockWorkflows.length} workflow(s) paused` })
+                  toast.success('Workflows disabled' workflow(s) paused` })
                   setShowDisableWorkflowsDialog(false)
                 }}>Disable All</Button>
               </div>
@@ -4096,7 +4082,7 @@ export default function CiCdClient() {
                 <Button variant="destructive" onClick={() => {
                   const count = mockArtifacts.length
                   const totalSize = mockArtifacts.reduce((sum, a) => sum + a.size, 0)
-                  toast.success('All artifacts deleted', { description: `${formatBytes(totalSize)} of storage freed (${count} artifacts)` })
+                  toast.success('All artifacts deleted' of storage freed (${count} artifacts)` })
                   setShowDeleteAllArtifactsDialog(false)
                 }}>Delete All</Button>
               </div>
@@ -4125,7 +4111,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowClearCachesDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Caches cleared', { description: '4.2GB of cache data has been removed' })
+                  toast.success('Caches cleared')
                   setShowClearCachesDialog(false)
                 }}>Clear All</Button>
               </div>
@@ -4157,7 +4143,7 @@ export default function CiCdClient() {
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Webhook test successful', { description: 'Received 200 OK response' })
+                  toast.success('Webhook test successful')
                   setShowTestWebhookDialog(false)
                 }}>Send Test</Button>
               </div>
@@ -4192,7 +4178,7 @@ export default function CiCdClient() {
                 Export History
               </Button>
               <Button variant="ghost" className="w-full justify-start gap-2 text-red-600" onClick={() => {
-                toast.success('Workflow disabled', { description: 'Workflow will no longer run automatically' })
+                toast.success('Workflow disabled')
                 setShowMoreOptionsDialog(false)
               }}>
                 <StopCircle className="w-4 h-4" />
@@ -4309,7 +4295,7 @@ jobs:
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowWorkflowSettingsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Settings saved', { description: `${selectedWorkflow?.name} settings updated` })
+                  toast.success('Settings saved' settings updated` })
                   setShowWorkflowSettingsDialog(false)
                 }}>Save</Button>
               </div>
@@ -4342,7 +4328,7 @@ jobs:
                   a.download = selectedArtifact?.name || 'artifact.zip'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Download complete', { description: `${selectedArtifact?.name} downloaded` })
+                  toast.success('Download complete' downloaded` })
                   setShowDownloadArtifactDialog(false)
                 }}>Download</Button>
               </div>
@@ -4366,7 +4352,7 @@ jobs:
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeleteArtifactDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Artifact deleted', { description: `${selectedArtifact?.name} has been removed` })
+                  toast.success('Artifact deleted' has been removed` })
                   setShowDeleteArtifactDialog(false)
                 }}>Delete</Button>
               </div>

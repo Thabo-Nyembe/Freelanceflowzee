@@ -363,8 +363,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         conditions: {},
         metadata: {}
       })
-      toast.success('Automation Created!', {
-        description: `"${newName}" is now ready. Add your first trigger and actions.`
+      toast.success('Automation Created!'" is now ready. Add your first trigger and actions.`
       })
       setShowCreateDialog(false)
       setNewName('')
@@ -396,8 +395,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         status: newStatus as AutomationStatus,
         is_enabled: newStatus === 'active'
       })
-      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
-        description: `"${automation.automation_name}" is now ${newStatus}`
+      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`" is now ${newStatus}`
       })
       refetch()
     } catch (err) {
@@ -413,8 +411,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         last_run_at: new Date().toISOString(),
         run_count: automation.run_count + 1
       })
-      toast.success('Running Automation', {
-        description: `"${automation.automation_name}" triggered manually`
+      toast.success('Running Automation'" triggered manually`
       })
       // Execute automation via API
       try {
@@ -446,7 +443,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
           last_failure_at: new Date().toISOString(),
           last_error: execError.message
         })
-        toast.error('Automation Failed', { description: execError.message })
+        toast.error('Automation Failed')
         refetch()
       }
     } catch (err) {
@@ -489,8 +486,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         category: automation.category,
         metadata: automation.metadata
       })
-      toast.success('Automation Duplicated', {
-        description: `Copy of "${automation.automation_name}" created`
+      toast.success('Automation Duplicated'" created`
       })
       refetch()
     } catch (err) {
@@ -504,8 +500,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
     }
     try {
       await deleteAutomation(automation.id)
-      toast.success('Automation Deleted', {
-        description: `"${automation.automation_name}" has been removed`
+      toast.success('Automation Deleted'" has been removed`
       })
       refetch()
     } catch (err) {
@@ -1300,9 +1295,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               variant="ghost"
                               onClick={() => {
                                 navigator.clipboard.writeText('n8n_api_key_xxxxxxxxxxxxxxxxxxxxx')
-                                toast.success('Copied!', {
-                                  description: 'API key copied to clipboard'
-                                })
+                                toast.success('Copied!')
                               }}
                             >
                               <Copy className="h-4 w-4" />
@@ -1328,9 +1321,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                               variant="ghost"
                               onClick={() => {
                                 navigator.clipboard.writeText('https://automation.yourapp.com/webhook/')
-                                toast.success('Copied!', {
-                                  description: 'Webhook URL copied to clipboard'
-                                })
+                                toast.success('Copied!')
                               }}
                             >
                               <Copy className="h-4 w-4" />
@@ -2152,7 +2143,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             <AIInsightsPanel
               insights={mockAutomationAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2301,8 +2292,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 onClick={() => {
-                  toast.success('Template Applied!', {
-                    description: `"${selectedTemplate?.name}" has been created`
+                  toast.success('Template Applied!'" has been created`
                   })
                   setShowTemplateDialog(false)
                 }}
@@ -2358,8 +2348,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 onClick={() => {
-                  toast.success('Integration Connected!', {
-                    description: `${selectedIntegration?.name} is now ready to use`
+                  toast.success('Integration Connected!' is now ready to use`
                   })
                   setShowIntegrationDialog(false)
                 }}
@@ -2451,8 +2440,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to create workflow')
-                    toast.success('Workflow Created!', {
-                      description: `"${workflowFormName}" is ready. Configure triggers and actions to get started.`
+                    toast.success('Workflow Created!'" is ready. Configure triggers and actions to get started.`
                     })
                     setWorkflowFormName('')
                     setWorkflowFormDescription('')
@@ -2460,7 +2448,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     setShowNewWorkflowDialog(false)
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to create workflow', { description: err.message })
+                    toast.error('Failed to create workflow')
                   } finally {
                     setIsCreatingWorkflow(false)
                   }
@@ -2590,12 +2578,11 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     const response = await fetch('/api/automation?action=info')
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to refresh history')
-                    toast.success('History Refreshed', {
-                      description: `Loaded ${RUN_LOGS.length} execution records`
+                    toast.success('History Refreshed' execution records`
                     })
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to refresh history', { description: err.message })
+                    toast.error('Failed to refresh history')
                   } finally {
                     setIsRefreshingHistory(false)
                   }
@@ -2715,7 +2702,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                         variant="ghost"
                         onClick={() => {
                           navigator.clipboard.writeText(newApiKey)
-                          toast.success('Copied!', { description: 'API key copied to clipboard' })
+                          toast.success('Copied!')
                         }}
                       >
                         <Copy className="h-4 w-4" />
@@ -2751,11 +2738,9 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       if (!response.ok) throw new Error(result.error || 'Failed to regenerate key')
                       const generatedKey = result.data?.apiKey || `n8n_api_${Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')}`
                       setNewApiKey(generatedKey)
-                      toast.success('API Key Regenerated', {
-                        description: 'Your new API key has been generated. Copy it now.'
-                      })
+                      toast.success('API Key Regenerated')
                     } catch (err: any) {
-                      toast.error('Failed to regenerate API key', { description: err.message })
+                      toast.error('Failed to regenerate API key')
                     } finally {
                       setIsRegeneratingKey(false)
                     }
@@ -2846,12 +2831,10 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to rotate key')
-                    toast.success('Encryption Key Rotated', {
-                      description: 'All credentials have been re-encrypted with the new key.'
-                    })
+                    toast.success('Encryption Key Rotated')
                     setShowEncryptionKeyDialog(false)
                   } catch (err: any) {
-                    toast.error('Failed to rotate encryption key', { description: err.message })
+                    toast.error('Failed to rotate encryption key')
                   } finally {
                     setIsRotatingKey(false)
                   }
@@ -2927,13 +2910,11 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to clear history')
-                    toast.success('History Cleared', {
-                      description: 'All execution logs and history have been deleted.'
-                    })
+                    toast.success('History Cleared')
                     setShowClearHistoryDialog(false)
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to clear history', { description: err.message })
+                    toast.error('Failed to clear history')
                   } finally {
                     setIsDeletingHistory(false)
                   }
@@ -3010,13 +2991,11 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to reset credentials')
-                    toast.success('Credentials Reset', {
-                      description: 'All app connections have been disconnected and credentials cleared.'
-                    })
+                    toast.success('Credentials Reset')
                     setShowResetCredentialsDialog(false)
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to reset credentials', { description: err.message })
+                    toast.error('Failed to reset credentials')
                   } finally {
                     setIsResettingCredentials(false)
                   }
@@ -3096,13 +3075,11 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to delete workflows')
-                    toast.success('Workflows Deleted', {
-                      description: 'All automation workflows have been permanently deleted.'
-                    })
+                    toast.success('Workflows Deleted')
                     setShowDeleteWorkflowsDialog(false)
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to delete workflows', { description: err.message })
+                    toast.error('Failed to delete workflows')
                   } finally {
                     setIsDeletingWorkflows(false)
                   }
@@ -3192,14 +3169,12 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     })
                     const result = await response.json()
                     if (!response.ok) throw new Error(result.error || 'Failed to perform factory reset')
-                    toast.success('Factory Reset Complete', {
-                      description: 'All settings have been reset to defaults.'
-                    })
+                    toast.success('Factory Reset Complete')
                     setFactoryResetConfirmText('')
                     setShowFactoryResetDialog(false)
                     refetch()
                   } catch (err: any) {
-                    toast.error('Failed to perform factory reset', { description: err.message })
+                    toast.error('Failed to perform factory reset')
                   } finally {
                     setIsFactoryResetting(false)
                   }

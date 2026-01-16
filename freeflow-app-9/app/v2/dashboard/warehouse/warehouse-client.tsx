@@ -654,9 +654,7 @@ export default function WarehouseClient() {
   // Handlers with real dialog functionality
   const handleAddInventory = () => {
     if (!newInventoryForm.sku || !newInventoryForm.name || !newInventoryForm.quantity) {
-      toast.error('Required fields missing', {
-        description: 'Please fill in SKU, name, and quantity'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Inventory item ${newInventoryForm.sku} added successfully`)
@@ -669,9 +667,7 @@ export default function WarehouseClient() {
 
   const handleStartCycleCount = () => {
     if (!cycleCountForm.zone || !cycleCountForm.assignedTo) {
-      toast.error('Required fields missing', {
-        description: 'Please select zone and assign to a team member'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Cycle count scheduled for ${cycleCountForm.zone}`)
@@ -681,9 +677,7 @@ export default function WarehouseClient() {
 
   const handleCreateShipment = () => {
     if (!shipmentForm.poNumber || !shipmentForm.supplier) {
-      toast.error('Required fields missing', {
-        description: 'Please enter PO number and supplier'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Shipment for PO ${shipmentForm.poNumber} created successfully`)
@@ -695,9 +689,7 @@ export default function WarehouseClient() {
 
   const handleReceiveInventory = () => {
     if (!receiveForm.shipmentNumber || !receiveForm.dockDoor) {
-      toast.error('Required fields missing', {
-        description: 'Please select shipment and dock door'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Receiving started for shipment ${receiveForm.shipmentNumber}`)
@@ -707,9 +699,7 @@ export default function WarehouseClient() {
 
   const handleTransfer = () => {
     if (!transferForm.sku || !transferForm.fromLocation || !transferForm.toLocation || !transferForm.quantity) {
-      toast.error('Required fields missing', {
-        description: 'Please fill in all required transfer details'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Transferred ${transferForm.quantity} units of ${transferForm.sku}`)
@@ -729,9 +719,7 @@ export default function WarehouseClient() {
 
   const handleCreateTask = () => {
     if (!newTaskForm.type || !newTaskForm.priority || !newTaskForm.itemSku) {
-      toast.error('Required fields missing', {
-        description: 'Please fill in task type, priority, and item SKU'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`${newTaskForm.type} task created successfully`)
@@ -745,9 +733,7 @@ export default function WarehouseClient() {
   // Handler for editing inventory item
   const handleEditInventory = () => {
     if (!editInventoryForm.name || !editInventoryForm.sku) {
-      toast.error('Required fields missing', {
-        description: 'Please fill in SKU and name'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Inventory item ${editInventoryForm.sku} updated successfully`)
@@ -786,9 +772,7 @@ export default function WarehouseClient() {
   // Handler for shipping order
   const handleShipOrder = () => {
     if (!selectedOrderForShipping || !shipOrderForm.carrier || !shipOrderForm.trackingNumber) {
-      toast.error('Required fields missing', {
-        description: 'Please fill in carrier and tracking number'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Order ${selectedOrderForShipping.order_number} shipped successfully`)
@@ -800,9 +784,7 @@ export default function WarehouseClient() {
   // Handler for assigning task
   const handleAssignTask = () => {
     if (!selectedTaskForAction || !assignTaskForm.assignedTo) {
-      toast.error('Required fields missing', {
-        description: 'Please select a team member to assign'
-      })
+      toast.error('Required fields missing')
       return
     }
     toast.success(`Task ${selectedTaskForAction.task_number} assigned to ${assignTaskForm.assignedTo}`)
@@ -899,8 +881,7 @@ export default function WarehouseClient() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('File selected', {
-          description: `Ready to import: ${file.name}`
+        toast.success('File selected'`
         })
       }
     }
@@ -910,9 +891,7 @@ export default function WarehouseClient() {
   // Handler for scan mode selection
   const handleScanModeSelect = (mode: string) => {
     setScanMode(mode)
-    toast.success(`${mode} mode activated`, {
-      description: 'Ready to scan items'
-    })
+    toast.success(`${mode} mode activated`)
   }
 
   // Quick actions with real dialog triggers
@@ -2309,7 +2288,7 @@ export default function WarehouseClient() {
             <AIInsightsPanel
               insights={mockWarehouseAIInsights}
               title="Warehouse Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3067,8 +3046,7 @@ export default function WarehouseClient() {
               className="text-center font-mono text-lg"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  toast.success('Barcode scanned', {
-                    description: `Processing barcode: ${(e.target as HTMLInputElement).value}`
+                  toast.success('Barcode scanned'`
                   })
                 }
               }}

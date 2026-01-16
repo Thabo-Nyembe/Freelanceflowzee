@@ -879,11 +879,11 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification created', { description: `"${certForm.certification_name}" has been added` })
+      toast.success('Certification created'" has been added` })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Failed to create certification', { description: error.message })
+      toast.error('Failed to create certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -914,12 +914,12 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification updated', { description: `"${certForm.certification_name}" has been updated` })
+      toast.success('Certification updated'" has been updated` })
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
     } catch (error: any) {
-      toast.error('Failed to update certification', { description: error.message })
+      toast.error('Failed to update certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -930,11 +930,11 @@ export default function CertificationsClient() {
     setIsSubmitting(true)
     try {
       await deleteCertification(certToDelete.id)
-      toast.success('Certification deleted', { description: `"${certToDelete.certification_name}" has been removed` })
+      toast.success('Certification deleted'" has been removed` })
       setShowDeleteDialog(false)
       setCertToDelete(null)
     } catch (error: any) {
-      toast.error('Failed to delete certification', { description: error.message })
+      toast.error('Failed to delete certification')
     } finally {
       setIsSubmitting(false)
     }
@@ -978,12 +978,10 @@ export default function CertificationsClient() {
       )
 
       if (credential || data.verified) {
-        toast.success('Badge Verified Successfully', {
-          description: `${credential?.name || verifyBadgeForm.credentialId} is valid and verified via ${verifyBadgeForm.verificationMethod}`
+        toast.success('Badge Verified Successfully' is valid and verified via ${verifyBadgeForm.verificationMethod}`
         })
       } else {
-        toast.success('Verification Complete', {
-          description: `Credential ${verifyBadgeForm.credentialId} verified via ${verifyBadgeForm.verificationMethod}`
+        toast.success('Verification Complete' verified via ${verifyBadgeForm.verificationMethod}`
         })
       }
 
@@ -996,7 +994,7 @@ export default function CertificationsClient() {
         verifierOrganization: ''
       })
     } catch (error: any) {
-      toast.error('Verification failed', { description: error.message })
+      toast.error('Verification failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -1072,13 +1070,12 @@ export default function CertificationsClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Report Exported Successfully', {
-        description: `${reportTypeLabels[exportReportForm.reportType]} exported as ${formatLabels[exportReportForm.format]}`
+      toast.success('Report Exported Successfully' exported as ${formatLabels[exportReportForm.format]}`
       })
 
       setShowExportReportDialog(false)
     } catch (error: any) {
-      toast.error('Export failed', { description: error.message })
+      toast.error('Export failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -1086,23 +1083,23 @@ export default function CertificationsClient() {
 
   // Legacy handlers (for mock data UI elements)
   const handleStartCertification = (certName: string) => {
-    toast.info('Starting certification', { description: `Beginning "${certName}" exam...` })
+    toast.info('Starting certification'" exam...` })
   }
 
   const handleDownloadCertificate = (certName: string) => {
-    toast.success('Downloading certificate', { description: `"${certName}" certificate will be downloaded` })
+    toast.success('Downloading certificate'" certificate will be downloaded` })
   }
 
   const handleShareCertification = (certName: string) => {
-    toast.success('Sharing certification', { description: `"${certName}" share link copied` })
+    toast.success('Sharing certification'" share link copied` })
   }
 
   const handleRenewCertification = (certName: string) => {
-    toast.info('Renewing certification', { description: `Starting renewal for "${certName}"...` })
+    toast.info('Renewing certification'"...` })
   }
 
   const handleViewCredential = (certName: string) => {
-    toast.info('Loading credential', { description: `Opening "${certName}" details...` })
+    toast.info('Loading credential'" details...` })
   }
 
   // Quick Actions with real dialog functionality
@@ -1353,7 +1350,7 @@ export default function CertificationsClient() {
                           className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                           onClick={() => {
                             navigator.clipboard.writeText(credential.credentialUrl)
-                            toast.success('Share link copied!', { description: `Link for "${credential.name}" copied to clipboard` })
+                            toast.success('Share link copied!'" copied to clipboard` })
                           }}
                         >
                           Share Credential
@@ -1361,7 +1358,7 @@ export default function CertificationsClient() {
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
                           onClick={() => {
-                            toast.success('Downloading PDF...', { description: `Generating PDF for "${credential.name}"` })
+                            toast.success('Downloading PDF...'"` })
                             handleDownloadCertificate(credential.name)
                           }}
                         >
@@ -1493,7 +1490,7 @@ export default function CertificationsClient() {
                           className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                           onClick={() => {
                             navigator.clipboard.writeText(`${window.location.origin}/badges/${badge.id}`)
-                            toast.success('Badge shared!', { description: `Share link for "${badge.name}" copied to clipboard` })
+                            toast.success('Badge shared!'" copied to clipboard` })
                           }}
                         >
                           Share Badge
@@ -1501,9 +1498,7 @@ export default function CertificationsClient() {
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
                           onClick={() => {
-                            toast.success(badge.isPinned ? 'Badge unpinned' : 'Badge pinned!', {
-                              description: badge.isPinned
-                                ? `"${badge.name}" removed from profile`
+                            toast.success(badge.isPinned ? 'Badge unpinned' : 'Badge pinned!'" removed from profile`
                                 : `"${badge.name}" is now pinned to your profile`
                             })
                           }}
@@ -1648,8 +1643,7 @@ export default function CertificationsClient() {
                         <button
                           className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                           onClick={() => {
-                            toast.info('Starting Assessment', {
-                              description: `Preparing assessment for "${skill.name}" skill`
+                            toast.info('Starting Assessment'" skill`
                             })
                           }}
                         >
@@ -1658,8 +1652,7 @@ export default function CertificationsClient() {
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
                           onClick={() => {
-                            toast.success('Endorsement Request Sent', {
-                              description: `Request for "${skill.name}" endorsement has been sent to your network`
+                            toast.success('Endorsement Request Sent'" endorsement has been sent to your network`
                             })
                           }}
                         >
@@ -1750,8 +1743,7 @@ export default function CertificationsClient() {
                       <button
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                         onClick={() => {
-                          toast.info('Resuming Learning Path', {
-                            description: `Continuing "${pathway.name}" - ${pathway.progress}% complete`
+                          toast.info('Resuming Learning Path'" - ${pathway.progress}% complete`
                           })
                         }}
                       >
@@ -1785,9 +1777,7 @@ export default function CertificationsClient() {
                     <button
                       className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm"
                       onClick={() => {
-                        toast.success('QR Code Downloaded', {
-                          description: 'Your verification QR code has been downloaded'
-                        })
+                        toast.success('QR Code Downloaded')
                       }}
                     >
                       Download QR
@@ -1796,9 +1786,7 @@ export default function CertificationsClient() {
                       className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white"
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/verify/credentials`)
-                        toast.success('Verification Link Copied', {
-                          description: 'Share this link to allow others to verify your credentials'
-                        })
+                        toast.success('Verification Link Copied')
                       }}
                     >
                       Copy Link
@@ -2296,7 +2284,7 @@ export default function CertificationsClient() {
             <AIInsightsPanel
               insights={mockCertsAIInsights}
               title="Certification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

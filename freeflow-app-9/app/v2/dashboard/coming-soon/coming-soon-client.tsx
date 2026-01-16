@@ -27,7 +27,6 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Plus, Download, Settings, FileText, Folder, Zap, Bell, Lock, Palette, Database, Cloud } from 'lucide-react'
 
-// A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -62,7 +61,6 @@ const comingSoonActivities = [
 ]
 
 export default function ComingSoonClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -93,7 +91,7 @@ export default function ComingSoonClient() {
   // Handler for creating new item
   const handleCreateNewItem = useCallback(async () => {
     if (!newItemName.trim()) {
-      toast.error('Validation Error', { description: 'Please enter an item name' })
+      toast.error('Validation Error')
       return
     }
 
@@ -106,8 +104,7 @@ export default function ComingSoonClient() {
       })
       if (!response.ok) throw new Error('Failed to create item')
 
-      toast.success('Item Created', {
-        description: `${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} "${newItemName}" has been created successfully`
+      toast.success('Item Created' "${newItemName}" has been created successfully`
       })
 
       // Reset form and close dialog
@@ -116,7 +113,7 @@ export default function ComingSoonClient() {
       setNewItemDescription('')
       setShowNewItemDialog(false)
     } catch (err) {
-      toast.error('Creation Failed', { description: 'Failed to create item. Please try again.' })
+      toast.error('Creation Failed')
     }
   }, [newItemName, newItemType])
 
@@ -141,13 +138,12 @@ export default function ComingSoonClient() {
         }
       }
 
-      toast.success('Export Complete', {
-        description: `Data exported as ${exportFormat.toUpperCase()}${exportIncludeAttachments ? ' with attachments' : ''}`
+      toast.success('Export Complete'${exportIncludeAttachments ? ' with attachments' : ''}`
       })
 
       setShowExportDialog(false)
     } catch (err) {
-      toast.error('Export Failed', { description: 'Failed to export data. Please try again.' })
+      toast.error('Export Failed')
     }
   }, [exportFormat, exportIncludeAttachments])
 
@@ -166,17 +162,14 @@ export default function ComingSoonClient() {
       })
       if (!response.ok) throw new Error('Failed to save settings')
 
-      toast.success('Settings Saved', {
-        description: 'Your preferences have been updated successfully'
-      })
+      toast.success('Settings Saved')
 
       setShowSettingsDialog(false)
     } catch (err) {
-      toast.error('Save Failed', { description: 'Failed to save settings. Please try again.' })
+      toast.error('Save Failed')
     }
   }, [settingsNotifications, settingsTheme, settingsAutoSave])
 
-  // A+++ LOAD COMING SOON DATA
   useEffect(() => {
     const loadComingSoonData = async () => {
       try {
@@ -217,7 +210,6 @@ export default function ComingSoonClient() {
     // Production implementation - handler is functional
   }, [])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <ErrorBoundary level="page" name="Available Page">
@@ -239,7 +231,6 @@ export default function ComingSoonClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <ErrorBoundary level="page" name="Available Page">

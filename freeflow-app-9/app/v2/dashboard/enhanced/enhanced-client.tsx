@@ -62,7 +62,6 @@ import {
   Send,
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
@@ -153,7 +152,6 @@ const enhancedActivities = [
 ]
 
 export default function EnhancedClient() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -254,7 +252,7 @@ export default function EnhancedClient() {
   // Handle new item creation
   const handleCreateItem = () => {
     if (!newItemForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Item name is required' })
+      toast.error('Validation Error')
       return
     }
 

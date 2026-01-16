@@ -607,11 +607,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   // Handler for creating a new article
   const handleCreateNewArticle = () => {
     if (!newArticleTitle.trim()) {
-      toast.error('Title required', { description: 'Please enter an article title' })
+      toast.error('Title required')
       return
     }
     if (!newArticleSpaceId) {
-      toast.error('Space required', { description: 'Please select a space for the article' })
+      toast.error('Space required')
       return
     }
 
@@ -656,7 +656,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     setNewArticleLevel('beginner')
     setNewArticleSpaceId('')
     setNewArticleLabels('')
-    toast.success('Article created', { description: `"${newArticle.title}" has been created as a draft` })
+    toast.success('Article created'" has been created as a draft` })
   }
 
   // Handler for using a template
@@ -664,7 +664,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     setNewArticleType(template.type)
     setShowTemplatesDialog(false)
     setShowNewArticleDialog(true)
-    toast.success('Template applied', { description: `Using "${template.name}" template` })
+    toast.success('Template applied'" template` })
   }
 
   // Computed values
@@ -748,9 +748,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
         ? { ...a, status: 'published' as ArticleStatus, publishedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
         : a
     ))
-    toast.success('Article published', {
-      description: 'Article is now live'
-    })
+    toast.success('Article published')
   }
 
   const handleExportArticles = () => {
@@ -765,22 +763,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Exporting articles', {
-      description: 'Articles have been downloaded'
-    })
+    toast.success('Exporting articles')
   }
 
   // Handler for creating a new space
   const handleCreateSpace = () => {
     if (!newSpaceName.trim()) {
-      toast.error('Name required', { description: 'Please enter a space name' })
+      toast.error('Name required')
       return
     }
     if (!newSpaceKey.trim()) {
-      toast.error('Key required', { description: 'Please enter a space key' })
+      toast.error('Key required')
       return
     }
-    toast.success('Space created', { description: `"${newSpaceName}" has been created successfully` })
+    toast.success('Space created'" has been created successfully` })
     setShowCreateSpaceDialog(false)
     setNewSpaceName('')
     setNewSpaceKey('')
@@ -791,10 +787,10 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   // Handler for creating a new template
   const handleCreateTemplate = () => {
     if (!newTemplateName.trim()) {
-      toast.error('Name required', { description: 'Please enter a template name' })
+      toast.error('Name required')
       return
     }
-    toast.success('Template created', { description: `"${newTemplateName}" template has been created` })
+    toast.success('Template created'" template has been created` })
     setShowCreateTemplateDialog(false)
     setNewTemplateName('')
     setNewTemplateDescription('')
@@ -805,7 +801,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   // Handler for editing article
   const handleEditArticle = () => {
     if (!editArticleTitle.trim()) {
-      toast.error('Title required', { description: 'Please enter an article title' })
+      toast.error('Title required')
       return
     }
     if (selectedArticle) {
@@ -814,7 +810,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           ? { ...a, title: editArticleTitle, excerpt: editArticleExcerpt, content: editArticleContent, updatedAt: new Date().toISOString() }
           : a
       ))
-      toast.success('Article updated', { description: `"${editArticleTitle}" has been updated` })
+      toast.success('Article updated'" has been updated` })
     }
     setShowEditArticleDialog(false)
   }
@@ -825,7 +821,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       setArticles(prev => prev.map(a =>
         a.id === selectedArticle.id ? { ...a, status: 'archived' as ArticleStatus, updatedAt: new Date().toISOString() } : a
       ))
-      toast.success('Article archived', { description: `"${selectedArticle.title}" has been archived` })
+      toast.success('Article archived'" has been archived` })
     }
     setShowArchiveArticleDialog(false)
     setShowArticleDialog(false)
@@ -835,7 +831,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleDeleteArticle = () => {
     if (selectedArticle) {
       setArticles(prev => prev.filter(a => a.id !== selectedArticle.id))
-      toast.success('Article deleted', { description: `"${selectedArticle.title}" has been deleted` })
+      toast.success('Article deleted'" has been deleted` })
     }
     setShowDeleteArticleDialog(false)
     setShowArticleDialog(false)
@@ -846,7 +842,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleCopyArticleLink = () => {
     if (selectedArticle) {
       navigator.clipboard.writeText(`https://docs.company.com/${selectedArticle.slug}`)
-      toast.success('Link copied', { description: 'Article link has been copied to clipboard' })
+      toast.success('Link copied')
     }
   }
 
@@ -862,7 +858,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       // Copy share link to clipboard
       const shareUrl = `https://docs.company.com/${selectedArticle.slug}`
       navigator.clipboard.writeText(shareUrl)
-      toast.success('Article shared', { description: 'Share link has been copied to clipboard' })
+      toast.success('Article shared')
     }
     setShowShareArticleDialog(false)
   }
@@ -887,7 +883,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Export completed', { description: 'Your data has been downloaded' })
+    toast.success('Export completed')
     setShowExportDataDialog(false)
   }
 
@@ -895,7 +891,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleClearCache = () => {
     // Simulate cache clear by forcing a re-render with updated timestamps
     setArticles(prev => prev.map(a => ({ ...a })))
-    toast.success('Cache cleared', { description: 'All cached content has been refreshed' })
+    toast.success('Cache cleared')
     setShowClearCacheDialog(false)
   }
 
@@ -903,7 +899,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleDeleteKnowledgeBase = () => {
     // Clear all articles (simulated delete)
     setArticles([])
-    toast.error('Knowledge base deleted', { description: 'All content has been permanently deleted' })
+    toast.error('Knowledge base deleted')
     setShowDeleteKnowledgeBaseDialog(false)
   }
 
@@ -912,7 +908,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
   const handleConnectIntegration = () => {
     setIntegrationConnected(true)
-    toast.success('Integration connected', { description: 'Google Analytics has been connected' })
+    toast.success('Integration connected')
     setShowConnectIntegrationDialog(false)
   }
 
@@ -946,7 +942,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Report exported', { description: 'Analytics report has been downloaded' })
+    toast.success('Report exported')
     setShowExportReportDialog(false)
   }
 
@@ -1613,7 +1609,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     </div>
                   </div>
 
-                  <Button className="w-full" onClick={() => { setActiveTab('articles'); toast.success('Search applied', { description: `Searching for "${searchQuery}"` }) }}>
+                  <Button className="w-full" onClick={() => { setActiveTab('articles'); toast.success('Search applied'"` }) }}>
                     <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                 </div>
@@ -2121,7 +2117,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             <AIInsightsPanel
               insights={mockKnowledgeArticlesAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2478,7 +2474,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   if (template) {
                     handleUseTemplate(template)
                   } else {
-                    toast.error('Select a template', { description: 'Please select a template to use' })
+                    toast.error('Select a template')
                   }
                 }}
                 disabled={!selectedTemplateId}
@@ -3224,7 +3220,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                         size="sm"
                         onClick={() => {
                           setArticles(prev => prev.map(a => a.id === article.id ? { ...a, status: 'draft' as ArticleStatus } : a))
-                          toast.success('Article restored', { description: `"${article.title}" has been restored` })
+                          toast.success('Article restored'" has been restored` })
                         }}
                       >
                         Restore
@@ -3377,7 +3373,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                         createdBy: mockAuthors[0]
                       }
                       setTemplates(prev => [...prev, duplicatedTemplate])
-                      toast.success('Template duplicated', { description: `"${duplicatedTemplate.name}" has been created` })
+                      toast.success('Template duplicated'" has been created` })
                       setShowDuplicateDialog(false)
                     }}
                   >
@@ -3450,8 +3446,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                   // Save customization settings (in a real app, this would persist to backend)
-                  toast.success('Customizations saved', {
-                    description: `Theme: ${selectedTemplateColor}, Font: ${selectedTemplateFont}, Dark mode: ${templateDarkModeEnabled ? 'enabled' : 'disabled'}`
+                  toast.success('Customizations saved', Font: ${selectedTemplateFont}, Dark mode: ${templateDarkModeEnabled ? 'enabled' : 'disabled'}`
                   })
                   setShowCustomizeDialog(false)
                 }}>
@@ -3740,7 +3735,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                       }
                       return sorted
                     })
-                    toast.success('Sort applied', { description: `Articles sorted by ${option.label}` })
+                    toast.success('Sort applied'` })
                     setShowSortDialog(false)
                   }}
                 >
