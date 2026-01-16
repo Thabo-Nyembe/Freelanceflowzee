@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -430,7 +429,7 @@ const mockOverviewActivities = [
 // ============================================================================
 
 export default function OverviewClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -522,9 +521,13 @@ export default function OverviewClient() {
   // Fetch dashboard metrics from Supabase
   const fetchMetrics = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
@@ -536,14 +539,18 @@ export default function OverviewClient() {
     } catch (error) {
       console.error('Error fetching metrics:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch dashboard stats from Supabase
   const fetchStats = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_stats')
         .select('*')
@@ -555,14 +562,18 @@ export default function OverviewClient() {
     } catch (error) {
       console.error('Error fetching stats:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch notifications from Supabase
   const fetchNotifications = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_notifications')
         .select('*')
@@ -576,7 +587,7 @@ export default function OverviewClient() {
     } catch (error) {
       console.error('Error fetching notifications:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Initial data fetch
   useEffect(() => {
@@ -606,7 +617,7 @@ export default function OverviewClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, fetchMetrics, fetchStats, fetchNotifications])
+  }, [ fetchMetrics, fetchStats, fetchNotifications])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -618,6 +629,8 @@ export default function OverviewClient() {
   // Export dashboard data
   const handleExportDashboard = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please log in to export data')
@@ -653,12 +666,16 @@ export default function OverviewClient() {
   const handleSaveSettings = async () => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please log in to save settings')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -680,6 +697,8 @@ export default function OverviewClient() {
   // Mark notification as read
   const handleMarkNotificationRead = async (notificationId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dashboard_notifications')
         .update({ is_read: true })
@@ -697,9 +716,13 @@ export default function OverviewClient() {
   // Clear all metrics (danger zone)
   const handleClearMetrics = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dashboard_metrics')
         .delete()
@@ -717,9 +740,13 @@ export default function OverviewClient() {
   // Reset dashboard stats (danger zone)
   const handleResetDashboards = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('dashboard_stats')
         .delete()
@@ -737,6 +764,8 @@ export default function OverviewClient() {
   // Delete all data (danger zone)
   const handleDeleteAllData = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
