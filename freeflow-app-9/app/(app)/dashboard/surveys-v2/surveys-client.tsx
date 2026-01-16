@@ -695,23 +695,12 @@ export default function SurveysClient() {
 
   // Computed stats from database
   const displayStats = useMemo(() => {
-    if (!dbStats) {
-      return {
-        totalSurveys: 0,
-        activeSurveys: 0,
-        totalResponses: 0,
-        avgCompletionRate: 0,
-        avgNPS: 0,
-        responsesThisWeek: 0,
-        responsesLastWeek: 0
-      }
-    }
     return {
-      totalSurveys: dbStats.total,
-      activeSurveys: dbStats.active,
-      totalResponses: dbStats.totalResponses,
-      avgCompletionRate: Math.round(dbStats.avgCompletionRate * 10) / 10,
-      avgNPS: Math.round(dbStats.avgNPS * 10) / 10 || 0,
+      totalSurveys: dbStats?.total || 0,
+      activeSurveys: dbStats?.active || 0,
+      totalResponses: dbStats?.totalResponses || 0,
+      avgCompletionRate: dbStats?.avgCompletionRate ? Math.round(dbStats.avgCompletionRate * 10) / 10 : 0,
+      avgNPS: dbStats?.avgNPS ? Math.round(dbStats.avgNPS * 10) / 10 : 0,
       responsesThisWeek: mockStats.responsesThisWeek, // Would need additional query for real data
       responsesLastWeek: mockStats.responsesLastWeek
     }

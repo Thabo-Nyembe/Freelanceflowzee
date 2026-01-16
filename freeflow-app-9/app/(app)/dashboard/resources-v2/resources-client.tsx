@@ -632,7 +632,7 @@ export default function ResourcesClient() {
     currency: 'USD'
   })
 
-  // Merge DB resources with mock data for display
+  // Merge DB resources for display
   const displayResources = useMemo(() => {
     if (dbResources.length > 0) {
       return dbResources.map(r => ({
@@ -667,7 +667,7 @@ export default function ResourcesClient() {
         tags: []
       })) as Resource[]
     }
-    return mockResources
+    return []
   }, [dbResources])
 
   // Calculate stats

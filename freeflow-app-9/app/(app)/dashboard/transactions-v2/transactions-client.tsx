@@ -409,7 +409,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', description: '' })
 
   const { transactions, createTransaction, deleteTransaction, refetch } = useTransactions({})
-  const displayTransactions = transactions.length > 0 ? transactions : initialTransactions
+  const displayTransactions = transactions || []
 
   // Calculate stats
   const totalVolume = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0)

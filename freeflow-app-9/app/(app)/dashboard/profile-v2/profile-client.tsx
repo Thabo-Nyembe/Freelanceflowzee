@@ -1133,14 +1133,15 @@ export default function ProfileClient() {
 
   const filteredSkills = useMemo(() => {
     // Merge DB skills with mock for display
-    const displaySkills = skills.length > 0 ? skills.map(s => ({
+    const dbSkills = (skills || []).map(s => ({
       ...s,
       level: s.level as SkillLevel,
       endorsers: [],
       isTopSkill: s.endorsements > 50,
       isPinned: false,
       assessmentStatus: 'not-taken' as AssessmentStatus
-    })) : mockSkills
+    }))
+    const displaySkills = dbSkills.length > 0 ? dbSkills : mockSkills
 
     return displaySkills.filter((skill: any) => {
       const matchesCategory = selectedSkillCategory === 'all' || skill.category === selectedSkillCategory
@@ -1195,7 +1196,7 @@ export default function ProfileClient() {
   } : mockProfile
 
   // Display experiences - use DB data if available
-  const displayExperiences = experiences.length > 0 ? experiences.map(exp => ({
+  const dbExperiences = (experiences || []).map(exp => ({
     id: exp.id,
     company: exp.company,
     title: exp.title,
@@ -1209,10 +1210,11 @@ export default function ProfileClient() {
     skills: [],
     media: [],
     achievements: exp.achievements
-  })) : mockExperiences
+  }))
+  const displayExperiences = dbExperiences.length > 0 ? dbExperiences : mockExperiences
 
   // Display education - use DB data if available
-  const displayEducation = education.length > 0 ? education.map(edu => ({
+  const dbEducation = (education || []).map(edu => ({
     id: edu.id,
     school: edu.school,
     degree: edu.degree,
@@ -1223,7 +1225,8 @@ export default function ProfileClient() {
     activities: edu.activities.join(', '),
     description: '',
     societies: []
-  })) : mockEducation
+  }))
+  const displayEducation = dbEducation.length > 0 ? dbEducation : mockEducation
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">

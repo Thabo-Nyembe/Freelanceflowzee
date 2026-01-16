@@ -506,27 +506,15 @@ export default function TemplatesClient() {
 
   // Calculate stats from DB or mock data
   const stats: TemplateStats = useMemo(() => {
-    if (templatesFromDB.length > 0) {
-      return {
-        totalTemplates: dbStats.total,
-        activeTemplates: dbStats.active,
-        totalUsage: dbStats.totalUsage,
-        totalDownloads: dbStats.totalDownloads,
-        avgRating: dbStats.avgRating,
-        favoritesCount: 0,
-        collectionsCount: mockCollections.length,
-        teamTemplates: templatesFromDB.filter(t => t.accessLevel === 'team').length
-      }
-    }
     return {
-      totalTemplates: mockTemplates.length,
-      activeTemplates: mockTemplates.filter(t => t.status === 'active').length,
-      totalUsage: mockTemplates.reduce((sum, t) => sum + t.usageCount, 0),
-      totalDownloads: mockTemplates.reduce((sum, t) => sum + t.downloads, 0),
-      avgRating: mockTemplates.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / mockTemplates.filter(t => t.rating > 0).length || 0,
-      favoritesCount: mockTemplates.filter(t => t.isFavorite).length,
+      totalTemplates: dbStats?.total || 0,
+      activeTemplates: dbStats?.active || 0,
+      totalUsage: dbStats?.totalUsage || 0,
+      totalDownloads: dbStats?.totalDownloads || 0,
+      avgRating: dbStats?.avgRating || 0,
+      favoritesCount: 0,
       collectionsCount: mockCollections.length,
-      teamTemplates: mockTemplates.filter(t => t.accessLevel === 'team').length
+      teamTemplates: (templatesFromDB || []).filter(t => t.accessLevel === 'team').length
     }
   }, [templatesFromDB, dbStats])
 

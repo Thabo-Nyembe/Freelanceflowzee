@@ -362,8 +362,8 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     getStats
   } = useSupportTickets()
 
-  const displayTickets = tickets.length > 0 ? tickets : initialTickets
-  const stats = tickets.length > 0 ? getStats() : (initialStats || defaultStats)
+  const displayTickets = tickets || []
+  const stats = getStats()
 
   const [activeTab, setActiveTab] = useState('inbox')
   const [isSubmitting, setIsSubmitting] = useState(false)

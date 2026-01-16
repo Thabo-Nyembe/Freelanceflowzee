@@ -425,7 +425,7 @@ export default function AnalyticsClient() {
     loadAllAnalytics()
   }, [userId, fetchUserAnalytics, fetchEngagementMetrics, fetchPlatformMetrics, fetchDashboardMetrics])
 
-  // Compute real metrics from Supabase data with fallback to mock data
+  // Compute real metrics from Supabase data
   const computedMetrics = useMemo((): AnalyticsMetric[] => {
     // If we have dashboard metrics from Supabase, transform them
     if (dashboardMetricsData.length > 0) {
@@ -439,7 +439,7 @@ export default function AnalyticsClient() {
         type: metric.unit === 'currency' ? 'currency' : metric.unit === '%' ? 'percentage' : 'count',
         status: metric.trend === 'up' ? 'up' : metric.trend === 'down' ? 'down' : 'stable',
         alertThreshold: metric.target ? parseFloat(metric.target) : undefined,
-        isAlertTriggered: metric.target ? parseFloat(metric.value) > parseFloat(metric.target) : false,
+        isAlertTriggered: metric.target ? parseFloat(metric.target) > parseFloat(metric.target) : false,
       }))
     }
 
@@ -533,8 +533,8 @@ export default function AnalyticsClient() {
       return realMetrics
     }
 
-    // Fallback to mock metrics if no real data
-    return mockMetrics
+    // Return empty array when no data available
+    return []
   }, [dashboardMetricsData, userAnalyticsData, platformMetricsDb, revenueData])
 
   // Filter metrics based on search

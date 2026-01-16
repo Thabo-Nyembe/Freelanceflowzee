@@ -770,21 +770,16 @@ export default function InvoicingClient() {
       if (error) {
         console.error('Error fetching invoices:', error)
         toast.error('Failed to load invoices')
-        // Fall back to mock data if fetch fails
-        setInvoices(mockInvoices)
         return
       }
 
       if (data && data.length > 0) {
         const transformedInvoices = data.map(transformInvoice)
         setInvoices(transformedInvoices)
-      } else {
-        // No data in database, use mock data for demo
-        setInvoices(mockInvoices)
       }
     } catch (err) {
       console.error('Error fetching invoices:', err)
-      setInvoices(mockInvoices)
+      toast.error('Failed to load invoices')
     } finally {
       setIsLoading(false)
     }

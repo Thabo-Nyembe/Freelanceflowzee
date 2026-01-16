@@ -35,7 +35,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
+// Import React icons
 
 
 
@@ -163,50 +163,8 @@ interface WebhookEndpoint {
 }
 
 // ============================================================================
-// MOCK DATA
+// CONFIGURATION DATA
 // ============================================================================
-
-const mockScenarios: Scenario[] = [
-  { id: '1', name: 'Lead Scoring Pipeline', description: 'Score and qualify leads using AI', status: 'active', operations: 2450, lastRun: new Date(Date.now() - 1000 * 60 * 5), nextRun: new Date(Date.now() + 1000 * 60 * 10), interval: '15 minutes', modules: 8, dataTransferred: 125000, creditsUsed: 245 },
-  { id: '2', name: 'Daily Report Generator', description: 'Generate and send daily reports to Slack', status: 'active', operations: 890, lastRun: new Date(Date.now() - 1000 * 60 * 60), nextRun: new Date(Date.now() + 1000 * 60 * 60 * 23), interval: 'Daily at 9am', modules: 12, dataTransferred: 450000, creditsUsed: 89 },
-  { id: '3', name: 'Customer Onboarding', description: 'Automate welcome emails and CRM updates', status: 'active', operations: 1560, lastRun: new Date(Date.now() - 1000 * 60 * 30), nextRun: new Date(), interval: 'On new signup', modules: 6, dataTransferred: 78000, creditsUsed: 156 },
-  { id: '4', name: 'Invoice Processing', description: 'Extract data from invoices and update accounting', status: 'error', operations: 0, lastRun: new Date(Date.now() - 1000 * 60 * 120), interval: 'On email receipt', modules: 10, dataTransferred: 0, creditsUsed: 0 },
-  { id: '5', name: 'Social Media Publisher', description: 'Schedule and publish across platforms', status: 'inactive', operations: 340, lastRun: new Date(Date.now() - 1000 * 60 * 60 * 24), interval: 'Scheduled posts', modules: 5, dataTransferred: 23000, creditsUsed: 34 },
-]
-
-const mockExecutions: Execution[] = [
-  { id: '1', workflowId: '1', workflowName: 'Lead Scoring Pipeline', status: 'success', startedAt: new Date(Date.now() - 1000 * 60 * 5), completedAt: new Date(Date.now() - 1000 * 60 * 3), duration: 2.3, nodesExecuted: 8, totalNodes: 8, triggeredBy: 'Webhook', dataProcessed: 15000, retryCount: 0 },
-  { id: '2', workflowId: '2', workflowName: 'Daily Report Generator', status: 'running', startedAt: new Date(Date.now() - 1000 * 30), duration: 0, nodesExecuted: 3, totalNodes: 12, triggeredBy: 'Schedule', dataProcessed: 45000, retryCount: 0 },
-  { id: '3', workflowId: '3', workflowName: 'Slack Notifications', status: 'success', startedAt: new Date(Date.now() - 1000 * 60 * 15), completedAt: new Date(Date.now() - 1000 * 60 * 14), duration: 0.8, nodesExecuted: 4, totalNodes: 4, triggeredBy: 'API Call', dataProcessed: 500, retryCount: 0 },
-  { id: '4', workflowId: '1', workflowName: 'Lead Scoring Pipeline', status: 'failed', startedAt: new Date(Date.now() - 1000 * 60 * 30), completedAt: new Date(Date.now() - 1000 * 60 * 28), duration: 1.5, nodesExecuted: 5, totalNodes: 8, triggeredBy: 'Webhook', dataProcessed: 8000, errorMessage: 'API rate limit exceeded', retryCount: 2 },
-  { id: '5', workflowId: '4', workflowName: 'Email Campaign', status: 'waiting', startedAt: new Date(Date.now() - 1000 * 60 * 60), duration: 0, nodesExecuted: 0, totalNodes: 6, triggeredBy: 'Manual', dataProcessed: 0, retryCount: 0 },
-  { id: '6', workflowId: '2', workflowName: 'Daily Report Generator', status: 'queued', startedAt: new Date(Date.now() + 1000 * 60 * 5), duration: 0, nodesExecuted: 0, totalNodes: 12, triggeredBy: 'Schedule', dataProcessed: 0, retryCount: 0 },
-]
-
-const mockTemplates: WorkflowTemplate[] = [
-  { id: '1', name: 'New Customer Onboarding', description: 'Automate welcome emails, CRM updates, and Slack notifications for new signups', category: 'Sales', nodes: 8, uses: 12400, author: 'Make Team', rating: 4.8, reviews: 234, icon: <Users className="h-5 w-5" />, isPremium: false, tags: ['CRM', 'Email', 'Slack'] },
-  { id: '2', name: 'Daily Report to Slack', description: 'Generate and send daily reports with key metrics to Slack channels', category: 'Productivity', nodes: 5, uses: 8900, author: 'Community', rating: 4.6, reviews: 156, icon: <Slack className="h-5 w-5" />, isPremium: false, tags: ['Slack', 'Reports', 'Analytics'] },
-  { id: '3', name: 'AI Lead Scoring', description: 'Use GPT-4 to automatically score and qualify leads based on behavior', category: 'AI', nodes: 12, uses: 5600, author: 'Make Team', rating: 4.9, reviews: 89, icon: <Bot className="h-5 w-5" />, isPremium: true, tags: ['AI', 'OpenAI', 'CRM'] },
-  { id: '4', name: 'Invoice to Accounting', description: 'Auto-extract data from invoices and sync to QuickBooks/Xero', category: 'Finance', nodes: 6, uses: 4200, author: 'Community', rating: 4.5, reviews: 67, icon: <CreditCard className="h-5 w-5" />, isPremium: false, tags: ['Finance', 'OCR', 'Accounting'] },
-  { id: '5', name: 'GitHub to Notion Sync', description: 'Sync GitHub issues and PRs to Notion databases automatically', category: 'Dev Tools', nodes: 4, uses: 7800, author: 'Community', rating: 4.7, reviews: 178, icon: <GitBranch className="h-5 w-5" />, isPremium: false, tags: ['GitHub', 'Notion', 'Dev'] },
-  { id: '6', name: 'Social Media Publisher', description: 'Schedule and publish content across multiple platforms at once', category: 'Marketing', nodes: 10, uses: 6500, author: 'Make Team', rating: 4.4, reviews: 123, icon: <Share2 className="h-5 w-5" />, isPremium: false, tags: ['Social', 'Marketing', 'Scheduling'] },
-  { id: '7', name: 'E-commerce Order Sync', description: 'Sync Shopify orders to inventory and fulfillment systems', category: 'E-commerce', nodes: 8, uses: 3400, author: 'Community', rating: 4.6, reviews: 45, icon: <ShoppingCart className="h-5 w-5" />, isPremium: false, tags: ['Shopify', 'Inventory', 'Orders'] },
-  { id: '8', name: 'AI Email Responder', description: 'Automatically draft and send AI-powered email responses', category: 'AI', nodes: 7, uses: 2890, author: 'Make Team', rating: 4.8, reviews: 56, icon: <Mail className="h-5 w-5" />, isPremium: true, tags: ['AI', 'Email', 'GPT'] },
-]
-
-const mockConnections: Connection[] = [
-  { id: '1', name: 'Slack Workspace', app: 'Slack', status: 'connected', lastUsed: new Date(Date.now() - 1000 * 60 * 5), createdAt: new Date('2024-01-15'), usageCount: 1250 },
-  { id: '2', name: 'Google Sheets', app: 'Google', status: 'connected', lastUsed: new Date(Date.now() - 1000 * 60 * 30), createdAt: new Date('2024-02-01'), usageCount: 890 },
-  { id: '3', name: 'OpenAI API', app: 'OpenAI', status: 'connected', lastUsed: new Date(Date.now() - 1000 * 60 * 15), createdAt: new Date('2024-03-10'), usageCount: 2340 },
-  { id: '4', name: 'Stripe Account', app: 'Stripe', status: 'expired', lastUsed: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), createdAt: new Date('2024-01-01'), usageCount: 456 },
-  { id: '5', name: 'HubSpot CRM', app: 'HubSpot', status: 'connected', lastUsed: new Date(Date.now() - 1000 * 60 * 60 * 2), createdAt: new Date('2024-04-01'), usageCount: 670 },
-]
-
-const mockWebhooks: WebhookEndpoint[] = [
-  { id: '1', name: 'New Lead Webhook', url: 'https://hook.make.com/abc123', method: 'POST', scenarioId: '1', scenarioName: 'Lead Scoring Pipeline', isActive: true, lastTriggered: new Date(Date.now() - 1000 * 60 * 5), totalTriggers: 1250 },
-  { id: '2', name: 'Order Received', url: 'https://hook.make.com/def456', method: 'POST', scenarioId: '3', scenarioName: 'Customer Onboarding', isActive: true, lastTriggered: new Date(Date.now() - 1000 * 60 * 30), totalTriggers: 890 },
-  { id: '3', name: 'Invoice Webhook', url: 'https://hook.make.com/ghi789', method: 'POST', scenarioId: '4', scenarioName: 'Invoice Processing', isActive: false, totalTriggers: 234 },
-]
 
 const nodeCategories = [
   { id: 'triggers', name: 'Triggers', color: 'amber', icon: <Zap className="h-4 w-4" /> },
@@ -295,34 +253,7 @@ const formatDuration = (seconds: number): string => {
   return `${mins}m ${secs.toFixed(0)}s`
 }
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA
-// ============================================================================
-
-const mockAutomationsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Automation Health', description: 'All 24 active workflows running smoothly. 99.8% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'Optimization Opportunity', description: '3 workflows can be combined for 40% faster execution.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Gmail API approaching daily limit. Consider scheduling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Limits' },
-]
-
-const mockAutomationsCollaborators = [
-  { id: '1', name: 'Automation Engineer', avatar: '/avatars/auto.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Integration Specialist', avatar: '/avatars/int.jpg', status: 'away' as const, role: 'Specialist' },
-]
-
-const mockAutomationsPredictions = [
-  { id: '1', title: 'Execution Forecast', prediction: 'Peak automation usage expected Tuesday 9-11 AM', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Savings', prediction: 'Current automations saving 120 hours/month', confidence: 95, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockAutomationsActivities = [
-  { id: '1', user: 'System', action: 'Executed', target: 'Email sync workflow 150 times', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'DevOps', action: 'Created', target: 'new Slack notification workflow', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Engineer', action: 'Updated', target: 'CRM data sync schedule', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
-
-// Quick actions are now defined inside the component to access state and handlers
+// Quick actions are defined inside the component to access state and handlers
 // See getQuickActions() function inside AutomationsClient component
 
 // ============================================================================
@@ -387,8 +318,8 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     const failedExecutions = displayWorkflows.reduce((sum, w) => sum + w.failed_executions, 0)
     const successRate = totalExecutions > 0 ? (successfulExecutions / totalExecutions) * 100 : 0
     const totalNodes = displayWorkflows.reduce((sum, w) => sum + w.step_count, 0)
-    const totalOperations = mockScenarios.reduce((sum, s) => sum + s.operations, 0)
-    const totalDataTransferred = mockScenarios.reduce((sum, s) => sum + s.dataTransferred, 0)
+    const totalOperations = [].reduce((sum, s) => sum + s.operations, 0)
+    const totalDataTransferred = [].reduce((sum, s) => sum + s.dataTransferred, 0)
 
     return {
       total,
@@ -762,7 +693,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
   // Refresh expired connections handler
   const handleRefreshExpiredConnections = async () => {
-    const expiredConnections = mockConnections.filter(c => c.status === 'expired')
+    const expiredConnections = [].filter(c => c.status === 'expired')
     if (expiredConnections.length === 0) {
       toast.info('No expired connections to refresh')
       return
@@ -998,7 +929,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         </TabsContent>
                         <TabsContent value="template" className="pr-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            {mockTemplates.slice(0, 6).map(template => (
+                            {[].slice(0, 6).map(template => (
                               <button key={template.id} className="p-4 border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-left relative">
                                 {template.isPremium && (
                                   <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
@@ -1056,7 +987,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             { label: 'Failed', value: stats.failedExecutions, icon: XCircle, color: 'red', change: '-5' },
             { label: 'Data Transferred', value: formatBytes(stats.totalDataTransferred), icon: Database, color: 'purple', change: '+8%' },
             { label: 'Total Nodes', value: stats.totalNodes, icon: Layers, color: 'amber', change: '+15' },
-            { label: 'Connections', value: mockConnections.filter(c => c.status === 'connected').length, icon: Network, color: 'sky', change: '' },
+            { label: 'Connections', value: [].filter(c => c.status === 'connected').length, icon: Network, color: 'sky', change: '' },
           ].map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
@@ -1221,7 +1152,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab("scenarios")}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockScenarios.filter(s => s.status === 'active').slice(0, 4).map(scenario => (
+                  {[].filter(s => s.status === 'active').slice(0, 4).map(scenario => (
                     <div key={scenario.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
@@ -1250,7 +1181,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockExecutions.slice(0, 4).map(execution => (
+                  {[].slice(0, 4).map(execution => (
                     <div key={execution.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${
@@ -1312,7 +1243,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab("templates")}>Browse All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockTemplates.slice(0, 3).map(template => (
+                  {[].slice(0, 3).map(template => (
                     <div key={template.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 text-purple-600 rounded-lg">
@@ -1554,7 +1485,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </Button>
               </CardHeader>
               <CardContent className="divide-y dark:divide-gray-700">
-                {mockExecutions.map(execution => (
+                {[].map(execution => (
                   <div
                     key={execution.id}
                     className="py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 -mx-6 px-6 cursor-pointer transition-all"
@@ -1618,11 +1549,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockTemplates.length}</div>
+                    <div className="text-2xl font-bold">{[].length}</div>
                     <div className="text-xs text-white/70">Templates</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockTemplates.filter(t => t.isPremium).length}</div>
+                    <div className="text-2xl font-bold">{[].filter(t => t.isPremium).length}</div>
                     <div className="text-xs text-white/70">Premium</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
@@ -1630,7 +1561,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <div className="text-xs text-white/70">Categories</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockTemplates.reduce((sum, t) => sum + t.uses, 0).toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{[].reduce((sum, t) => sum + t.uses, 0).toLocaleString()}</div>
                     <div className="text-xs text-white/70">Total Uses</div>
                   </div>
                 </div>
@@ -1683,7 +1614,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {mockTemplates.map(template => (
+              {[].map(template => (
                 <Card
                   key={template.id}
                   className="hover:shadow-md transition-all cursor-pointer group relative"
@@ -1739,19 +1670,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockConnections.length}</div>
+                    <div className="text-2xl font-bold">{[].length}</div>
                     <div className="text-xs text-white/70">Connected</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-green-200">{mockConnections.filter(c => c.status === 'connected').length}</div>
+                    <div className="text-2xl font-bold text-green-200">{[].filter(c => c.status === 'connected').length}</div>
                     <div className="text-xs text-white/70">Active</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-amber-200">{mockConnections.filter(c => c.status === 'expired').length}</div>
+                    <div className="text-2xl font-bold text-amber-200">{[].filter(c => c.status === 'expired').length}</div>
                     <div className="text-xs text-white/70">Expired</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockWebhooks.length}</div>
+                    <div className="text-2xl font-bold">{[].length}</div>
                     <div className="text-xs text-white/70">Webhooks</div>
                   </div>
                 </div>
@@ -1794,7 +1725,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <CardTitle>Connected Apps</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockConnections.map(connection => (
+                  {[].map(connection => (
                     <div key={connection.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         <Avatar>
@@ -1843,7 +1774,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   <CardTitle>Webhook Endpoints</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockWebhooks.map(webhook => (
+                  {[].map(webhook => (
                     <div key={webhook.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -1898,7 +1829,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <div className="text-xs text-white/70">Active Scenarios</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockConnections.length}</div>
+                    <div className="text-2xl font-bold">{[].length}</div>
                     <div className="text-xs text-white/70">Connections</div>
                   </div>
                 </div>
@@ -2149,7 +2080,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <CardDescription>Manage your webhook URLs and triggers</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockWebhooks.map(webhook => (
+                        {[].map(webhook => (
                           <div key={webhook.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
@@ -2241,7 +2172,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <CardDescription>Manage your app connections</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockConnections.map(connection => (
+                        {[].map(connection => (
                           <div key={connection.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
                               <Avatar>
@@ -2519,18 +2450,18 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAutomationsAIInsights}
+              insights={[]}
               title="Automation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAutomationsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAutomationsPredictions}
+              predictions={[]}
               title="Automation Forecasts"
             />
           </div>
@@ -2538,7 +2469,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAutomationsActivities}
+            activities={[]}
             title="Automation Activity"
             maxItems={5}
           />
@@ -2606,7 +2537,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     </div>
                   </TabsContent>
                   <TabsContent value="executions" className="mt-4 space-y-2">
-                    {mockExecutions.slice(0, 5).map(exec => (
+                    {[].slice(0, 5).map(exec => (
                       <div key={exec.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
                           {exec.status === 'success' ? <CheckCircle2 className="h-5 w-5 text-green-600" /> :
@@ -2945,7 +2876,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <label className="block text-sm font-medium mb-2">Link to Scenario</label>
                 <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
                   <option value="">Select a scenario...</option>
-                  {mockScenarios.map(s => (
+                  {[].map(s => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>

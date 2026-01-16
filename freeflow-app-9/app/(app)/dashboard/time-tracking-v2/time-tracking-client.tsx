@@ -1834,7 +1834,7 @@ export default function TimeTrackingClient() {
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((mockTeam.reduce((sum, m) => sum + m.weekHours, 0) / (mockTeam.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
                     </div>
-                    <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{mockTimeOff.filter(t => t.status === 'approved').length > 0 ? mockTimeOff.filter(t => t.status === 'approved').map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>) : <span className="text-gray-500">No time off scheduled</span>}</div></div>
+                    <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{(mockTimeOff.filter(t => t.status === 'approved') || []).map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>)}{mockTimeOff.filter(t => t.status === 'approved').length === 0 && <span className="text-gray-500">No time off scheduled</span>}</div></div>
                   </CardContent>
                 </Card>
               </div>

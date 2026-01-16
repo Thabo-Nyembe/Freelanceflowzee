@@ -38,23 +38,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-// Centralized Mock Data - Investor-Ready
+// Project status configuration
 import {
-  projectsHubProjects,
-  projectsHubSprints,
-  projectsHubBacklog,
-  projectsHubRoadmap,
-  projectsHubAutomations,
-  projectsHubTemplates,
-  projectsHubIssues,
-  projectsHubEpics,
-  projectsHubReports,
-  projectsHubIntegrations,
-  projectsHubAIInsights,
-  projectsHubCollaborators,
-  projectsHubPredictions,
-  projectsHubActivities,
-  projectsHubQuickActions,
   projectsStatusColumns,
 } from '@/lib/mock-data/adapters'
 
@@ -212,24 +197,8 @@ interface Integration {
   icon: string
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
+// Status columns configuration
 const statusColumns = projectsStatusColumns
-const mockProjects = projectsHubProjects as Project[]
-const mockSprints = projectsHubSprints
-const mockBacklog = projectsHubBacklog
-const mockRoadmap = projectsHubRoadmap
-const mockAutomations = projectsHubAutomations
-const mockTemplates = projectsHubTemplates
-const mockIssues = projectsHubIssues as Issue[]
-const mockEpics = projectsHubEpics as Epic[]
-const mockActivities = projectsHubActivities as unknown as Activity[]
-const mockReports = projectsHubReports as Report[]
-const mockIntegrations = projectsHubIntegrations as Integration[]
-const mockProjectsAIInsights = projectsHubAIInsights
-const mockProjectsCollaborators = projectsHubCollaborators
-const mockProjectsPredictions = projectsHubPredictions
-const mockProjectsActivities = projectsHubActivities
-const mockProjectsQuickActions = projectsHubQuickActions
 
 const priorityConfig = {
   critical: { color: 'bg-red-500', label: 'Critical' },
@@ -238,8 +207,8 @@ const priorityConfig = {
   low: { color: 'bg-gray-400', label: 'Low' }
 }
 
-// Custom fields mock data (kept local as it's specific to this component)
-const mockCustomFields: CustomField[] = [
+// Custom fields configuration
+const customFieldsConfig: CustomField[] = [
   { id: '1', name: 'Customer Impact', type: 'select', required: false, options: ['Low', 'Medium', 'High', 'Critical'], appliesTo: ['bug', 'story'] },
   { id: '2', name: 'Technical Debt', type: 'select', required: false, options: ['Yes', 'No'], appliesTo: ['task', 'bug'] },
   { id: '3', name: 'Release Version', type: 'text', required: true, appliesTo: ['story', 'bug', 'task'] },
@@ -358,9 +327,9 @@ export default function ProjectsHubClient() {
     { url: 'https://api.company.com/webhooks/jira', events: ['issue.created', 'issue.updated'], status: 'active' },
     { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['sprint.completed'], status: 'active' },
   ])
-  const [localCustomFields, setLocalCustomFields] = useState<CustomField[]>(mockCustomFields)
-  const [localAutomations, setLocalAutomations] = useState(mockAutomations)
-  const [localIssues, setLocalIssues] = useState<Issue[]>(mockIssues)
+  const [localCustomFields, setLocalCustomFields] = useState<CustomField[]>(customFieldsConfig)
+  const [localAutomations, setLocalAutomations] = useState([])
+  const [localIssues, setLocalIssues] = useState<Issue[]>([])
 
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
@@ -449,16 +418,20 @@ export default function ProjectsHubClient() {
     return grouped
   }, [filteredProjects])
 
-  const stats = useMemo(() => ({
-    total: allProjects.length,
-    active: allProjects.filter(p => p.status === 'active').length,
-    completed: allProjects.filter(p => p.status === 'completed').length,
-    onTrack: allProjects.filter(p => p.progress >= 50 && p.status !== 'on_hold').length,
-    totalBudget: allProjects.reduce((sum, p) => sum + (p.budget || 0), 0),
-    totalSpent: allProjects.reduce((sum, p) => sum + p.spent, 0),
-    avgProgress: allProjects.length > 0 ? Math.round(allProjects.reduce((sum, p) => sum + p.progress, 0) / allProjects.length) : 0,
-    overdue: allProjects.filter(p => p.endDate && new Date(p.endDate) < new Date() && p.status !== 'completed').length
-  }), [allProjects])
+  const stats = useMemo(() => {
+    const projects = allProjects || []
+    const totalProgress = projects.reduce((sum, p) => sum + p.progress, 0)
+    return {
+      total: projects.length,
+      active: projects.filter(p => p.status === 'active').length,
+      completed: projects.filter(p => p.status === 'completed').length,
+      onTrack: projects.filter(p => p.progress >= 50 && p.status !== 'on_hold').length,
+      totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
+      totalSpent: projects.reduce((sum, p) => sum + p.spent, 0),
+      avgProgress: projects.length > 0 ? Math.round(totalProgress / projects.length) : 0,
+      overdue: projects.filter(p => p.endDate && new Date(p.endDate) < new Date() && p.status !== 'completed').length
+    }
+  }, [allProjects])
 
   const statsCards = [
     { label: 'Total Projects', value: stats.total.toString(), icon: FolderOpen, color: 'from-blue-500 to-blue-600', trend: '+2' },
@@ -772,7 +745,7 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button onClick={() => setShowMilestoneDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
               <CardContent className="space-y-6">
-                {mockRoadmap.map(item => (
+                {[].map(item => (
                   <div key={item.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div><h3 className="font-semibold text-lg">{item.title}</h3><p className="text-sm text-gray-500">{item.quarter}</p></div>
@@ -790,7 +763,7 @@ export default function ProjectsHubClient() {
           {/* Sprints Tab */}
           <TabsContent value="sprints" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockSprints.map(sprint => (
+              {[].map(sprint => (
                 <Card key={sprint.id} className={`border-gray-200 dark:border-gray-700 ${sprint.status === 'active' ? 'ring-2 ring-blue-500' : ''}`}>
                   <CardHeader>
                     <div className="flex items-center justify-between"><CardTitle className="text-lg">{sprint.name}</CardTitle><Badge className={getSprintStatusColor(sprint.status)}>{sprint.status}</Badge></div>
@@ -815,7 +788,7 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button onClick={() => setShowBacklogItemDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {mockBacklog.map(item => (
+                {[].map(item => (
                   <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1"><h4 className="font-medium">{item.title}</h4><Badge className={getTypeColor(item.type)}>{item.type}</Badge></div>
@@ -838,7 +811,7 @@ export default function ProjectsHubClient() {
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Reports & Analytics</CardTitle><Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Report</Button></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {mockReports.map(report => (
+                  {[].map(report => (
                     <div key={report.id} className="p-4 border rounded-lg hover:shadow-md cursor-pointer transition-shadow">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -860,7 +833,7 @@ export default function ProjectsHubClient() {
               <CardHeader><CardTitle className="flex items-center gap-2"><Zap className="h-5 w-5" />Epics Progress</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockEpics.map(epic => (
+                  {[].map(epic => (
                     <div key={epic.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
@@ -890,8 +863,9 @@ export default function ProjectsHubClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {statusColumns.map(col => {
-                      const count = allProjects.filter(p => p.status === col.id).length
-                      const percentage = allProjects.length > 0 ? (count / allProjects.length) * 100 : 0
+                      const projects = allProjects || []
+                      const count = projects.filter(p => p.status === col.id).length
+                      const percentage = projects.length > 0 ? (count / projects.length) * 100 : 0
                       return (
                         <div key={col.id}>
                           <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${col.color}`} /><span className="text-sm">{col.label}</span></div><span className="text-sm font-medium">{count}</span></div>
@@ -921,7 +895,7 @@ export default function ProjectsHubClient() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-3">
-                    {mockActivities.map(activity => {
+                    {[].map(activity => {
                       const ActivityIcon = getActivityIcon(activity.type)
                       return (
                         <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -950,7 +924,7 @@ export default function ProjectsHubClient() {
                   <table className="w-full">
                     <thead><tr className="border-b"><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Key</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Summary</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Priority</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Assignee</th></tr></thead>
                     <tbody className="divide-y">
-                      {mockIssues.map(issue => (
+                      {[].map(issue => (
                         <tr key={issue.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { setSelectedIssue(issue); setShowIssueDialog(true) }}>
                           <td className="px-4 py-3"><span className="text-blue-600 font-medium">{issue.key}</span></td>
                           <td className="px-4 py-3"><p className="font-medium">{issue.title}</p></td>
@@ -987,7 +961,7 @@ export default function ProjectsHubClient() {
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockTemplates.map(template => (
+              {[].map(template => (
                 <Card key={template.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg cursor-pointer">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-3"><div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg"><FileText className="h-5 w-5 text-blue-600" /></div><Badge variant="outline">{template.category}</Badge></div>
@@ -1442,7 +1416,7 @@ export default function ProjectsHubClient() {
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockIntegrations.map(integration => (
+                        {[].map(integration => (
                           <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
                               <span className="text-2xl">{integration.icon}</span>
@@ -1864,7 +1838,7 @@ export default function ProjectsHubClient() {
                             <div className="text-sm text-gray-500">Projects</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockIssues.length}</div>
+                            <div className="text-2xl font-bold">{[].length}</div>
                             <div className="text-sm text-gray-500">Issues</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -1896,7 +1870,7 @@ export default function ProjectsHubClient() {
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockProjectsAIInsights as any}
+              insights={[] as any}
               onInsightAction={(insight: any) => {
                 toast.promise(
                   fetch('/api/projects/insights/apply', {
@@ -1920,11 +1894,11 @@ export default function ProjectsHubClient() {
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' })) as any}
+              collaborators={[].map(c => ({ ...c, color: c.color || '#6366f1' })) as any}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockProjectsPredictions as any}
+              predictions={[] as any}
             />
           </div>
         </div>
@@ -1932,11 +1906,11 @@ export default function ProjectsHubClient() {
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockProjectsActivities as any}
+            activities={[] as any}
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockProjectsQuickActions as any}
+            actions={[] as any}
           />
         </div>
 

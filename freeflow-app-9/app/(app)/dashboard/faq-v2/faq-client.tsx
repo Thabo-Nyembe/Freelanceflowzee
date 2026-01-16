@@ -509,28 +509,14 @@ export default function FAQClient() {
 
   // Stats from database
   const stats = useMemo(() => {
-    if (!dbStats) {
-      return {
-        totalArticles: 0,
-        publishedArticles: 0,
-        draftArticles: 0,
-        totalViews: 0,
-        totalSearches: 0,
-        avgHelpfulRating: 0,
-        articlesNeedingReview: 0,
-        unansweredQuestions: 0,
-        totalCollections: collections.length,
-        totalAuthors: mockAuthors.length
-      }
-    }
     return {
-      totalArticles: dbStats.total,
-      publishedArticles: dbStats.published,
-      draftArticles: dbStats.draft,
-      totalViews: dbStats.totalViews,
+      totalArticles: dbStats?.total || 0,
+      publishedArticles: dbStats?.published || 0,
+      draftArticles: dbStats?.draft || 0,
+      totalViews: dbStats?.totalViews || 0,
       totalSearches: 0,
-      avgHelpfulRating: dbStats.avgHelpfulness,
-      articlesNeedingReview: dbStats.review,
+      avgHelpfulRating: dbStats?.avgHelpfulness || 0,
+      articlesNeedingReview: dbStats?.review || 0,
       unansweredQuestions: 0,
       totalCollections: collections.length,
       totalAuthors: mockAuthors.length

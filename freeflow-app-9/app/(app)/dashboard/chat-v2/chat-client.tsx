@@ -290,7 +290,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     limit: 50
   })
 
-  const displayMessages = chatMessages.length > 0 ? chatMessages : initialChatMessages
+  const displayMessages = chatMessages || []
 
   // Stats calculation
   const stats = useMemo(() => ({

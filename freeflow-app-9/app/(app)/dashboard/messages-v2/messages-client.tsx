@@ -2935,7 +2935,7 @@ export default function MessagesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {mockThreads.length > 0 ? mockThreads.map(thread => (
+            {(mockThreads || []).map(thread => (
               <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                 <div className="flex items-start gap-3">
                   <Avatar>
@@ -2955,7 +2955,8 @@ export default function MessagesClient() {
                   </div>
                 </div>
               </div>
-            )) : (
+            ))}
+            {mockThreads.length === 0 && (
               <p className="text-center text-gray-500 py-8">No threads found</p>
             )}
           </div>
@@ -2978,7 +2979,7 @@ export default function MessagesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {mockThreads.filter(t => t.isFollowing).length > 0 ? mockThreads.filter(t => t.isFollowing).map(thread => (
+            {(mockThreads.filter(t => t.isFollowing) || []).map(thread => (
               <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                 <div className="flex items-start gap-3">
                   <Avatar>
@@ -2997,7 +2998,8 @@ export default function MessagesClient() {
                   </div>
                 </div>
               </div>
-            )) : (
+            ))}
+            {mockThreads.filter(t => t.isFollowing).length === 0 && (
               <p className="text-center text-gray-500 py-8">You haven't replied to any threads yet</p>
             )}
           </div>
@@ -3161,7 +3163,7 @@ export default function MessagesClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {mockMentions.length > 0 ? mockMentions.map(mention => (
+            {(mockMentions || []).map(mention => (
               <div key={mention.id} className={`p-4 border rounded-lg ${mention.isRead ? '' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'}`}>
                 <div className="flex items-start gap-3">
                   <Avatar>
@@ -3178,7 +3180,8 @@ export default function MessagesClient() {
                   </div>
                 </div>
               </div>
-            )) : (
+            ))}
+            {mockMentions.length === 0 && (
               <p className="text-center text-gray-500 py-8">No mentions found</p>
             )}
           </div>

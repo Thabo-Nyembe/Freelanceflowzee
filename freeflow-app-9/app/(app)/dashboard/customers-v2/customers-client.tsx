@@ -289,56 +289,6 @@ const PIPELINE_STAGES: { id: DealStage; name: string; color: string; probability
   { id: 'closed-lost', name: 'Closed Lost', color: 'bg-red-500', probability: 0 },
 ]
 
-const MOCK_ACCOUNTS: Account[] = [
-  { id: 'acc1', name: 'Acme Corporation', type: 'customer', industry: 'Technology', website: 'acme.com', phone: '+1 555-0101', annualRevenue: 50000000, employees: 500, description: 'Leading tech company', billingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, shippingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, parentAccountId: null, ownerId: 'u1', rating: 'hot', sla: 'gold', accountSource: 'referral', contacts: ['c1', 'c4'], opportunities: ['o1', 'o4'], createdDate: '2022-01-15', lastActivityDate: '2024-01-28' },
-  { id: 'acc2', name: 'StartupXYZ', type: 'prospect', industry: 'SaaS', website: 'startupxyz.io', phone: '+1 555-0102', annualRevenue: 2000000, employees: 25, description: 'Fast-growing startup', billingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, shippingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, parentAccountId: null, ownerId: 'u2', rating: 'warm', sla: null, accountSource: 'website', contacts: ['c2'], opportunities: ['o2'], createdDate: '2023-06-01', lastActivityDate: '2024-01-27' },
-  { id: 'acc3', name: 'Global Retail Inc', type: 'customer', industry: 'Retail', website: 'globalretail.com', phone: '+1 555-0103', annualRevenue: 15000000, employees: 150, description: 'Major retail chain', billingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, shippingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, parentAccountId: null, ownerId: 'u3', rating: 'hot', sla: 'platinum', accountSource: 'event', contacts: ['c3'], opportunities: ['o3'], createdDate: '2022-08-20', lastActivityDate: '2024-01-26' },
-  { id: 'acc4', name: 'FinServ Partners', type: 'prospect', industry: 'Finance', website: 'finserv.com', phone: '+1 555-0104', annualRevenue: 75000000, employees: 300, description: 'Financial services firm', billingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, shippingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, parentAccountId: null, ownerId: 'u1', rating: 'warm', sla: null, accountSource: 'cold-call', contacts: ['c5'], opportunities: ['o5'], createdDate: '2023-11-01', lastActivityDate: '2024-01-25' }
-]
-
-const MOCK_CONTACTS: Contact[] = [
-  { id: 'c1', firstName: 'John', lastName: 'Smith', email: 'john.smith@acme.com', phone: '+1 555-1001', mobile: '+1 555-1002', title: 'VP of Engineering', department: 'Engineering', accountId: 'acc1', leadSource: 'referral', ownerId: 'u1', mailingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: true, leadScore: 85, lastActivityDate: '2024-01-28', createdDate: '2022-01-15', lastModifiedDate: '2024-01-28', tags: ['decision-maker', 'technical'], customFields: {} },
-  { id: 'c2', firstName: 'Sarah', lastName: 'Johnson', email: 'sarah@startupxyz.io', phone: '+1 555-2001', mobile: '+1 555-2002', title: 'CEO', department: 'Executive', accountId: 'acc2', leadSource: 'website', ownerId: 'u2', mailingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 72, lastActivityDate: '2024-01-27', createdDate: '2023-06-01', lastModifiedDate: '2024-01-27', tags: ['decision-maker', 'budget-owner'], customFields: {} },
-  { id: 'c3', firstName: 'Mike', lastName: 'Davis', email: 'mike.davis@globalretail.com', phone: '+1 555-3001', mobile: '+1 555-3002', title: 'CTO', department: 'Technology', accountId: 'acc3', leadSource: 'event', ownerId: 'u3', mailingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 90, lastActivityDate: '2024-01-26', createdDate: '2022-08-20', lastModifiedDate: '2024-01-26', tags: ['decision-maker', 'champion'], customFields: {} },
-  { id: 'c4', firstName: 'Emily', lastName: 'Chen', email: 'emily.chen@acme.com', phone: '+1 555-4001', mobile: '+1 555-4002', title: 'Director of Procurement', department: 'Operations', accountId: 'acc1', leadSource: 'referral', ownerId: 'u1', mailingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 68, lastActivityDate: '2024-01-25', createdDate: '2022-03-10', lastModifiedDate: '2024-01-25', tags: ['influencer', 'procurement'], customFields: {} },
-  { id: 'c5', firstName: 'Robert', lastName: 'Williams', email: 'r.williams@finserv.com', phone: '+1 555-5001', mobile: '+1 555-5002', title: 'Head of Technology', department: 'IT', accountId: 'acc4', leadSource: 'cold-call', ownerId: 'u1', mailingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 55, lastActivityDate: '2024-01-24', createdDate: '2023-11-01', lastModifiedDate: '2024-01-24', tags: ['evaluator'], customFields: {} }
-]
-
-const MOCK_OPPORTUNITIES: Opportunity[] = [
-  { id: 'o1', name: 'Acme Enterprise License', accountId: 'acc1', contactId: 'c1', amount: 125000, stage: 'negotiation', probability: 75, closeDate: '2024-02-15', type: 'new-business', leadSource: 'referral', nextStep: 'Final contract review', description: 'Enterprise platform license with support', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: 'camp1', forecastCategory: 'commit', competitors: [{ id: 'comp1', name: 'CompetitorA', strengths: 'Price', weaknesses: 'Support' }], products: [{ id: 'p1', productId: 'prod1', productName: 'Enterprise License', quantity: 1, unitPrice: 100000, totalPrice: 100000, discount: 0 }, { id: 'p2', productId: 'prod2', productName: 'Premium Support', quantity: 1, unitPrice: 25000, totalPrice: 25000, discount: 0 }], createdDate: '2024-01-10', lastStageChangeDate: '2024-01-25', stageDuration: { 'lead': 3, 'qualified': 5, 'proposal': 4, 'negotiation': 3, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
-  { id: 'o2', name: 'StartupXYZ Pro Subscription', accountId: 'acc2', contactId: 'c2', amount: 24000, stage: 'proposal', probability: 50, closeDate: '2024-02-28', type: 'new-business', leadSource: 'website', nextStep: 'Demo scheduled', description: 'Annual Pro subscription', ownerId: 'u2', ownerName: 'Mike Chen', campaignId: null, forecastCategory: 'best-case', competitors: [], products: [{ id: 'p3', productId: 'prod3', productName: 'Pro Annual', quantity: 1, unitPrice: 24000, totalPrice: 24000, discount: 0 }], createdDate: '2024-01-15', lastStageChangeDate: '2024-01-22', stageDuration: { 'lead': 2, 'qualified': 3, 'proposal': 5, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
-  { id: 'o3', name: 'Global Retail Expansion', accountId: 'acc3', contactId: 'c3', amount: 85000, stage: 'qualified', probability: 30, closeDate: '2024-03-15', type: 'existing-business', leadSource: 'event', nextStep: 'Requirements gathering', description: 'Expand to 50 new locations', ownerId: 'u3', ownerName: 'Alex Rivera', campaignId: 'camp2', forecastCategory: 'pipeline', competitors: [{ id: 'comp2', name: 'CompetitorB', strengths: 'Features', weaknesses: 'Integration' }], products: [], createdDate: '2024-01-20', lastStageChangeDate: '2024-01-24', stageDuration: { 'lead': 2, 'qualified': 4, 'proposal': 0, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
-  { id: 'o4', name: 'Acme Annual Renewal', accountId: 'acc1', contactId: 'c4', amount: 45000, stage: 'closed-won', probability: 100, closeDate: '2024-01-25', type: 'renewal', leadSource: 'referral', nextStep: '', description: 'Annual contract renewal', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: null, forecastCategory: 'closed', competitors: [], products: [{ id: 'p4', productId: 'prod4', productName: 'Annual Renewal', quantity: 1, unitPrice: 45000, totalPrice: 45000, discount: 0 }], createdDate: '2024-01-05', lastStageChangeDate: '2024-01-25', stageDuration: { 'lead': 1, 'qualified': 2, 'proposal': 3, 'negotiation': 4, 'closed-won': 0, 'closed-lost': 0 }, isClosed: true, isWon: true },
-  { id: 'o5', name: 'FinServ Initial Pilot', accountId: 'acc4', contactId: 'c5', amount: 15000, stage: 'lead', probability: 10, closeDate: '2024-04-30', type: 'new-business', leadSource: 'cold-call', nextStep: 'Intro call scheduled', description: 'Pilot program for 3 months', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: null, forecastCategory: 'pipeline', competitors: [], products: [], createdDate: '2024-01-28', lastStageChangeDate: '2024-01-28', stageDuration: { 'lead': 0, 'qualified': 0, 'proposal': 0, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false }
-]
-
-const MOCK_ACTIVITIES: ActivityRecord[] = [
-  { id: 'a1', type: 'email', subject: 'Enterprise Proposal Sent', description: 'Sent final pricing proposal with discount options', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', status: 'completed', dueDate: null, completedDate: '2024-01-28T10:30:00Z', duration: null, outcome: 'Positive - reviewing with CFO', createdDate: '2024-01-28T10:30:00Z', priority: 'high' },
-  { id: 'a2', type: 'call', subject: 'Discovery Call', description: 'Discussed requirements and timeline with CEO', contactId: 'c2', accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', status: 'completed', dueDate: '2024-01-28T09:00:00Z', completedDate: '2024-01-28T09:45:00Z', duration: 45, outcome: 'Qualified - interested in Pro plan', createdDate: '2024-01-27T16:00:00Z', priority: 'high' },
-  { id: 'a3', type: 'meeting', subject: 'Demo Presentation', description: 'Product demo for decision makers', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', status: 'scheduled', dueDate: '2024-01-29T14:00:00Z', completedDate: null, duration: 60, outcome: null, createdDate: '2024-01-26T11:00:00Z', priority: 'high' },
-  { id: 'a4', type: 'note', subject: 'Budget Confirmation', description: 'Customer confirmed Q1 budget is available for this project', contactId: 'c3', accountId: 'acc3', opportunityId: 'o3', ownerId: 'u3', ownerName: 'Alex Rivera', status: 'completed', dueDate: null, completedDate: '2024-01-27T16:00:00Z', duration: null, outcome: null, createdDate: '2024-01-27T16:00:00Z', priority: 'medium' },
-  { id: 'a5', type: 'task', subject: 'Send Case Studies', description: 'Send relevant case studies from similar industries', contactId: 'c2', accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', status: 'scheduled', dueDate: '2024-01-30T10:00:00Z', completedDate: null, duration: null, outcome: null, createdDate: '2024-01-28T08:00:00Z', priority: 'medium' }
-]
-
-const MOCK_TASKS: Task[] = [
-  { id: 't1', subject: 'Follow up on proposal', description: 'Check if they have reviewed the proposal', status: 'open', priority: 'high', dueDate: '2024-01-30', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', reminder: '2024-01-30T09:00:00Z', isRecurring: false, createdDate: '2024-01-28', completedDate: null },
-  { id: 't2', subject: 'Prepare demo environment', description: 'Set up sandbox with sample data', status: 'in-progress', priority: 'high', dueDate: '2024-01-29', contactId: null, accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', reminder: null, isRecurring: false, createdDate: '2024-01-27', completedDate: null },
-  { id: 't3', subject: 'Weekly pipeline review', description: 'Review all open opportunities', status: 'open', priority: 'medium', dueDate: '2024-01-31', contactId: null, accountId: null, opportunityId: null, ownerId: 'u1', ownerName: 'Sarah Johnson', reminder: '2024-01-31T08:00:00Z', isRecurring: true, createdDate: '2024-01-01', completedDate: null },
-  { id: 't4', subject: 'Update CRM notes', description: 'Add meeting notes from last call', status: 'completed', priority: 'low', dueDate: '2024-01-27', contactId: 'c3', accountId: 'acc3', opportunityId: 'o3', ownerId: 'u3', ownerName: 'Alex Rivera', reminder: null, isRecurring: false, createdDate: '2024-01-26', completedDate: '2024-01-27' }
-]
-
-const MOCK_CAMPAIGNS: Campaign[] = [
-  { id: 'camp1', name: 'Q1 Enterprise Push', type: 'email', status: 'active', startDate: '2024-01-01', endDate: '2024-03-31', description: 'Targeted campaign for enterprise prospects', expectedRevenue: 500000, budgetedCost: 25000, actualCost: 18000, expectedResponse: 200, actualResponses: 156, numSent: 1500, numConverted: 12, ownerId: 'u1', parentCampaignId: null, isActive: true, members: [] },
-  { id: 'camp2', name: 'Retail Industry Webinar', type: 'webinar', status: 'completed', startDate: '2024-01-15', endDate: '2024-01-15', description: 'Webinar on retail digital transformation', expectedRevenue: 200000, budgetedCost: 5000, actualCost: 4500, expectedResponse: 100, actualResponses: 87, numSent: 500, numConverted: 5, ownerId: 'u3', parentCampaignId: null, isActive: false, members: [] },
-  { id: 'camp3', name: 'Conference Sponsorship', type: 'conference', status: 'planned', startDate: '2024-02-20', endDate: '2024-02-22', description: 'Silver sponsor at TechConf 2024', expectedRevenue: 300000, budgetedCost: 50000, actualCost: 0, expectedResponse: 150, actualResponses: 0, numSent: 0, numConverted: 0, ownerId: 'u2', parentCampaignId: null, isActive: false, members: [] }
-]
-
-const MOCK_FORECASTS: Forecast[] = [
-  { id: 'f1', ownerId: 'u1', ownerName: 'Sarah Johnson', period: '2024-Q1', quotaAmount: 300000, closedAmount: 45000, commitAmount: 125000, bestCaseAmount: 0, pipelineAmount: 15000, percentToQuota: 15, lastModifiedDate: '2024-01-28' },
-  { id: 'f2', ownerId: 'u2', ownerName: 'Mike Chen', period: '2024-Q1', quotaAmount: 200000, closedAmount: 0, commitAmount: 0, bestCaseAmount: 24000, pipelineAmount: 0, percentToQuota: 0, lastModifiedDate: '2024-01-28' },
-  { id: 'f3', ownerId: 'u3', ownerName: 'Alex Rivera', period: '2024-Q1', quotaAmount: 250000, closedAmount: 0, commitAmount: 0, bestCaseAmount: 0, pipelineAmount: 85000, percentToQuota: 0, lastModifiedDate: '2024-01-27' }
-]
-
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -483,8 +433,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   })
 
   // Local state for CRM entities
-  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS)
-  const [campaigns, setCampaigns] = useState<Campaign[]>(MOCK_CAMPAIGNS)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [pipelineStages, setPipelineStages] = useState(PIPELINE_STAGES)
   const [leadScoringRules, setLeadScoringRules] = useState<LeadScoreRule[]>([
     { id: '1', name: 'Job Title Contains VP/Director', field: 'job_title', operator: 'contains', value: 'VP,Director', points: 15, isActive: true },
@@ -743,40 +693,48 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     )
   }
 
-  // Stats
+  // Stats - Now purely from database data
   const stats = useMemo(() => {
-    const totalPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
-    const weightedPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
-    const closedWon = MOCK_OPPORTUNITIES.filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
-    const totalQuota = MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0)
-    const openTasks = MOCK_TASKS.filter(t => t.status !== 'completed').length
-    const activeCampaigns = MOCK_CAMPAIGNS.filter(c => c.status === 'active').length
+    const contacts: any[] = []
+    const accounts: any[] = []
+    const opportunities: any[] = []
+    const forecasts: any[] = []
+
+    const totalPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
+    const weightedPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
+    const closedWon = (opportunities || []).filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
+    const totalQuota = (forecasts || []).reduce((sum, f) => sum + f.quotaAmount, 0)
+    const openTasksCount = (tasks || []).filter(t => t.status !== 'completed').length
+    const activeCampaignsCount = (campaigns || []).filter(c => c.status === 'active').length
+    const closedOpps = (opportunities || []).filter(o => o.isClosed)
+    const wonOpps = (opportunities || []).filter(o => o.isWon)
+    const openOpps = (opportunities || []).filter(o => !o.isClosed)
 
     return {
-      totalContacts: MOCK_CONTACTS.length,
-      totalAccounts: MOCK_ACCOUNTS.length,
-      totalOpportunities: MOCK_OPPORTUNITIES.length,
+      totalContacts: contacts.length,
+      totalAccounts: accounts.length,
+      totalOpportunities: opportunities.length,
       totalPipeline,
       weightedPipeline,
       closedWon,
-      winRate: MOCK_OPPORTUNITIES.filter(o => o.isClosed).length > 0
-        ? (MOCK_OPPORTUNITIES.filter(o => o.isWon).length / MOCK_OPPORTUNITIES.filter(o => o.isClosed).length * 100)
-        : 0,
-      avgDealSize: MOCK_OPPORTUNITIES.length > 0 ? totalPipeline / MOCK_OPPORTUNITIES.filter(o => !o.isClosed).length : 0,
+      winRate: closedOpps.length > 0 ? (wonOpps.length / closedOpps.length * 100) : 0,
+      avgDealSize: openOpps.length > 0 ? totalPipeline / openOpps.length : 0,
       quotaAttainment: totalQuota > 0 ? (closedWon / totalQuota * 100) : 0,
-      openTasks,
-      activeCampaigns,
-      avgLeadScore: MOCK_CONTACTS.reduce((sum, c) => sum + c.leadScore, 0) / MOCK_CONTACTS.length
+      openTasks: openTasksCount,
+      activeCampaigns: activeCampaignsCount,
+      avgLeadScore: contacts.length > 0 ? (contacts || []).reduce((sum, c) => sum + (c.leadScore || 0), 0) / contacts.length : 0
     }
-  }, [])
+  }, [tasks, campaigns])
 
   // Filtered opportunities by stage
   const filteredOpportunities = useMemo(() => {
-    return MOCK_OPPORTUNITIES.filter(opp => {
+    const opportunities: any[] = []
+    const accounts: any[] = []
+    return (opportunities || []).filter(opp => {
       if (stageFilter !== 'all' && opp.stage !== stageFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+        const account = (accounts || []).find(a => a.id === opp.accountId)
         if (!opp.name.toLowerCase().includes(query) && !account?.name.toLowerCase().includes(query)) return false
       }
       return true
@@ -785,8 +743,9 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
   // Pipeline grouped by stage
   const pipelineByStage = useMemo(() => {
+    const opportunities: any[] = []
     const grouped: Record<DealStage, Opportunity[]> = { 'lead': [], 'qualified': [], 'proposal': [], 'negotiation': [], 'closed-won': [], 'closed-lost': [] }
-    MOCK_OPPORTUNITIES.filter(o => !o.isClosed).forEach(opp => {
+    ;(opportunities || []).filter(o => !o.isClosed).forEach(opp => {
       grouped[opp.stage].push(opp)
     })
     return grouped
@@ -1109,7 +1068,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           {/* Accounts Tab */}
           <TabsContent value="accounts" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {MOCK_ACCOUNTS.map(account => (
+              {([]).map(account => (
                 <Card key={account.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedAccount(account)}>
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -1160,8 +1119,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
             <div className="space-y-4">
               {filteredOpportunities.map(opp => {
-                const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
-                const contact = MOCK_CONTACTS.find(c => c.id === opp.contactId)
+                const account = ([]).find(a => a.id === opp.accountId)
+                const contact = ([]).find(c => c.id === opp.contactId)
                 return (
                   <Card key={opp.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedOpportunity(opp)}>
                     <CardContent className="p-6">
@@ -1215,7 +1174,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     </div>
                     <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-b-lg min-h-[400px] space-y-3">
                       {stageOpps.map(opp => {
-                        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+                        const account = ([]).find(a => a.id === opp.accountId)
                         return (
                           <Card key={opp.id} className="bg-white dark:bg-gray-700 cursor-pointer hover:shadow-md transition-shadow">
                             <CardContent className="p-4">
@@ -1243,9 +1202,9 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <Button onClick={handleLogActivity}><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
             </div>
             <div className="space-y-3">
-              {MOCK_ACTIVITIES.map(activity => {
-                const contact = MOCK_CONTACTS.find(c => c.id === activity.contactId)
-                const account = MOCK_ACCOUNTS.find(a => a.id === activity.accountId)
+              {([]).map(activity => {
+                const contact = ([]).find(c => c.id === activity.contactId)
+                const account = ([]).find(a => a.id === activity.accountId)
                 return (
                   <Card key={activity.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                     <CardContent className="p-4">
@@ -1393,25 +1352,25 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mb-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(([]).reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Total Quota</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.closedAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-green-600">{formatCurrency(([]).reduce((sum, f) => sum + f.closedAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Closed</div>
                   </div>
                   <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.commitAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(([]).reduce((sum, f) => sum + f.commitAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Commit</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.pipelineAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-purple-600">{formatCurrency(([]).reduce((sum, f) => sum + f.pipelineAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Pipeline</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {MOCK_FORECASTS.map(forecast => (
+                  {([]).map(forecast => (
                     <div key={forecast.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${forecast.ownerName}`} />
@@ -2479,7 +2438,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 <Select value={newContactForm.accountId} onValueChange={(value) => setNewContactForm(prev => ({ ...prev, accountId: value }))}>
                   <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                   <SelectContent>
-                    {MOCK_ACCOUNTS.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
+                    {([]).map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -2652,7 +2611,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 >
                   <SelectTrigger><SelectValue placeholder="Select contact..." /></SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3401,7 +3360,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 >
                   <SelectTrigger><SelectValue placeholder="Select contact..." /></SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
