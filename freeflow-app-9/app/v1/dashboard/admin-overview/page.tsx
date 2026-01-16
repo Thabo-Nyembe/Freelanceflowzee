@@ -110,11 +110,7 @@ export default function AdminOverviewPage() {
 
       try {
         setIsLoading(true)
-        setError(null)
-
-        logger.info('Loading admin dashboard overview', { userId })
-
-        // Import query functions
+        setError(null)        // Import query functions
         const {
           getDashboardStats,
           getHighValueDeals: getHighValueDealsQuery,
@@ -142,20 +138,7 @@ export default function AdminOverviewPage() {
         setActiveWorkflows(workflows)
 
         setIsLoading(false)
-        announce('Admin dashboard loaded successfully', 'polite')
-        logger.info('Dashboard data loaded', {
-          success: true,
-          stats: {
-            deals: deals.length,
-            invoices: invoices.length,
-            leads: leads.length,
-            campaigns: campaigns.length,
-            workflows: workflows.length
-          }
-        })
-
-        toast.success('Dashboard Loaded', {
-          description: `Tracking ${stats.totalDeals} deals, ${stats.totalInvoices} invoices, ${stats.totalLeads} leads`
+        announce('Admin dashboard loaded successfully', 'polite')        toast.success('Dashboard Loaded' deals, ${stats.totalInvoices} invoices, ${stats.totalLeads} leads`
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard'
@@ -163,9 +146,7 @@ export default function AdminOverviewPage() {
         setIsLoading(false)
         announce('Error loading dashboard', 'assertive')
         logger.error('Dashboard load failed', { error: err, userId })
-        toast.error('Failed to Load Dashboard', {
-          description: errorMessage
-        })
+        toast.error('Failed to Load Dashboard')
       }
     }
 
@@ -180,10 +161,7 @@ export default function AdminOverviewPage() {
     }
 
     try {
-      setRefreshing(true)
-      logger.info('Refreshing dashboard data', { userId })
-
-      // Import query functions
+      setRefreshing(true)      // Import query functions
       const {
         getDashboardStats,
         getHighValueDeals: getHighValueDealsQuery,
@@ -210,15 +188,9 @@ export default function AdminOverviewPage() {
       setActiveCampaigns(campaigns)
       setActiveWorkflows(workflows)
 
-      toast.success('Dashboard Refreshed', {
-        description: 'All dashboard widgets have been updated with latest data'
-      })
-      logger.info('Dashboard refresh completed', { success: true })
-      announce('Dashboard refreshed successfully', 'polite')
+      toast.success('Dashboard Refreshed')      announce('Dashboard refreshed successfully', 'polite')
     } catch (error) {
-      toast.error('Refresh Failed', {
-        description: error instanceof Error ? error.message : 'Unable to refresh dashboard'
-      })
+      toast.error('Refresh Failed')
       logger.error('Dashboard refresh failed', { error, userId })
     } finally {
       setRefreshing(false)
@@ -229,21 +201,14 @@ export default function AdminOverviewPage() {
   const handleMarkAlertRead = async (alertId: string) => {
     try {
       const { acknowledgeAlert } = await import('@/lib/admin-overview-queries')
-      await acknowledgeAlert(alertId)
-
-      logger.info('Alert marked as read', { alertId, userId })
-      toast.success('Alert Marked as Read', {
-        description: 'The alert has been acknowledged'
-      })
+      await acknowledgeAlert(alertId)      toast.success('Alert Marked as Read')
       announce('Alert acknowledged', 'polite')
 
       // Refresh dashboard data to update alerts list
       await handleRefresh()
     } catch (error: any) {
       logger.error('Failed to acknowledge alert', { error, alertId, userId })
-      toast.error('Failed to mark alert as read', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to mark alert as read')
     }
   }
 
@@ -251,31 +216,20 @@ export default function AdminOverviewPage() {
   const handleDismissAlert = async (alertId: string) => {
     try {
       const { dismissAlert } = await import('@/lib/admin-overview-queries')
-      await dismissAlert(alertId)
-
-      logger.info('Alert dismissed', { alertId, userId })
-      toast.success('Alert Dismissed', {
-        description: 'The alert has been removed from view'
-      })
+      await dismissAlert(alertId)      toast.success('Alert Dismissed')
       announce('Alert dismissed', 'polite')
 
       // Refresh dashboard data to update alerts list
       await handleRefresh()
     } catch (error: any) {
       logger.error('Failed to dismiss alert', { error, alertId, userId })
-      toast.error('Failed to dismiss alert', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to dismiss alert')
     }
   }
 
   // Handle view module
-  const handleViewModule = (moduleName: string, path: string) => {
-    logger.info('Navigating to module', { module: moduleName, path })
-    router.push(path)
-    toast.info(`Opening ${moduleName}`, {
-      description: 'Navigating to detailed view'
-    })
+  const handleViewModule = (moduleName: string, path: string) => {    router.push(path)
+    toast.info(`Opening ${moduleName}`)
   }
 
   // Get alert level styling
