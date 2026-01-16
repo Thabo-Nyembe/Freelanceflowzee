@@ -136,7 +136,6 @@ export default function InvoicingPage() {
   useEffect(() => {
     const loadInvoicing = async () => {
       if (!userId) {
-        logger.info('Waiting for user authentication')
         setIsLoading(false)
         return
       }
@@ -144,7 +143,6 @@ export default function InvoicingPage() {
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading invoicing data', { userId })
 
         const { getInvoices } = await import('@/lib/admin-overview-queries')
         const invoicesResult = await getInvoices(userId)
@@ -153,13 +151,7 @@ export default function InvoicingPage() {
 
         setIsLoading(false)
         announce('Invoicing data loaded successfully', 'polite')
-        toast.success('Invoices loaded', {
-          description: `${invoicesResult?.length || 0} invoices loaded`
-        })
-        logger.info('Invoicing loaded', {
-          success: true,
-          invoiceCount: invoicesResult?.length || 0
-        })
+        toast.success('Invoices loaded')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load invoicing'
         setError(errorMessage)
@@ -182,8 +174,6 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Creating new invoice', { userId })
-
       const invoiceNumber = `INV-2024-${String(invoices.length + 1).padStart(3, '0')}`
       const { createInvoice } = await import('@/lib/admin-overview-queries')
 
@@ -200,11 +190,8 @@ export default function InvoicingPage() {
         items: []
       })
 
-      toast.success('Invoice created', {
-        description: `Invoice ${invoiceNumber} has been created as draft`
-      })
+      toast.success('Invoice created')
       announce('Invoice created successfully', 'polite')
-      logger.info('Invoice created', { success: true, invoiceId: newInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -227,19 +214,14 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Editing invoice', { userId, invoiceId })
-
       const { updateInvoice } = await import('@/lib/admin-overview-queries')
       await updateInvoice(invoiceId, {
         amount_total: 50000,
         notes: 'Updated invoice terms'
       })
 
-      toast.success('Invoice updated', {
-        description: 'Invoice details have been updated successfully'
-      })
+      toast.success('Invoice updated')
       announce('Invoice updated successfully', 'polite')
-      logger.info('Invoice edited', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -269,16 +251,11 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Deleting invoice', { userId, invoiceId: deleteInvoice.id })
-
       const { deleteInvoice: deleteInvoiceQuery } = await import('@/lib/admin-overview-queries')
       await deleteInvoiceQuery(deleteInvoice.id)
 
-      toast.success('Invoice deleted', {
-        description: `${deleteInvoice.number} has been permanently removed`
-      })
+      toast.success('Invoice deleted')
       announce('Invoice deleted successfully', 'polite')
-      logger.info('Invoice deleted', { success: true, invoiceId: deleteInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -303,16 +280,11 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Sending invoice', { userId, invoiceId })
-
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'sent')
 
-      toast.success('Invoice sent', {
-        description: `${invoiceNumber} has been sent to ${clientEmail}`
-      })
+      toast.success('Invoice sent')
       announce('Invoice sent successfully', 'polite')
-      logger.info('Invoice sent', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -335,16 +307,11 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Marking invoice as paid', { userId, invoiceId })
-
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'paid')
 
-      toast.success('Invoice marked as paid', {
-        description: `${invoiceNumber} has been marked as paid and closed`
-      })
+      toast.success('Invoice marked as paid')
       announce('Invoice marked as paid', 'polite')
-      logger.info('Invoice marked as paid', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -362,8 +329,6 @@ export default function InvoicingPage() {
   // NOTE: PDF generation requires server-side processing via API endpoint
   const handleDownloadPDF = async (invoiceId: string, invoiceNumber: string) => {
     try {
-      logger.info('Downloading invoice PDF', { invoiceId })
-
       const response = await fetch('/api/admin/invoicing/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -383,10 +348,7 @@ export default function InvoicingPage() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
 
-      toast.success('PDF downloaded', {
-        description: `${invoiceNumber} has been saved as PDF file`
-      })
-      logger.info('PDF download completed', { success: true, invoiceId })
+      toast.success('PDF downloaded')
       announce('PDF downloaded successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Download failed'
@@ -400,8 +362,6 @@ export default function InvoicingPage() {
   // NOTE: Email sending requires server-side processing via API endpoint
   const handleSendReminder = async (invoiceId: string, invoiceNumber: string, clientEmail: string) => {
     try {
-      logger.info('Sending payment reminder', { invoiceId })
-
       const response = await fetch('/api/admin/invoicing/reminder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -411,10 +371,7 @@ export default function InvoicingPage() {
       if (!response.ok) throw new Error('Failed to send reminder')
       await response.json()
 
-      toast.success('Reminder sent', {
-        description: `Payment reminder for ${invoiceNumber} sent to ${clientEmail}`
-      })
-      logger.info('Reminder sent', { success: true, invoiceId })
+      toast.success('Reminder sent')
       announce('Reminder sent successfully', 'polite')
 
       setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, remindersSent: (inv.remindersSent || 0) + 1, lastReminderDate: new Date().toISOString() } : inv))
@@ -442,16 +399,11 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Voiding invoice', { userId, invoiceId: voidInvoice.id })
-
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(voidInvoice.id, 'cancelled')
 
-      toast.success('Invoice voided', {
-        description: `${voidInvoice.number} has been voided and cancelled`
-      })
+      toast.success('Invoice voided')
       announce('Invoice voided successfully', 'polite')
-      logger.info('Invoice voided', { success: true, invoiceId: voidInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -469,12 +421,9 @@ export default function InvoicingPage() {
 
   // Button 9: View Invoice
   const handleViewInvoice = (invoice: Invoice) => {
-    logger.info('Opening invoice details', { invoiceId: invoice.id })
     setSelectedInvoice(invoice)
     setShowInvoiceModal(true)
-    toast.success('Invoice details loaded', {
-      description: `Viewing details for ${invoice.number}`
-    })
+    toast.success('Invoice details loaded')
     announce('Invoice details opened', 'polite')
   }
 
@@ -486,20 +435,12 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Refreshing invoices', { userId })
-
       const { getInvoices } = await import('@/lib/admin-overview-queries')
 
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
 
-      toast.success('Invoices refreshed', {
-        description: `Reloaded ${invoicesResult?.length || 0} invoices`
-      })
-      logger.info('Invoices refresh completed', {
-        success: true,
-        invoiceCount: invoicesResult?.length || 0
-      })
+      toast.success('Invoices refreshed')
       announce('Invoices refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
