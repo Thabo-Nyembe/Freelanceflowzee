@@ -26,7 +26,6 @@ import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { createFeatureLogger } from '@/lib/logger'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -139,7 +138,6 @@ const loadingQuickActions = teamQuickActionsConfig.map(action => ({
 }))
 
 export default function TeamClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -307,7 +305,6 @@ export default function TeamClient() {
     }
   ])
 
-  // A+++ LOAD TEAM DATA FROM DATABASE
   useEffect(() => {
     const loadTeamData = async () => {
       if (!userId || userLoading) {
@@ -347,12 +344,8 @@ export default function TeamClient() {
             workHours: '9:00 AM - 6:00 PM',
             timezone: m.timezone || 'UTC'
           }))
-          setTeamMembers(mappedMembers)
-          logger.info('Team members loaded from database', { count: mappedMembers.length })
-        } else {
-          // Keep demo data for users without team members
-          logger.info('Using demo team data - no members in database', { userId })
-        }
+          setTeamMembers(mappedMembers)        } else {
+          // Keep demo data for users without team members        }
 
         setIsLoading(false)
         announce('Team dashboard loaded successfully', 'polite')
@@ -453,43 +446,19 @@ export default function TeamClient() {
         timezone: 'UTC'
       }
 
-      setTeamMembers([...teamMembers, newMember])
-
-      logger.info('Team member invited and saved to database', {
-        memberId: newMember.id,
-        name: inviteName,
-        email: inviteEmail,
-        role: inviteRole,
-        totalMembers: teamMembers.length + 1
-      })
-
-      toast.success('Invitation Sent!', {
-        description: `Invited ${inviteName} as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
+      setTeamMembers([...teamMembers, newMember])      toast.success('Invitation Sent!' as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
       })
 
       setShowInviteDialog(false)
     } catch (error) {
       logger.error('Failed to invite team member', { error, email: inviteEmail })
-      toast.error('Failed to invite member', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to invite member')
     }
   }
 
   const handleViewMember = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return
-
-    logger.info('Viewing member profile', {
-      memberId: id,
-      memberName: member.name,
-      role: member.role,
-      projects: member.projects,
-      completedTasks: member.completedTasks
-    })
-
-    toast.info(`${member.name} Profile`, {
-      description: `${member.role} • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating}⭐`
+    if (!member) return    toast.info(`${member.name} Profile` • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating}⭐`
     })
   }
 
@@ -503,14 +472,7 @@ export default function TeamClient() {
     setEditMemberRole(member.role)
     setEditMemberPhone(member.phone)
     setEditMemberLocation(member.location)
-    setShowEditMemberDialog(true)
-
-    logger.info('Edit member dialog opened', {
-      memberId: id,
-      memberName: member.name,
-      currentRole: member.role
-    })
-  }
+    setShowEditMemberDialog(true)  }
 
   const confirmEditMember = async () => {
     if (!editMemberId || !editMemberName.trim() || !editMemberEmail.trim()) {
@@ -553,26 +515,14 @@ export default function TeamClient() {
               location: editMemberLocation
             }
           : m
-      ))
-
-      logger.info('Member details updated', {
-        memberId: editMemberId,
-        name: editMemberName,
-        email: editMemberEmail,
-        role: editMemberRole
-      })
-
-      toast.success('Member Updated', {
-        description: `${editMemberName}'s details have been updated`
+      ))      toast.success('Member Updated''s details have been updated`
       })
 
       setShowEditMemberDialog(false)
       setEditMemberId(null)
     } catch (error) {
       logger.error('Failed to update member', { error, memberId: editMemberId })
-      toast.error('Failed to update member', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update member')
     }
   }
 
@@ -613,24 +563,12 @@ export default function TeamClient() {
 
       // Update local state
       const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove)
-      setTeamMembers(updatedMembers)
-
-      logger.info('Team member removed from database', {
-        memberId: memberToRemove,
-        memberName: member.name,
-        role: member.role,
-        remainingMembers: updatedMembers.length
-      })
-
-      toast.success('Member Removed', {
-        description: `${member.name} removed from team - ${updatedMembers.length} members remaining`
+      setTeamMembers(updatedMembers)      toast.success('Member Removed' removed from team - ${updatedMembers.length} members remaining`
       })
       announce(`${member.name} removed from team`, 'polite')
     } catch (error) {
       logger.error('Failed to remove team member', { error, memberId: memberToRemove })
-      toast.error('Failed to remove member', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to remove member')
     } finally {
       setIsRemoving(false)
       setShowRemoveMemberDialog(false)
@@ -676,17 +614,7 @@ export default function TeamClient() {
       // Update local state on success
       setTeamMembers(teamMembers.map(m =>
         m.id === changeRoleMemberId ? { ...m, role: newRole } : m
-      ))
-
-      logger.info('Member role changed', {
-        memberId: changeRoleMemberId,
-        memberName: member.name,
-        previousRole,
-        newRole
-      })
-
-      toast.success('Role Updated', {
-        description: `${member.name} role changed from ${previousRole} to ${newRole}`
+      ))      toast.success('Role Updated' role changed from ${previousRole} to ${newRole}`
       })
 
       setShowChangeRoleDialog(false)
@@ -694,9 +622,7 @@ export default function TeamClient() {
       setNewRole('')
     } catch (error) {
       logger.error('Failed to update role', { error, memberId: changeRoleMemberId })
-      toast.error('Failed to update role', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update role')
     }
   }
 
@@ -706,14 +632,7 @@ export default function TeamClient() {
 
     setPermissionsMemberId(id)
     setSelectedPermission('Read')
-    setShowPermissionsDialog(true)
-
-    logger.info('Permissions dialog opened', {
-      memberId: id,
-      memberName: member.name,
-      role: member.role
-    })
-  }
+    setShowPermissionsDialog(true)  }
 
   const confirmSetPermissions = async () => {
     if (!permissionsMemberId) return
@@ -736,25 +655,14 @@ export default function TeamClient() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to update permissions')
-      }
-
-      logger.info('Permissions updated', {
-        memberId: permissionsMemberId,
-        memberName: member.name,
-        permission: selectedPermission
-      })
-
-      toast.success('Permissions Updated', {
-        description: `${member.name} now has ${selectedPermission} permissions`
+      }      toast.success('Permissions Updated' now has ${selectedPermission} permissions`
       })
 
       setShowPermissionsDialog(false)
       setPermissionsMemberId(null)
     } catch (error) {
       logger.error('Failed to update permissions', { error, memberId: permissionsMemberId })
-      toast.error('Failed to update permissions', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to update permissions')
     }
   }
 
@@ -764,15 +672,7 @@ export default function TeamClient() {
 
     setMessageMemberId(id)
     setMessageContent('')
-    setShowMessageDialog(true)
-
-    logger.info('Message composer opened', {
-      memberId: id,
-      memberName: member.name,
-      email: member.email,
-      status: member.status
-    })
-  }
+    setShowMessageDialog(true)  }
 
   const confirmSendMessage = async () => {
     if (!messageMemberId || !messageContent.trim()) {
@@ -798,16 +698,7 @@ export default function TeamClient() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to send message')
-      }
-
-      logger.info('Message sent', {
-        memberId: messageMemberId,
-        memberName: member.name,
-        messageLength: messageContent.length
-      })
-
-      toast.success('Message Sent', {
-        description: `Message sent to ${member.name}`
+      }      toast.success('Message Sent'`
       })
 
       setShowMessageDialog(false)
@@ -815,26 +706,13 @@ export default function TeamClient() {
       setMessageContent('')
     } catch (error) {
       logger.error('Failed to send message', { error, memberId: messageMemberId })
-      toast.error('Failed to send message', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to send message')
     }
   }
 
   const handleViewActivity = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return
-
-    logger.info('Viewing member activity', {
-      memberId: id,
-      memberName: member.name,
-      projects: member.projects,
-      completedTasks: member.completedTasks,
-      rating: member.rating
-    })
-
-    toast.info(`${member.name} Activity`, {
-      description: `${member.completedTasks} tasks completed • ${member.projects} active projects • ${member.rating}⭐ rating`
+    if (!member) return    toast.info(`${member.name} Activity` tasks completed • ${member.projects} active projects • ${member.rating}⭐ rating`
     })
   }
 
@@ -876,17 +754,7 @@ export default function TeamClient() {
       // Update local state on success
       setTeamMembers(teamMembers.map(m =>
         m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
-      ))
-
-      logger.info('Project assigned to member', {
-        memberId: assignProjectMemberId,
-        memberName: member.name,
-        projectName,
-        newProjectCount: member.projects + 1
-      })
-
-      toast.success('Project Assigned', {
-        description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
+      ))      toast.success('Project Assigned' assigned to ${member.name} - Total: ${member.projects + 1} projects`
       })
 
       setShowAssignProjectDialog(false)
@@ -894,24 +762,13 @@ export default function TeamClient() {
       setProjectName('')
     } catch (error) {
       logger.error('Failed to assign project', { error, memberId: assignProjectMemberId })
-      toast.error('Failed to assign project', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to assign project')
     }
   }
 
   const handleViewProjects = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return
-
-    logger.info('Viewing member projects', {
-      memberId: id,
-      memberName: member.name,
-      activeProjects: member.projects
-    })
-
-    toast.info(`${member.name}'s Projects`, {
-      description: `${member.projects} active projects • ${member.completedTasks} tasks completed`
+    if (!member) return    toast.info(`${member.name}'s Projects` active projects • ${member.completedTasks} tasks completed`
     })
   }
 
@@ -921,23 +778,11 @@ export default function TeamClient() {
       online: teamMembers.filter(m => m.status === 'online').length,
       projects: teamMembers.reduce((sum, m) => sum + m.projects, 0),
       tasks: teamMembers.reduce((sum, m) => sum + m.completedTasks, 0)
-    }
-
-    logger.info('Team analytics accessed', stats)
-
-    toast.info('Team Analytics', {
-      description: `${stats.totalMembers} members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
+    }    toast.info('Team Analytics' members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
     })
   }
 
-  const handleTeamSettings = () => {
-    logger.info('Team settings accessed', {
-      totalMembers: teamMembers.length
-    })
-
-    toast.info('Team Settings', {
-      description: 'Configure team preferences, roles, and permissions'
-    })
+  const handleTeamSettings = () => {    toast.info('Team Settings')
   }
 
   const handleExportTeam = () => {
@@ -963,15 +808,7 @@ export default function TeamClient() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    logger.info('Team data exported', {
-      totalMembers: teamMembers.length,
-      fileSize: blob.size
-    })
-
-    toast.success('Team Data Exported', {
-      description: `${teamMembers.length} members exported - ${Math.round(blob.size / 1024)}KB`
+    URL.revokeObjectURL(url)    toast.success('Team Data Exported' members exported - ${Math.round(blob.size / 1024)}KB`
     })
   }
 
@@ -1019,77 +856,34 @@ export default function TeamClient() {
 
       if (successCount === 0) {
         throw new Error('Failed to send any invitations')
-      }
-
-      logger.info('Bulk invite initiated', {
-        emailCount: emailList.length,
-        emails: emailList,
-        successCount
-      })
-
-      toast.success('Bulk Invitations Sent', {
-        description: `${successCount} of ${emailList.length} invitation emails sent`
+      }      toast.success('Bulk Invitations Sent' of ${emailList.length} invitation emails sent`
       })
 
       setShowBulkInviteDialog(false)
       setBulkEmails('')
     } catch (error) {
       logger.error('Failed to send bulk invites', { error, emailCount: emailList.length })
-      toast.error('Failed to send invitations', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to send invitations')
     }
   }
 
   const handleTeamChat = () => {
-    const onlineMembers = teamMembers.filter(m => m.status === 'online').length
-
-    logger.info('Team chat opened', {
-      totalMembers: teamMembers.length,
-      onlineMembers
-    })
-
-    toast.info('Team Chat', {
-      description: `${onlineMembers}/${teamMembers.length} members online`
+    const onlineMembers = teamMembers.filter(m => m.status === 'online').length    toast.info('Team Chat'/${teamMembers.length} members online`
     })
   }
 
   const handleScheduleMeeting = () => {
-    const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length
-
-    logger.info('Meeting scheduler opened', {
-      totalMembers: teamMembers.length,
-      availableMembers
-    })
-
-    toast.info('Schedule Meeting', {
-      description: `${availableMembers}/${teamMembers.length} members available`
+    const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length    toast.info('Schedule Meeting'/${teamMembers.length} members available`
     })
   }
 
-  const handleViewCalendar = () => {
-    logger.info('Team calendar accessed', {
-      totalMembers: teamMembers.length
-    })
-
-    toast.info('Team Calendar', {
-      description: `View schedules for ${teamMembers.length} team members`
+  const handleViewCalendar = () => {    toast.info('Team Calendar' team members`
     })
   }
 
   const handlePerformanceReview = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return
-
-    logger.info('Performance review opened', {
-      memberId: id,
-      memberName: member.name,
-      rating: member.rating,
-      completedTasks: member.completedTasks
-    })
-
-    toast.info(`Review ${member.name}`, {
-      description: `Current rating: ${member.rating}⭐ • ${member.completedTasks} tasks completed`
+    if (!member) return    toast.info(`Review ${member.name}`⭐ • ${member.completedTasks} tasks completed`
     })
   }
 
@@ -1097,27 +891,11 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    const hoursWorked = Math.floor(Math.random() * 40) + 120
-
-    logger.info('Time tracking viewed', {
-      memberId: id,
-      memberName: member.name,
-      hoursWorked
-    })
-
-    toast.info(`${member.name} Time Tracking`, {
-      description: `${hoursWorked} hours this month • ${member.workHours}`
+    const hoursWorked = Math.floor(Math.random() * 40) + 120    toast.info(`${member.name} Time Tracking` hours this month • ${member.workHours}`
     })
   }
 
-  const handleFilter = (filter: string) => {
-    logger.info('Filter applied', {
-      filterType: filter,
-      totalMembers: teamMembers.length
-    })
-
-    toast.success('Filter Applied', {
-      description: `Filtering team by: ${filter}`
+  const handleFilter = (filter: string) => {    toast.success('Filter Applied'`
     })
   }
 
@@ -1177,7 +955,6 @@ export default function TeamClient() {
     averageRating: teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative">
@@ -1212,7 +989,6 @@ export default function TeamClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative">
@@ -1551,29 +1327,20 @@ export default function TeamClient() {
                       Chat
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.info('Email Composer', {
-                        description: `Opening email to ${member.email}`
+                      toast.info('Email Composer'`
                       })
                       window.open(`mailto:${member.email}`, '_blank')
                     }}>
                       <Mail className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.info('Phone Call', {
-                        description: `Calling ${member.name} at ${member.phone}`
+                      toast.info('Phone Call' at ${member.phone}`
                       })
                       window.open(`tel:${member.phone}`, '_blank')
                     }}>
                       <Phone className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => {
-                      logger.info('Video call initiated', {
-                        memberId: member.id,
-                        memberName: member.name,
-                        status: member.status
-                      })
-                      toast.info('Video Call', {
-                        description: `Starting video call with ${member.name}`
+                    <Button size="sm" variant="outline" onClick={() => {                      toast.info('Video Call'`
                       })
                     }}>
                       <Video className="h-4 w-4" />

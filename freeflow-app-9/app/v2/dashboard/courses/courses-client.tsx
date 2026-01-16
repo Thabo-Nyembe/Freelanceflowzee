@@ -747,7 +747,7 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Creating course...', { description: `Setting up "${courseForm.course_name}"` })
+    toast.success('Creating course...'"` })
 
     try {
       const response = await fetch('/api/courses', {
@@ -786,16 +786,13 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to create course')
       }
 
-      toast.success('Course created successfully', {
-        description: `Created "${courseForm.course_name}"`
+      toast.success('Course created successfully'"`
       })
       setShowCreateCourseDialog(false)
       resetCourseForm()
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to create course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create course')
     } finally {
       setIsSubmitting(false)
     }
@@ -838,7 +835,7 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Updating course...', { description: `Saving changes to "${courseForm.course_name}"` })
+    toast.success('Updating course...'"` })
 
     try {
       const response = await fetch('/api/courses', {
@@ -878,17 +875,14 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to update course')
       }
 
-      toast.success('Course updated successfully', {
-        description: `Updated "${courseForm.course_name}"`
+      toast.success('Course updated successfully'"`
       })
       setShowEditCourseDialog(false)
       resetCourseForm()
       setSelectedCourse(null)
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to update course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to update course')
     } finally {
       setIsSubmitting(false)
     }
@@ -898,7 +892,7 @@ export default function CoursesClient() {
     if (!courseToDelete) return
 
     setIsSubmitting(true)
-    toast.success('Deleting course...', { description: `Removing "${courseToDelete.title}"` })
+    toast.success('Deleting course...'"` })
 
     try {
       const response = await fetch(`/api/courses?id=${courseToDelete.id}`, {
@@ -911,16 +905,13 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to delete course')
       }
 
-      toast.success('Course deleted', {
-        description: `Deleted "${courseToDelete.title}"`
+      toast.success('Course deleted'"`
       })
       setShowDeleteCourseDialog(false)
       setCourseToDelete(null)
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to delete course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete course')
     } finally {
       setIsSubmitting(false)
     }
@@ -933,7 +924,7 @@ export default function CoursesClient() {
 
   const handlePublishCourse = async (course: Course) => {
     setIsSubmitting(true)
-    toast.success('Publishing course...', { description: `Making "${course.title}" live` })
+    toast.success('Publishing course...'" live` })
 
     try {
       const response = await fetch('/api/courses', {
@@ -953,14 +944,11 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to publish course')
       }
 
-      toast.success('Course published', {
-        description: `"${course.title}" is now live`
+      toast.success('Course published'" is now live`
       })
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to publish course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to publish course')
     } finally {
       setIsSubmitting(false)
     }
@@ -968,7 +956,7 @@ export default function CoursesClient() {
 
   const handleArchiveCourse = async (course: Course) => {
     setIsSubmitting(true)
-    toast.success('Archiving course...', { description: `Archiving "${course.title}"` })
+    toast.success('Archiving course...'"` })
 
     try {
       const response = await fetch('/api/courses', {
@@ -987,14 +975,11 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to archive course')
       }
 
-      toast.success('Course archived', {
-        description: `"${course.title}" has been archived`
+      toast.success('Course archived'" has been archived`
       })
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to archive course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to archive course')
     } finally {
       setIsSubmitting(false)
     }
@@ -1022,14 +1007,11 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Enrolled!', {
-        description: `You've enrolled in "${course.title}"`
+      toast.success('Enrolled!'"`
       })
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to enroll', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to enroll')
     } finally {
       setIsSubmitting(false)
     }
@@ -1053,13 +1035,10 @@ export default function CoursesClient() {
         started_at: new Date().toISOString()
       })
 
-      toast.info('Starting lesson', {
-        description: `Loading "${lecture.title}"...`
+      toast.info('Starting lesson'"...`
       })
     } catch (error: any) {
-      toast.error('Failed to start lesson', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to start lesson')
     }
   }
 
@@ -1083,14 +1062,10 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Course completed!', {
-        description: 'Congratulations on finishing the course!'
-      })
+      toast.success('Course completed!')
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to complete course', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to complete course')
     } finally {
       setIsSubmitting(false)
     }
@@ -1107,13 +1082,9 @@ export default function CoursesClient() {
       }
 
       // Generate certificate URL or trigger download
-      toast.success('Download started', {
-        description: 'Your certificate is being downloaded'
-      })
+      toast.success('Download started')
     } catch (error: any) {
-      toast.error('Failed to download certificate', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to download certificate')
     }
   }
 
@@ -1136,16 +1107,13 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Section added', {
-        description: `Added "${sectionForm.title}" to the course`
+      toast.success('Section added'" to the course`
       })
       setShowAddSectionDialog(false)
       resetSectionForm()
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to add section', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to add section')
     } finally {
       setIsSubmitting(false)
     }
@@ -1172,16 +1140,13 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Lecture added', {
-        description: `Added "${lectureForm.title}" to the section`
+      toast.success('Lecture added'" to the section`
       })
       setShowAddLectureDialog(false)
       resetLectureForm()
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to add lecture', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to add lecture')
     } finally {
       setIsSubmitting(false)
     }
@@ -1202,14 +1167,10 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Response posted', {
-        description: 'Your response has been added to the review'
-      })
+      toast.success('Response posted')
       refreshCourses()
     } catch (error: any) {
-      toast.error('Failed to post response', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to post response')
     } finally {
       setIsSubmitting(false)
     }
@@ -1503,7 +1464,7 @@ export default function CoursesClient() {
                             if (course.status === 'draft') {
                               handlePublishCourse(course)
                             } else {
-                              toast.info('Opening preview...', { description: `Previewing "${course.title}"` })
+                              toast.info('Opening preview...'"` })
                             }
                           }}
                           disabled={isSubmitting}
@@ -2497,7 +2458,7 @@ export default function CoursesClient() {
             <AIInsightsPanel
               insights={mockCoursesAIInsights}
               title="Course Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

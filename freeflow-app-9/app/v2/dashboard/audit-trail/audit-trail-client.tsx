@@ -28,7 +28,6 @@ import {
 } from '@/lib/audit-utils'
 import type { AuditLog, ActivityType, EntityType, SeverityLevel } from '@/lib/audit-types'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -74,7 +73,6 @@ export default function AuditTrailClient() {
   // AUTHENTICATION
   const { userId, loading: userLoading } = useCurrentUser()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -164,10 +162,7 @@ export default function AuditTrailClient() {
     }
 
     setIsCreatingEntry(true)
-    try {
-      logger.info('Creating new audit entry', { userId, form: newEntryForm })
-
-      const { createAuditLog } = await import('@/lib/audit-trail-queries')
+    try {      const { createAuditLog } = await import('@/lib/audit-trail-queries')
 
       await createAuditLog({
         userId,
@@ -213,10 +208,7 @@ export default function AuditTrailClient() {
     }
 
     setIsExporting(true)
-    try {
-      logger.info('Exporting audit logs with options', { userId, options: exportOptions })
-
-      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
+    try {      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
 
       const exportData = await exportAuditLogs(
         userId,
@@ -261,10 +253,7 @@ export default function AuditTrailClient() {
   // HANDLER: Save audit settings
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
-    try {
-      logger.info('Saving audit settings', { settings: auditSettings })
-
-      // Save settings via API
+    try {      // Save settings via API
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -287,7 +276,6 @@ export default function AuditTrailClient() {
     }
   }
 
-  // A+++ LOAD AUDIT TRAIL DATA
   useEffect(() => {
     const loadAuditTrailData = async () => {
       // Wait for authentication
@@ -301,10 +289,7 @@ export default function AuditTrailClient() {
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading audit trail data', { userId })
-
-        // Load all audit trail data in parallel
+        setError(null)        // Load all audit trail data in parallel
         const {
           getAuditLogs,
           getActivitySummary,
@@ -329,13 +314,7 @@ export default function AuditTrailClient() {
         setCriticalEvents(critical)
         setComplianceReports(reports)
 
-        setIsLoading(false)
-        logger.info('Audit trail data loaded successfully', {
-          logsCount: logs.length,
-          criticalCount: critical.length,
-          reportsCount: reports.length
-        })
-        announce('Audit trail loaded successfully', 'polite')
+        setIsLoading(false)        announce('Audit trail loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load audit trail data'
         logger.error('Failed to load audit trail data', { error: err, userId })
@@ -366,10 +345,7 @@ export default function AuditTrailClient() {
       return
     }
 
-    try {
-      logger.info('Exporting audit logs', { userId, filtersCount: Object.keys(filters).length })
-
-      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
+    try {      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
 
       // Export with current filters
       const csvData = await exportAuditLogs(
@@ -394,9 +370,7 @@ export default function AuditTrailClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Audit logs exported successfully')
-      logger.info('Audit logs exported', { userId, logsCount: auditLogs.length })
-      announce('Audit logs exported successfully', 'polite')
+      toast.success('Audit logs exported successfully')      announce('Audit logs exported successfully', 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to export logs'
       logger.error('Failed to export logs', { error: err, userId })
@@ -404,7 +378,6 @@ export default function AuditTrailClient() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 dark:bg-none dark:bg-gray-900">
@@ -433,7 +406,6 @@ export default function AuditTrailClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 dark:bg-none dark:bg-gray-900">

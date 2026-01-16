@@ -569,7 +569,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
   const handleExportInventory = useCallback(async () => {
     try {
-      toast.info('Export started', { description: 'Fetching inventory data...' })
+      toast.info('Export started')
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
@@ -602,7 +602,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed', { description: `Exported ${items.length} items` })
+      toast.success('Export completed' items` })
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Failed to export inventory')
@@ -637,7 +637,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Stock transfer created', { description: 'Transfer is now pending' })
+      toast.success('Stock transfer created')
       setShowTransferDialog(false)
       setTransferForm({
         originLocationId: '',
@@ -676,7 +676,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Purchase order created', { description: 'PO saved as draft' })
+      toast.success('Purchase order created')
       setShowPODialog(false)
       setPoForm({
         supplierId: '',
@@ -715,7 +715,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Stock updated', { description: `Stock for "${product.title}" has been updated` })
+      toast.success('Stock updated'" has been updated` })
       refetch()
     } catch (error) {
       console.error('Stock update error:', error)
@@ -742,7 +742,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Product archived', { description: `"${product.title}" has been archived` })
+      toast.success('Product archived'" has been archived` })
       refetch()
     } catch (error) {
       console.error('Archive error:', error)
@@ -770,7 +770,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Location created', { description: `"${locationForm.name}" has been added` })
+      toast.success('Location created'" has been added` })
       setShowLocationDialog(false)
       setLocationForm({
         name: '',
@@ -810,7 +810,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Supplier created', { description: `"${supplierForm.name}" has been added` })
+      toast.success('Supplier created'" has been added` })
       setShowSupplierDialog(false)
       setSupplierForm({
         name: '',
@@ -830,9 +830,9 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   }
 
   const handleSyncInventory = async () => {
-    toast.info('Syncing...', { description: 'Refreshing inventory data' })
+    toast.info('Syncing...')
     await refetch()
-    toast.success('Sync complete', { description: 'Inventory data refreshed' })
+    toast.success('Sync complete')
   }
 
   return (
@@ -2047,7 +2047,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             <AIInsightsPanel
               insights={mockInventoryAIInsights}
               title="Inventory Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
 

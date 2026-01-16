@@ -727,8 +727,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started', {
-        description: `Build #${buildNumber} for ${newBuildConfig.platform} (${newBuildConfig.channel}) initiated`
+      toast.success('Build started' for ${newBuildConfig.platform} (${newBuildConfig.channel}) initiated`
       })
       setShowNewBuildDialog(false)
       setNewBuildConfig({
@@ -797,8 +796,7 @@ export default function DesktopAppClient() {
         .map(([p]) => p)
         .join(', ')
 
-      toast.success('Update deployed', {
-        description: `v${deployConfig.version} deployed to ${deployConfig.channel} channel for ${platformList}${deployConfig.isCritical ? ' (Critical)' : ''}`
+      toast.success('Update deployed' deployed to ${deployConfig.channel} channel for ${platformList}${deployConfig.isCritical ? ' (Critical)' : ''}`
       })
       setShowDeployUpdateDialog(false)
       setDeployConfig({
@@ -872,7 +870,7 @@ export default function DesktopAppClient() {
         : dbProjects[0]
 
       if (!project) {
-        toast.info('No project found', { description: 'Create a project first' })
+        toast.info('No project found')
         return
       }
 
@@ -891,7 +889,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started', { description: `Build #${buildNumber} initiated` })
+      toast.success('Build started' initiated` })
       fetchData()
     } catch (error) {
       console.error('Error starting build:', error)
@@ -938,7 +936,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.info('Retrying build', { description: `Build ${build.build_number} restarted` })
+      toast.info('Retrying build' restarted` })
       fetchData()
     } catch (error) {
       console.error('Error retrying build:', error)
@@ -984,8 +982,7 @@ export default function DesktopAppClient() {
 
   // Download build (mock with toast for actual file download)
   const handleDownloadBuild = (buildVersion: string, platform: string) => {
-    toast.success('Downloading build', {
-      description: `${buildVersion} for ${platform} download starting...`
+    toast.success('Downloading build' for ${platform} download starting...`
     })
   }
 
@@ -1003,7 +1000,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Release published', { description: `${buildVersion} is now live` })
+      toast.success('Release published' is now live` })
       fetchData()
     } catch (error) {
       console.error('Error publishing release:', error)
@@ -1092,8 +1089,7 @@ export default function DesktopAppClient() {
       windows: 'Windows EV Certificate',
       gpg: 'GPG Key'
     }
-    toast.success('Certificate added', {
-      description: `${typeNames[addCertificateType]} has been configured successfully`
+    toast.success('Certificate added' has been configured successfully`
     })
     setShowAddCertificateDialog(false)
   }
@@ -1124,8 +1120,7 @@ export default function DesktopAppClient() {
 
   // Save CI/CD configuration
   const handleSaveCICDConfig = (provider: string) => {
-    toast.success('CI/CD configured', {
-      description: `${provider} has been connected successfully`
+    toast.success('CI/CD configured' has been connected successfully`
     })
     setShowCICDDialog(false)
   }
@@ -1228,9 +1223,7 @@ export default function DesktopAppClient() {
 
   // Save settings
   const handleSaveSettings = () => {
-    toast.success('Settings saved', {
-      description: 'Your desktop app settings have been updated'
-    })
+    toast.success('Settings saved')
     setShowSettingsDialog(false)
   }
 
@@ -2679,7 +2672,7 @@ export default function DesktopAppClient() {
             <AIInsightsPanel
               insights={mockDesktopAppAIInsights}
               title="Desktop App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

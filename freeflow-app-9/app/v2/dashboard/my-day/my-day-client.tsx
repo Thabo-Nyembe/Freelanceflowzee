@@ -894,7 +894,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, newTask])
     setShowAddTaskDialog(false)
-    toast.success('Task created', { description: `"${newTaskTitle}" has been added` })
+    toast.success('Task created'" has been added` })
   }
 
   const submitScheduleMeeting = () => {
@@ -922,7 +922,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, meetingTask])
     setShowScheduleMeetingDialog(false)
-    toast.success('Meeting scheduled', { description: `${meetingTitle} on ${meetingDate} at ${meetingTime}` })
+    toast.success('Meeting scheduled' on ${meetingDate} at ${meetingTime}` })
   }
 
   const submitReminder = () => {
@@ -948,7 +948,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, reminderTask])
     setShowReminderDialog(false)
-    toast.success('Reminder set', { description: `You'll be reminded on ${reminderDate} at ${reminderTime}` })
+    toast.success('Reminder set' at ${reminderTime}` })
   }
 
   const submitNewSection = () => {
@@ -971,7 +971,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
           ? { ...p, sections: [...p.sections, newSection] }
           : p
       ))
-      toast.success('Section created', { description: `"${newSectionName}" has been added` })
+      toast.success('Section created'" has been added` })
       setNewSectionName('')
     } else {
       toast.error('No project selected for section')
@@ -991,7 +991,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       taskCount: 0
     }
     setLabels(prev => [...prev, newLabel])
-    toast.success('Label created', { description: `@${newLabelName} has been created` })
+    toast.success('Label created' has been created` })
     setNewLabelName('')
     setNewLabelColor('#6366F1')
     setShowAddLabelDialog(false)
@@ -1015,7 +1015,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       createdAt: new Date().toISOString()
     }
     setProjects(prev => [...prev, newProject])
-    toast.success('Project created', { description: `"${newProjectName}" has been created` })
+    toast.success('Project created'" has been created` })
     setNewProjectName('')
     setNewProjectColor('#10B981')
     setNewProjectDescription('')
@@ -1035,7 +1035,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       ))
       setSelectedTask(prev => prev ? { ...prev, title: editedTaskTitle, description: editedTaskDescription, priority: editedTaskPriority } : null)
       setShowEditTaskDialog(false)
-      toast.success('Task updated', { description: 'Changes have been saved' })
+      toast.success('Task updated')
     }
   }
 
@@ -1049,7 +1049,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       ))
       setSelectedTask(prev => prev ? { ...prev, projectId: moveTargetProject, projectName: targetProject?.name, projectColor: targetProject?.color } : null)
       setShowMoveTaskDialog(false)
-      toast.success('Task moved', { description: `Moved to ${targetProject?.name}` })
+      toast.success('Task moved'` })
     }
   }
 
@@ -1066,7 +1066,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       }
       setTasks(prev => [...prev, duplicatedTask])
       setShowDuplicateTaskDialog(false)
-      toast.success('Task duplicated', { description: `"${duplicatedTask.title}" has been created` })
+      toast.success('Task duplicated'" has been created` })
     }
   }
 
@@ -1076,7 +1076,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       setShowArchiveTaskDialog(false)
       setShowTaskDialog(false)
       setSelectedTask(null)
-      toast.success('Task archived', { description: 'Task has been moved to archive' })
+      toast.success('Task archived')
     }
   }
 
@@ -1086,7 +1086,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       setShowDeleteTaskDialog(false)
       setShowTaskDialog(false)
       setSelectedTask(null)
-      toast.success('Task deleted', { description: 'Task has been permanently removed' })
+      toast.success('Task deleted')
     }
   }
 
@@ -1099,7 +1099,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     setTimerMode('focus')
     setTimerActive(true)
     setShowFocusSessionDialog(false)
-    toast.success('Focus session started', { description: `${duration} minute focus session active` })
+    toast.success('Focus session started' minute focus session active` })
   }
 
   const handlePostComment = () => {
@@ -1122,7 +1122,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       ))
       setSelectedTask(prev => prev ? { ...prev, comments: [...prev.comments, newComment] } : null)
       setCommentText('')
-      toast.success('Comment posted', { description: 'Your comment has been added' })
+      toast.success('Comment posted')
     }
   }
 
@@ -2112,7 +2112,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             <AIInsightsPanel
               insights={mockMyDayAIInsights}
               title="Daily Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2603,7 +2603,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 // Apply settings - update default timer duration
                 setTimerSeconds(parseInt(settingsFocusDuration) * 60)
                 setShowSettingsDialog(false)
-                toast.success('Settings saved', { description: 'Your preferences have been updated' })
+                toast.success('Settings saved')
               }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>

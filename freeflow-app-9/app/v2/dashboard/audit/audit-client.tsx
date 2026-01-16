@@ -645,7 +645,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           clearInterval(interval)
           setIsRunningAudit(false)
           setShowRunAuditDialog(false)
-          toast.success('Audit Complete', { description: `${auditName || 'Security audit'} completed successfully` })
+          toast.success('Audit Complete' completed successfully` })
           return 100
         }
         return prev + 10
@@ -684,7 +684,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmSchedule = () => {
     setShowScheduleDialog(false)
-    toast.success('Schedule Created', { description: `Audit scheduled ${scheduleFrequency} at ${scheduleTime}` })
+    toast.success('Schedule Created' at ${scheduleTime}` })
   }
 
   const handleResolveIssue = (id: string) => {
@@ -695,7 +695,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmResolveIssue = () => {
     setShowResolveIssueDialog(false)
-    toast.success('Issue Resolved', { description: `Issue #${issueToResolve} has been marked as resolved` })
+    toast.success('Issue Resolved' has been marked as resolved` })
     setIssueToResolve('')
     setResolutionNotes('')
   }
@@ -720,7 +720,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleSearch = () => {
     if (!searchQuery.trim()) {
-      toast.error('Search Error', { description: 'Please enter a search query' })
+      toast.error('Search Error')
       return
     }
     toast.promise(
@@ -761,14 +761,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         if (selectedAlert) {
           setShowAcknowledgeAlertDialog(true)
         } else {
-          toast.error('No Alert Selected', { description: 'Please select an alert first' })
+          toast.error('No Alert Selected')
         }
         break
       case 'Suppress':
         if (selectedAlert) {
           setShowSuppressAlertDialog(true)
         } else {
-          toast.error('No Alert Selected', { description: 'Please select an alert first' })
+          toast.error('No Alert Selected')
         }
         break
       case 'History':
@@ -853,7 +853,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         setActiveTab('compliance')
         break
       default:
-        toast.info(label, { description: `${label} action initiated` })
+        toast.info(label action initiated` })
     }
   }
 
@@ -865,11 +865,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmCreateReport = () => {
     if (!reportName.trim()) {
-      toast.error('Validation Error', { description: 'Report name is required' })
+      toast.error('Validation Error')
       return
     }
     setShowCreateReportDialog(false)
-    toast.success('Report Created', { description: `"${reportName}" has been created` })
+    toast.success('Report Created'" has been created` })
     setReportName('')
     setReportDescription('')
   }
@@ -941,13 +941,13 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const handleConfirmIntegration = () => {
     setShowIntegrationDialog(false)
     const action = selectedIntegration?.status === 'connected' ? 'configured' : 'connected'
-    toast.success(`Integration ${action}`, { description: `${selectedIntegration?.name} has been ${action}` })
+    toast.success(`Integration ${action}` has been ${action}` })
     setSelectedIntegration(null)
   }
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('sk_siem_xxxxxxxxxxxxxxxxxxxxx')
-    toast.success('Copied', { description: 'API key copied to clipboard' })
+    toast.success('Copied')
   }
 
   const handleRegenerateApiKey = () => {
@@ -1029,7 +1029,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmResetSettings = () => {
     setShowConfirmResetDialog(false)
-    toast.success('Settings Reset', { description: 'All settings have been restored to defaults' })
+    toast.success('Settings Reset')
   }
 
   const handleDeleteAllData = () => {
@@ -1038,7 +1038,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmDeleteAllData = () => {
     setShowConfirmDeleteDialog(false)
-    toast.success('Data Deleted', { description: 'All audit data has been permanently deleted' })
+    toast.success('Data Deleted')
   }
 
   const handleAcknowledgeAlert = () => {
@@ -1048,7 +1048,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmAcknowledgeAlert = () => {
     setShowAcknowledgeAlertDialog(false)
-    toast.success('Alert Acknowledged', { description: `Alert "${selectedAlert?.name}" has been acknowledged` })
+    toast.success('Alert Acknowledged'" has been acknowledged` })
     setSelectedAlert(null)
     setAcknowledgeNotes('')
   }
@@ -1060,7 +1060,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmSuppressAlert = () => {
     setShowSuppressAlertDialog(false)
-    toast.success('Alert Suppressed', { description: `Alert suppressed for ${suppressDuration}` })
+    toast.success('Alert Suppressed'` })
     setSelectedAlert(null)
   }
 
@@ -1070,13 +1070,13 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmDeleteAlert = () => {
     setShowDeleteAlertDialog(false)
-    toast.success('Alert Deleted', { description: `Alert "${selectedAlert?.name}" has been removed` })
+    toast.success('Alert Deleted'" has been removed` })
     setSelectedAlert(null)
   }
 
   const handleSaveSearch = () => {
     setShowSaveSearchDialog(false)
-    toast.success('Search Saved', { description: 'Your search has been saved' })
+    toast.success('Search Saved')
   }
 
   const formatTimeAgo = (timestamp: string) => {
@@ -2534,7 +2534,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             <AIInsightsPanel
               insights={mockAuditAIInsights}
               title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3497,7 +3497,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                   onClick={() => {
                     setShowDuplicateDialog(false)
-                    toast.success('Duplicated', { description: `"${duplicateItemName}" has been created` })
+                    toast.success('Duplicated'" has been created` })
                   }}
                 >
                   Duplicate
@@ -3572,11 +3572,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   className="flex-1 bg-pink-600 hover:bg-pink-700"
                   onClick={() => {
                     if (!emailRecipients.trim()) {
-                      toast.error('Validation Error', { description: 'Please enter at least one recipient' })
+                      toast.error('Validation Error')
                       return
                     }
                     setShowEmailReportDialog(false)
-                    toast.success('Email Sent', { description: `Report sent to ${emailRecipients.split(',').length} recipient(s)` })
+                    toast.success('Email Sent' recipient(s)` })
                   }}
                 >
                   Send Email
@@ -3641,7 +3641,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   className="flex-1 bg-amber-600 hover:bg-amber-700"
                   onClick={() => {
                     setShowArchiveDialog(false)
-                    toast.success('Archived', { description: `"${itemToArchive}" has been moved to archive` })
+                    toast.success('Archived'" has been moved to archive` })
                   }}
                 >
                   Archive Item

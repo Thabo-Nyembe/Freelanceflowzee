@@ -905,13 +905,13 @@ export default function KnowledgeBaseClient() {
       })
 
       if (error) throw error
-      toast.success('Page created', { description: `"${newPageTitle}" has been created` })
+      toast.success('Page created'" has been created` })
       setNewPageTitle('')
       setNewPageContent('')
       setShowCreateDialog(false)
       fetchData()
     } catch (error) {
-      toast.error('Failed to create page', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create page')
     } finally {
       setIsSubmitting(false)
     }
@@ -925,11 +925,11 @@ export default function KnowledgeBaseClient() {
         .eq('id', pageId)
 
       if (error) throw error
-      toast.success('Page deleted', { description: `"${pageTitle}" moved to trash` })
+      toast.success('Page deleted'" moved to trash` })
       setShowPageDialog(false)
       fetchData()
     } catch (error) {
-      toast.error('Failed to delete page', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete page')
     }
   }
 
@@ -941,10 +941,10 @@ export default function KnowledgeBaseClient() {
         .eq('id', pageId)
 
       if (error) throw error
-      toast.success('Page published', { description: `"${pageTitle}" is now live` })
+      toast.success('Page published'" is now live` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to publish page', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to publish page')
     }
   }
 
@@ -997,10 +997,10 @@ export default function KnowledgeBaseClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', { description: `Exported ${pages.length} articles successfully` })
+      toast.success('Export complete' articles successfully` })
     } catch (error) {
       console.error('Export failed:', error)
-      toast.error('Export failed', { description: 'Unable to export knowledge base' })
+      toast.error('Export failed')
     }
   }
 
@@ -1010,10 +1010,10 @@ export default function KnowledgeBaseClient() {
         ? `${window.location.origin}/knowledge-base/page/${pageId}`
         : `${window.location.origin}/knowledge-base`
       await navigator.clipboard.writeText(shareUrl)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (error) {
       console.error('Failed to copy:', error)
-      toast.error('Failed to copy link', { description: 'Please try again' })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -1043,9 +1043,7 @@ export default function KnowledgeBaseClient() {
           .eq('user_id', user.id)
       }
 
-      toast.success(page.isWatching ? 'Stopped watching page' : 'Now watching page', {
-        description: page.isWatching ? 'You will no longer receive notifications' : 'You will receive notifications for updates'
-      })
+      toast.success(page.isWatching ? 'Stopped watching page' : 'Now watching page')
     } catch (error) {
       console.error('Failed to toggle watch:', error)
       // Revert on error
@@ -1088,7 +1086,7 @@ export default function KnowledgeBaseClient() {
 
       if (error) throw error
 
-      toast.success('Page updated', { description: `"${editPageTitle}" has been saved` })
+      toast.success('Page updated'" has been saved` })
       setShowEditDialog(false)
       setEditingPage(null)
       setEditPageTitle('')
@@ -1096,7 +1094,7 @@ export default function KnowledgeBaseClient() {
       fetchData()
     } catch (error) {
       console.error('Failed to update page:', error)
-      toast.error('Failed to update page', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update page')
     } finally {
       setIsUpdating(false)
     }
@@ -1125,14 +1123,14 @@ export default function KnowledgeBaseClient() {
       })
       if (!res.ok) throw new Error('Failed to create space')
 
-      toast.success('Space created', { description: `"${newSpaceName}" has been created successfully` })
+      toast.success('Space created'" has been created successfully` })
       setNewSpaceName('')
       setNewSpaceKey('')
       setNewSpaceDescription('')
       setNewSpaceType('team')
       setShowCreateSpaceDialog(false)
     } catch (error) {
-      toast.error('Failed to create space', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create space')
     } finally {
       setIsCreatingSpace(false)
     }
@@ -1159,14 +1157,14 @@ export default function KnowledgeBaseClient() {
       if (!res.ok) throw new Error('Import failed')
 
       const importCount = importSource === 'file' ? importFiles.length : 1
-      toast.success('Documents imported', { description: `Successfully imported ${importCount} document(s)` })
+      toast.success('Documents imported' document(s)` })
       setImportUrl('')
       setImportFiles([])
       setImportSource('file')
       setShowImportDocsDialog(false)
       fetchData()
     } catch (error) {
-      toast.error('Failed to import documents', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to import documents')
     } finally {
       setIsImporting(false)
     }
@@ -1205,7 +1203,7 @@ export default function KnowledgeBaseClient() {
       setSearchResults(results)
       toast.success(`Found ${results.length} result(s)`)
     } catch (error) {
-      toast.error('Search failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Search failed')
     } finally {
       setIsSearching(false)
     }
@@ -2148,7 +2146,7 @@ export default function KnowledgeBaseClient() {
             <AIInsightsPanel
               insights={mockKnowledgeBaseAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

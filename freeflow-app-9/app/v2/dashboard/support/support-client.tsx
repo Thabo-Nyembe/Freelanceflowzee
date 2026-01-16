@@ -537,7 +537,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitNewTicket = () => {
     if (!newTicketForm.subject.trim() || !newTicketForm.description.trim() || !newTicketForm.customerEmail.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in subject, description, and customer email' })
+      toast.error('Missing required fields')
       return
     }
     setShowNewTicketDialog(false)
@@ -553,7 +553,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitAssignment = () => {
     if (!selectedAgent) {
-      toast.error('No agent selected', { description: 'Please select an agent to assign the ticket' })
+      toast.error('No agent selected')
       return
     }
     const agent = mockAgents.find(a => a.id === selectedAgent)
@@ -592,7 +592,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSendLiveChatMessage = () => {
     if (!liveChatMessage.trim()) {
-      toast.error('Empty message', { description: 'Please type a message to send' })
+      toast.error('Empty message')
       return
     }
     setLiveChatMessage('')
@@ -615,7 +615,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitInternalNote = () => {
     if (!internalNote.trim()) {
-      toast.error('Empty note', { description: 'Please enter a note before saving' })
+      toast.error('Empty note')
       return
     }
     setShowNoteDialog(false)
@@ -631,7 +631,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitForward = () => {
     if (!forwardEmail.trim()) {
-      toast.error('Missing email', { description: 'Please enter an email address to forward to' })
+      toast.error('Missing email')
       return
     }
     setShowForwardDialog(false)
@@ -642,7 +642,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitCannedResponse = () => {
     if (!newResponseForm.title.trim() || !newResponseForm.content.trim()) {
-      toast.error('Missing required fields', { description: 'Please fill in title and content' })
+      toast.error('Missing required fields')
       return
     }
     setShowAddResponseDialog(false)
@@ -652,7 +652,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitSLAPolicy = () => {
     if (!newPolicyForm.name.trim()) {
-      toast.error('Missing policy name', { description: 'Please enter a name for the SLA policy' })
+      toast.error('Missing policy name')
       return
     }
     setShowAddPolicyDialog(false)
@@ -1899,7 +1899,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             <AIInsightsPanel
               insights={mockSupportAIInsights}
               title="Support Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2089,7 +2089,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => {
-                        toast.success('Article opened', { description: article.title })
+                        toast.success('Article opened')
                       }}>View</Button>
                     </div>
                   </div>
@@ -2364,7 +2364,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 <Button variant="outline" onClick={() => setShowReplyDialog(false)}>Cancel</Button>
                 <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
                   if (!replyContent.trim()) {
-                    toast.error('Empty reply', { description: 'Please enter a message before sending' })
+                    toast.error('Empty reply')
                     return
                   }
                   setShowReplyDialog(false)
@@ -2529,7 +2529,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   Configure automatic actions based on ticket properties
                 </p>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.info('Opening rule builder...', { description: 'Configure automatic ticket actions' })
+                  toast.info('Opening rule builder...')
                 }}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Rule
@@ -2690,7 +2690,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             toast.success(`Reply sent successfully for ticket #${selectedTicket.code}`)
                             setReplyContent('')
                           } else if (!replyContent.trim()) {
-                            toast.error('Empty Reply', { description: 'Please enter a message before sending' })
+                            toast.error('Empty Reply')
                           }
                         }}>
                           <Send className="w-4 h-4 mr-2" />

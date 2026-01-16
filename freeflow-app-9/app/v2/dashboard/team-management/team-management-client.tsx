@@ -332,13 +332,10 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed', {
-        description: `Exported ${teamsData?.length || 0} teams`
+      toast.success('Export completed' teams`
       })
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'Could not export team data'
-      })
+      toast.error('Export failed')
     } finally {
       setExporting(false)
     }
@@ -373,15 +370,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Team member added', {
-        description: `${newMemberForm.name} has been added to the team`
+      toast.success('Team member added' has been added to the team`
       })
       setShowAddMemberModal(false)
       setNewMemberForm({ name: '', email: '', role: '', department: 'Engineering' })
     } catch (error: any) {
-      toast.error('Failed to add member', {
-        description: error.message || 'Could not add team member'
-      })
+      toast.error('Failed to add member')
     } finally {
       setAddingMember(false)
     }
@@ -391,14 +385,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     setArchivingTeam(team.id)
     try {
       await updateTeam({ id: team.id, status: 'archived' as TeamStatus })
-      toast.success('Team archived', {
-        description: `"${team.team_name}" has been archived`
+      toast.success('Team archived'" has been archived`
       })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to archive team', {
-        description: error.message || 'Could not archive the team'
-      })
+      toast.error('Failed to archive team')
     } finally {
       setArchivingTeam(null)
     }
@@ -430,15 +421,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Recognition sent!', {
-        description: `Your recognition for ${recipient?.name} has been posted`
+      toast.success('Recognition sent!' has been posted`
       })
       setShowRecognitionModal(false)
       setRecognitionForm({ recipientId: '', value: 'Excellence', message: '' })
     } catch (error: any) {
-      toast.error('Failed to send recognition', {
-        description: error.message || 'Could not send recognition'
-      })
+      toast.error('Failed to send recognition')
     } finally {
       setSendingRecognition(false)
     }
@@ -471,15 +459,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('1:1 scheduled', {
-        description: `Meeting scheduled with ${participant?.name}`
+      toast.success('1:1 scheduled'`
       })
       setShowSchedule1on1Modal(false)
       setSchedule1on1Form({ participantId: '', scheduledDate: '', topics: '' })
     } catch (error: any) {
-      toast.error('Failed to schedule 1:1', {
-        description: error.message || 'Could not schedule meeting'
-      })
+      toast.error('Failed to schedule 1:1')
     } finally {
       setScheduling1on1(false)
     }
@@ -513,15 +498,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Review cycle started', {
-        description: `Created ${teamMembers.length} review entries`
+      toast.success('Review cycle started' review entries`
       })
       setShowReviewCycleModal(false)
       setReviewCycleForm({ cycleName: '', reviewType: '360', dueDate: '' })
     } catch (error: any) {
-      toast.error('Failed to start review cycle', {
-        description: error.message || 'Could not start review cycle'
-      })
+      toast.error('Failed to start review cycle')
     } finally {
       setStartingReviewCycle(false)
     }
@@ -546,14 +528,10 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('OKRs reset', {
-        description: 'All goals and OKRs have been cleared'
-      })
+      toast.success('OKRs reset')
       refetch()
     } catch (error: any) {
-      toast.error('Failed to reset OKRs', {
-        description: error.message || 'Could not reset OKRs'
-      })
+      toast.error('Failed to reset OKRs')
     }
   }
 
@@ -572,13 +550,9 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Reviews archived', {
-        description: 'All reviews have been moved to archive'
-      })
+      toast.success('Reviews archived')
     } catch (error: any) {
-      toast.error('Failed to archive reviews', {
-        description: error.message || 'Could not archive reviews'
-      })
+      toast.error('Failed to archive reviews')
     }
   }
 
@@ -613,25 +587,21 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed', {
-        description: 'All HR data has been exported'
-      })
+      toast.success('Export completed')
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'Could not export data'
-      })
+      toast.error('Export failed')
     } finally {
       setExporting(false)
     }
   }
 
   const handleSyncNow = async () => {
-    toast.info('Syncing...', { description: 'Refreshing data from all sources' })
+    toast.info('Syncing...')
     try {
       await refetch()
-      toast.success('Sync complete', { description: 'All data is up to date' })
+      toast.success('Sync complete')
     } catch (error: any) {
-      toast.error('Sync failed', { description: error.message })
+      toast.error('Sync failed')
     }
   }
 
@@ -2442,7 +2412,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
             <AIInsightsPanel
               insights={teamManagementAIInsights}
               title="Team Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

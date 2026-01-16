@@ -769,15 +769,12 @@ export default function MediaLibraryClient({
   const handleDownloadAsset = (asset: MediaAsset) => {
     if (asset.originalUrl) {
       window.open(asset.originalUrl, '_blank')
-      toast.success('Download started', {
-        description: `Downloading "${asset.fileName}"...`
+      toast.success('Download started'"...`
       })
       // Increment download count
       fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
     } else {
-      toast.info('Download unavailable', {
-        description: 'No download URL available for this asset'
-      })
+      toast.info('Download unavailable')
     }
   }
 
@@ -798,14 +795,12 @@ export default function MediaLibraryClient({
     try {
       if (itemToDelete.type === 'file') {
         await fileMutation.remove(itemToDelete.id)
-        toast.success('File deleted', {
-          description: `"${itemToDelete.name}" has been deleted`
+        toast.success('File deleted'" has been deleted`
         })
         refetchFiles()
       } else {
         await folderMutation.remove(itemToDelete.id)
-        toast.success('Folder deleted', {
-          description: `"${itemToDelete.name}" has been deleted`
+        toast.success('Folder deleted'" has been deleted`
         })
         refetchFolders()
       }
@@ -830,8 +825,7 @@ export default function MediaLibraryClient({
     setIsSubmitting(true)
     try {
       await fileMutation.update(itemToMove.id, { folder_id: targetFolderId })
-      toast.success('Asset moved', {
-        description: `"${itemToMove.fileName}" has been moved`
+      toast.success('Asset moved'" has been moved`
       })
       setShowMoveDialog(false)
       setItemToMove(null)
@@ -873,8 +867,7 @@ export default function MediaLibraryClient({
         access_level: fileForm.access_level,
         is_public: fileForm.is_public,
       })
-      toast.success('Asset updated', {
-        description: `"${fileForm.file_name}" has been updated`
+      toast.success('Asset updated'" has been updated`
       })
       setShowEditDialog(false)
       setItemToEdit(null)
@@ -968,21 +961,15 @@ export default function MediaLibraryClient({
   }
 
   const handleBulkExport = async () => {
-    toast.info('Preparing bulk export...', {
-      description: 'This feature will download all selected assets'
-    })
+    toast.info('Preparing bulk export...')
   }
 
   const handleAIEnhance = async (asset?: MediaAsset) => {
-    toast.info('AI Enhancement', {
-      description: 'AI-powered optimization is being applied...'
-    })
+    toast.info('AI Enhancement')
   }
 
   const handleAISearch = () => {
-    toast.info('AI Search', {
-      description: 'Smart search is analyzing your query...'
-    })
+    toast.info('AI Search')
   }
 
   return (
@@ -1269,11 +1256,11 @@ export default function MediaLibraryClient({
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => setShowFolderTreeDialog(true) },
                 { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => setShowBulkMoveDialog(true) },
-                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Archived ${emptyFolders.length} empty folder(s)`); } else { toast.info('No empty folders', { description: 'All folders contain assets' }); } } },
+                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Archived ${emptyFolders.length} empty folder(s)`); } else { toast.info('No empty folders'); } } },
                 { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => { refetchFolders(); toast.success('Folders synced'); } },
                 { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => setShowSortFoldersDialog(true) },
                 { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => setShowFolderPermissionsDialog(true) },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Cleaned up ${emptyFolders.length} empty folder(s)`); } else { toast.info('No cleanup needed', { description: 'All folders contain assets' }); } } },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Cleaned up ${emptyFolders.length} empty folder(s)`); } else { toast.info('No cleanup needed'); } } },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
@@ -2095,7 +2082,7 @@ export default function MediaLibraryClient({
             <AIInsightsPanel
               insights={mockMediaAIInsights}
               title="Media Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2664,7 +2651,7 @@ export default function MediaLibraryClient({
               <div className="flex items-center gap-2">
                 <Input placeholder="Search assets to share..." />
                 <Button variant="outline" size="icon" onClick={() => {
-                  toast.info('Searching assets', { description: 'Searching for assets to share...' })
+                  toast.info('Searching assets')
                 }}>
                   <Search className="w-4 h-4" />
                 </Button>

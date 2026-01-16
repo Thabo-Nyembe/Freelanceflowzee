@@ -2272,7 +2272,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <AIInsightsPanel
               insights={mockBudgetsAIInsights}
               title="Budget Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3688,28 +3688,28 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </DialogHeader>
             <div className="space-y-3 py-4">
               <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                toast.success('Category renamed', { description: 'Open the rename dialog to change the name' })
+                toast.success('Category renamed')
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Edit3 className="h-4 w-4" />
                 Rename Category
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                toast.success('Category moved', { description: 'Drag and drop to reorganize categories' })
+                toast.success('Category moved')
                 setShowCategoryOptionsDialog(null)
               }}>
                 <ArrowLeftRight className="h-4 w-4" />
                 Move to Different Group
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                toast.success('Goal set', { description: 'Configure your savings or spending target' })
+                toast.success('Goal set')
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Target className="h-4 w-4" />
                 Set Goal
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                toast.success('Category hidden', { description: 'Hidden categories can be restored from settings' })
+                toast.success('Category hidden')
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Clock className="h-4 w-4" />
@@ -3717,7 +3717,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 text-red-600" onClick={async () => {
                 if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-                  toast.success('Category deleted', { description: 'The category and its transactions have been removed' })
+                  toast.success('Category deleted')
                   setShowCategoryOptionsDialog(null)
                 }
               }}>

@@ -884,7 +884,7 @@ export default function ProfileClient() {
 
       if (error) throw error
 
-      toast.success('Skill added', { description: `${skillName} has been added to your profile` })
+      toast.success('Skill added' has been added to your profile` })
       fetchProfileData()
     } catch (error: any) {
       if (error.code === '23505') {
@@ -973,12 +973,12 @@ export default function ProfileClient() {
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${user?.id}`
     navigator.clipboard.writeText(profileUrl)
-    toast.success('Link copied', { description: 'Profile link copied to clipboard' })
+    toast.success('Link copied')
   }
 
   // Download profile as PDF (placeholder)
   const handleDownloadPDF = () => {
-    toast.info('Generating PDF...', { description: 'Your profile PDF will download shortly' })
+    toast.info('Generating PDF...')
   }
 
   const skillCategories = useMemo(() => {
@@ -2702,7 +2702,7 @@ export default function ProfileClient() {
               <AIInsightsPanel
                 insights={mockProfileAIInsights}
                 title="Profile Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">
@@ -2895,7 +2895,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('CV Generated', { description: `Your ${cvFormat.toUpperCase()} CV is ready for download` })
+                    toast.success('CV Generated' CV is ready for download` })
                     setShowDownloadCVDialog(false)
                   }}
                 >
@@ -3094,7 +3094,7 @@ export default function ProfileClient() {
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   disabled={!quizSelectedSkill}
                   onClick={() => {
-                    toast.success('Assessment Started', { description: `Good luck with your ${quizSelectedSkill} assessment!` })
+                    toast.success('Assessment Started' assessment!` })
                     setShowSkillQuizDialog(false)
                     setQuizSelectedSkill('')
                   }}
@@ -3277,7 +3277,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-orange-500 to-red-500 text-white"
                   onClick={() => {
-                    toast.success('Skill goal set', { description: `Goal: Reach ${skillGoalData.targetLevel} in ${skillGoalData.skill}` })
+                    toast.success('Skill goal set' in ${skillGoalData.skill}` })
                     setSkillGoalData({ skill: '', targetLevel: 'advanced', deadline: '' })
                     setShowSkillGoalsDialog(false)
                   }}
@@ -3587,7 +3587,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-orange-500 to-amber-500 text-white"
                   onClick={() => {
-                    toast.success('Event created', { description: eventFormData.title })
+                    toast.success('Event created')
                     setEventFormData({ title: '', description: '', date: '', time: '', location: '', isOnline: false })
                     setShowCreateEventDialog(false)
                   }}
@@ -3676,7 +3676,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Post scheduled', { description: `Scheduled for ${schedulePostData.scheduledDate} at ${schedulePostData.scheduledTime}` })
+                    toast.success('Post scheduled' at ${schedulePostData.scheduledTime}` })
                     setSchedulePostData({ content: '', scheduledDate: '', scheduledTime: '' })
                     setShowSchedulePostDialog(false)
                   }}
@@ -3728,7 +3728,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Application submitted', { description: `Applied to ${showJobApplyDialog?.title}` })
+                    toast.success('Application submitted'` })
                     setShowJobApplyDialog(null)
                   }}
                 >
@@ -3757,7 +3757,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Skill endorsed', { description: `You endorsed ${showEndorseSkillDialog}` })
+                    toast.success('Skill endorsed'` })
                     setShowEndorseSkillDialog(null)
                   }}
                 >
@@ -3813,7 +3813,7 @@ export default function ProfileClient() {
                 <Button
                   variant="destructive"
                   onClick={() => {
-                    toast.success('Session ended', { description: 'Successfully signed out from device' })
+                    toast.success('Session ended')
                     setShowSessionSignOutDialog(null)
                   }}
                 >

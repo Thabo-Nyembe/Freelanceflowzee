@@ -436,23 +436,23 @@ export default function ComponentLibraryClient() {
   }
 
   // Handlers
-  const handleCopyCode = (n: string) => toast.success('Copied', { description: `${n} code copied` })
-  const handlePreview = (n: string) => toast.info('Preview', { description: `Previewing ${n}...` })
-  const handleExport = () => toast.success('Exporting', { description: 'Component exported' })
-  const handleCreate = () => toast.info('Create', { description: 'Opening builder...' })
-  const handleOpenFigma = () => toast.info('Figma', { description: 'Opening Figma design kit...' })
-  const handleOpenGitHub = () => toast.info('GitHub', { description: 'Opening GitHub repository...' })
-  const handleOpenDocs = (docType: string) => toast.info('Documentation', { description: `Opening ${docType}...` })
-  const handleDownload = (item: string) => toast.success('Download Started', { description: `Downloading ${item}...` })
-  const handleConnect = (toolName: string) => toast.info('Connect', { description: `Connecting to ${toolName}...` })
-  const handleAddWebhook = () => toast.info('Add Webhook', { description: 'Opening webhook configuration...' })
-  const handleViewApiKey = () => toast.info('API Key', { description: 'Revealing API key...' })
-  const handleCopyApiKey = () => toast.success('Copied', { description: 'API key copied to clipboard' })
-  const handleRegenerateApiKey = () => toast.warning('Regenerate API Key', { description: 'Are you sure? This will invalidate the current key.' })
-  const handleViewNpm = () => toast.info('NPM', { description: 'Opening NPM package page...' })
-  const handleClearCache = () => toast.success('Cache Cleared', { description: 'Component cache has been cleared' })
-  const handleViewAccessLogs = () => toast.info('Access Logs', { description: 'Opening access logs...' })
-  const handleDangerAction = (action: string) => toast.error('Danger Zone', { description: `${action} requires confirmation` })
+  const handleCopyCode = (n: string) => toast.success('Copied' code copied` })
+  const handlePreview = (n: string) => toast.info('Preview'...` })
+  const handleExport = () => toast.success('Exporting')
+  const handleCreate = () => toast.info('Create')
+  const handleOpenFigma = () => toast.info('Figma')
+  const handleOpenGitHub = () => toast.info('GitHub')
+  const handleOpenDocs = (docType: string) => toast.info('Documentation'...` })
+  const handleDownload = (item: string) => toast.success('Download Started'...` })
+  const handleConnect = (toolName: string) => toast.info('Connect'...` })
+  const handleAddWebhook = () => toast.info('Add Webhook')
+  const handleViewApiKey = () => toast.info('API Key')
+  const handleCopyApiKey = () => toast.success('Copied')
+  const handleRegenerateApiKey = () => toast.warning('Regenerate API Key')
+  const handleViewNpm = () => toast.info('NPM')
+  const handleClearCache = () => toast.success('Cache Cleared')
+  const handleViewAccessLogs = () => toast.info('Access Logs')
+  const handleDangerAction = (action: string) => toast.error('Danger Zone' requires confirmation` })
 
   // Key metrics for header
   const keyMetrics = [
@@ -1785,7 +1785,7 @@ export default function App() {
             <AIInsightsPanel
               insights={mockComponentLibAIInsights}
               title="Component Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

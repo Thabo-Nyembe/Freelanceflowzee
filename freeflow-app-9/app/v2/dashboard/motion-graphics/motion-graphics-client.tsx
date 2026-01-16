@@ -717,8 +717,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.info('Rendering started', {
-        description: `"${projectName}" added to render queue`
+      toast.info('Rendering started'" added to render queue`
       })
       fetchExports()
     } catch (error) {
@@ -746,8 +745,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Export started', {
-        description: `"${projectName}" will be ready shortly`
+      toast.success('Export started'" will be ready shortly`
       })
       fetchExports()
     } catch (error) {
@@ -786,8 +784,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project duplicated', {
-        description: `Copy of "${projectName}" created`
+      toast.success('Project duplicated'" created`
       })
       fetchProjects()
     } catch (error) {
@@ -824,8 +821,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project deleted', {
-        description: `"${projectName}" has been removed`
+      toast.success('Project deleted'" has been removed`
       })
       fetchProjects()
     } catch (error) {
@@ -854,8 +850,7 @@ export default function MotionGraphicsClient({
 
   // Apply preset handler
   const handleApplyPreset = (presetName: string) => {
-    toast.success('Preset applied', {
-      description: `"${presetName}" effect applied to timeline`
+    toast.success('Preset applied'" effect applied to timeline`
     })
   }
 
@@ -907,27 +902,20 @@ export default function MotionGraphicsClient({
 
   // Effect handlers
   const handleApplyEffect = (effectName: string) => {
-    toast.success(`${effectName} applied`, {
-      description: 'Effect added to selected layer'
-    })
+    toast.success(`${effectName} applied`)
   }
 
   // Render queue handlers
   const handleStartRenderJob = (jobId: string) => {
-    toast.info('Render started', {
-      description: 'Job added to active queue'
-    })
+    toast.info('Render started')
   }
 
   const handlePauseRenderJob = (jobId: string) => {
-    toast.info('Render paused', {
-      description: 'Job paused - resume when ready'
-    })
+    toast.info('Render paused')
   }
 
   const handleDownloadRender = (job: RenderJob) => {
-    toast.success('Download started', {
-      description: `Downloading ${job.animationTitle}`
+    toast.success('Download started'`
     })
   }
 
@@ -936,73 +924,53 @@ export default function MotionGraphicsClient({
   }
 
   const handleStartAllRenders = () => {
-    toast.success('All renders started', {
-      description: 'Processing queue...'
-    })
+    toast.success('All renders started')
   }
 
   // Export handlers
   const handleExportAnalytics = () => {
-    toast.success('Analytics exported', {
-      description: 'CSV file downloaded'
-    })
+    toast.success('Analytics exported')
     setShowExportAnalyticsDialog(false)
   }
 
   const handleExportConfig = () => {
-    toast.success('Configuration exported', {
-      description: 'Settings file downloaded'
-    })
+    toast.success('Configuration exported')
     setShowExportConfigDialog(false)
   }
 
   // Settings handlers
   const handleClearCache = () => {
-    toast.success('Cache cleared', {
-      description: '12.4 GB freed'
-    })
+    toast.success('Cache cleared')
     setShowClearCacheDialog(false)
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API key regenerated', {
-      description: 'New key is now active'
-    })
+    toast.success('API key regenerated')
   }
 
   const handleResetSettings = () => {
-    toast.success('Settings reset', {
-      description: 'All settings restored to defaults'
-    })
+    toast.success('Settings reset')
     setShowResetSettingsDialog(false)
   }
 
   const handleDeleteAllProjects = () => {
-    toast.success('All projects deleted', {
-      description: 'Project data has been removed'
-    })
+    toast.success('All projects deleted')
     setShowDeleteAllProjectsDialog(false)
   }
 
   // Asset handlers
   const handleUploadAsset = () => {
-    toast.success('Asset upload started', {
-      description: 'Select files to upload'
-    })
+    toast.success('Asset upload started')
   }
 
   const handleAddAssetToProject = () => {
-    toast.success('Asset added to project', {
-      description: 'Asset is now available in timeline'
-    })
+    toast.success('Asset added to project')
     setShowAssetsDialog(false)
   }
 
   // Share handler
   const handleShare = () => {
-    toast.success('Share link copied', {
-      description: 'Link copied to clipboard'
-    })
+    toast.success('Share link copied')
     setShowShareDialog(false)
   }
 
@@ -1120,12 +1088,12 @@ export default function MotionGraphicsClient({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { icon: Plus, label: 'New Project', desc: 'Start fresh', color: 'text-cyan-500', action: () => setShowCreateDialog(true) },
-                { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500', action: () => toast.success('AI Animation', { description: 'AI is generating your animation...' }) },
+                { icon: Wand2, label: 'AI Animate', desc: 'Auto-create', color: 'text-purple-500', action: () => toast.success('AI Animation') },
                 { icon: LayoutTemplate, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', action: () => setShowTemplatesDialog(true) },
                 { icon: Layers, label: 'Compositions', desc: 'Layer groups', color: 'text-green-500', action: () => setActiveTab('timeline') },
                 { icon: Sparkles, label: 'Effects', desc: 'Add effects', color: 'text-pink-500', action: () => setShowAddEffectDialog(true) },
-                { icon: Type, label: 'Typography', desc: 'Kinetic text', color: 'text-orange-500', action: () => toast.info('Typography', { description: 'Opening kinetic text editor...' }) },
-                { icon: Camera, label: 'Cameras', desc: '3D cameras', color: 'text-amber-500', action: () => toast.info('Cameras', { description: 'Opening 3D camera controls...' }) },
+                { icon: Type, label: 'Typography', desc: 'Kinetic text', color: 'text-orange-500', action: () => toast.info('Typography') },
+                { icon: Camera, label: 'Cameras', desc: '3D cameras', color: 'text-amber-500', action: () => toast.info('Cameras') },
                 { icon: Clapperboard, label: 'Render', desc: 'Export video', color: 'text-red-500', action: () => setShowRenderDialog(true) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1189,7 +1157,7 @@ export default function MotionGraphicsClient({
                           <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full" onClick={(e) => {
                             e.stopPropagation()
                             setSelectedAnimation(animation)
-                            toast.info('Preview', { description: `Playing ${animation.title}` })
+                            toast.info('Preview'` })
                           }}>
                             <Play className="w-6 h-6" />
                           </Button>
@@ -2254,7 +2222,7 @@ export default function MotionGraphicsClient({
             <AIInsightsPanel
               insights={mockMotionGraphicsAIInsights}
               title="Motion Graphics Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2306,9 +2274,7 @@ export default function MotionGraphicsClient({
                       className="w-16 h-16 rounded-full"
                       onClick={() => {
                         setIsPlaying(!isPlaying)
-                        toast.info(isPlaying ? 'Paused' : 'Playing', {
-                          description: selectedAnimation.title
-                        })
+                        toast.info(isPlaying ? 'Paused' : 'Playing')
                       }}
                     >
                       <Play className="w-8 h-8 ml-1" />
@@ -2790,9 +2756,7 @@ export default function MotionGraphicsClient({
                     className="p-4 rounded-lg border hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all text-left"
                     onClick={() => {
                       setShowAddLayerDialog(false)
-                      toast.success(`${item.label} layer added`, {
-                        description: 'New layer added to timeline'
-                      })
+                      toast.success(`${item.label} layer added`)
                     }}
                   >
                     <item.icon className="w-6 h-6 text-purple-500 mb-2" />
@@ -3202,9 +3166,7 @@ export default function MotionGraphicsClient({
               </Button>
               <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
                 setShowEditProjectDialog(false)
-                toast.success('Project updated', {
-                  description: 'Changes saved successfully'
-                })
+                toast.success('Project updated')
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes

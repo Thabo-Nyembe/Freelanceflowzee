@@ -55,7 +55,6 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { toast } from 'sonner'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -140,25 +139,17 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_INSIGHTS':
-      logger.info('Setting insights', { count: action.insights.length })
-      return { ...state, insights: action.insights }
+    case 'SET_INSIGHTS':      return { ...state, insights: action.insights }
 
-    case 'ADD_INSIGHT':
-      logger.info('Adding insight', { insightId: action.insight.id, title: action.insight.title })
-      return { ...state, insights: [action.insight, ...state.insights] }
+    case 'ADD_INSIGHT':      return { ...state, insights: [action.insight, ...state.insights] }
 
-    case 'UPDATE_INSIGHT':
-      logger.info('Updating insight', { insightId: action.insight.id, title: action.insight.title })
-      return {
+    case 'UPDATE_INSIGHT':      return {
         ...state,
         insights: state.insights.map(i => i.id === action.insight.id ? action.insight : i),
         selectedInsight: state.selectedInsight?.id === action.insight.id ? action.insight : state.selectedInsight
       }
 
-    case 'DELETE_INSIGHT':
-      logger.info('Deleting insight', { insightId: action.insightId })
-      return {
+    case 'DELETE_INSIGHT':      return {
         ...state,
         insights: state.insights.filter(i => i.id !== action.insightId),
         selectedInsight: state.selectedInsight?.id === action.insightId ? null : state.selectedInsight,
@@ -207,9 +198,7 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
       logger.debug('Clearing selection')
       return { ...state, selectedInsights: [] }
 
-    case 'RETRAIN_MODEL':
-      logger.info('Retraining model', { insightId: action.insightId })
-      return {
+    case 'RETRAIN_MODEL':      return {
         ...state,
         insights: state.insights.map(i =>
           i.id === action.insightId
@@ -320,10 +309,7 @@ function generateMockInsights(): MLInsight[] {
       potentialRevenue: Math.floor(Math.random() * 500000) + 10000,
       priority: Math.floor(Math.random() * 10) + 1
     }
-  })
-
-  logger.info('Generated mock ML insights', { count: insights.length })
-  return insights
+  })  return insights
 }
 
 // ============================================================================
@@ -438,7 +424,6 @@ const mlInsightsActivities = [
 export default function MlInsightsClient() {
   logger.debug('Component mounting')
 
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -497,14 +482,9 @@ export default function MlInsightsClient() {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
-      }
-
-      logger.info('Loading ML insights from database', { userId })
-      try {
+      }      try {
         setIsLoading(true)
         setError(null)
 
@@ -517,14 +497,7 @@ export default function MlInsightsClient() {
 
         // If no insights in database, use mock data
         const insightsToUse = (insights && insights.length > 0) ? insights : generateMockInsights()
-        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })
-
-        logger.info('ML insights loaded successfully', {
-          userId,
-          count: insightsToUse.length,
-          source: (insights && insights.length > 0) ? 'database' : 'mock'
-        })
-        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
+        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
 
         setIsLoading(false)
       } catch (err) {
@@ -627,16 +600,7 @@ export default function MlInsightsClient() {
   // HANDLERS
   // ============================================================================
 
-  const handleCreateInsight = async () => {
-    logger.info('Creating ML insight', {
-      title: insightTitle,
-      type: insightType,
-      category: insightCategory,
-      confidence: insightConfidence,
-      impact: insightImpact
-    })
-
-    if (!insightTitle || !insightDescription) {
+  const handleCreateInsight = async () => {    if (!insightTitle || !insightDescription) {
       logger.warn('Missing required fields for insight creation', {
         hasTitle: !!insightTitle,
         hasDescription: !!insightDescription
@@ -668,17 +632,7 @@ export default function MlInsightsClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'ADD_INSIGHT', insight: result.insight })
-
-        logger.info('ML insight created successfully', {
-          insightId: result.insight.id,
-          title: result.insight.title,
-          type: result.insight.type,
-          category: result.insight.category
-        })
-
-        toast.success('ML insight created', {
-          description: `${result.insight.title} - ${result.insight.type} - ${result.insight.category} - ${result.insight.confidence} confidence - ${result.insight.impact} impact`
+        dispatch({ type: 'ADD_INSIGHT', insight: result.insight })        toast.success('ML insight created' - ${result.insight.type} - ${result.insight.category} - ${result.insight.confidence} confidence - ${result.insight.impact} impact`
         })
 
         setShowCreateModal(false)
@@ -693,41 +647,21 @@ export default function MlInsightsClient() {
         title: insightTitle,
         type: insightType
       })
-      toast.error('Failed to create insight', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create insight')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleViewInsight = (insight: MLInsight) => {
-    logger.info('Opening insight details', {
-      insightId: insight.id,
-      title: insight.title,
-      type: insight.type,
-      category: insight.category,
-      confidence: insight.confidence
-    })
-
-    dispatch({ type: 'SELECT_INSIGHT', insight })
+  const handleViewInsight = (insight: MLInsight) => {    dispatch({ type: 'SELECT_INSIGHT', insight })
     setShowViewModal(true)
 
-    toast.info('View ML Insight', {
-      description: `${insight.title} - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy - ${insight.affectedUsers || 0} users affected`
+    toast.info('View ML Insight' - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy - ${insight.affectedUsers || 0} users affected`
     })
   }
 
   const handleDeleteInsight = async (insightId: string) => {
-    const insight = state.insights.find(i => i.id === insightId)
-
-    logger.info('Deleting ML insight', {
-      insightId,
-      title: insight?.title,
-      type: insight?.type
-    })
-
-    try {
+    const insight = state.insights.find(i => i.id === insightId)    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -742,15 +676,7 @@ export default function MlInsightsClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'DELETE_INSIGHT', insightId })
-
-        logger.info('ML insight deleted successfully', {
-          insightId,
-          title: insight?.title
-        })
-
-        toast.success('ML insight deleted', {
-          description: `${insight?.title} - ${insight?.type} - ${insight?.category} - Removed from dashboard`
+        dispatch({ type: 'DELETE_INSIGHT', insightId })        toast.success('ML insight deleted' - ${insight?.type} - ${insight?.category} - Removed from dashboard`
         })
 
         setShowDeleteModal(false)
@@ -763,9 +689,7 @@ export default function MlInsightsClient() {
         error: error.message,
         insightId
       })
-      toast.error('Failed to delete insight', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete insight')
     } finally {
       setIsSaving(false)
     }
@@ -773,15 +697,7 @@ export default function MlInsightsClient() {
 
   const handleBulkDelete = async () => {
     const selectedInsightsData = state.insights.filter(i => state.selectedInsights.includes(i.id))
-    const totalAffectedUsers = selectedInsightsData.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
-
-    logger.info('Bulk deleting ML insights', {
-      count: state.selectedInsights.length,
-      insightIds: state.selectedInsights,
-      totalAffectedUsers
-    })
-
-    try {
+    const totalAffectedUsers = selectedInsightsData.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -798,14 +714,7 @@ export default function MlInsightsClient() {
       if (result.success) {
         state.selectedInsights.forEach(id => {
           dispatch({ type: 'DELETE_INSIGHT', insightId: id })
-        })
-
-        logger.info('Bulk delete complete', {
-          deletedCount: result.deletedCount,
-          totalAffectedUsers
-        })
-
-        toast.success(`Deleted ${result.deletedCount} insight(s)`, {
+        })        toast.success(`Deleted ${result.deletedCount} insight(s)`, {
           description: `${result.deletedCount} ML insights - ${totalAffectedUsers.toLocaleString()} total users affected - Removed from dashboard`
         })
 
@@ -818,28 +727,16 @@ export default function MlInsightsClient() {
         error: error.message,
         count: state.selectedInsights.length
       })
-      toast.error('Failed to delete insights', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete insights')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleRetrainModel = async (insightId: string) => {
-    const insight = state.insights.find(i => i.id === insightId)
-
-    logger.info('Retraining ML model', {
-      insightId,
-      modelName: insight?.modelName,
-      currentVersion: insight?.modelVersion,
-      currentAccuracy: insight?.metrics.accuracy
-    })
-
-    try {
+    const insight = state.insights.find(i => i.id === insightId)    try {
       dispatch({ type: 'RETRAIN_MODEL', insightId })
-      toast.info('Model retraining started...', {
-        description: `${insight?.modelName} - v${insight?.modelVersion} - This may take a few moments`
+      toast.info('Model retraining started...' - v${insight?.modelVersion} - This may take a few moments`
       })
 
       const response = await fetch('/api/ml-insights', {
@@ -864,17 +761,7 @@ export default function MlInsightsClient() {
             updatedAt: result.insight.updatedAt
           }
           dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
-        }
-
-        logger.info('Model retrained successfully', {
-          insightId,
-          modelName: insight?.modelName,
-          newVersion: result.insight.modelVersion,
-          newMetrics: result.metrics
-        })
-
-        toast.success('Model retrained successfully', {
-          description: `${insight?.modelName} - v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
+        }        toast.success('Model retrained successfully' - v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
         })
       } else {
         throw new Error(result.error || 'Retrain failed')
@@ -885,23 +772,11 @@ export default function MlInsightsClient() {
         insightId,
         modelName: insight?.modelName
       })
-      toast.error('Failed to retrain model', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to retrain model')
     }
   }
 
-  const handleSaveSettings = async () => {
-    logger.info('Saving ML insights settings', {
-      autoRefreshEnabled,
-      refreshInterval,
-      notificationsEnabled,
-      criticalAlertsOnly,
-      defaultConfidenceThreshold,
-      modelAutoRetrain
-    })
-
-    try {
+  const handleSaveSettings = async () => {    try {
       setIsSaving(true)
 
       // Save settings via API
@@ -910,19 +785,7 @@ export default function MlInsightsClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update', section: 'ml-insights', settings: { autoRefreshEnabled, refreshInterval, notificationsEnabled, criticalAlertsOnly, defaultConfidenceThreshold, modelAutoRetrain } })
       })
-      if (!res.ok) throw new Error('Failed to save settings')
-
-      logger.info('Settings saved successfully', {
-        autoRefreshEnabled,
-        refreshInterval,
-        notificationsEnabled,
-        criticalAlertsOnly,
-        defaultConfidenceThreshold,
-        modelAutoRetrain
-      })
-
-      toast.success('Settings saved', {
-        description: `Auto-refresh: ${autoRefreshEnabled ? `${refreshInterval}min` : 'Off'} | Notifications: ${notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Off'} | Confidence threshold: ${defaultConfidenceThreshold} | Auto-retrain: ${modelAutoRetrain ? 'On' : 'Off'}`
+      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Settings saved'min` : 'Off'} | Notifications: ${notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Off'} | Confidence threshold: ${defaultConfidenceThreshold} | Auto-retrain: ${modelAutoRetrain ? 'On' : 'Off'}`
       })
 
       setShowSettingsModal(false)
@@ -930,9 +793,7 @@ export default function MlInsightsClient() {
       logger.error('Failed to save settings', {
         error: error.message
       })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSaving(false)
     }
@@ -940,16 +801,7 @@ export default function MlInsightsClient() {
 
   const handleExport = async () => {
     const totalUsers = filteredAndSortedInsights.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
-    const avgAccuracy = filteredAndSortedInsights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / filteredAndSortedInsights.length
-
-    logger.info('Exporting ML insights', {
-      format: exportFormat,
-      count: filteredAndSortedInsights.length,
-      totalUsers,
-      avgAccuracy
-    })
-
-    try {
+    const avgAccuracy = filteredAndSortedInsights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / filteredAndSortedInsights.length    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -972,17 +824,7 @@ export default function MlInsightsClient() {
         link.href = url
         link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
         link.click()
-        URL.revokeObjectURL(url)
-
-        logger.info('Export complete', {
-          format: exportFormat,
-          count: filteredAndSortedInsights.length,
-          fileSize: dataBlob.size,
-          fileName: link.download
-        })
-
-        toast.success(`Exported ${result.insightCount} insights`, {
-          description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${totalUsers.toLocaleString()} users affected - ${(avgAccuracy * 100).toFixed(1)}% avg accuracy - ${link.download}`
+        URL.revokeObjectURL(url)        toast.success(`Exported ${result.insightCount} insights` - ${Math.round(dataBlob.size / 1024)}KB - ${totalUsers.toLocaleString()} users affected - ${(avgAccuracy * 100).toFixed(1)}% avg accuracy - ${link.download}`
         })
 
         setShowExportModal(false)
@@ -995,9 +837,7 @@ export default function MlInsightsClient() {
         format: exportFormat,
         count: filteredAndSortedInsights.length
       })
-      toast.error('Failed to export insights', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to export insights')
     } finally {
       setIsSaving(false)
     }

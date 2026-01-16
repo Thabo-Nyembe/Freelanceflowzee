@@ -54,7 +54,6 @@ import {
   estimateExportTime
 } from '@/lib/report-builder-utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -97,7 +96,6 @@ const customReportsActivities = [
 // Quick actions are now defined inside the component to use state setters
 
 export default function CustomReportsClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -132,21 +130,15 @@ export default function CustomReportsClient() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  // A+++ LOAD REPORT BUILDER DATA
   useEffect(() => {
     const loadReportBuilderData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading custom reports data', { userId })
-
-        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
+        setError(null)        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
 
         const [templatesResult, reportsResult, statsResult] = await Promise.all([
           getReportTemplates({ is_public: true }),
@@ -159,20 +151,14 @@ export default function CustomReportsClient() {
         setReportsStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Reports loaded', {
-          description: `${templatesResult.data?.length || 0} templates, ${reportsResult.data?.length || 0} custom reports`
-        })
-        logger.info('Custom reports data loaded successfully', {
-          templates: templatesResult.data?.length,
-          reports: reportsResult.data?.length
-        })
-        announce('Report builder loaded successfully', 'polite')
+        toast.success('Reports loaded' templates, ${reportsResult.data?.length || 0} custom reports`
+        })        announce('Report builder loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load report builder'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load custom reports data', { error: errorMessage, userId })
-        toast.error('Failed to load reports', { description: errorMessage })
+        toast.error('Failed to load reports')
         announce('Error loading report builder', 'assertive')
       }
     }
@@ -254,7 +240,6 @@ export default function CustomReportsClient() {
     }
   ] : []
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -292,7 +277,6 @@ export default function CustomReportsClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -508,10 +492,10 @@ export default function CustomReportsClient() {
                                   const widgetExists = selectedWidgets.some(w => w.id === widget.id)
                                   if (widgetExists) {
                                     setSelectedWidgets(selectedWidgets.filter(w => w.id !== widget.id))
-                                    toast.info(`${widget.name} removed`, { description: 'Widget removed from report' })
+                                    toast.info(`${widget.name} removed`)
                                   } else {
                                     setSelectedWidgets([...selectedWidgets, widget as Widget])
-                                    toast.success(`${widget.name} added`, { description: 'Widget added to report' })
+                                    toast.success(`${widget.name} added`)
                                   }
                                 }}
                               >
@@ -675,8 +659,7 @@ export default function CustomReportsClient() {
                         className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                         size="lg"
                         onClick={() => {
-                          toast.success('Download Started', {
-                            description: `Downloading ${reportName || 'report'} as ${exportFormat.toUpperCase()}`
+                          toast.success('Download Started' as ${exportFormat.toUpperCase()}`
                           })
                         }}
                       >
@@ -824,7 +807,7 @@ export default function CustomReportsClient() {
             </Button>
             <Button onClick={() => {
               setShowNewReportDialog(false)
-              toast.success('Report Created', { description: 'New custom report is ready to configure' })
+              toast.success('Report Created')
             }} className="bg-blue-600 hover:bg-blue-700">
               Create Report
             </Button>
@@ -894,7 +877,7 @@ export default function CustomReportsClient() {
             </Button>
             <Button onClick={() => {
               setShowExportDialog(false)
-              toast.success('Export Started', { description: 'Your reports are being exported' })
+              toast.success('Export Started')
             }} className="bg-green-600 hover:bg-green-700">
               Export Selected
             </Button>
@@ -953,7 +936,7 @@ export default function CustomReportsClient() {
             </Button>
             <Button onClick={() => {
               setShowSettingsDialog(false)
-              toast.success('Settings Saved', { description: 'Your report preferences have been updated' })
+              toast.success('Settings Saved')
             }} className="bg-purple-600 hover:bg-purple-700">
               Save Settings
             </Button>
@@ -1022,7 +1005,7 @@ export default function CustomReportsClient() {
             </Button>
             <Button onClick={() => {
               setShowScheduleDialog(false)
-              toast.success('Schedule Created', { description: 'Your report will be generated automatically' })
+              toast.success('Schedule Created')
             }} className="bg-blue-600 hover:bg-blue-700">
               Create Schedule
             </Button>
