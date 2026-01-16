@@ -388,7 +388,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1 hour
    - **Complexity:** Medium-High (complex schema mapping with style/model enums, multiple field transformations)
 
-7. `deployments` (app/v2/dashboard) - ✅ **MIGRATED** (4,919 lines) - Commit: TBD
+7. `deployments` (app/v2/dashboard) - ✅ **MIGRATED** (4,919 lines) - Commit: `51724d41`
    - **Pattern:** Manual Supabase → Hooks with complex schema mapping and mutation migrations (UI Deployment ↔ DB Deployment)
    - **Tables:** deployments (via use-deployments hook)
    - **Mapping:** Field name mapping (deployment_name → name, commit_hash → commit, commit_message → commitMessage, commit_author → author, started_at → createdAt, duration_seconds → duration, can_rollback → isProtected), default values for missing UI fields (authorAvatar, previewUrl, productionUrl, prNumber, prTitle, buildCache)

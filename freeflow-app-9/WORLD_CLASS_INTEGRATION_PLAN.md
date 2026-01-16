@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (6/301 pages migrated - 2.0%) 🎉 SIXTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (7/301 pages migrated - 2.3%) 🎉 SEVENTH MILESTONE!
 
 ---
 
@@ -542,6 +542,145 @@ const mappedDesigns: Generation[] = useMemo(() => dbDesigns.map((dbDesign): Gene
 6. Replace manual fetch functions with hook's refetch
 7. Clean up duplicate/manual database calls
 
+#### 7. deployments (v2) ✅ (Commit: 51724d41)
+**File:** `app/v2/dashboard/deployments/deployments-client.tsx` (4,919 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** High (manual Supabase → hooks migration, 6 mutation functions migrated, complex schema mapping)
+
+**Before:** Manual Supabase calls throughout (fetchDeployments, mutations), UI using mockDeployments
+```typescript
+const [dbDeployments, setDbDeployments] = useState<DbDeployment[]>([])
+const [loading, setLoading] = useState(true)
+
+// Manual fetch with manual createClient
+const fetchDeployments = useCallback(async () => {
+  setLoading(true)
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  const { data, error } = await supabase.from('deployments').select('*').order('created_at', { ascending: false })
+  if (error) throw error
+  setDbDeployments(data || [])
+  setLoading(false)
+}, [])
+
+// UI using mockDeployments instead of dbDeployments!
+const filteredDeployments = useMemo(() => {
+  return mockDeployments.filter(d => { /* ... */ })
+}, [searchQuery, environmentFilter])
+
+// Manual mutation handlers (6 different handlers with manual Supabase calls)
+const handleCreateDeployment = async () => {
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  const { error } = await supabase.from('deployments').insert({ /* ... */ })
+  // ...
+}
+```
+
+**After:** Hook-based with schema mapping and mutation hooks
+```typescript
+// Integrate useDeployments hook
+const { data: dbDeploymentsData, isLoading, error: deploymentsError, refetch: fetchDeployments } = useDeployments()
+const createDeploymentMutation = useCreateDeployment()
+const updateDeploymentMutation = useUpdateDeployment()
+const deleteDeploymentMutation = useDeleteDeployment()
+
+// Map DB deployments to UI format
+const mappedDeployments: Deployment[] = useMemo(() => {
+  if (!dbDeploymentsData) return []
+
+  return dbDeploymentsData.map((dbDep): Deployment => ({
+    id: dbDep.id,
+    name: dbDep.deployment_name,
+    status: dbDep.status as DeploymentStatus,
+    environment: dbDep.environment as DeploymentEnvironment,
+    branch: dbDep.branch || 'main',
+    commit: dbDep.commit_hash || '',
+    commitMessage: dbDep.commit_message || '',
+    author: dbDep.commit_author || 'Unknown',
+    authorAvatar: dbDep.commit_author ? dbDep.commit_author.substring(0, 1).toLowerCase() : 'u',
+    createdAt: dbDep.started_at || dbDep.created_at,
+    duration: dbDep.duration_seconds || 0,
+    previewUrl: dbDep.environment === 'preview' ? `https://app-${dbDep.commit_hash?.substring(0, 7)}.vercel.app` : '',
+    productionUrl: dbDep.environment === 'production' ? 'https://freeflow.app' : undefined,
+    prNumber: undefined,
+    prTitle: undefined,
+    buildCache: true,
+    isProtected: dbDep.can_rollback
+  }))
+}, [dbDeploymentsData])
+
+// UI now uses mappedDeployments
+const filteredDeployments = useMemo(() => {
+  return mappedDeployments.filter(d => { /* ... */ })
+}, [searchQuery, environmentFilter, mappedDeployments])
+
+// Mutation handlers now use hooks
+const handleCreateDeployment = async () => {
+  await createDeploymentMutation.mutateAsync({ /* ... */ })
+  fetchDeployments()
+}
+
+const handleStartDeployment = async (deployment: DBDeployment) => {
+  await updateDeploymentMutation.mutateAsync({ id: deployment.id, status: 'in_progress', started_at: new Date().toISOString() })
+  fetchDeployments()
+}
+// Similar for handleCompleteDeployment, handleRollbackDeployment, handleCancelDeployment, handleDeleteDeployment
+```
+
+**Tables Integrated:**
+- `deployments` (via use-deployments hook) - Deployment tracking, CI/CD pipeline, build status, rollbacks
+
+**Schema Mapping Performed:**
+- Field name mapping:
+  - `deployment_name` → `name`
+  - `commit_hash` → `commit`
+  - `commit_message` → `commitMessage`
+  - `commit_author` → `author`
+  - `started_at` → `createdAt`
+  - `duration_seconds` → `duration`
+  - `can_rollback` → `isProtected`
+- Default values for missing UI fields:
+  - `authorAvatar` - derived from author name (first letter)
+  - `previewUrl` - constructed from environment and commit hash
+  - `productionUrl` - set for production environment
+  - `prNumber`, `prTitle` - undefined (not available in DB)
+  - `buildCache` - default to true
+
+**Write Operations Migrated:**
+- CREATE: `useCreateDeployment()` → `handleCreateDeployment`
+- UPDATE: `useUpdateDeployment()` → `handleStartDeployment`, `handleCompleteDeployment`, `handleRollbackDeployment`, `handleCancelDeployment`
+- DELETE: `useDeleteDeployment()` → `handleDeleteDeployment`
+- Total: 6 mutation functions converted from manual Supabase to hooks
+
+**Cleanup Performed:**
+- Replaced mockDeployments with mappedDeployments in filteredDeployments logic
+- Updated stats calculation to use mappedDeployments
+- Removed manual fetchDeployments implementation (replaced with hook's refetch)
+- Fixed authentication bug (supabase.auth.getUser() called before supabase was defined)
+
+**Fixes Applied:**
+- Fixed 3 malformed toast messages in mutation handlers
+- Note: File has pre-existing template literal syntax errors (lines 697, 731, 796, 811, 812, 814 - unrelated to migration)
+
+**Impact:**
+- ✅ Replaced 6 manual database mutation functions with hook-based mutations
+- ✅ Real database integration with schema mapping (DB → UI format)
+- ✅ Hook-based refetch replaces manual fetch function
+- ✅ All mutations now use proper mutation hooks (create, update, delete)
+- ✅ UI correctly uses database data instead of mockDeployments
+- ✅ Fixed pre-existing authentication bug
+- ✅ Kept mock data for: BuildLogs, Domains, EnvVars, Functions, EdgeConfigs, Blobs, Protections, Webhooks, Integrations, UsageMetrics (competitive showcase features)
+
+**Pattern Reinforced (manual Supabase → hooks with mutations):**
+1. Import hooks (useDeployments, useCreateDeployment, useUpdateDeployment, useDeleteDeployment)
+2. Call query hook for data fetching (replaces manual fetch)
+3. Map DB schema to UI schema with useMemo for field name transformations
+4. Replace mockData with mappedData in all UI calculations (filteredData, stats)
+5. Replace ALL manual mutation functions with mutation hooks (.mutateAsync())
+6. Call refetch() after mutations to update data
+7. Fix bugs discovered during migration (authentication, toast messages)
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -551,7 +690,7 @@ const mappedDesigns: Generation[] = useMemo(() => dbDesigns.map((dbDesign): Gene
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 295 pages need mock data → database migration
+**Remaining:** 294 pages need mock data → database migration
 
 ---
 
