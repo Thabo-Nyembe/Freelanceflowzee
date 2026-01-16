@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (10/301 pages migrated - 3.3%) 🎉 TENTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (11/301 pages migrated - 3.7%) 🎉 ELEVENTH MILESTONE!
 
 ---
 
@@ -1087,6 +1087,106 @@ const handleDeleteGeneration = async (id: string) => {
 - ✅ Cleaned up duplicate imports and authentication bugs
 - ✅ Kept mock data for: Collections (no hook available), PromptHistory (no hook available), StyleTemplates (UI-only feature)
 
+#### 11. add-ons-v2 (app/(app)/dashboard) ✅ (Commit: TBD)
+**File:** `app/(app)/dashboard/add-ons-v2/add-ons-client.tsx` (3,731 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Low (page was 95% integrated, only needed final cleanup to remove mock fallback)
+
+**Before:** Hook already integrated but falling back to mockAddOns when empty
+```typescript
+// Hook already integrated
+const { addOns: dbAddOns, stats: dbStats, isLoading, error, fetchAddOns, installAddOn: dbInstallAddOn, uninstallAddOn: dbUninstallAddOn, disableAddOn: dbDisableAddOn } = useAddOns([], {
+  status: statusFilter !== 'all' ? statusFilter : undefined,
+  category: categoryFilter !== 'all' ? categoryFilter : undefined,
+  searchQuery: searchQuery || undefined
+})
+
+// Schema mapping already implemented
+const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
+  /* ... mapping ... */
+})), [dbAddOns])
+
+// BUT: useState with mock fallback
+const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
+
+// Sync with fallback to mockAddOns
+useEffect(() => {
+  if (mappedAddOns.length > 0) {
+    setAddOns(mappedAddOns)
+  } else if (!isLoading && !error) {
+    setAddOns(mockAddOns)  // ❌ Fallback to mock
+  }
+}, [mappedAddOns, isLoading, error])
+```
+
+**After:** Removed mock fallback, using 100% database data
+```typescript
+// Same hook integration (already complete)
+const { addOns: dbAddOns, stats: dbStats, isLoading, error, fetchAddOns, installAddOn: dbInstallAddOn, uninstallAddOn: dbUninstallAddOn, disableAddOn: dbDisableAddOn } = useAddOns([], {
+  status: statusFilter !== 'all' ? statusFilter : undefined,
+  category: categoryFilter !== 'all' ? categoryFilter : undefined,
+  searchQuery: searchQuery || undefined
+})
+
+// Same schema mapping (already complete)
+const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
+  id: dbAddOn.id,
+  name: dbAddOn.name,
+  description: dbAddOn.description || '',
+  version: dbAddOn.version,
+  author: dbAddOn.provider || 'Unknown',
+  category: dbAddOn.category as AddOnCategory,
+  status: dbAddOn.status as AddOnStatus,
+  rating: dbAddOn.rating,
+  downloadCount: dbAddOn.downloads,
+  installedCount: dbAddOn.subscribers,
+  size: `${(dbAddOn.size_bytes / 1048576).toFixed(1)} MB`,
+  // ... complete mapping
+})), [dbAddOns])
+
+// Direct assignment (no useState, no fallback)
+const addOns = mappedAddOns
+
+// Simple fetch on mount
+useEffect(() => {
+  fetchAddOns()
+}, [fetchAddOns])
+```
+
+**Tables Integrated:**
+- `add_ons` (via use-add-ons hook) - Add-on marketplace, plugins, extensions management
+
+**Schema Mapping:**
+- Already implemented in previous integration:
+  - addon_code preserved
+  - provider → author
+  - size_bytes → size (converted to MB string)
+  - reviews_count → reviewCount
+  - downloads → downloadCount
+  - subscribers → installedCount
+  - Type conversions for category, status, pricingType
+
+**Write Operations:**
+- Already migrated (mutations already using hooks):
+  - INSTALL: installAddOn()
+  - UNINSTALL: uninstallAddOn()
+  - DISABLE: disableAddOn()
+
+**Cleanup Performed:**
+- Removed useState initialization with mockAddOns
+- Removed mock fallback useEffect entirely
+- Replaced with direct const assignment
+
+**Fixes Applied:**
+- None needed (clean migration, no pre-existing errors)
+
+**Impact:**
+- ✅ Now uses 100% database data for add-ons display (no mock fallback)
+- ✅ Simpler code without useState and conditional sync logic
+- ✅ All mutations already using hooks (already complete)
+- ✅ Schema mapping already complete
+- ✅ Cleaner, more maintainable code
+
 **Pattern Reinforced (manual Supabase → hooks with mutations):**
 1. Import hooks (useDeployments, useCreateDeployment, useUpdateDeployment, useDeleteDeployment)
 2. Call query hook for data fetching (replaces manual fetch)
@@ -1105,7 +1205,7 @@ const handleDeleteGeneration = async (id: string) => {
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 291 pages need mock data → database migration
+**Remaining:** 290 pages need mock data → database migration
 
 ---
 
