@@ -18,7 +18,6 @@ import {
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
   MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useCourses as useCoursesExtended } from '@/lib/hooks/use-courses-extended'
 import { useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
@@ -785,6 +784,8 @@ export default function CoursesClient() {
     setIsSubmitting(true)
     try {
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1017,6 +1018,8 @@ export default function CoursesClient() {
     setIsSubmitting(true)
     try {
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1025,6 +1028,8 @@ export default function CoursesClient() {
       }
 
       // Create enrollment in course_enrollments table
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('course_enrollments').insert({
         user_id: user.id,
         course_id: course.id,
@@ -1048,6 +1053,8 @@ export default function CoursesClient() {
   const handleStartLesson = async (lecture: Lecture) => {
     try {
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1056,6 +1063,8 @@ export default function CoursesClient() {
       }
 
       // Track lesson start in course_progress table
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('course_progress').upsert({
         user_id: user.id,
         lesson_id: lecture.id,
@@ -1074,6 +1083,8 @@ export default function CoursesClient() {
     setIsSubmitting(true)
     try {
       const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1082,6 +1093,8 @@ export default function CoursesClient() {
       }
 
       // Update enrollment status to completed
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('course_enrollments')
         .update({ status: 'completed', completed_at: new Date().toISOString(), progress_percent: 100 })
@@ -1101,6 +1114,8 @@ export default function CoursesClient() {
 
   const handleDownloadCertificate = async (course: Course) => {
     try {
+      const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -1126,6 +1141,8 @@ export default function CoursesClient() {
     try {
       const supabase = createClient()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('course_modules').insert({
         course_id: selectedCourse.id,
         title: sectionForm.title,
@@ -1157,6 +1174,8 @@ export default function CoursesClient() {
     try {
       const supabase = createClient()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('course_lessons').insert({
         module_id: sectionId,
         title: lectureForm.title,
@@ -1185,6 +1204,8 @@ export default function CoursesClient() {
     try {
       const supabase = createClient()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('course_reviews')
         .update({

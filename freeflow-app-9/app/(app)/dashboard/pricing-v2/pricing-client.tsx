@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -469,7 +468,7 @@ const mockPricingActivities = [
 export default function PricingClient({
   initialPlans = mockPlans
 }: PricingClientProps) {
-  const supabase = createClient()
+
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('plans')
@@ -501,9 +500,13 @@ export default function PricingClient({
   // Fetch plans from Supabase
   const fetchPlans = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('pricing_plans')
         .select('*')
@@ -514,14 +517,18 @@ export default function PricingClient({
     } catch (error) {
       console.error('Error fetching plans:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch coupons from Supabase
   const fetchCoupons = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('booking_coupons')
         .select('*')
@@ -537,7 +544,7 @@ export default function PricingClient({
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchPlans()
@@ -592,12 +599,16 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create plans')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('pricing_plans').insert({
         user_id: user.id,
         name: planForm.name,
@@ -627,6 +638,8 @@ export default function PricingClient({
   const handleUpdatePlan = async (planId: string) => {
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('pricing_plans')
         .update({
@@ -656,6 +669,8 @@ export default function PricingClient({
   // CRUD: Delete/Archive Plan
   const handleArchivePlan = async (planId: string, planName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('pricing_plans')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -678,12 +693,16 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create coupons')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('booking_coupons').insert({
         user_id: user.id,
         code: couponForm.code.toUpperCase(),
@@ -713,6 +732,8 @@ export default function PricingClient({
   // CRUD: Toggle Coupon Active Status
   const handleToggleCoupon = async (couponId: string, isActive: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .update({ is_active: !isActive })
@@ -730,6 +751,8 @@ export default function PricingClient({
   // CRUD: Delete Coupon
   const handleDeleteCoupon = async (couponId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .delete()
@@ -966,12 +989,16 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
   // Duplicate plan
   const handleDuplicatePlan = async (plan: PricingPlan) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate plans')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('pricing_plans').insert({
         user_id: user.id,
         name: `${plan.name} (Copy)`,
