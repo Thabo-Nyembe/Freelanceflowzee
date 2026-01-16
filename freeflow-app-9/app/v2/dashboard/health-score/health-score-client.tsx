@@ -895,7 +895,7 @@ export default function HealthScoreClient() {
 
   // Refresh metrics handler
   const handleRefreshMetrics = async () => {
-    toast.info('Refreshing metrics', { description: 'Fetching latest health data...' })
+    toast.info('Refreshing metrics')
     setLoading(true)
     await fetchHealthScores()
     toast.success('Metrics refreshed')
@@ -2162,7 +2162,7 @@ export default function HealthScoreClient() {
             <AIInsightsPanel
               insights={mockHealthScoreAIInsights}
               title="Health Score Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2460,7 +2460,7 @@ export default function HealthScoreClient() {
                   <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={() => {
-                        toast.success('Incident Acknowledged', { description: `${selectedIncident.id} has been acknowledged` })
+                        toast.success('Incident Acknowledged' has been acknowledged` })
                         setSelectedIncident(null)
                       }}
                       className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
@@ -2469,7 +2469,7 @@ export default function HealthScoreClient() {
                     </button>
                     <button
                       onClick={() => {
-                        toast.success('Incident Resolved', { description: `${selectedIncident.id} has been marked as resolved` })
+                        toast.success('Incident Resolved' has been marked as resolved` })
                         setSelectedIncident(null)
                       }}
                       className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -2816,7 +2816,7 @@ export default function HealthScoreClient() {
               <div className="space-y-2">
                 <button
                   onClick={() => {
-                    toast.success('Generating Daily Summary', { description: 'Report will be ready shortly' })
+                    toast.success('Generating Daily Summary')
                     setShowReportsDialog(false)
                   }}
                   className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -2826,7 +2826,7 @@ export default function HealthScoreClient() {
                 </button>
                 <button
                   onClick={() => {
-                    toast.success('Generating Weekly Analysis', { description: 'Report will be ready shortly' })
+                    toast.success('Generating Weekly Analysis')
                     setShowReportsDialog(false)
                   }}
                   className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -2836,7 +2836,7 @@ export default function HealthScoreClient() {
                 </button>
                 <button
                   onClick={() => {
-                    toast.success('Generating Monthly Report', { description: 'Report will be ready shortly' })
+                    toast.success('Generating Monthly Report')
                     setShowReportsDialog(false)
                   }}
                   className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -3577,7 +3577,7 @@ export default function HealthScoreClient() {
               <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Button variant="outline" onClick={() => setShowDiagnosticsDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Diagnostics completed', { description: 'All selected checks passed successfully' })
+                  toast.success('Diagnostics completed')
                   setShowDiagnosticsDialog(false)
                 }}>
                   <Activity className="w-4 h-4 mr-2" />
@@ -3645,7 +3645,7 @@ export default function HealthScoreClient() {
               <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.success('Export started', { description: 'Your report will be downloaded shortly' })
+                  toast.success('Export started')
                   setShowExportDialog(false)
                 }}>
                   <Download className="w-4 h-4 mr-2" />

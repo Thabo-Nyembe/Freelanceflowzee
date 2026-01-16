@@ -438,7 +438,7 @@ export default function NotificationsClient() {
         send_in_app: true,
         metadata: { channel: campaignForm.channel, segment: campaignForm.segment, campaign_name: campaignForm.name }
       })
-      toast.success('Campaign sent', { description: `"${campaignForm.name}" delivered successfully` })
+      toast.success('Campaign sent'" delivered successfully` })
       setShowCreateCampaign(false)
       setCampaignForm({ name: '', channel: '', segment: '', title: '', message: '', scheduled: false })
     } catch (err) {
@@ -460,7 +460,7 @@ export default function NotificationsClient() {
         is_read: false,
         send_in_app: true
       })
-      toast.success('Notification sent', { description: `"${notification.title}" delivered successfully` })
+      toast.success('Notification sent'" delivered successfully` })
     } catch (err) {
       toast.error('Failed to send notification')
     } finally {
@@ -492,7 +492,7 @@ export default function NotificationsClient() {
       if (dbNotif) {
         await updateNotification(dbNotif.id, { metadata: { ...dbNotif.metadata, starred: !notification.isStarred } })
       }
-      toast.success('Star updated', { description: `Notification ${action} starred` })
+      toast.success('Star updated' starred` })
     } catch (err) {
       toast.error('Failed to update star')
     } finally {
@@ -533,13 +533,13 @@ export default function NotificationsClient() {
   }
 
   const handleCreateAutomation = () => {
-    toast.info('Create Automation', { description: 'Opening automation builder...' })
+    toast.info('Create Automation')
     setShowCreateAutomation(true)
   }
 
   const handleToggleAutomation = (automation: (typeof mockAutomations)[0]) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus}`, { description: `"${automation.name}" is now ${newStatus}` })
+    toast.success(`Automation ${newStatus}`" is now ${newStatus}` })
   }
 
   const handleExportNotifications = async () => {
@@ -552,7 +552,7 @@ export default function NotificationsClient() {
       a.download = `notifications-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Notification data exported successfully' })
+      toast.success('Export complete')
     } catch (err) {
       toast.error('Export failed')
     }
@@ -2045,7 +2045,7 @@ export default function NotificationsClient() {
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
                           setShowWebhookDialog(true)
-                          toast.info('Opening webhook form...', { description: 'Configure a new webhook endpoint' })
+                          toast.info('Opening webhook form...')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
@@ -2288,7 +2288,7 @@ export default function NotificationsClient() {
             <AIInsightsPanel
               insights={notificationsAIInsights}
               title="Notification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2343,7 +2343,7 @@ export default function NotificationsClient() {
                     <Button className="w-full" onClick={() => {
                       if (selectedNotification.actionUrl) {
                         window.open(selectedNotification.actionUrl, '_blank')
-                        toast.success('Opening action...', { description: selectedNotification.actionLabel || 'Navigating to details' })
+                        toast.success('Opening action...')
                       }
                     }}>
                       {selectedNotification.actionLabel || 'View Details'}

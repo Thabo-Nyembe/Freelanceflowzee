@@ -806,7 +806,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
       input.onchange = (e) => {
         const files = (e.target as HTMLInputElement).files
         if (files && files.length > 0) {
-          toast.success('Assets uploaded successfully', { description: `${files.length} file(s) selected for upload` })
+          toast.success('Assets uploaded successfully' file(s) selected for upload` })
         }
       }
       input.click()
@@ -822,10 +822,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
   // CRUD Handlers
   const handleSync = async () => {
-    toast.success('Sync started', { description: 'Syncing assets with cloud storage...' })
+    toast.success('Sync started')
     await refetchAssets()
     await refetchCollections()
-    toast.success('Sync complete', { description: 'All assets are up to date' })
+    toast.success('Sync complete')
   }
 
   const handleUploadAssets = () => {
@@ -856,7 +856,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         download_count: 0,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset created', { description: `"${assetForm.asset_name}" has been added` })
+      toast.success('Asset created'" has been added` })
       setShowCreateAssetDialog(false)
       setAssetForm(defaultAssetForm)
     } catch (error) {
@@ -881,7 +881,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         total_size: 0,
         sort_order: 0,
       })
-      toast.success('Collection created', { description: `"${collectionForm.collection_name}" has been created` })
+      toast.success('Collection created'" has been created` })
       setShowCreateCollectionDialog(false)
       setCollectionForm(defaultCollectionForm)
     } catch (error) {
@@ -902,10 +902,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     try {
       if (itemToDelete.type === 'asset') {
         await assetMutation.remove(itemToDelete.id)
-        toast.success('Asset deleted', { description: `"${itemToDelete.name}" has been deleted` })
+        toast.success('Asset deleted'" has been deleted` })
       } else {
         await collectionMutation.remove(itemToDelete.id)
-        toast.success('Collection deleted', { description: `"${itemToDelete.name}" has been deleted` })
+        toast.success('Collection deleted'" has been deleted` })
       }
       setShowDeleteDialog(false)
       setItemToDelete(null)
@@ -946,7 +946,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         is_public: assetForm.is_public,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset updated', { description: `"${assetForm.asset_name}" has been updated` })
+      toast.success('Asset updated'" has been updated` })
       setShowEditDialog(false)
       setItemToEdit(null)
       setAssetForm(defaultAssetForm)
@@ -961,7 +961,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/assets/${selectedAsset.id}`)
-      toast.success('Share link copied', { description: `Sharing link for ${selectedAsset.name} copied to clipboard` })
+      toast.success('Share link copied' copied to clipboard` })
     } catch {
       toast.error('Failed to copy link')
     }
@@ -971,7 +971,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await assetMutation.update(selectedAsset.id, { is_starred: !selectedAsset.isFavorite })
-      toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites', { description: selectedAsset.name })
+      toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites')
     } catch {
       toast.error('Failed to update favorite status')
     }
@@ -981,7 +981,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await assetMutation.update(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
-      toast.success('Download started', { description: `Downloading ${selectedAsset.name}` })
+      toast.success('Download started'` })
     } catch {
       toast.error('Download failed')
     }
@@ -1188,12 +1188,12 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   a.download = 'assets-export.json'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Export downloaded', { description: 'assets-export.json' })
+                  toast.success('Export downloaded')
                 } },
                 { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: async () => {
                   try {
                     await navigator.clipboard.writeText(window.location.href)
-                    toast.success('Share link copied', { description: 'Asset library link copied to clipboard' })
+                    toast.success('Share link copied')
                   } catch {
                     toast.error('Failed to copy link')
                   }
@@ -1311,7 +1311,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                             <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100" onClick={(e) => {
                               e.stopPropagation()
                               setSelectedAsset(asset)
-                              toast.info('Asset Options', { description: `Options for ${asset.name}: Edit, Delete, Share, Download` })
+                              toast.info('Asset Options': Edit, Delete, Share, Download` })
                             }}>
                               <MoreVertical className="w-4 h-4" />
                             </Button>
@@ -1398,7 +1398,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={(e) => {
                             e.stopPropagation()
-                            toast.success('Download started', { description: `Downloading ${asset.name}` })
+                            toast.success('Download started'` })
                           }}>
                             <Download className="w-4 h-4 mr-1" />
                             Download
@@ -1407,7 +1407,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                             e.stopPropagation()
                             try {
                               await navigator.clipboard.writeText(`${window.location.origin}/assets/${asset.id}`)
-                              toast.success('Share link copied', { description: `Link for ${asset.name} copied to clipboard` })
+                              toast.success('Share link copied' copied to clipboard` })
                             } catch {
                               toast.error('Failed to copy share link')
                             }
@@ -1619,7 +1619,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">Get all brand assets in one package</p>
                     <Button className="w-full" onClick={() => {
-                      toast.success('Brand Kit download started', { description: 'Preparing brand assets package...' })
+                      toast.success('Brand Kit download started')
                       // Simulate download
                       setTimeout(() => {
                         const brandKit = JSON.stringify({
@@ -1636,7 +1636,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                         a.download = `${brandPortal.name.toLowerCase().replace(/\s+/g, '-')}-brand-kit.json`
                         a.click()
                         URL.revokeObjectURL(url)
-                        toast.success('Brand Kit downloaded', { description: 'Brand kit saved successfully' })
+                        toast.success('Brand Kit downloaded')
                       }, 1000)
                     }}>
                       <Download className="w-4 h-4 mr-2" />
@@ -1994,7 +1994,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <AIInsightsPanel
               insights={mockAssetsAIInsights}
               title="Asset Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2458,7 +2458,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBulkTagDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Tags updated', { description: 'Bulk tagging completed successfully' })
+                toast.success('Tags updated')
                 setShowBulkTagDialog(false)
               }}>
                 Apply Tags
@@ -2507,7 +2507,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Assets archived', { description: 'Selected assets moved to archive' })
+                toast.success('Assets archived')
                 setShowArchiveDialog(false)
               }}>
                 Archive Selected
@@ -2564,7 +2564,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCleanUpDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Cleanup complete', { description: 'Found 0 unused assets, 0 duplicates' })
+                toast.success('Cleanup complete')
                 setShowCleanUpDialog(false)
               }}>
                 Start Cleanup Scan
@@ -2646,7 +2646,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBulkEditDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Assets updated', { description: 'Bulk edit completed successfully' })
+                toast.success('Assets updated')
                 setShowBulkEditDialog(false)
               }}>
                 Apply Changes
@@ -2831,7 +2831,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Settings saved', { description: `${settingsSection} settings updated successfully` })
+                toast.success('Settings saved' settings updated successfully` })
                 setShowSettingsDialog(false)
               }}>
                 Save Changes
@@ -2894,14 +2894,14 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
               <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
               {selectedIntegration?.connected ? (
                 <Button variant="destructive" onClick={() => {
-                  toast.success('Disconnected', { description: `${selectedIntegration?.name} has been disconnected` })
+                  toast.success('Disconnected' has been disconnected` })
                   setShowIntegrationDialog(false)
                 }}>
                   Disconnect
                 </Button>
               ) : (
                 <Button onClick={() => {
-                  toast.success('Connected', { description: `${selectedIntegration?.name} connected successfully` })
+                  toast.success('Connected' connected successfully` })
                   setShowIntegrationDialog(false)
                 }}>
                   Connect
@@ -2936,7 +2936,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                       <span className="text-sm">{field}</span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">Required</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => { toast.info('Edit Field', { description: `Editing metadata field: ${field}` }) }}>
+                        <Button variant="ghost" size="sm" onClick={() => { toast.info('Edit Field'` }) }}>
                           <Edit3 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -2944,14 +2944,14 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   ))}
                 </div>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => { toast.info('Add Field', { description: 'Opening field creator...' }) }}>
+              <Button variant="outline" className="w-full" onClick={() => { toast.info('Add Field') }}>
                 + Add New Field
               </Button>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowMetadataTemplateDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Template saved', { description: `${selectedTemplate?.name} template updated` })
+                toast.success('Template saved' template updated` })
                 setShowMetadataTemplateDialog(false)
               }}>
                 Save Template

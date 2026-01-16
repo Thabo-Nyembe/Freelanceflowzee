@@ -484,61 +484,44 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   // Handlers
   const handleExportLogs = () => {
-    toast.success('Export started', {
-      description: 'Activity logs are being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleClearFilters = () => {
-    toast.success('Filters cleared', {
-      description: 'All log filters have been reset'
-    })
+    toast.success('Filters cleared')
   }
 
   const handleBookmarkLog = (log: ActivityLog) => {
-    toast.success('Log bookmarked', {
-      description: 'Activity log has been bookmarked'
-    })
+    toast.success('Log bookmarked')
   }
 
   const handleCreateAlert = (log: ActivityLog) => {
-    toast.success('Alert created', {
-      description: 'Alert rule created for this activity type'
-    })
+    toast.success('Alert created')
   }
 
   const handleRefreshLogs = () => {
-    toast.success('Logs refreshed', {
-      description: 'Activity logs have been refreshed'
-    })
+    toast.success('Logs refreshed')
   }
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('log_api_xxxxxxxxxxxxxxxxxx')
-    toast.success('API key copied', {
-      description: 'API key has been copied to clipboard'
-    })
+    toast.success('API key copied')
   }
 
   const handleCopyLog = () => {
     if (selectedLog) {
       navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2))
-      toast.success('Log copied', {
-        description: 'Log entry has been copied to clipboard'
-      })
+      toast.success('Log copied')
     }
   }
 
   const handleSaveQuery = () => {
-    toast.success('Query saved', {
-      description: 'Your query has been saved successfully'
-    })
+    toast.success('Query saved')
     setShowQueryDialog(false)
   }
 
   const handleSettingsAction = (action: string) => {
-    toast.info(`${action} settings`, {
-      description: `Opening ${action.toLowerCase()} configuration`
+    toast.info(`${action} settings` configuration`
     })
     // Navigate to appropriate settings tab
     if (action === 'General') setSettingsTab('general')
@@ -1800,7 +1783,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Logs Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2031,7 +2014,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Search executed', { description: 'Displaying search results' })
+                toast.success('Search executed')
                 setShowSearchLogsDialog(false)
               }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
@@ -2100,7 +2083,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Export started', { description: 'Your logs are being exported' })
+                toast.success('Export started')
                 setShowExportDialog(false)
               }}
               className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
@@ -2182,7 +2165,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Alert created', { description: 'Your alert rule has been configured' })
+                toast.success('Alert created')
                 setShowSetAlertDialog(false)
               }}
               className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 flex items-center gap-2"
@@ -2250,7 +2233,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <button
               onClick={() => {
                 setIsLiveMode(true)
-                toast.success('Live tail started', { description: 'Streaming logs in real-time' })
+                toast.success('Live tail started')
                 setShowLiveTailDialog(false)
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
@@ -2298,7 +2281,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Parser created', { description: 'Custom parser has been added' })
+                toast.success('Parser created')
                 setShowAddParserDialog(false)
               }}
               className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
@@ -2357,7 +2340,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Alert rule created', { description: 'New alert rule has been configured' })
+                toast.success('Alert rule created')
                 setShowCreateAlertRuleDialog(false)
               }}
               className="px-4 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 flex items-center gap-2"
@@ -2404,7 +2387,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Logs purged', { description: 'All log data has been permanently deleted' })
+                toast.success('Logs purged')
                 setShowPurgeLogsDialog(false)
               }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
@@ -2445,7 +2428,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Parsers reset', { description: 'All parsers have been reset to defaults' })
+                toast.success('Parsers reset')
                 setShowResetParsersDialog(false)
               }}
               className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 flex items-center gap-2"
@@ -2503,7 +2486,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Export started', { description: 'Complete log archive export has begun' })
+                toast.success('Export started')
                 setShowExportAllDataDialog(false)
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
@@ -2527,7 +2510,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
           <div className="space-y-2 py-4">
             <button
               onClick={() => {
-                toast.success('Query duplicated', { description: 'Query has been duplicated' })
+                toast.success('Query duplicated')
                 setShowQueryOptionsDialog(false)
               }}
               className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
@@ -2537,7 +2520,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Query shared', { description: 'Share link copied to clipboard' })
+                toast.success('Query shared')
                 setShowQueryOptionsDialog(false)
               }}
               className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-3"
@@ -2547,7 +2530,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.info('Editing query', { description: 'Opening query editor' })
+                toast.info('Editing query')
                 setShowQueryOptionsDialog(false)
                 setShowQueryDialog(true)
               }}
@@ -2558,7 +2541,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             </button>
             <button
               onClick={() => {
-                toast.success('Query deleted', { description: 'Query has been removed' })
+                toast.success('Query deleted')
                 setShowQueryOptionsDialog(false)
               }}
               className="w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-3 text-red-600"

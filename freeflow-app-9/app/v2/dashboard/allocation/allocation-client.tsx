@@ -856,7 +856,7 @@ export default function AllocationClient() {
   // CRUD Handlers
   const handleCreateAllocation = async () => {
     if (!formData.resource_name || !formData.project_name) {
-      toast.error('Validation Error', { description: 'Resource and Project names are required' })
+      toast.error('Validation Error')
       return
     }
     try {
@@ -874,12 +874,12 @@ export default function AllocationClient() {
         billable_rate: formData.billable_rate,
         notes: formData.notes,
       })
-      toast.success('Allocation Created', { description: `${formData.resource_name} allocated to ${formData.project_name}` })
+      toast.success('Allocation Created' allocated to ${formData.project_name}` })
       setShowCreateDialog(false)
       setFormData(initialFormState)
       refetch()
     } catch (error: any) {
-      toast.error('Failed to create allocation', { description: error.message })
+      toast.error('Failed to create allocation')
     }
   }
 
@@ -903,55 +903,55 @@ export default function AllocationClient() {
           notes: formData.notes,
         }
       })
-      toast.success('Allocation Updated', { description: 'Changes saved successfully' })
+      toast.success('Allocation Updated')
       setShowEditDialog(false)
       setSelectedAllocation(null)
       setEditingId(null)
       setFormData(initialFormState)
       refetch()
     } catch (error: any) {
-      toast.error('Failed to update allocation', { description: error.message })
+      toast.error('Failed to update allocation')
     }
   }
 
   const handleDeleteAllocation = async (id: string, resourceName: string) => {
     try {
       await deleteAllocation(id)
-      toast.success('Allocation Deleted', { description: `${resourceName}'s allocation removed` })
+      toast.success('Allocation Deleted''s allocation removed` })
       setSelectedAllocation(null)
       refetch()
     } catch (error: any) {
-      toast.error('Failed to delete allocation', { description: error.message })
+      toast.error('Failed to delete allocation')
     }
   }
 
   const handleApproveAllocation = async (id: string, resourceName: string) => {
     try {
       await activateAllocation(id)
-      toast.success('Allocation Approved', { description: `${resourceName}'s allocation is now active` })
+      toast.success('Allocation Approved''s allocation is now active` })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to approve allocation', { description: error.message })
+      toast.error('Failed to approve allocation')
     }
   }
 
   const handleCompleteAllocation = async (id: string, resourceName: string) => {
     try {
       await completeAllocation(id)
-      toast.success('Allocation Completed', { description: `${resourceName}'s allocation marked complete` })
+      toast.success('Allocation Completed''s allocation marked complete` })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to complete allocation', { description: error.message })
+      toast.error('Failed to complete allocation')
     }
   }
 
   const handleCancelAllocation = async (id: string, resourceName: string) => {
     try {
       await cancelAllocation(id)
-      toast.info('Allocation Cancelled', { description: `${resourceName}'s allocation was cancelled` })
+      toast.info('Allocation Cancelled''s allocation was cancelled` })
       refetch()
     } catch (error: any) {
-      toast.error('Failed to cancel allocation', { description: error.message })
+      toast.error('Failed to cancel allocation')
     }
   }
 
@@ -975,13 +975,13 @@ export default function AllocationClient() {
   }
 
   const handleExportAllocations = () => {
-    toast.success('Exporting allocations', { description: 'Allocation report will be downloaded' })
+    toast.success('Exporting allocations')
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing...', { description: 'Fetching latest data' })
+    toast.info('Refreshing...')
     await refetch()
-    toast.success('Refreshed', { description: 'Data updated successfully' })
+    toast.success('Refreshed')
   }
 
   return (
@@ -2005,7 +2005,7 @@ export default function AllocationClient() {
             <AIInsightsPanel
               insights={mockAllocationAIInsights}
               title="Allocation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

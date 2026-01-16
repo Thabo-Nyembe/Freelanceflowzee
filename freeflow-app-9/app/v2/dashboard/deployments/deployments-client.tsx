@@ -361,7 +361,7 @@ export default function DeploymentsClient() {
       if (error) throw error
       setDbDeployments(data || [])
     } catch (error: any) {
-      toast.error('Failed to load deployments', { description: error.message })
+      toast.error('Failed to load deployments')
     } finally {
       setLoading(false)
     }
@@ -374,7 +374,7 @@ export default function DeploymentsClient() {
   // Create deployment
   const handleCreateDeployment = async () => {
     if (!deploymentForm.deployment_name || !deploymentForm.version) {
-      toast.error('Validation Error', { description: 'Deployment name and version are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -400,12 +400,12 @@ export default function DeploymentsClient() {
       })
 
       if (error) throw error
-      toast.success('Deployment Created', { description: `${deploymentForm.deployment_name} v${deploymentForm.version} queued` })
+      toast.success('Deployment Created' v${deploymentForm.version} queued` })
       setShowCreateDialog(false)
       setDeploymentForm(defaultDeploymentForm)
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to create deployment', { description: error.message })
+      toast.error('Failed to create deployment')
     } finally {
       setIsSubmitting(false)
     }
@@ -420,10 +420,10 @@ export default function DeploymentsClient() {
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.info('Deployment Started', { description: `${deployment.deployment_name} is now deploying...` })
+      toast.info('Deployment Started' is now deploying...` })
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to start deployment', { description: error.message })
+      toast.error('Failed to start deployment')
     }
   }
 
@@ -449,14 +449,14 @@ export default function DeploymentsClient() {
       )
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to update deployment', { description: error.message })
+      toast.error('Failed to update deployment')
     }
   }
 
   // Rollback deployment
   const handleRollbackDeployment = async (deployment: DbDeployment) => {
     if (!deployment.can_rollback) {
-      toast.error('Cannot Rollback', { description: 'This deployment cannot be rolled back' })
+      toast.error('Cannot Rollback')
       return
     }
 
@@ -467,11 +467,11 @@ export default function DeploymentsClient() {
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.success('Rollback Initiated', { description: `Rolling back ${deployment.deployment_name}` })
+      toast.success('Rollback Initiated'` })
       setShowRollbackDialog(false)
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to rollback', { description: error.message })
+      toast.error('Failed to rollback')
     }
   }
 
@@ -484,10 +484,10 @@ export default function DeploymentsClient() {
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.info('Deployment Cancelled', { description: `${deployment.deployment_name} has been cancelled` })
+      toast.info('Deployment Cancelled' has been cancelled` })
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to cancel deployment', { description: error.message })
+      toast.error('Failed to cancel deployment')
     }
   }
 
@@ -496,10 +496,10 @@ export default function DeploymentsClient() {
     try {
       const { error } = await supabase.from('deployments').delete().eq('id', id)
       if (error) throw error
-      toast.success('Deployment Deleted', { description: 'Deployment record removed' })
+      toast.success('Deployment Deleted')
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to delete deployment', { description: error.message })
+      toast.error('Failed to delete deployment')
     }
   }
 
@@ -678,13 +678,13 @@ export default function DeploymentsClient() {
       })
 
       if (error) throw error
-      toast.success('Quick Deploy Initiated', { description: `Deploying ${quickDeployBranch} to ${quickDeployEnvironment}` })
+      toast.success('Quick Deploy Initiated' to ${quickDeployEnvironment}` })
       setShowQuickDeployDialog(false)
       setQuickDeployBranch('main')
       setQuickDeployEnvironment('staging')
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Quick Deploy Failed', { description: error.message })
+      toast.error('Quick Deploy Failed')
     } finally {
       setIsQuickDeploying(false)
     }
@@ -693,7 +693,7 @@ export default function DeploymentsClient() {
   // Quick rollback handler
   const handleQuickRollback = async () => {
     if (!quickRollbackVersion) {
-      toast.error('Validation Error', { description: 'Please select a version to rollback to' })
+      toast.error('Validation Error')
       return
     }
 
@@ -710,12 +710,12 @@ export default function DeploymentsClient() {
         if (error) throw error
       }
 
-      toast.success('Rollback Completed', { description: `Rolled back to version ${quickRollbackVersion}` })
+      toast.success('Rollback Completed'` })
       setShowQuickRollbackDialog(false)
       setQuickRollbackVersion('')
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Rollback Failed', { description: error.message })
+      toast.error('Rollback Failed')
     } finally {
       setIsQuickRollingBack(false)
     }
@@ -773,10 +773,10 @@ export default function DeploymentsClient() {
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.success('Promoted', { description: `${deployment.deployment_name} promoted to production` })
+      toast.success('Promoted' promoted to production` })
       fetchDeployments()
     } catch (error: any) {
-      toast.error('Failed to promote', { description: error.message })
+      toast.error('Failed to promote')
     }
   }
 
@@ -1601,7 +1601,7 @@ export default function DeploymentsClient() {
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
                     const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
                     navigator.clipboard.writeText(logsText).then(() => {
-                      toast.success('Logs copied to clipboard', { description: `${buildLogs.length} log entries copied` });
+                      toast.success('Logs copied to clipboard' log entries copied` });
                     }).catch(() => {
                       toast.error('Failed to copy logs');
                     });
@@ -1617,11 +1617,11 @@ export default function DeploymentsClient() {
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    toast.success('Logs downloaded', { description: `deployment-logs-${new Date().toISOString().split('T')[0]}.txt` });
+                    toast.success('Logs downloaded'.txt` });
                   }} title="Download logs"><Download className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
                     setBuildLogs([]);
-                    toast.success('Logs cleared', { description: 'All build logs have been cleared' });
+                    toast.success('Logs cleared');
                   }} title="Clear logs"><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardHeader>
@@ -2300,17 +2300,12 @@ export default function DeploymentsClient() {
               title="Deployment Intelligence"
               onInsightAction={(insight) => {
                 if (insight.type === 'warning' && insight.category === 'Resources') {
-                  toast.info('Resource Alert', {
-                    description: insight.description,
-                    action: {
-                      label: 'View Details',
-                      onClick: () => setActiveTab('analytics')
-                    }
+                  toast.info('Resource Alert'
                   })
                 } else if (insight.type === 'success') {
-                  toast.success(insight.title, { description: insight.description })
+                  toast.success(insight.title)
                 } else {
-                  toast.info(insight.title, { description: insight.description })
+                  toast.info(insight.title)
                 }
               }}
             />
@@ -2399,7 +2394,7 @@ export default function DeploymentsClient() {
                 <Input placeholder="Value" className="flex-1" type="password" value={newEnvValue} onChange={(e) => setNewEnvValue(e.target.value)} />
                 <Button onClick={() => {
                   if (!newEnvKey.trim()) {
-                    toast.error('Validation Error', { description: 'Variable key is required' });
+                    toast.error('Validation Error');
                     return;
                   }
                   const newVar: EnvironmentVariable = {
@@ -2412,7 +2407,7 @@ export default function DeploymentsClient() {
                   setEnvVars([...envVars, newVar]);
                   setNewEnvKey('');
                   setNewEnvValue('');
-                  toast.success('Variable added', { description: `${newEnvKey} has been added to environment variables` });
+                  toast.success('Variable added' has been added to environment variables` });
                 }}><Plus className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="h-[300px]">
@@ -2429,7 +2424,7 @@ export default function DeploymentsClient() {
                       <Badge variant="outline">{env.environment}</Badge>
                       <Button variant="ghost" size="icon" onClick={() => {
                         setEnvVars(envVars.filter(e => e.id !== env.id));
-                        toast.success('Variable deleted', { description: `${env.key} has been removed` });
+                        toast.success('Variable deleted' has been removed` });
                       }} title="Delete variable"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
@@ -2459,12 +2454,11 @@ export default function DeploymentsClient() {
                       }, { onConflict: 'id' })
                   }
 
-                  toast.success('Environment variables saved', {
-                    description: `${envVars.length} variables updated successfully`
+                  toast.success('Environment variables saved' variables updated successfully`
                   })
                   setShowEnvDialog(false)
                 } catch (error: any) {
-                  toast.error('Failed to save environment variables', { description: error.message })
+                  toast.error('Failed to save environment variables')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -2487,10 +2481,10 @@ export default function DeploymentsClient() {
                 <Input placeholder="example.com" className="flex-1" value={newDomainName} onChange={(e) => setNewDomainName(e.target.value)} />
                 <Button onClick={() => {
                   if (!newDomainName.trim()) {
-                    toast.error('Validation Error', { description: 'Domain name is required' });
+                    toast.error('Validation Error');
                     return;
                   }
-                  toast.success('Domain added', { description: `${newDomainName} has been added. DNS verification pending.` });
+                  toast.success('Domain added' has been added. DNS verification pending.` });
                   setNewDomainName('');
                 }}>Add Domain</Button>
               </div>
@@ -2555,7 +2549,7 @@ export default function DeploymentsClient() {
               <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => {
-              toast.success('Webhook added', { description: 'Your webhook endpoint has been configured' });
+              toast.success('Webhook added');
               setShowWebhookDialog(false);
             }}>Add Webhook</Button></DialogFooter>
           </DialogContent>
@@ -2572,7 +2566,7 @@ export default function DeploymentsClient() {
               </div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => {
-              toast.success('Invitation sent', { description: 'Team member will receive an email invitation' });
+              toast.success('Invitation sent');
               setShowTeamDialog(false);
             }}>Send Invitation</Button></DialogFooter>
           </DialogContent>
@@ -3112,12 +3106,10 @@ export default function DeploymentsClient() {
                   if (filterOptions.dateRange !== 'all') appliedFilters.push(`Date: ${filterOptions.dateRange}`)
                   if (filterOptions.author !== 'all') appliedFilters.push(`Author: ${filterOptions.author}`)
 
-                  toast.success('Filters applied', {
-                    description: appliedFilters.length > 0 ? appliedFilters.join(', ') : 'Showing all deployments'
-                  })
+                  toast.success('Filters applied')
                   setShowFiltersDialog(false)
                 } catch (error: any) {
-                  toast.error('Failed to apply filters', { description: error.message })
+                  toast.error('Failed to apply filters')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -3235,7 +3227,7 @@ export default function DeploymentsClient() {
                   toast.error('Function name is required');
                   return;
                 }
-                toast.success('Function created', { description: `${newFunctionForm.name} has been deployed` });
+                toast.success('Function created' has been deployed` });
                 setNewFunctionForm({ name: '', runtime: 'Node.js 20', region: 'iad1', memory: '256' });
                 setShowNewFunctionDialog(false);
               }}>Create Function</Button>
@@ -3266,7 +3258,7 @@ export default function DeploymentsClient() {
                   toast.error('Config name is required');
                   return;
                 }
-                toast.success('Edge config created', { description: `${newEdgeConfigForm.name} is now available` });
+                toast.success('Edge config created' is now available` });
                 setNewEdgeConfigForm({ name: '' });
                 setShowEdgeConfigDialog(false);
               }}>Create Config</Button>
@@ -3358,12 +3350,11 @@ export default function DeploymentsClient() {
 
                   if (error) throw error
 
-                  toast.success('Config updated', {
-                    description: `${selectedEdgeConfig.name} configuration saved`
+                  toast.success('Config updated' configuration saved`
                   })
                   setShowEdgeConfigEditDialog(false)
                 } catch (error: any) {
-                  toast.error('Failed to update config', { description: error.message })
+                  toast.error('Failed to update config')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -3394,7 +3385,7 @@ export default function DeploymentsClient() {
                   toast.error('Folder name is required');
                   return;
                 }
-                toast.success('Folder created', { description: `/${newFolderName} has been created` });
+                toast.success('Folder created' has been created` });
                 setNewFolderName('');
                 setShowNewFolderDialog(false);
               }}>Create Folder</Button>
@@ -3479,13 +3470,12 @@ export default function DeploymentsClient() {
                       if (!error) successCount++
                     }
 
-                    toast.success('Files uploaded', {
-                      description: `${successCount} of ${uploadedFiles.length} files uploaded successfully`
+                    toast.success('Files uploaded' of ${uploadedFiles.length} files uploaded successfully`
                     })
                     setUploadedFiles([])
                     setShowUploadDialog(false)
                   } catch (error: any) {
-                    toast.error('Upload failed', { description: error.message })
+                    toast.error('Upload failed')
                   } finally {
                     setIsProcessing(false)
                   }
@@ -3741,14 +3731,12 @@ export default function DeploymentsClient() {
                   if (alertSettings.warningAlerts) enabledAlerts.push('Warnings')
                   if (alertSettings.deploymentAlerts) enabledAlerts.push('Deployments')
 
-                  toast.success('Alert settings saved', {
-                    description: enabledAlerts.length > 0
-                      ? `Alerts enabled for: ${enabledAlerts.join(', ')}`
+                  toast.success('Alert settings saved'`
                       : 'All alerts disabled'
                   })
                   setShowAlertsDialog(false)
                 } catch (error: any) {
-                  toast.error('Failed to save alert settings', { description: error.message })
+                  toast.error('Failed to save alert settings')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -3851,12 +3839,10 @@ export default function DeploymentsClient() {
                   document.body.removeChild(a)
                   URL.revokeObjectURL(url)
 
-                  toast.success('Analytics exported', {
-                    description: 'Analytics data has been downloaded'
-                  })
+                  toast.success('Analytics exported')
                   setShowAnalyticsExportDialog(false)
                 } catch (error: any) {
-                  toast.error('Export failed', { description: error.message })
+                  toast.error('Export failed')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -3968,12 +3954,10 @@ export default function DeploymentsClient() {
                   document.body.removeChild(a)
                   URL.revokeObjectURL(url)
 
-                  toast.success('Security report downloaded', {
-                    description: 'Full audit report saved to your device'
-                  })
+                  toast.success('Security report downloaded')
                   setShowSecurityAuditDialog(false)
                 } catch (error: any) {
-                  toast.error('Failed to generate report', { description: error.message })
+                  toast.error('Failed to generate report')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -4019,7 +4003,7 @@ export default function DeploymentsClient() {
                   toast.error('Rule name is required');
                   return;
                 }
-                toast.success('Protection rule added', { description: `${newRuleForm.name} is now ${newRuleForm.enabled ? 'active' : 'inactive'}` });
+                toast.success('Protection rule added' is now ${newRuleForm.enabled ? 'active' : 'inactive'}` });
                 setNewRuleForm({ name: '', type: 'password', enabled: true });
                 setShowAddRuleDialog(false);
               }}>Add Rule</Button>
@@ -4063,7 +4047,7 @@ export default function DeploymentsClient() {
                   toast.error('Hook name is required');
                   return;
                 }
-                toast.success('Deploy hook created', { description: `${newHookForm.name} hook is ready` });
+                toast.success('Deploy hook created' hook is ready` });
                 setNewHookForm({ name: '', branch: 'main' });
                 setShowCreateHookDialog(false);
               }}>Create Hook</Button>
@@ -4191,13 +4175,11 @@ export default function DeploymentsClient() {
                     if (error) throw error
 
                     setDbDeployments([])
-                    toast.success('All deployments deleted', {
-                      description: 'All deployments have been permanently removed'
-                    })
+                    toast.success('All deployments deleted')
                     setShowDeleteAllDeploymentsDialog(false)
                     setDeleteAllConfirmation('')
                   } catch (error: any) {
-                    toast.error('Failed to delete deployments', { description: error.message })
+                    toast.error('Failed to delete deployments')
                   } finally {
                     setIsProcessing(false)
                   }
@@ -4255,12 +4237,10 @@ export default function DeploymentsClient() {
                     })
                     setFilterOptions({ status: 'all', dateRange: 'all', author: 'all' })
 
-                    toast.success('Project settings reset', {
-                      description: 'All settings have been restored to defaults'
-                    })
+                    toast.success('Project settings reset')
                     setShowResetSettingsDialog(false)
                   } catch (error: any) {
-                    toast.error('Failed to reset settings', { description: error.message })
+                    toast.error('Failed to reset settings')
                   } finally {
                     setIsProcessing(false)
                   }
@@ -4305,12 +4285,10 @@ export default function DeploymentsClient() {
 
                     if (error) throw error
 
-                    toast.success('Deployments disabled', {
-                      description: 'New deployments are now blocked. Existing deployments remain active.'
-                    })
+                    toast.success('Deployments disabled')
                     setShowDisableDeploymentsDialog(false)
                   } catch (error: any) {
-                    toast.error('Failed to disable deployments', { description: error.message })
+                    toast.error('Failed to disable deployments')
                   } finally {
                     setIsProcessing(false)
                   }
@@ -4573,7 +4551,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
-                toast.success('Metrics exported', { description: `${selectedFunction?.name} metrics exported to CSV` })
+                toast.success('Metrics exported' metrics exported to CSV` })
               }}>
                 <Download className="h-4 w-4 mr-2" />Export Metrics
               </Button>
@@ -4710,7 +4688,7 @@ export default function DeploymentsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFunctionSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Function settings saved', { description: `${selectedFunction?.name} configuration updated` })
+                toast.success('Function settings saved' configuration updated` })
                 setShowFunctionSettingsDialog(false)
               }}>
                 Save Changes
@@ -4873,7 +4851,7 @@ export default function DeploymentsClient() {
                     <p className="text-xs text-red-600 dark:text-red-300">This will remove the integration and revoke all permissions</p>
                   </div>
                   <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-100" onClick={() => {
-                    toast.success('Integration disconnected', { description: `${selectedIntegration?.name} has been removed` })
+                    toast.success('Integration disconnected' has been removed` })
                     setShowIntegrationSettingsDialog(false)
                   }}>
                     <Trash2 className="h-4 w-4 mr-2" />Disconnect
@@ -4884,7 +4862,7 @@ export default function DeploymentsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowIntegrationSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Integration settings saved', { description: `${selectedIntegration?.name} configuration updated` })
+                toast.success('Integration settings saved' configuration updated` })
                 setShowIntegrationSettingsDialog(false)
               }}>
                 Save Changes

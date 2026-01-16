@@ -636,79 +636,58 @@ export default function AICreateClient() {
   const handleGenerate = () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
-    toast.info('Generating...', {
-      description: 'AI is creating your content'
-    })
+    toast.info('Generating...')
     // Simulate generation
     setTimeout(() => setIsGenerating(false), 2000)
   }
 
   // Handlers
   const handleSaveCreation = () => {
-    toast.success('Creation saved', {
-      description: 'Your AI creation has been saved to gallery'
-    })
+    toast.success('Creation saved')
   }
 
   const handleDownloadCreation = () => {
-    toast.success('Downloading', {
-      description: 'Your creation will be downloaded shortly'
-    })
+    toast.success('Downloading')
   }
 
   const handleShareCreation = () => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
+    toast.success('Link copied')
   }
 
   const handleRegenerateCreation = () => {
-    toast.info('Regenerating', {
-      description: 'Creating a new variation...'
-    })
+    toast.info('Regenerating')
   }
 
   const handleClearHistory = () => {
-    toast.success('History cleared', {
-      description: 'All generation history has been cleared'
-    })
+    toast.success('History cleared')
   }
 
   const handleRetryGeneration = (gen: Generation) => {
-    toast.info('Retrying generation', {
-      description: `Retrying: ${gen.prompt.slice(0, 30)}...`
+    toast.info('Retrying generation'...`
     })
   }
 
   const handleDeleteGeneration = (gen: Generation) => {
-    toast.success('Generation deleted', {
-      description: 'The generation has been removed from history'
-    })
+    toast.success('Generation deleted')
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API Key regenerated', {
-      description: 'Your new API key is ready to use'
-    })
+    toast.success('API Key regenerated')
     setShowRegenerateKeyDialog(false)
   }
 
   const handleConnectService = (serviceName: string, connected: boolean) => {
     if (connected) {
-      toast.success(`${serviceName} disconnected`, {
-        description: `${serviceName} integration has been removed`
+      toast.success(`${serviceName} disconnected` integration has been removed`
       })
     } else {
-      toast.success(`${serviceName} connected`, {
-        description: `${serviceName} integration is now active`
+      toast.success(`${serviceName} connected` integration is now active`
       })
     }
   }
 
   const handleClearCache = () => {
-    toast.success('Cache cleared', {
-      description: '1.2 GB of generation cache has been freed'
-    })
+    toast.success('Cache cleared')
   }
 
   const handleManageModels = () => {
@@ -716,34 +695,24 @@ export default function AICreateClient() {
   }
 
   const handleDeleteAllGenerations = () => {
-    toast.success('All generations deleted', {
-      description: 'Your generated content has been removed'
-    })
+    toast.success('All generations deleted')
     setShowDeleteAllDialog(false)
   }
 
   const handleResetSettings = () => {
-    toast.success('Settings reset', {
-      description: 'All settings have been restored to defaults'
-    })
+    toast.success('Settings reset')
     setShowResetSettingsDialog(false)
   }
 
   const handleCreateVariation = () => {
-    toast.info('Creating variation', {
-      description: 'Generating a new variation of your creation...'
-    })
+    toast.info('Creating variation')
   }
 
   const handleToggleFavorite = (gen: Generation) => {
     if (gen.isFavorite) {
-      toast.success('Removed from favorites', {
-        description: 'Generation removed from your favorites'
-      })
+      toast.success('Removed from favorites')
     } else {
-      toast.success('Added to favorites', {
-        description: 'Generation added to your favorites'
-      })
+      toast.success('Added to favorites')
     }
   }
 
@@ -2052,7 +2021,7 @@ export default function AICreateClient() {
             <AIInsightsPanel
               insights={mockAICreateInsights}
               title="AI Creation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2286,7 +2255,7 @@ export default function AICreateClient() {
                       onClick={() => {
                         setGeneratorSettings(prev => ({ ...prev, style: template.style, quality: template.quality || prev.quality }))
                         setNewCreationPrompt(template.prompt || '')
-                        toast.success('Template loaded', { description: `"${template.name}" template applied to generator` })
+                        toast.success('Template loaded'" template applied to generator` })
                         setShowTemplateDialog(false)
                       }}
                     >

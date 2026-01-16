@@ -518,21 +518,16 @@ export default function ThreeDModelingClient() {
 
   // Handlers
   const handleCreateModel = () => {
-    toast.info('Create Model', {
-      description: 'Opening 3D canvas...'
-    })
+    toast.info('Create Model')
   }
 
   const handleExportModel = (format: string) => {
-    toast.success('Exporting model', {
-      description: `Model will be exported as ${format}`
+    toast.success('Exporting model'`
     })
   }
 
   const handleSaveProject = () => {
-    toast.success('Project saved', {
-      description: 'All changes have been saved'
-    })
+    toast.success('Project saved')
   }
 
   // Scene hierarchy toggle functions
@@ -556,8 +551,7 @@ export default function ThreeDModelingClient() {
       return nodes.map(node => {
         if (node.id === nodeId) {
           const newVisible = !node.visible
-          toast.info(newVisible ? 'Object Visible' : 'Object Hidden', {
-            description: `${nodeName} is now ${newVisible ? 'visible' : 'hidden'}`
+          toast.info(newVisible ? 'Object Visible' : 'Object Hidden' is now ${newVisible ? 'visible' : 'hidden'}`
           })
           return { ...node, visible: newVisible }
         }
@@ -841,7 +835,7 @@ export default function ThreeDModelingClient() {
                           </Button>
                           <Button size="sm" className="gap-1" onClick={() => {
                             setActiveTab('viewport')
-                            toast.success('Opening model', { description: `Loading ${model.name}...` })
+                            toast.success('Opening model'...` })
                           }}>
                             <Play className="w-3 h-3" />
                             Open
@@ -906,7 +900,7 @@ export default function ThreeDModelingClient() {
                             const lastState = newUndoStack.pop()!
                             setUndoStack(newUndoStack)
                             setRedoStack([...redoStack, lastState])
-                            toast.info('Undo', { description: 'Action undone' })
+                            toast.info('Undo')
                           }
                         }}
                       >
@@ -923,7 +917,7 @@ export default function ThreeDModelingClient() {
                             const lastState = newRedoStack.pop()!
                             setRedoStack(newRedoStack)
                             setUndoStack([...undoStack, lastState])
-                            toast.info('Redo', { description: 'Action redone' })
+                            toast.info('Redo')
                           }
                         }}
                       >
@@ -1001,7 +995,7 @@ export default function ThreeDModelingClient() {
                           onClick={() => {
                             const newZoom = Math.min(zoomLevel + 10, 200)
                             setZoomLevel(newZoom)
-                            toast.info('Zoom', { description: `${newZoom}%` })
+                            toast.info('Zoom'%` })
                           }}
                         >
                           <ZoomIn className="w-4 h-4" />
@@ -1013,7 +1007,7 @@ export default function ThreeDModelingClient() {
                           onClick={() => {
                             const newZoom = Math.max(zoomLevel - 10, 10)
                             setZoomLevel(newZoom)
-                            toast.info('Zoom', { description: `${newZoom}%` })
+                            toast.info('Zoom'%` })
                           }}
                         >
                           <ZoomOut className="w-4 h-4" />
@@ -1024,7 +1018,7 @@ export default function ThreeDModelingClient() {
                           title="Reset View"
                           onClick={() => {
                             setZoomLevel(100)
-                            toast.info('View Reset', { description: 'View reset to default' })
+                            toast.info('View Reset')
                           }}
                         >
                           <RotateCcw className="w-4 h-4" />
@@ -1929,7 +1923,7 @@ export default function ThreeDModelingClient() {
             <AIInsightsPanel
               insights={mock3DAIInsights}
               title="3D Modeling Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2001,7 +1995,7 @@ export default function ThreeDModelingClient() {
                 <Button className="flex-1 gap-2" onClick={() => {
                   setSelectedModel(null)
                   setActiveTab('viewport')
-                  toast.success('Opening model in editor', { description: `Loading ${selectedModel?.name}...` })
+                  toast.success('Opening model in editor'...` })
                 }}>
                   <Play className="w-4 h-4" />
                   Open in Editor
@@ -2566,7 +2560,7 @@ export default function ThreeDModelingClient() {
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
                   // File download functionality
-                  toast.success('Download started', { description: `Downloading ${downloadRenderJob.model_name} render...` })
+                  toast.success('Download started' render...` })
                   setDownloadRenderJob(null)
                 }}>
                   <Download className="w-4 h-4" />
@@ -2611,7 +2605,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
                     // Plugin marketplace installation
-                    toast.success('Plugin installed', { description: `${plugin.name} has been installed` })
+                    toast.success('Plugin installed' has been installed` })
                   }}>
                     Install
                   </Button>
@@ -2642,7 +2636,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <Button size="sm" onClick={() => {
                     // Plugin local installation
-                    toast.success('Plugin installed', { description: `${selectedFile.name} has been installed from file` })
+                    toast.success('Plugin installed' has been installed from file` })
                     setSelectedFile(null)
                   }}>
                     Install
@@ -2865,7 +2859,7 @@ export default function ThreeDModelingClient() {
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
                 if (confirm('Are you sure you want to clear the cache? This action cannot be undone.')) {
                   // Clear cache functionality
-                  toast.success('Cache cleared successfully', { description: '4.65 GB freed' })
+                  toast.success('Cache cleared successfully')
                   setShowClearCacheDialog(false)
                 }
               }}>
@@ -2969,7 +2963,7 @@ export default function ThreeDModelingClient() {
               <Button variant="destructive" className="flex-1 gap-2" onClick={() => {
                 if (confirm('Are you sure you want to purge orphan data? This will permanently remove unused data blocks.')) {
                   // Purge orphan data
-                  toast.success('Orphan data purged', { description: '25 data blocks removed' })
+                  toast.success('Orphan data purged')
                   setShowPurgeDataDialog(false)
                 }
               }}>
@@ -3097,7 +3091,7 @@ export default function ThreeDModelingClient() {
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
                   // Update scene node properties
-                  toast.success('Node properties updated', { description: `${selectedSceneNode.name} has been modified` })
+                  toast.success('Node properties updated' has been modified` })
                   setShowSceneNodePropertiesDialog(false)
                 }}>
                   <CheckCircle2 className="w-4 h-4" />
@@ -3261,7 +3255,7 @@ export default function ThreeDModelingClient() {
                 onClick={() => {
                   if (selectedFile) {
                     // File selection callback
-                    toast.success('File selected', { description: `${selectedFile.name} ready for ${
+                    toast.success('File selected' ready for ${
                       fileBrowserMode === 'import-model' ? 'import' :
                       fileBrowserMode === 'upload-texture' ? 'upload' : 'installation'
                     }` })

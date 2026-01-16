@@ -526,7 +526,7 @@ export default function WebhooksClient({
   // CRUD Handlers with Supabase integration
   const handleSaveWebhook = async () => {
     if (!formData.name || !formData.url) {
-      toast.error('Validation Error', { description: 'Name and URL are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -545,10 +545,10 @@ export default function WebhooksClient({
           custom_headers: formData.custom_headers
         })
         if (result.success) {
-          toast.success('Webhook updated', { description: `"${formData.name}" has been updated` })
+          toast.success('Webhook updated'" has been updated` })
           setShowEndpointDialog(false)
         } else {
-          toast.error('Update failed', { description: result.error })
+          toast.error('Update failed')
         }
       } else {
         // Create new webhook
@@ -564,10 +564,10 @@ export default function WebhooksClient({
           status: 'active'
         })
         if (result.success) {
-          toast.success('Webhook created', { description: `"${formData.name}" has been created` })
+          toast.success('Webhook created'" has been created` })
           setShowEndpointDialog(false)
         } else {
-          toast.error('Creation failed', { description: result.error })
+          toast.error('Creation failed')
         }
       }
     } finally {
@@ -578,9 +578,9 @@ export default function WebhooksClient({
   const handleDeleteWebhook = async (id: string, name: string) => {
     const result = await deleteWebhook(id)
     if (result.success) {
-      toast.success('Webhook deleted', { description: `"${name}" has been deleted` })
+      toast.success('Webhook deleted'" has been deleted` })
     } else {
-      toast.error('Delete failed', { description: result.error })
+      toast.error('Delete failed')
     }
   }
 
@@ -588,35 +588,35 @@ export default function WebhooksClient({
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
     const result = await toggleStatus(id, newStatus as 'active' | 'paused')
     if (result.success) {
-      toast.success('Status updated', { description: `Webhook is now ${newStatus}` })
+      toast.success('Status updated'` })
     } else {
-      toast.error('Status update failed', { description: result.error })
+      toast.error('Status update failed')
     }
   }
 
   const handleTestWebhookDelivery = async (id: string) => {
-    toast.info('Testing webhook', { description: 'Sending test payload...' })
+    toast.info('Testing webhook')
     const result = await testWebhook(id)
     if (result.success) {
-      toast.success('Test sent', { description: 'Test delivery has been queued' })
+      toast.success('Test sent')
     } else {
-      toast.error('Test failed', { description: result.error })
+      toast.error('Test failed')
     }
     setShowTestDialog(false)
   }
 
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url)
-    toast.success('URL copied', { description: 'Webhook URL copied to clipboard' })
+    toast.success('URL copied')
   }
 
   const handleRotateSecret = async (id: string) => {
     const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
     const result = await updateWebhook(id, { secret: newSecret })
     if (result.success) {
-      toast.success('Secret rotated', { description: 'New signing secret has been generated' })
+      toast.success('Secret rotated')
     } else {
-      toast.error('Rotation failed', { description: result.error })
+      toast.error('Rotation failed')
     }
   }
 
@@ -638,7 +638,7 @@ export default function WebhooksClient({
     a.download = 'webhooks-export.json'
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Webhook configuration downloaded' })
+    toast.success('Exported')
   }
 
   // Quick actions with proper dialog openers
@@ -1861,7 +1861,7 @@ export default function WebhooksClient({
             <AIInsightsPanel
               insights={mockWebhooksAIInsights}
               title="Webhooks Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2200,7 +2200,7 @@ export default function WebhooksClient({
               </button>
               <button
                 onClick={() => {
-                  toast.success('Retrying', { description: 'Failed deliveries have been queued for retry' })
+                  toast.success('Retrying')
                   setShowRetryFailedDialog(false)
                 }}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 flex items-center gap-2"

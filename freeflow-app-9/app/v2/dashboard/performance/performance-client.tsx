@@ -604,8 +604,7 @@ export default function PerformanceClient() {
       }
 
       setIsRunning(true)
-      toast.info('Running performance audit...', {
-        description: `Analyzing ${testUrl}`
+      toast.info('Running performance audit...'`
       })
 
       // Call performance API to run test
@@ -634,9 +633,7 @@ export default function PerformanceClient() {
       if (error) throw error
 
       setShowRunDialog(false)
-      toast.success('Performance audit completed!', {
-        description: 'Results have been saved'
-      })
+      toast.success('Performance audit completed!')
 
       fetchPerformanceData()
     } catch (err: any) {
@@ -660,9 +657,7 @@ export default function PerformanceClient() {
   const handleExportReport = async () => {
     try {
       setIsExporting(true)
-      toast.info('Generating report...', {
-        description: 'Please wait while we compile your data'
-      })
+      toast.info('Generating report...')
 
       // Call performance API to generate export
       const apiRes = await fetch('/api/performance', {
@@ -695,9 +690,7 @@ export default function PerformanceClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Report exported successfully!', {
-        description: 'Check your downloads folder'
-      })
+      toast.success('Report exported successfully!')
     } catch (err: any) {
       toast.error(err.message || 'Failed to export report')
     } finally {
@@ -715,9 +708,7 @@ export default function PerformanceClient() {
       }
 
       // In production, this would create a scheduled job
-      toast.success('Test scheduled successfully!', {
-        description: 'You will receive notifications when tests complete'
-      })
+      toast.success('Test scheduled successfully!')
     } catch (err: any) {
       toast.error(err.message || 'Failed to schedule test')
     }
@@ -730,9 +721,7 @@ export default function PerformanceClient() {
       return
     }
 
-    toast.info('Opening comparison view', {
-      description: 'Comparing latest test results'
-    })
+    toast.info('Opening comparison view')
   }
 
   // Add performance budget
@@ -768,8 +757,7 @@ export default function PerformanceClient() {
 
       setShowAddBudgetDialog(false)
       setBudgetForm({ name: '', metric: 'script', target: 300, unit: 'KB', category: 'performance' })
-      toast.success('Performance budget added!', {
-        description: `${budgetForm.name} budget has been created`
+      toast.success('Performance budget added!' budget has been created`
       })
 
       fetchPerformanceData()
@@ -832,9 +820,7 @@ export default function PerformanceClient() {
 
       if (error) throw error
 
-      toast.success('History deleted', {
-        description: 'All performance test history has been removed'
-      })
+      toast.success('History deleted')
       fetchPerformanceData()
     } catch (err: any) {
       toast.error(err.message || 'Failed to delete history')
@@ -857,9 +843,7 @@ export default function PerformanceClient() {
 
       if (error) throw error
 
-      toast.success('Budgets reset', {
-        description: 'All performance budgets have been cleared'
-      })
+      toast.success('Budgets reset')
       fetchPerformanceData()
     } catch (err: any) {
       toast.error(err.message || 'Failed to reset budgets')
@@ -2625,7 +2609,7 @@ export default function PerformanceClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockPerfAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your performance question...') } })}
+          onAskQuestion={(q) => toast.info('Question Submitted' })}
         />
         <PredictiveAnalytics predictions={mockPerfPredictions} />
       </div>

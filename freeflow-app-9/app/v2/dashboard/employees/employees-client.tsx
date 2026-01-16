@@ -1049,21 +1049,17 @@ export default function EmployeesClient() {
   // Handlers (handleExportEmployees is defined above at line 541)
 
   const handleScheduleReview = (employee: Employee) => {
-    toast.success('Review scheduled', {
-      description: `Performance review scheduled for ${employee.name}`
+    toast.success('Review scheduled'`
     })
   }
 
   const handleApproveTimeOff = (request: typeof mockTimeOffRequests[0]) => {
-    toast.success('Time off approved', {
-      description: `Request from ${request.employeeName} has been approved`
+    toast.success('Time off approved' has been approved`
     })
   }
 
   const handleSendAnnouncement = () => {
-    toast.info('Send Announcement', {
-      description: 'Opening announcement composer...'
-    })
+    toast.info('Send Announcement')
   }
 
   const renderOrgNode = (node: OrgNode, level: number = 0): JSX.Element => (
@@ -2507,7 +2503,7 @@ export default function EmployeesClient() {
             <AIInsightsPanel
               insights={employeesAIInsights}
               title="HR Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

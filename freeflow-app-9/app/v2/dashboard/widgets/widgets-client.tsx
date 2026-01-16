@@ -36,7 +36,6 @@ import {
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -140,24 +139,16 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_WIDGETS':
-      logger.info('Setting widgets', { count: action.widgets.length })
-      return { ...state, widgets: action.widgets }
+    case 'SET_WIDGETS':      return { ...state, widgets: action.widgets }
 
-    case 'ADD_WIDGET':
-      logger.info('Adding widget', { widgetId: action.widget.id, widgetName: action.widget.name })
-      return { ...state, widgets: [action.widget, ...state.widgets] }
+    case 'ADD_WIDGET':      return { ...state, widgets: [action.widget, ...state.widgets] }
 
-    case 'UPDATE_WIDGET':
-      logger.info('Updating widget', { widgetId: action.widget.id })
-      return {
+    case 'UPDATE_WIDGET':      return {
         ...state,
         widgets: state.widgets.map(w => w.id === action.widget.id ? action.widget : w)
       }
 
-    case 'DELETE_WIDGET':
-      logger.info('Deleting widget', { widgetId: action.widgetId })
-      return {
+    case 'DELETE_WIDGET':      return {
         ...state,
         widgets: state.widgets.filter(w => w.id !== action.widgetId),
         selectedWidget: state.selectedWidget?.id === action.widgetId ? null : state.selectedWidget
@@ -292,10 +283,7 @@ const generateMockWidgets = (): Widget[] => {
       lastRefreshed: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString() : undefined,
       usageCount: Math.floor(Math.random() * 500) + 10
     })
-  }
-
-  logger.info('Generated mock widgets', { count: widgets.length })
-  return widgets
+  }  return widgets
 }
 
 // ============================================================================
@@ -340,7 +328,6 @@ const widgetsQuickActionsTemplate = [
 export default function WidgetsClient() {
   logger.debug('Component mounting')
 
-  // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
@@ -395,14 +382,9 @@ export default function WidgetsClient() {
 
   useEffect(() => {
     const loadWidgetsData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
-      }
-
-      logger.info('Loading widgets data', { userId })
-      try {
+      }      try {
         setIsLoading(true)
         setError(null)
 
@@ -420,12 +402,9 @@ export default function WidgetsClient() {
         dispatch({ type: 'SET_WIDGETS', widgets })
 
         setIsLoading(false)
-        toast.success('Widgets loaded', {
-          description: `${widgets.length} widgets configured`
+        toast.success('Widgets loaded' widgets configured`
         })
-        announce('Widgets loaded successfully', 'polite')
-        logger.info('Widgets data loaded successfully', { count: widgets.length, userId })
-      } catch (err) {
+        announce('Widgets loaded successfully', 'polite')      } catch (err) {
         logger.error('Widgets load error', {
           error: err instanceof Error ? err.message : 'Unknown error',
           errorObject: err,
@@ -433,9 +412,7 @@ export default function WidgetsClient() {
         })
         setError(err instanceof Error ? err.message : 'Failed to load widgets')
         setIsLoading(false)
-        toast.error('Failed to load widgets', {
-          description: err instanceof Error ? err.message : 'Please try again'
-        })
+        toast.error('Failed to load widgets')
         announce('Error loading widgets', 'assertive')
       }
     }
@@ -535,11 +512,7 @@ export default function WidgetsClient() {
       logger.warn('Widget creation failed', { reason: 'Name required' })
       toast.error('Widget name required')
       return
-    }
-
-    logger.info('Creating widget', { name: widgetName, type: widgetType, category: widgetCategory, size: widgetSize })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       const icons = {
@@ -579,9 +552,7 @@ export default function WidgetsClient() {
         })
         if (createdWidget?.id) {
           widgetId = createdWidget.id
-        }
-        logger.info('Widget created in database', { widgetId, userId })
-      }
+        }      }
 
       const newWidget: Widget = {
         id: widgetId,
@@ -608,12 +579,7 @@ export default function WidgetsClient() {
       dispatch({ type: 'ADD_WIDGET', widget: newWidget })
       setIsCreateModalOpen(false)
       setWidgetName('')
-      setWidgetDescription('')
-
-      logger.info('Widget created successfully', { widgetId: newWidget.id, name: newWidget.name, type: newWidget.type })
-
-      toast.success('Widget created', {
-        description: `${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`
+      setWidgetDescription('')      toast.success('Widget created' - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`
       })
     } catch (error) {
       logger.error('Widget creation error', {
@@ -629,15 +595,7 @@ export default function WidgetsClient() {
   const handleDeleteWidget = async () => {
     if (!state.selectedWidget || !userId) return
 
-    const widgetToDelete = state.selectedWidget
-    logger.info('Deleting widget', {
-      widgetId: widgetToDelete.id,
-      name: widgetToDelete.name,
-      type: widgetToDelete.type,
-      userId
-    })
-
-    try {
+    const widgetToDelete = state.selectedWidget    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -646,16 +604,7 @@ export default function WidgetsClient() {
       await deleteWidget(widgetToDelete.id)
 
       dispatch({ type: 'DELETE_WIDGET', widgetId: widgetToDelete.id })
-      setIsDeleteModalOpen(false)
-
-      logger.info('Widget deleted from database', {
-        widgetId: widgetToDelete.id,
-        name: widgetToDelete.name,
-        userId
-      })
-
-      toast.success('Widget deleted', {
-        description: `${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`
+      setIsDeleteModalOpen(false)      toast.success('Widget deleted' - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`
       })
       announce('Widget deleted successfully', 'polite')
     } catch (error: any) {
@@ -665,9 +614,7 @@ export default function WidgetsClient() {
         widgetId: widgetToDelete.id,
         userId
       })
-      toast.error('Failed to delete widget', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete widget')
       announce('Error deleting widget', 'assertive')
     } finally {
       setIsSaving(false)
@@ -687,16 +634,7 @@ export default function WidgetsClient() {
     }
 
     const selectedWidgetsData = state.widgets.filter(w => state.selectedWidgets.includes(w.id))
-    const widgetNames = selectedWidgetsData.map(w => w.name)
-
-    logger.info('Bulk deleting widgets', {
-      count: state.selectedWidgets.length,
-      widgetIds: state.selectedWidgets,
-      widgetNames,
-      userId
-    })
-
-    try {
+    const widgetNames = selectedWidgetsData.map(w => w.name)    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -713,14 +651,7 @@ export default function WidgetsClient() {
       })
 
       const deletedCount = state.selectedWidgets.length
-      dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
-
-      logger.info('Bulk delete successful from database', {
-        count: deletedCount,
-        userId
-      })
-
-      toast.success(`Deleted ${deletedCount} widget(s)`, {
+      dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })      toast.success(`Deleted ${deletedCount} widget(s)`, {
         description: `Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`
       })
       announce(`${deletedCount} widgets deleted successfully`, 'polite')
@@ -731,19 +662,14 @@ export default function WidgetsClient() {
         count: state.selectedWidgets.length,
         userId
       })
-      toast.error('Failed to delete widgets', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete widgets')
       announce('Error deleting widgets', 'assertive')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleExportConfig = () => {
-    logger.info('Exporting widget configuration', { widgetCount: state.widgets.length })
-
-    const config = {
+  const handleExportConfig = () => {    const config = {
       widgets: state.widgets,
       exportedAt: new Date().toISOString(),
       version: '1.0'
@@ -759,16 +685,7 @@ export default function WidgetsClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    const fileSizeKB = (blob.size / 1024).toFixed(1)
-
-    logger.info('Configuration exported successfully', {
-      fileName,
-      fileSize: blob.size,
-      widgetCount: state.widgets.length
-    })
-
-    toast.success('Configuration exported', {
-      description: `${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`
+    const fileSizeKB = (blob.size / 1024).toFixed(1)    toast.success('Configuration exported' - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`
     })
   }
 

@@ -400,11 +400,11 @@ export default function AnalyticsClient() {
   // CRUD Operations
   const handleCreateFunnel = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a funnel' })
+      toast.error('Error')
       return
     }
     if (!funnelForm.name.trim()) {
-      toast.error('Error', { description: 'Funnel name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -422,12 +422,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Funnel created', { description: `"${funnelForm.name}" has been created` })
+      toast.success('Funnel created'" has been created` })
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnel(false)
       fetchFunnels()
     } catch (err: any) {
-      toast.error('Error creating funnel', { description: err.message })
+      toast.error('Error creating funnel')
     } finally {
       setIsLoading(false)
     }
@@ -443,10 +443,10 @@ export default function AnalyticsClient() {
         .eq('id', funnelId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Funnel deleted', { description: 'Funnel has been removed' })
+      toast.success('Funnel deleted')
       fetchFunnels()
     } catch (err: any) {
-      toast.error('Error deleting funnel', { description: err.message })
+      toast.error('Error deleting funnel')
     } finally {
       setIsLoading(false)
     }
@@ -454,11 +454,11 @@ export default function AnalyticsClient() {
 
   const handleCreateReport = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a report' })
+      toast.error('Error')
       return
     }
     if (!reportForm.name.trim()) {
-      toast.error('Error', { description: 'Report name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -479,12 +479,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Report created', { description: `"${reportForm.name}" has been created` })
+      toast.success('Report created'" has been created` })
       setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
       setShowCreateReport(false)
       fetchReports()
     } catch (err: any) {
-      toast.error('Error creating report', { description: err.message })
+      toast.error('Error creating report')
     } finally {
       setIsLoading(false)
     }
@@ -500,10 +500,10 @@ export default function AnalyticsClient() {
         .eq('id', reportId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report running', { description: `"${reportName}" is being generated` })
+      toast.success('Report running'" is being generated` })
       fetchReports()
     } catch (err: any) {
-      toast.error('Error running report', { description: err.message })
+      toast.error('Error running report')
     } finally {
       setIsLoading(false)
     }
@@ -519,10 +519,10 @@ export default function AnalyticsClient() {
         .eq('id', reportId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report deleted', { description: 'Report has been removed' })
+      toast.success('Report deleted')
       fetchReports()
     } catch (err: any) {
-      toast.error('Error deleting report', { description: err.message })
+      toast.error('Error deleting report')
     } finally {
       setIsLoading(false)
     }
@@ -530,11 +530,11 @@ export default function AnalyticsClient() {
 
   const handleCreateDashboard = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a dashboard' })
+      toast.error('Error')
       return
     }
     if (!dashboardForm.name.trim()) {
-      toast.error('Error', { description: 'Dashboard name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -553,12 +553,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard created', { description: `"${dashboardForm.name}" has been created` })
+      toast.success('Dashboard created'" has been created` })
       setDashboardForm({ name: '', description: '', is_default: false })
       setShowCreateDashboard(false)
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error creating dashboard', { description: err.message })
+      toast.error('Error creating dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -574,10 +574,10 @@ export default function AnalyticsClient() {
         .eq('id', dashboardId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Dashboard deleted', { description: 'Dashboard has been removed' })
+      toast.success('Dashboard deleted')
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error deleting dashboard', { description: err.message })
+      toast.error('Error deleting dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -586,9 +586,9 @@ export default function AnalyticsClient() {
   const handleShareDashboard = async (dashboardId: string) => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/dashboard/analytics-v2?dashboard=${dashboardId}`)
-      toast.success('Link copied', { description: 'Dashboard share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Failed to copy link', { description: 'Please try again' })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -610,10 +610,10 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard duplicated', { description: `"${dashboard.name}" has been duplicated` })
+      toast.success('Dashboard duplicated'" has been duplicated` })
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error duplicating dashboard', { description: err.message })
+      toast.error('Error duplicating dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -623,7 +623,7 @@ export default function AnalyticsClient() {
   const handleNotifications = () => {
     setSettingsTab('notifications')
     setActiveTab('settings')
-    toast.info('Notifications', { description: 'Opening notification settings...' })
+    toast.info('Notifications')
   }
 
   const handleExport = async () => {
@@ -647,7 +647,7 @@ export default function AnalyticsClient() {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Export complete', { description: 'Analytics data downloaded as CSV' })
+    toast.success('Export complete')
   }
 
   const handleExportCohorts = async () => {
@@ -675,7 +675,7 @@ export default function AnalyticsClient() {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Export complete', { description: 'Cohort data downloaded as CSV' })
+    toast.success('Export complete')
   }
 
   const handleExportConfig = async () => {
@@ -704,7 +704,7 @@ export default function AnalyticsClient() {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Config exported', { description: 'Analytics configuration downloaded' })
+    toast.success('Config exported')
   }
 
   const handleCopyTrackingCode = async () => {
@@ -717,9 +717,9 @@ export default function AnalyticsClient() {
 </script>`
     try {
       await navigator.clipboard.writeText(trackingCode)
-      toast.success('Copied', { description: 'Tracking code copied to clipboard' })
+      toast.success('Copied')
     } catch (err) {
-      toast.error('Failed to copy', { description: 'Please try again' })
+      toast.error('Failed to copy')
     }
   }
 
@@ -737,7 +737,7 @@ export default function AnalyticsClient() {
 
 Add this code to the <head> section of your HTML.`)
     window.open(`mailto:?subject=${subject}&body=${body}`)
-    toast.success('Email opened', { description: 'Compose your email with the tracking code' })
+    toast.success('Email opened')
   }
 
   const handleExportAllData = async () => {
@@ -759,15 +759,15 @@ Add this code to the <head> section of your HTML.`)
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
-    toast.success('Export complete', { description: 'All analytics data downloaded' })
+    toast.success('Export complete')
   }
 
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Failed to copy link', { description: 'Please try again' })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -785,9 +785,7 @@ Add this code to the <head> section of your HTML.`)
       (activeFilters.maxValue ? 1 : 0)
 
     setShowFilterDialog(false)
-    toast.success('Filters applied', {
-      description: filterCount > 0
-        ? `${filterCount} filter${filterCount > 1 ? 's' : ''} active`
+    toast.success('Filters applied' filter${filterCount > 1 ? 's' : ''} active`
         : 'Showing all data'
     })
   }
@@ -801,7 +799,7 @@ Add this code to the <head> section of your HTML.`)
       minValue: '',
       maxValue: ''
     })
-    toast.success('Filters cleared', { description: 'Showing all data' })
+    toast.success('Filters cleared')
   }
 
   // Toggle filter option
@@ -818,26 +816,24 @@ Add this code to the <head> section of your HTML.`)
   // Handle custom date range selection
   const handleApplyCustomDateRange = () => {
     if (new Date(customDateRange.startDate) > new Date(customDateRange.endDate)) {
-      toast.error('Invalid date range', { description: 'Start date must be before end date' })
+      toast.error('Invalid date range')
       return
     }
     setTimeRange('custom')
     setShowCustomDateRange(false)
-    toast.success('Date range applied', {
-      description: `${customDateRange.startDate} to ${customDateRange.endDate}`
+    toast.success('Date range applied' to ${customDateRange.endDate}`
     })
   }
 
   // Handle compare date range
   const handleApplyCompare = () => {
     if (new Date(compareDateRange.startDate) > new Date(compareDateRange.endDate)) {
-      toast.error('Invalid compare range', { description: 'Start date must be before end date' })
+      toast.error('Invalid compare range')
       return
     }
     setCompareMode(true)
     setShowCompareDialog(false)
-    toast.success('Compare mode enabled', {
-      description: `Comparing with ${compareDateRange.startDate} to ${compareDateRange.endDate}`
+    toast.success('Compare mode enabled' to ${compareDateRange.endDate}`
     })
   }
 
@@ -881,10 +877,10 @@ Report generated by Kazi Analytics
       URL.revokeObjectURL(url)
 
       toast.dismiss(loadingToast)
-      toast.success('PDF exported', { description: 'Report downloaded successfully' })
+      toast.success('PDF exported')
     } catch (err) {
       toast.dismiss(loadingToast)
-      toast.error('Export failed', { description: 'Could not generate PDF report' })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -893,7 +889,7 @@ Report generated by Kazi Analytics
   // Save custom report
   const handleSaveCustomReport = async () => {
     if (!customReportForm.name.trim()) {
-      toast.error('Report name required', { description: 'Please enter a name for your report' })
+      toast.error('Report name required')
       return
     }
 
@@ -920,12 +916,12 @@ Report generated by Kazi Analytics
         if (error) throw error
       }
 
-      toast.success('Report saved', { description: `"${customReportForm.name}" has been saved` })
+      toast.success('Report saved'" has been saved` })
       setCustomReportForm({ name: '', description: '', metrics: [], schedule: 'none' })
       setShowSaveReportDialog(false)
       fetchReports()
     } catch (err: any) {
-      toast.error('Error saving report', { description: err.message })
+      toast.error('Error saving report')
     } finally {
       setIsLoading(false)
     }
@@ -936,9 +932,9 @@ Report generated by Kazi Analytics
     const shareUrl = `${window.location.origin}/dashboard/analytics-v2?range=${timeRange}&filters=${encodeURIComponent(JSON.stringify(activeFilters))}`
     try {
       await navigator.clipboard.writeText(shareUrl)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Copy failed', { description: 'Could not copy link to clipboard' })
+      toast.error('Copy failed')
     }
   }
 
@@ -946,9 +942,9 @@ Report generated by Kazi Analytics
     setIsLoading(true)
     try {
       await Promise.all([fetchFunnels(), fetchReports(), fetchDashboards(), fetchMetrics()])
-      toast.success('Data refreshed', { description: 'Analytics data updated' })
+      toast.success('Data refreshed')
     } catch (err) {
-      toast.error('Refresh failed', { description: 'Please try again' })
+      toast.error('Refresh failed')
     } finally {
       setIsLoading(false)
     }
@@ -970,9 +966,9 @@ Report generated by Kazi Analytics
           notification_channels: ['email', 'in_app']
         })
       if (error) throw error
-      toast.success('Alert created', { description: `Alert set for "${selectedMetric.name}"` })
+      toast.success('Alert created'"` })
     } catch (err: any) {
-      toast.error('Error creating alert', { description: err.message })
+      toast.error('Error creating alert')
     } finally {
       setIsLoading(false)
     }
@@ -981,11 +977,11 @@ Report generated by Kazi Analytics
   // Handler for adding metric
   const handleAddMetric = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to add a metric' })
+      toast.error('Error')
       return
     }
     if (!metricForm.name.trim()) {
-      toast.error('Error', { description: 'Metric name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -1004,12 +1000,12 @@ Report generated by Kazi Analytics
           alert_threshold: metricForm.alertThreshold ? parseFloat(metricForm.alertThreshold) : null
         })
       if (error) throw error
-      toast.success('Metric added', { description: `"${metricForm.name}" has been added` })
+      toast.success('Metric added'" has been added` })
       setMetricForm({ name: '', category: 'users', type: 'count', alertThreshold: '' })
       setShowAddMetric(false)
       fetchMetrics()
     } catch (err: any) {
-      toast.error('Error adding metric', { description: err.message })
+      toast.error('Error adding metric')
     } finally {
       setIsLoading(false)
     }
@@ -1018,15 +1014,15 @@ Report generated by Kazi Analytics
   // Handler for creating cohort
   const handleCreateCohort = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a cohort' })
+      toast.error('Error')
       return
     }
     if (!cohortForm.name.trim()) {
-      toast.error('Error', { description: 'Cohort name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
-    toast.success('Creating cohort...', { description: `Setting up "${cohortForm.name}"` })
+    toast.success('Creating cohort...'"` })
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1041,11 +1037,11 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to create cohort')
-      toast.success('Cohort created', { description: `"${cohortForm.name}" has been created` })
+      toast.success('Cohort created'" has been created` })
       setCohortForm({ name: '', type: 'retention', description: '' })
       setShowCreateCohort(false)
     } catch (err: any) {
-      toast.error('Error creating cohort', { description: err.message })
+      toast.error('Error creating cohort')
     } finally {
       setIsLoading(false)
     }
@@ -1055,7 +1051,7 @@ Report generated by Kazi Analytics
   const handleEditReport = async () => {
     if (!userId || !showEditReport) return
     if (!editReportForm.name.trim()) {
-      toast.error('Error', { description: 'Report name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -1073,11 +1069,11 @@ Report generated by Kazi Analytics
         .eq('id', showEditReport)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report updated', { description: `"${editReportForm.name}" has been updated` })
+      toast.success('Report updated'" has been updated` })
       setShowEditReport(null)
       fetchReports()
     } catch (err: any) {
-      toast.error('Error updating report', { description: err.message })
+      toast.error('Error updating report')
     } finally {
       setIsLoading(false)
     }
@@ -1087,7 +1083,7 @@ Report generated by Kazi Analytics
   const handleConnectIntegration = async (integrationName: string, connected: boolean) => {
     setIsLoading(true)
     const action = connected ? 'disconnect' : 'connect'
-    toast.success(`${connected ? 'Disconnecting' : 'Connecting'}...`, { description: `${action === 'connect' ? 'Setting up' : 'Removing'} ${integrationName}` })
+    toast.success(`${connected ? 'Disconnecting' : 'Connecting'}...` ${integrationName}` })
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1102,13 +1098,13 @@ Report generated by Kazi Analytics
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || `Failed to ${action} integration`)
       if (connected) {
-        toast.success('Disconnected', { description: `${integrationName} has been disconnected` })
+        toast.success('Disconnected' has been disconnected` })
       } else {
-        toast.success('Connected', { description: `${integrationName} has been connected` })
+        toast.success('Connected' has been connected` })
       }
       setShowConnectIntegration(null)
     } catch (err: any) {
-      toast.error('Error', { description: err.message })
+      toast.error('Error')
     } finally {
       setIsLoading(false)
     }
@@ -1117,7 +1113,7 @@ Report generated by Kazi Analytics
   // Handler for regenerating API key
   const handleRegenerateApiKey = async () => {
     setIsLoading(true)
-    toast.success('Regenerating API key...', { description: 'Generating new secure key' })
+    toast.success('Regenerating API key...')
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1129,10 +1125,10 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to regenerate API key')
-      toast.success('API key regenerated', { description: 'New API key has been generated. Please save it securely.' })
+      toast.success('API key regenerated')
       setShowRegenerateApiKey(false)
     } catch (err: any) {
-      toast.error('Error regenerating key', { description: err.message })
+      toast.error('Error regenerating key')
     } finally {
       setIsLoading(false)
     }
@@ -1141,11 +1137,11 @@ Report generated by Kazi Analytics
   // Handler for configuring event schema
   const handleConfigureEventSchema = async () => {
     if (!eventSchemaForm.eventName.trim()) {
-      toast.error('Error', { description: 'Event name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
-    toast.success('Configuring schema...', { description: `Setting up event "${eventSchemaForm.eventName}"` })
+    toast.success('Configuring schema...'"` })
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1160,11 +1156,11 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to configure event schema')
-      toast.success('Schema configured', { description: `Event schema for "${eventSchemaForm.eventName}" has been configured` })
+      toast.success('Schema configured'" has been configured` })
       setEventSchemaForm({ eventName: '', properties: '', description: '' })
       setShowConfigureEventSchema(false)
     } catch (err: any) {
-      toast.error('Error configuring schema', { description: err.message })
+      toast.error('Error configuring schema')
     } finally {
       setIsLoading(false)
     }
@@ -1180,14 +1176,14 @@ Report generated by Kazi Analytics
       await supabase.from('analytics_reports').delete().eq('user_id', userId)
       await supabase.from('analytics_dashboards').delete().eq('user_id', userId)
       await supabase.from('analytics_conversion_funnels').delete().eq('user_id', userId)
-      toast.success('Data reset', { description: 'All analytics data has been permanently deleted' })
+      toast.success('Data reset')
       setShowResetData(false)
       fetchMetrics()
       fetchReports()
       fetchDashboards()
       fetchFunnels()
     } catch (err: any) {
-      toast.error('Error resetting data', { description: err.message })
+      toast.error('Error resetting data')
     } finally {
       setIsLoading(false)
     }
@@ -1196,7 +1192,7 @@ Report generated by Kazi Analytics
   // Handler for deleting tracking code
   const handleDeleteTrackingCode = async () => {
     setIsLoading(true)
-    toast.success('Deleting tracking...', { description: 'Removing tracking code from all sites' })
+    toast.success('Deleting tracking...')
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1208,10 +1204,10 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to delete tracking code')
-      toast.success('Tracking removed', { description: 'Tracking code has been deleted from all sites' })
+      toast.success('Tracking removed')
       setShowDeleteTracking(false)
     } catch (err: any) {
-      toast.error('Error deleting tracking', { description: err.message })
+      toast.error('Error deleting tracking')
     } finally {
       setIsLoading(false)
     }
@@ -1220,7 +1216,7 @@ Report generated by Kazi Analytics
   // Handler for revoking all API keys
   const handleRevokeAllApiKeys = async () => {
     setIsLoading(true)
-    toast.success('Revoking keys...', { description: 'Invalidating all API keys' })
+    toast.success('Revoking keys...')
     try {
       const response = await fetch('/api/analytics', {
         method: 'POST',
@@ -1232,10 +1228,10 @@ Report generated by Kazi Analytics
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Failed to revoke API keys')
-      toast.success('Keys revoked', { description: 'All API keys have been invalidated' })
+      toast.success('Keys revoked')
       setShowRevokeApiKeys(false)
     } catch (err: any) {
-      toast.error('Error revoking keys', { description: err.message })
+      toast.error('Error revoking keys')
     } finally {
       setIsLoading(false)
     }
@@ -1244,12 +1240,12 @@ Report generated by Kazi Analytics
   // Handler for duplicating a metric
   const handleDuplicateMetric = async () => {
     if (!userId || !selectedMetricForAction) {
-      toast.error('Error', { description: 'You must be logged in to duplicate a metric' })
+      toast.error('Error')
       return
     }
     const originalMetric = mockMetrics.find(m => m.id === selectedMetricForAction)
     if (!originalMetric) {
-      toast.error('Error', { description: 'Metric not found' })
+      toast.error('Error')
       return
     }
     const newName = duplicateMetricName.trim() || `${originalMetric.name} (Copy)`
@@ -1269,14 +1265,14 @@ Report generated by Kazi Analytics
           alert_threshold: originalMetric.alertThreshold || null
         })
       if (error) throw error
-      toast.success('Metric duplicated', { description: `"${newName}" has been created` })
+      toast.success('Metric duplicated'" has been created` })
       setDuplicateMetricName('')
       setShowDuplicateMetric(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
       fetchMetrics()
     } catch (err: any) {
-      toast.error('Error duplicating metric', { description: err.message })
+      toast.error('Error duplicating metric')
     } finally {
       setIsLoading(false)
     }
@@ -1285,16 +1281,16 @@ Report generated by Kazi Analytics
   // Handler for setting an alert on a metric
   const handleSetMetricAlert = async () => {
     if (!userId || !selectedMetricForAction) {
-      toast.error('Error', { description: 'You must be logged in to set an alert' })
+      toast.error('Error')
       return
     }
     if (!alertForm.thresholdValue) {
-      toast.error('Error', { description: 'Threshold value is required' })
+      toast.error('Error')
       return
     }
     const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
     if (!metric) {
-      toast.error('Error', { description: 'Metric not found' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -1315,13 +1311,13 @@ Report generated by Kazi Analytics
           notification_channels: notificationChannels
         })
       if (error) throw error
-      toast.success('Alert created', { description: `Alert set for "${metric.name}" when value goes ${alertForm.thresholdType} ${alertForm.thresholdValue}` })
+      toast.success('Alert created'" when value goes ${alertForm.thresholdType} ${alertForm.thresholdValue}` })
       setAlertForm({ thresholdType: 'above', thresholdValue: '', notifyEmail: true, notifyInApp: true })
       setShowSetAlertDialog(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
     } catch (err: any) {
-      toast.error('Error creating alert', { description: err.message })
+      toast.error('Error creating alert')
     } finally {
       setIsLoading(false)
     }
@@ -1330,12 +1326,12 @@ Report generated by Kazi Analytics
   // Handler for sharing a metric
   const handleShareMetric = async () => {
     if (!selectedMetricForAction) {
-      toast.error('Error', { description: 'No metric selected' })
+      toast.error('Error')
       return
     }
     const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
     if (!metric) {
-      toast.error('Error', { description: 'Metric not found' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -1348,18 +1344,18 @@ Report generated by Kazi Analytics
         const subject = encodeURIComponent(`Check out this metric: ${metric.name}`)
         const body = encodeURIComponent(`I wanted to share this analytics metric with you:\n\nMetric: ${metric.name}\nCurrent Value: ${formatValue(metric.value, metric.type)}\nChange: ${metric.changePercent >= 0 ? '+' : ''}${metric.changePercent.toFixed(1)}%\n\nView the full analytics here: ${shareLink}`)
         window.open(`mailto:${emails.join(',')}?subject=${subject}&body=${body}`)
-        toast.success('Email opened', { description: `Share metric "${metric.name}" with ${emails.length} recipient(s)` })
+        toast.success('Email opened'" with ${emails.length} recipient(s)` })
       } else {
         // Copy link to clipboard
         await navigator.clipboard.writeText(shareLink)
-        toast.success('Link copied', { description: `Share link for "${metric.name}" copied to clipboard` })
+        toast.success('Link copied'" copied to clipboard` })
       }
       setShareEmails('')
       setShowShareMetric(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
     } catch (err: any) {
-      toast.error('Error sharing metric', { description: err.message })
+      toast.error('Error sharing metric')
     } finally {
       setIsLoading(false)
     }
@@ -1368,7 +1364,7 @@ Report generated by Kazi Analytics
   // Handler for deleting a metric
   const handleDeleteMetric = async () => {
     if (!userId || !selectedMetricForAction) {
-      toast.error('Error', { description: 'You must be logged in to delete a metric' })
+      toast.error('Error')
       return
     }
     const metric = mockMetrics.find(m => m.id === selectedMetricForAction)
@@ -1380,13 +1376,13 @@ Report generated by Kazi Analytics
         .eq('id', selectedMetricForAction)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Metric deleted', { description: `"${metric?.name || 'Metric'}" has been removed` })
+      toast.success('Metric deleted'" has been removed` })
       setShowDeleteMetric(false)
       setSelectedMetricForAction(null)
       setShowMetricOptions(null)
       fetchMetrics()
     } catch (err: any) {
-      toast.error('Error deleting metric', { description: err.message })
+      toast.error('Error deleting metric')
     } finally {
       setIsLoading(false)
     }
@@ -4317,7 +4313,7 @@ Report generated by Kazi Analytics
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your analytics question...') } })}
+            onAskQuestion={(q) => toast.info('Question Submitted' })}
           />
           <PredictiveAnalytics predictions={mockPredictions} />
         </div>

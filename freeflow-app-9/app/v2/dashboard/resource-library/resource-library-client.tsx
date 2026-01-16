@@ -68,7 +68,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -108,7 +107,6 @@ const resourceLibraryActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function ResourceLibraryClient() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -122,21 +120,15 @@ export default function ResourceLibraryClient() {
     totalAuthors: 0
   })
 
-  // A+++ LOAD RESOURCE LIBRARY DATA
   useEffect(() => {
     const loadResourceLibraryData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading resource library data', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getResources, getResourceLibraryStats } = await import('@/lib/resource-library-queries')
 
         // Load resources and stats in parallel
@@ -156,15 +148,7 @@ export default function ResourceLibraryClient() {
           totalAuthors: statsResult.data?.total_authors || 0
         })
 
-        setIsLoading(false)
-
-        logger.info('Resource library data loaded successfully', {
-          userId,
-          resourcesCount: resourcesResult.data?.length || 0,
-          totalResources: statsResult.data?.total_resources || 0
-        })
-
-        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
+        setIsLoading(false)        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
       } catch (err) {
         logger.error('Failed to load resource library data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load resource library')
@@ -257,11 +241,11 @@ export default function ResourceLibraryClient() {
     try {
       // Validate form
       if (!newResourceData.title.trim()) {
-        toast.error('Title Required', { description: 'Please enter a resource title' })
+        toast.error('Title Required')
         return
       }
       if (!newResourceData.description.trim()) {
-        toast.error('Description Required', { description: 'Please enter a resource description' })
+        toast.error('Description Required')
         return
       }
 
@@ -292,7 +276,7 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Error', { description: 'Failed to create resource' })
+      toast.error('Error')
     }
   }
 
@@ -333,7 +317,7 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Export Failed', { description: 'An error occurred during export' })
+      toast.error('Export Failed')
     }
   }
 
@@ -359,7 +343,7 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Error', { description: 'Failed to save settings' })
+      toast.error('Error')
     }
   }
 
@@ -367,7 +351,7 @@ export default function ResourceLibraryClient() {
   const handleUpload = async () => {
     try {
       if (!uploadData.title.trim()) {
-        toast.error('Title Required', { description: 'Please enter a title for your upload' })
+        toast.error('Title Required')
         return
       }
 
@@ -401,14 +385,13 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Upload Failed', { description: 'An error occurred during upload' })
+      toast.error('Upload Failed')
     }
   }
 
   // Apply filters handler
   const handleApplyFilters = () => {
-    toast.success('Filters Applied', {
-      description: `Showing ${filterOptions.showPremiumOnly ? 'premium ' : ''}${filterOptions.showFeaturedOnly ? 'featured ' : ''}resources sorted by ${filterOptions.sortBy}`
+    toast.success('Filters Applied'${filterOptions.showFeaturedOnly ? 'featured ' : ''}resources sorted by ${filterOptions.sortBy}`
     })
     setShowFiltersDialog(false)
   }
@@ -424,14 +407,14 @@ export default function ResourceLibraryClient() {
       showFeaturedOnly: false,
       showPremiumOnly: false
     })
-    toast.info('Filters Reset', { description: 'All filters have been cleared' })
+    toast.info('Filters Reset')
   }
 
   // Preview resource handler
   const handlePreviewResource = (resource: any) => {
     setSelectedResource(resource)
     setShowPreviewDialog(true)
-    toast.info('Preview', { description: `Viewing "${resource.title}"` })
+    toast.info('Preview'"` })
   }
 
   // Bookmark toggle handler
@@ -440,10 +423,10 @@ export default function ResourceLibraryClient() {
       const newSet = new Set(prev)
       if (newSet.has(resourceId)) {
         newSet.delete(resourceId)
-        toast.success('Bookmark Removed', { description: `"${resourceTitle}" removed from bookmarks` })
+        toast.success('Bookmark Removed'" removed from bookmarks` })
       } else {
         newSet.add(resourceId)
-        toast.success('Bookmarked', { description: `"${resourceTitle}" added to bookmarks` })
+        toast.success('Bookmarked'" added to bookmarks` })
       }
       return newSet
     })
@@ -522,7 +505,7 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Share Failed', { description: 'An error occurred while creating share link' })
+      toast.error('Share Failed')
     }
   }
 
@@ -563,7 +546,7 @@ export default function ResourceLibraryClient() {
         }
       )
     } catch (error) {
-      toast.error('Delete Failed', { description: 'An error occurred while deleting the resource' })
+      toast.error('Delete Failed')
     }
   }
 
@@ -583,7 +566,7 @@ export default function ResourceLibraryClient() {
     })
     setShowResourceMenuDialog(false)
     setShowNewResourceDialog(true)
-    toast.info('Edit Mode', { description: `Editing "${selectedResource.title}"` })
+    toast.info('Edit Mode'"` })
   }
 
   // Duplicate resource handler
@@ -645,7 +628,7 @@ export default function ResourceLibraryClient() {
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        toast.success('Files Selected', { description: `${files.length} file(s) ready to upload` })
+        toast.success('Files Selected' file(s) ready to upload` })
       }
     }
     input.click()
@@ -845,7 +828,6 @@ export default function ResourceLibraryClient() {
     return matchesSearch && matchesCategory
   })
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -861,7 +843,6 @@ export default function ResourceLibraryClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -2081,7 +2062,7 @@ export default function ResourceLibraryClient() {
                 if (selectedResource) {
                   const url = `https://freeflow.app/resources/${selectedResource.id}`
                   window.open(url, '_blank')
-                  toast.info('Opening in new tab', { description: 'Resource page opened' })
+                  toast.info('Opening in new tab')
                 }
                 setShowResourceMenuDialog(false)
               }}

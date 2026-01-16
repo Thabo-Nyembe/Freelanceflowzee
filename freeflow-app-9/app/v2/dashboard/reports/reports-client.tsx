@@ -687,8 +687,7 @@ export default function ReportsClient() {
       })
 
       if (result.success) {
-        toast.success('Report created successfully', {
-          description: `"${newReportName}" has been created in the ${newReportFolder} folder`
+        toast.success('Report created successfully'" has been created in the ${newReportFolder} folder`
         })
 
         // Refresh reports list
@@ -702,14 +701,10 @@ export default function ReportsClient() {
         setNewReportFolder('Sales')
         setShowNewReportDialog(false)
       } else {
-        toast.error('Failed to create report', {
-          description: result.error || 'An error occurred'
-        })
+        toast.error('Failed to create report')
       }
     } catch (error: any) {
-      toast.error('Failed to create report', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Failed to create report')
     } finally {
       setIsCreatingReport(false)
     }
@@ -739,8 +734,7 @@ export default function ReportsClient() {
       })
 
       if (result.data) {
-        toast.success('Export scheduled successfully', {
-          description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
+        toast.success('Export scheduled successfully' at ${scheduleExportTime}`
         })
 
         // Refresh scheduled reports list
@@ -754,14 +748,10 @@ export default function ReportsClient() {
         setScheduleExportTime('08:00')
         setShowScheduleExportDialog(false)
       } else {
-        toast.error('Failed to schedule export', {
-          description: result.error || 'An error occurred'
-        })
+        toast.error('Failed to schedule export')
       }
     } catch (error: any) {
-      toast.error('Failed to schedule export', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Failed to schedule export')
     } finally {
       setIsSchedulingExport(false)
     }
@@ -777,8 +767,7 @@ export default function ReportsClient() {
       return
     }
 
-    toast.success('Data source connected', {
-      description: `"${newDataSourceName}" has been added and is now syncing`
+    toast.success('Data source connected'" has been added and is now syncing`
     })
 
     // Reset form
@@ -790,8 +779,7 @@ export default function ReportsClient() {
 
   // Apply Filters Handler
   const handleApplyFilters = () => {
-    toast.success('Filters applied', {
-      description: `Status: ${filterStatus}, Type: ${filterType}, Date: ${filterDateRange}`
+    toast.success('Filters applied', Type: ${filterType}, Date: ${filterDateRange}`
     })
     setShowFilterDialog(false)
   }
@@ -811,17 +799,14 @@ export default function ReportsClient() {
         body: JSON.stringify({ action: 'import', file: importFile, format: importFormat })
       })
       if (!res.ok) throw new Error('Failed to import reports')
-      toast.success('Reports imported successfully', {
-        description: `Imported reports from ${importFormat.toUpperCase()} file`
+      toast.success('Reports imported successfully' file`
       })
       // Refresh reports list
       await loadReports()
       setImportFile('')
       setShowImportDialog(false)
     } catch (error: any) {
-      toast.error('Import failed', {
-        description: error.message || 'Failed to import reports'
-      })
+      toast.error('Import failed')
     } finally {
       setIsImporting(false)
     }
@@ -834,19 +819,14 @@ export default function ReportsClient() {
       // Export all reports via analytics API
       const result = await fetchAnalyticsAPI('comprehensive')
       if (result.success) {
-        toast.success('Export started', {
-          description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
+        toast.success('Export started'. Download will begin shortly.`
         })
         setShowExportAllDialog(false)
       } else {
-        toast.error('Export failed', {
-          description: result.error || 'Failed to export reports'
-        })
+        toast.error('Export failed')
       }
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Export failed')
     } finally {
       setIsExportingAll(false)
     }
@@ -866,8 +846,7 @@ export default function ReportsClient() {
           'Marketing spend optimization can save 20% budget',
           'Product feature adoption correlates with retention'
         ])
-        toast.success('AI analysis complete', {
-          description: `Found ${insights.length} actionable insights`
+        toast.success('AI analysis complete' actionable insights`
         })
       } else {
         // Fallback to default insights
@@ -877,14 +856,10 @@ export default function ReportsClient() {
           'Marketing spend optimization can save 20% budget',
           'Product feature adoption correlates with retention'
         ])
-        toast.success('AI analysis complete', {
-          description: 'Found 4 actionable insights'
-        })
+        toast.success('AI analysis complete')
       }
     } catch (error: any) {
-      toast.error('AI analysis failed', {
-        description: error.message || 'Failed to run AI analysis'
-      })
+      toast.error('AI analysis failed')
     } finally {
       setAiAnalysisRunning(false)
     }
@@ -892,24 +867,21 @@ export default function ReportsClient() {
 
   // Apply Theme Handler
   const handleApplyTheme = () => {
-    toast.success('Theme applied', {
-      description: `Applied "${selectedTheme}" theme to all reports`
+    toast.success('Theme applied'" theme to all reports`
     })
     setShowThemeDialog(false)
   }
 
   // Publish Report Handler
   const handlePublishReport = () => {
-    toast.success('Report published', {
-      description: `Report is now visible to ${publishVisibility === 'public' ? 'everyone' : publishVisibility}`
+    toast.success('Report published'`
     })
     setShowPublishDialog(false)
   }
 
   // Refresh Data Source Handler
   const handleRefreshDataSource = (source: DataSource) => {
-    toast.success('Data source refreshed', {
-      description: `${source.name} has been synced successfully`
+    toast.success('Data source refreshed' has been synced successfully`
     })
   }
 
@@ -922,8 +894,7 @@ export default function ReportsClient() {
   // Save Data Source Settings Handler
   const handleSaveDataSourceSettings = () => {
     if (!selectedDataSource) return
-    toast.success('Settings saved', {
-      description: `${selectedDataSource.name} settings updated`
+    toast.success('Settings saved' settings updated`
     })
     setShowDataSourceSettingsDialog(false)
     setSelectedDataSource(null)
@@ -938,8 +909,7 @@ export default function ReportsClient() {
   // Toggle Schedule Status Handler
   const handleToggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
-    toast.success(`Schedule ${newStatus}`, {
-      description: `Report delivery has been ${newStatus}`
+    toast.success(`Schedule ${newStatus}``
     })
   }
 
@@ -949,26 +919,21 @@ export default function ReportsClient() {
       toast.error('Please type "DELETE ALL" to confirm')
       return
     }
-    toast.success('All reports deleted', {
-      description: 'All reports have been permanently removed'
-    })
+    toast.success('All reports deleted')
     setShowDeleteAllDialog(false)
     setDeleteConfirmText('')
   }
 
   // Clear Cache Handler
   const handleClearCache = () => {
-    toast.success('Cache cleared', {
-      description: 'All cached data has been refreshed'
-    })
+    toast.success('Cache cleared')
     setShowClearCacheDialog(false)
   }
 
   // Open Report Handler
   const handleOpenReport = () => {
     if (!selectedReport) return
-    toast.success('Opening report', {
-      description: `Loading "${selectedReport.name}" in full view`
+    toast.success('Opening report'" in full view`
     })
     // In a real app, this would navigate to the report view
   }
@@ -986,8 +951,7 @@ export default function ReportsClient() {
       toast.error('Report name is required')
       return
     }
-    toast.success('Report updated', {
-      description: `"${editReportName}" has been saved`
+    toast.success('Report updated'" has been saved`
     })
     setShowEditReportDialog(false)
   }
@@ -1005,8 +969,7 @@ export default function ReportsClient() {
       return
     }
     const emailCount = shareEmails.split(',').length
-    toast.success('Report shared', {
-      description: `Shared with ${emailCount} recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
+    toast.success('Report shared' recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
     })
     setShowShareReportDialog(false)
   }
@@ -1023,19 +986,14 @@ export default function ReportsClient() {
     try {
       const result = await exportReportAPI(selectedReport.id, exportFormat)
       if (result.success) {
-        toast.success('Export started', {
-          description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
+        toast.success('Export started'" will be downloaded as ${exportFormat.toUpperCase()}`
         })
         setShowExportReportDialog(false)
       } else {
-        toast.error('Export failed', {
-          description: result.error || 'Failed to start export'
-        })
+        toast.error('Export failed')
       }
     } catch (error: any) {
-      toast.error('Export failed', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Export failed')
     } finally {
       setIsExportingReport(false)
     }
@@ -1052,22 +1010,17 @@ export default function ReportsClient() {
     try {
       const result = await deleteReportAPI(selectedReport.id)
       if (result.success) {
-        toast.success('Report deleted', {
-          description: `"${selectedReport.name}" has been removed`
+        toast.success('Report deleted'" has been removed`
         })
         // Refresh reports list
         await loadReports()
         setShowDeleteReportDialog(false)
         setSelectedReport(null)
       } else {
-        toast.error('Delete failed', {
-          description: result.error || 'Failed to delete report'
-        })
+        toast.error('Delete failed')
       }
     } catch (error: any) {
-      toast.error('Delete failed', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Delete failed')
     } finally {
       setIsDeletingReport(false)
     }
@@ -1079,9 +1032,7 @@ export default function ReportsClient() {
       toast.error('Please enter an API key')
       return
     }
-    toast.success('Integration connected', {
-      description: 'Redshift has been successfully connected'
-    })
+    toast.success('Integration connected')
     setShowConnectIntegrationDialog(false)
     setIntegrationApiKey('')
   }
@@ -1094,9 +1045,7 @@ export default function ReportsClient() {
 
   // Regenerate API Key Handler
   const handleRegenerateApiKey = () => {
-    toast.success('API key regenerated', {
-      description: 'Your new API key has been generated. Please update your integrations.'
-    })
+    toast.success('API key regenerated')
   }
 
   // Copy Embed Secret Handler
@@ -1122,8 +1071,7 @@ export default function ReportsClient() {
       toast.error('Connection string is required')
       return
     }
-    toast.success('Connection added', {
-      description: `"${newDataSourceName}" is now connected and syncing`
+    toast.success('Connection added'" is now connected and syncing`
     })
     setShowAddConnectionDialog(false)
     setNewDataSourceName('')
@@ -1265,8 +1213,7 @@ export default function ReportsClient() {
 
   // Duplicate Report Handler (legacy - for context menu)
   const handleDuplicateReport = (reportName: string) => {
-    toast.success('Report duplicated', {
-      description: `Copy of "${reportName}" created`
+    toast.success('Report duplicated'" created`
     })
   }
 
@@ -2495,7 +2442,7 @@ export default function ReportsClient() {
             <AIInsightsPanel
               insights={mockReportsAIInsights}
               title="Reports Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

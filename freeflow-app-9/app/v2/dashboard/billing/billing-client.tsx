@@ -560,8 +560,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         cancel_at_period_end: true,
         canceled_at: new Date().toISOString()
       })
-      toast.success('Subscription cancelled', {
-        description: `Subscription for ${subscription.customer_name || 'customer'} has been cancelled`
+      toast.success('Subscription cancelled' has been cancelled`
       })
       setSelectedSubscription(null)
     } catch (error) {
@@ -581,8 +580,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         reason: 'requested_by_customer',
         notes: `Refund for transaction ${transaction.transaction_id}`
       })
-      toast.success('Refund initiated', {
-        description: `Refund for ${formatCurrency(transaction.amount)} has been initiated`
+      toast.success('Refund initiated' has been initiated`
       })
     } catch (error) {
       console.error('Failed to initiate refund:', error)
@@ -617,13 +615,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
 
-        toast.success('Export completed', {
-          description: `Exported ${billingData.length} billing records`
+        toast.success('Export completed' billing records`
         })
       } else {
-        toast.info('No data to export', {
-          description: 'There are no billing records to export'
-        })
+        toast.info('No data to export')
       }
     } catch (error) {
       console.error('Failed to export billing data:', error)
@@ -637,8 +632,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'processing',
         last_retry_at: new Date().toISOString()
       })
-      toast.info('Retrying payment', {
-        description: `Attempting to charge for invoice ${invoice.number || invoice.id}`
+      toast.info('Retrying payment'`
       })
       // Call billing API to retry payment
       const response = await fetch('/api/billing-settings', {
@@ -655,17 +649,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           status: 'paid',
           paid_at: new Date().toISOString()
         })
-        toast.success('Payment successful', {
-          description: `Invoice ${invoice.number || invoice.id} has been paid`
+        toast.success('Payment successful' has been paid`
         })
       } else {
         await updateInvoice(invoice.id, {
           status: 'open',
           paid_at: null
         })
-        toast.error('Payment failed', {
-          description: result.error || 'The payment could not be processed. Please try again.'
-        })
+        toast.error('Payment failed')
       }
     } catch (error) {
       console.error('Failed to retry payment:', error)
@@ -715,8 +706,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         last_reminder_sent: new Date().toISOString(),
         reminder_count: (invoice as any).reminder_count ? (invoice as any).reminder_count + 1 : 1
       })
-      toast.success('Reminder sent', {
-        description: `Payment reminder sent to ${invoice.customer_email}`
+      toast.success('Reminder sent'`
       })
     } catch (error) {
       console.error('Failed to send reminder:', error)
@@ -730,8 +720,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'paused',
         paused_at: new Date().toISOString()
       })
-      toast.success('Subscription paused', {
-        description: `Subscription for ${subscription.customer_name} has been paused`
+      toast.success('Subscription paused' has been paused`
       })
     } catch (error) {
       console.error('Failed to pause subscription:', error)
@@ -745,8 +734,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'active',
         paused_at: null
       })
-      toast.success('Subscription resumed', {
-        description: `Subscription for ${subscription.customer_name} has been resumed`
+      toast.success('Subscription resumed' has been resumed`
       })
     } catch (error) {
       console.error('Failed to resume subscription:', error)
@@ -2252,7 +2240,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <AIInsightsPanel
               insights={mockBillingAIInsights}
               title="Billing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

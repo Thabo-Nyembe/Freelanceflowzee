@@ -611,7 +611,7 @@ export default function OverviewClient() {
   const handleRefresh = async () => {
     setIsRefreshing(true)
     await Promise.all([fetchMetrics(), fetchStats(), fetchNotifications()])
-    toast.success('Dashboard refreshed', { description: 'Data has been updated' })
+    toast.success('Dashboard refreshed')
     setIsRefreshing(false)
   }
 
@@ -642,10 +642,10 @@ export default function OverviewClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Dashboard exported', { description: 'Dashboard data has been downloaded' })
+      toast.success('Dashboard exported')
     } catch (error) {
       console.error('Export error:', error)
-      toast.error('Export failed', { description: 'Could not export dashboard data' })
+      toast.error('Export failed')
     }
   }
 
@@ -668,10 +668,10 @@ export default function OverviewClient() {
         }, { onConflict: 'user_id' })
 
       if (error) throw error
-      toast.success('Settings saved', { description: 'Your preferences have been updated' })
+      toast.success('Settings saved')
     } catch (error: any) {
       console.error('Error saving settings:', error)
-      toast.error('Failed to save settings', { description: error.message })
+      toast.error('Failed to save settings')
     } finally {
       setIsSaving(false)
     }
@@ -707,10 +707,10 @@ export default function OverviewClient() {
 
       if (error) throw error
       setDbMetrics([])
-      toast.success('Metrics cleared', { description: 'All metrics data has been deleted' })
+      toast.success('Metrics cleared')
     } catch (error: any) {
       console.error('Error clearing metrics:', error)
-      toast.error('Failed to clear metrics', { description: error.message })
+      toast.error('Failed to clear metrics')
     }
   }
 
@@ -727,10 +727,10 @@ export default function OverviewClient() {
 
       if (error) throw error
       setDbStats(null)
-      toast.success('Dashboard reset', { description: 'Dashboard has been restored to defaults' })
+      toast.success('Dashboard reset')
     } catch (error: any) {
       console.error('Error resetting dashboard:', error)
-      toast.error('Failed to reset dashboard', { description: error.message })
+      toast.error('Failed to reset dashboard')
     }
   }
 
@@ -749,21 +749,21 @@ export default function OverviewClient() {
       setDbMetrics([])
       setDbStats(null)
       setDbNotifications([])
-      toast.success('All data deleted', { description: 'All monitoring data has been permanently removed' })
+      toast.success('All data deleted')
     } catch (error: any) {
       console.error('Error deleting all data:', error)
-      toast.error('Failed to delete data', { description: error.message })
+      toast.error('Failed to delete data')
     }
   }
 
   // Acknowledge alert (placeholder - can be connected to alerts table)
   const handleAcknowledgeAlert = (alertTitle: string) => {
-    toast.success('Alert acknowledged', { description: `"${alertTitle}" has been acknowledged` })
+    toast.success('Alert acknowledged'" has been acknowledged` })
   }
 
   // View details (placeholder)
   const handleViewDetails = (section: string) => {
-    toast.info('View Details', { description: `Opening ${section} details...` })
+    toast.info('View Details' details...` })
   }
 
   // Show loading spinner during initial load
@@ -2325,7 +2325,7 @@ export default function OverviewClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your infrastructure question...') } })}
+            onAskQuestion={(q) => toast.info('Question Submitted' })}
           />
           <PredictiveAnalytics predictions={mockOverviewPredictions} />
         </div>

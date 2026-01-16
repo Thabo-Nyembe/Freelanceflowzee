@@ -504,71 +504,71 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   ]
 
   // Handlers
-  const handleRunAnalysis = () => toast.info('Analyzing', { description: 'SEO analysis started...' })
-  const handleOptimize = (n: string) => toast.info('Optimizing', { description: `Optimizing "${n}"...` })
-  const handleGenerateSitemap = () => toast.success('Generated', { description: 'Sitemap updated' })
-  const handleExportReport = () => toast.success('Exporting', { description: 'Report downloading...' })
+  const handleRunAnalysis = () => toast.info('Analyzing')
+  const handleOptimize = (n: string) => toast.info('Optimizing'"...` })
+  const handleGenerateSitemap = () => toast.success('Generated')
+  const handleExportReport = () => toast.success('Exporting')
 
   // Toast handlers for unconnected buttons
   const handleOptimizePage = (pageName: string) => {
-    toast.info('Optimizing', { description: `Optimizing "${pageName}"...` })
+    toast.info('Optimizing'"...` })
   }
   const handleAddKeywords = () => {
-    toast.info('Add Keywords', { description: 'Opening keyword research tool...' })
+    toast.info('Add Keywords')
   }
   const handleUpdateRankings = () => {
-    toast.info('Updating Rankings', { description: 'Fetching latest keyword positions...' })
+    toast.info('Updating Rankings')
   }
   const handleFindProspects = () => {
-    toast.info('Finding Prospects', { description: 'Searching for backlink opportunities...' })
+    toast.info('Finding Prospects')
   }
   const handleAddCompetitor = () => {
-    toast.info('Add Competitor', { description: 'Enter competitor domain to analyze...' })
+    toast.info('Add Competitor')
   }
   const handleAnalyzeCompetitor = (domain: string) => {
-    toast.info('Analyzing Competitor', { description: `Analyzing ${domain}...` })
+    toast.info('Analyzing Competitor'...` })
   }
   const handleCreateContent = () => {
-    toast.info('Create Content', { description: 'Opening content editor...' })
+    toast.info('Create Content')
   }
   const handleRunAudit = () => {
-    toast.info('Running Audit', { description: 'Starting site crawl and analysis...' })
+    toast.info('Running Audit')
   }
   const handleSaveSettings = (section: string) => {
-    toast.success('Settings Saved', { description: `${section} settings have been saved` })
+    toast.success('Settings Saved' settings have been saved` })
   }
   const handleExportData = (type: string) => {
-    toast.success('Export Started', { description: `${type} export will be downloaded shortly` })
+    toast.success('Export Started' export will be downloaded shortly` })
   }
   const handleRecrawlSite = () => {
-    toast.info('Re-crawling Site', { description: 'Starting fresh site crawl...' })
+    toast.info('Re-crawling Site')
   }
   const handleClearData = () => {
-    toast.warning('Clear Data', { description: 'This action would clear all SEO data' })
+    toast.warning('Clear Data')
   }
   const handleResetSettings = () => {
-    toast.warning('Reset Settings', { description: 'This action would reset all settings to default' })
+    toast.warning('Reset Settings')
   }
   const handleViewHistory = () => {
-    toast.info('View History', { description: 'Loading keyword ranking history...' })
+    toast.info('View History')
   }
   const handleViewCompetitors = () => {
-    toast.info('Competitors', { description: 'Loading competitor analysis...' })
+    toast.info('Competitors')
   }
   const handleCopyKeyword = () => {
-    toast.success('Copied', { description: 'Keyword copied to clipboard' })
+    toast.success('Copied')
   }
   const handleViewSerp = () => {
-    toast.info('View SERP', { description: 'Opening search results page...' })
+    toast.info('View SERP')
   }
   const handleImplementInsight = (title: string) => {
-    toast.info('Implementing', { description: `Starting implementation for "${title}"...` })
+    toast.info('Implementing'"...` })
   }
   const handleConnectIntegration = (name: string) => {
-    toast.info('Connecting', { description: `Connecting to ${name}...` })
+    toast.info('Connecting'...` })
   }
   const handleConfigureIntegration = (name: string) => {
-    toast.info('Configure', { description: `Opening ${name} configuration...` })
+    toast.info('Configure' configuration...` })
   }
 
   return (
@@ -1822,7 +1822,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             <AIInsightsPanel
               insights={mockSEOAIInsights}
               title="SEO Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

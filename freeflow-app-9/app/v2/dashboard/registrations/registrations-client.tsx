@@ -891,17 +891,14 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration created successfully', {
-        description: `${formData.registrant_name} has been registered`
+      toast.success('Registration created successfully' has been registered`
       })
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error creating registration:', error)
-      toast.error('Failed to create registration', {
-        description: error.message
-      })
+      toast.error('Failed to create registration')
     } finally {
       setIsSaving(false)
     }
@@ -938,8 +935,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration updated successfully', {
-        description: `${formData.registrant_name}'s registration has been updated`
+      toast.success('Registration updated successfully''s registration has been updated`
       })
       setShowEditDialog(false)
       setRegistrationToEdit(null)
@@ -947,9 +943,7 @@ export default function RegistrationsClient() {
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error updating registration:', error)
-      toast.error('Failed to update registration', {
-        description: error.message
-      })
+      toast.error('Failed to update registration')
     } finally {
       setIsSaving(false)
     }
@@ -975,17 +969,14 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration deleted', {
-        description: `${registrationToDelete.registrant_name}'s registration has been removed`
+      toast.success('Registration deleted''s registration has been removed`
       })
       setShowDeleteDialog(false)
       setRegistrationToDelete(null)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error deleting registration:', error)
-      toast.error('Failed to delete registration', {
-        description: error.message
-      })
+      toast.error('Failed to delete registration')
     } finally {
       setIsSaving(false)
     }
@@ -1009,13 +1000,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Check-in complete', {
-        description: `${registration.registrant_name} has been checked in`
+      toast.success('Check-in complete' has been checked in`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error checking in:', error)
-      toast.error('Check-in failed', { description: error.message })
+      toast.error('Check-in failed')
     }
   }
 
@@ -1037,13 +1027,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration confirmed', {
-        description: `${registration.registrant_name} has been confirmed`
+      toast.success('Registration confirmed' has been confirmed`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error confirming:', error)
-      toast.error('Confirmation failed', { description: error.message })
+      toast.error('Confirmation failed')
     }
   }
 
@@ -1064,13 +1053,12 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.info('Registration cancelled', {
-        description: `${registration.registrant_name}'s registration has been cancelled`
+      toast.info('Registration cancelled''s registration has been cancelled`
       })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error cancelling:', error)
-      toast.error('Cancellation failed', { description: error.message })
+      toast.error('Cancellation failed')
     }
   }
 
@@ -1163,9 +1151,7 @@ export default function RegistrationsClient() {
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Registrations exported to CSV'
-      })
+      toast.success('Export complete')
     } catch (error) {
       toast.error('Export failed')
     }
@@ -2308,7 +2294,7 @@ export default function RegistrationsClient() {
             <AIInsightsPanel
               insights={mockRegistrationsAIInsights}
               title="Registration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2809,7 +2795,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewEventDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Event Created', { description: 'New event ready for registrations' })
+              toast.success('Event Created')
               setShowNewEventDialog(false)
             }}>
               <Plus className="w-4 h-4 mr-2" />
@@ -2843,7 +2829,7 @@ export default function RegistrationsClient() {
                   input.accept = '.csv,.xlsx'
                   input.onchange = () => {
                     if (input.files && input.files[0]) {
-                      toast.success('File Selected', { description: `${input.files[0].name} ready for import` })
+                      toast.success('File Selected' ready for import` })
                     }
                   }
                   input.click()
@@ -2870,7 +2856,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportListDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('List Imported', { description: 'Registration list imported successfully' })
+              toast.success('List Imported')
               setShowImportListDialog(false)
             }}>
               <Download className="w-4 h-4 mr-2" />
@@ -2929,7 +2915,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Data Exported', { description: 'Registration data exported to CSV' })
+              toast.success('Data Exported')
               setShowExportDataDialog(false)
             }}>
               <Download className="w-4 h-4 mr-2" />
@@ -2962,7 +2948,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQrCodeDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('QR Code Downloaded', { description: 'QR code saved to downloads' })
+              toast.success('QR Code Downloaded')
               setShowQrCodeDialog(false)
             }}>
               <Download className="w-4 h-4 mr-2" />
@@ -3013,7 +2999,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Email Sent', { description: `Email sent to ${selectedRegistration?.attendee.email}` })
+              toast.success('Email Sent'` })
               setShowSendEmailDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3070,7 +3056,7 @@ export default function RegistrationsClient() {
               variant="outline"
               className="w-full justify-start"
               onClick={() => {
-                toast.success('Registration Resent', { description: 'Confirmation email resent successfully' })
+                toast.success('Registration Resent')
                 setShowMoreOptionsDialog(false)
               }}
             >
@@ -3081,7 +3067,7 @@ export default function RegistrationsClient() {
               variant="outline"
               className="w-full justify-start text-red-600 hover:text-red-700"
               onClick={() => {
-                toast.info('Registration Cancelled', { description: 'Registration has been cancelled' })
+                toast.info('Registration Cancelled')
                 setShowMoreOptionsDialog(false)
               }}
             >
@@ -3147,7 +3133,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowViewDetailsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('Event Opened', { description: 'Navigating to event management' })
+              toast.success('Event Opened')
               setShowViewDetailsDialog(false)
             }}>
               <Edit className="w-4 h-4 mr-2" />
@@ -3181,7 +3167,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowStartScanningDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Check-in Successful', { description: 'Attendee has been checked in' })
+              toast.success('Check-in Successful')
               setShowStartScanningDialog(false)
             }}>
               <UserCheck className="w-4 h-4 mr-2" />
@@ -3229,7 +3215,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendCommunicationDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Communication Sent', { description: `${selectedTemplate?.name} sent to ${stats.total} recipients` })
+              toast.success('Communication Sent' sent to ${stats.total} recipients` })
               setShowSendCommunicationDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3289,7 +3275,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBulkEmailDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Bulk Email Sent', { description: `Email sent to ${stats.total} registrants` })
+              toast.success('Bulk Email Sent' registrants` })
               setShowBulkEmailDialog(false)
             }}>
               <Mail className="w-4 h-4 mr-2" />
@@ -3339,7 +3325,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Reminders Sent', { description: `Reminders sent to ${stats.confirmed} registrants` })
+              toast.success('Reminders Sent' registrants` })
               setShowSendRemindersDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3394,7 +3380,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Template Created', { description: 'New email template saved successfully' })
+              toast.success('Template Created')
               setShowCreateTemplateDialog(false)
             }}>
               <Plus className="w-4 h-4 mr-2" />
@@ -3441,8 +3427,7 @@ export default function RegistrationsClient() {
               variant={selectedIntegration?.connected ? 'destructive' : 'default'}
               onClick={() => {
                 toast.success(
-                  selectedIntegration?.connected ? 'Disconnected' : 'Connected',
-                  { description: `${selectedIntegration?.name} ${selectedIntegration?.connected ? 'disconnected' : 'connected'} successfully` }
+                  selectedIntegration?.connected ? 'Disconnected' : 'Connected' ${selectedIntegration?.connected ? 'disconnected' : 'connected'} successfully` }
                 )
                 setShowIntegrationDialog(false)
               }}
@@ -3520,7 +3505,7 @@ export default function RegistrationsClient() {
             <Button
               variant="destructive"
               onClick={() => {
-                toast.success('Cache Cleared', { description: 'All cached data has been cleared' })
+                toast.success('Cache Cleared')
                 setShowClearCacheDialog(false)
               }}
             >
@@ -3558,7 +3543,7 @@ export default function RegistrationsClient() {
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => {
-                toast.success('Check-In Complete', { description: `${selectedRegistration?.attendee.firstName} ${selectedRegistration?.attendee.lastName} has been checked in` })
+                toast.success('Check-In Complete' ${selectedRegistration?.attendee.lastName} has been checked in` })
                 setShowCheckInConfirmDialog(false)
                 setShowRegistrationDialog(false)
               }}
@@ -3607,7 +3592,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPrintBadgeDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Badge Printed', { description: 'Badge sent to printer' })
+              toast.success('Badge Printed')
               setShowPrintBadgeDialog(false)
             }}>
               <Printer className="w-4 h-4 mr-2" />
@@ -3643,7 +3628,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTicketsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('Opening Ticket Editor', { description: 'Navigating to ticket configuration' })
+              toast.success('Opening Ticket Editor')
               setShowTicketsDialog(false)
             }}>
               <Edit className="w-4 h-4 mr-2" />
@@ -3684,7 +3669,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBadgesDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Printing Badges', { description: `${stats.checkedIn} badges sent to printer` })
+              toast.success('Printing Badges' badges sent to printer` })
               setShowBadgesDialog(false)
             }}>
               <Printer className="w-4 h-4 mr-2" />
@@ -3750,7 +3735,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Report Generated', { description: 'Your report is being prepared for download' })
+              toast.success('Report Generated')
               setShowReportsDialog(false)
             }}>
               <BarChart3 className="w-4 h-4 mr-2" />

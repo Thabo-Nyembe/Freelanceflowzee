@@ -454,7 +454,7 @@ export default function TimeTrackingClient() {
         setActiveTimerEntryId(result.id)
         setActiveTimerStartTime(result.start_time)
         setIsTimerRunning(true)
-        toast.success('Timer started', { description: 'Time tracking is now active in the database' })
+        toast.success('Timer started')
       }
     } catch (error) {
       console.error('Failed to start timer:', error)
@@ -488,7 +488,7 @@ export default function TimeTrackingClient() {
       setActiveTimerEntryId(null)
       setActiveTimerStartTime(null)
 
-      toast.success('Timer stopped and saved', { description: `Logged ${(durationSeconds / 3600).toFixed(2)} hours` })
+      toast.success('Timer stopped and saved' hours` })
     } catch (error) {
       console.error('Failed to stop timer:', error)
       toast.error('Failed to stop timer')
@@ -499,7 +499,7 @@ export default function TimeTrackingClient() {
   const handleDeleteEntry = async (entryId: string) => {
     try {
       await deleteEntry(entryId)
-      toast.success('Entry deleted', { description: 'Time entry has been removed' })
+      toast.success('Entry deleted')
     } catch (error) {
       console.error('Failed to delete entry:', error)
       toast.error('Failed to delete entry')
@@ -510,7 +510,7 @@ export default function TimeTrackingClient() {
   const handleApproveEntry = async (entryId: string) => {
     try {
       await approveEntry(entryId)
-      toast.success('Entry approved', { description: 'Time entry has been approved' })
+      toast.success('Entry approved')
     } catch (error) {
       console.error('Failed to approve entry:', error)
       toast.error('Failed to approve entry')
@@ -521,7 +521,7 @@ export default function TimeTrackingClient() {
   const handleRejectEntry = async (entryId: string, reason?: string) => {
     try {
       await rejectEntry(entryId, reason)
-      toast.success('Entry rejected', { description: 'Time entry has been rejected' })
+      toast.success('Entry rejected')
     } catch (error) {
       console.error('Failed to reject entry:', error)
       toast.error('Failed to reject entry')
@@ -532,7 +532,7 @@ export default function TimeTrackingClient() {
   const handleSubmitEntry = async (entryId: string) => {
     try {
       await submitEntry(entryId)
-      toast.success('Entry submitted', { description: 'Time entry submitted for approval' })
+      toast.success('Entry submitted')
     } catch (error) {
       console.error('Failed to submit entry:', error)
       toast.error('Failed to submit entry')
@@ -543,7 +543,7 @@ export default function TimeTrackingClient() {
   const handleLockEntry = async (entryId: string) => {
     try {
       await lockEntry(entryId)
-      toast.info('Entry locked', { description: 'Time entry can no longer be edited' })
+      toast.info('Entry locked')
     } catch (error) {
       console.error('Failed to lock entry:', error)
       toast.error('Failed to lock entry')
@@ -671,7 +671,7 @@ export default function TimeTrackingClient() {
       for (const entry of stoppedEntries) {
         await approveEntry(entry.id)
       }
-      toast.success('Timesheet approved', { description: `${stoppedEntries.length} entries approved` })
+      toast.success('Timesheet approved' entries approved` })
     } else {
       toast.info('No entries to approve')
     }
@@ -930,7 +930,7 @@ export default function TimeTrackingClient() {
                       })
                     }
                     toast.dismiss()
-                    toast.success('Week copied', { description: `${lastWeekEntries.length} entries duplicated to this week` })
+                    toast.success('Week copied' entries duplicated to this week` })
                   } else {
                     toast.info('No entries found from last week to copy')
                   }
@@ -943,7 +943,7 @@ export default function TimeTrackingClient() {
                     for (const entry of weekEntries) {
                       await handleLockEntry(entry.id)
                     }
-                    toast.info('Timesheet Locked', { description: 'All entries are now locked' })
+                    toast.info('Timesheet Locked')
                   } else {
                     toast.info('No entries to lock')
                   }
@@ -958,7 +958,7 @@ export default function TimeTrackingClient() {
                   const subject = encodeURIComponent(`Timesheet for Week of ${weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`)
                   const body = encodeURIComponent(`Please find my timesheet summary:\n\nTotal Hours: ${weekTotal}h\nWeek: ${weekDays[0].toLocaleDateString()} - ${weekDays[6].toLocaleDateString()}\n\nBest regards`)
                   window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
-                  toast.success('Email client opened', { description: 'Compose your timesheet email' })
+                  toast.success('Email client opened')
                 } },
               ].map((action, idx) => (
                 <Button
@@ -1335,7 +1335,7 @@ export default function TimeTrackingClient() {
                 { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
                   const archivedProjects = mockProjects.filter(p => p.status === 'completed' || p.status === 'archived')
                   if (archivedProjects.length > 0) {
-                    toast.info('Archived projects', { description: `${archivedProjects.length} archived projects found` })
+                    toast.info('Archived projects' archived projects found` })
                   } else {
                     toast.info('No archived projects')
                   }
@@ -1725,7 +1725,7 @@ export default function TimeTrackingClient() {
                           const subject = encodeURIComponent(`Invoice ${invoice.number} - ${invoice.project}`)
                           const body = encodeURIComponent(`Dear ${invoice.client},\n\nPlease find attached invoice ${invoice.number} for ${invoice.project}.\n\nAmount Due: $${invoice.amount.toLocaleString()}\nDue Date: ${invoice.dueDate}\n\nBest regards`)
                           window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
-                          toast.success('Email client opened', { description: `Send invoice ${invoice.number}` })
+                          toast.success('Email client opened'` })
                         }} title="Send invoice"><Send className="h-4 w-4" /></Button></div></td>
                       </tr>
                     ))}
@@ -2219,7 +2219,7 @@ export default function TimeTrackingClient() {
                             <Button size="sm" variant="outline" onClick={async () => {
                               const newKey = `tt_api_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
                               setApiKey(newKey)
-                              toast.success('API key regenerated', { description: 'Your old key is now invalid' })
+                              toast.success('API key regenerated')
                             }}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
                           </div>
                           <div className="flex items-center gap-2">
@@ -2357,7 +2357,7 @@ export default function TimeTrackingClient() {
             <AIInsightsPanel
               insights={mockTimeTrackingAIInsights}
               title="Time Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

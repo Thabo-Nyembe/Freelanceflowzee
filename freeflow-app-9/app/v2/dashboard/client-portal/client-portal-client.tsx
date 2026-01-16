@@ -73,7 +73,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
-// A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -181,55 +180,33 @@ function portalReducer(state: PortalState, action: PortalAction): PortalState {
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_CLIENTS':
-      logger.info('Setting clients', { count: action.clients.length })
-      return { ...state, clients: action.clients }
+    case 'SET_CLIENTS':      return { ...state, clients: action.clients }
 
-    case 'SET_PROJECTS':
-      logger.info('Setting projects', { count: action.projects.length })
-      return { ...state, projects: action.projects }
+    case 'SET_PROJECTS':      return { ...state, projects: action.projects }
 
-    case 'SET_COMMUNICATIONS':
-      logger.info('Setting communications', { count: action.communications.length })
-      return { ...state, communications: action.communications }
+    case 'SET_COMMUNICATIONS':      return { ...state, communications: action.communications }
 
-    case 'SET_FILES':
-      logger.info('Setting files', { count: action.files.length })
-      return { ...state, files: action.files }
+    case 'SET_FILES':      return { ...state, files: action.files }
 
-    case 'ADD_CLIENT':
-      logger.info('Client added', { clientId: action.client.id, companyName: action.client.companyName })
-      return { ...state, clients: [action.client, ...state.clients] }
+    case 'ADD_CLIENT':      return { ...state, clients: [action.client, ...state.clients] }
 
-    case 'UPDATE_CLIENT':
-      logger.info('Client updated', { clientId: action.client.id })
-      return {
+    case 'UPDATE_CLIENT':      return {
         ...state,
         clients: state.clients.map(c => c.id === action.client.id ? action.client : c)
       }
 
-    case 'DELETE_CLIENT':
-      logger.info('Client deleted', { clientId: action.clientId })
-      return {
+    case 'DELETE_CLIENT':      return {
         ...state,
         clients: state.clients.filter(c => c.id !== action.clientId)
       }
 
-    case 'ADD_PROJECT':
-      logger.info('Project added', { projectId: action.project.id, name: action.project.name })
-      return { ...state, projects: [action.project, ...state.projects] }
+    case 'ADD_PROJECT':      return { ...state, projects: [action.project, ...state.projects] }
 
-    case 'ADD_COMMUNICATION':
-      logger.info('Communication added', { communicationId: action.communication.id })
-      return { ...state, communications: [action.communication, ...state.communications] }
+    case 'ADD_COMMUNICATION':      return { ...state, communications: [action.communication, ...state.communications] }
 
-    case 'SELECT_CLIENT':
-      logger.info('Client selected', { companyName: action.client ? action.client.companyName : null })
-      return { ...state, selectedClient: action.client }
+    case 'SELECT_CLIENT':      return { ...state, selectedClient: action.client }
 
-    case 'SELECT_PROJECT':
-      logger.info('Project selected', { name: action.project ? action.project.name : null })
-      return { ...state, selectedProject: action.project }
+    case 'SELECT_PROJECT':      return { ...state, selectedProject: action.project }
 
     case 'SET_VIEW_MODE':
       logger.debug('View mode changed', { viewMode: action.viewMode })
@@ -295,10 +272,7 @@ const generateMockClients = (): Client[] => {
     nextFollowUp: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
     tags: ['priority', 'enterprise', 'growth'].slice(0, Math.floor(Math.random() * 3) + 1),
     createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-  }))
-
-  logger.info('Generated mock clients', { count: clients.length })
-  return clients
+  }))  return clients
 }
 
 const generateMockProjects = (clients: Client[]): Project[] => {
@@ -330,10 +304,7 @@ const generateMockProjects = (clients: Client[]): Project[] => {
       endDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
       team: ['John Doe', 'Jane Smith', 'Bob Johnson'].slice(0, Math.floor(Math.random() * 3) + 1)
     }
-  })
-
-  logger.info('Generated mock projects', { count: projects.length })
-  return projects
+  })  return projects
 }
 
 // ============================================================================
@@ -373,7 +344,6 @@ const clientPortalActivities = [
 export default function ClientPortalClient() {
   logger.debug('Component mounting')
 
-  // A+++ UTILITIES
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
@@ -449,10 +419,7 @@ export default function ClientPortalClient() {
   // LOAD DATA
   // ============================================================================
 
-  useEffect(() => {
-    logger.info('Loading portal data from API')
-
-    const loadData = async () => {
+  useEffect(() => {    const loadData = async () => {
       try {
         setIsLoading(true)
 
@@ -470,13 +437,7 @@ export default function ClientPortalClient() {
           const projects = generateMockProjects(clients)
 
           dispatch({ type: 'SET_CLIENTS', clients })
-          dispatch({ type: 'SET_PROJECTS', projects })
-
-          logger.info('Data loaded from API', {
-            clientsCount: result.clients?.length || 0,
-            projectsCount: result.projects?.length || 0
-          })
-          announce('Client portal loaded', 'polite')
+          dispatch({ type: 'SET_PROJECTS', projects })          announce('Client portal loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load clients')
         }
@@ -485,9 +446,7 @@ export default function ClientPortalClient() {
           error: error instanceof Error ? error.message : 'Unknown error',
           errorObject: error
         })
-        toast.error('Failed to load client portal data', {
-          description: error.message || 'Please try again later'
-        })
+        toast.error('Failed to load client portal data')
       } finally {
         setIsLoading(false)
       }
@@ -583,15 +542,7 @@ export default function ClientPortalClient() {
       logger.warn('Client creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
-    }
-
-    logger.info('Adding new client via API', {
-      companyName: clientForm.companyName,
-      contactPerson: clientForm.contactPerson,
-      tier: clientForm.tier
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       const response = await fetch('/api/clients', {
@@ -630,17 +581,9 @@ export default function ClientPortalClient() {
           createdAt: new Date().toISOString()
         }
 
-        dispatch({ type: 'ADD_CLIENT', client: newClient })
+        dispatch({ type: 'ADD_CLIENT', client: newClient })        const followUpDate = new Date(newClient.nextFollowUp).toLocaleDateString()
 
-        logger.info('Client added successfully', {
-          clientId: result.client.id,
-          companyName: clientForm.companyName
-        })
-
-        const followUpDate = new Date(newClient.nextFollowUp).toLocaleDateString()
-
-        toast.success('Client added successfully', {
-          description: `${clientForm.companyName} - ${clientForm.tier} tier - ${clientForm.contactPerson} - Health: 85% - Follow-up: ${followUpDate}`
+        toast.success('Client added successfully' - ${clientForm.tier} tier - ${clientForm.contactPerson} - Health: 85% - Follow-up: ${followUpDate}`
         })
         setIsAddClientModalOpen(false)
         setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
@@ -653,24 +596,14 @@ export default function ClientPortalClient() {
         errorObject: error,
         companyName: clientForm.companyName
       })
-      toast.error('Failed to add client', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to add client')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDeleteClient = async (clientId: string) => {
-    const client = state.clients.find(c => c.id === clientId)
-
-    logger.info('Deleting client via API', {
-      clientId,
-      companyName: client?.companyName,
-      activeProjects: client?.activeProjects
-    })
-
-    try {
+    const client = state.clients.find(c => c.id === clientId)    try {
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -683,14 +616,9 @@ export default function ClientPortalClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'DELETE_CLIENT', clientId })
+        dispatch({ type: 'DELETE_CLIENT', clientId })        const revenueLost = client?.totalRevenue || 0
 
-        logger.info('Client deleted successfully', { clientId })
-
-        const revenueLost = client?.totalRevenue || 0
-
-        toast.success('Client deleted successfully', {
-          description: `${client?.companyName || 'Client'} - ${client?.tier || 'basic'} tier - ${client?.activeProjects || 0} projects - $${revenueLost.toLocaleString()} total revenue`
+        toast.success('Client deleted successfully' - ${client?.tier || 'basic'} tier - ${client?.activeProjects || 0} projects - $${revenueLost.toLocaleString()} total revenue`
         })
         setIsDeleteModalOpen(false)
       } else {
@@ -702,9 +630,7 @@ export default function ClientPortalClient() {
         errorObject: error,
         clientId
       })
-      toast.error('Failed to delete client', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete client')
     }
   }
 
@@ -720,16 +646,7 @@ export default function ClientPortalClient() {
       return
     }
 
-    const client = state.clients.find(c => c.id === projectForm.clientId)
-
-    logger.info('Adding new project', {
-      projectName: projectForm.name,
-      clientId: projectForm.clientId,
-      companyName: client?.companyName,
-      userId
-    })
-
-    try {
+    const client = state.clients.find(c => c.id === projectForm.clientId)    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -763,18 +680,9 @@ export default function ClientPortalClient() {
         team: []
       }
 
-      dispatch({ type: 'ADD_PROJECT', project: newProject })
+      dispatch({ type: 'ADD_PROJECT', project: newProject })      const endDateFormatted = new Date(newProject.endDate).toLocaleDateString()
 
-      logger.info('Project added to database', {
-        projectId: newProject.id,
-        name: newProject.name,
-        userId
-      })
-
-      const endDateFormatted = new Date(newProject.endDate).toLocaleDateString()
-
-      toast.success('Project added successfully', {
-        description: `${projectForm.name} - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDateFormatted}`
+      toast.success('Project added successfully' - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDateFormatted}`
       })
       announce('Project added successfully', 'polite')
       setIsAddProjectModalOpen(false)
@@ -786,9 +694,7 @@ export default function ClientPortalClient() {
         projectName: projectForm.name,
         userId
       })
-      toast.error('Failed to add project', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to add project')
       announce('Error adding project', 'assertive')
     } finally {
       setIsSaving(false)
@@ -800,16 +706,7 @@ export default function ClientPortalClient() {
       logger.warn('Communication creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
-    }
-
-    logger.info('Adding communication', {
-      clientId: state.selectedClient.id,
-      companyName: state.selectedClient.companyName,
-      type: communicationForm.type,
-      subject: communicationForm.subject
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       let commId = `CM-${String(state.communications.length + 1).padStart(3, '0')}`
@@ -826,9 +723,7 @@ export default function ClientPortalClient() {
         })
         if (createdComm?.id) {
           commId = createdComm.id
-        }
-        logger.info('Communication created in database', { commId, clientId: state.selectedClient.id })
-      }
+        }      }
 
       const newComm: Communication = {
         id: commId,
@@ -840,14 +735,9 @@ export default function ClientPortalClient() {
         createdBy: userId || 'Current User'
       }
 
-      dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })
+      dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })      const timestamp = new Date(newComm.createdAt).toLocaleString()
 
-      logger.info('Communication added successfully', { communicationId: newComm.id, type: newComm.type })
-
-      const timestamp = new Date(newComm.createdAt).toLocaleString()
-
-      toast.success('Communication logged successfully', {
-        description: `${state.selectedClient.companyName} - ${communicationForm.type} - ${communicationForm.subject} - ${timestamp}`
+      toast.success('Communication logged successfully' - ${communicationForm.type} - ${communicationForm.subject} - ${timestamp}`
       })
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
@@ -857,18 +747,13 @@ export default function ClientPortalClient() {
         errorObject: error,
         subject: communicationForm.subject
       })
-      toast.error('Failed to log communication', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to log communication')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleExportData = async () => {
-    logger.info('Exporting data', { format: exportFormat, dataType: exportDataType })
-
-    try {
+  const handleExportData = async () => {    try {
       setIsExporting(true)
 
       // Prepare data based on selection
@@ -941,16 +826,7 @@ export default function ClientPortalClient() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-
-      logger.info('Export completed', {
-        format: exportFormat,
-        dataType: exportDataType,
-        recordCount: dataToExport.length
-      })
-
-      toast.success('Export completed', {
-        description: `${dataToExport.length} records exported as ${exportFormat.toUpperCase()}`
+      URL.revokeObjectURL(url)      toast.success('Export completed' records exported as ${exportFormat.toUpperCase()}`
       })
 
       setIsExportDialogOpen(false)
@@ -959,18 +835,13 @@ export default function ClientPortalClient() {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error
       })
-      toast.error('Export failed', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Export failed')
     } finally {
       setIsExporting(false)
     }
   }
 
-  const handleSaveSettings = async () => {
-    logger.info('Saving portal settings', portalSettings)
-
-    try {
+  const handleSaveSettings = async () => {    try {
       setIsSaving(true)
 
       // Save settings via API
@@ -979,12 +850,7 @@ export default function ClientPortalClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update', section: 'client-portal', settings: portalSettings })
       })
-      if (!res.ok) throw new Error('Failed to save settings')
-
-      logger.info('Settings saved successfully', portalSettings)
-
-      toast.success('Settings saved', {
-        description: `Notifications: ${portalSettings.notifyOnNewClient ? 'On' : 'Off'} | Health threshold: ${portalSettings.healthScoreThreshold}% | Default tier: ${portalSettings.defaultClientTier}`
+      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Settings saved' | Health threshold: ${portalSettings.healthScoreThreshold}% | Default tier: ${portalSettings.defaultClientTier}`
       })
 
       setIsSettingsDialogOpen(false)
@@ -993,9 +859,7 @@ export default function ClientPortalClient() {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error
       })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSaving(false)
     }
