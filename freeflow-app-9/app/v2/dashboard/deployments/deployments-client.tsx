@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -339,7 +338,7 @@ const defaultDeploymentForm = {
 }
 
 export default function DeploymentsClient() {
-  const supabase = createClient()
+
 
   // Database state
   const [dbDeployments, setDbDeployments] = useState<DbDeployment[]>([])
@@ -353,6 +352,8 @@ export default function DeploymentsClient() {
   const fetchDeployments = useCallback(async () => {
     try {
       setLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('deployments')
         .select('*')
@@ -365,7 +366,7 @@ export default function DeploymentsClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchDeployments()
@@ -383,6 +384,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deployments').insert({
         user_id: userData.user.id,
         deployment_name: deploymentForm.deployment_name,
@@ -414,6 +417,8 @@ export default function DeploymentsClient() {
   // Start deployment (update status to in_progress)
   const handleStartDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
@@ -433,6 +438,8 @@ export default function DeploymentsClient() {
       const startTime = deployment.started_at ? new Date(deployment.started_at).getTime() : Date.now()
       const duration = Math.floor((Date.now() - startTime) / 1000)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({
@@ -461,6 +468,8 @@ export default function DeploymentsClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'rolled_back' })
@@ -478,6 +487,8 @@ export default function DeploymentsClient() {
   // Cancel deployment
   const handleCancelDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'cancelled' })
@@ -494,6 +505,8 @@ export default function DeploymentsClient() {
   // Delete deployment
   const handleDeleteDeployment = async (id: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deployments').delete().eq('id', id)
       if (error) throw error
       toast.success('Deployment Deleted')
@@ -664,6 +677,8 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('deployments').insert({
         user_id: userData.user.id,
         deployment_name: `Quick Deploy ${new Date().toLocaleDateString()}`,
@@ -702,6 +717,8 @@ export default function DeploymentsClient() {
       // Find the deployment to rollback
       const deploymentToRollback = dbDeployments.find(d => d.version === quickRollbackVersion)
       if (deploymentToRollback) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { error } = await supabase
           .from('deployments')
           .update({ status: 'rolled_back' })
@@ -767,6 +784,8 @@ export default function DeploymentsClient() {
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ environment: 'production' })
@@ -1088,6 +1107,8 @@ export default function DeploymentsClient() {
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
                     toast.promise(
                       (async () => {
+                        const { createClient } = await import('@/lib/supabase/client')
+                        const supabase = createClient()
                         const { data, error } = await supabase
                           .from('serverless_functions')
                           .select('*')
@@ -1270,6 +1291,8 @@ export default function DeploymentsClient() {
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
                     toast.promise(
                       (async () => {
+                        const { createClient } = await import('@/lib/supabase/client')
+                        const supabase = createClient()
                         const { data, error } = await supabase
                           .from('edge_configs')
                           .select('*')
@@ -1559,6 +1582,8 @@ export default function DeploymentsClient() {
                     <Button variant="outline" size="sm" onClick={async () => {
                       toast.promise(
                         (async () => {
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           const { data, error } = await supabase
                             .from('deployment_logs')
                             .select('*')
@@ -2441,6 +2466,8 @@ export default function DeploymentsClient() {
 
                   // Save environment variables to database
                   for (const envVar of envVars) {
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     await supabase
                       .from('environment_variables')
                       .upsert({
@@ -3340,6 +3367,8 @@ export default function DeploymentsClient() {
                   const { data: userData } = await supabase.auth.getUser()
                   if (!userData.user) throw new Error('Not authenticated')
 
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { error } = await supabase
                     .from('edge_configs')
                     .update({
@@ -3463,6 +3492,8 @@ export default function DeploymentsClient() {
                     let successCount = 0
                     for (const file of uploadedFiles) {
                       const filePath = `${userData.user.id}/uploads/${Date.now()}_${file.name}`
+                      const { createClient } = await import('@/lib/supabase/client')
+                      const supabase = createClient()
                       const { error } = await supabase.storage
                         .from('blob-storage')
                         .upload(filePath, file)
@@ -3712,6 +3743,8 @@ export default function DeploymentsClient() {
                   const { data: userData } = await supabase.auth.getUser()
                   if (!userData.user) throw new Error('Not authenticated')
 
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
                   const { error } = await supabase
                     .from('alert_settings')
                     .upsert({
@@ -4087,6 +4120,8 @@ export default function DeploymentsClient() {
                           if (!userData.user) throw new Error('Not authenticated')
 
                           // Record plugin installation
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           const { error } = await supabase
                             .from('installed_plugins')
                             .insert({
@@ -4167,6 +4202,8 @@ export default function DeploymentsClient() {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
 
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     const { error } = await supabase
                       .from('deployments')
                       .delete()
@@ -4215,12 +4252,16 @@ export default function DeploymentsClient() {
                     if (!userData.user) throw new Error('Not authenticated')
 
                     // Reset environment variables
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     await supabase
                       .from('environment_variables')
                       .delete()
                       .eq('user_id', userData.user.id)
 
                     // Reset alert settings
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     await supabase
                       .from('alert_settings')
                       .delete()
@@ -4275,6 +4316,8 @@ export default function DeploymentsClient() {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
 
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
                     const { error } = await supabase
                       .from('project_settings')
                       .upsert({
