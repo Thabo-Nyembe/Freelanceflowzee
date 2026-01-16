@@ -320,7 +320,7 @@ const mappedModels: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D =>
 4. Sync mapped data to local state via useEffect
 5. Update all dependencies to use mapped data instead of mock data
 
-#### 5. api-keys-v2 ✅ (Commit: TBD)
+#### 5. api-keys-v2 ✅ (Commit: d597a908)
 **File:** `app/(app)/dashboard/api-keys-v2/api-keys-client.tsx` (3,279 lines)
 **Migration Date:** January 16, 2026
 **Complexity:** Medium (schema mapping with default values, multiple filter integration)

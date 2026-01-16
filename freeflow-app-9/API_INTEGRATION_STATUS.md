@@ -364,7 +364,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1.5 hours
    - **Complexity:** Medium (schema mapping required, straightforward byte-to-MB conversion)
 
-5. `api-keys-v2` - ✅ **MIGRATED** (3,279 lines, +0 net) - Commit: TBD
+5. `api-keys-v2` - ✅ **MIGRATED** (3,279 lines, +0 net) - Commit: `d597a908`
    - **Pattern:** Hook integration with schema mapping + filter support (UI ApiKey ↔ DB ApiKey)
    - **Tables:** api_keys
    - **Mapping:** Database fields (last_ip_address) → UI fields (last_used_ip), plus default values for missing fields (rate_limit_per_minute, requests_this_week, last_used_location, rotated_at, rotation_interval_days)
