@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 144/286 pages integrated (50.3%)
+**Overall Progress:** 145/286 pages integrated (50.7%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 138/223 using Supabase hooks (61.9%) 🚧
-  - **Mock → Database:** 15/157 migrated (9.6%) 🎉 NEW!
+- **V2 Pages:** 139/223 using Supabase hooks (62.3%) 🚧
+  - **Mock → Database:** 16/157 migrated (10.2%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -535,6 +535,24 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~3 minutes
    - **Complexity:** Medium (two fallback patterns, but straightforward removal)
 
+16. `surveys-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (4,157 lines) - Commit: 0361bf1a
+   - **Pattern:** Completion of partial integration - removed dual mock fallback patterns
+   - **Tables:** surveys (via use-surveys hook)
+   - **Hook Features:** Already integrated with useSurveys, useSurveyMutations (create, update, delete, publish, close)
+   - **Mapping:** Already implemented - DB Survey → UI Survey with field transformations (total_responses → responses, completion_rate → completionRate, average_time → avgTime, published_date → publishedAt, closed_date → closedAt)
+   - **Cleanup:** Removed TWO mock fallback patterns:
+     1. Display surveys (lines 651-683): Removed ternary fallback `dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys`
+     2. Stats calculation (lines 696-710): Removed if/else fallback, added null guard
+   - **Before (Display):** `return dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys`
+   - **After (Display):** `return (dbSurveys || []).map(...)` - safe array handling
+   - **Before (Stats):** `if (dbStats && dbSurveys.length > 0) { return db stats } return mockStats`
+   - **After (Stats):** `if (!dbStats) return zeros; return db stats` - null guard instead of fallback
+   - **Impact:** Now uses 100% database data for surveys display and stats
+   - **Kept as Mock:** mockStats.responsesThisWeek/responsesLastWeek, mockResponses, mockTemplates (separate entities/features not in database yet, intentional per inline comments)
+   - **Note:** Clean migration, no errors introduced, ~6 lines removed/modified
+   - **Migration Time:** ~3 minutes
+   - **Complexity:** Medium (two fallback patterns with different handling approaches)
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -860,3 +878,21 @@ Every API client includes:
 ---
 
 **End of API Integration Status Report**
+
+16. `surveys-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (4,157 lines) - Commit: 0361bf1a
+   - **Pattern:** Completion of partial integration - removed dual mock fallback patterns
+   - **Tables:** surveys (via use-surveys hook)
+   - **Hook Features:** Already integrated with useSurveys, useSurveyMutations (create, update, delete, publish, close)
+   - **Mapping:** Already implemented - DB Survey → UI Survey with field transformations (total_responses → responses, completion_rate → completionRate, average_time → avgTime, published_date → publishedAt, closed_date → closedAt)
+   - **Cleanup:** Removed TWO mock fallback patterns:
+     1. Display surveys (lines 651-683): Removed ternary fallback `dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys`
+     2. Stats calculation (lines 696-710): Removed if/else fallback, added null guard
+   - **Before (Display):** `return dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys`
+   - **After (Display):** `return (dbSurveys || []).map(...)` - safe array handling
+   - **Before (Stats):** `if (dbStats && dbSurveys.length > 0) { return db stats } return mockStats`
+   - **After (Stats):** `if (!dbStats) return zeros; return db stats` - null guard instead of fallback
+   - **Impact:** Now uses 100% database data for surveys display and stats
+   - **Kept as Mock:** mockStats.responsesThisWeek/responsesLastWeek, mockResponses, mockTemplates (separate entities/features not in database yet, intentional per inline comments)
+   - **Note:** Clean migration, no errors introduced, ~6 lines removed/modified
+   - **Migration Time:** ~3 minutes
+   - **Complexity:** Medium (two fallback patterns with different handling approaches)
