@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 151/286 pages integrated (52.8%)
+**Overall Progress:** 153/286 pages integrated (53.5%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 145/223 using Supabase hooks (65.0%) 🚧
-  - **Mock → Database:** 22/157 migrated (14.0%) 🎉 NEW!
+- **V2 Pages:** 147/223 using Supabase hooks (65.9%) 🚧
+  - **Mock → Database:** 24/157 migrated (15.3%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -642,6 +642,42 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** Batch migration with roles-v2, ~1 line removed
    - **Migration Time:** ~1 minute (batched)
    - **Complexity:** Low (single ternary fallback in handler, straightforward removal)
+
+23. `analytics-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #3 - Part 1) - Commit: 933a47f7
+   - **Pattern:** Completion of partial integration - removed 3 JSX ternary fallback patterns
+   - **Tables:** analytics_funnels, analytics_reports, analytics_dashboards (via use-analytics hook)
+   - **Hook Features:** Already integrated with useAnalytics (dbFunnels, dbReports, dbDashboards)
+   - **Mapping:** Already implemented - DB entities → UI entities
+   - **Cleanup:** Removed THREE ternary fallback patterns in JSX map functions:
+     1. Funnels (line 2077): `dbFunnels.length > 0 ? dbFunnels : mockFunnels`
+     2. Reports (line 2473): `dbReports.length > 0 ? dbReports : mockReports`
+     3. Dashboards (line 2600): `dbDashboards.length > 0 ? dbDashboards : mockDashboards`
+   - **Before (Funnels):** `{(dbFunnels.length > 0 ? dbFunnels : mockFunnels).map((funnel) => (`
+   - **After (Funnels):** `{dbFunnels.map((funnel) => (` - direct map without fallback
+   - **Impact:** Now uses 100% database data for funnels, reports, and dashboards display
+   - **Kept as Mock:** None (all analytics entities use database)
+   - **Note:** Batch migration with time-tracking-v2, ~6 lines removed
+   - **Migration Time:** ~3 minutes (batched)
+   - **Complexity:** Low (three identical JSX ternary patterns, straightforward removal)
+
+24. `time-tracking-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #3 - Part 2) - Commit: 933a47f7
+   - **Pattern:** Completion of partial integration - removed 5 ternary fallback patterns
+   - **Tables:** time_entries (via use-time-tracking hook)
+   - **Hook Features:** Already integrated with useTimeTracking (dbTimeEntries)
+   - **Mapping:** Already implemented - DB TimeEntry → UI TimeEntry
+   - **Cleanup:** Removed FIVE ternary fallback patterns across different functions:
+     1. Stats calculation (line 637): `dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(...)`
+     2. Export handler (line 724): `dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(...)`
+     3. Export all data (line 864): `dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries`
+     4. Total hours calc (line 1138): `dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(...)`
+     5. JSX filter (line 1156): `dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(...)`
+   - **Before (Stats):** `const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(...)`
+   - **After (Stats):** `const entries = (dbTimeEntries || []).map(e => ({ ... }))` - direct map with safety guard
+   - **Impact:** Now uses 100% database data for stats, exports, and time entry display
+   - **Kept as Mock:** mockProjects, mockTeam, mockInvoices, mockClients, mockTags (separate entities, will be migrated separately)
+   - **Note:** Batch migration with analytics-v2, ~18 lines removed
+   - **Migration Time:** ~4 minutes (batched)
+   - **Complexity:** Medium (five patterns across different contexts, required careful refactoring)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
