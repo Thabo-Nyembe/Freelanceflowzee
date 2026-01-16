@@ -27,7 +27,6 @@ import {
   CheckCircle2
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -40,7 +39,6 @@ import { WorkflowDetailsDialog } from '@/components/workflow/workflow-details-di
 const logger = createFeatureLogger('WorkflowBuilder')
 
 export default function WorkflowBuilderPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -56,28 +54,19 @@ export default function WorkflowBuilderPage() {
   const [isEditMode, setIsEditMode] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
 
-  // A+++ Loading states for individual actions
   const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
 
-  // A+++ LOAD WORKFLOW DATA
   const loadWorkflowData = async () => {
-    if (userLoading) {
-      logger.info('Waiting for user authentication')
-      return // Keep loading state while auth is loading
+    if (userLoading) {      return // Keep loading state while auth is loading
     }
 
-    if (!userId) {
-      logger.info('No user found, stopping load')
-      setIsLoading(false)
+    if (!userId) {      setIsLoading(false)
       return
     }
 
     try {
       setIsLoading(true)
-      setError(null)
-      logger.info('Loading workflow data', { userId })
-
-      // Dynamic import for code splitting
+      setError(null)      // Dynamic import for code splitting
       const { getWorkflowsForBuilder } = await import('@/lib/workflow-builder-queries')
 
       // Load workflows from database
@@ -85,15 +74,11 @@ export default function WorkflowBuilderPage() {
       setWorkflows(workflowData)
 
       setIsLoading(false)
-      announce('Workflows loaded successfully', 'polite')
-      logger.info('Workflow data loaded successfully', { count: workflowData.length, userId })
-    } catch (err) {
+      announce('Workflows loaded successfully', 'polite')    } catch (err) {
       logger.error('Failed to load workflows', { error: err, userId })
       setError(err instanceof Error ? err.message : 'Failed to load workflows')
       setIsLoading(false)
-      toast.error('Failed to load workflows', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to load workflows')
       announce('Error loading workflows', 'assertive')
     }
   }
@@ -102,15 +87,12 @@ export default function WorkflowBuilderPage() {
     loadWorkflowData()
   }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A+++ CRUD HANDLERS
   const handleCreateWorkflow = () => {
     announce('Opening workflow creation', 'polite')
     setIsCreateDialogOpen(true)
   }
 
-  const handleWorkflowCreated = async (workflowId: string) => {
-    logger.info('Workflow created', { workflowId })
-    await toast.promise(
+  const handleWorkflowCreated = async (workflowId: string) => {    await toast.promise(
       loadWorkflowData(),
       {
         loading: 'Loading updated workflows...',
@@ -124,9 +106,7 @@ export default function WorkflowBuilderPage() {
     announce(`Editing workflow: ${workflow.name}`, 'polite')
     setSelectedWorkflow(workflow)
     setIsEditMode(true)
-    setIsDetailsDialogOpen(true)
-    logger.info('Workflow editor opened', { workflowId: workflow.id, mode: 'edit' })
-  }
+    setIsDetailsDialogOpen(true)  }
 
   const handleImportWorkflow = async () => {
     const input = document.createElement('input')
@@ -168,14 +148,10 @@ export default function WorkflowBuilderPage() {
             success: `Workflow imported! "${workflowData.name}" has been imported successfully`,
             error: 'Import completed but failed to refresh list'
           }
-        )
-        logger.info('Workflow imported', { workflowName: workflowData.name })
-        announce('Workflow imported successfully', 'polite')
+        )        announce('Workflow imported successfully', 'polite')
       } catch (error) {
         logger.error('Failed to import workflow', { error })
-        toast.error('Import failed', {
-          description: error instanceof Error ? error.message : 'Invalid workflow file'
-        })
+        toast.error('Import failed')
         announce('Import failed', 'assertive')
       } finally {
         setIsImporting(false)
@@ -235,9 +211,7 @@ export default function WorkflowBuilderPage() {
         }
       ) as { success: boolean; steps: any[] }
 
-      if (result.success) {
-        logger.info('Workflow test succeeded', { workflowId: workflow.id, steps: result.steps.length })
-      } else {
+      if (result.success) {      } else {
         logger.error('Workflow test failed', { workflowId: workflow.id })
       }
     } catch (error) {
@@ -258,7 +232,6 @@ export default function WorkflowBuilderPage() {
       return
     }
 
-    // A+++ Set loading state
     setRunningWorkflows(prev => new Set(prev).add(workflow.id))
     announce(`Starting workflow: ${workflow.name}`, 'polite')
 
@@ -300,10 +273,7 @@ export default function WorkflowBuilderPage() {
       await updateWorkflow(workflow.id, {
         run_count: (workflow.run_count || 0) + 1,
         last_run: new Date().toISOString()
-      })
-
-      logger.info('Workflow executed', { workflowId: workflow.id, executionId: execution.id, stepsCompleted })
-      announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
+      })      announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
 
       // Reload workflows to show updated run count
       await loadWorkflowData()
@@ -324,7 +294,6 @@ export default function WorkflowBuilderPage() {
       logger.error('Failed to run workflow', { error, workflowId: workflow.id })
       announce('Workflow execution failed', 'assertive')
     } finally {
-      // A+++ Clear loading state
       setRunningWorkflows(prev => {
         const next = new Set(prev)
         next.delete(workflow.id)
@@ -358,14 +327,9 @@ export default function WorkflowBuilderPage() {
       )
 
       await loadWorkflowData() // Reload workflows
-      setActiveTab('workflows') // Switch to workflows tab
-
-      logger.info('Workflow created from template', { templateId: template.id, workflowId })
-    } catch (error) {
+      setActiveTab('workflows') // Switch to workflows tab    } catch (error) {
       logger.error('Failed to create from template', { error, templateId: template.id })
-      toast.error('Failed to create workflow', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to create workflow')
     }
   }
 
@@ -422,7 +386,6 @@ export default function WorkflowBuilderPage() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
@@ -439,7 +402,6 @@ export default function WorkflowBuilderPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
@@ -453,7 +415,6 @@ export default function WorkflowBuilderPage() {
     )
   }
 
-  // A+++ EMPTY STATE
   if (workflows.length === 0 && !isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
@@ -481,9 +442,7 @@ export default function WorkflowBuilderPage() {
                         success: 'Create your first workflow to automate repetitive tasks and boost productivity.',
                         error: 'Failed to prepare workflow builder'
                       }
-                    )
-                    logger.info('User clicked Create Workflow - feature ready for implementation')
-                  }
+                    )                  }
             }}
           />
         </div>
