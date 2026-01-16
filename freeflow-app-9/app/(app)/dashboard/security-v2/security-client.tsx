@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -522,7 +521,7 @@ const createSecurityQuickActions = (
 // ============================================================================
 
 export default function SecurityClient() {
-  const supabase = createClient()
+
 
   // Use security hook for real CRUD operations
   const {
@@ -614,8 +613,12 @@ export default function SecurityClient() {
 
     try {
       // Log security scan event
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -630,7 +633,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase, fetchEvents])
+  }, [ fetchEvents])
 
   const handleEnableMFA = useCallback(async () => {
     setIsSaving(true)
@@ -669,8 +672,12 @@ export default function SecurityClient() {
     toast.info('Rotating keys...')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -684,14 +691,18 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   const handleExportReport = useCallback(async () => {
     toast.info('Exporting report')
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -703,7 +714,7 @@ export default function SecurityClient() {
     } catch (err) {
       toast.error('Export failed')
     }
-  }, [supabase])
+  }, [])
 
   const handleBlockThreat = useCallback(async (eventId: string) => {
     setIsSaving(true)
@@ -789,6 +800,8 @@ export default function SecurityClient() {
     const deletionRequest = async () => {
       setIsSaving(true)
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('User not authenticated')
 
@@ -805,6 +818,8 @@ export default function SecurityClient() {
         }
 
         // Log the deletion request
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -823,12 +838,14 @@ export default function SecurityClient() {
       success: 'Deletion request submitted. Our support team will contact you within 24-48 hours to verify your identity and process the request.',
       error: 'Failed to submit deletion request. Please try again or contact support directly.'
     })
-  }, [supabase])
+  }, [])
 
   // Handler for adding a new password to the vault
   const handleAddPassword = useCallback(async () => {
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
@@ -847,6 +864,8 @@ export default function SecurityClient() {
         throw new Error(error.message || 'Failed to add password')
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('security_audit_logs').insert({
         user_id: user.id,
         event_type: 'vault_item_created',
@@ -861,7 +880,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Handler for refreshing vault data
   const handleRefreshVault = useCallback(async () => {
@@ -891,6 +910,8 @@ export default function SecurityClient() {
   const handleExportVault = useCallback(async () => {
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
@@ -917,6 +938,8 @@ export default function SecurityClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('security_audit_logs').insert({
         user_id: user.id,
         event_type: 'vault_exported',
@@ -931,7 +954,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Handler for copying text to clipboard
   const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
@@ -948,6 +971,8 @@ export default function SecurityClient() {
   const handleExportAuditLog = useCallback(async () => {
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
@@ -980,7 +1005,7 @@ export default function SecurityClient() {
     } finally {
       setIsSaving(false)
     }
-  }, [supabase])
+  }, [])
 
   // Memoized quick actions with real handlers
   const securityQuickActions = useMemo(() =>

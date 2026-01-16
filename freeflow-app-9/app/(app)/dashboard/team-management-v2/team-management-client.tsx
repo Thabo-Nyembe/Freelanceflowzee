@@ -30,7 +30,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   teamManagementAIInsights,
@@ -112,7 +111,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
   const { teams, loading, error, createTeam, updateTeam, deleteTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
   const displayTeams = teams.length > 0 ? teams : initialTeams
-  const supabase = createClient()
+
 
   // Form state for new team member
   const [showAddMemberModal, setShowAddMemberModal] = useState(false)
@@ -300,6 +299,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const handleExportTeams = async () => {
     setExporting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -351,9 +352,13 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setAddingMember(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .insert({
@@ -411,11 +416,15 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setSendingRecognition(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const recipient = teamMembers.find(m => m.id === recognitionForm.recipientId)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_recognitions')
         .insert({
@@ -451,11 +460,15 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setScheduling1on1(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const participant = teamMembers.find(m => m.id === schedule1on1Form.participantId)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_meetings')
         .insert({
@@ -492,6 +505,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setStartingReviewCycle(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -507,6 +522,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         metadata: {}
       }))
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_reviews')
         .insert(reviewInserts)
@@ -532,9 +549,13 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       return
     }
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_management')
         .update({
@@ -562,9 +583,13 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       return
     }
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('team_reviews')
         .update({ status: 'archived' })
@@ -585,6 +610,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const handleExportAllData = async () => {
     setExporting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 

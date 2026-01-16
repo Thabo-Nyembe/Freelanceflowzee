@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -279,7 +278,7 @@ const getSettingsQuickActions = (handleExportData: () => Promise<void>) => [
 ]
 
 export default function SettingsClient() {
-  const supabase = createClient()
+
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
@@ -494,6 +493,8 @@ export default function SettingsClient() {
   useEffect(() => {
     const fetchUserAndSettings = async () => {
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
@@ -591,7 +592,7 @@ export default function SettingsClient() {
       }
     }
     fetchUserAndSettings()
-  }, [supabase])
+  }, [])
 
   // Stats
   const stats = useMemo(() => {
@@ -653,6 +654,8 @@ export default function SettingsClient() {
     }
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -686,6 +689,8 @@ export default function SettingsClient() {
     setIsSaving(true)
     try {
       for (const notif of notifications) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('notification_preferences')
           .upsert({
@@ -719,6 +724,8 @@ export default function SettingsClient() {
     }
     setIsSaving(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) throw error
       toast.success('Password updated')
@@ -739,6 +746,8 @@ export default function SettingsClient() {
     setIsSaving(true)
     try {
       const newValue = !security.twoFactorEnabled
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .update({ two_factor_enabled: newValue, updated_at: new Date().toISOString() })
@@ -757,6 +766,8 @@ export default function SettingsClient() {
   // Revoke session
   const handleRevokeSession = async (sessionId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_sessions')
         .update({ is_active: false, revoked_at: new Date().toISOString() })
@@ -774,6 +785,8 @@ export default function SettingsClient() {
   const handleRevokeAllSessions = async () => {
     if (!userId) return
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_sessions')
         .update({ is_active: false, revoked_at: new Date().toISOString() })
@@ -795,6 +808,8 @@ export default function SettingsClient() {
 
     try {
       const isConnecting = integration.status !== 'connected'
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('integrations')
         .update({
@@ -823,6 +838,8 @@ export default function SettingsClient() {
     if (!userId) return
     setTheme(newTheme)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .update({ theme: newTheme, updated_at: new Date().toISOString() })
@@ -870,6 +887,8 @@ export default function SettingsClient() {
       if (response.ok) {
         toast.success('Account deletion requested')
         // Sign out user
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.auth.signOut()
         window.location.href = '/'
       } else {
@@ -1020,6 +1039,8 @@ export default function SettingsClient() {
         .from('avatars')
         .getPublicUrl(fileName)
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('user_settings')
         .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
@@ -1040,6 +1061,8 @@ export default function SettingsClient() {
     if (!userId) return
     setIsSavingWebhook(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
@@ -1059,6 +1082,8 @@ export default function SettingsClient() {
   const handleRevokeAllIntegrations = async () => {
     try {
       if (userId) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase
           .from('integrations')
           .update({
