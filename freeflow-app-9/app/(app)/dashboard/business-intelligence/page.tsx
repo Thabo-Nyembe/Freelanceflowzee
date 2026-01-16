@@ -44,34 +44,35 @@ export default function BusinessIntelligencePage() {
   const [userType, setUserType] = useState<UserType>('freelancer')
   const [refreshing, setRefreshing] = useState(false)
 
-  // Load all hooks
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
+  // Load all hooks with real database integration
   const {
     metrics,
     healthScore,
     loading: biLoading,
     refresh: refreshBI
-  } = useBusinessIntelligence({ useMockData: true })
+  } = useBusinessIntelligence()
 
   const {
     summary: profitSummary,
     projectProfitability,
     clientProfitability,
     loading: profitLoading
-  } = useProfitability({ useMockData: true })
+  } = useProfitability()
 
   const {
     clientMetrics,
     churnAnalysis,
     ltvAnalysis,
     loading: clientLoading
-  } = useClientValue({ useMockData: true })
+  } = useClientValue()
 
   const {
     scenarios,
     forecasts,
     goals: revenueGoals,
     loading: forecastLoading
-  } = useRevenueForecast({ useMockData: true })
+  } = useRevenueForecast()
 
   const {
     goals: kpiGoals,
@@ -80,7 +81,7 @@ export default function BusinessIntelligencePage() {
     templates,
     getTemplatesForUserType,
     loading: kpiLoading
-  } = useKPIGoals({ useMockData: true })
+  } = useKPIGoals()
 
   const loading = biLoading || profitLoading || clientLoading || forecastLoading || kpiLoading
 

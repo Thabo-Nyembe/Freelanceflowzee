@@ -82,12 +82,10 @@ const FILE_TYPES = {
   other: { icon: FileText, color: 'text-gray-500', bgColor: 'bg-gray-50' }
 }
 
-// MOCK DATA - REMOVED (Migration #84)
-// All mock data replaced with database queries
-const MOCK_FILES: FileItem[] = []
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
 export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileShare }: FilesHubProps) {
-  const [files, setFiles] = useState<FileItem[]>(MOCK_FILES)
+  const [files, setFiles] = useState<FileItem[]>([])
   const [searchQuery, setSearchQuery] = useState<any>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)

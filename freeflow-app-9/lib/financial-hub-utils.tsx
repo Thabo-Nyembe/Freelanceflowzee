@@ -163,8 +163,11 @@ export interface Report {
 // ============================================================================
 // MOCK DATA
 // ============================================================================
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
-export const MOCK_TRANSACTIONS: Transaction[] = [
+export const MOCK_TRANSACTIONS: Transaction[] = []
+
+const MOCK_TRANSACTIONS_OLD_REMOVED = [
   {
     id: 'txn_001',
     type: 'income',
@@ -277,7 +280,9 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
   }
 ]
 
-export const MOCK_INVOICES: Invoice[] = [
+export const MOCK_INVOICES: Invoice[] = []
+
+const MOCK_INVOICES_OLD = [
   {
     id: 'INV-2024-007',
     number: 'INV-2024-007',
@@ -360,7 +365,9 @@ export const MOCK_INVOICES: Invoice[] = [
   }
 ]
 
-export const MOCK_CLIENTS: Client[] = [
+export const MOCK_CLIENTS: Client[] = []
+
+const MOCK_CLIENTS_OLD = [
   {
     id: 'client_001',
     name: 'TechCorp Inc.',
@@ -405,7 +412,9 @@ export const MOCK_CLIENTS: Client[] = [
   }
 ]
 
-export const MOCK_INSIGHTS: FinancialInsight[] = [
+export const MOCK_INSIGHTS: FinancialInsight[] = []
+
+const MOCK_INSIGHTS_OLD = [
   {
     id: 'insight_001',
     type: 'revenue_optimization',
@@ -442,50 +451,50 @@ export const MOCK_INSIGHTS: FinancialInsight[] = [
 ]
 
 export const MOCK_FINANCIAL_OVERVIEW: FinancialOverview = {
-  totalRevenue: 287450,
-  monthlyRevenue: 45231,
-  totalExpenses: 98750,
-  netProfit: 188700,
-  profitMargin: 65.7,
-  monthlyGrowth: 23.4,
-  quarterlyGrowth: 67.8,
-  yearlyGrowth: 145.2,
-  cashFlow: 156780,
-  accountsReceivable: 45600,
-  accountsPayable: 12400
+  totalRevenue: 0,
+  monthlyRevenue: 0,
+  totalExpenses: 0,
+  netProfit: 0,
+  profitMargin: 0,
+  monthlyGrowth: 0,
+  quarterlyGrowth: 0,
+  yearlyGrowth: 0,
+  cashFlow: 0,
+  accountsReceivable: 0,
+  accountsPayable: 0
 }
 
 export const MOCK_ANALYTICS: FinancialAnalytics = {
-  revenuePerClient: 8950,
-  averageProjectValue: 3850,
-  clientRetentionRate: 94.2,
-  projectProfitability: 72.3,
-  operationalEfficiency: 87.5,
-  burnRate: 12400,
-  runwayMonths: 18.7,
-  breakEvenPoint: 15600,
-  roi: 234.5,
-  costPerAcquisition: 450
+  revenuePerClient: 0,
+  averageProjectValue: 0,
+  clientRetentionRate: 0,
+  projectProfitability: 0,
+  operationalEfficiency: 0,
+  burnRate: 0,
+  runwayMonths: 0,
+  breakEvenPoint: 0,
+  roi: 0,
+  costPerAcquisition: 0
 }
 
 export const MOCK_TAX_INFO: TaxInfo = {
-  quarterlyEstimate: 18750,
-  yearToDateTax: 45600,
+  quarterlyEstimate: 0,
+  yearToDateTax: 0,
   deductions: {
-    homeOffice: 3600,
-    equipment: 4200,
-    software: 2100,
-    professional: 1500
+    homeOffice: 0,
+    equipment: 0,
+    software: 0,
+    professional: 0
   },
-  documents: ['1099-K', 'W-9', 'Quarterly Estimates', 'Expense Receipts']
+  documents: []
 }
 
 export const MOCK_GOALS: FinancialGoals = {
-  monthlyRevenue: { target: 50000, current: 45231, progress: 90.4 },
-  quarterlyGrowth: { target: 60, current: 67.8, progress: 113 },
-  profitMargin: { target: 70, current: 65.7, progress: 93.9 },
-  clientAcquisition: { target: 5, current: 3, progress: 60 },
-  emergencyFund: { target: 100000, current: 156780, progress: 156.8 }
+  monthlyRevenue: { target: 0, current: 0, progress: 0 },
+  quarterlyGrowth: { target: 0, current: 0, progress: 0 },
+  profitMargin: { target: 0, current: 0, progress: 0 },
+  clientAcquisition: { target: 0, current: 0, progress: 0 },
+  emergencyFund: { target: 0, current: 0, progress: 0 }
 }
 
 // ============================================================================

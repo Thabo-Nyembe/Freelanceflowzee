@@ -228,7 +228,10 @@ export interface EscrowStatistics {
 // MOCK DATA
 // ============================================================================
 
-export const MOCK_ESCROW_DEPOSITS: EscrowDeposit[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_ESCROW_DEPOSITS: EscrowDeposit[] = []
+
+const MOCK_ESCROW_DEPOSITS_OLD = [
   {
     id: 'ESC-001',
     userId: 'USR-001',

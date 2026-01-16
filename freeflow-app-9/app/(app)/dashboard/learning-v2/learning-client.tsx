@@ -243,10 +243,16 @@ interface LearningStats {
 }
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - MIGRATED
 // ============================================================================
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
-const mockInstructors: Instructor[] = [
+const mockInstructors: Instructor[] = []
+
+const mockCourses: Course[] = []
+
+/* Removed in migration - use database hooks instead
+const mockInstructors_OLD: Instructor[] = [
   {
     id: 'inst-1',
     name: 'Sarah Chen',
@@ -271,7 +277,7 @@ const mockInstructors: Instructor[] = [
   }
 ]
 
-const mockCourses: Course[] = [
+const mockCourses_OLD: Course[] = [
   {
     id: 'course-1',
     title: 'Leadership Foundations: Building High-Performance Teams',
@@ -397,146 +403,29 @@ const mockCourses: Course[] = [
   }
 ]
 
-const mockLearningPaths: LearningPath[] = [
-  {
-    id: 'path-1',
-    title: 'Become a Data Scientist',
-    description: 'Master the skills needed to start your data science career. From Python basics to machine learning.',
-    thumbnail: '/paths/data-scientist.jpg',
-    courses: mockCourses,
-    totalDuration: 1080,
-    lessonsCount: 122,
-    enrolledCount: 28450,
-    completedCourses: 1,
-    progress: 35,
-    skills: ['Python', 'Data Analysis', 'Machine Learning', 'SQL', 'Statistics'],
-    level: 'beginner',
-    estimatedWeeks: 12,
-    milestones: [
-      { id: 'm-1', title: 'Python Proficient', coursesRequired: 1, unlocked: true, badge: '🐍' },
-      { id: 'm-2', title: 'Data Explorer', coursesRequired: 2, unlocked: false, badge: '📊' },
-      { id: 'm-3', title: 'ML Practitioner', coursesRequired: 3, unlocked: false, badge: '🤖' },
-      { id: 'm-4', title: 'Data Scientist', coursesRequired: 4, unlocked: false, badge: '🎓' }
-    ],
-    curator: { name: 'LinkedIn Learning Team', avatar: '/avatars/linkedin.jpg', title: 'Content Team' }
-  },
-  {
-    id: 'path-2',
-    title: 'Engineering Manager Path',
-    description: 'Transition from individual contributor to engineering manager with confidence.',
-    thumbnail: '/paths/eng-manager.jpg',
-    courses: [mockCourses[0], mockCourses[2]],
-    totalDuration: 600,
-    lessonsCount: 70,
-    enrolledCount: 15230,
-    completedCourses: 0,
-    progress: 0,
-    skills: ['Leadership', 'Team Management', 'Technical Strategy', 'Hiring'],
-    level: 'intermediate',
-    estimatedWeeks: 8,
-    milestones: [
-      { id: 'm-5', title: 'Team Lead', coursesRequired: 1, unlocked: false, badge: '👥' },
-      { id: 'm-6', title: 'Manager Ready', coursesRequired: 2, unlocked: false, badge: '🚀' }
-    ],
-    curator: { name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', title: 'Senior Engineering Manager' }
-  }
-]
-
-const mockSkills: Skill[] = [
-  { id: 'skill-1', name: 'Python', category: 'Programming', level: 75, assessmentScore: 82, endorsements: 23, coursesCompleted: 3, lastPracticed: '2024-12-22', trending: true, inDemand: true },
-  { id: 'skill-2', name: 'Leadership', category: 'Business', level: 60, assessmentScore: null, endorsements: 15, coursesCompleted: 2, lastPracticed: '2024-12-20', trending: false, inDemand: true },
-  { id: 'skill-3', name: 'Data Analysis', category: 'Data', level: 45, assessmentScore: 68, endorsements: 8, coursesCompleted: 1, lastPracticed: '2024-12-18', trending: true, inDemand: true },
-  { id: 'skill-4', name: 'Project Management', category: 'Business', level: 55, assessmentScore: 72, endorsements: 12, coursesCompleted: 2, lastPracticed: '2024-12-15', trending: false, inDemand: false },
-  { id: 'skill-5', name: 'Machine Learning', category: 'AI', level: 30, assessmentScore: null, endorsements: 5, coursesCompleted: 1, lastPracticed: '2024-12-10', trending: true, inDemand: true }
-]
-
-const mockCollections: Collection[] = [
-  {
-    id: 'col-1',
-    name: 'Career Development Essentials',
-    description: 'Courses to advance your career',
-    courses: mockCourses.slice(0, 2),
-    isPublic: true,
-    createdAt: '2024-12-01',
-    likes: 45
-  },
-  {
-    id: 'col-2',
-    name: 'Technical Skills 2025',
-    description: 'Must-have tech skills for the new year',
-    courses: mockCourses,
-    isPublic: false,
-    createdAt: '2024-12-15',
-    likes: 0
-  }
-]
-
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+const mockLearningPaths: LearningPath[] = []
+const mockSkills: Skill[] = []
+const mockCollections: Collection[] = []
 const mockStats: LearningStats = {
-  totalLearningHours: 47.5,
-  coursesCompleted: 8,
-  coursesInProgress: 3,
-  skillsGained: 12,
-  certificatesEarned: 5,
-  currentStreak: 7,
-  longestStreak: 21,
-  weeklyGoal: 5,
-  weeklyProgress: 3.5,
-  averageRating: 4.8,
-  totalNotes: 34,
-  collectionsCount: 2
+  totalLearningHours: 0,
+  coursesCompleted: 0,
+  coursesInProgress: 0,
+  skillsGained: 0,
+  certificatesEarned: 0,
+  currentStreak: 0,
+  longestStreak: 0,
+  weeklyGoal: 0,
+  weeklyProgress: 0,
+  averageRating: 0,
+  totalNotes: 0,
+  collectionsCount: 0
 }
-
-const mockProgress: UserProgress[] = [
-  {
-    courseId: 'course-1',
-    lessonsCompleted: 4,
-    totalLessons: 28,
-    progress: 14,
-    timeSpent: 45,
-    lastAccessedAt: '2024-12-22T14:30:00Z',
-    notes: [{ lessonId: 'les-1', content: 'Key insight: Leaders serve their teams', timestamp: 120 }],
-    bookmarks: [{ lessonId: 'les-2', timestamp: 340 }],
-    completedAt: null,
-    certificateUrl: null
-  },
-  {
-    courseId: 'course-2',
-    lessonsCompleted: 5,
-    totalLessons: 52,
-    progress: 10,
-    timeSpent: 85,
-    lastAccessedAt: '2024-12-23T09:15:00Z',
-    notes: [],
-    bookmarks: [],
-    completedAt: null,
-    certificateUrl: null
-  }
-]
-
-// Enhanced Competitive Upgrade Mock Data - Learning Context
-const mockLearningAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Course Completed', description: 'JavaScript Fundamentals completed with 95% score. Certificate available!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Progress' },
-  { id: '2', type: 'info' as const, title: 'Learning Streak', description: 'You\'ve maintained a 7-day learning streak. Keep it up!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '3', type: 'warning' as const, title: 'Course Expiring', description: 'React Advanced course access expires in 5 days. Complete to retain progress.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deadlines' },
-]
-
-const mockLearningCollaborators = [
-  { id: '1', name: 'Dr. Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Course Instructor', lastActive: 'Now' },
-  { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Study Group', lastActive: '5m ago' },
-  { id: '3', name: 'Emma Davis', avatar: '/avatars/emma.jpg', status: 'away' as const, role: 'Mentor', lastActive: '20m ago' },
-]
-
-const mockLearningPredictions = [
-  { id: '1', label: 'Completion Rate', current: 68, target: 100, predicted: 85, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Weekly Hours', current: 5.5, target: 8, predicted: 7, confidence: 75, trend: 'up' as const },
-  { id: '3', label: 'Skill Score', current: 78, target: 90, predicted: 85, confidence: 80, trend: 'up' as const },
-]
-
-const mockLearningActivities = [
-  { id: '1', user: 'You', action: 'completed', target: 'Module 5: State Management', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Dr. Sarah Chen', action: 'posted', target: 'new assignment', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'Mike Johnson', action: 'shared', target: 'study notes', timestamp: '2h ago', type: 'info' as const },
-]
+const mockProgress: UserProgress[] = []
+const mockLearningAIInsights = []
+const mockLearningCollaborators = []
+const mockLearningPredictions = []
+const mockLearningActivities = []
 
 // Note: mockLearningQuickActions moved inside component to access state setters
 

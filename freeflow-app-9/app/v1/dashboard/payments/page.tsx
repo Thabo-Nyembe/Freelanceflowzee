@@ -57,67 +57,7 @@ interface PaymentHistory {
   transactionId: string
 }
 
-// MIGRATED: Mock Payment Data as fallback - Database-first approach
-const MOCK_MILESTONES: Milestone[] = [
-  {
-    id: 1,
-    name: 'Logo Concepts',
-    description: 'Initial logo concept presentation and client approval',
-    project: 'Brand Identity Redesign',
-    amount: 2000,
-    releaseCondition: 'Client approval of initial concepts',
-    status: 'released',
-    completionDate: '2024-01-20',
-    releaseDate: '2024-01-21',
-    dueDate: '2024-01-25',
-    approvalNotes: 'All concepts approved. Moving forward with refinement.'
-  },
-  {
-    id: 2,
-    name: 'Color Palette & Typography',
-    description: 'Finalized brand color palette and typography selection',
-    project: 'Brand Identity Redesign',
-    amount: 1500,
-    releaseCondition: 'Completion and approval of brand color system',
-    status: 'in-escrow',
-    completionDate: '2024-01-25',
-    dueDate: '2024-02-01',
-    approvalNotes: 'Awaiting final client approval'
-  },
-  {
-    id: 3,
-    name: 'Brand Guidelines Document',
-    description: 'Comprehensive brand guidelines and asset package',
-    project: 'Brand Identity Redesign',
-    amount: 2000,
-    releaseCondition: 'Delivery and approval of complete guidelines document',
-    status: 'completed',
-    completionDate: '2024-02-05',
-    dueDate: '2024-02-10',
-    approvalNotes: 'Ready for client approval'
-  }
-]
-
-const MOCK_PAYMENT_HISTORY: PaymentHistory[] = [
-  {
-    id: 1,
-    date: '2024-01-21',
-    milestone: 'Logo Concepts',
-    amount: 2000,
-    type: 'release',
-    status: 'completed',
-    transactionId: 'TXN-2024-001'
-  },
-  {
-    id: 2,
-    date: '2024-01-22',
-    milestone: 'CMS Integration & Testing',
-    amount: 4000,
-    type: 'release',
-    status: 'completed',
-    transactionId: 'TXN-2024-002'
-  }
-]
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
 export default function PaymentsPage() {
   const router = useRouter()
@@ -141,7 +81,7 @@ export default function PaymentsPage() {
   const [disputeMilestone, setDisputeMilestone] = useState<Milestone | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
 
-  // MIGRATED: Load Payments Data - Database-first with fallback
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   useEffect(() => {
     const loadPaymentsData = async () => {
       try {
@@ -149,28 +89,28 @@ export default function PaymentsPage() {
         setError(null)
 
         try {
-          // Try to fetch from database first
+          // Fetch from database
           const response = await fetch('/api/payments')
 
           if (response.ok) {
             const data = await response.json()
 
-            // Use database data if available, otherwise use mock data
-            setMilestones(data.milestones || MOCK_MILESTONES)
-            setPaymentHistory(data.history || MOCK_PAYMENT_HISTORY)
+            // Use database data with safe array handling
+            setMilestones(data.milestones || [])
+            setPaymentHistory(data.history || [])
 
             logger.info('Payments data loaded from database', {
-              milestoneCount: data.milestones?.length || MOCK_MILESTONES.length,
-              historyCount: data.history?.length || MOCK_PAYMENT_HISTORY.length
+              milestoneCount: data.milestones?.length || 0,
+              historyCount: data.history?.length || 0
             })
           } else {
             throw new Error('API response not OK')
           }
         } catch (apiError) {
-          // Fallback to mock data if API fails
-          logger.warn('Could not fetch from API, using mock data', { error: apiError })
-          setMilestones(MOCK_MILESTONES)
-          setPaymentHistory(MOCK_PAYMENT_HISTORY)
+          // No fallback - use empty arrays
+          logger.warn('Could not fetch from API, using empty arrays', { error: apiError })
+          setMilestones([])
+          setPaymentHistory([])
         }
 
         setIsLoading(false)

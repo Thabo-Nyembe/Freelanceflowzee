@@ -92,17 +92,12 @@ interface CommunityHubProps {
   onMemberConnect?: (memberId: string) => void
 }
 
-// MOCK DATA - REMOVED (Migration #85)
-// All mock data replaced with database queries
-const MOCK_MEMBERS: CommunityMember[] = []
-
-const MOCK_POSTS: Post[] = []
-
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 const logger = createFeatureLogger('CommunityHub')
 
 export default function CommunityHub({ currentUserId, onPostCreate, onMemberConnect }: CommunityHubProps) {
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
-  const [members, setMembers] = useState<CommunityMember[]>(MOCK_MEMBERS)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [members, setMembers] = useState<CommunityMember[]>([])
   const [searchQuery, setSearchQuery] = useState<any>('')
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'projects' | 'questions' | 'events' | 'jobs'>('all')
   const [newPostContent, setNewPostContent] = useState<any>('')

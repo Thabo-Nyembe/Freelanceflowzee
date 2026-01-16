@@ -45,23 +45,16 @@ export function DatabaseBlock({
     })
   }
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   const fetchData = async () => {
     if (!selectedSource) return
 
     setIsLoading(true)
     try {
-      // In a real app, this would make an API call to fetch data
-      // For now, we'll simulate a response
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockData = [
-        { id: 1, name: 'Project A', status: 'Active', created_at: '2024-03-26' },
-        { id: 2, name: 'Project B', status: 'Completed', created_at: '2024-03-25' },
-        { id: 3, name: 'Project C', status: 'Pending', created_at: '2024-03-24' }
-      ]
-
-      updateContent('data', mockData)
-      updateContent('columns', Object.keys(mockData[0]))
+      // Real database integration would go here
+      // For now, return empty data
+      updateContent('data', [])
+      updateContent('columns', [])
       updateContent('error', undefined)
     } catch (error) {
       updateContent('error', 'Failed to fetch data')

@@ -19,7 +19,10 @@ import {
   FileCategory
 } from './client-portal-types'
 
-export const MOCK_CLIENTS: Client[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_CLIENTS: Client[] = []
+
+const MOCK_CLIENTS_OLD = [
   {
     id: 'client-1',
     companyName: 'TechCorp Inc',
@@ -215,7 +218,10 @@ export const MOCK_CLIENTS: Client[] = [
   }
 ]
 
-export const MOCK_PROJECTS: ClientProject[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_PROJECTS: ClientProject[] = []
+
+const MOCK_PROJECTS_OLD = [
   {
     id: 'project-1',
     clientId: 'client-1',
@@ -293,7 +299,10 @@ export const MOCK_PROJECTS: ClientProject[] = [
   }
 ]
 
-export const MOCK_COMMUNICATIONS: Communication[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_COMMUNICATIONS: Communication[] = []
+
+const MOCK_COMMUNICATIONS_OLD = [
   {
     id: 'comm-1',
     clientId: 'client-1',
@@ -320,7 +329,10 @@ export const MOCK_COMMUNICATIONS: Communication[] = [
   }
 ]
 
-export const MOCK_FILES: ClientFile[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_FILES: ClientFile[] = []
+
+const MOCK_FILES_OLD = [
   {
     id: 'file-1',
     clientId: 'client-1',
@@ -367,7 +379,10 @@ export const MOCK_FILES: ClientFile[] = [
   }
 ]
 
-export const MOCK_CONTRACTS: Contract[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_CONTRACTS: Contract[] = []
+
+const MOCK_CONTRACTS_OLD = [
   {
     id: 'contract-1',
     clientId: 'client-1',
@@ -401,7 +416,10 @@ export const MOCK_CONTRACTS: Contract[] = [
   }
 ]
 
-export const MOCK_ACTIVITIES: ClientActivity[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_ACTIVITIES: ClientActivity[] = []
+
+const MOCK_ACTIVITIES_OLD = [
   {
     id: 'activity-1',
     clientId: 'client-1',
@@ -432,7 +450,10 @@ export const MOCK_ACTIVITIES: ClientActivity[] = [
   }
 ]
 
-export const MOCK_CLIENT_INVOICES: ClientInvoice[] = [
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_CLIENT_INVOICES: ClientInvoice[] = []
+
+const MOCK_CLIENT_INVOICES_OLD = [
   {
     invoiceId: 'inv-1',
     invoiceNumber: 'INV-2024-001',
@@ -456,39 +477,30 @@ export const MOCK_CLIENT_INVOICES: ClientInvoice[] = [
   }
 ]
 
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 export const MOCK_CLIENT_STATS: ClientStats = {
-  totalClients: 45,
-  activeClients: 38,
-  newClientsThisMonth: 5,
-  churnedClients: 2,
-  totalRevenue: 1250000,
-  averageClientValue: 27777,
-  clientSatisfaction: 91.5,
+  totalClients: 0,
+  activeClients: 0,
+  newClientsThisMonth: 0,
+  churnedClients: 0,
+  totalRevenue: 0,
+  averageClientValue: 0,
+  clientSatisfaction: 0,
   clientsByTier: {
-    basic: 15,
-    standard: 18,
-    premium: 9,
-    enterprise: 3
+    basic: 0,
+    standard: 0,
+    premium: 0,
+    enterprise: 0
   },
   clientsByStatus: {
-    active: 38,
-    inactive: 3,
-    onboarding: 2,
-    churned: 2,
+    active: 0,
+    inactive: 0,
+    onboarding: 0,
+    churned: 0,
     prospect: 0
   },
-  clientsByIndustry: [
-    { industry: 'Technology', count: 15 },
-    { industry: 'Marketing', count: 12 },
-    { industry: 'SaaS', count: 8 },
-    { industry: 'E-commerce', count: 6 },
-    { industry: 'Other', count: 4 }
-  ],
-  topClients: [
-    { clientId: 'client-1', clientName: 'TechCorp Inc', revenue: 450000 },
-    { clientId: 'client-2', clientName: 'Creative Studios', revenue: 185000 },
-    { clientId: 'client-3', clientName: 'StartupXYZ', revenue: 75000 }
-  ]
+  clientsByIndustry: [],
+  topClients: []
 }
 
 // Helper Functions

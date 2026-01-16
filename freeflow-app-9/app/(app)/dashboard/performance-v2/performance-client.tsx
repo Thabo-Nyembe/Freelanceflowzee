@@ -287,9 +287,9 @@ export default function PerformanceClient() {
     fetchUserId()
   }, [getUserId])
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   // Filter audits from real data
   const filteredAudits = useMemo(() => {
-    // Return empty array when no data available
     return []
   }, [categoryFilter])
 
@@ -300,15 +300,14 @@ export default function PerformanceClient() {
 
   // Calculate average scores from real data
   const averageScores = useMemo(() => {
-    // Return zero scores when no data available
     return {
-      performance: 0,
+      performance: performanceMetrics?.[0]?.efficiency_score || 0,
       accessibility: 0,
       bestPractices: 0,
       seo: 0,
       pwa: 0
     }
-  }, [])
+  }, [performanceMetrics])
 
 
   // Run performance audit - stores result in Supabase

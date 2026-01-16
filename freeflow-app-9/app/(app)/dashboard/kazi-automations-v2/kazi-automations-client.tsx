@@ -126,7 +126,8 @@ const quickAutomations = [
 ]
 
 export default function KaziAutomationsClient() {
-  // Use the Kazi Automations hook with mock data fallback
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
+  // Use the Kazi Automations hook with real database integration
   const {
     automations,
     stats: apiStats,
@@ -137,7 +138,7 @@ export default function KaziAutomationsClient() {
     duplicateAutomation,
     createAutomation,
     updateAutomation
-  } = useKaziAutomations({ useMockData: true })
+  } = useKaziAutomations()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')

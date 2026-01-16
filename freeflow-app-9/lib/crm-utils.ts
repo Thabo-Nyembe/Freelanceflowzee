@@ -15,349 +15,60 @@ import {
   Priority
 } from './crm-types'
 
-export const MOCK_CONTACTS: Contact[] = [
-  {
-    id: 'contact-1',
-    type: 'customer',
-    firstName: 'John',
-    lastName: 'Smith',
-    displayName: 'John Smith',
-    email: 'john.smith@techcorp.com',
-    phone: '+1 (555) 123-4567',
-    company: 'TechCorp Inc',
-    jobTitle: 'CEO',
-    leadStatus: 'won',
-    leadSource: 'referral',
-    leadScore: 95,
-    tags: ['enterprise', 'high-value', 'tech'],
-    customFields: {},
-    address: {
-      street: '123 Tech Street',
-      city: 'San Francisco',
-      state: 'CA',
-      zip: '94105',
-      country: 'USA'
-    },
-    socialProfiles: {
-      linkedin: 'https://linkedin.com/in/johnsmith',
-      twitter: '@johnsmith'
-    },
-    createdAt: new Date(Date.now() - 86400000 * 180),
-    updatedAt: new Date(),
-    lastContactedAt: new Date(Date.now() - 86400000 * 3),
-    assignedTo: 'user-1',
-    ownedBy: 'user-1',
-    metadata: {
-      totalDeals: 3,
-      totalRevenue: 150000,
-      averageDealSize: 50000,
-      conversionRate: 75,
-      lifetimeValue: 150000,
-      totalInteractions: 24,
-      lastInteractionType: 'meeting',
-      emailsOpened: 18,
-      emailsClicked: 12
-    }
-  },
-  {
-    id: 'contact-2',
-    type: 'lead',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    displayName: 'Sarah Johnson',
-    email: 'sarah.j@startup.io',
-    phone: '+1 (555) 234-5678',
-    company: 'Startup.io',
-    jobTitle: 'Founder',
-    leadStatus: 'qualified',
-    leadSource: 'website',
-    leadScore: 78,
-    tags: ['startup', 'saas', 'warm'],
-    customFields: {},
-    createdAt: new Date(Date.now() - 86400000 * 30),
-    updatedAt: new Date(Date.now() - 86400000 * 2),
-    lastContactedAt: new Date(Date.now() - 86400000 * 2),
-    assignedTo: 'user-2',
-    ownedBy: 'user-2',
-    metadata: {
-      totalDeals: 1,
-      totalRevenue: 0,
-      averageDealSize: 0,
-      conversionRate: 0,
-      lifetimeValue: 0,
-      totalInteractions: 8,
-      lastInteractionType: 'email',
-      emailsOpened: 5,
-      emailsClicked: 3
-    }
-  },
-  {
-    id: 'contact-3',
-    type: 'prospect',
-    firstName: 'Michael',
-    lastName: 'Chen',
-    displayName: 'Michael Chen',
-    email: 'mchen@agency.com',
-    phone: '+1 (555) 345-6789',
-    company: 'Creative Agency',
-    jobTitle: 'Creative Director',
-    leadStatus: 'proposal',
-    leadSource: 'social-media',
-    leadScore: 85,
-    tags: ['agency', 'creative', 'hot'],
-    customFields: {},
-    createdAt: new Date(Date.now() - 86400000 * 45),
-    updatedAt: new Date(Date.now() - 86400000),
-    lastContactedAt: new Date(Date.now() - 86400000),
-    assignedTo: 'user-1',
-    ownedBy: 'user-1',
-    metadata: {
-      totalDeals: 1,
-      totalRevenue: 0,
-      averageDealSize: 35000,
-      conversionRate: 0,
-      lifetimeValue: 0,
-      totalInteractions: 12,
-      lastInteractionType: 'call',
-      emailsOpened: 8,
-      emailsClicked: 6
-    }
-  }
-]
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_CONTACTS: Contact[] = []
 
-export const MOCK_DEALS: Deal[] = [
-  {
-    id: 'deal-1',
-    name: 'Enterprise Platform Deal',
-    contactId: 'contact-1',
-    companyName: 'TechCorp Inc',
-    stage: 'closed-won',
-    value: 75000,
-    probability: 100,
-    expectedCloseDate: new Date(Date.now() - 86400000 * 30),
-    actualCloseDate: new Date(Date.now() - 86400000 * 30),
-    priority: 'high',
-    description: 'Annual enterprise platform subscription',
-    products: [
-      {
-        id: 'prod-1',
-        name: 'Enterprise License',
-        quantity: 1,
-        unitPrice: 75000,
-        discount: 0,
-        tax: 0,
-        total: 75000
-      }
-    ],
-    assignedTo: 'user-1',
-    ownedBy: 'user-1',
-    tags: ['enterprise', 'annual'],
-    customFields: {},
-    createdAt: new Date(Date.now() - 86400000 * 90),
-    updatedAt: new Date(Date.now() - 86400000 * 30),
-    wonReason: 'Great product fit, competitive pricing'
-  },
-  {
-    id: 'deal-2',
-    name: 'Startup Growth Package',
-    contactId: 'contact-2',
-    companyName: 'Startup.io',
-    stage: 'proposal',
-    value: 25000,
-    probability: 60,
-    expectedCloseDate: new Date(Date.now() + 86400000 * 15),
-    priority: 'medium',
-    description: 'Growth package for scaling startup',
-    products: [
-      {
-        id: 'prod-2',
-        name: 'Growth Package',
-        quantity: 1,
-        unitPrice: 25000,
-        discount: 2500,
-        tax: 0,
-        total: 22500
-      }
-    ],
-    assignedTo: 'user-2',
-    ownedBy: 'user-2',
-    tags: ['startup', 'growth'],
-    customFields: {},
-    createdAt: new Date(Date.now() - 86400000 * 30),
-    updatedAt: new Date(Date.now() - 86400000 * 2)
-  },
-  {
-    id: 'deal-3',
-    name: 'Agency Creative Suite',
-    contactId: 'contact-3',
-    companyName: 'Creative Agency',
-    stage: 'negotiation',
-    value: 35000,
-    probability: 75,
-    expectedCloseDate: new Date(Date.now() + 86400000 * 10),
-    priority: 'high',
-    description: 'Full creative suite for agency team',
-    products: [
-      {
-        id: 'prod-3',
-        name: 'Creative Suite',
-        quantity: 1,
-        unitPrice: 35000,
-        discount: 0,
-        tax: 0,
-        total: 35000
-      }
-    ],
-    assignedTo: 'user-1',
-    ownedBy: 'user-1',
-    tags: ['agency', 'creative'],
-    customFields: {},
-    createdAt: new Date(Date.now() - 86400000 * 45),
-    updatedAt: new Date(Date.now() - 86400000)
-  }
-]
+export const MOCK_DEALS: Deal[] = []
 
 export const MOCK_PIPELINE: Pipeline = {
   id: 'pipeline-1',
   name: 'Sales Pipeline',
   description: 'Main sales pipeline',
-  stages: [
-    {
-      id: 'stage-1',
-      name: 'Discovery',
-      order: 1,
-      probability: 10,
-      color: '#3b82f6',
-      dealCount: 5,
-      totalValue: 50000
-    },
-    {
-      id: 'stage-2',
-      name: 'Qualification',
-      order: 2,
-      probability: 25,
-      color: '#8b5cf6',
-      dealCount: 4,
-      totalValue: 80000
-    },
-    {
-      id: 'stage-3',
-      name: 'Proposal',
-      order: 3,
-      probability: 50,
-      color: '#f59e0b',
-      dealCount: 3,
-      totalValue: 95000
-    },
-    {
-      id: 'stage-4',
-      name: 'Negotiation',
-      order: 4,
-      probability: 75,
-      color: '#10b981',
-      dealCount: 2,
-      totalValue: 70000
-    },
-    {
-      id: 'stage-5',
-      name: 'Closed Won',
-      order: 5,
-      probability: 100,
-      color: '#22c55e',
-      dealCount: 8,
-      totalValue: 320000
-    },
-    {
-      id: 'stage-6',
-      name: 'Closed Lost',
-      order: 6,
-      probability: 0,
-      color: '#ef4444',
-      dealCount: 3,
-      totalValue: 0
-    }
-  ],
-  deals: MOCK_DEALS,
-  createdAt: new Date(Date.now() - 86400000 * 365),
+  stages: [],
+  deals: [],
+  createdAt: new Date(),
   updatedAt: new Date(),
   isDefault: true
 }
 
-export const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: 'activity-1',
-    type: 'meeting',
-    subject: 'Product Demo with TechCorp',
-    description: 'Showcase enterprise features',
-    contactId: 'contact-1',
-    dealId: 'deal-1',
-    assignedTo: 'user-1',
-    dueDate: new Date(Date.now() + 86400000 * 2),
-    priority: 'high',
-    status: 'pending',
-    duration: 60,
-    createdAt: new Date(Date.now() - 86400000 * 5),
-    updatedAt: new Date()
-  },
-  {
-    id: 'activity-2',
-    type: 'call',
-    subject: 'Follow-up call with Sarah',
-    contactId: 'contact-2',
-    dealId: 'deal-2',
-    assignedTo: 'user-2',
-    dueDate: new Date(Date.now() + 86400000),
-    priority: 'medium',
-    status: 'pending',
-    duration: 30,
-    createdAt: new Date(Date.now() - 86400000 * 3),
-    updatedAt: new Date()
-  }
-]
+export const MOCK_ACTIVITIES: Activity[] = []
 
 export const MOCK_CRM_STATS: CRMStats = {
-  totalContacts: 248,
-  totalLeads: 89,
-  totalDeals: 45,
-  totalRevenue: 1250000,
-  averageDealSize: 27778,
-  conversionRate: 32,
-  pipelineValue: 495000,
-  wonDealsThisMonth: 8,
-  lostDealsThisMonth: 2,
-  activitiesThisWeek: 24,
+  totalContacts: 0,
+  totalLeads: 0,
+  totalDeals: 0,
+  totalRevenue: 0,
+  averageDealSize: 0,
+  conversionRate: 0,
+  pipelineValue: 0,
+  wonDealsThisMonth: 0,
+  lostDealsThisMonth: 0,
+  activitiesThisWeek: 0,
   contactsByType: {
-    lead: 89,
-    prospect: 67,
-    customer: 78,
-    partner: 10,
-    vendor: 4
+    lead: 0,
+    prospect: 0,
+    customer: 0,
+    partner: 0,
+    vendor: 0
   },
   leadsByStatus: {
-    new: 25,
-    contacted: 18,
-    qualified: 22,
-    proposal: 12,
-    negotiation: 8,
-    won: 78,
-    lost: 45
+    new: 0,
+    contacted: 0,
+    qualified: 0,
+    proposal: 0,
+    negotiation: 0,
+    won: 0,
+    lost: 0
   },
   dealsByStage: {
-    discovery: 5,
-    qualification: 8,
-    proposal: 12,
-    negotiation: 6,
-    'closed-won': 78,
-    'closed-lost': 12
+    discovery: 0,
+    qualification: 0,
+    proposal: 0,
+    negotiation: 0,
+    'closed-won': 0,
+    'closed-lost': 0
   },
-  revenueByMonth: [
-    { month: 'Jan', revenue: 85000 },
-    { month: 'Feb', revenue: 95000 },
-    { month: 'Mar', revenue: 120000 },
-    { month: 'Apr', revenue: 110000 },
-    { month: 'May', revenue: 135000 },
-    { month: 'Jun', revenue: 125000 }
-  ]
+  revenueByMonth: []
 }
 
 // Helper Functions

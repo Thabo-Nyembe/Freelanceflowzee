@@ -214,97 +214,21 @@ export const AUDIO_TEMPLATES: AudioTemplate[] = [
   }
 ]
 
-export const MOCK_AUDIO_PROJECTS: AudioProject[] = [
-  {
-    id: 'proj-1',
-    name: 'Podcast Episode 15',
-    description: 'Interview with industry expert',
-    tracks: [],
-    tempo: 120,
-    duration: 2847,
-    sampleRate: 48000,
-    format: 'mp3',
-    quality: 'high',
-    createdAt: new Date(Date.now() - 86400000 * 2),
-    updatedAt: new Date(Date.now() - 3600000),
-    createdBy: 'user-1',
-    tags: ['podcast', 'interview']
-  },
-  {
-    id: 'proj-2',
-    name: 'Product Demo Audio',
-    description: 'Background music for product video',
-    tracks: [],
-    tempo: 128,
-    duration: 180,
-    sampleRate: 44100,
-    format: 'wav',
-    quality: 'lossless',
-    createdAt: new Date(Date.now() - 86400000 * 5),
-    updatedAt: new Date(Date.now() - 7200000),
-    createdBy: 'user-1',
-    tags: ['commercial', 'music']
-  }
-]
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+export const MOCK_AUDIO_PROJECTS: AudioProject[] = []
 
-export const MOCK_AUDIO_FILES: AudioFile[] = [
-  {
-    id: 'file-1',
-    name: 'intro-music.mp3',
-    url: '/audio/intro.mp3',
-    format: 'mp3',
-    duration: 45,
-    size: 1024000,
-    sampleRate: 44100,
-    bitRate: 192,
-    channels: 2,
-    createdAt: new Date(Date.now() - 86400000 * 3),
-    uploadedBy: 'user-1'
-  },
-  {
-    id: 'file-2',
-    name: 'voice-recording.wav',
-    url: '/audio/voice.wav',
-    format: 'wav',
-    duration: 180,
-    size: 15360000,
-    sampleRate: 48000,
-    bitRate: 1411,
-    channels: 1,
-    createdAt: new Date(Date.now() - 86400000 * 1),
-    uploadedBy: 'user-1'
-  }
-]
+export const MOCK_AUDIO_FILES: AudioFile[] = []
 
-export const MOCK_AUDIO_LIBRARIES: AudioLibrary[] = [
-  {
-    id: 'lib-1',
-    name: 'Sound Effects',
-    files: [],
-    category: 'sfx',
-    tags: ['impact', 'transition', 'ambient'],
-    isPublic: true,
-    createdBy: 'user-1'
-  },
-  {
-    id: 'lib-2',
-    name: 'Music Loops',
-    files: [],
-    category: 'loops',
-    tags: ['electronic', 'drums', 'bass'],
-    isPublic: false,
-    createdBy: 'user-1'
-  }
-]
+export const MOCK_AUDIO_LIBRARIES: AudioLibrary[] = []
 
 export const MOCK_AUDIO_STATS: AudioStats = {
-  totalProjects: 15,
-  totalRecordings: 42,
-  totalDuration: 18450,
-  storageUsed: 2457600000,
+  totalProjects: 0,
+  totalRecordings: 0,
+  totalDuration: 0,
+  storageUsed: 0,
   storageLimit: 10737418240,
-  exportCount: 28,
-  collaborators: 5
+  exportCount: 0,
+  collaborators: 0
 }
 
 // Helper Functions

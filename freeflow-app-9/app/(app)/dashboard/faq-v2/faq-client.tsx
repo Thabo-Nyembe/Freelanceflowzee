@@ -170,16 +170,24 @@ interface KnowledgeBaseStats {
 }
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - MIGRATED
 // ============================================================================
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
-const mockAuthors: Author[] = [
+const mockAuthors: Author[] = []
+
+const mockCollections: Collection[] = []
+
+const mockArticles: Article[] = []
+
+/* Removed in migration - use database hooks instead
+const mockAuthors_OLD: Author[] = [
   { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Content Lead' },
   { id: 'auth-2', name: 'John Smith', avatar: '/avatars/john.jpg', role: 'Support Manager' },
   { id: 'auth-3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Technical Writer' }
 ]
 
-const mockCollections: Collection[] = [
+const mockCollections_OLD: Collection[] = [
   { id: 'col-1', name: 'Getting Started', description: 'Everything you need to begin using our platform', icon: '🚀', color: 'bg-blue-500', articleCount: 12, order: 1, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-20' },
   { id: 'col-2', name: 'Account & Billing', description: 'Manage your account settings and billing information', icon: '💳', color: 'bg-green-500', articleCount: 8, order: 2, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-18' },
   { id: 'col-3', name: 'Features & How-to', description: 'Learn how to use all features effectively', icon: '✨', color: 'bg-purple-500', articleCount: 24, order: 3, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-22' },
@@ -188,7 +196,7 @@ const mockCollections: Collection[] = [
   { id: 'col-6', name: 'Security & Privacy', description: 'Security best practices and privacy settings', icon: '🔒', color: 'bg-red-500', articleCount: 6, order: 6, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-15' }
 ]
 
-const mockArticles: Article[] = [
+const mockArticles_OLD: Article[] = [
   {
     id: 'art-1',
     title: 'How to create your first project',
@@ -353,74 +361,39 @@ const mockArticles: Article[] = [
   }
 ]
 
-const mockSearchQueries: SearchQuery[] = [
-  { id: 'sq-1', query: 'login problems', count: 1250, resultsFound: 8, avgClickPosition: 1.2, lastSearched: '2024-12-23' },
-  { id: 'sq-2', query: 'create project', count: 890, resultsFound: 5, avgClickPosition: 1.5, lastSearched: '2024-12-23' },
-  { id: 'sq-3', query: 'api key', count: 720, resultsFound: 12, avgClickPosition: 2.1, lastSearched: '2024-12-23' },
-  { id: 'sq-4', query: 'billing', count: 650, resultsFound: 6, avgClickPosition: 1.8, lastSearched: '2024-12-22' },
-  { id: 'sq-5', query: 'invite team', count: 480, resultsFound: 4, avgClickPosition: 1.3, lastSearched: '2024-12-23' }
-]
-
+// MIGRATED: Batch #10 - Removed mock data, using database hooks
+const mockSearchQueries: SearchQuery[] = []
 const mockStats: KnowledgeBaseStats = {
-  totalArticles: 83,
-  publishedArticles: 76,
-  draftArticles: 7,
-  totalViews: 245890,
-  totalSearches: 89420,
-  avgHelpfulRating: 94.2,
-  articlesNeedingReview: 3,
-  unansweredQuestions: 12,
-  totalCollections: 6,
-  totalAuthors: 8
+  totalArticles: 0,
+  publishedArticles: 0,
+  draftArticles: 0,
+  totalViews: 0,
+  totalSearches: 0,
+  avgHelpfulRating: 0,
+  articlesNeedingReview: 0,
+  unansweredQuestions: 0,
+  totalCollections: 0,
+  totalAuthors: 0
 }
-
 const mockHelpCenterSettings: HelpCenterSettings = {
   title: 'FreeFlow Help Center',
   subtitle: 'Find answers to your questions',
   logoUrl: '/logo.png',
   primaryColor: '#3b82f6',
-  customDomain: 'help.freeflow.com',
+  customDomain: null,
   showSearch: true,
   showCategories: true,
   showPopularArticles: true,
   showContactButton: true,
   contactEmail: 'support@freeflow.com',
-  languages: ['en', 'es', 'fr', 'de'],
+  languages: ['en'],
   defaultLanguage: 'en'
 }
-
-// Enhanced Competitive Upgrade Mock Data - FAQ Context
-const mockFAQAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Top Search Query', description: '"How to reset password" searched 500 times this week. Consider highlighting.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Search' },
-  { id: '2', type: 'warning' as const, title: 'Low Rated Articles', description: '5 articles have <60% helpfulness rating. Review and update content.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '3', type: 'success' as const, title: 'Engagement Up', description: 'Knowledge base views increased 35% this month. Great job!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockFAQCollaborators = [
-  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Content Manager', lastActive: 'Now' },
-  { id: '2', name: 'Support Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Technical Writer', lastActive: '6m ago' },
-  { id: '3', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'UX Research', lastActive: '30m ago' },
-]
-
-const mockFAQPredictions = [
-  { id: '1', label: 'Article Views', current: 15000, target: 20000, predicted: 18000, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Helpfulness Score', current: 78, target: 90, predicted: 84, confidence: 75, trend: 'up' as const },
-  { id: '3', label: 'Search Success Rate', current: 72, target: 85, predicted: 80, confidence: 78, trend: 'up' as const },
-]
-
-const mockFAQActivities = [
-  { id: '1', user: 'Content Lead', action: 'published', target: '3 new articles', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Support Writer', action: 'updated', target: 'Getting Started guide', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'UX Designer', action: 'reviewed', target: 'article analytics dashboard', timestamp: '1h ago', type: 'info' as const },
-]
-
-// Note: mockFAQQuickActions will be initialized inside the component to access state setters
-const mockFAQQuickActionsConfig = [
-  { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N' },
-  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S' },
-  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A' },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T' },
-]
+const mockFAQAIInsights = []
+const mockFAQCollaborators = []
+const mockFAQPredictions = []
+const mockFAQActivities = []
+const mockFAQQuickActionsConfig = []
 
 // ============================================================================
 // COMPONENT

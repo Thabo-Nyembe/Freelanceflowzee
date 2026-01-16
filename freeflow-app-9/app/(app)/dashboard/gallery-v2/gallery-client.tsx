@@ -261,11 +261,11 @@ export default function GalleryClient() {
   const totalDownloads = galleryStats.totalViews
   const totalViews = galleryStats.totalViews
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   // Filtered photos - transform gallery items to Photo format
   const filteredPhotos = useMemo(() => {
-    // Return empty array if no data available
-    return []
-  }, [searchQuery, orientation])
+    return galleryItems || []
+  }, [galleryItems])
 
   const handleCopyLink = () => {
     if (selectedPhoto) {

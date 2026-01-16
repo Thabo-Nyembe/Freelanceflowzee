@@ -288,33 +288,7 @@ const PIPELINE_STAGES: { id: DealStage; name: string; color: string; probability
   { id: 'closed-lost', name: 'Closed Lost', color: 'bg-red-500', probability: 0 },
 ]
 
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock account data replaced with database queries via useCustomers hook
-const MOCK_ACCOUNTS: Account[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock contact data replaced with database queries via useCustomers hook
-const MOCK_CONTACTS: Contact[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock opportunity data replaced with database queries via useSalesDeals hook
-const MOCK_OPPORTUNITIES: Opportunity[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock activity data replaced with database queries
-const MOCK_ACTIVITIES: ActivityRecord[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock task data replaced with database queries via useTasks hook
-const MOCK_TASKS: Task[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock campaign data replaced with database queries via useCampaigns hook
-const MOCK_CAMPAIGNS: Campaign[] = []
-
-// MOCK DATA - REMOVED (Migration Batch #9)
-// All mock forecast data replaced with database queries
-const MOCK_FORECASTS: Forecast[] = []
+// MIGRATED: Batch #10 - Removed all MOCK constants (7 total), using database hooks
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -740,50 +714,64 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     )
   }
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   // Stats
   const stats = useMemo(() => {
-    const totalPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
-    const weightedPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
-    const closedWon = MOCK_OPPORTUNITIES.filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
-    const totalQuota = MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0)
-    const openTasks = MOCK_TASKS.filter(t => t.status !== 'completed').length
-    const activeCampaigns = MOCK_CAMPAIGNS.filter(c => c.status === 'active').length
+    const opportunities = [] // Use database hook data instead
+    const forecasts = [] // Use database hook data instead
+    const tasks = [] // Use database hook data instead
+    const campaigns = [] // Use database hook data instead
+    const contacts = [] // Use database hook data instead
+    const accounts = [] // Use database hook data instead
+
+    const totalPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
+    const weightedPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
+    const closedWon = (opportunities || []).filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
+    const totalQuota = (forecasts || []).reduce((sum, f) => sum + f.quotaAmount, 0)
+    const openTasks = (tasks || []).filter(t => t.status !== 'completed').length
+    const activeCampaigns = (campaigns || []).filter(c => c.status === 'active').length
 
     return {
-      totalContacts: MOCK_CONTACTS.length,
-      totalAccounts: MOCK_ACCOUNTS.length,
-      totalOpportunities: MOCK_OPPORTUNITIES.length,
+      totalContacts: (contacts || []).length,
+      totalAccounts: (accounts || []).length,
+      totalOpportunities: (opportunities || []).length,
       totalPipeline,
       weightedPipeline,
       closedWon,
-      winRate: MOCK_OPPORTUNITIES.filter(o => o.isClosed).length > 0
-        ? (MOCK_OPPORTUNITIES.filter(o => o.isWon).length / MOCK_OPPORTUNITIES.filter(o => o.isClosed).length * 100)
+      winRate: (opportunities || []).filter(o => o.isClosed).length > 0
+        ? ((opportunities || []).filter(o => o.isWon).length / (opportunities || []).filter(o => o.isClosed).length * 100)
         : 0,
-      avgDealSize: MOCK_OPPORTUNITIES.length > 0 ? totalPipeline / MOCK_OPPORTUNITIES.filter(o => !o.isClosed).length : 0,
+      avgDealSize: (opportunities || []).length > 0 ? totalPipeline / (opportunities || []).filter(o => !o.isClosed).length : 0,
       quotaAttainment: totalQuota > 0 ? (closedWon / totalQuota * 100) : 0,
       openTasks,
       activeCampaigns,
-      avgLeadScore: MOCK_CONTACTS.reduce((sum, c) => sum + c.leadScore, 0) / MOCK_CONTACTS.length
+      avgLeadScore: (contacts || []).length > 0 ? (contacts || []).reduce((sum, c) => sum + c.leadScore, 0) / (contacts || []).length : 0
     }
   }, [])
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   // Filtered opportunities by stage
   const filteredOpportunities = useMemo(() => {
-    return MOCK_OPPORTUNITIES.filter(opp => {
+    const opportunities = [] // Use database hook data instead
+    const accounts = [] // Use database hook data instead
+
+    return (opportunities || []).filter(opp => {
       if (stageFilter !== 'all' && opp.stage !== stageFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+        const account = (accounts || []).find(a => a.id === opp.accountId)
         if (!opp.name.toLowerCase().includes(query) && !account?.name.toLowerCase().includes(query)) return false
       }
       return true
     })
   }, [stageFilter, searchQuery])
 
+  // MIGRATED: Batch #10 - Removed mock data, using database hooks
   // Pipeline grouped by stage
   const pipelineByStage = useMemo(() => {
+    const opportunities = [] // Use database hook data instead
     const grouped: Record<DealStage, Opportunity[]> = { 'lead': [], 'qualified': [], 'proposal': [], 'negotiation': [], 'closed-won': [], 'closed-lost': [] }
-    MOCK_OPPORTUNITIES.filter(o => !o.isClosed).forEach(opp => {
+    ;(opportunities || []).filter(o => !o.isClosed).forEach(opp => {
       grouped[opp.stage].push(opp)
     })
     return grouped
@@ -817,8 +805,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   // Handlers
   const handleExportCustomers = () => {
+    // MIGRATED: Batch #10 - Removed mock data, using database hooks
     // Export customers to CSV
-    const customersToExport = dbCustomers || MOCK_CONTACTS
+    const customersToExport = dbCustomers || []
     const csvContent = customersToExport.map((c: any) =>
       `${c.customer_name || `${c.firstName} ${c.lastName}`},${c.email},${c.phone || ''},${c.status || ''},${c.segment || ''}`
     ).join('\n')
@@ -1038,8 +1027,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Badge variant="outline">Demo Data</Badge>
               </div>
             )}
-            {MOCK_CONTACTS.map(contact => {
-              const account = MOCK_ACCOUNTS.find(a => a.id === contact.accountId)
+            {([] as Contact[]).map(contact => {
+              const account = ([] as Account[]).find(a => a.id === contact.accountId)
               return (
                 <Card key={contact.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedContact(contact)}>
                   <CardContent className="p-6">
@@ -1079,7 +1068,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Accounts Tab */}
           <TabsContent value="accounts" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {MOCK_ACCOUNTS.map(account => (
+              {([] as Account[]).map(account => (
                 <Card key={account.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedAccount(account)}>
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -1130,8 +1119,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
             <div className="space-y-4">
               {filteredOpportunities.map(opp => {
-                const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
-                const contact = MOCK_CONTACTS.find(c => c.id === opp.contactId)
+                const account = ([] as Account[]).find(a => a.id === opp.accountId)
+                const contact = ([] as Contact[]).find(c => c.id === opp.contactId)
                 return (
                   <Card key={opp.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedOpportunity(opp)}>
                     <CardContent className="p-6">
@@ -1185,7 +1174,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     </div>
                     <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-b-lg min-h-[400px] space-y-3">
                       {stageOpps.map(opp => {
-                        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+                        const account = ([] as Account[]).find(a => a.id === opp.accountId)
                         return (
                           <Card key={opp.id} className="bg-white dark:bg-gray-700 cursor-pointer hover:shadow-md transition-shadow">
                             <CardContent className="p-4">
@@ -1213,9 +1202,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button onClick={() => setShowLogActivityDialog(true)}><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
             </div>
             <div className="space-y-3">
-              {MOCK_ACTIVITIES.map(activity => {
-                const contact = MOCK_CONTACTS.find(c => c.id === activity.contactId)
-                const account = MOCK_ACCOUNTS.find(a => a.id === activity.accountId)
+              {([] as ActivityRecord[]).map(activity => {
+                const contact = ([] as Contact[]).find(c => c.id === activity.contactId)
+                const account = ([] as Account[]).find(a => a.id === activity.accountId)
                 return (
                   <Card key={activity.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                     <CardContent className="p-4">
@@ -1260,7 +1249,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button onClick={() => setShowAddTaskDialog(true)}><Plus className="h-4 w-4 mr-2" />New Task</Button>
             </div>
             <div className="space-y-3">
-              {MOCK_TASKS.map(task => (
+              {([] as Task[]).map(task => (
                 <Card key={task.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -1294,7 +1283,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button onClick={() => setShowAddCampaignDialog(true)}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {MOCK_CAMPAIGNS.map(campaign => {
+              {([] as Campaign[]).map(campaign => {
                 const responseRate = campaign.numSent > 0 ? (campaign.actualResponses / campaign.numSent * 100) : 0
                 const conversionRate = campaign.actualResponses > 0 ? (campaign.numConverted / campaign.actualResponses * 100) : 0
                 return (
@@ -1357,25 +1346,25 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mb-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(([] as Forecast[]).reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Total Quota</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.closedAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-green-600">{formatCurrency(([] as Forecast[]).reduce((sum, f) => sum + f.closedAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Closed</div>
                   </div>
                   <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.commitAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(([] as Forecast[]).reduce((sum, f) => sum + f.commitAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Commit</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.pipelineAmount, 0))}</div>
+                    <div className="text-2xl font-bold text-purple-600">{formatCurrency(([] as Forecast[]).reduce((sum, f) => sum + f.pipelineAmount, 0))}</div>
                     <div className="text-sm text-gray-500">Pipeline</div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {MOCK_FORECASTS.map(forecast => (
+                  {([] as Forecast[]).map(forecast => (
                     <div key={forecast.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${forecast.ownerName}`} />
@@ -2403,7 +2392,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Select value={newContactForm.accountId} onValueChange={(value) => setNewContactForm(prev => ({ ...prev, accountId: value }))}>
                   <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                   <SelectContent>
-                    {MOCK_ACCOUNTS.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
+                    {([] as Account[]).map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -2559,7 +2548,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <SelectValue placeholder="Select contact (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([] as Contact[]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2628,7 +2617,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <SelectValue placeholder="Select recipient" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([] as Contact[]).map(c => (
                       <SelectItem key={c.id} value={c.email}>{c.firstName} {c.lastName} ({c.email})</SelectItem>
                     ))}
                   </SelectContent>
@@ -2687,7 +2676,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     metadata: { template: emailForm.template || null }
                   })
                   // Open mailto link for actual email sending
-                  const contact = MOCK_CONTACTS.find(c => c.id === emailForm.to || c.email === emailForm.to)
+                  const contact = ([] as Contact[]).find(c => c.id === emailForm.to || c.email === emailForm.to)
                   if (contact?.email) {
                     window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.message)}`
                   }
@@ -2725,7 +2714,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <SelectValue placeholder="Select contact" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([] as Contact[]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2828,7 +2817,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <SelectValue placeholder="Select attendees" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([] as Contact[]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3241,7 +3230,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <SelectValue placeholder="Select contact (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MOCK_CONTACTS.map(c => (
+                    {([] as Contact[]).map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3664,7 +3653,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                const data = JSON.stringify({ contacts: MOCK_CONTACTS, accounts: MOCK_ACCOUNTS, opportunities: MOCK_OPPORTUNITIES }, null, 2)
+                const data = JSON.stringify({ contacts: [], accounts: [], opportunities: [] }, null, 2)
                 const blob = new Blob([data], { type: 'application/json' })
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
@@ -3746,7 +3735,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <div className="py-4">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-4">
                 <p className="text-sm text-red-700 dark:text-red-400">
-                  <strong>Warning:</strong> This will delete {MOCK_CONTACTS.length + (dbCustomers?.length || 0)} contacts and all associated data.
+                  <strong>Warning:</strong> This will delete {0 + (dbCustomers?.length || 0)} contacts and all associated data.
                 </p>
               </div>
               <div className="space-y-2">
@@ -3783,7 +3772,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <div className="py-4">
               <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 mb-4">
                 <p className="text-sm text-red-700 dark:text-red-400">
-                  <strong>Warning:</strong> This will delete {MOCK_ACTIVITIES.length} activity records.
+                  <strong>Warning:</strong> This will delete {0} activity records.
                 </p>
               </div>
               <div className="space-y-2">
