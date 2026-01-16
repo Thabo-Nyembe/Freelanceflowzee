@@ -16,7 +16,6 @@ import {
 } from '@/lib/audit-utils'
 import type { AuditLog, ActivityType, EntityType, SeverityLevel } from '@/lib/audit-types'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -34,7 +33,6 @@ export default function AuditTrailPage() {
   // AUTHENTICATION
   const { userId, loading: userLoading } = useCurrentUser()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -59,7 +57,6 @@ export default function AuditTrailPage() {
     searchQuery: ''
   })
 
-  // A+++ LOAD AUDIT TRAIL DATA
   useEffect(() => {
     const loadAuditTrailData = async () => {
       // Wait for authentication
@@ -73,10 +70,7 @@ export default function AuditTrailPage() {
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading audit trail data', { userId })
-
-        // Load all audit trail data in parallel
+        setError(null)        // Load all audit trail data in parallel
         const {
           getAuditLogs,
           getActivitySummary,
@@ -101,13 +95,7 @@ export default function AuditTrailPage() {
         setCriticalEvents(critical)
         setComplianceReports(reports)
 
-        setIsLoading(false)
-        logger.info('Audit trail data loaded successfully', {
-          logsCount: logs.length,
-          criticalCount: critical.length,
-          reportsCount: reports.length
-        })
-        announce('Audit trail loaded successfully', 'polite')
+        setIsLoading(false)        announce('Audit trail loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load audit trail data'
         logger.error('Failed to load audit trail data', { error: err, userId })
@@ -138,10 +126,7 @@ export default function AuditTrailPage() {
       return
     }
 
-    try {
-      logger.info('Exporting audit logs', { userId, filtersCount: Object.keys(filters).length })
-
-      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
+    try {      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
 
       // Export with current filters
       const csvData = await exportAuditLogs(
@@ -166,9 +151,7 @@ export default function AuditTrailPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Audit logs exported successfully')
-      logger.info('Audit logs exported', { userId, logsCount: auditLogs.length })
-      announce('Audit logs exported successfully', 'polite')
+      toast.success('Audit logs exported successfully')      announce('Audit logs exported successfully', 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to export logs'
       logger.error('Failed to export logs', { error: err, userId })
@@ -176,7 +159,6 @@ export default function AuditTrailPage() {
     }
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 dark:bg-none dark:bg-gray-900">
@@ -194,7 +176,6 @@ export default function AuditTrailPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-red-50 to-orange-50 dark:bg-none dark:bg-gray-900">
