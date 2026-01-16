@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 143/286 pages integrated (50.0%)
+**Overall Progress:** 144/286 pages integrated (50.3%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 137/223 using Supabase hooks (61.4%) 🚧
-  - **Mock → Database:** 14/157 migrated (8.9%) 🎉 NEW!
+- **V2 Pages:** 138/223 using Supabase hooks (61.9%) 🚧
+  - **Mock → Database:** 15/157 migrated (9.6%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -502,7 +502,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~2 minutes (same pattern as #12)
    - **Complexity:** Low (page was already integrated, just needed final cleanup)
 
-14. `tickets` (app/v2/dashboard) - ✅ **MIGRATED** (3,206 lines) - Commit: TBD
+14. `tickets` (app/v2/dashboard) - ✅ **MIGRATED** (3,206 lines) - Commit: fec00dda
    - **Pattern:** Completion of partial integration - removed mock fallback with safe array handling
    - **Tables:** tickets (via use-tickets hook)
    - **Hook Features:** Already integrated with createTicket, updateTicket, deleteTicket, assignTicket mutations
@@ -516,6 +516,24 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~3 minutes
    - **Complexity:** Low (page was already integrated, just needed final cleanup with safe array handling)
    - **Milestone:** 🎉 50.0% OVERALL PROGRESS ACHIEVED!
+
+15. `workflows-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (3,615 lines) - Commit: cba018a2
+   - **Pattern:** Completion of partial integration - removed dual mock fallback patterns
+   - **Tables:** workflows (via use-workflows hook)
+   - **Hook Features:** Already integrated with createWorkflow, updateWorkflow, deleteWorkflow, startWorkflow, pauseWorkflow, resumeWorkflow mutations
+   - **Mapping:** Already implemented - DB Workflow → UI Workflow with field transformations (steps_config → steps array, current_step → totalRuns, completion_rate → successRate)
+   - **Cleanup:** Removed TWO mock fallback patterns:
+     1. Stats calculation (lines 453-496): Removed if/else fallback in useMemo
+     2. Display workflows (line 507): Removed ternary fallback in filteredWorkflows
+   - **Before (Stats):** `if (dbWorkflows.length > 0) { calculate from db } else { calculate from mock }`
+   - **After (Stats):** Always use `(dbWorkflows || [])` with safe array handling
+   - **Before (Display):** `const workflowsToFilter = displayWorkflows.length > 0 ? displayWorkflows : mockWorkflows`
+   - **After (Display):** `return displayWorkflows.filter(...)` - direct usage without fallback
+   - **Impact:** Now uses 100% database data for workflows stats and display
+   - **Kept as Mock:** mockRuns, mockApps (separate entities - runs tracking not implemented yet, intentional per inline comment)
+   - **Note:** Clean migration, no errors introduced, ~25 lines removed
+   - **Migration Time:** ~3 minutes
+   - **Complexity:** Medium (two fallback patterns, but straightforward removal)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
