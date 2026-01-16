@@ -633,7 +633,7 @@ export default function FeaturesClient() {
     setFeatures(prev => [newFeature, ...prev])
     setNewFeatureDialogOpen(false)
     setNewFeatureForm({ name: '', key: '', description: '', category: 'AI & ML', priority: 'medium', team: '', platforms: [] })
-    toast.success('Feature created successfully', { description: `${newFeature.name} has been added to the backlog` })
+    toast.success('Feature created successfully' has been added to the backlog` })
   }
 
   const handleToggleFlag = () => {
@@ -671,7 +671,7 @@ export default function FeaturesClient() {
         : f
     ))
     setRolloutDialogOpen(false)
-    toast.success('Rollout started', { description: `Rolling out to ${rolloutForm.percentage}% of users` })
+    toast.success('Rollout started'% of users` })
   }
 
   const handleCreateABTest = () => {
@@ -694,7 +694,7 @@ export default function FeaturesClient() {
         : f
     ))
     setAbTestDialogOpen(false)
-    toast.success('A/B Test created', { description: `${abTestForm.testName} is now running` })
+    toast.success('A/B Test created' is now running` })
   }
 
   const handleCreateSegment = () => {
@@ -704,7 +704,7 @@ export default function FeaturesClient() {
     }
     // In a real app, this would create a segment in the backend
     setSegmentDialogOpen(false)
-    toast.success('Segment created', { description: `${segmentForm.name} segment is now active` })
+    toast.success('Segment created' segment is now active` })
     setSegmentForm({ name: '', description: '', attribute: '', operator: '=', value: '' })
   }
 
@@ -730,14 +730,14 @@ export default function FeaturesClient() {
     URL.revokeObjectURL(url)
 
     setExportDialogOpen(false)
-    toast.success('Export completed', { description: `${features.length} features exported` })
+    toast.success('Export completed' features exported` })
   }
 
   const handleMoveFeature = (featureId: string, newStatus: FeatureStatus) => {
     setFeatures(prev => prev.map(f =>
       f.id === featureId ? { ...f, status: newStatus, updatedAt: new Date().toISOString().split('T')[0] } : f
     ))
-    toast.success('Feature moved', { description: `Feature moved to ${newStatus.replace('_', ' ')}` })
+    toast.success('Feature moved'` })
   }
 
   return (
@@ -1842,7 +1842,7 @@ export default function FeaturesClient() {
             <AIInsightsPanel
               insights={mockFeaturesAIInsights}
               title="Feature Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2093,7 +2093,7 @@ export default function FeaturesClient() {
                             : f
                         ))
                         setSelectedFeature(prev => prev ? { ...prev, votes: [...prev.votes, newVote] } : prev)
-                        toast.success('Vote recorded', { description: 'Your vote has been added' })
+                        toast.success('Vote recorded')
                       }}>
                         <ThumbsUp className="h-4 w-4 mr-2" />
                         Vote

@@ -383,8 +383,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'approved',
         approved_at: new Date().toISOString()
       } as any)
-      toast.success('Expense approved', {
-        description: `Report "${title}" has been approved`
+      toast.success('Expense approved'" has been approved`
       })
       setShowReportDialog(false)
       refetch()
@@ -400,8 +399,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'rejected'
       } as any)
-      toast.success('Expense rejected', {
-        description: `Report "${title}" has been rejected`
+      toast.success('Expense rejected'" has been rejected`
       })
       setShowReportDialog(false)
       refetch()
@@ -419,8 +417,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         reimbursed_at: new Date().toISOString(),
         reimbursed: true
       } as any)
-      toast.success('Expense reimbursed', {
-        description: `Report "${title}" has been marked as reimbursed`
+      toast.success('Expense reimbursed'" has been marked as reimbursed`
       })
       setShowReportDialog(false)
       refetch()
@@ -433,8 +430,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleDeleteExpense = async (expenseId: string, title: string) => {
     try {
       await deleteExpense({ id: expenseId } as any)
-      toast.success('Expense deleted', {
-        description: `Report "${title}" has been deleted`
+      toast.success('Expense deleted'" has been deleted`
       })
       setShowReportDialog(false)
       refetch()
@@ -445,9 +441,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   const handleExportExpenses = async () => {
-    toast.success('Export started', {
-      description: 'Your expense data is being exported'
-    })
+    toast.success('Export started')
     try {
       const response = await fetch('/api/expenses?action=export', {
         method: 'GET',
@@ -460,14 +454,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       }
 
       const data = await response.json()
-      toast.success('Export completed', {
-        description: 'Your expense data has been exported successfully'
-      })
+      toast.success('Export completed')
     } catch (error) {
       console.error('Failed to export expenses:', error)
-      toast.error('Failed to export expenses', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to export expenses')
     }
   }
 
@@ -478,8 +468,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'pending',
         submitted_at: new Date().toISOString()
       } as any)
-      toast.success('Report submitted', {
-        description: `"${title}" submitted for approval`
+      toast.success('Report submitted'" submitted for approval`
       })
       refetch()
     } catch (error) {
@@ -499,7 +488,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       return
     }
     setScanReceiptProcessing(true)
-    toast.success('Scanning receipt...', { description: 'Processing your receipt' })
+    toast.success('Scanning receipt...')
     try {
       const formData = new FormData()
       formData.append('file', scanReceiptFile)
@@ -516,17 +505,13 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       }
 
       const data = await response.json()
-      toast.success('Receipt scanned successfully', {
-        description: 'Expense data extracted and ready for review'
-      })
+      toast.success('Receipt scanned successfully')
       setScanReceiptFile(null)
       setShowScanReceiptDialog(false)
       refetch()
     } catch (error) {
       console.error('Failed to scan receipt:', error)
-      toast.error('Failed to scan receipt', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to scan receipt')
     } finally {
       setScanReceiptProcessing(false)
     }
@@ -539,7 +524,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       return
     }
     setGeneratingReport(true)
-    toast.success('Generating report...', { description: 'Please wait' })
+    toast.success('Generating report...')
     try {
       const response = await fetch('/api/expenses', {
         method: 'POST',
@@ -558,16 +543,13 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       }
 
       const data = await response.json()
-      toast.success('Expense report generated', {
-        description: `${reportFormat.toUpperCase()} report for ${reportDateRange.start} to ${reportDateRange.end}`
+      toast.success('Expense report generated' report for ${reportDateRange.start} to ${reportDateRange.end}`
       })
       setReportDateRange({ start: '', end: '' })
       setShowGenerateReportDialog(false)
     } catch (error) {
       console.error('Failed to generate report:', error)
-      toast.error('Failed to generate report', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to generate report')
     } finally {
       setGeneratingReport(false)
     }
@@ -579,7 +561,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Adding mileage entry...', { description: 'Please wait' })
+    toast.success('Adding mileage entry...')
     try {
       const reimbursement = mileageForm.distance * 0.67
       const response = await fetch('/api/expenses', {
@@ -603,8 +585,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to add mileage entry')
       }
 
-      toast.success('Mileage entry added', {
-        description: `${mileageForm.distance} miles - $${reimbursement.toFixed(2)} reimbursement`
+      toast.success('Mileage entry added' miles - $${reimbursement.toFixed(2)} reimbursement`
       })
       setMileageForm({
         origin: '',
@@ -617,9 +598,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       refetch()
     } catch (error) {
       console.error('Failed to add mileage entry:', error)
-      toast.error('Failed to add mileage entry', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to add mileage entry')
     }
   }
 
@@ -629,7 +608,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Submitting per diem request...', { description: 'Please wait' })
+    toast.success('Submitting per diem request...')
     try {
       const days = Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
       const dailyRate = 79 // Default GSA rate
@@ -656,8 +635,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to submit per diem request')
       }
 
-      toast.success('Per diem request submitted', {
-        description: `${days} days in ${perDiemForm.location} - $${totalAmount} total`
+      toast.success('Per diem request submitted' days in ${perDiemForm.location} - $${totalAmount} total`
       })
       setPerDiemForm({
         location: '',
@@ -669,9 +647,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       refetch()
     } catch (error) {
       console.error('Failed to submit per diem request:', error)
-      toast.error('Failed to submit per diem request', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to submit per diem request')
     }
   }
 
@@ -681,7 +657,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please enter the last 4 digits of your card')
       return
     }
-    toast.success('Linking card...', { description: 'Please wait' })
+    toast.success('Linking card...')
     try {
       const response = await fetch('/api/expenses', {
         method: 'POST',
@@ -699,8 +675,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to link card')
       }
 
-      toast.success('Card linked successfully', {
-        description: `${linkCardForm.cardType.toUpperCase()} ending in ${linkCardForm.lastFour} connected`
+      toast.success('Card linked successfully' ending in ${linkCardForm.lastFour} connected`
       })
       setLinkCardForm({
         cardType: 'visa',
@@ -710,9 +685,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       setShowLinkCardDialog(false)
     } catch (error) {
       console.error('Failed to link card:', error)
-      toast.error('Failed to link card', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
+      toast.error('Failed to link card')
     }
   }
 
@@ -2105,7 +2078,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             <AIInsightsPanel
               insights={mockExpensesAIInsights}
               title="Expense Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

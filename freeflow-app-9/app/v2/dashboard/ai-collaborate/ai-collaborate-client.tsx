@@ -50,7 +50,6 @@ import {
   UserPlus
 } from 'lucide-react'
 
-// A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -235,11 +234,9 @@ const aiCollaborateQuickActions = [
 ]
 
 export default function AiCollaborateClient() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -280,7 +277,6 @@ export default function AiCollaborateClient() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // A+++ LOAD AI OPTIONS
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -317,14 +313,7 @@ export default function AiCollaborateClient() {
 
   const handleGenerateOptions = useCallback(async () => {
     try {
-      setIsGenerating(true)
-
-      logger.info('AI generation initiated', {
-        selectedStyles,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
-      })
-
-      // Simulate API call
+      setIsGenerating(true)      // Simulate API call
       const response = await fetch('/api/client-zone/ai/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -339,20 +328,11 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to generate AI options')
-      }
-
-      logger.info('AI options generated successfully', {
-        count: selectedStyles.length
-      })
-
-      toast.success('AI designs generated!', {
-        description: `${selectedStyles.length} new design options created based on your preferences`
+      }      toast.success('AI designs generated!' new design options created based on your preferences`
       })
     } catch (error: any) {
       logger.error('Failed to generate AI options', { error })
-      toast.error('Failed to generate designs', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to generate designs')
     } finally {
       setIsGenerating(false)
     }
@@ -363,13 +343,7 @@ export default function AiCollaborateClient() {
   // ============================================================================
 
   const handleSelectOption = useCallback(async (optionId: number) => {
-    try {
-      logger.info('AI option selection initiated', {
-        optionId,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
-      })
-
-      const response = await fetch('/api/client-zone/ai/select', {
+    try {      const response = await fetch('/api/client-zone/ai/select', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -395,13 +369,7 @@ export default function AiCollaborateClient() {
         setSelectedOptions(selectedOptions.filter(id => id !== optionId))
       } else {
         setSelectedOptions([...selectedOptions, optionId])
-      }
-
-      logger.info('AI option selected', { optionId })
-
-      toast.success('Option selected!', {
-        description: 'Design added to your selections'
-      })
+      }      toast.success('Option selected!')
     } catch (error: any) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
@@ -413,13 +381,7 @@ export default function AiCollaborateClient() {
   // ============================================================================
 
   const handleRateOption = useCallback(async (optionId: number, rating: number) => {
-    try {
-      logger.info('Option rating submitted', {
-        optionId,
-        rating
-      })
-
-      const response = await fetch('/api/client-zone/ai/rate', {
+    try {      const response = await fetch('/api/client-zone/ai/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -467,13 +429,7 @@ export default function AiCollaborateClient() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }
-
-      logger.info('Download selection initiated', {
-        selectedCount: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/download', {
+      }      const response = await fetch('/api/client-zone/ai/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -486,8 +442,7 @@ export default function AiCollaborateClient() {
         throw new Error('Failed to download designs')
       }
 
-      toast.success('Downloads starting!', {
-        description: `${selectedOptions.length} design(s) downloading`
+      toast.success('Downloads starting!' design(s) downloading`
       })
     } catch (error: any) {
       logger.error('Failed to download selection', { error })
@@ -504,13 +459,7 @@ export default function AiCollaborateClient() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }
-
-      logger.info('Share selection initiated', {
-        selectedCount: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/share', {
+      }      const response = await fetch('/api/client-zone/ai/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -523,9 +472,7 @@ export default function AiCollaborateClient() {
         throw new Error('Failed to share designs')
       }
 
-      toast.success('Share link copied!', {
-        description: 'Design links copied to clipboard'
-      })
+      toast.success('Share link copied!')
     } catch (error: any) {
       logger.error('Failed to share selection', { error })
       toast.error('Failed to share designs')
@@ -543,13 +490,7 @@ export default function AiCollaborateClient() {
     }
 
     try {
-      setIsSubmitting(true)
-      logger.info('Creating new AI collaboration session', {
-        sessionName: newSessionName,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
-      })
-
-      const response = await fetch('/api/client-zone/ai/sessions', {
+      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -563,11 +504,7 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to create session')
-      }
-
-      logger.info('Session created successfully', { sessionName: newSessionName })
-      toast.success('Session created!', {
-        description: `"${newSessionName}" is ready for collaboration`
+      }      toast.success('Session created!'" is ready for collaboration`
       })
 
       setNewSessionName('')
@@ -576,9 +513,7 @@ export default function AiCollaborateClient() {
       announce('New AI collaboration session created', 'polite')
     } catch (error: any) {
       logger.error('Failed to create session', { error })
-      toast.error('Failed to create session', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create session')
     } finally {
       setIsSubmitting(false)
     }
@@ -601,13 +536,7 @@ export default function AiCollaborateClient() {
     }
 
     try {
-      setIsSubmitting(true)
-      logger.info('Inviting collaborator', {
-        email: inviteEmail,
-        role: inviteRole
-      })
-
-      const response = await fetch('/api/client-zone/ai/invite', {
+      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -621,11 +550,7 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to send invitation')
-      }
-
-      logger.info('Invitation sent successfully', { email: inviteEmail })
-      toast.success('Invitation sent!', {
-        description: `${inviteEmail} has been invited as ${inviteRole}`
+      }      toast.success('Invitation sent!' has been invited as ${inviteRole}`
       })
 
       setInviteEmail('')
@@ -634,9 +559,7 @@ export default function AiCollaborateClient() {
       announce('Collaboration invitation sent', 'polite')
     } catch (error: any) {
       logger.error('Failed to invite collaborator', { error })
-      toast.error('Failed to send invitation', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)
     }
@@ -656,21 +579,14 @@ export default function AiCollaborateClient() {
   const handleCopyShareLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareLink)
-      toast.success('Link copied to clipboard!')
-      logger.info('Share link copied', { link: shareLink })
-    } catch (error) {
+      toast.success('Link copied to clipboard!')    } catch (error) {
       toast.error('Failed to copy link')
     }
   }, [shareLink])
 
   const handleShareViaEmail = useCallback(async () => {
     try {
-      setIsSubmitting(true)
-      logger.info('Sharing via email', {
-        selectedCount: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/share-email', {
+      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/share-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -685,17 +601,13 @@ export default function AiCollaborateClient() {
         throw new Error('Failed to share via email')
       }
 
-      toast.success('Shared successfully!', {
-        description: 'Email with designs has been sent'
-      })
+      toast.success('Shared successfully!')
 
       setShareMessage('')
       setShareDialogOpen(false)
     } catch (error: any) {
       logger.error('Failed to share via email', { error })
-      toast.error('Failed to share', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to share')
     } finally {
       setIsSubmitting(false)
     }
@@ -707,10 +619,7 @@ export default function AiCollaborateClient() {
 
   const handleSaveSettings = useCallback(async () => {
     try {
-      setIsSubmitting(true)
-      logger.info('Saving AI settings', { settings: aiSettings })
-
-      const response = await fetch('/api/client-zone/ai/settings', {
+      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -722,20 +631,13 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to save settings')
-      }
-
-      logger.info('Settings saved successfully')
-      toast.success('Settings saved!', {
-        description: 'Your AI collaboration preferences have been updated'
-      })
+      }      toast.success('Settings saved!')
 
       setSettingsDialogOpen(false)
       announce('AI settings saved', 'polite')
     } catch (error: any) {
       logger.error('Failed to save settings', { error })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSubmitting(false)
     }
@@ -758,12 +660,7 @@ export default function AiCollaborateClient() {
 
   const handleDeleteAllSelections = useCallback(async () => {
     try {
-      setIsSubmitting(true)
-      logger.info('Deleting all selections', {
-        count: selectedOptions.length
-      })
-
-      const response = await fetch('/api/client-zone/ai/selections', {
+      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/selections', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -777,20 +674,13 @@ export default function AiCollaborateClient() {
       }
 
       setSelectedOptions([])
-      setOptions(options.map(opt => ({ ...opt, selected: false })))
-
-      logger.info('All selections deleted')
-      toast.success('Selections cleared!', {
-        description: 'All designs have been deselected'
-      })
+      setOptions(options.map(opt => ({ ...opt, selected: false })))      toast.success('Selections cleared!')
 
       setConfirmDeleteDialogOpen(false)
       announce('All selections cleared', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete selections', { error })
-      toast.error('Failed to clear selections', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to clear selections')
     } finally {
       setIsSubmitting(false)
     }
@@ -802,13 +692,7 @@ export default function AiCollaborateClient() {
 
   const handleRegenerateOptions = useCallback(async () => {
     try {
-      setIsGenerating(true)
-      logger.info('Regenerating AI options', {
-        category,
-        selectedStyles
-      })
-
-      const response = await fetch('/api/client-zone/ai/regenerate', {
+      setIsGenerating(true)      const response = await fetch('/api/client-zone/ai/regenerate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -821,25 +705,17 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to regenerate options')
-      }
-
-      logger.info('Options regenerated successfully')
-      toast.success('Options regenerated!', {
-        description: 'Fresh AI designs are now available'
-      })
+      }      toast.success('Options regenerated!')
 
       announce('AI options regenerated', 'polite')
     } catch (error: any) {
       logger.error('Failed to regenerate options', { error })
-      toast.error('Failed to regenerate', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to regenerate')
     } finally {
       setIsGenerating(false)
     }
   }, [category, selectedStyles, announce])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -866,7 +742,6 @@ export default function AiCollaborateClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">

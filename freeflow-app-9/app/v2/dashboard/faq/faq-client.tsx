@@ -612,11 +612,11 @@ export default function FAQClient() {
   // Create new article/FAQ
   const handleCreateArticle = useCallback(async (publishImmediately = false) => {
     if (!newArticle.title.trim()) {
-      toast.error('Validation Error', { description: 'Title is required' })
+      toast.error('Validation Error')
       return
     }
     if (!newArticle.content.trim()) {
-      toast.error('Validation Error', { description: 'Content is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -640,15 +640,13 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Created', {
-        description: publishImmediately
-          ? `"${newArticle.title}" has been published`
+      toast.success('Article Created'" has been published`
           : `"${newArticle.title}" saved as draft`
       })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to create article' })
+      toast.error('Error')
     }
   }, [newArticle, createFAQ, resetForm])
 
@@ -657,10 +655,10 @@ export default function FAQClient() {
     try {
       const { data, error } = await updateFAQ(articleId, updates)
       if (error) throw new Error(error)
-      toast.success('Article Updated', { description: 'Changes have been saved' })
+      toast.success('Article Updated')
       return data
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update article' })
+      toast.error('Error')
       return null
     }
   }, [updateFAQ])
@@ -670,9 +668,9 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'published' })
       if (error) throw new Error(error)
-      toast.success('Article Published', { description: `"${article.title}" is now public` })
+      toast.success('Article Published'" is now public` })
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to publish article' })
+      toast.error('Error')
     }
   }, [updateFAQ])
 
@@ -681,10 +679,10 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'archived' })
       if (error) throw new Error(error)
-      toast.success('Article Archived', { description: `"${article.title}" has been archived` })
+      toast.success('Article Archived'" has been archived` })
       setSelectedArticle(null)
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to archive article' })
+      toast.error('Error')
     }
   }, [updateFAQ])
 
@@ -700,12 +698,12 @@ export default function FAQClient() {
     try {
       const { success, error } = await deleteFAQ(articleToDelete)
       if (error) throw new Error(error)
-      toast.success('Article Deleted', { description: 'Article has been permanently deleted' })
+      toast.success('Article Deleted')
       setShowDeleteDialog(false)
       setArticleToDelete(null)
       setSelectedArticle(null)
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to delete article' })
+      toast.error('Error')
     }
   }, [articleToDelete, deleteFAQ])
 
@@ -714,11 +712,9 @@ export default function FAQClient() {
     try {
       const { error } = await markHelpful(articleId, helpful)
       if (error) throw new Error(error)
-      toast.success('Feedback Recorded', {
-        description: helpful ? 'Thank you for your feedback!' : 'We\'ll work to improve this article'
-      })
+      toast.success('Feedback Recorded')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to record feedback' })
+      toast.error('Error')
     }
   }, [markHelpful])
 
@@ -736,7 +732,7 @@ export default function FAQClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Articles exported to CSV file' })
+    toast.success('Export Complete')
   }, [articles])
 
   // Edit article - open dialog with pre-filled form
@@ -770,11 +766,11 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Updated', { description: `"${newArticle.title}" has been updated` })
+      toast.success('Article Updated'" has been updated` })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update article' })
+      toast.error('Error')
     }
   }, [editingArticle, newArticle, updateFAQ, resetForm])
 
@@ -2010,7 +2006,7 @@ export default function FAQClient() {
             <AIInsightsPanel
               insights={mockFAQAIInsights}
               title="Knowledge Base Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

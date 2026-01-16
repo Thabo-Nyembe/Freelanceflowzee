@@ -775,7 +775,7 @@ export default function ResourcesClient() {
           allocated: resource.allocated_hours + 8,
           capacity: resource.capacity_hours
         })
-        toast.success('Resource assigned', { description: `${resourceName} assigned to ${projectName}` })
+        toast.success('Resource assigned' assigned to ${projectName}` })
         refetch()
       }
     } catch (error) {
@@ -787,7 +787,7 @@ export default function ResourcesClient() {
   const handleDeleteResource = async (id: string, name: string) => {
     try {
       await deleteResource(id)
-      toast.success('Resource removed', { description: `${name} has been removed` })
+      toast.success('Resource removed' has been removed` })
       refetch()
     } catch (error) {
       toast.error('Failed to remove resource')
@@ -804,7 +804,7 @@ export default function ResourcesClient() {
           allocated: hours,
           capacity: resource.capacity_hours
         })
-        toast.success('Capacity updated', { description: `${resourceName}'s allocation updated` })
+        toast.success('Capacity updated''s allocation updated` })
         refetch()
       }
     } catch (error) {
@@ -814,11 +814,11 @@ export default function ResourcesClient() {
   }
 
   const handleExportResources = async () => {
-    toast.success('Exporting resources', { description: 'Resource report will be downloaded' })
+    toast.success('Exporting resources')
   }
 
   const handleScheduleResource = (resourceName: string) => {
-    toast.info('Schedule Resource', { description: `Opening scheduler for ${resourceName}...` })
+    toast.info('Schedule Resource'...` })
   }
 
   const handleSyncResources = async () => {
@@ -2083,7 +2083,7 @@ export default function ResourcesClient() {
             <AIInsightsPanel
               insights={mockResourcesAIInsights}
               title="Resource Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

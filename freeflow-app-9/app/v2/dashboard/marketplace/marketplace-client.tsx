@@ -531,7 +531,7 @@ export default function MarketplaceClient() {
         scopes: apiKeyForm.permissions, expires_at: expiresAt, is_active: true
       })
       if (error) throw error
-      toast.success('API key created!', { description: `Key prefix: ${keyPrefix}...` })
+      toast.success('API key created!'...` })
       setShowAPIKeyDialog(false)
       setApiKeyForm({ name: '', permissions: ['read'], expiration: 'never' })
       fetchApiKeys()
@@ -696,15 +696,13 @@ export default function MarketplaceClient() {
 
   // Handlers
   const handleAddToWishlist = (product: Product) => {
-    toast.success('Added to wishlist', {
-      description: `"${product.name}" added to your wishlist`
+    toast.success('Added to wishlist'" added to your wishlist`
     })
     setWishlist(prev => [...prev, product.id])
   }
 
   const handleRemoveFromWishlist = (product: Product) => {
-    toast.success('Removed from wishlist', {
-      description: `"${product.name}" removed from your wishlist`
+    toast.success('Removed from wishlist'" removed from your wishlist`
     })
     setWishlist(prev => prev.filter(id => id !== product.id))
   }
@@ -715,9 +713,7 @@ export default function MarketplaceClient() {
   }
 
   const handleSubmitReview = (product: Product) => {
-    toast.success('Review submitted', {
-      description: 'Thank you for your review!'
-    })
+    toast.success('Review submitted')
     setShowReviewDialog(false)
   }
 
@@ -730,13 +726,11 @@ export default function MarketplaceClient() {
     setCart(prev => {
       const isAlreadyInCart = prev.some(p => p.id === product.id)
       if (isAlreadyInCart) {
-        toast.info('Already in cart', {
-          description: `"${product.name}" is already in your cart`
+        toast.info('Already in cart'" is already in your cart`
         })
         return prev
       }
-      toast.success('Added to cart', {
-        description: `"${product.name}" has been added to your cart`
+      toast.success('Added to cart'" has been added to your cart`
       })
       return [...prev, product]
     })
@@ -744,8 +738,7 @@ export default function MarketplaceClient() {
 
   const handleRemoveFromCart = (product: Product) => {
     setCart(prev => prev.filter(p => p.id !== product.id))
-    toast.success('Removed from cart', {
-      description: `"${product.name}" has been removed from your cart`
+    toast.success('Removed from cart'" has been removed from your cart`
     })
   }
 
@@ -871,7 +864,7 @@ export default function MarketplaceClient() {
                 <Button variant="ghost" size="sm" onClick={() => {
                   setCurrentPage(1)
                   setSelectedCategory('all')
-                  toast.success('All apps loaded', { description: `Showing ${mockProducts.length} marketplace apps` })
+                  toast.success('All apps loaded' marketplace apps` })
                 }}>View All</Button>
               </CardHeader>
               <CardContent>
@@ -1491,7 +1484,7 @@ export default function MarketplaceClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Orders refreshed', { description: `${mockOrders.length} orders loaded` })
+                      toast.success('Orders refreshed' orders loaded` })
                     }}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
@@ -2037,7 +2030,7 @@ export default function MarketplaceClient() {
                               <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span> success</p>{webhook.lastTriggered && <p className="text-xs text-gray-500">Last: {webhook.lastTriggered}</p>}</div>
                               <Badge className={getStatusColor(webhook.status)}>{webhook.status}</Badge>
                               <Button variant="ghost" size="icon" onClick={() => {
-                                toast.success('Webhook test successful', { description: 'Received 200 OK response' })
+                                toast.success('Webhook test successful')
                               }}><RefreshCw className="h-4 w-4" /></Button>
                             </div>
                           </div>
@@ -2069,7 +2062,7 @@ export default function MarketplaceClient() {
             <AIInsightsPanel
               insights={mockMarketplaceAIInsights}
               title="Marketplace Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2213,7 +2206,7 @@ export default function MarketplaceClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('Bundle created successfully!', { description: 'Your product bundle is now available' })
+                toast.success('Bundle created successfully!')
                 setShowBundleDialog(false)
               }}>Create Bundle</Button></DialogFooter>
           </DialogContent>
@@ -2299,7 +2292,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewListingDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Product listing created successfully!', { description: 'Your product is now live on the marketplace' })
+                toast.success('Product listing created successfully!')
                 setShowNewListingDialog(false)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600">Create Listing</Button>
             </DialogFooter>
@@ -2351,7 +2344,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Purchase completed successfully!', { description: `You now have access to ${checkoutProduct?.name}` })
+                toast.success('Purchase completed successfully!'` })
                 setShowCheckoutDialog(false)
                 setCheckoutProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><CreditCard className="h-4 w-4 mr-2" />Complete Purchase</Button>
@@ -2388,7 +2381,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Message sent!', { description: `Your message has been sent to ${contactProduct?.vendor.name}` })
+                toast.success('Message sent!'` })
                 setShowContactDialog(false)
                 setContactProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Message</Button>
@@ -2474,7 +2467,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowInstallDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('App installed successfully!', { description: `${installProduct?.name} is now ready to use` })
+                toast.success('App installed successfully!' is now ready to use` })
                 setShowInstallDialog(false)
                 setInstallProduct(null)
               }}>
@@ -2556,7 +2549,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowVisitStoreDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 window.open('https://techpro.marketplace.example.com', '_blank')
-                toast.success('Store opened', { description: 'Opened TechPro Solutions in new tab' })
+                toast.success('Store opened')
                 setShowVisitStoreDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Visit Store
@@ -2601,7 +2594,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFollowDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('Now following TechPro Solutions!', { description: 'You will receive updates on new products' })
+                toast.success('Now following TechPro Solutions!')
                 setShowFollowDialog(false)
               }}>
                 <Heart className="h-4 w-4 mr-2" />Follow
@@ -2640,7 +2633,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowApplyVendorDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('Application submitted!', { description: 'We will review your application and get back to you soon.' })
+                toast.success('Application submitted!')
                 setShowApplyVendorDialog(false)
               }}>
                 Submit Application
@@ -2699,7 +2692,7 @@ export default function MarketplaceClient() {
                 a.download = `reviews-export-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete', { description: 'Your file has been downloaded' })
+                toast.success('Export complete')
                 setShowExportReviewsDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export
@@ -2741,7 +2734,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowRespondAllDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const unreviewedCount = mockReviews.filter(r => !r.response).length
-                toast.success('Responses sent!', { description: `Responded to ${unreviewedCount} reviews` })
+                toast.success('Responses sent!' reviews` })
                 setShowRespondAllDialog(false)
               }}>
                 <MessageSquare className="h-4 w-4 mr-2" />Send Responses
@@ -2794,7 +2787,7 @@ export default function MarketplaceClient() {
                 a.download = `orders-export-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete', { description: `Exported ${mockOrders.length} orders` })
+                toast.success('Export complete' orders` })
                 setShowExportOrdersDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export
@@ -2860,7 +2853,7 @@ export default function MarketplaceClient() {
                 a.download = `marketplace-report-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Report generated!', { description: 'Your report has been downloaded' })
+                toast.success('Report generated!')
                 setShowGenerateReportDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-2" />Generate
@@ -2920,12 +2913,12 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setCurrentPage(1)
-                toast.success('Filters cleared', { description: 'Showing all orders' })
+                toast.success('Filters cleared')
                 setShowFiltersDialog(false)
               }}>Clear All</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 setCurrentPage(1)
-                toast.success('Filters applied', { description: 'Results updated' })
+                toast.success('Filters applied')
                 setShowFiltersDialog(false)
               }}>
                 <Filter className="h-4 w-4 mr-2" />Apply Filters
@@ -2943,33 +2936,33 @@ export default function MarketplaceClient() {
             </DialogHeader>
             <div className="space-y-2 py-4">
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.success('Order marked as complete', { description: selectedOrderForOptions?.orderNumber })
+                toast.success('Order marked as complete')
                 setShowMoreOptionsDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
                 if (!confirm('Are you sure you want to process a refund for this order?')) return
-                toast.success('Refund initiated', { description: 'Customer will be refunded within 5-7 business days' })
+                toast.success('Refund initiated')
                 setShowMoreOptionsDialog(false)
               }}>
                 <DollarSign className="h-4 w-4 mr-2" />Process Refund
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.success('Email sent to customer', { description: 'Order confirmation email delivered' })
+                toast.success('Email sent to customer')
                 setShowMoreOptionsDialog(false)
               }}>
                 <Mail className="h-4 w-4 mr-2" />Email Customer
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.success('License renewed', { description: 'Extended for another year' })
+                toast.success('License renewed')
                 setShowMoreOptionsDialog(false)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Renew License
               </Button>
               <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
                 if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) return
-                toast.success('Order cancelled', { description: selectedOrderForOptions?.orderNumber })
+                toast.success('Order cancelled')
                 setShowMoreOptionsDialog(false)
               }}>
                 <XCircle className="h-4 w-4 mr-2" />Cancel Order
@@ -3003,7 +2996,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowProcessOrdersDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const pendingCount = mockOrders.filter(o => o.status === 'pending').length
-                toast.success('Orders processed!', { description: `${pendingCount} orders completed, confirmations sent` })
+                toast.success('Orders processed!' orders completed, confirmations sent` })
                 setShowProcessOrdersDialog(false)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Process Orders
@@ -3048,7 +3041,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowGenerateInvoicesDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const invoiceCount = mockOrders.filter(o => o.status === 'completed').length
-                toast.success('Invoices generated!', { description: `Created ${invoiceCount} invoices and sent to customers` })
+                toast.success('Invoices generated!' invoices and sent to customers` })
                 setShowGenerateInvoicesDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-2" />Generate
@@ -3086,7 +3079,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowProcessPayoutsDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const payoutAmount = (mockOrders.reduce((sum, o) => sum + o.amount, 0) * 0.85).toFixed(2)
-                toast.success('Payouts processed!', { description: `$${payoutAmount} sent to ${mockVendors.length} vendors` })
+                toast.success('Payouts processed!' sent to ${mockVendors.length} vendors` })
                 setShowProcessPayoutsDialog(false)
               }}>
                 <DollarSign className="h-4 w-4 mr-2" />Process Payouts
@@ -3134,7 +3127,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowSendNotificationsDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const recipientCount = mockOrders.filter(o => o.status === 'pending').length
-                toast.success('Notifications sent!', { description: `Notified ${recipientCount} customers via email` })
+                toast.success('Notifications sent!' customers via email` })
                 setShowSendNotificationsDialog(false)
               }}>
                 <Send className="h-4 w-4 mr-2" />Send
@@ -3186,7 +3179,7 @@ export default function MarketplaceClient() {
                 a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('CSV exported!', { description: `Downloaded ${mockOrders.length} orders` })
+                toast.success('CSV exported!' orders` })
                 setShowExportCSVDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Download CSV
@@ -3233,7 +3226,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddProviderDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('Payment provider added!', { description: 'Integration is now active' })
+                toast.success('Payment provider added!')
                 setShowAddProviderDialog(false)
               }}>
                 <Plus className="h-4 w-4 mr-2" />Add Provider

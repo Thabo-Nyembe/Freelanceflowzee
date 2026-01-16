@@ -69,7 +69,6 @@ import {
   generateBrandingExportCss
 } from '@/lib/white-label-utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -115,7 +114,6 @@ const whiteLabelActivities = [
 ]
 
 export default function WhiteLabelClient() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -164,7 +162,7 @@ export default function WhiteLabelClient() {
   // Handlers for dialogs
   const handleCreateNewItem = () => {
     if (!newItemForm.name.trim()) {
-      toast.error('Validation Error', { description: 'Please enter an item name' })
+      toast.error('Validation Error')
       return
     }
 
@@ -179,7 +177,7 @@ export default function WhiteLabelClient() {
     setWhiteLabelItems(prev => [newItem, ...prev])
     setNewItemForm({ name: '', type: 'color-scheme', description: '' })
     setShowNewItemDialog(false)
-    toast.success('Item Created', { description: `${newItem.name} has been created successfully` })
+    toast.success('Item Created' has been created successfully` })
     announce(`Created new ${newItem.type}: ${newItem.name}`, 'polite')
   }
 
@@ -220,7 +218,7 @@ export default function WhiteLabelClient() {
 
   const handleSaveSettings = () => {
     setShowSettingsDialog(false)
-    toast.success('Settings Saved', { description: 'White-label settings have been updated' })
+    toast.success('Settings Saved')
     announce('White-label settings saved', 'polite')
   }
 
@@ -234,7 +232,7 @@ export default function WhiteLabelClient() {
       }
     }))
     setSelectedPreset(null)
-    toast.success('Colors Reset', { description: 'Color scheme has been reset to defaults' })
+    toast.success('Colors Reset')
     announce('Color scheme reset to defaults', 'polite')
   }
 
@@ -268,7 +266,7 @@ export default function WhiteLabelClient() {
   // Handle Verify Domain
   const handleVerifyDomain = async () => {
     if (!customDomain.trim()) {
-      toast.error('Validation Error', { description: 'Please enter a domain name' })
+      toast.error('Validation Error')
       return
     }
 
@@ -317,7 +315,7 @@ export default function WhiteLabelClient() {
   // Handle Copy DNS Record
   const handleCopyDnsRecord = (value: string) => {
     navigator.clipboard.writeText(value)
-    toast.success('Copied!', { description: 'DNS record value copied to clipboard' })
+    toast.success('Copied!')
     announce('DNS record copied to clipboard', 'polite')
   }
 
@@ -417,7 +415,7 @@ export default function WhiteLabelClient() {
   const handleCopyCss = () => {
     const css = generateBrandingExportCss(config)
     navigator.clipboard.writeText(css)
-    toast.success('Copied!', { description: 'CSS variables copied to clipboard' })
+    toast.success('Copied!')
     announce('CSS variables copied to clipboard', 'polite')
   }
 
@@ -463,7 +461,6 @@ export default function WhiteLabelClient() {
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ]
 
-  // A+++ LOAD WHITE LABEL DATA
   useEffect(() => {
     const loadWhiteLabelData = async () => {
       try {
@@ -528,7 +525,6 @@ export default function WhiteLabelClient() {
     setSelectedPreset(preset)
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -559,7 +555,6 @@ export default function WhiteLabelClient() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -1521,7 +1516,7 @@ export default function WhiteLabelClient() {
                 className="hidden"
                 id="logo-upload"
                 onChange={() => {
-                  toast.info('File selected', { description: 'Ready to upload' })
+                  toast.info('File selected')
                 }}
               />
               <Button

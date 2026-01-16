@@ -901,7 +901,7 @@ export default function RecruitmentClient() {
 
   const handleCreateJob = async () => {
     if (!newJobForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Job title is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -922,11 +922,11 @@ export default function RecruitmentClient() {
         benefits: [],
         configuration: {}
       })
-      toast.success('Job Posted', { description: `${newJobForm.title} has been created successfully` })
+      toast.success('Job Posted' has been created successfully` })
       setShowPostJobDialog(false)
       refetchJobs()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to create job posting' })
+      toast.error('Error')
     }
   }
 
@@ -965,7 +965,7 @@ export default function RecruitmentClient() {
       recruiter: job.recruiter || ''
     })
     setShowEditJobDialog(true)
-    toast.info('Editing Job', { description: `Opening editor for ${job.title}` })
+    toast.info('Editing Job'` })
   }
 
   const handleUpdateJob = async () => {
@@ -988,22 +988,22 @@ export default function RecruitmentClient() {
           recruiter: newJobForm.recruiter || null
         }
       })
-      toast.success('Job Updated', { description: `${newJobForm.title} has been updated` })
+      toast.success('Job Updated' has been updated` })
       setShowEditJobDialog(false)
       setEditingJob(null)
       refetchJobs()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to update job posting' })
+      toast.error('Error')
     }
   }
 
   const handleDeleteJob = async (jobId: string, jobTitle: string) => {
     try {
       await deleteJob(jobId)
-      toast.success('Job Deleted', { description: `${jobTitle} has been removed` })
+      toast.success('Job Deleted' has been removed` })
       refetchJobs()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to delete job posting' })
+      toast.error('Error')
     }
   }
 
@@ -1021,7 +1021,7 @@ export default function RecruitmentClient() {
     a.download = `recruitment-report-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Report Exported', { description: 'Recruitment report has been downloaded' })
+    toast.success('Report Exported')
   }
 
   const handleAddCandidate = () => {
@@ -1041,7 +1041,7 @@ export default function RecruitmentClient() {
 
   const handleCreateApplication = async () => {
     if (!newCandidateForm.candidate_name.trim() || !newCandidateForm.job_id) {
-      toast.error('Validation Error', { description: 'Candidate name and job are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -1063,12 +1063,12 @@ export default function RecruitmentClient() {
         interviewer_notes: [],
         configuration: {}
       })
-      toast.success('Candidate Added', { description: `${newCandidateForm.candidate_name} has been added to the pipeline` })
+      toast.success('Candidate Added' has been added to the pipeline` })
       setShowAddCandidateDialog(false)
       refetchApplications()
       refetchJobs()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to add candidate' })
+      toast.error('Error')
     }
   }
 
@@ -1091,11 +1091,11 @@ export default function RecruitmentClient() {
 
     try {
       await advanceStage({ id: applicationId, newStage: nextStage })
-      toast.success('Stage Advanced', { description: `${candidateName} has been moved to ${nextStage}` })
+      toast.success('Stage Advanced' has been moved to ${nextStage}` })
       refetchApplications()
       refetchJobs()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to advance candidate stage' })
+      toast.error('Error')
     }
   }
 
@@ -1108,17 +1108,15 @@ export default function RecruitmentClient() {
           stage: 'Rejected'
         }
       })
-      toast.success('Candidate Rejected', { description: `${candidateName} has been rejected` })
+      toast.success('Candidate Rejected' has been rejected` })
       refetchApplications()
     } catch (error) {
-      toast.error('Error', { description: 'Failed to reject candidate' })
+      toast.error('Error')
     }
   }
 
   const handleScheduleInterview = (candidateName: string) => {
-    toast.info(`Opening scheduler for ${candidateName}`, {
-      description: 'Select a date and time for the interview'
-    })
+    toast.info(`Opening scheduler for ${candidateName}`)
   }
 
   const handleExportCandidates = () => {
@@ -1129,16 +1127,14 @@ export default function RecruitmentClient() {
     a.download = `candidates-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Candidate data has been downloaded' })
+    toast.success('Exported')
   }
 
   const handleViewResume = (resumeUrl: string | null, candidateName: string) => {
     if (resumeUrl) {
       window.open(resumeUrl, '_blank')
     } else {
-      toast.info(`No resume file available for ${candidateName}`, {
-        description: 'Request the candidate to upload their resume'
-      })
+      toast.info(`No resume file available for ${candidateName}`)
     }
   }
 
@@ -1146,22 +1142,16 @@ export default function RecruitmentClient() {
     if (email) {
       window.location.href = `mailto:${email}`
     } else {
-      toast.info(`No email address available for ${candidateName}`, {
-        description: 'Contact information is missing'
-      })
+      toast.info(`No email address available for ${candidateName}`)
     }
   }
 
   const handleViewOffer = (candidateName: string) => {
-    toast.info(`Offer details for ${candidateName}`, {
-      description: 'View and manage the offer in the dialog'
-    })
+    toast.info(`Offer details for ${candidateName}`)
   }
 
   const handleEditOffer = (candidateName: string) => {
-    toast.info(`Editing offer for ${candidateName}`, {
-      description: 'Make changes and save when ready'
-    })
+    toast.info(`Editing offer for ${candidateName}`)
   }
 
   const handleSendOffer = async (candidateName: string, offerId?: string) => {
@@ -1187,24 +1177,18 @@ export default function RecruitmentClient() {
   }
 
   const handleFilterTalentPool = () => {
-    toast.info('Filter options ready', {
-      description: 'Use the filters above to refine your talent pool search'
-    })
+    toast.info('Filter options ready')
   }
 
   const handleImportCandidates = () => {
-    toast.info('Import dialog ready', {
-      description: 'Select a CSV or JSON file to import candidates'
-    })
+    toast.info('Import dialog ready')
   }
 
   const handleReachOut = (email: string | null, candidateName: string) => {
     if (email) {
       window.location.href = `mailto:${email}?subject=Opportunity at Our Company`
     } else {
-      toast.info(`No email address available for ${candidateName}`, {
-        description: 'Contact information is missing'
-      })
+      toast.info(`No email address available for ${candidateName}`)
     }
   }
 
@@ -2032,7 +2016,7 @@ export default function RecruitmentClient() {
               <AIInsightsPanel
                 insights={recruitmentAIInsights}
                 title="Recruitment Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">

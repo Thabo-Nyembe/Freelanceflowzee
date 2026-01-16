@@ -592,9 +592,7 @@ export default function SprintsClient() {
   // Submit new story from quick action dialog
   const handleSubmitNewStory = async () => {
     if (!newStoryTitle.trim()) {
-      toast.error('Validation Error', {
-        description: 'Story title is required'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -604,9 +602,7 @@ export default function SprintsClient() {
       mockSprints.find(s => s.status === 'active')?.id
 
     if (!targetSprintId) {
-      toast.error('No Sprint Available', {
-        description: 'Please create a sprint first before adding stories'
-      })
+      toast.error('No Sprint Available')
       return
     }
 
@@ -624,26 +620,21 @@ export default function SprintsClient() {
         labels: ['story'],
       })
 
-      toast.success('Story Created', {
-        description: `"${newStoryTitle}" has been added to the sprint`
+      toast.success('Story Created'" has been added to the sprint`
       })
       setShowNewStoryDialog(false)
       resetStoryForm()
       refetchTasks()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Create Story', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Create Story')
     }
   }
 
   // Submit start sprint from quick action dialog
   const handleSubmitStartSprint = async () => {
     if (!sprintToStart) {
-      toast.error('Validation Error', {
-        description: 'Please select a sprint to start'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -653,16 +644,13 @@ export default function SprintsClient() {
 
     try {
       await startSprint(sprintToStart)
-      toast.success('Sprint Started', {
-        description: `"${sprintName}" is now active with ${sprintDuration}-week duration`
+      toast.success('Sprint Started'" is now active with ${sprintDuration}-week duration`
       })
       setShowStartSprintDialog(false)
       resetStartSprintForm()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Start Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Start Sprint')
     }
   }
 
@@ -675,9 +663,7 @@ export default function SprintsClient() {
   // Submit Create Sprint to Supabase
   const handleSubmitCreateSprint = async () => {
     if (!newSprintName.trim()) {
-      toast.error('Validation Error', {
-        description: 'Sprint name is required'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -702,16 +688,13 @@ export default function SprintsClient() {
           : 14,
       })
 
-      toast.success('Sprint Created', {
-        description: `"${newSprintName}" has been created successfully`
+      toast.success('Sprint Created'" has been created successfully`
       })
       setShowCreateSprintDialog(false)
       resetSprintForm()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Create Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Create Sprint')
     }
   }
 
@@ -719,14 +702,11 @@ export default function SprintsClient() {
   const handleStartSprint = async (sprintId: string, sprintName: string) => {
     try {
       await startSprint(sprintId)
-      toast.success('Sprint Started', {
-        description: `"${sprintName}" is now active`
+      toast.success('Sprint Started'" is now active`
       })
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Start Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Start Sprint')
     }
   }
 
@@ -734,14 +714,11 @@ export default function SprintsClient() {
   const handleCompleteSprint = async (sprintId: string, sprintName: string) => {
     try {
       await completeSprint({ id: sprintId })
-      toast.success('Sprint Completed', {
-        description: `"${sprintName}" has been completed`
+      toast.success('Sprint Completed'" has been completed`
       })
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Complete Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Complete Sprint')
     }
   }
 
@@ -756,16 +733,12 @@ export default function SprintsClient() {
 
     try {
       await deleteSprint(sprintToDelete)
-      toast.success('Sprint Deleted', {
-        description: 'Sprint has been deleted successfully'
-      })
+      toast.success('Sprint Deleted')
       setShowDeleteConfirmDialog(false)
       setSprintToDelete(null)
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Delete Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Delete Sprint')
     }
   }
 
@@ -779,16 +752,12 @@ export default function SprintsClient() {
   // Submit Create Task to Supabase
   const handleSubmitCreateTask = async () => {
     if (!newTaskTitle.trim()) {
-      toast.error('Validation Error', {
-        description: 'Task title is required'
-      })
+      toast.error('Validation Error')
       return
     }
 
     if (!selectedSprintForTask) {
-      toast.error('Validation Error', {
-        description: 'Please select a sprint for this task'
-      })
+      toast.error('Validation Error')
       return
     }
 
@@ -806,17 +775,14 @@ export default function SprintsClient() {
         labels: [],
       })
 
-      toast.success('Task Created', {
-        description: `"${newTaskTitle}" has been added to the sprint`
+      toast.success('Task Created'" has been added to the sprint`
       })
       setShowCreateTaskDialog(false)
       resetTaskForm()
       refetchTasks()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Create Task', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Create Task')
     }
   }
 
@@ -827,14 +793,11 @@ export default function SprintsClient() {
         id: taskId,
         updates: { status: newStatus }
       })
-      toast.info('Task Moved', {
-        description: `"${taskName}" moved to ${newStatus.replace('_', ' ')}`
+      toast.info('Task Moved'" moved to ${newStatus.replace('_', ' ')}`
       })
       refetchTasks()
     } catch (error) {
-      toast.error('Failed to Move Task', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Move Task')
     }
   }
 
@@ -842,15 +805,12 @@ export default function SprintsClient() {
   const handleCompleteTask = async (taskId: string, taskName: string) => {
     try {
       await completeTask(taskId)
-      toast.success('Task Completed', {
-        description: `"${taskName}" has been marked as done`
+      toast.success('Task Completed'" has been marked as done`
       })
       refetchTasks()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Complete Task', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Complete Task')
     }
   }
 
@@ -870,32 +830,23 @@ export default function SprintsClient() {
         labels: taskData.labels,
       })
 
-      toast.success('Task Added to Sprint', {
-        description: `"${taskData.title}" has been added to the sprint`
+      toast.success('Task Added to Sprint'" has been added to the sprint`
       })
       refetchTasks()
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Add Task to Sprint', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Add Task to Sprint')
     }
   }
 
   // Sync data from Supabase
   const handleSync = async () => {
-    toast.info('Syncing', {
-      description: 'Syncing sprint data from database...'
-    })
+    toast.info('Syncing')
     try {
       await Promise.all([refetchSprints(), refetchTasks()])
-      toast.success('Sync Complete', {
-        description: 'Sprint data has been refreshed'
-      })
+      toast.success('Sync Complete')
     } catch (error) {
-      toast.error('Sync Failed', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Sync Failed')
     }
   }
 
@@ -906,14 +857,11 @@ export default function SprintsClient() {
       for (const sprint of completedSprints) {
         await deleteSprint(sprint.id)
       }
-      toast.success('Sprints Archived', {
-        description: `${completedSprints.length} completed sprints have been archived`
+      toast.success('Sprints Archived' completed sprints have been archived`
       })
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Archive Sprints', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Archive Sprints')
     }
   }
 
@@ -926,14 +874,10 @@ export default function SprintsClient() {
           updates: { velocity: 0 }
         })
       }
-      toast.success('Velocity Reset', {
-        description: 'Velocity data has been cleared for all sprints'
-      })
+      toast.success('Velocity Reset')
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Reset Velocity', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Reset Velocity')
     }
   }
 
@@ -943,28 +887,20 @@ export default function SprintsClient() {
       for (const sprint of dbSprints) {
         await deleteSprint(sprint.id)
       }
-      toast.error('Project Deleted', {
-        description: 'All sprints have been permanently deleted'
-      })
+      toast.error('Project Deleted')
       refetchSprints()
     } catch (error) {
-      toast.error('Failed to Delete Project', {
-        description: error instanceof Error ? error.message : 'An error occurred'
-      })
+      toast.error('Failed to Delete Project')
     }
   }
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx')
-    toast.success('Copied', {
-      description: 'API key copied to clipboard'
-    })
+    toast.success('Copied')
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated', {
-      description: 'New API key has been generated'
-    })
+    toast.success('API Key Regenerated')
   }
 
   return (
@@ -2424,7 +2360,7 @@ export default function SprintsClient() {
             <AIInsightsPanel
               insights={mockSprintsAIInsights}
               title="Sprint Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

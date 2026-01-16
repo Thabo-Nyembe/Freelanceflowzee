@@ -646,21 +646,15 @@ export default function ContentStudioClient() {
 
   // Handlers
   const handleCreateContent = () => {
-    toast.info('Create Content', {
-      description: 'Opening content editor...'
-    })
+    toast.info('Create Content')
   }
 
   const handlePublishContent = (contentId: string) => {
-    toast.success('Content published', {
-      description: 'Content is now live'
-    })
+    toast.success('Content published')
   }
 
   const handleScheduleContent = (contentId: string) => {
-    toast.info('Schedule Content', {
-      description: 'Opening scheduler...'
-    })
+    toast.info('Schedule Content')
   }
 
   return (
@@ -1521,7 +1515,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_delivery_xxxxxxxxxxxxx'); toast.success('Delivery API Key Copied', { description: 'Key copied to clipboard' }); }}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_delivery_xxxxxxxxxxxxx'); toast.success('Delivery API Key Copied'); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
@@ -1530,7 +1524,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_management_xxxxxxxxxxxxx'); toast.success('Management API Key Copied', { description: 'Key copied to clipboard' }); }}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_management_xxxxxxxxxxxxx'); toast.success('Management API Key Copied'); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -1774,7 +1768,7 @@ export default function ContentStudioClient() {
             <AIInsightsPanel
               insights={mockContentAIInsights}
               title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2044,7 +2038,7 @@ export default function ContentStudioClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.success('Entry created', { description: 'New entry has been created successfully' })
+                  toast.success('Entry created')
                   setShowNewEntryDialog(false)
                 }}>
                   Create Entry
@@ -2093,7 +2087,7 @@ export default function ContentStudioClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                  toast.success('Content published', { description: 'Selected entries have been published' })
+                  toast.success('Content published')
                   setShowBulkPublishDialog(false)
                 }}>
                   <Send className="w-4 h-4 mr-2" />
@@ -2163,7 +2157,7 @@ export default function ContentStudioClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.success('Export started', { description: 'Your export is being prepared for download' })
+                  toast.success('Export started')
                   setShowExportDialog(false)
                 }}>
                   <Download className="w-4 h-4 mr-2" />

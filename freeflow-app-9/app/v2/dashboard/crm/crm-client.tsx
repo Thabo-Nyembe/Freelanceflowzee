@@ -450,14 +450,11 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Contact created', {
-        description: `${contactForm.name} has been added to your CRM`
+      toast.success('Contact created' has been added to your CRM`
       })
       setShowAddContactDialog(false)
     } else {
-      toast.error('Failed to create contact', {
-        description: contactMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to create contact')
     }
   }
 
@@ -497,29 +494,23 @@ export default function CrmClient() {
     }, selectedContact.id)
 
     if (result) {
-      toast.success('Contact updated', {
-        description: `${contactForm.name} has been updated`
+      toast.success('Contact updated' has been updated`
       })
       setShowEditContactDialog(false)
       setSelectedContact(null)
     } else {
-      toast.error('Failed to update contact', {
-        description: contactMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to update contact')
     }
   }
 
   const handleDeleteContact = async (contactId: string, contactName: string) => {
     const success = await contactMutation.remove(contactId)
     if (success) {
-      toast.success('Contact deleted', {
-        description: `${contactName} has been removed`
+      toast.success('Contact deleted' has been removed`
       })
       setSelectedContact(null)
     } else {
-      toast.error('Failed to delete contact', {
-        description: contactMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to delete contact')
     }
   }
 
@@ -556,14 +547,11 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Deal created', {
-        description: `${dealForm.name} has been added to your pipeline`
+      toast.success('Deal created' has been added to your pipeline`
       })
       setShowAddDealDialog(false)
     } else {
-      toast.error('Failed to create deal', {
-        description: dealMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to create deal')
     }
   }
 
@@ -597,29 +585,23 @@ export default function CrmClient() {
     }, selectedDeal.id)
 
     if (result) {
-      toast.success('Deal updated', {
-        description: `${dealForm.name} has been updated`
+      toast.success('Deal updated' has been updated`
       })
       setShowEditDealDialog(false)
       setSelectedDeal(null)
     } else {
-      toast.error('Failed to update deal', {
-        description: dealMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to update deal')
     }
   }
 
   const handleDeleteDeal = async (dealId: string, dealName: string) => {
     const success = await dealMutation.remove(dealId)
     if (success) {
-      toast.success('Deal deleted', {
-        description: `${dealName} has been removed`
+      toast.success('Deal deleted' has been removed`
       })
       setSelectedDeal(null)
     } else {
-      toast.error('Failed to delete deal', {
-        description: dealMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to delete deal')
     }
   }
 
@@ -639,8 +621,7 @@ export default function CrmClient() {
     }, dealId)
 
     if (result) {
-      toast.success('Deal stage updated', {
-        description: `Moved to ${newStage.replace('_', ' ')}`
+      toast.success('Deal stage updated'`
       })
     } else {
       toast.error('Failed to update deal stage')
@@ -677,14 +658,11 @@ export default function CrmClient() {
     })
 
     if (result) {
-      toast.success('Activity logged', {
-        description: `${activityForm.title} has been recorded`
+      toast.success('Activity logged' has been recorded`
       })
       setShowAddActivityDialog(false)
     } else {
-      toast.error('Failed to log activity', {
-        description: activityMutation.error?.message || 'Please try again'
-      })
+      toast.error('Failed to log activity')
     }
   }
 
@@ -701,9 +679,7 @@ export default function CrmClient() {
   }
 
   const handleExportCRM = async () => {
-    toast.info('Preparing export...', {
-      description: 'Your CRM data is being prepared for download'
-    })
+    toast.info('Preparing export...')
 
     try {
       const exportData = {
@@ -723,20 +699,14 @@ export default function CrmClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', {
-        description: 'Your CRM data has been downloaded'
-      })
+      toast.success('Export complete')
     } catch (error) {
-      toast.error('Export failed', {
-        description: 'Unable to export CRM data'
-      })
+      toast.error('Export failed')
     }
   }
 
   const handleSyncData = async () => {
-    toast.info('Syncing data...', {
-      description: 'Refreshing from database'
-    })
+    toast.info('Syncing data...')
 
     await Promise.all([
       refetchContacts(),
@@ -744,9 +714,7 @@ export default function CrmClient() {
       refetchActivities()
     ])
 
-    toast.success('Sync complete', {
-      description: 'CRM data has been refreshed'
-    })
+    toast.success('Sync complete')
   }
 
   const handleQualifyLead = async (contactId: string, contactName: string) => {
@@ -756,8 +724,7 @@ export default function CrmClient() {
     }, contactId)
 
     if (result) {
-      toast.success('Lead qualified', {
-        description: `${contactName} has been moved to qualified status`
+      toast.success('Lead qualified' has been moved to qualified status`
       })
     } else {
       toast.error('Failed to qualify lead')
@@ -770,15 +737,13 @@ export default function CrmClient() {
 
   // CSV Import Handler - parses CSV and creates contacts via API
   const handleProcessCSVImport = async (file: File) => {
-    toast.success('Import started', {
-      description: 'Processing your CSV file...'
-    })
+    toast.success('Import started')
 
     try {
       const text = await file.text()
       const lines = text.split('\n').filter(line => line.trim())
       if (lines.length < 2) {
-        toast.error('Import failed', { description: 'CSV file appears to be empty or invalid' })
+        toast.error('Import failed')
         return
       }
 
@@ -824,21 +789,17 @@ export default function CrmClient() {
 
       await refetchContacts()
 
-      toast.success('Import complete', {
-        description: `${successCount} contacts imported successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`
+      toast.success('Import complete' contacts imported successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`
       })
       setShowImportDialog(false)
     } catch (error) {
-      toast.error('Import failed', {
-        description: 'Unable to process CSV file'
-      })
+      toast.error('Import failed')
     }
   }
 
   // Automation API Handlers
   const handleEditAutomation = async (automation: Automation) => {
-    toast.success('Opening editor', {
-      description: `Loading ${automation.name} for editing`
+    toast.success('Opening editor' for editing`
     })
     // In production, this would open an automation editor
     setShowAutomationActionsDialog(false)
@@ -860,8 +821,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
-          description: `${automation.name} has been ${newStatus === 'active' ? 'activated' : 'paused'}`
+        toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused' has been ${newStatus === 'active' ? 'activated' : 'paused'}`
         })
       } else {
         toast.error('Failed to update automation')
@@ -876,13 +836,11 @@ export default function CrmClient() {
     try {
       const response = await fetch(`/api/crm?type=activities`)
       if (response.ok) {
-        toast.success('History loaded', {
-          description: `Showing execution history for ${automation.name}`
+        toast.success('History loaded'`
         })
       }
     } catch {
-      toast.info('Viewing history', {
-        description: `Loading execution history for ${automation.name}`
+      toast.info('Viewing history'`
       })
     }
     setShowAutomationActionsDialog(false)
@@ -903,8 +861,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Automation duplicated', {
-          description: `Copy of ${automation.name} created`
+        toast.success('Automation duplicated' created`
         })
       } else {
         toast.error('Failed to duplicate automation')
@@ -930,8 +887,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Automation deleted', {
-          description: `${automation.name} has been removed`
+        toast.success('Automation deleted' has been removed`
         })
       } else {
         toast.error('Failed to delete automation')
@@ -958,9 +914,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Slack connected', {
-          description: 'Your Slack workspace has been connected successfully'
-        })
+        toast.success('Slack connected')
       } else {
         toast.error('Failed to connect Slack')
       }
@@ -985,9 +939,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Stripe connected', {
-          description: 'Your Stripe account has been connected successfully'
-        })
+        toast.success('Stripe connected')
       } else {
         toast.error('Failed to connect Stripe')
       }
@@ -1012,9 +964,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('Zapier connected', {
-          description: 'Your Zapier integration has been set up successfully'
-        })
+        toast.success('Zapier connected')
       } else {
         toast.error('Failed to connect Zapier')
       }
@@ -1026,9 +976,7 @@ export default function CrmClient() {
 
   // AI Question Handler
   const handleAskAIQuestion = async (question: string) => {
-    toast.info('Question Submitted', {
-      description: question.substring(0, 100) + (question.length > 100 ? '...' : '')
-    })
+    toast.info('Question Submitted')
 
     try {
       const response = await fetch('/api/crm', {
@@ -1044,9 +992,7 @@ export default function CrmClient() {
       })
 
       if (response.ok) {
-        toast.success('AI is analyzing your CRM question...', {
-          description: 'Response will be generated shortly'
-        })
+        toast.success('AI is analyzing your CRM question...')
       }
     } catch {
       // Silent fail, already showed info toast
@@ -1055,7 +1001,7 @@ export default function CrmClient() {
 
   // Filter Handler with API
   const handleApplyFilters = async () => {
-    toast.success('Applying filters...', { description: 'Fetching filtered data' })
+    toast.success('Applying filters...')
 
     try {
       const params = new URLSearchParams()
@@ -1066,9 +1012,7 @@ export default function CrmClient() {
       const response = await fetch(`/api/crm?${params.toString()}`)
       if (response.ok) {
         await refetchContacts()
-        toast.success('Filters applied', {
-          description: 'Your contact list has been filtered'
-        })
+        toast.success('Filters applied')
       } else {
         toast.error('Failed to apply filters')
       }
@@ -3452,8 +3396,7 @@ export default function CrmClient() {
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
-                      toast.success('File selected', {
-                        description: `${file.name} is ready to import`
+                      toast.success('File selected' is ready to import`
                       })
                     }
                   }}
@@ -3489,9 +3432,7 @@ export default function CrmClient() {
                 if (file) {
                   handleProcessCSVImport(file)
                 } else {
-                  toast.error('No file selected', {
-                    description: 'Please select a CSV file to import'
-                  })
+                  toast.error('No file selected')
                 }
               }}>
                 Start Import
@@ -3774,8 +3715,7 @@ export default function CrmClient() {
                     activity_date: new Date().toISOString(),
                     completed: true
                   })
-                  toast.success('Email sent', {
-                    description: `Email sent to ${selectedContactForActions.name}`
+                  toast.success('Email sent'`
                   })
                 }
                 setShowContactEmailDialog(false)
@@ -3836,8 +3776,7 @@ export default function CrmClient() {
                     activity_date: new Date().toISOString(),
                     completed: true
                   })
-                  toast.success('Call logged', {
-                    description: `Call with ${selectedContactForActions.name} recorded`
+                  toast.success('Call logged' recorded`
                   })
                 }
                 setShowContactCallDialog(false)
@@ -4078,7 +4017,7 @@ export default function CrmClient() {
                 const apiKeyInput = document.querySelector('input[placeholder="sk_live_..."]') as HTMLInputElement
                 const apiKey = apiKeyInput?.value || ''
                 if (!apiKey) {
-                  toast.error('API key required', { description: 'Please enter your Stripe API key' })
+                  toast.error('API key required')
                   return
                 }
                 handleConnectStripe(apiKey)
@@ -4142,7 +4081,7 @@ export default function CrmClient() {
                 const webhookInput = document.querySelector('input[placeholder="https://hooks.zapier.com/..."]') as HTMLInputElement
                 const webhookUrl = webhookInput?.value || ''
                 if (!webhookUrl) {
-                  toast.error('Webhook URL required', { description: 'Please enter your Zapier webhook URL' })
+                  toast.error('Webhook URL required')
                   return
                 }
                 handleConnectZapier(webhookUrl)

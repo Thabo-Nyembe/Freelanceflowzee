@@ -61,7 +61,6 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 
@@ -146,7 +145,6 @@ const setupActivities = [
 
 export default function SetupClient() {
   const { toast } = useToast();
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 

@@ -186,11 +186,9 @@ const referralsQuickActions = [
 ]
 
 export default function ReferralsClient() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState('KAZI-ACME-45K')
@@ -231,7 +229,6 @@ export default function ReferralsClient() {
   })
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // A+++ LOAD REFERRAL DATA
   useEffect(() => {
     const loadReferralData = async () => {
       try {
@@ -349,13 +346,7 @@ export default function ReferralsClient() {
         if (!response.ok) throw new Error('Failed to load referral data')
 
         setIsLoading(false)
-        announce('Referral system loaded successfully', 'polite')
-        logger.info('Referral data loaded', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          totalReferrals: referralsList.length,
-          loyaltyPoints: 2000
-        })
-      } catch (err) {
+        announce('Referral system loaded successfully', 'polite')      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load referral data')
         setIsLoading(false)
         announce('Error loading referral system', 'assertive')
@@ -373,25 +364,14 @@ export default function ReferralsClient() {
   const handleCopyReferralCode = () => {
     try {
       navigator.clipboard.writeText(referralCode)
-      setCopiedToClipboard(true)
-
-      logger.info('Referral code copied', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        code: referralCode
-      })
-
-      toast.success('Referral code copied!', {
-        description: 'Share it with your network to earn rewards'
-      })
+      setCopiedToClipboard(true)      toast.success('Referral code copied!')
 
       setTimeout(() => {
         setCopiedToClipboard(false)
       }, 2000)
     } catch (error) {
       logger.error('Failed to copy referral code', { error })
-      toast.error('Failed to copy code', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to copy code')
     }
   }
 
@@ -401,21 +381,10 @@ export default function ReferralsClient() {
 
   const handleCopyReferralLink = () => {
     try {
-      navigator.clipboard.writeText(referralLink)
-
-      logger.info('Referral link copied', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        link: referralLink
-      })
-
-      toast.success('Referral link copied!', {
-        description: 'Ready to share with your network'
-      })
+      navigator.clipboard.writeText(referralLink)      toast.success('Referral link copied!')
     } catch (error) {
       logger.error('Failed to copy referral link', { error })
-      toast.error('Failed to copy link', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -425,15 +394,7 @@ export default function ReferralsClient() {
 
   const handleShareReferral = async (platform: 'email' | 'whatsapp' | 'twitter' | 'linkedin') => {
     try {
-      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`
-
-      logger.info('Referral share initiated', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        platform,
-        code: referralCode
-      })
-
-      let shareUrl = ''
+      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`      let shareUrl = ''
 
       switch (platform) {
         case 'email':
@@ -454,14 +415,11 @@ export default function ReferralsClient() {
           break
       }
 
-      toast.success('Opening share dialog...', {
-        description: `Share your referral link on ${platform.charAt(0).toUpperCase() + platform.slice(1)}`
+      toast.success('Opening share dialog...'`
       })
     } catch (error) {
       logger.error('Failed to share referral', { error, platform })
-      toast.error('Failed to open share dialog', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to open share dialog')
     }
   }
 
@@ -470,17 +428,7 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleViewReferralDetails = (referralId: number) => {
-    const referral = referrals.find(r => r.id === referralId)
-
-    logger.info('Referral details viewed', {
-      referralId,
-      referralName: referral?.name,
-      status: referral?.status
-    })
-
-    toast.info(`Loading details for ${referral?.name}...`, {
-      description: 'Viewing referral history and earnings'
-    })
+    const referral = referrals.find(r => r.id === referralId)    toast.info(`Loading details for ${referral?.name}...`)
   }
 
   // ============================================================================
@@ -489,15 +437,7 @@ export default function ReferralsClient() {
 
   const handleClaimReward = async (rewardId: number) => {
     try {
-      const reward = rewards.find(r => r.id === rewardId)
-
-      logger.info('Reward claim initiated', {
-        rewardId,
-        rewardTitle: reward?.title,
-        points: reward?.points
-      })
-
-      const response = await fetch('/api/loyalty/claim-reward', {
+      const reward = rewards.find(r => r.id === rewardId)      const response = await fetch('/api/loyalty/claim-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -513,11 +453,7 @@ export default function ReferralsClient() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Reward claimed successfully', { rewardId })
-
-        toast.success('Reward claimed!', {
-          description: `You earned ${reward?.points} loyalty points`
+      if (result.success) {        toast.success('Reward claimed!' loyalty points`
         })
 
         // Update local state
@@ -525,9 +461,7 @@ export default function ReferralsClient() {
       }
     } catch (error: any) {
       logger.error('Failed to claim reward', { error, rewardId })
-      toast.error('Failed to claim reward', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to claim reward')
     }
   }
 
@@ -538,18 +472,10 @@ export default function ReferralsClient() {
   const handleRedeemPoints = async (points: number) => {
     try {
       if (loyaltyPoints < points) {
-        toast.error('Insufficient points', {
-          description: `You need ${points - loyaltyPoints} more points`
+        toast.error('Insufficient points' more points`
         })
         return
-      }
-
-      logger.info('Points redemption initiated', {
-        points,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      const response = await fetch('/api/loyalty/redeem-points', {
+      }      const response = await fetch('/api/loyalty/redeem-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -566,20 +492,14 @@ export default function ReferralsClient() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Points redeemed successfully', { points })
-
-        toast.success('Points redeemed!', {
-          description: `${points} points converted to account credit`
+      if (result.success) {        toast.success('Points redeemed!' points converted to account credit`
         })
 
         setLoyaltyPoints(prev => prev - points)
       }
     } catch (error: any) {
       logger.error('Failed to redeem points', { error, points })
-      toast.error('Failed to redeem points', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to redeem points')
     }
   }
 
@@ -590,21 +510,11 @@ export default function ReferralsClient() {
   const handleCreateReferral = async () => {
     try {
       if (!newReferralData.name || !newReferralData.email) {
-        toast.error('Missing information', {
-          description: 'Please fill in name and email'
-        })
+        toast.error('Missing information')
         return
       }
 
-      setIsProcessing(true)
-
-      logger.info('Creating new referral', {
-        name: newReferralData.name,
-        email: newReferralData.email,
-        company: newReferralData.company
-      })
-
-      // Call API to create referral
+      setIsProcessing(true)      // Call API to create referral
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -632,17 +542,11 @@ export default function ReferralsClient() {
       setIsCreateReferralDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Referral created!', {
-        description: `Invitation sent to ${newReferralData.email}`
-      })
-
-      logger.info('Referral created successfully', { referralId: newReferral.id })
-    } catch (error: any) {
+      toast.success('Referral created!'`
+      })    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to create referral', { error })
-      toast.error('Failed to create referral', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create referral')
     }
   }
 
@@ -653,28 +557,17 @@ export default function ReferralsClient() {
   const handleRequestPayout = async () => {
     try {
       if (payoutAmount <= 0) {
-        toast.error('Invalid amount', {
-          description: 'Please enter a valid payout amount'
-        })
+        toast.error('Invalid amount')
         return
       }
 
       if (payoutAmount > totalCommission) {
-        toast.error('Insufficient balance', {
-          description: `Maximum available: $${totalCommission.toLocaleString()}`
+        toast.error('Insufficient balance'`
         })
         return
       }
 
-      setIsProcessing(true)
-
-      logger.info('Requesting payout', {
-        amount: payoutAmount,
-        method: payoutMethod,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      // Call API to request payout
+      setIsProcessing(true)      // Call API to request payout
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -691,17 +584,11 @@ export default function ReferralsClient() {
       setIsPayoutDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Payout requested!', {
-        description: `$${payoutAmount.toLocaleString()} will be sent to your ${payoutMethod} within 3-5 business days`
-      })
-
-      logger.info('Payout request submitted', { amount: payoutAmount, method: payoutMethod })
-    } catch (error: any) {
+      toast.success('Payout requested!' will be sent to your ${payoutMethod} within 3-5 business days`
+      })    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to request payout', { error })
-      toast.error('Failed to request payout', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to request payout')
     }
   }
 
@@ -711,14 +598,7 @@ export default function ReferralsClient() {
 
   const handleSaveSettings = async () => {
     try {
-      setIsProcessing(true)
-
-      logger.info('Saving referral settings', {
-        settings: settingsData,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      // Call API to save settings
+      setIsProcessing(true)      // Call API to save settings
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -732,17 +612,10 @@ export default function ReferralsClient() {
       setIsSettingsDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Settings saved!', {
-        description: 'Your referral program settings have been updated'
-      })
-
-      logger.info('Settings saved successfully', { settings: settingsData })
-    } catch (error: any) {
+      toast.success('Settings saved!')    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to save settings', { error })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to save settings')
     }
   }
 
@@ -752,14 +625,7 @@ export default function ReferralsClient() {
 
   const handleOpenReferralDetails = (referral: Referral) => {
     setSelectedReferral(referral)
-    setIsReferralDetailsDialogOpen(true)
-
-    logger.info('Viewing referral details', {
-      referralId: referral.id,
-      referralName: referral.name,
-      status: referral.status
-    })
-  }
+    setIsReferralDetailsDialogOpen(true)  }
 
   // ============================================================================
   // HANDLER 11: SEND REMINDER TO REFERRAL
@@ -767,14 +633,7 @@ export default function ReferralsClient() {
 
   const handleSendReminder = async (referralId: number) => {
     try {
-      const referral = referrals.find(r => r.id === referralId)
-
-      logger.info('Sending reminder to referral', {
-        referralId,
-        referralName: referral?.name
-      })
-
-      // Call API to send reminder
+      const referral = referrals.find(r => r.id === referralId)      // Call API to send reminder
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -786,16 +645,10 @@ export default function ReferralsClient() {
       })
       if (!response.ok) throw new Error('Failed to send reminder')
 
-      toast.success('Reminder sent!', {
-        description: `Email reminder sent to ${referral?.email}`
-      })
-
-      logger.info('Reminder sent successfully', { referralId })
-    } catch (error: any) {
+      toast.success('Reminder sent!'`
+      })    } catch (error: any) {
       logger.error('Failed to send reminder', { error, referralId })
-      toast.error('Failed to send reminder', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to send reminder')
     }
   }
 
@@ -804,14 +657,7 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleExportReferralData = async (format: 'csv' | 'pdf') => {
-    try {
-      logger.info('Exporting referral data', {
-        format,
-        referralCount: referrals.length,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      toast.promise(
+    try {      toast.promise(
         fetch(`/api/referrals?action=export&format=${format}`).then(async res => {
           if (!res.ok) throw new Error('Export failed')
           const blob = await res.blob()
@@ -830,14 +676,9 @@ export default function ReferralsClient() {
           success: `Referral data exported as ${format.toUpperCase()}`,
           error: 'Failed to export data'
         }
-      )
-
-      logger.info('Export completed', { format })
-    } catch (error: any) {
+      )    } catch (error: any) {
       logger.error('Failed to export referral data', { error, format })
-      toast.error('Failed to export data', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to export data')
     }
   }
 
@@ -846,12 +687,7 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleRefreshData = async () => {
-    try {
-      logger.info('Refreshing referral data', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      toast.promise(
+    try {      toast.promise(
         fetch('/api/referrals?action=refresh').then(res => {
           if (!res.ok) throw new Error('Refresh failed')
           return res.json()
@@ -861,14 +697,9 @@ export default function ReferralsClient() {
           success: 'Referral data refreshed',
           error: 'Failed to refresh data'
         }
-      )
-
-      logger.info('Data refresh completed')
-    } catch (error: any) {
+      )    } catch (error: any) {
       logger.error('Failed to refresh data', { error })
-      toast.error('Failed to refresh data', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to refresh data')
     }
   }
 

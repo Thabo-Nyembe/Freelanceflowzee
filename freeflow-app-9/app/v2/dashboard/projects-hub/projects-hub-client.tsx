@@ -485,7 +485,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a milestone title')
       return
     }
-    toast.success('Milestone created', { description: `"${milestoneForm.title}" added to roadmap` })
+    toast.success('Milestone created'" added to roadmap` })
     setShowMilestoneDialog(false)
     setMilestoneForm({ title: '', quarter: '', status: 'planned' })
   }
@@ -500,7 +500,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a title')
       return
     }
-    toast.success('Backlog item created', { description: `"${backlogItemForm.title}" added to backlog` })
+    toast.success('Backlog item created'" added to backlog` })
     setShowBacklogItemDialog(false)
     setBacklogItemForm({ title: '', description: '', priority: 'medium', points: 1, type: 'task' })
   }
@@ -510,7 +510,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a report name')
       return
     }
-    toast.success('Report created', { description: `"${reportForm.name}" report is ready` })
+    toast.success('Report created'" report is ready` })
     setShowReportDialog(false)
     setReportForm({ name: '', type: 'burndown', description: '' })
   }
@@ -520,7 +520,7 @@ export default function ProjectsHubClient() {
       toast.error('Please fill in all fields')
       return
     }
-    toast.success('Automation created', { description: `"${automationForm.name}" is now active` })
+    toast.success('Automation created'" is now active` })
     setShowAutomationDialog(false)
     setAutomationForm({ name: '', trigger: '', action: '' })
   }
@@ -532,14 +532,14 @@ export default function ProjectsHubClient() {
 
   const handleConfirmUseTemplate = () => {
     if (selectedTemplate) {
-      toast.success('Template applied', { description: `Project created from "${selectedTemplate.name}"` })
+      toast.success('Template applied'"` })
       setShowTemplateUseDialog(false)
       setSelectedTemplate(null)
     }
   }
 
   const handleConfigureSlack = () => {
-    toast.success('Slack channel updated', { description: 'Notifications will be sent to the selected channel' })
+    toast.success('Slack channel updated')
     setShowSlackConfigDialog(false)
   }
 
@@ -548,13 +548,13 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a webhook URL')
       return
     }
-    toast.success('Webhook created', { description: 'New webhook endpoint added' })
+    toast.success('Webhook created')
     setShowWebhookDialog(false)
     setWebhookForm({ url: '', events: [] })
   }
 
   const handleAddIntegration = () => {
-    toast.success('Integration added', { description: 'New service connected successfully' })
+    toast.success('Integration added')
     setShowIntegrationDialog(false)
   }
 
@@ -565,14 +565,14 @@ export default function ProjectsHubClient() {
 
   const handleSaveIntegrationConfig = () => {
     if (selectedIntegration) {
-      toast.success('Integration updated', { description: `${selectedIntegration.name} configuration saved` })
+      toast.success('Integration updated' configuration saved` })
       setShowIntegrationConfigDialog(false)
       setSelectedIntegration(null)
     }
   }
 
   const handleRegenerateApiToken = () => {
-    toast.success('API token regenerated', { description: 'New token has been created. Please update your applications.' })
+    toast.success('API token regenerated')
   }
 
   const handleViewApiDocs = () => {
@@ -581,7 +581,7 @@ export default function ProjectsHubClient() {
   }
 
   const handleDownloadCli = () => {
-    toast.success('Downloading CLI tool', { description: 'Download started' })
+    toast.success('Downloading CLI tool')
     // Simulate download
     const link = document.createElement('a')
     link.href = '#'
@@ -594,18 +594,18 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a field name')
       return
     }
-    toast.success('Custom field created', { description: `"${customFieldForm.name}" field added` })
+    toast.success('Custom field created'" field added` })
     setShowCustomFieldDialog(false)
     setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: [] })
   }
 
   const handleArchiveAllProjects = () => {
-    toast.success('All projects archived', { description: 'Projects moved to archive' })
+    toast.success('All projects archived')
     setShowArchiveDialog(false)
   }
 
   const handleDeleteAllData = () => {
-    toast.success('All data deleted', { description: 'Projects and issues permanently removed' })
+    toast.success('All data deleted')
     setShowDeleteAllDialog(false)
   }
 
@@ -614,7 +614,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a status name')
       return
     }
-    toast.success('Status added', { description: `"${statusForm.name}" status added to workflow` })
+    toast.success('Status added'" status added to workflow` })
     setShowStatusDialog(false)
     setStatusForm({ name: '' })
   }
@@ -624,7 +624,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a rule name')
       return
     }
-    toast.success('Automation rule created', { description: 'New rule is now active' })
+    toast.success('Automation rule created')
     setShowAutomationRuleDialog(false)
     setAutomationForm({ name: '', trigger: '', action: '' })
   }
@@ -640,7 +640,7 @@ export default function ProjectsHubClient() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Data imported', { description: `${file.name} processed successfully` })
+        toast.success('Data imported' processed successfully` })
       }
     }
     input.click()
@@ -675,7 +675,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a comment')
       return
     }
-    toast.success('Comment added', { description: 'Your comment has been posted' })
+    toast.success('Comment added')
     setCommentText('')
   }
 
@@ -684,7 +684,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter time amount')
       return
     }
-    toast.success('Time logged', { description: `${logTimeAmount} hours logged` })
+    toast.success('Time logged' hours logged` })
     setShowLogTimeDialog(false)
     setLogTimeAmount('')
   }
@@ -696,7 +696,7 @@ export default function ProjectsHubClient() {
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        toast.success('Attachment added', { description: `${files.length} file(s) uploaded` })
+        toast.success('Attachment added' file(s) uploaded` })
         setShowAttachmentDialog(false)
       }
     }
@@ -704,7 +704,7 @@ export default function ProjectsHubClient() {
   }
 
   const handleLinkIssue = (issueKey: string) => {
-    toast.success('Issue linked', { description: `Linked to ${issueKey}` })
+    toast.success('Issue linked'` })
     setShowLinkIssueDialog(false)
   }
 
@@ -715,14 +715,14 @@ export default function ProjectsHubClient() {
 
   const handleSaveIssueEdit = () => {
     if (selectedIssue) {
-      toast.success('Issue updated', { description: `${selectedIssue.key} has been updated` })
+      toast.success('Issue updated' has been updated` })
       setShowEditIssueDialog(false)
     }
   }
 
   const handleMoveToInProgress = () => {
     if (selectedIssue) {
-      toast.success('Issue moved', { description: `${selectedIssue.key} moved to In Progress` })
+      toast.success('Issue moved' moved to In Progress` })
       setShowIssueDialog(false)
     }
   }
@@ -1710,7 +1710,7 @@ export default function ProjectsHubClient() {
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Edit Field', { description: `Editing field: ${field.name}` })
+                                toast.info('Edit Field'` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -2039,7 +2039,7 @@ export default function ProjectsHubClient() {
           <div className="lg:col-span-2">
             <AIInsightsPanel
               insights={mockProjectsAIInsights as any}
-              onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
 

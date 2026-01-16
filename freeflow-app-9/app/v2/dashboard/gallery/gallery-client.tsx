@@ -560,7 +560,7 @@ export default function GalleryClient() {
   // Handlers - Real Supabase Operations
   const handleUploadPhoto = async () => {
     if (!uploadForm.title.trim()) {
-      toast.error('Title required', { description: 'Please enter a title for your photo' })
+      toast.error('Title required')
       return
     }
 
@@ -568,7 +568,7 @@ export default function GalleryClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to upload photos' })
+        toast.error('Authentication required')
         return
       }
 
@@ -588,11 +588,11 @@ export default function GalleryClient() {
         metadata: {}
       })
 
-      toast.success('Photo uploaded', { description: `"${uploadForm.title}" has been uploaded successfully` })
+      toast.success('Photo uploaded'" has been uploaded successfully` })
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
     } catch (error: any) {
-      toast.error('Upload failed', { description: error.message || 'Failed to upload photo' })
+      toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -600,7 +600,7 @@ export default function GalleryClient() {
 
   const handleCreateCollection = async () => {
     if (!collectionForm.name.trim()) {
-      toast.error('Name required', { description: 'Please enter a name for your collection' })
+      toast.error('Name required')
       return
     }
 
@@ -608,7 +608,7 @@ export default function GalleryClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to create collections' })
+        toast.error('Authentication required')
         return
       }
 
@@ -619,11 +619,11 @@ export default function GalleryClient() {
         is_public: collectionForm.is_public
       })
 
-      toast.success('Collection created', { description: `"${collectionForm.name}" has been created` })
+      toast.success('Collection created'" has been created` })
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
     } catch (error: any) {
-      toast.error('Creation failed', { description: error.message || 'Failed to create collection' })
+      toast.error('Creation failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -632,9 +632,9 @@ export default function GalleryClient() {
   const handleDeleteCollection = async (collection: GalleryCollection) => {
     try {
       await deleteCollection(collection.id)
-      toast.success('Collection deleted', { description: `"${collection.name}" has been deleted` })
+      toast.success('Collection deleted'" has been deleted` })
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete collection' })
+      toast.error('Delete failed')
     }
   }
 
@@ -642,10 +642,10 @@ export default function GalleryClient() {
     const newLiked = new Set(likedItems)
     if (newLiked.has(photoId)) {
       newLiked.delete(photoId)
-      toast.info('Unliked', { description: 'Removed from your likes' })
+      toast.info('Unliked')
     } else {
       newLiked.add(photoId)
-      toast.success('Liked', { description: 'Added to your likes' })
+      toast.success('Liked')
     }
     setLikedItems(newLiked)
 
@@ -672,17 +672,17 @@ export default function GalleryClient() {
     const newSaved = new Set(savedItems)
     if (newSaved.has(photoId)) {
       newSaved.delete(photoId)
-      toast.info('Unsaved', { description: 'Removed from your saved items' })
+      toast.info('Unsaved')
     } else {
       newSaved.add(photoId)
-      toast.success('Saved', { description: 'Added to your saved items' })
+      toast.success('Saved')
     }
     setSavedItems(newSaved)
   }
 
   const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
     const title = 'title' in photo ? photo.title : ''
-    toast.success('Download started', { description: `Downloading "${title}"...` })
+    toast.success('Download started'"...` })
 
     // Track download for gallery items
     if ('download_count' in photo && photo.id) {
@@ -701,19 +701,19 @@ export default function GalleryClient() {
     const url = `${window.location.origin}/gallery/${photoId}`
     try {
       await navigator.clipboard.writeText(url)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (error) {
-      toast.error('Copy failed', { description: 'Failed to copy link to clipboard' })
+      toast.error('Copy failed')
     }
   }
 
   const handleDeleteGalleryItem = async (item: GalleryItem) => {
     try {
       await deleteGalleryItem(item.id)
-      toast.success('Photo deleted', { description: `"${item.title}" has been deleted` })
+      toast.success('Photo deleted'" has been deleted` })
       setSelectedGalleryItem(null)
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete photo' })
+      toast.error('Delete failed')
     }
   }
 
@@ -741,11 +741,11 @@ export default function GalleryClient() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to follow photographer')
       }
-      toast.success('Following', { description: `You are now following ${selectedPhotographer.name}` })
+      toast.success('Following'` })
       setShowFollowDialog(false)
       setSelectedPhotographer(null)
     } catch (error: any) {
-      toast.error('Follow failed', { description: error.message || 'Failed to follow photographer' })
+      toast.error('Follow failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -754,9 +754,9 @@ export default function GalleryClient() {
   const handleCopyApiKey = async () => {
     try {
       await navigator.clipboard.writeText('kazi-gallery-xxxxxxxxxxxxxxxxxxxxx')
-      toast.success('API Key copied', { description: 'API key copied to clipboard' })
+      toast.success('API Key copied')
     } catch (error) {
-      toast.error('Copy failed', { description: 'Failed to copy API key' })
+      toast.error('Copy failed')
     }
   }
 
@@ -781,10 +781,10 @@ export default function GalleryClient() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to regenerate API key')
       }
-      toast.success('API Key regenerated', { description: 'Your new API key is ready. The old key is now invalid.' })
+      toast.success('API Key regenerated')
       setShowRegenerateApiKeyDialog(false)
     } catch (error: any) {
-      toast.error('Regeneration failed', { description: error.message || 'Failed to regenerate API key' })
+      toast.error('Regeneration failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -814,14 +814,14 @@ export default function GalleryClient() {
         throw new Error(result.error || `Failed to ${action} service`)
       }
       if (selectedService.isConnected) {
-        toast.success('Disconnected', { description: `${selectedService.name} has been disconnected` })
+        toast.success('Disconnected' has been disconnected` })
       } else {
-        toast.success('Connected', { description: `${selectedService.name} has been connected successfully` })
+        toast.success('Connected' has been connected successfully` })
       }
       setShowConnectServiceDialog(false)
       setSelectedService(null)
     } catch (error: any) {
-      toast.error('Action failed', { description: error.message || 'Failed to update service connection' })
+      toast.error('Action failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -857,10 +857,10 @@ export default function GalleryClient() {
           throw new Error(result.error || 'Failed to empty trash')
         }
       }
-      toast.success('Trash emptied', { description: 'All items in trash have been permanently deleted' })
+      toast.success('Trash emptied')
       setShowEmptyTrashDialog(false)
     } catch (error: any) {
-      toast.error('Failed to empty trash', { description: error.message || 'An error occurred' })
+      toast.error('Failed to empty trash')
     } finally {
       setIsSubmitting(false)
     }
@@ -891,12 +891,11 @@ export default function GalleryClient() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to request data export')
       }
-      toast.success('Export requested', {
-        description: `Your ${exportFormat.toUpperCase()} export (${exportResolution} resolution) is being prepared. You will be notified when it is ready.`
+      toast.success('Export requested' export (${exportResolution} resolution) is being prepared. You will be notified when it is ready.`
       })
       setShowDataExportDialog(false)
     } catch (error: any) {
-      toast.error('Export failed', { description: error.message || 'Failed to request data export' })
+      toast.error('Export failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -931,10 +930,10 @@ export default function GalleryClient() {
       for (const item of galleryItems) {
         await deleteGalleryItem(item.id)
       }
-      toast.success('Photos deleted', { description: 'All your photos have been deleted' })
+      toast.success('Photos deleted')
       setShowDeletePhotosDialog(false)
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete photos' })
+      toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -947,12 +946,12 @@ export default function GalleryClient() {
       for (const collection of galleryCollections) {
         await deleteCollection(collection.id)
       }
-      toast.success('Collections deleted', { description: 'All your collections have been deleted' })
+      toast.success('Collections deleted')
       setShowDeleteCollectionsDialog(false)
       // Refresh the collections list
       await fetchCollections()
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete collections' })
+      toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -998,10 +997,10 @@ export default function GalleryClient() {
         throw new Error(result.error || 'Failed to delete account')
       }
 
-      toast.success('Account deleted', { description: 'Your account has been permanently deleted' })
+      toast.success('Account deleted')
       setShowDeleteAccountDialog(false)
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete account' })
+      toast.error('Delete failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -1010,9 +1009,9 @@ export default function GalleryClient() {
   const handleShareViaLink = async () => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (error) {
-      toast.error('Copy failed', { description: 'Failed to copy link' })
+      toast.error('Copy failed')
     }
   }
 
@@ -1020,16 +1019,16 @@ export default function GalleryClient() {
     const subject = encodeURIComponent('Check out my gallery')
     const body = encodeURIComponent(`Check out my photo gallery: ${window.location.origin}/gallery/shared/my-gallery`)
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
-    toast.success('Email client opened', { description: 'Compose your email to share' })
+    toast.success('Email client opened')
   }
 
   const handleShareViaEmbed = async () => {
     const embedCode = `<iframe src="${window.location.origin}/gallery/embed/my-gallery" width="600" height="400" frameborder="0"></iframe>`
     try {
       await navigator.clipboard.writeText(embedCode)
-      toast.success('Embed code copied', { description: 'Paste this code to embed your gallery' })
+      toast.success('Embed code copied')
     } catch (error) {
-      toast.error('Copy failed', { description: 'Failed to copy embed code' })
+      toast.error('Copy failed')
     }
   }
 
@@ -1039,7 +1038,7 @@ export default function GalleryClient() {
 
   const handleDownloadQRCode = () => {
     // In a real implementation, this would download the QR code image
-    toast.success('QR Code downloaded', { description: 'QR code image has been saved' })
+    toast.success('QR Code downloaded')
     setShowQRCodeDialog(false)
   }
 
@@ -2199,7 +2198,7 @@ export default function GalleryClient() {
             <AIInsightsPanel
               insights={mockGalleryAIInsights}
               title="Gallery Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2608,7 +2607,7 @@ export default function GalleryClient() {
                 </button>
                 <button
                   onClick={() => {
-                    toast.success('Bulk edit applied', { description: 'Changes applied to selected photos' })
+                    toast.success('Bulk edit applied')
                     setShowBulkEditDialog(false)
                   }}
                   className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
@@ -2645,7 +2644,7 @@ export default function GalleryClient() {
                       size="sm"
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
-                        toast.success('Link copied', { description: 'Share link copied to clipboard' })
+                        toast.success('Link copied')
                       }}
                     >
                       <Copy className="h-4 w-4" />

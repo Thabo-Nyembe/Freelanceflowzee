@@ -701,7 +701,7 @@ export default function LearningClient() {
   const handleStartCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Course started', { description: `Starting ${course.title}` })
+      toast.success('Course started'` })
     } catch (err) {
       toast.error('Failed to start course')
     }
@@ -710,31 +710,31 @@ export default function LearningClient() {
   const handleResumeCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, last_accessed_at: new Date().toISOString() })
-      toast.success('Resuming course', { description: `Continuing ${course.title}` })
+      toast.success('Resuming course'` })
     } catch (err) {
       toast.error('Failed to resume course')
     }
   }
 
   const handleDownloadCertificate = async () => {
-    toast.success('Certificate download started', { description: 'Your certificate is being generated' })
+    toast.success('Certificate download started')
   }
 
   const handleShareProgress = async () => {
-    toast.success('Progress shared', { description: 'Your learning progress has been shared' })
+    toast.success('Progress shared')
   }
 
   const handleEnrollCourse = async (courseId: string, courseName: string) => {
     try {
       await updateProgress({ course_id: courseId, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Enrolled', { description: `You are now enrolled in "${courseName}"` })
+      toast.success('Enrolled'"` })
     } catch (err) {
       toast.error('Failed to enroll in course')
     }
   }
 
   const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
-    toast.success('Lesson bookmarked', { description: `"${lessonName}" saved to bookmarks` })
+    toast.success('Lesson bookmarked'" saved to bookmarks` })
   }
 
   const handleCreatePath = async () => {
@@ -754,7 +754,7 @@ export default function LearningClient() {
         enrolled_count: 0,
         status: 'draft'
       })
-      toast.success('Learning path created', { description: `"${newPathForm.title}" has been created` })
+      toast.success('Learning path created'" has been created` })
       setShowCreatePathModal(false)
       setNewPathForm({ title: '', description: '', level: 'beginner', estimated_weeks: 4 })
     } catch (err) {
@@ -765,7 +765,7 @@ export default function LearningClient() {
   const handleDeletePath = async (pathId: string, pathTitle: string) => {
     try {
       await deletePath(pathId)
-      toast.success('Learning path deleted', { description: `"${pathTitle}" has been removed` })
+      toast.success('Learning path deleted'" has been removed` })
     } catch (err) {
       toast.error('Failed to delete learning path')
     }
@@ -783,7 +783,7 @@ export default function LearningClient() {
         is_public: newCollectionForm.is_public,
         likes: 0
       })
-      toast.success('Collection created', { description: `"${newCollectionForm.name}" has been created` })
+      toast.success('Collection created'" has been created` })
       setShowCreateCollectionModal(false)
       setNewCollectionForm({ name: '', description: '', is_public: false })
     } catch (err) {
@@ -794,7 +794,7 @@ export default function LearningClient() {
   const handleDeleteCollection = async (collectionId: string, collectionName: string) => {
     try {
       await deleteCollection(collectionId)
-      toast.success('Collection deleted', { description: `"${collectionName}" has been removed` })
+      toast.success('Collection deleted'" has been removed` })
     } catch (err) {
       toast.error('Failed to delete collection')
     }
@@ -2049,7 +2049,7 @@ export default function LearningClient() {
             <AIInsightsPanel
               insights={mockLearningAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
