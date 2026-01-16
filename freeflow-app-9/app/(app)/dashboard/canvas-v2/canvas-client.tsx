@@ -162,7 +162,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [zoom, setZoom] = useState(100)
 
   const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
-  const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
+  const displayCanvases = canvases
 
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)

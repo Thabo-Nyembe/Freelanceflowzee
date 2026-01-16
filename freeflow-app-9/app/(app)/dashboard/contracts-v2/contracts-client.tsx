@@ -176,7 +176,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const [settingsTab, setSettingsTab] = useState('general')
 
   const { contracts, loading, error, createContract, updateContract, deleteContract, mutating } = useContracts({ status: 'all' })
-  const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
+  const display = contracts || []
   const [showFilters, setShowFilters] = useState(false)
 
   // Additional state for dialogs

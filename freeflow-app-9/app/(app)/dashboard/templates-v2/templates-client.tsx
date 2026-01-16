@@ -502,7 +502,7 @@ export default function TemplatesClient() {
   }, [dbTemplates])
 
   // Use DB templates if available, otherwise fall back to mock data
-  const allTemplates = templatesFromDB.length > 0 ? templatesFromDB : mockTemplates
+  const allTemplates = templatesFromDB
 
   // Calculate stats from DB or mock data
   const stats: TemplateStats = useMemo(() => {

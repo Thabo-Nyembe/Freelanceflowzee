@@ -2257,7 +2257,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                 >
                   <option value="">Select origin...</option>
-                  {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
+                  {(dbLocations || []).map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
@@ -2270,7 +2270,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                 >
                   <option value="">Select destination...</option>
-                  {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
+                  {(dbLocations || []).map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
@@ -2692,7 +2692,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
               >
                 <option value="">All locations</option>
-                {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
+                {(dbLocations || []).map(loc => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
               </select>

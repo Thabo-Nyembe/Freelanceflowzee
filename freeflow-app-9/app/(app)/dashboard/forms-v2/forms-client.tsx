@@ -300,7 +300,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { forms, loading, error, createForm, updateForm, deleteForm, mutating } = useForms({ status: statusFilter, formType: typeFilter, limit: 50 })
-  const displayForms = forms.length > 0 ? forms : initialForms
+  const displayForms = forms
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {

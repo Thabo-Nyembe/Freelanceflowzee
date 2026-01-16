@@ -124,7 +124,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [settingsTab, setSettingsTab] = useState('general')
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
-  const displayUsers = users.length > 0 ? users : initialUsers
+  const displayUsers = users
 
 
   // Form state for inviting new user

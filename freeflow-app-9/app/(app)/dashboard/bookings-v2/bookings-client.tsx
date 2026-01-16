@@ -154,7 +154,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     recurring: false,
     recurringDays: [] as string[]
   })
-  const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
+  const displayBookings = bookings || []
 
   // Service types
   const serviceTypes: ServiceType[] = [

@@ -377,11 +377,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
     const mockExpenses = mockTransactions.filter(t => t.type === 'outflow').reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     // Use real data if we have budgets, otherwise mock
-    const totalBudgeted = displayBudgets.length > 0 ? realTotalBudgeted : mockTotalBudgeted
-    const totalSpent = displayBudgets.length > 0 ? realTotalSpent : mockTotalSpent
-    const totalAvailable = displayBudgets.length > 0 ? realTotalAvailable : mockTotalAvailable
-    const income = dbTransactions?.length > 0 ? realIncome : mockIncome
-    const expenses = dbTransactions?.length > 0 ? realExpenses : mockExpenses
+    const totalBudgeted = realTotalBudgeted
+    const totalSpent = realTotalSpent
+    const totalAvailable = realTotalAvailable
+    const income = realIncome
+    const expenses = realExpenses
 
     const onBudgetAccounts = mockAccounts.filter(a => a.onBudget)
     const netWorth = mockAccounts.reduce((sum, a) => sum + a.balance, 0)

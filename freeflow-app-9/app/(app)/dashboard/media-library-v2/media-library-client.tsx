@@ -590,8 +590,8 @@ export default function MediaLibraryClient({
   })
 
   // Use Supabase data if available, otherwise fallback to mock data
-  const displayFiles = supabaseFiles.length > 0 ? supabaseFiles : initialAssets
-  const displayFolders = supabaseFolders.length > 0 ? supabaseFolders : initialFolders
+  const displayFiles = supabaseFiles
+  const displayFolders = supabaseFolders
 
   const [activeTab, setActiveTab] = useState('assets')
   const [searchQuery, setSearchQuery] = useState('')

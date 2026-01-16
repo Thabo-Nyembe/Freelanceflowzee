@@ -303,7 +303,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       }
     )
   }
-  const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
+  const displayEvents = events || []
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {
