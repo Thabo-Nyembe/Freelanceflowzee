@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -339,7 +338,6 @@ const FEATURE_TESTS: FeatureTest[] = [
 ]
 
 export default function FeatureTestingPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -353,7 +351,6 @@ export default function FeatureTestingPage() {
   // useTransition for non-blocking test operations
   const [isPending, startTransition] = useTransition()
 
-  // A+++ LOAD FEATURE TESTING DATA
   React.useEffect(() => {
     const loadFeatureTestingData = async () => {
       try {
@@ -445,7 +442,6 @@ export default function FeatureTestingPage() {
 
   const { total: totalTests, passed: passedTests, failed: failedTests, warning: warningTests } = testStatistics
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -463,7 +459,6 @@ export default function FeatureTestingPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
