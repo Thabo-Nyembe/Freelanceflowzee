@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -494,7 +493,7 @@ const mockDesktopAppActivities = [
 ]
 
 export default function DesktopAppClient() {
-  const supabase = createClient()
+
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('builds')
@@ -533,6 +532,8 @@ export default function DesktopAppClient() {
   // Fetch projects and builds from Supabase
   const fetchData = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -562,7 +563,7 @@ export default function DesktopAppClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -667,12 +668,16 @@ export default function DesktopAppClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create projects')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('desktop_projects').insert({
         user_id: user.id,
         project_name: formState.project_name,
@@ -701,6 +706,8 @@ export default function DesktopAppClient() {
   // Start a new build
   const handleStartBuild = async (projectId?: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to start builds')
@@ -718,6 +725,8 @@ export default function DesktopAppClient() {
       }
 
       const buildNumber = `${Date.now()}`
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('desktop_builds').insert({
         user_id: user.id,
         project_id: project.id,
@@ -743,6 +752,8 @@ export default function DesktopAppClient() {
   // Cancel a build
   const handleCancelBuild = async (buildId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -767,6 +778,8 @@ export default function DesktopAppClient() {
       const build = dbBuilds.find(b => b.id === buildId)
       if (!build) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -790,6 +803,8 @@ export default function DesktopAppClient() {
   // Delete a build
   const handleDeleteBuild = async (buildId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .delete()
@@ -808,6 +823,8 @@ export default function DesktopAppClient() {
   // Archive a project
   const handleArchiveProject = async (projectId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_projects')
         .update({ is_archived: true })
@@ -933,6 +950,8 @@ export default function DesktopAppClient() {
   // Deploy update handler - deploys to production
   const handleDeployUpdate = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to deploy updates')
@@ -947,6 +966,8 @@ export default function DesktopAppClient() {
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -969,6 +990,8 @@ export default function DesktopAppClient() {
   // Publish release (update build status)
   const handlePublishRelease = async (buildId: string, buildVersion: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({

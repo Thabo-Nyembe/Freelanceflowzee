@@ -43,7 +43,6 @@ import { useRefunds } from '@/lib/hooks/use-refund-extended'
 import { useWebhooks } from '@/lib/hooks/use-webhooks-extended'
 import { useActivePricingPlans } from '@/lib/hooks/use-pricing-extended'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 interface Subscription {
@@ -370,6 +369,8 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     settingCategory: string
   ) => {
     try {
+      const supabase = createClient()
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       await supabase.from('billing_settings').upsert({
         key: settingKey,
@@ -2351,6 +2352,8 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                         try {
                           // In production, this would call an API endpoint to rotate keys
                           const supabase = createClient()
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           await supabase.from('api_keys').update({
                             rotated_at: new Date().toISOString(),
                             status: 'rotated'
@@ -2682,6 +2685,8 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                         toast.loading('Canceling all subscriptions...', { id: 'cancel-all' })
                         try {
                           const supabase = createClient()
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           await supabase.from('subscriptions').update({
                             status: 'canceled',
                             canceled_at: new Date().toISOString()
@@ -2703,8 +2708,14 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                         try {
                           const supabase = createClient()
                           // Delete test records (those with test metadata or in test mode)
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           await supabase.from('billing').delete().eq('is_test', true)
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           await supabase.from('subscriptions').delete().eq('is_test', true)
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           await supabase.from('invoices').delete().eq('is_test', true)
                           refetchTransactions?.()
                           toast.success('All test data has been deleted', { id: 'delete-test' })
@@ -2721,6 +2732,8 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                         }
                         toast.loading('Disabling billing module...', { id: 'disable-billing' })
                         try {
+                          const supabase = createClient()
+                          const { createClient } = await import('@/lib/supabase/client')
                           const supabase = createClient()
                           await supabase.from('settings').upsert({
                             key: 'billing_enabled',
