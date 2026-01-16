@@ -668,7 +668,7 @@ export default function AccessLogsClient() {
         is_suspicious: true,
         metadata: { action: 'ip_blocked', blocked_ip: ip }
       })
-      toast.success('IP blocked', { description: `${ip} has been added to blocklist` })
+      toast.success('IP blocked' has been added to blocklist` })
     } catch (err) {
       toast.error('Failed to block IP')
     }
@@ -711,7 +711,7 @@ export default function AccessLogsClient() {
         .lt('created_at', thirtyDaysAgo.toISOString())
 
       if (error) throw error
-      toast.success('Old logs archived', { description: 'Logs older than 30 days have been removed' })
+      toast.success('Old logs archived')
       fetchLogs()
     } catch (err) {
       console.error('Clear logs error:', err)
@@ -841,7 +841,7 @@ export default function AccessLogsClient() {
 
   const handleFilterByIP = (ip: string) => {
     setSearchQuery(ip)
-    toast.info('Filter applied', { description: `Showing logs from ${ip}` })
+    toast.info('Filter applied'` })
   }
 
   const handleBlockIP = (ip: string) => {
@@ -865,7 +865,7 @@ export default function AccessLogsClient() {
         resource: '/alerts/create',
         metadata: { action: 'alert_created' }
       })
-      toast.success('Alert created', { description: 'You will be notified of suspicious activity' })
+      toast.success('Alert created')
     } catch {
       toast.error('Failed to create alert')
     }
@@ -879,7 +879,7 @@ export default function AccessLogsClient() {
       toast.dismiss()
       if (response.ok) {
         const result = await response.json()
-        toast.success('Audit complete', { description: result.message || 'No suspicious activity detected' })
+        toast.success('Audit complete')
       } else {
         await createAccessLog({
           access_type: 'admin',
@@ -887,7 +887,7 @@ export default function AccessLogsClient() {
           resource: '/audit/run',
           metadata: { action: 'security_audit' }
         })
-        toast.success('Audit complete', { description: 'No suspicious activity detected' })
+        toast.success('Audit complete')
       }
     } catch {
       toast.error('Audit failed')
@@ -2026,7 +2026,7 @@ export default function AccessLogsClient() {
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Access Log Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2356,7 +2356,7 @@ export default function AccessLogsClient() {
                 toast.error('Please enter a webhook URL')
                 return
               }
-              toast.success('Webhook configured successfully', { description: webhookUrl })
+              toast.success('Webhook configured successfully')
               setShowWebhookDialog(false)
             }}>Save Webhook</Button>
           </DialogFooter>

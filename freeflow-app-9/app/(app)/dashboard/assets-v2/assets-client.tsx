@@ -795,10 +795,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
   // CRUD Handlers
   const handleSync = async () => {
-    toast.success('Sync started', { description: 'Syncing assets with cloud storage...' })
+    toast.success('Sync started')
     await refetchAssets()
     await refetchCollections()
-    toast.success('Sync complete', { description: 'All assets are up to date' })
+    toast.success('Sync complete')
   }
 
   const handleUploadAssets = () => {
@@ -829,7 +829,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         download_count: 0,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset created', { description: `"${assetForm.asset_name}" has been added` })
+      toast.success('Asset created'" has been added` })
       setShowCreateAssetDialog(false)
       setAssetForm(defaultAssetForm)
     } catch (error) {
@@ -854,7 +854,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         total_size: 0,
         sort_order: 0,
       })
-      toast.success('Collection created', { description: `"${collectionForm.collection_name}" has been created` })
+      toast.success('Collection created'" has been created` })
       setShowCreateCollectionDialog(false)
       setCollectionForm(defaultCollectionForm)
     } catch (error) {
@@ -875,10 +875,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     try {
       if (itemToDelete.type === 'asset') {
         await assetMutation.remove(itemToDelete.id)
-        toast.success('Asset deleted', { description: `"${itemToDelete.name}" has been deleted` })
+        toast.success('Asset deleted'" has been deleted` })
       } else {
         await collectionMutation.remove(itemToDelete.id)
-        toast.success('Collection deleted', { description: `"${itemToDelete.name}" has been deleted` })
+        toast.success('Collection deleted'" has been deleted` })
       }
       setShowDeleteDialog(false)
       setItemToDelete(null)
@@ -919,7 +919,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         is_public: assetForm.is_public,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset updated', { description: `"${assetForm.asset_name}" has been updated` })
+      toast.success('Asset updated'" has been updated` })
       setShowEditDialog(false)
       setItemToEdit(null)
       setAssetForm(defaultAssetForm)
@@ -934,7 +934,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/assets/${selectedAsset.id}`)
-      toast.success('Share link copied', { description: `Sharing link for ${selectedAsset.name} copied to clipboard` })
+      toast.success('Share link copied' copied to clipboard` })
     } catch {
       toast.error('Failed to copy link')
     }
@@ -944,7 +944,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await assetMutation.update(selectedAsset.id, { is_starred: !selectedAsset.isFavorite })
-      toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites', { description: selectedAsset.name })
+      toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites')
     } catch {
       toast.error('Failed to update favorite status')
     }
@@ -989,7 +989,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const handleBulkTag = async () => {
     const selectedCount = filteredAssets.filter(a => a.isStarred).length
     if (selectedCount === 0) {
-      toast.info('Bulk Tag', { description: 'Star assets to select them for bulk tagging' })
+      toast.info('Bulk Tag')
       return
     }
     toast.promise(
@@ -1049,13 +1049,13 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const handleBulkShare = async () => {
     const selectedAssets = filteredAssets.filter(a => a.isStarred)
     if (selectedAssets.length === 0) {
-      toast.info('Share', { description: 'Star assets to select them for sharing' })
+      toast.info('Share')
       return
     }
     try {
       const shareUrls = selectedAssets.map(a => `${window.location.origin}/assets/${a.id}`).join('\n')
       await navigator.clipboard.writeText(shareUrls)
-      toast.success('Share links copied', { description: `${selectedAssets.length} asset links copied to clipboard` })
+      toast.success('Share links copied' asset links copied to clipboard` })
     } catch {
       toast.error('Failed to copy share links')
     }
@@ -1064,7 +1064,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const handleBulkArchive = async () => {
     const selectedAssets = filteredAssets.filter(a => a.isStarred)
     if (selectedAssets.length === 0) {
-      toast.info('Archive', { description: 'Star assets to select them for archiving' })
+      toast.info('Archive')
       return
     }
     if (!confirm(`Are you sure you want to archive ${selectedAssets.length} assets?`)) return
@@ -1131,9 +1131,9 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
       action: () => {
         const selectedCount = filteredAssets.filter(a => a.isStarred).length
         if (selectedCount === 0) {
-          toast.info('Bulk Edit', { description: 'Star assets to select them for bulk editing' })
+          toast.info('Bulk Edit')
         } else {
-          toast.info('Bulk Edit', { description: `${selectedCount} assets selected. Opening bulk edit panel...` })
+          toast.info('Bulk Edit' assets selected. Opening bulk edit panel...` })
           // In a real implementation, this would open a bulk edit dialog
         }
       },
@@ -2087,7 +2087,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             <AIInsightsPanel
               insights={mockAssetsAIInsights}
               title="Asset Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

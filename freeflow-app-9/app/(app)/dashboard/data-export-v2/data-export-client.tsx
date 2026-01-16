@@ -504,7 +504,7 @@ export default function DataExportClient() {
       if (error) throw error
       setDataExports(data || [])
     } catch (error: any) {
-      toast.error('Failed to load exports', { description: error.message })
+      toast.error('Failed to load exports')
     } finally {
       setLoading(false)
     }
@@ -582,11 +582,11 @@ export default function DataExportClient() {
         status: 'pending',
       })
       if (error) throw error
-      toast.success('Export created', { description: formData.export_name })
+      toast.success('Export created')
       setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to create export', { description: error.message })
+      toast.error('Failed to create export')
     }
   }
 
@@ -597,10 +597,10 @@ export default function DataExportClient() {
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export started', { description: `${exportName} is now running` })
+      toast.success('Export started' is now running` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to start export', { description: error.message })
+      toast.error('Failed to start export')
     }
   }
 
@@ -612,10 +612,10 @@ export default function DataExportClient() {
         .update({ status: 'scheduled', scheduled_at: scheduledAt })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export scheduled', { description: `${exportName} scheduled for 1 hour` })
+      toast.success('Export scheduled' scheduled for 1 hour` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to schedule export', { description: error.message })
+      toast.error('Failed to schedule export')
     }
   }
 
@@ -630,9 +630,9 @@ export default function DataExportClient() {
       if (data?.download_url) {
         window.open(data.download_url, '_blank')
       }
-      toast.success('Downloading export', { description: data?.export_name || 'File ready' })
+      toast.success('Downloading export')
     } catch (error: any) {
-      toast.error('Download failed', { description: error.message })
+      toast.error('Download failed')
     }
   }
 
@@ -643,10 +643,10 @@ export default function DataExportClient() {
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export deleted', { description: `${exportName} has been removed` })
+      toast.success('Export deleted' has been removed` })
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to delete export', { description: error.message })
+      toast.error('Failed to delete export')
     }
   }
 
@@ -657,10 +657,10 @@ export default function DataExportClient() {
         .update({ status: 'cancelled' })
         .eq('id', exportId)
       if (error) throw error
-      toast.success('Export cancelled', { description: exportName })
+      toast.success('Export cancelled')
       fetchDataExports()
     } catch (error: any) {
-      toast.error('Failed to cancel export', { description: error.message })
+      toast.error('Failed to cancel export')
     }
   }
 
@@ -2438,7 +2438,7 @@ export default function DataExportClient() {
             <AIInsightsPanel
               insights={mockDataExportAIInsights}
               title="Data Pipeline Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

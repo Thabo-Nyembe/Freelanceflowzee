@@ -340,8 +340,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         conditions: {},
         metadata: {}
       })
-      toast.success('Automation Created!', {
-        description: `"${newName}" is now ready. Add your first trigger and actions.`
+      toast.success('Automation Created!'" is now ready. Add your first trigger and actions.`
       })
       setShowCreateDialog(false)
       setNewName('')
@@ -373,8 +372,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         status: newStatus as AutomationStatus,
         is_enabled: newStatus === 'active'
       })
-      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
-        description: `"${automation.automation_name}" is now ${newStatus}`
+      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`" is now ${newStatus}`
       })
       refetch()
     } catch (err) {
@@ -390,8 +388,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         last_run_at: new Date().toISOString(),
         run_count: automation.run_count + 1
       })
-      toast.success('Running Automation', {
-        description: `"${automation.automation_name}" triggered manually`
+      toast.success('Running Automation'" triggered manually`
       })
       // Simulate completion after delay (in real app, this would be async task)
       setTimeout(async () => {
@@ -443,8 +440,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         category: automation.category,
         metadata: automation.metadata
       })
-      toast.success('Automation Duplicated', {
-        description: `Copy of "${automation.automation_name}" created`
+      toast.success('Automation Duplicated'" created`
       })
       refetch()
     } catch (err) {
@@ -458,8 +454,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
     }
     try {
       await deleteAutomation(automation.id)
-      toast.success('Automation Deleted', {
-        description: `"${automation.automation_name}" has been removed`
+      toast.success('Automation Deleted'" has been removed`
       })
       refetch()
     } catch (err) {
@@ -2058,7 +2053,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             <AIInsightsPanel
               insights={mockAutomationAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

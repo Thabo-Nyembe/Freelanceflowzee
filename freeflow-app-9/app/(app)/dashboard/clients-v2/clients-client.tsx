@@ -888,9 +888,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       })
       setShowEmailComposeDialog(true)
     } else {
-      toast.error('No email available', {
-        description: 'This client does not have an email address'
-      })
+      toast.error('No email available')
     }
   }
 
@@ -1023,13 +1021,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const handleCallClient = (client: typeof mockClients[0]) => {
     if (client.primaryContact.phone) {
       window.location.href = `tel:${client.primaryContact.phone}`
-      toast.success('Initiating call', {
-        description: `Calling ${client.primaryContact.name}`
+      toast.success('Initiating call'`
       })
     } else {
-      toast.error('No phone number available', {
-        description: 'This client does not have a phone number'
-      })
+      toast.error('No phone number available')
     }
   }
 
@@ -2281,24 +2276,12 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               onInsightAction={(insight) => {
                 // Handle insight actions based on type
                 if (insight.type === 'warning') {
-                  toast.warning(`Action needed: ${insight.title}`, {
-                    description: insight.description,
-                    action: {
-                      label: 'View Details',
-                      onClick: () => setActiveTab('clients')
-                    }
+                  toast.warning(`Action needed: ${insight.title}`
                   })
                 } else if (insight.type === 'success') {
-                  toast.success(insight.title, {
-                    description: insight.description
-                  })
+                  toast.success(insight.title)
                 } else {
-                  toast.info(insight.title, {
-                    description: insight.description,
-                    action: {
-                      label: 'Explore',
-                      onClick: () => setActiveTab('reports')
-                    }
+                  toast.info(insight.title
                   })
                 }
               }}

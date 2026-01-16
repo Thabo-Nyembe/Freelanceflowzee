@@ -802,7 +802,7 @@ export default function ProfileClient() {
 
       if (error) throw error
 
-      toast.success('Skill added', { description: `${skillName} has been added to your profile` })
+      toast.success('Skill added' has been added to your profile` })
       fetchProfileData()
     } catch (error: any) {
       if (error.code === '23505') {
@@ -2863,7 +2863,7 @@ export default function ProfileClient() {
               <AIInsightsPanel
                 insights={mockProfileAIInsights}
                 title="Profile Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
               />
             </div>
             <div className="space-y-6">

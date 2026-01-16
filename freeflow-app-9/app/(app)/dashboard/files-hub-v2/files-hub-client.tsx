@@ -577,12 +577,12 @@ export default function FilesHubClient() {
       })
 
       if (error) throw error
-      toast.success('Folder created', { description: `"${newFolderName}" has been created` })
+      toast.success('Folder created'" has been created` })
       setNewFolderName('')
       setShowCreateFolderDialog(false)
       fetchData()
     } catch (error) {
-      toast.error('Failed to create folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create folder')
     } finally {
       setIsSubmitting(false)
     }
@@ -592,10 +592,10 @@ export default function FilesHubClient() {
     try {
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
-      toast.success('File deleted', { description: `${fileName} moved to trash` })
+      toast.success('File deleted' moved to trash` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to delete file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete file')
     }
   }
 
@@ -624,10 +624,10 @@ export default function FilesHubClient() {
       if (error) throw error
 
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
-      toast.success('File shared', { description: `Share link created for ${fileName}` })
+      toast.success('File shared'` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to share file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to share file')
     }
   }
 
@@ -635,11 +635,11 @@ export default function FilesHubClient() {
     try {
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
-      toast.success('Folder deleted', { description: `"${folderName}" has been deleted` })
+      toast.success('Folder deleted'" has been deleted` })
       if (currentFolderId === folderId) setCurrentFolderId(null)
       fetchData()
     } catch (error) {
-      toast.error('Failed to delete folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete folder')
     }
   }
 
@@ -664,10 +664,10 @@ export default function FilesHubClient() {
         description: `File moved to ${targetFolderId ? folders.find(f => f.id === targetFolderId)?.name || 'folder' : 'root'}`
       })
 
-      toast.success('File moved', { description: `${fileName} has been moved` })
+      toast.success('File moved' has been moved` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to move file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to move file')
     }
   }
 
@@ -692,10 +692,10 @@ export default function FilesHubClient() {
         description: `File renamed to ${newName}`
       })
 
-      toast.success('File renamed', { description: `File renamed to ${newName}` })
+      toast.success('File renamed'` })
       fetchData()
     } catch (error) {
-      toast.error('Failed to rename file', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to rename file')
     }
   }
 
@@ -744,11 +744,11 @@ export default function FilesHubClient() {
       }
 
       toast.dismiss()
-      toast.success('Files uploaded successfully', { description: `${uploadedFiles.length} file(s) uploaded` })
+      toast.success('Files uploaded successfully' file(s) uploaded` })
       fetchData()
     } catch (error) {
       toast.dismiss()
-      toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Upload failed')
     }
 
     // Reset file input
@@ -806,7 +806,7 @@ export default function FilesHubClient() {
       const { error } = await supabase.from('file_shares').delete().eq('id', linkId)
       if (error) throw error
       toast.dismiss()
-      toast.success('Access revoked', { description: `Share link for "${fileName}" has been revoked` })
+      toast.success('Access revoked'" has been revoked` })
       fetchData()
     } catch (error) {
       toast.dismiss()
@@ -2322,7 +2322,7 @@ export default function FilesHubClient() {
             <AIInsightsPanel
               insights={mockFilesHubAIInsights}
               title="Files Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2579,7 +2579,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Local cache cleared', { description: 'Freed up 2.5 GB of storage' })
+                toast.success('Local cache cleared')
                 setShowClearCacheDialog(false)
               }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 Clear Cache
@@ -2642,7 +2642,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUnlinkDeviceDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Device unlinked', { description: `${selectedDevice?.name} has been removed` })
+                toast.success('Device unlinked' has been removed` })
                 setShowUnlinkDeviceDialog(false)
               }} variant="destructive">
                 Unlink Device
@@ -2675,7 +2675,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectAppDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success(`Connecting to ${selectedApp?.name}...`, { description: 'Redirecting to authorization' })
+                toast.success(`Connecting to ${selectedApp?.name}...`)
                 setShowConnectAppDialog(false)
               }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 Connect
@@ -2722,7 +2722,7 @@ export default function FilesHubClient() {
                   toast.error('Please enter a webhook URL')
                   return
                 }
-                toast.success('Webhook added', { description: 'Your webhook has been configured' })
+                toast.success('Webhook added')
                 setWebhookUrl('')
                 setWebhookEvent('file_upload')
                 setShowAddWebhookDialog(false)
@@ -2749,7 +2749,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('API key regenerated', { description: 'Your new API key is ready to use' })
+                toast.success('API key regenerated')
                 setShowRegenerateApiKeyDialog(false)
               }} variant="destructive">
                 Regenerate Key
@@ -2796,7 +2796,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportAuditLogDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Exporting audit log...', { description: 'Download will start shortly' })
+                toast.success('Exporting audit log...')
                 setShowExportAuditLogDialog(false)
               }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 Export
@@ -2856,7 +2856,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Export started', { description: 'You will receive an email when ready' })
+                toast.success('Export started')
                 setShowExportDataDialog(false)
               }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 Start Export
@@ -2884,7 +2884,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmptyTrashDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Trash emptied', { description: 'All deleted files have been permanently removed' })
+                toast.success('Trash emptied')
                 setShowEmptyTrashDialog(false)
               }} variant="destructive">
                 Empty Trash
@@ -2912,7 +2912,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateBackupDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Backup started', { description: 'Creating backup in the background...' })
+                toast.success('Backup started')
                 setShowCreateBackupDialog(false)
               }} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 Create Backup
@@ -2941,7 +2941,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllFilesDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.error('All files deleted', { description: 'Your Files Hub has been cleared' })
+                toast.error('All files deleted')
                 setShowDeleteAllFilesDialog(false)
               }} variant="destructive">
                 Delete All Files
@@ -2991,7 +2991,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Settings reset', { description: 'All settings restored to defaults' })
+                toast.success('Settings reset')
                 setShowResetSettingsDialog(false)
               }} variant="destructive">
                 Reset Settings
@@ -3019,7 +3019,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDisableFilesHubDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.error('Files Hub disabled', { description: 'You can re-enable it from account settings' })
+                toast.error('Files Hub disabled')
                 setShowDisableFilesHubDialog(false)
               }} variant="destructive">
                 Disable Files Hub

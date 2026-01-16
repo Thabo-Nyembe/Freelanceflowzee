@@ -788,7 +788,7 @@ export default function LogisticsClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to create shipments' })
+        toast.error('Authentication required')
         return
       }
 
@@ -811,13 +811,13 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Shipment created', { description: 'New shipment has been created successfully' })
+      toast.success('Shipment created')
       setShipmentForm(initialShipmentForm)
       setShowNewShipmentDialog(false)
       await fetchShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to create shipment'
-      toast.error('Error', { description: message })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
     }
@@ -832,11 +832,11 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Status updated', { description: `Shipment status changed to ${newStatus}` })
+      toast.success('Status updated'` })
       await fetchShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update status'
-      toast.error('Error', { description: message })
+      toast.error('Error')
     }
   }
 
@@ -849,11 +849,11 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Shipment deleted', { description: 'Shipment has been removed' })
+      toast.success('Shipment deleted')
       await fetchShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to delete shipment'
-      toast.error('Error', { description: message })
+      toast.error('Error')
     }
   }
 
@@ -866,11 +866,11 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Carrier updated', { description: `Carrier ${active ? 'activated' : 'deactivated'}` })
+      toast.success('Carrier updated'` })
       await fetchCarriers()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update carrier'
-      toast.error('Error', { description: message })
+      toast.error('Error')
     }
   }
 
@@ -878,23 +878,23 @@ export default function LogisticsClient() {
     setIsLoading(true)
     await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
     setIsLoading(false)
-    toast.success('Data refreshed', { description: 'All logistics data updated' })
+    toast.success('Data refreshed')
   }
 
   // Track order handler
   const handleTrackOrder = () => {
     if (!trackingNumber.trim()) {
-      toast.error('Tracking number required', { description: 'Please enter a valid tracking number' })
+      toast.error('Tracking number required')
       return
     }
     const found = mockShipments.find(s => s.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase()))
     if (found) {
       setSelectedShipment(found)
-      toast.success('Shipment found', { description: `Tracking ${found.trackingNumber}` })
+      toast.success('Shipment found'` })
       // Keep dialog open to show results
     } else {
       setSelectedShipment(null)
-      toast.error('Not found', { description: 'No shipment matches that tracking number' })
+      toast.error('Not found')
     }
   }
 
@@ -908,11 +908,11 @@ export default function LogisticsClient() {
     if (!selectedOrder) return
     setIsSaving(true)
     try {
-      toast.success('Order processed', { description: `Order ${selectedOrder.orderNumber} has been processed and is ready for shipment` })
+      toast.success('Order processed' has been processed and is ready for shipment` })
       setShowProcessOrderDialog(false)
       setSelectedOrder(null)
     } catch {
-      toast.error('Error', { description: 'Failed to process order' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
     }
@@ -920,7 +920,7 @@ export default function LogisticsClient() {
 
   // Rate shopping handler
   const handleCompareRates = () => {
-    toast.success('Rates compared', { description: 'Best rate: UPS Ground at $8.99' })
+    toast.success('Rates compared')
     setShowRateShoppingDialog(false)
   }
 
@@ -961,16 +961,16 @@ export default function LogisticsClient() {
       a.download = filename
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: `${type} data downloaded` })
+      toast.success('Export complete' data downloaded` })
     } catch {
-      toast.error('Export failed', { description: 'Could not generate report' })
+      toast.error('Export failed')
     }
     setShowExportDialog(false)
   }
 
   // Filter handlers
   const handleApplyFilters = () => {
-    toast.success('Filters applied', { description: `Carrier: ${filterOptions.carrier}, Priority: ${filterOptions.priority}` })
+    toast.success('Filters applied', Priority: ${filterOptions.priority}` })
     setShowFiltersDialog(false)
   }
 
@@ -978,7 +978,7 @@ export default function LogisticsClient() {
     setFilterOptions({ carrier: 'all', priority: 'all', dateRange: 'all' })
     setStatusFilter('all')
     setSearchQuery('')
-    toast.info('Filters cleared', { description: 'All filters have been reset' })
+    toast.info('Filters cleared')
     setShowFiltersDialog(false)
   }
 
@@ -990,7 +990,7 @@ export default function LogisticsClient() {
 
   const handleSaveCarrierConfig = () => {
     if (!selectedCarrier) return
-    toast.success('Carrier configured', { description: `${selectedCarrier.name} settings saved` })
+    toast.success('Carrier configured' settings saved` })
     setShowCarrierConfigDialog(false)
     setSelectedCarrier(null)
   }
@@ -1000,7 +1000,7 @@ export default function LogisticsClient() {
   }
 
   const handleSaveNewCarrier = () => {
-    toast.success('Carrier added', { description: 'New carrier has been added successfully' })
+    toast.success('Carrier added')
     setShowAddCarrierDialog(false)
   }
 
@@ -1012,7 +1012,7 @@ export default function LogisticsClient() {
 
   const handleSaveWarehouse = () => {
     if (!selectedWarehouse) return
-    toast.success('Warehouse updated', { description: `${selectedWarehouse.name} settings saved` })
+    toast.success('Warehouse updated' settings saved` })
     setShowWarehouseEditDialog(false)
     setSelectedWarehouse(null)
   }
@@ -1022,13 +1022,13 @@ export default function LogisticsClient() {
   }
 
   const handleSaveNewWarehouse = () => {
-    toast.success('Warehouse added', { description: 'New warehouse location added successfully' })
+    toast.success('Warehouse added')
     setShowAddWarehouseDialog(false)
   }
 
   // Batch print handler
   const handleConfirmBatchPrint = () => {
-    toast.success('Labels printed', { description: 'Batch printing started for selected shipments' })
+    toast.success('Labels printed')
     setShowBatchPrintDialog(false)
   }
 
@@ -1066,7 +1066,7 @@ export default function LogisticsClient() {
     a.download = `logistics-settings-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Settings exported', { description: 'Configuration file downloaded' })
+    toast.success('Settings exported')
     setShowSettingsExportDialog(false)
   }
 
@@ -1075,7 +1075,7 @@ export default function LogisticsClient() {
   }
 
   const handleConfirmSaveSettings = () => {
-    toast.success('Settings saved', { description: 'All logistics settings have been saved' })
+    toast.success('Settings saved')
     setShowSaveSettingsDialog(false)
   }
 
@@ -1087,9 +1087,9 @@ export default function LogisticsClient() {
   const handleConfirmResetHistory = async () => {
     setIsSaving(true)
     try {
-      toast.success('History reset', { description: 'All shipping history has been cleared' })
+      toast.success('History reset')
     } catch {
-      toast.error('Error', { description: 'Failed to reset history' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
       setShowResetHistoryDialog(false)
@@ -1103,9 +1103,9 @@ export default function LogisticsClient() {
   const handleConfirmDisconnectCarriers = async () => {
     setIsSaving(true)
     try {
-      toast.success('Carriers disconnected', { description: 'All carrier API connections have been removed' })
+      toast.success('Carriers disconnected')
     } catch {
-      toast.error('Error', { description: 'Failed to disconnect carriers' })
+      toast.error('Error')
     } finally {
       setIsSaving(false)
       setShowDisconnectCarriersDialog(false)
@@ -1117,7 +1117,7 @@ export default function LogisticsClient() {
     setIsLoading(true)
     await fetchCarriers()
     setIsLoading(false)
-    toast.success('Carriers synced', { description: 'All carrier data has been synchronized' })
+    toast.success('Carriers synced')
   }
 
   // Quick action handlers from dashboard
@@ -1131,7 +1131,7 @@ export default function LogisticsClient() {
         break
       case 'Process Orders':
         setActiveTab('orders')
-        toast.info('Orders tab', { description: 'View and process pending orders' })
+        toast.info('Orders tab')
         break
       case 'Rate Shopping':
         setShowRateShoppingDialog(true)
@@ -1140,7 +1140,7 @@ export default function LogisticsClient() {
         setShowExportDialog(true)
         break
       default:
-        toast.info('Action', { description: `${actionLabel} clicked` })
+        toast.info('Action' clicked` })
     }
   }
 
@@ -2445,7 +2445,7 @@ export default function LogisticsClient() {
               <AIInsightsPanel
                 insights={logisticsAIInsights}
                 title="Logistics Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+                onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
               />
             </div>
             <div className="space-y-6">

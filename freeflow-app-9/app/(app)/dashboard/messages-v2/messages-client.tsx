@@ -504,7 +504,7 @@ export default function MessagesClient() {
   // Real Supabase handlers
   const handleSendMessage = async () => {
     if (!messageInput.trim()) {
-      toast.error('Message required', { description: 'Please enter a message to send' })
+      toast.error('Message required')
       return
     }
 
@@ -521,12 +521,12 @@ export default function MessagesClient() {
         if (result.success) {
           setMessageInput('')
           setMessageSubject('')
-          toast.success('Message sent', { description: 'Your message has been delivered' })
+          toast.success('Message sent')
         } else {
-          toast.error('Failed to send message', { description: result.error || 'Unknown error' })
+          toast.error('Failed to send message')
         }
       } catch (error) {
-        toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+        toast.error('Failed to send message')
       }
     } else {
       // Fallback to legacy messages table
@@ -554,9 +554,9 @@ export default function MessagesClient() {
         })
         setMessageInput('')
         setMessageSubject('')
-        toast.success('Message sent', { description: 'Your message has been delivered' })
+        toast.success('Message sent')
       } catch (error) {
-        toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+        toast.error('Failed to send message')
       }
     }
   }
@@ -574,9 +574,9 @@ export default function MessagesClient() {
       } else {
         await deleteMessage(messageId)
       }
-      toast.success('Message deleted', { description: 'The message has been removed' })
+      toast.success('Message deleted')
     } catch (error) {
-      toast.error('Failed to delete message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to delete message')
     }
   }
 
@@ -599,9 +599,9 @@ export default function MessagesClient() {
           status: 'read' as const
         })
       }
-      toast.success('Marked as read', { description: 'Message marked as read' })
+      toast.success('Marked as read')
     } catch (error) {
-      toast.error('Failed to mark as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to mark as read')
     }
   }
 
@@ -612,9 +612,9 @@ export default function MessagesClient() {
       if (!result.success) {
         throw new Error(result.error || 'Failed to mark chat as read')
       }
-      toast.success('Chat marked as read', { description: 'All messages marked as read' })
+      toast.success('Chat marked as read')
     } catch (error) {
-      toast.error('Failed to mark chat as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to mark chat as read')
     }
   }
 
@@ -624,9 +624,9 @@ export default function MessagesClient() {
         status: 'archived' as const,
         folder: 'archive'
       })
-      toast.success('Message archived', { description: 'Message moved to archive' })
+      toast.success('Message archived')
     } catch (error) {
-      toast.error('Failed to archive message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to archive message')
     }
   }
 
@@ -635,11 +635,9 @@ export default function MessagesClient() {
       await updateMessage(messageId, {
         is_starred: !currentStarred
       })
-      toast.success(currentStarred ? 'Star removed' : 'Message starred', {
-        description: currentStarred ? 'Star has been removed' : 'Message has been starred'
-      })
+      toast.success(currentStarred ? 'Star removed' : 'Message starred')
     } catch (error) {
-      toast.error('Failed to update star', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update star')
     }
   }
 
@@ -658,11 +656,9 @@ export default function MessagesClient() {
           is_pinned: !currentPinned
         })
       }
-      toast.success(currentPinned ? 'Message unpinned' : 'Message pinned', {
-        description: currentPinned ? 'Message has been unpinned' : 'Message has been pinned'
-      })
+      toast.success(currentPinned ? 'Message unpinned' : 'Message pinned')
     } catch (error) {
-      toast.error('Failed to update pin', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update pin')
     }
   }
 
@@ -671,11 +667,9 @@ export default function MessagesClient() {
       await updateMessage(messageId, {
         is_important: !currentImportant
       })
-      toast.success(currentImportant ? 'Removed important flag' : 'Marked as important', {
-        description: currentImportant ? 'Important flag removed' : 'Message marked as important'
-      })
+      toast.success(currentImportant ? 'Removed important flag' : 'Marked as important')
     } catch (error) {
-      toast.error('Failed to update importance', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to update importance')
     }
   }
 
@@ -690,7 +684,7 @@ export default function MessagesClient() {
   // Actual channel creation when form is submitted
   const handleSubmitCreateChannel = async () => {
     if (!newChannelName.trim()) {
-      toast.error('Channel name required', { description: 'Please enter a channel name' })
+      toast.error('Channel name required')
       return
     }
 
@@ -701,17 +695,17 @@ export default function MessagesClient() {
         description: newChannelDescription.trim() || `Channel for ${newChannelName} discussions`
       })
       if (result.success) {
-        toast.success('Channel created', { description: `#${newChannelName} is now available` })
+        toast.success('Channel created' is now available` })
         setShowCreateChannelDialog(false)
         setNewChannelName('')
         setNewChannelDescription('')
         // Refresh chats list
         fetchChats()
       } else {
-        toast.error('Failed to create channel', { description: result.error || 'Unknown error' })
+        toast.error('Failed to create channel')
       }
     } catch (error) {
-      toast.error('Failed to create channel', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to create channel')
     }
   }
 
@@ -724,14 +718,14 @@ export default function MessagesClient() {
         memberIds: [userId]
       })
       if (result.success && result.chat) {
-        toast.success('Chat created', { description: `Started conversation with ${userName}` })
+        toast.success('Chat created'` })
         // Select the new chat
         await selectChat(result.chat.id)
       } else {
-        toast.error('Failed to start chat', { description: result.error || 'Unknown error' })
+        toast.error('Failed to start chat')
       }
     } catch (error) {
-      toast.error('Failed to start chat', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to start chat')
     }
   }
 
@@ -746,11 +740,11 @@ export default function MessagesClient() {
   // Handler for compose message dialog submission
   const handleSubmitCompose = async () => {
     if (!composeBody.trim()) {
-      toast.error('Message required', { description: 'Please enter a message' })
+      toast.error('Message required')
       return
     }
     if (!composeRecipient) {
-      toast.error('Recipient required', { description: 'Please select a recipient' })
+      toast.error('Recipient required')
       return
     }
 
@@ -776,25 +770,25 @@ export default function MessagesClient() {
         attachment_count: uploadedFiles.length,
         reaction_count: 0
       })
-      toast.success('Message sent', { description: 'Your message has been delivered' })
+      toast.success('Message sent')
       setShowComposeDialog(false)
       setComposeRecipient('')
       setComposeSubject('')
       setComposeBody('')
       setUploadedFiles([])
     } catch (error) {
-      toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to send message')
     }
   }
 
   // Handler for reply dialog submission
   const handleSubmitReply = async () => {
     if (!replyBody.trim()) {
-      toast.error('Reply required', { description: 'Please enter a reply message' })
+      toast.error('Reply required')
       return
     }
     if (!replyToMessage) {
-      toast.error('No message selected', { description: 'Please select a message to reply to' })
+      toast.error('No message selected')
       return
     }
 
@@ -807,11 +801,11 @@ export default function MessagesClient() {
   // Handler for forward dialog submission
   const handleSubmitForward = async () => {
     if (!forwardMessage) {
-      toast.error('No message selected', { description: 'Please select a message to forward' })
+      toast.error('No message selected')
       return
     }
     if (!forwardRecipient) {
-      toast.error('Recipient required', { description: 'Please select a recipient' })
+      toast.error('Recipient required')
       return
     }
 
@@ -846,13 +840,13 @@ export default function MessagesClient() {
 
     const newFiles = Array.from(files)
     setUploadedFiles(prev => [...prev, ...newFiles])
-    toast.success('Files added', { description: `${newFiles.length} file(s) ready to upload` })
+    toast.success('Files added' file(s) ready to upload` })
   }
 
   // Handler for advanced search
   const handleAdvancedSearch = async () => {
     if (!searchQuery.trim()) {
-      toast.error('Search required', { description: 'Please enter a search term' })
+      toast.error('Search required')
       return
     }
 
@@ -893,9 +887,9 @@ export default function MessagesClient() {
       }))
 
       setSearchResults([...convertedResults, ...mockResults])
-      toast.success('Search complete', { description: `Found ${convertedResults.length + mockResults.length} matching messages` })
+      toast.success('Search complete' matching messages` })
     } catch (error) {
-      toast.error('Search failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Search failed')
     } finally {
       setIsSearching(false)
     }
@@ -935,7 +929,7 @@ export default function MessagesClient() {
         throw new Error(result.error || 'Failed to add reaction')
       }
     } catch (error) {
-      toast.error('Failed to add reaction', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to add reaction')
     }
   }
 
@@ -969,11 +963,11 @@ export default function MessagesClient() {
       startTime: new Date().toISOString(),
       isRecorded: false
     })
-    toast.success(`Calling ${contactName}`, { description: 'Call connected!' })
+    toast.success(`Calling ${contactName}`)
   }
 
   const handleMuteChannel = (channelName: string) => {
-    toast.success('Channel muted', { description: `#${channelName} notifications are now off` })
+    toast.success('Channel muted' notifications are now off` })
   }
 
   const handleMarkAllAsRead = async () => {
@@ -1003,12 +997,12 @@ export default function MessagesClient() {
       }
 
       if (totalMarked > 0) {
-        toast.success('All messages marked as read', { description: `${totalMarked} messages updated` })
+        toast.success('All messages marked as read' messages updated` })
       } else {
-        toast.info('No unread messages', { description: 'All messages are already read' })
+        toast.info('No unread messages')
       }
     } catch (error) {
-      toast.error('Failed to mark all as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to mark all as read')
     }
   }
 
@@ -1042,9 +1036,9 @@ export default function MessagesClient() {
         attachment_count: originalMessage.attachment_count,
         reaction_count: 0
       })
-      toast.success('Message forwarded', { description: 'Message has been forwarded successfully' })
+      toast.success('Message forwarded')
     } catch (error) {
-      toast.error('Failed to forward message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to forward message')
     }
   }
 
@@ -1080,9 +1074,9 @@ export default function MessagesClient() {
         attachment_count: 0,
         reaction_count: 0
       })
-      toast.success('Reply sent', { description: 'Your reply has been sent' })
+      toast.success('Reply sent')
     } catch (error) {
-      toast.error('Failed to send reply', { description: error instanceof Error ? error.message : 'Unknown error' })
+      toast.error('Failed to send reply')
     }
   }
 
@@ -1253,12 +1247,12 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: handleCreateChannel },
-                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setChannelFilter('all'); toast.success('Browse channels', { description: `${mockChannels.length} channels available` }) } },
-                { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { navigator.clipboard.writeText('https://freeflow.app/invite/workspace'); toast.success('Invite link copied!', { description: 'Share this link to invite people' }) } },
+                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setChannelFilter('all'); toast.success('Browse channels' channels available` }) } },
+                { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { navigator.clipboard.writeText('https://freeflow.app/invite/workspace'); toast.success('Invite link copied!') } },
                 { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Showing starred channels') } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => window.open('/dashboard/integrations', '_blank') },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => window.open('/dashboard/automations', '_blank') },
-                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success('Archived channels', { description: `${archived.length} channels in archive` }) } },
+                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success('Archived channels' channels in archive` }) } },
                 { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
@@ -1393,7 +1387,7 @@ export default function MessagesClient() {
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={() => {
                       navigator.clipboard.writeText('https://freeflow.app/invite/channel')
-                      toast.success('Invite link copied!', { description: 'Share this link to invite people to the channel' })
+                      toast.success('Invite link copied!')
                     }}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite People
@@ -1476,8 +1470,8 @@ export default function MessagesClient() {
               {[
                 { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setComposeRecipient(''); setComposeSubject(''); setComposeBody(''); setShowComposeDialog(true) } },
                 { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setComposeRecipient(''); setComposeSubject(''); setComposeBody(''); setShowComposeDialog(true) } },
-                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to', { description: 'Select a conversation first' }) } } },
-                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setIsForwardMode(true); toast.info('Forward mode enabled', { description: 'Click on a message to forward it' }) } },
+                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to') } } },
+                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setIsForwardMode(true); toast.info('Forward mode enabled') } },
                 { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowSavedMessagesDialog(true) },
                 { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowPinnedMessagesDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
@@ -1552,12 +1546,12 @@ export default function MessagesClient() {
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => {
                             const pinnedMessages = channelMessages.filter(m => m.isPinned)
-                            toast.success('Pinned items', { description: `${pinnedMessages.length} pinned messages in this channel` })
+                            toast.success('Pinned items' pinned messages in this channel` })
                           }}><Pin className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={async () => {
                             if (confirm(`Are you sure you want to archive #${selectedChannel.name}?`)) {
-                              toast.success('Channel archived', { description: `#${selectedChannel.name} has been archived` })
+                              toast.success('Channel archived' has been archived` })
                               setSelectedChannel(null)
                             }
                           }}><Archive className="w-4 h-4" /></Button>
@@ -1708,10 +1702,10 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowAllThreadsDialog(true) },
-                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { const following = mockThreads.filter(t => t.isFollowing); toast.success('Following', { description: `${following.length} threads you are following` }) } },
-                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { const unread = mockThreads.filter(t => t.isUnread); toast.success('Unread threads', { description: `${unread.length} unread threads` }) } },
+                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { const following = mockThreads.filter(t => t.isFollowing); toast.success('Following' threads you are following` }) } },
+                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { const unread = mockThreads.filter(t => t.isUnread); toast.success('Unread threads' unread threads` }) } },
                 { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowMyRepliesDialog(true) },
-                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success('Mentions', { description: `${stats.mentions} mentions found` }) } },
+                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success('Mentions' mentions found` }) } },
                 { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowArchivedThreadsDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
@@ -1797,12 +1791,12 @@ export default function MessagesClient() {
             {/* Calls Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact', { description: 'Choose a contact from the list to call' }) } } },
-                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact', { description: 'Choose a contact for video call' }) } } },
-                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as any], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started', { description: 'Invite others to join your huddle' }) } },
-                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (!activeCall) { toast.warning('Start a call first', { description: 'You need to be in a call to share your screen' }) } } },
+                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact') } } },
+                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { if (selectedChannel) { handleStartCall(selectedChannel.name) } else { toast.success('Select a contact') } } },
+                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as any], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started') } },
+                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (!activeCall) { toast.warning('Start a call first') } } },
                 { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => window.open('/dashboard/calendar', '_blank') },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success('Call recordings', { description: `${recorded.length} recorded calls available` }) } },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success('Call recordings' recorded calls available` }) } },
                 { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowCallHistoryDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
@@ -1840,7 +1834,7 @@ export default function MessagesClient() {
                           </div>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
                             setActiveCall(call)
-                            toast.success(`Joined ${call.channelName}`, { description: `You are now in the call with ${call.participants.length} participants` })
+                            toast.success(`Joined ${call.channelName}` participants` })
                           }}>
                             Join
                           </Button>
@@ -1882,7 +1876,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
                             navigator.clipboard.writeText(`Call: ${call.channelName}\nScheduled: ${new Date(call.startTime).toLocaleString()}\nParticipants: ${call.participants.length}`)
-                            toast.success('Call details copied', { description: `${call.channelName} - ${new Date(call.startTime).toLocaleString()}` })
+                            toast.success('Call details copied' - ${new Date(call.startTime).toLocaleString()}` })
                           }}>View</Button>
                         </div>
                       </div>
@@ -1979,7 +1973,7 @@ export default function MessagesClient() {
                     const input = document.createElement('input')
                     input.type = 'file'
                     input.multiple = true
-                    input.onchange = () => toast.success('Files selected', { description: `${input.files?.length || 0} files ready to upload` })
+                    input.onchange = () => toast.success('Files selected' files ready to upload` })
                     input.click()
                   }}>
                     <Upload className="w-4 h-4 mr-2" />
@@ -2016,7 +2010,7 @@ export default function MessagesClient() {
                           link.href = file.url || '#'
                           link.download = file.name
                           link.click()
-                          toast.success(`Downloaded ${file.name}`, { description: formatFileSize(file.size) })
+                          toast.success(`Downloaded ${file.name}`)
                         }}>
                           <Download className="w-4 h-4" />
                         </Button>
@@ -2061,7 +2055,7 @@ export default function MessagesClient() {
                 { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowAllMentionsDialog(true) },
                 { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowReactionsDialog(true) },
                 { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowSavedMessagesDialog(true) },
-                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to', { description: 'Select a conversation first' }) } } },
+                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to') } } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: handleMarkAllAsRead },
                 { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all') } },
                 { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
@@ -2103,7 +2097,7 @@ export default function MessagesClient() {
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setMessageInput(`@${mention.message.author.name} `)
-                          toast.success('Ready to reply', { description: `Replying to ${mention.message.author.displayName}` })
+                          toast.success('Ready to reply'` })
                         }}>
                           <Reply className="w-4 h-4" />
                         </Button>
@@ -2691,7 +2685,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
                             window.open('https://zoom.us/oauth/authorize', '_blank')
-                            toast.success('Zoom OAuth started', { description: 'Complete authorization in the popup window' })
+                            toast.success('Zoom OAuth started')
                           }}>Connect</Button>
                         </div>
                       </CardContent>
@@ -2771,9 +2765,9 @@ export default function MessagesClient() {
                               link.download = 'freeflow-data-export.json'
                               link.click()
                               URL.revokeObjectURL(url)
-                              toast.success('Data exported', { description: 'Your data has been downloaded' })
+                              toast.success('Data exported')
                             } catch {
-                              toast.error('Export failed', { description: 'Could not export data' })
+                              toast.error('Export failed')
                             }
                           }}>
                             <Download className="w-4 h-4 mr-2" />
@@ -2782,7 +2776,7 @@ export default function MessagesClient() {
                           <Button variant="outline" className="flex-1" onClick={() => {
                             localStorage.clear()
                             sessionStorage.clear()
-                            toast.success('Cache cleared', { description: 'All cached data has been removed' })
+                            toast.success('Cache cleared')
                           }}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear Cache
@@ -2809,14 +2803,14 @@ export default function MessagesClient() {
                           Contact Support
                         </Button>
                         <Button variant="outline" className="w-full justify-start" onClick={() => {
-                          toast.success('Keyboard shortcuts', { description: 'Press Ctrl+/ or Cmd+/ to view shortcuts anytime' })
+                          toast.success('Keyboard shortcuts')
                         }}>
                           <Zap className="w-4 h-4 mr-2" />
                           Keyboard Shortcuts
                         </Button>
                         <Button variant="outline" className="w-full justify-start" onClick={() => {
                           refetchMessages()
-                          toast.success('You are on the latest version', { description: 'No updates available' })
+                          toast.success('You are on the latest version')
                         }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Check for Updates
@@ -2840,7 +2834,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="destructive" size="sm" onClick={() => {
                             if (confirm('Are you sure you want to leave this workspace?')) {
-                              toast.success('Left workspace', { description: 'Redirecting to workspace selector...' })
+                              toast.success('Left workspace')
                               window.location.href = '/dashboard'
                             }
                           }}>
@@ -2863,9 +2857,9 @@ export default function MessagesClient() {
                                 for (const msg of supabaseMessages) {
                                   await deleteMessage(msg.id, true)
                                 }
-                                toast.success('All messages deleted', { description: 'All your messages have been permanently deleted' })
+                                toast.success('All messages deleted')
                               } catch (error) {
-                                toast.error('Failed to delete messages', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                toast.error('Failed to delete messages')
                               }
                             }
                           }} disabled={mutating}>
@@ -2898,7 +2892,7 @@ export default function MessagesClient() {
                 } else if (insight.actionLabel?.toLowerCase().includes('filter')) {
                   setChannelFilter('unread')
                 } else {
-                  toast.info('Insight action', { description: `Processing: ${insight.title || 'action'}` })
+                  toast.info('Insight action'` })
                 }
               }}
             />
@@ -3116,7 +3110,7 @@ export default function MessagesClient() {
                   link.href = file.url || '#'
                   link.download = file.name
                   link.click()
-                  toast.success(`Downloaded ${file.name}`, { description: formatFileSize(file.size) })
+                  toast.success(`Downloaded ${file.name}`)
                 }}>
                   <Download className="w-4 h-4" />
                 </Button>
@@ -3652,7 +3646,7 @@ export default function MessagesClient() {
                   setShowFileUploadDialog(false)
                   setUploadedFiles([])
                 } else {
-                  toast.error('No files selected', { description: 'Please select files to upload' })
+                  toast.error('No files selected')
                 }
               }}
               disabled={uploadedFiles.length === 0}

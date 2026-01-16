@@ -961,16 +961,12 @@ export default function ApiKeysClient() {
       // Copy the full key to clipboard
       if (data.data?.fullKey) {
         await navigator.clipboard.writeText(data.data.fullKey)
-        toast.success('API key created successfully!', {
-          description: `Key copied to clipboard - save it now, it won't be shown again!`
-        })
+        toast.success('API key created successfully!')
       } else {
         toast.success('API key created successfully!')
       }
     } catch (error: any) {
-      toast.error('Failed to create API key', {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error('Failed to create API key')
     }
   }
 
@@ -993,9 +989,7 @@ export default function ApiKeysClient() {
 
       toast.success(`${keyName} has been revoked successfully`)
     } catch (error: any) {
-      toast.error(`Failed to revoke ${keyName}`, {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error(`Failed to revoke ${keyName}`)
     }
   }
 
@@ -1019,16 +1013,12 @@ export default function ApiKeysClient() {
       // Copy the new key to clipboard
       if (data.data?.fullKey) {
         await navigator.clipboard.writeText(data.data.fullKey)
-        toast.success(`New key created for ${keyName}`, {
-          description: 'Key copied to clipboard - save it now!'
-        })
+        toast.success(`New key created for ${keyName}`)
       } else {
         toast.success(`Key regenerated for ${keyName}`)
       }
     } catch (error: any) {
-      toast.error(`Failed to regenerate key for ${keyName}`, {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error(`Failed to regenerate key for ${keyName}`)
     }
   }
 
@@ -1046,9 +1036,7 @@ export default function ApiKeysClient() {
 
       toast.success(`${keyName} has been deleted successfully`)
     } catch (error: any) {
-      toast.error(`Failed to delete ${keyName}`, {
-        description: error.message || 'An unexpected error occurred'
-      })
+      toast.error(`Failed to delete ${keyName}`)
     }
   }
 
@@ -1953,7 +1941,7 @@ export default function ApiKeysClient() {
             <AIInsightsPanel
               insights={mockApiKeysAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2561,7 +2549,7 @@ export default function ApiKeysClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => { setFilterEnvironment('all'); setFilterStatus('all'); setFilterKeyType('all') }}>Reset</Button>
               <Button onClick={() => {
-                toast.success('Filters applied', { description: `Environment: ${filterEnvironment}, Status: ${filterStatus}, Type: ${filterKeyType}` })
+                toast.success('Filters applied', Status: ${filterStatus}, Type: ${filterKeyType}` })
                 setFilterDialogOpen(false)
               }}>Apply Filters</Button>
             </DialogFooter>
@@ -3208,7 +3196,7 @@ console.log(user);`}</code>
               ].map((doc, i) => (
                 <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => {
                   window.open(`/docs/api/${doc.title.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
-                  toast.info(`Opening ${doc.title}...`, { description: doc.desc })
+                  toast.info(`Opening ${doc.title}...`)
                   setDocsDialogOpen(false)
                 }}>
                   <doc.icon className="w-5 h-5 text-gray-600" />

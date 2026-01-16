@@ -713,7 +713,7 @@ export default function DesktopAppClient() {
         : dbProjects[0]
 
       if (!project) {
-        toast.info('No project found', { description: 'Create a project first' })
+        toast.info('No project found')
         return
       }
 
@@ -732,7 +732,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started', { description: `Build #${buildNumber} initiated` })
+      toast.success('Build started' initiated` })
       fetchData()
     } catch (error) {
       console.error('Error starting build:', error)
@@ -779,7 +779,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.info('Retrying build', { description: `Build ${build.build_number} restarted` })
+      toast.info('Retrying build' restarted` })
       fetchData()
     } catch (error) {
       console.error('Error retrying build:', error)
@@ -943,9 +943,7 @@ export default function DesktopAppClient() {
       const latestBuild = dbBuilds.find(b => b.status === 'success' && b.build_type !== 'production')
 
       if (!latestBuild) {
-        toast.info('No builds ready for deployment', {
-          description: 'Complete a successful build first'
-        })
+        toast.info('No builds ready for deployment')
         return
       }
 
@@ -959,8 +957,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Update deployed to production', {
-        description: `Build ${latestBuild.build_number} is now live`
+      toast.success('Update deployed to production' is now live`
       })
       fetchData()
     } catch (error) {
@@ -983,7 +980,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Release published', { description: `${buildVersion} is now live` })
+      toast.success('Release published' is now live` })
       fetchData()
     } catch (error) {
       console.error('Error publishing release:', error)
@@ -993,8 +990,7 @@ export default function DesktopAppClient() {
 
   // View certificate details
   const handleViewCertificate = (cert: Certificate) => {
-    toast.info(`Certificate: ${cert.name}`, {
-      description: `Issued by ${cert.issuer}, expires ${new Date(cert.expiresAt).toLocaleDateString()}`
+    toast.info(`Certificate: ${cert.name}`, expires ${new Date(cert.expiresAt).toLocaleDateString()}`
     })
   }
 
@@ -1026,9 +1022,7 @@ export default function DesktopAppClient() {
       URL.revokeObjectURL(url)
 
       toast.dismiss()
-      toast.success(`Renewal initiated for ${cert.name}`, {
-        description: 'Renewal request details downloaded'
-      })
+      toast.success(`Renewal initiated for ${cert.name}`)
     } catch (error) {
       toast.dismiss()
       console.error('Certificate renewal error:', error)
@@ -1043,9 +1037,7 @@ export default function DesktopAppClient() {
     try {
       // Simulate checking for updates
       await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Your desktop app is up to date!', {
-        description: 'Version 2.5.0 is the latest version'
-      })
+      toast.success('Your desktop app is up to date!')
     } catch (error) {
       console.error('Error checking for updates:', error)
       toast.error('Failed to check for updates')
@@ -1086,9 +1078,7 @@ export default function DesktopAppClient() {
       URL.revokeObjectURL(url)
 
       toast.dismiss()
-      toast.success(`Download started for ${platform}`, {
-        description: 'Download info saved to file'
-      })
+      toast.success(`Download started for ${platform}`)
       setShowDownloadDialog(false)
     } catch (error) {
       toast.dismiss()
@@ -1165,9 +1155,7 @@ export default function DesktopAppClient() {
 
   // Save preferences handler
   const handleSavePreferences = () => {
-    toast.success('Preferences saved successfully', {
-      description: 'Your settings have been updated'
-    })
+    toast.success('Preferences saved successfully')
     setShowPreferencesDialog(false)
   }
 
@@ -1180,9 +1168,7 @@ export default function DesktopAppClient() {
       await new Promise(resolve => setTimeout(resolve, 3000))
 
       toast.dismiss()
-      toast.success('App submitted for notarization', {
-        description: 'Apple notarization typically takes 5-15 minutes'
-      })
+      toast.success('App submitted for notarization')
       setShowNotarizeDialog(false)
     } catch (error) {
       toast.dismiss()
@@ -1205,9 +1191,7 @@ export default function DesktopAppClient() {
       await new Promise(resolve => setTimeout(resolve, 2000))
 
       toast.dismiss()
-      toast.success(`Deployed ${latestBuild.version} to production`, {
-        description: 'All platforms updated successfully'
-      })
+      toast.success(`Deployed ${latestBuild.version} to production`)
       setShowDeployDialog(false)
     } catch (error) {
       toast.dismiss()
@@ -1261,8 +1245,7 @@ Date: ${new Date().toISOString().split('T')[0]}
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Release notes generated', {
-      description: `Notes for ${latestBuild.version} downloaded`
+    toast.success('Release notes generated' downloaded`
     })
     setShowReleaseNotesDialog(false)
   }
@@ -1742,8 +1725,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        toast.info(`Viewing release ${release.version}`, {
-                          description: `Published: ${new Date(release.publishedAt).toLocaleDateString()}`
+                        toast.info(`Viewing release ${release.version}``
                         })
                       }}
                     >
@@ -1818,8 +1800,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success(`Assigned to ${crash.assignee || 'you'}`, {
-                              description: `Crash report ${crash.id} assigned`
+                            toast.success(`Assigned to ${crash.assignee || 'you'}` assigned`
                             })
                           }}
                         >
@@ -1829,8 +1810,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success('Status updated to Investigating', {
-                              description: `Crash ${crash.errorType} marked as investigating`
+                            toast.success('Status updated to Investigating' marked as investigating`
                             })
                           }}
                         >
@@ -1883,8 +1863,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              toast.success('GitHub issue created', {
-                                description: `Issue created for ${crash.errorType}`
+                              toast.success('GitHub issue created'`
                               })
                             }}
                           >
@@ -2084,7 +2063,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                       className="h-auto p-4 flex flex-col items-center gap-2"
                       onClick={() => {
                         window.open('https://developer.apple.com/account/resources/certificates/list', '_blank')
-                        toast.info('Opening Apple Developer Portal', { description: 'Create a new Developer ID certificate' })
+                        toast.info('Opening Apple Developer Portal')
                       }}
                     >
                       <Apple className="w-8 h-8 text-gray-400" />
@@ -2096,7 +2075,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                       className="h-auto p-4 flex flex-col items-center gap-2"
                       onClick={() => {
                         window.open('https://www.digicert.com/signing/code-signing-certificates', '_blank')
-                        toast.info('Opening DigiCert', { description: 'Purchase an EV code signing certificate' })
+                        toast.info('Opening DigiCert')
                       }}
                     >
                       <Monitor className="w-8 h-8 text-blue-400" />
@@ -2107,7 +2086,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                       variant="outline"
                       className="h-auto p-4 flex flex-col items-center gap-2"
                       onClick={() => {
-                        toast.info('GPG Key Generation', { description: 'Run: gpg --full-generate-key' })
+                        toast.info('GPG Key Generation')
                       }}
                     >
                       <Key className="w-8 h-8 text-orange-400" />
@@ -2396,7 +2375,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                               toast.success('Native modules rebuilt successfully')
                             } catch {
                               toast.dismiss()
-                              toast.info('Rebuild initiated', { description: 'Run: npm run rebuild' })
+                              toast.info('Rebuild initiated')
                             }
                           }}
                         >
@@ -2428,7 +2407,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           className="w-full"
                           onClick={() => {
                             setActiveTab('settings')
-                            toast.info('CI/CD Configuration', { description: 'Configure your build pipeline in Settings' })
+                            toast.info('CI/CD Configuration')
                           }}
                         >
                           Configure CI/CD
@@ -2945,7 +2924,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                                   toast.success('Update keys revoked')
                                 } catch {
                                   toast.dismiss()
-                                  toast.info('Keys revoked', { description: 'Generate new keys in settings' })
+                                  toast.info('Keys revoked')
                                 }
                               }}
                             >
@@ -2994,7 +2973,7 @@ Date: ${new Date().toISOString().split('T')[0]}
             <AIInsightsPanel
               insights={mockDesktopAppAIInsights}
               title="Desktop App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

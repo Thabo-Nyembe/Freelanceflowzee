@@ -512,7 +512,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.success('Agent assigned', { description: 'Ticket assigned successfully' })
+      toast.success('Agent assigned')
       fetchTickets()
     } catch (error) {
       console.error('Error assigning agent:', error)
@@ -538,7 +538,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.success('Ticket resolved', { description: 'Support ticket has been marked as resolved' })
+      toast.success('Ticket resolved')
       setShowTicketDialog(false)
       fetchTickets()
     } catch (error) {
@@ -562,7 +562,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       if (error) throw error
 
-      toast.info('Ticket escalated', { description: 'Ticket has been escalated to senior support' })
+      toast.info('Ticket escalated')
       fetchTickets()
     } catch (error) {
       console.error('Error escalating ticket:', error)
@@ -648,7 +648,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       a.download = `support-tickets-${new Date().toISOString().split('T')[0]}.csv`
       a.click()
 
-      toast.success('Export started', { description: 'Support data is being exported' })
+      toast.success('Export started')
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export tickets')
@@ -711,9 +711,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       shortcut: '⌘R',
       action: () => {
         if (selectedTicket) {
-          toast.info('Reply template loaded', { description: 'Select a canned response to send' })
+          toast.info('Reply template loaded')
         } else {
-          toast.info('Select a ticket first', { description: 'Choose a ticket to reply to' })
+          toast.info('Select a ticket first')
         }
       }
     },
@@ -726,7 +726,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
         if (selectedTicket) {
           await handleEscalateTicket(selectedTicket.id)
         } else {
-          toast.info('Select a ticket first', { description: 'Choose a ticket to escalate' })
+          toast.info('Select a ticket first')
         }
       }
     },
@@ -900,7 +900,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   {[
                     { label: 'My Tickets', count: 5, action: () => { setStatusFilter('all'); toast.success('Showing your assigned tickets') } },
                     { label: 'Unassigned', count: 3, action: () => { setStatusFilter('new'); toast.success('Showing unassigned tickets') } },
-                    { label: 'SLA Breached', count: 1, action: () => toast.info('Showing SLA breached tickets', { description: '1 ticket requires immediate attention' }) },
+                    { label: 'SLA Breached', count: 1, action: () => toast.info('Showing SLA breached tickets') },
                     { label: 'Awaiting Reply', count: 2, action: () => { setStatusFilter('pending'); toast.success('Showing tickets awaiting reply') } },
                   ].map((filter, i) => (
                     <button
@@ -1267,7 +1267,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               {[
                 { icon: BarChart3, label: 'Overview', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.success('Showing analytics overview') },
                 { icon: TrendingUp, label: 'Trends', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => setShowInsightsDialog(true) },
-                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Response time analytics', { description: 'Average: 2.4 hours' }) },
+                { icon: Timer, label: 'Response', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Response time analytics') },
                 { icon: Star, label: 'CSAT', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setShowRatingsDialog(true) },
                 { icon: Users, label: 'Agents', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('agents') },
                 { icon: Tag, label: 'Topics', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowTagsDialog(true) },
@@ -3302,7 +3302,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
             <Button onClick={() => {
               setFilteredTickets(tickets.filter(t => true)) // Apply actual filter logic
-              toast.success('Filters applied', { description: 'Ticket list updated' })
+              toast.success('Filters applied')
               setShowFilterDialog(false)
             }}>Apply Filters</Button>
           </DialogFooter>
@@ -3571,7 +3571,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={() => {
               setMessageInput(selectedResponse?.content || '')
               setShowPreviewResponseDialog(false)
-              toast.success('Response inserted', { description: 'Template added to message' })
+              toast.success('Response inserted')
             }}>Use Response</Button>
           </DialogFooter>
         </DialogContent>
@@ -3816,7 +3816,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 return
               }
               setTags(prev => [...prev, { id: `TAG-${Date.now()}`, name: newTagForm.trim(), color: '#' + Math.floor(Math.random()*16777215).toString(16) }])
-              toast.success(`Tag "${newTagForm}" added`, { description: 'Tag is now available' })
+              toast.success(`Tag "${newTagForm}" added`)
               setShowAddTagDialog(false)
               setNewTagForm('')
             }}>Add Tag</Button>
@@ -4182,7 +4182,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 toast.error('Please enter a team name');
                 return;
               }
-              toast.success('Team created', { description: `${newTeamName} team is now active` });
+              toast.success('Team created' team is now active` });
               setShowCreateTeamDialog(false);
               setNewTeamName('');
             }}>Create Team</Button>
@@ -4236,7 +4236,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 toast.error('Please enter a segment name');
                 return;
               }
-              toast.success('Segment created', { description: `${newSegmentName} segment is now active` });
+              toast.success('Segment created' segment is now active` });
               setShowCreateSegmentDialog(false);
               setNewSegmentName('');
             }}>Create Segment</Button>
@@ -4270,9 +4270,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success(`${selectedIntegration?.name} connected successfully`, {
-                description: 'Integration is now active'
-              });
+              toast.success(`${selectedIntegration?.name} connected successfully`);
               setShowConnectIntegrationDialog(false);
             }}>Connect</Button>
           </DialogFooter>
@@ -4304,9 +4302,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
             <Button variant="destructive" onClick={() => {
-              toast.success('API key regenerated', {
-                description: 'Your new API key has been generated. Copy it now as it won\'t be shown again.'
-              });
+              toast.success('API key regenerated');
               setShowRegenerateApiKeyDialog(false);
             }}>Regenerate Key</Button>
           </DialogFooter>
@@ -4359,9 +4355,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 toast.error('Please select start and end dates');
                 return;
               }
-              toast.success('PTO request submitted', {
-                description: 'Your supervisor will be notified'
-              });
+              toast.success('PTO request submitted');
               setShowPTORequestDialog(false);
               setPtoRequestForm({ startDate: '', endDate: '', reason: '' });
             }}>Submit Request</Button>
@@ -4411,8 +4405,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 return;
               }
               const swapAgent = agents.find(a => a.id === shiftSwapForm.swapWith);
-              toast.success('Shift swap request sent', {
-                description: `${swapAgent?.name} will be notified`
+              toast.success('Shift swap request sent' will be notified`
               });
               setShowShiftSwapDialog(false);
               setShiftSwapForm({ date: '', swapWith: '' });
@@ -4446,9 +4439,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                     </div>
                   </div>
                   <Button size="sm" onClick={() => {
-                    toast.success(`${customer.name} added as VIP`, {
-                      description: 'Customer will receive priority support'
-                    });
+                    toast.success(`${customer.name} added as VIP`);
                     setShowVIPSelectorDialog(false);
                   }}>Add VIP</Button>
                 </div>
@@ -4485,7 +4476,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                     </div>
                     <Button variant="ghost" size="sm" onClick={() => {
                       if (confirm(`Are you sure you want to remove ${agent.name} from this team?`)) {
-                        toast.success(`${agent.name} removed from team`, { description: 'Team updated successfully' })
+                        toast.success(`${agent.name} removed from team`)
                       }
                     }}>Remove</Button>
                   </div>
@@ -4569,7 +4560,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success('Email campaign started', { description: `Sending to ${selectedSegment?.count} customers` });
+                toast.success('Email campaign started' customers` });
               }}>Email Segment</Button>
               <Button variant="outline" className="flex-1" onClick={() => {
                 toast.success('Exporting segment data');

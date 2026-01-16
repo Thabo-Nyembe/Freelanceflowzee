@@ -749,9 +749,7 @@ export default function SurveysClient() {
         body: formData
       })
       if (!response.ok) throw new Error('Import failed')
-      toast.success('Survey imported successfully!', {
-        description: importSource === 'file'
-          ? `Imported from ${importFile?.name}`
+      toast.success('Survey imported successfully!'`
           : `Connected to ${importSource} and imported surveys`
       })
       setShowImportDialog(false)
@@ -783,8 +781,7 @@ export default function SurveysClient() {
         })
       })
       if (!response.ok) throw new Error('Failed to create template')
-      toast.success('Template created successfully!', {
-        description: `"${templateName}" is now available in templates`
+      toast.success('Template created successfully!'" is now available in templates`
       })
       setShowTemplateDialog(false)
       setTemplateName('')
@@ -813,8 +810,7 @@ export default function SurveysClient() {
         status: 'draft'
       })
       if (result.success) {
-        toast.success('Survey created from template!', {
-          description: `Created "${templateSurveyTitle}" with ${selectedTemplate.questions} questions`
+        toast.success('Survey created from template!'" with ${selectedTemplate.questions} questions`
         })
         setShowUseTemplateDialog(false)
         setSelectedTemplate(null)
@@ -852,8 +848,7 @@ export default function SurveysClient() {
       link.click()
       URL.revokeObjectURL(url)
       const dateRangeLabel = exportDateRange === 'all' ? 'all time' : `last ${exportDateRange}`
-      toast.success('Data exported successfully!', {
-        description: `Exported ${displayStats.totalResponses} responses (${dateRangeLabel}) as ${exportFormat.toUpperCase()}`
+      toast.success('Data exported successfully!' responses (${dateRangeLabel}) as ${exportFormat.toUpperCase()}`
       })
       setShowExportDialog(false)
     } catch (err) {
@@ -883,8 +878,7 @@ export default function SurveysClient() {
       })
       if (!response.ok) throw new Error('Failed to send emails')
       const recipientCount = emailRecipients.split(',').filter(e => e.trim()).length
-      toast.success('Emails sent successfully!', {
-        description: `Survey invitation sent to ${recipientCount} recipient(s)`
+      toast.success('Emails sent successfully!' recipient(s)`
       })
       setShowDistributeDialog(false)
       setEmailRecipients('')
@@ -939,9 +933,7 @@ export default function SurveysClient() {
             a.click()
             document.body.removeChild(a)
             URL.revokeObjectURL(url)
-            toast.success('QR Code Downloaded', {
-              description: 'survey-qr-code.png saved to your downloads folder'
-            })
+            toast.success('QR Code Downloaded')
           }
         }, 'image/png')
       }
@@ -984,15 +976,11 @@ export default function SurveysClient() {
               await navigator.clipboard.write([
                 new ClipboardItem({ 'image/png': blob })
               ])
-              toast.success('QR Code Copied', {
-                description: 'QR code image copied to clipboard'
-              })
+              toast.success('QR Code Copied')
             } catch (clipboardErr) {
               // Fallback: copy the survey URL instead
               await navigator.clipboard.writeText('https://survey.app/s/example-survey')
-              toast.success('Survey URL Copied', {
-                description: 'Survey link copied to clipboard (image copy not supported in this browser)'
-              })
+              toast.success('Survey URL Copied')
             }
           }
         }, 'image/png')
@@ -1008,9 +996,7 @@ export default function SurveysClient() {
   const handleOpenLogicBuilder = () => {
     setShowLogicFlowDialog(false)
     setShowLogicBuilderDialog(true)
-    toast.info('Logic Builder Opening', {
-      description: 'Initializing visual logic flow editor...'
-    })
+    toast.info('Logic Builder Opening')
   }
 
   // Quick Actions for toolbar
@@ -1437,7 +1423,7 @@ export default function SurveysClient() {
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelectedSurvey(survey)
-                            toast.success('Survey editor opened', { description: `Editing "${survey.title}"` })
+                            toast.success('Survey editor opened'"` })
                           }}
                         >
                           <Edit className="w-4 h-4" />
@@ -2105,7 +2091,7 @@ export default function SurveysClient() {
                               size="sm"
                               onClick={() => {
                                 if (integration.status === 'connected') {
-                                  toast.success(`${integration.name} settings opened`, { description: 'Configure your integration' })
+                                  toast.success(`${integration.name} settings opened`)
                                 } else {
                                   toast.promise(
                                     fetch(`/api/surveys/integrations/${integration.name.toLowerCase()}`, { method: 'POST' }).then(res => {
@@ -2341,7 +2327,7 @@ export default function SurveysClient() {
                                 variant="outline"
                                 className="flex-1"
                                 onClick={() => {
-                                  toast.success('Invoices loaded', { description: 'Viewing your billing history' })
+                                  toast.success('Invoices loaded')
                                 }}
                               >
                                 View Invoices
@@ -2349,7 +2335,7 @@ export default function SurveysClient() {
                               <Button
                                 className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
                                 onClick={() => {
-                                  toast.success('Upgrade options available', { description: 'Choose a plan to unlock more features' })
+                                  toast.success('Upgrade options available')
                                 }}
                               >
                                 Upgrade
@@ -2424,7 +2410,7 @@ export default function SurveysClient() {
             <AIInsightsPanel
               insights={mockSurveysAIInsights}
               title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2526,7 +2512,7 @@ export default function SurveysClient() {
                   <Button
                     className="flex-1"
                     onClick={() => {
-                      toast.success('Survey editor opened', { description: `Editing "${selectedSurvey.title}"` })
+                      toast.success('Survey editor opened'"` })
                     }}
                   >
                     <Edit className="w-4 h-4 mr-2" />
@@ -2676,7 +2662,7 @@ export default function SurveysClient() {
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    toast.success('QR code generated', { description: 'Download or share the QR code' })
+                    toast.success('QR code generated')
                   }}
                 >
                   <QrCode className="w-4 h-4" />
@@ -3144,8 +3130,7 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Results exported!', {
-                    description: `Exported all survey results as ${resultsExportFormat.toUpperCase()}`
+                  toast.success('Results exported!'`
                   })
                   setShowResultsDialog(false)
                 }}
@@ -3567,8 +3552,7 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Automation created!', {
-                    description: `Automation will trigger on ${automationTrigger.replace('_', ' ')}`
+                  toast.success('Automation created!'`
                   })
                   setShowAutomationsDialog(false)
                 }}
@@ -3659,7 +3643,7 @@ export default function SurveysClient() {
                       data: { label: 'New Condition', color: 'yellow' }
                     }
                     setLogicNodes(prev => [...prev, newNode])
-                    toast.success('Condition Added', { description: 'Drag to position on canvas' })
+                    toast.success('Condition Added')
                   }}
                 >
                   <GitBranch className="w-5 h-5 text-yellow-600" />
@@ -3676,7 +3660,7 @@ export default function SurveysClient() {
                       data: { label: 'New Question', color: 'blue' }
                     }
                     setLogicNodes(prev => [...prev, newNode])
-                    toast.success('Question Added', { description: 'Drag to position on canvas' })
+                    toast.success('Question Added')
                   }}
                 >
                   <Type className="w-5 h-5 text-blue-600" />
@@ -3693,7 +3677,7 @@ export default function SurveysClient() {
                       data: { label: 'New Calculation', color: 'green' }
                     }
                     setLogicNodes(prev => [...prev, newNode])
-                    toast.success('Calculation Added', { description: 'Drag to position on canvas' })
+                    toast.success('Calculation Added')
                   }}
                 >
                   <Hash className="w-5 h-5 text-green-600" />
@@ -3710,7 +3694,7 @@ export default function SurveysClient() {
                       data: { label: 'End Point', color: 'red' }
                     }
                     setLogicNodes(prev => [...prev, newNode])
-                    toast.success('End Point Added', { description: 'Drag to position on canvas' })
+                    toast.success('End Point Added')
                   }}
                 >
                   <Target className="w-5 h-5 text-red-600" />
@@ -3722,7 +3706,7 @@ export default function SurveysClient() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  toast.info('Logic Cleared', { description: 'All logic rules have been reset' })
+                  toast.info('Logic Cleared')
                 }}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -3733,7 +3717,7 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Logic Saved', { description: 'Survey logic flow has been saved successfully' })
+                  toast.success('Logic Saved')
                   setShowLogicBuilderDialog(false)
                 }}
                 className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white"

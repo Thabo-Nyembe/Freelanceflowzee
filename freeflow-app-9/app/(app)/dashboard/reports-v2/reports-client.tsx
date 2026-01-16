@@ -1615,7 +1615,7 @@ export default function ReportsClient() {
             <AIInsightsPanel
               insights={mockReportsAIInsights}
               title="Reports Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

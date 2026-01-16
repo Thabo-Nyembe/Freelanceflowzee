@@ -390,14 +390,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         ...contractData,
       }
       await createContract(newContract)
-      toast.success('Contract Created', {
-        description: `Contract "${newContract.title}" has been created successfully.`
+      toast.success('Contract Created'" has been created successfully.`
       })
       setShowNewContract(false)
     } catch (err) {
-      toast.error('Failed to create contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to create contract')
     }
   }
 
@@ -408,13 +405,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         signed_date: new Date().toISOString(),
         effective_date: new Date().toISOString()
       })
-      toast.success('Contract Signed', {
-        description: `"${contractName}" has been signed and is now active.`
+      toast.success('Contract Signed'" has been signed and is now active.`
       })
     } catch (err) {
-      toast.error('Failed to sign contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to sign contract')
     }
   }
 
@@ -423,13 +417,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'pending-signature' as const
       })
-      toast.success('Sent for Signature', {
-        description: `"${contractName}" has been sent to recipients for signature.`
+      toast.success('Sent for Signature'" has been sent to recipients for signature.`
       })
     } catch (err) {
-      toast.error('Failed to send contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to send contract')
     }
   }
 
@@ -439,13 +430,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'terminated' as const,
         termination_date: new Date().toISOString()
       })
-      toast.success('Contract Terminated', {
-        description: `"${contractName}" has been terminated.`
+      toast.success('Contract Terminated'" has been terminated.`
       })
     } catch (err) {
-      toast.error('Failed to terminate contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to terminate contract')
     }
   }
 
@@ -480,26 +468,20 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'renewed' as const,
         renewal_date: new Date().toISOString()
       })
-      toast.success('Contract Renewed', {
-        description: `A new contract based on "${contract.title}" has been created.`
+      toast.success('Contract Renewed'" has been created.`
       })
     } catch (err) {
-      toast.error('Failed to renew contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to renew contract')
     }
   }
 
   const handleDeleteContract = async (contractId: string, contractName: string) => {
     try {
       await deleteContract(contractId)
-      toast.success('Contract Deleted', {
-        description: `"${contractName}" has been permanently deleted.`
+      toast.success('Contract Deleted'" has been permanently deleted.`
       })
     } catch (err) {
-      toast.error('Failed to delete contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to delete contract')
     }
   }
 
@@ -508,13 +490,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'completed' as const
       })
-      toast.success('Contract Archived', {
-        description: `"${contractName}" has been moved to archive.`
+      toast.success('Contract Archived'" has been moved to archive.`
       })
     } catch (err) {
-      toast.error('Failed to archive contract', {
-        description: err instanceof Error ? err.message : 'An error occurred'
-      })
+      toast.error('Failed to archive contract')
     }
   }
 
@@ -577,9 +556,9 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         version: 1,
       }
       await createContract(newEnvelope)
-      toast.success('Envelope duplicated', { description: `"${envelope.name}" has been duplicated as a new draft.` })
+      toast.success('Envelope duplicated'" has been duplicated as a new draft.` })
     } catch (err) {
-      toast.error('Failed to duplicate envelope', { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error('Failed to duplicate envelope')
     }
   }
 
@@ -626,10 +605,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         version: 1,
       }
       await createContract(newContract)
-      toast.success('Contract created from template', { description: `New contract created from "${template.name}" template.` })
+      toast.success('Contract created from template'" template.` })
       setShowNewContract(false)
     } catch (err) {
-      toast.error('Failed to use template', { description: err instanceof Error ? err.message : 'An error occurred' })
+      toast.error('Failed to use template')
     }
   }
 
@@ -733,8 +712,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     // Filter envelopes by folder and switch to envelopes tab
     setSelectedFolder(folder.id)
     setActiveTab('envelopes')
-    toast.success(`Viewing folder: ${folder.name}`, {
-      description: `${folder.envelopes_count} envelopes in this folder`
+    toast.success(`Viewing folder: ${folder.name}` envelopes in this folder`
     })
   }
 
@@ -879,9 +857,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   // Handler for starting bulk send workflow
   const handleStartBulkSend = () => {
     setActiveTab('templates')
-    toast.info('Bulk Send Mode', {
-      description: 'Select a template below to start bulk sending to multiple recipients'
-    })
+    toast.info('Bulk Send Mode')
   }
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
@@ -2320,7 +2296,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             <AIInsightsPanel
               insights={mockContractsAIInsights}
               title="Contract Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

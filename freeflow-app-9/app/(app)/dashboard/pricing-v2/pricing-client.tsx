@@ -2350,7 +2350,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
             <AIInsightsPanel
               insights={mockPricingAIInsights}
               title="Pricing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
