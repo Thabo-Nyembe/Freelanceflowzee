@@ -95,42 +95,6 @@ const MILESTONES: Milestone[] = [
     completionDate: '2024-02-05',
     dueDate: '2024-02-10',
     approvalNotes: 'Ready for client approval'
-  },
-  {
-    id: 4,
-    name: 'Website Design Mockups',
-    description: 'Desktop and mobile design mockups for website',
-    project: 'Website Development',
-    amount: 5000,
-    releaseCondition: 'Completion of all page designs and client feedback integration',
-    status: 'completed',
-    completionDate: '2024-01-22',
-    dueDate: '2024-01-30',
-    approvalNotes: 'Designs completed. Awaiting your approval to proceed.'
-  },
-  {
-    id: 5,
-    name: 'CMS Integration & Testing',
-    description: 'Complete CMS setup and quality assurance testing',
-    project: 'Website Development',
-    amount: 4000,
-    releaseCondition: 'Successful completion of QA and staging deployment',
-    status: 'released',
-    completionDate: '2024-01-20',
-    releaseDate: '2024-01-22',
-    dueDate: '2024-02-05'
-  },
-  {
-    id: 6,
-    name: 'Website Launch & Training',
-    description: 'Live deployment and client training session',
-    project: 'Website Development',
-    amount: 3000,
-    releaseCondition: 'Production deployment and completion of client training',
-    status: 'in-escrow',
-    completionDate: '2024-01-25',
-    dueDate: '2024-02-10',
-    approvalNotes: 'Awaiting final launch approval and sign-off'
   }
 ]
 
@@ -152,31 +116,12 @@ const PAYMENT_HISTORY: PaymentHistory[] = [
     type: 'release',
     status: 'completed',
     transactionId: 'TXN-2024-002'
-  },
-  {
-    id: 3,
-    date: '2024-01-25',
-    milestone: 'Color Palette & Typography',
-    amount: 1500,
-    type: 'hold',
-    status: 'pending',
-    transactionId: 'TXN-2024-003'
-  },
-  {
-    id: 4,
-    date: '2024-01-22',
-    milestone: 'Website Design Mockups',
-    amount: 5000,
-    type: 'hold',
-    status: 'pending',
-    transactionId: 'TXN-2024-004'
   }
 ]
 
 export default function PaymentsPage() {
   const router = useRouter()
 
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -203,7 +148,6 @@ export default function PaymentsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Fetch payments data from API
         const response = await fetch('/api/payments')
 
         if (!response.ok) {
@@ -212,7 +156,6 @@ export default function PaymentsPage() {
 
         const data = await response.json()
 
-        // Use API data if available, otherwise fallback to mock data
         const loadedMilestones = data.milestones || MILESTONES
         const loadedHistory = data.history || PAYMENT_HISTORY
 
@@ -220,9 +163,7 @@ export default function PaymentsPage() {
         setPaymentHistory(loadedHistory)
         setIsLoading(false)
 
-        toast.success('Payments loaded', {
-          description: `${loadedMilestones.length} milestones, ${loadedHistory.length} transactions`
-        })
+        toast.success('Payments loaded')
         announce('Payments loaded successfully', 'polite')
         logger.info('Payments data loaded', {
           milestoneCount: loadedMilestones.length,
@@ -256,11 +197,6 @@ export default function PaymentsPage() {
 
   // Handle Release Payment
   const handleReleasePayment = (milestone: Milestone) => {
-    logger.info('Payment release initiated', {
-      milestoneId: milestone.id,
-      milestoneName: milestone.name,
-      amount: milestone.amount
-    })
     setReleaseMilestone(milestone)
     setReleaseConfirmation('')
     setShowReleaseDialog(true)
@@ -305,20 +241,13 @@ export default function PaymentsPage() {
         )
       )
 
-      logger.info('Payment released successfully', {
-        milestoneId: releaseMilestone.id,
-        transactionId: data.transactionId
-      })
-
-      toast.success('Payment released!', {
-        description: `${formatCurrency(releaseMilestone.amount)} has been transferred to the freelancer`
-      })
+      toast.success('Payment released')
       announce('Payment released successfully', 'polite')
       setShowReleaseDialog(false)
       setReleaseMilestone(null)
       setReleaseConfirmation('')
     } catch (error: any) {
-      logger.error('Failed to release payment', { error, milestoneId: releaseMilestone.id })
+      logger.error('Failed to release payment', { error })
       toast.error('Failed to release payment', {
         description: error.message || 'Please try again later'
       })
@@ -327,10 +256,6 @@ export default function PaymentsPage() {
 
   // Handle Dispute Payment
   const handleDisputePayment = (milestone: Milestone) => {
-    logger.info('Payment dispute initiated', {
-      milestoneId: milestone.id,
-      milestoneName: milestone.name
-    })
     setDisputeMilestone(milestone)
     setDisputeReason('')
     setShowDisputeDialog(true)
@@ -368,8 +293,6 @@ export default function PaymentsPage() {
         )
       )
 
-      logger.info('Payment dispute submitted', { milestoneId: disputeMilestone.id })
-
       toast.success('Dispute submitted', {
         description: 'Our mediation team will review and contact you within 24 hours'
       })
@@ -378,7 +301,7 @@ export default function PaymentsPage() {
       setDisputeMilestone(null)
       setDisputeReason('')
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, milestoneId: disputeMilestone.id })
+      logger.error('Failed to submit dispute', { error })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'
       })
@@ -387,11 +310,6 @@ export default function PaymentsPage() {
 
   // Handle Download Receipt
   const handleDownloadReceipt = async (payment: PaymentHistory) => {
-    logger.info('Payment receipt download initiated', {
-      paymentId: payment.id,
-      transactionId: payment.transactionId
-    })
-
     try {
       const response = await fetch(`/api/payments/${payment.id}/receipt`, {
         method: 'GET'
@@ -400,8 +318,6 @@ export default function PaymentsPage() {
       if (!response.ok) {
         throw new Error('Failed to generate receipt')
       }
-
-      logger.info('Payment receipt generated', { paymentId: payment.id })
 
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
@@ -413,11 +329,9 @@ export default function PaymentsPage() {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      toast.success('Receipt downloaded', {
-        description: `${payment.transactionId} saved to downloads`
-      })
+      toast.success('Receipt downloaded')
     } catch (error: any) {
-      logger.error('Failed to download receipt', { error, paymentId: payment.id })
+      logger.error('Failed to download receipt', { error })
       toast.error('Failed to download receipt', {
         description: error.message || 'Please try again later'
       })
