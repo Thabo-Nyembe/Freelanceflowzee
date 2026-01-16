@@ -15,37 +15,37 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { toast } from 'sonner'
-import { NumberFlow } from '@/components/ui/number-flow'
-import { TextShimmer } from '@/components/ui/text-shimmer'
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   DollarSign,
   TrendingUp,
   TrendingDown,
   CreditCard,
-  FileText,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-  Target,
-  Receipt,
-  Building,
   Users,
+  Calendar,
+  FileText,
   Clock,
+  Receipt,
   CheckCircle,
-  XCircle
+  XCircle,
+  Building,
+  Target,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { NumberFlow } from '@/components/ui/number-flow'
 
-// A+++ UTILITIES
+// Utilities
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
-// AI FEATURES
+// AI Features
 import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
 import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 
@@ -55,22 +55,19 @@ import { downloadAsCsv, downloadAsJson } from '@/lib/button-handlers'
 const logger = createFeatureLogger('FinancialHub')
 
 export default function FinancialHubPage() {
-  // REAL USER AUTH & AI DATA
+  // Real user auth & AI data
   const { userId, loading: userLoading } = useCurrentUser()
   const { data: revenueData, loading: revenueLoading, refresh } = useRevenueData(userId || undefined)
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
-  const [_selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
-  const [activeTab, setActiveTab] = useState<string>('overview')
+  const [activeTab, setActiveTab] = useState('overview')
   const [showAIWidget, setShowAIWidget] = useState(true)
   const [deleteClient, setDeleteClient] = useState<{ id: number; name: string } | null>(null)
   const [deleteGoal, setDeleteGoal] = useState<string | null>(null)
 
-  // REAL DATA STATE
   const [financialData, setFinancialData] = useState({
     overview: {
       totalRevenue: 0,
@@ -123,7 +120,7 @@ export default function FinancialHubPage() {
     { id: 3, client: 'Local Business', amount: 5500, dueDate: '2024-02-05', status: 'scheduled' }
   ])
 
-  // A+++ LOAD FINANCIAL HUB DATA FROM DATABASE
+  // Load financial hub data
   useEffect(() => {
     const loadFinancialHubData = async () => {
       if (!userId) {
@@ -135,9 +132,8 @@ export default function FinancialHubPage() {
         setIsLoading(true)
         setError(null)
 
-        logger.info('Loading financial hub data from database', { userId })
+        logger.info('Loading financial hub data', { userId })
 
-        // Dynamic import for code splitting
         const {
           getFinancialOverview,
           getTransactions,
@@ -146,7 +142,6 @@ export default function FinancialHubPage() {
           getMonthlyTrend
         } = await import('@/lib/financial-queries')
 
-        // Load data in parallel
         const [overviewResult, transactionsResult, goalsResult, expenseBreakdownResult, trendResult] = await Promise.all([
           getFinancialOverview(userId),
           getTransactions(userId, { status: 'completed' }),
@@ -158,15 +153,11 @@ export default function FinancialHubPage() {
         // Process overview data
         if (overviewResult.data) {
           const overview = overviewResult.data
-
-          // Calculate growth from trend data
           let monthlyGrowth = 0
-          const yearlyGrowth = 0
 
           if (trendResult.data && trendResult.data.length >= 2) {
             const currentMonth = trendResult.data[0]
             const previousMonth = trendResult.data[1]
-
             if (previousMonth.revenue > 0) {
               monthlyGrowth = ((currentMonth.revenue - previousMonth.revenue) / previousMonth.revenue) * 100
             }
@@ -179,7 +170,7 @@ export default function FinancialHubPage() {
               totalExpenses: overview.total_expenses,
               netProfit: overview.net_profit,
               monthlyGrowth: monthlyGrowth,
-              yearlyGrowth: yearlyGrowth,
+              yearlyGrowth: 0,
               profitMargin: overview.profit_margin
             }
           }))
@@ -197,7 +188,6 @@ export default function FinancialHubPage() {
           }))
           setRecentTransactions(transformed)
 
-          // Calculate invoice stats from transactions
           const incomeTransactions = transactionsResult.data.filter(t => t.type === 'income')
           const paidInvoices = incomeTransactions.filter(t => t.status === 'completed')
           const pendingInvoices = incomeTransactions.filter(t => t.status === 'pending')
@@ -208,7 +198,7 @@ export default function FinancialHubPage() {
               total: incomeTransactions.length,
               paid: paidInvoices.length,
               pending: pendingInvoices.length,
-              overdue: 0, // Would need separate query for overdue
+              overdue: 0,
               totalAmount: incomeTransactions.reduce((sum, t) => sum + t.amount, 0),
               paidAmount: paidInvoices.reduce((sum, t) => sum + t.amount, 0),
               pendingAmount: pendingInvoices.reduce((sum, t) => sum + t.amount, 0),
@@ -239,7 +229,7 @@ export default function FinancialHubPage() {
         // Process goals
         if (goalsResult.data && goalsResult.data.length > 0) {
           const monthlyGoal = goalsResult.data.find(g => g.goal_type === 'monthly_revenue')
-          const yearlyGoal = goalsResult.data.find(g => g.goal_type === 'quarterly_growth') // Using as yearly proxy
+          const yearlyGoal = goalsResult.data.find(g => g.goal_type === 'quarterly_growth')
 
           setFinancialData(prev => ({
             ...prev,
@@ -254,23 +244,14 @@ export default function FinancialHubPage() {
 
         setIsLoading(false)
         announce('Financial hub loaded successfully', 'polite')
-
-        logger.info('Financial hub data loaded successfully', {
-          userId,
-          transactionCount: transactionsResult.data?.length || 0,
-          goalsCount: goalsResult.data?.length || 0
-        })
+        logger.info('Financial hub loaded', { transactionCount: transactionsResult.data?.length || 0 })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load financial hub'
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading financial hub', 'assertive')
-
-        logger.error('Failed to load financial hub data', { error: err, userId })
-
-        toast.error('Failed to load financial data', {
-          description: 'Using demo data. Please check your connection.'
-        })
+        logger.error('Failed to load financial hub', { error: err })
+        toast.error('Failed to load financial data', { description: 'Using demo data' })
 
         // Fallback to mock data
         setFinancialData({
@@ -335,16 +316,9 @@ export default function FinancialHubPage() {
     loadFinancialHubData()
   }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handler functions with comprehensive logging
+  // Handler functions
   const handleExportReport = async () => {
-    logger.info('Exporting financial report', {
-      totalRevenue: financialData.overview.totalRevenue,
-      totalExpenses: financialData.overview.totalExpenses,
-      netProfit: financialData.overview.netProfit
-    })
-
     try {
-      // Create real CSV export
       const reportData = `Financial Report - ${new Date().toLocaleDateString()}
 
 Overview:
@@ -372,8 +346,7 @@ Overdue: ${financialData.invoices.overdue}
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      logger.info('Report exported', { fileSize: blob.size })
-      toast.success(`Financial report exported - ${Math.round(blob.size / 1024)}KB - Revenue: $${financialData.overview.totalRevenue.toLocaleString()}`)
+      toast.success('Financial report exported')
     } catch (error) {
       logger.error('Failed to export report', { error })
       toast.error('Failed to export report')
@@ -383,12 +356,6 @@ Overdue: ${financialData.invoices.overdue}
   const handleScheduleReview = async () => {
     const reviewDate = new Date()
     reviewDate.setDate(reviewDate.getDate() + 7)
-
-    logger.info('Scheduling financial review', {
-      scheduledDate: reviewDate.toISOString(),
-      totalRevenue: financialData.overview.totalRevenue,
-      netProfit: financialData.overview.netProfit
-    })
 
     try {
       const res = await fetch('/api/calendar/events', {
@@ -405,7 +372,7 @@ Overdue: ${financialData.invoices.overdue}
         })
       })
       if (!res.ok) throw new Error('Failed to schedule')
-      toast.success(`Financial review scheduled for ${reviewDate.toLocaleDateString()} at 2:00 PM`)
+      toast.success(`Financial review scheduled for ${reviewDate.toLocaleDateString()}`)
     } catch (error) {
       logger.error('Failed to schedule review', { error })
       toast.error('Failed to schedule review')
@@ -415,12 +382,8 @@ Overdue: ${financialData.invoices.overdue}
   const [showAddClientDialog, setShowAddClientDialog] = useState(false)
 
   const handleAddClient = () => {
-    logger.info('Opening add client form', {
-      currentClientCount: financialData.clients.total
-    })
-
     setShowAddClientDialog(true)
-    toast.success(`Add new client - Current: ${financialData.clients.total} clients (${financialData.clients.active} active)`)
+    toast.success('Add new client')
   }
 
   const [editingClient, setEditingClient] = useState<{ id: number; name: string; revenue: number } | null>(null)
@@ -428,15 +391,9 @@ Overdue: ${financialData.invoices.overdue}
   const handleEditClient = (id: number) => {
     const client = financialData.clients.topClients.find((_, index) => index === id)
 
-    logger.info('Editing client', {
-      clientId: id,
-      clientName: client?.name,
-      revenue: client?.revenue
-    })
-
     if (client) {
       setEditingClient({ id, name: client.name, revenue: client.revenue })
-      toast.success(`Editing ${client.name} - $${client.revenue.toLocaleString()} revenue`)
+      toast.success(`Editing ${client.name}`)
     } else {
       toast.error('Client not found')
     }
@@ -444,8 +401,6 @@ Overdue: ${financialData.invoices.overdue}
 
   const handleDeleteClient = (id: number) => {
     const client = financialData.clients.topClients.find((_, index) => index === id)
-
-    logger.info('Deleting client', { clientId: id, clientName: client?.name })
     setDeleteClient({ id, name: client?.name || `Client #${id}` })
   }
 
@@ -453,18 +408,12 @@ Overdue: ${financialData.invoices.overdue}
     if (!deleteClient) return
 
     const client = financialData.clients.topClients.find((_, index) => index === deleteClient.id)
-    logger.info('Client deletion confirmed', {
-      clientId: deleteClient.id,
-      clientName: deleteClient.name,
-      lostRevenue: client?.revenue
-    })
 
     try {
       toast.loading('Deleting client...')
       const res = await fetch(`/api/clients/${deleteClient.id}`, { method: 'DELETE' })
       toast.dismiss()
 
-      // Update local state regardless of API response
       setFinancialData(prev => ({
         ...prev,
         clients: {
@@ -475,10 +424,9 @@ Overdue: ${financialData.invoices.overdue}
         }
       }))
 
-      toast.success(client ? `Client ${client.name} deleted - $${client.revenue.toLocaleString()} revenue removed` : `${deleteClient.name} removed`)
+      toast.success(client ? `Client ${client.name} deleted` : `${deleteClient.name} removed`)
     } catch (error) {
       toast.dismiss()
-      // Update local state for demo even on error
       setFinancialData(prev => ({
         ...prev,
         clients: {
@@ -487,7 +435,7 @@ Overdue: ${financialData.invoices.overdue}
           topClients: prev.clients.topClients.filter((_, i) => i !== deleteClient.id)
         }
       }))
-      toast.success(client ? `Client ${client.name} removed from view` : `${deleteClient.name} removed`)
+      toast.success(client ? `Client ${client.name} removed` : `${deleteClient.name} removed`)
       logger.warn('API call failed, updated local state', { error })
     }
     setDeleteClient(null)
@@ -496,19 +444,11 @@ Overdue: ${financialData.invoices.overdue}
   const handleViewClientDetails = async (id: number) => {
     const client = financialData.clients.topClients.find((_, index) => index === id)
 
-    logger.info('Viewing client details', {
-      clientId: id,
-      clientName: client?.name,
-      revenue: client?.revenue,
-      projects: client?.projects
-    })
-
     if (!client) {
       toast.error('Client not found')
       return
     }
 
-    // Copy client details to clipboard for easy reference
     const clientDetails = `Client: ${client.name}
 Revenue: $${client.revenue.toLocaleString()}
 Projects: ${client.projects}
@@ -516,19 +456,13 @@ Average per Project: $${Math.round(client.revenue / client.projects).toLocaleStr
 
     try {
       await navigator.clipboard.writeText(clientDetails)
-      toast.success(`${client.name} details copied - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects`)
+      toast.success(`${client.name} details copied`)
     } catch {
-      toast.info(`${client.name} - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects`)
+      toast.info(`${client.name} - $${client.revenue.toLocaleString()} revenue`)
     }
   }
 
   const handleCreateGoal = async () => {
-    logger.info('Creating financial goal', {
-      monthlyTarget: financialData.goals.monthlyTarget,
-      yearlyTarget: financialData.goals.yearlyTarget,
-      currentProgress: financialData.goals.currentProgress
-    })
-
     try {
       toast.loading('Creating goal...')
       const res = await fetch('/api/financial/goals', {
@@ -544,14 +478,13 @@ Average per Project: $${Math.round(client.revenue / client.projects).toLocaleStr
       toast.dismiss()
 
       if (res.ok) {
-        toast.success(`Goal created - Monthly: $${financialData.goals.monthlyTarget.toLocaleString()} - Yearly: $${financialData.goals.yearlyTarget.toLocaleString()}`)
+        toast.success('Goal created')
       } else {
         throw new Error('Failed to create goal')
       }
     } catch {
       toast.dismiss()
-      // Show form for manual entry
-      toast.success(`Create new goal - Monthly: $${financialData.goals.monthlyTarget.toLocaleString()} - Yearly: $${financialData.goals.yearlyTarget.toLocaleString()}`)
+      toast.success('Create new goal')
     }
   }
 
@@ -560,14 +493,6 @@ Average per Project: $${Math.round(client.revenue / client.projects).toLocaleStr
     const target = id === 'monthly' ? financialData.goals.monthlyTarget : financialData.goals.yearlyTarget
     const current = id === 'monthly' ? financialData.goals.currentProgress : financialData.goals.yearlyProgress
 
-    logger.info('Editing goal', {
-      goalId: id,
-      progress: progress.toFixed(1),
-      target,
-      current
-    })
-
-    // Copy goal details to clipboard
     const goalDetails = `${id === 'monthly' ? 'Monthly' : 'Yearly'} Goal
 Target: $${target.toLocaleString()}
 Current: $${current.toLocaleString()}
@@ -576,28 +501,24 @@ Remaining: $${(target - current).toLocaleString()}`
 
     try {
       await navigator.clipboard.writeText(goalDetails)
-      toast.success(`${id === 'monthly' ? 'Monthly' : 'Yearly'} goal details copied - $${current.toLocaleString()}/$${target.toLocaleString()} (${progress.toFixed(1)}%)`)
+      toast.success(`${id === 'monthly' ? 'Monthly' : 'Yearly'} goal details copied`)
     } catch {
-      toast.info(`Editing ${id === 'monthly' ? 'Monthly' : 'Yearly'} goal - $${current.toLocaleString()}/$${target.toLocaleString()} (${progress.toFixed(1)}%)`)
+      toast.info(`Editing ${id === 'monthly' ? 'Monthly' : 'Yearly'} goal`)
     }
   }
 
   const handleDeleteGoal = (id: string) => {
-    logger.info('Deleting goal', { goalId: id })
     setDeleteGoal(id)
   }
 
   const handleConfirmDeleteGoal = async () => {
     if (!deleteGoal) return
 
-    logger.info('Goal deletion confirmed', { goalId: deleteGoal })
-
     try {
       toast.loading('Deleting goal...')
       const res = await fetch(`/api/financial/goals/${deleteGoal}`, { method: 'DELETE' })
       toast.dismiss()
 
-      // Reset goal to defaults
       if (deleteGoal === 'monthly') {
         setFinancialData(prev => ({
           ...prev,
@@ -610,23 +531,15 @@ Remaining: $${(target - current).toLocaleString()}`
         }))
       }
 
-      toast.success(`${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal deleted`)
+      toast.success(`${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} goal deleted`)
     } catch {
       toast.dismiss()
-      toast.success(`${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal removed`)
+      toast.success(`${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} goal removed`)
     }
     setDeleteGoal(null)
   }
 
   const handleTrackGoalProgress = async () => {
-    logger.info('Tracking goal progress', {
-      monthlyProgress: monthlyTargetProgress.toFixed(1),
-      yearlyProgress: yearlyTargetProgress.toFixed(1),
-      monthlyTarget: financialData.goals.monthlyTarget,
-      yearlyTarget: financialData.goals.yearlyTarget
-    })
-
-    // Generate progress report and download it
     const progressReport = {
       generatedAt: new Date().toISOString(),
       monthly: {
@@ -644,16 +557,10 @@ Remaining: $${(target - current).toLocaleString()}`
     }
 
     downloadAsJson(progressReport, `goal-progress-${new Date().toISOString().split('T')[0]}.json`)
-    toast.success(`Progress exported - Monthly: ${monthlyTargetProgress.toFixed(1)}% - Yearly: ${yearlyTargetProgress.toFixed(1)}%`)
+    toast.success('Progress exported')
   }
 
   const handleAddExpense = async () => {
-    logger.info('Opening add expense form', {
-      totalExpenses: financialData.overview.totalExpenses,
-      categories: Object.keys(financialData.expenses.categories).length
-    })
-
-    // Copy expense summary to clipboard for reference
     const expenseSummary = `Current Expenses Summary
 Total: $${financialData.overview.totalExpenses.toLocaleString()}
 Categories: ${Object.keys(financialData.expenses.categories).length}
@@ -666,9 +573,9 @@ ${Object.entries(financialData.expenses.categories)
 
     try {
       await navigator.clipboard.writeText(expenseSummary)
-      toast.success(`Add expense - Total: $${financialData.overview.totalExpenses.toLocaleString()} (${Object.keys(financialData.expenses.categories).length} categories) - Summary copied`)
+      toast.success('Add expense - Summary copied')
     } catch {
-      toast.info(`Add expense - Total: $${financialData.overview.totalExpenses.toLocaleString()} (${Object.keys(financialData.expenses.categories).length} categories)`)
+      toast.info('Add expense')
     }
   }
 
@@ -678,13 +585,6 @@ ${Object.entries(financialData.expenses.categories)
       ? categories.reduce((max, curr) => curr[1] > max[1] ? curr : max)
       : ['none', 0]
 
-    logger.info('Categorizing expense', {
-      categoryCount: categories.length,
-      topCategory: topCategory[0],
-      topCategoryAmount: topCategory[1]
-    })
-
-    // Export category breakdown as CSV
     const categoryData = categories.map(([name, amount]) => ({
       category: name,
       amount: amount,
@@ -693,7 +593,7 @@ ${Object.entries(financialData.expenses.categories)
 
     if (categoryData.length > 0) {
       downloadAsCsv(categoryData, `expense-categories-${new Date().toISOString().split('T')[0]}.csv`)
-      toast.success(`${categories.length} categories exported - Top: ${topCategory[0]} ($${(topCategory[1] as number).toLocaleString()})`)
+      toast.success(`${categories.length} categories exported`)
     } else {
       toast.info('No expense categories to export')
     }
@@ -707,12 +607,6 @@ ${Object.entries(financialData.expenses.categories)
       percentage: ((amount / financialData.expenses.total) * 100).toFixed(1)
     }))
 
-    logger.info('Viewing expense breakdown', {
-      total: financialData.expenses.total,
-      categories: percentages
-    })
-
-    // Format and copy breakdown to clipboard
     const breakdownText = `Expense Breakdown - Total: $${financialData.expenses.total.toLocaleString()}
 
 ${percentages
@@ -722,9 +616,9 @@ ${percentages
 
     try {
       await navigator.clipboard.writeText(breakdownText)
-      toast.success(`Expense breakdown copied - Total: $${financialData.expenses.total.toLocaleString()} - ${categories.length} categories`)
+      toast.success('Expense breakdown copied')
     } catch {
-      toast.info(`Expense breakdown - Total: $${financialData.expenses.total.toLocaleString()} - Top: ${percentages[0]?.name} (${percentages[0]?.percentage}%)`)
+      toast.info(`Expense breakdown - Total: $${financialData.expenses.total.toLocaleString()}`)
     }
   }
 
@@ -745,25 +639,10 @@ ${percentages
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    logger.info('Expenses exported', {
-      fileSize: blob.size,
-      total: financialData.expenses.total,
-      categoryCount: Object.keys(financialData.expenses.categories).length
-    })
-
-    toast.success(`Expenses exported - ${Object.keys(financialData.expenses.categories).length} categories - Total: $${financialData.expenses.total.toLocaleString()}`)
+    toast.success('Expenses exported')
   }
 
   const handleGenerateInvoiceReport = () => {
-    logger.info('Generating invoice report', {
-      total: financialData.invoices.total,
-      paid: financialData.invoices.paid,
-      pending: financialData.invoices.pending,
-      overdue: financialData.invoices.overdue,
-      totalAmount: financialData.invoices.totalAmount
-    })
-
-    // Generate real invoice report CSV
     const reportContent = `Invoice Report - ${new Date().toLocaleDateString()}
 
 Summary:
@@ -790,36 +669,28 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success(`Invoice report generated - ${financialData.invoices.total} invoices - ${financialData.invoices.paid} paid ($${financialData.invoices.paidAmount.toLocaleString()})`)
+    toast.success('Invoice report generated')
   }
 
   const handleBulkInvoiceAction = async () => {
     const actionableCount = financialData.invoices.pending + financialData.invoices.overdue
     const totalAmount = financialData.invoices.pendingAmount + financialData.invoices.overdueAmount
 
-    logger.info('Bulk invoice action', {
-      selectedCount: actionableCount,
-      pendingAmount: financialData.invoices.pendingAmount,
-      overdueAmount: financialData.invoices.overdueAmount
-    })
-
     try {
       toast.loading('Processing bulk invoice operations...')
 
-      // Make real API call to process invoices
       const res = await fetch('/api/invoices/bulk-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'send_reminders',
-          invoiceIds: 'pending,overdue', // Would be actual IDs in production
+          invoiceIds: 'pending,overdue',
           totalAmount
         })
       })
 
       toast.dismiss()
 
-      // Update local state to show invoices processed
       setFinancialData(prev => ({
         ...prev,
         invoices: {
@@ -833,21 +704,16 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
         }
       }))
 
-      toast.success(`Processed ${actionableCount} invoices - Total: $${totalAmount.toLocaleString()}`)
+      toast.success(`Processed ${actionableCount} invoices`)
     } catch {
       toast.dismiss()
-      toast.success(`Marked ${actionableCount} invoices for follow-up - Total: $${totalAmount.toLocaleString()}`)
+      toast.success(`Marked ${actionableCount} invoices for follow-up`)
     }
   }
 
   const handleSendInvoiceReminders = async () => {
-    logger.info('Sending invoice reminders', {
-      overdueCount: financialData.invoices.overdue,
-      overdueAmount: financialData.invoices.overdueAmount
-    })
-
     if (financialData.invoices.overdue === 0) {
-      toast.info('No overdue invoices to send reminders for')
+      toast.info('No overdue invoices')
       return
     }
 
@@ -865,22 +731,15 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
       })
 
       toast.dismiss()
-      toast.success(`Reminders sent for ${financialData.invoices.overdue} overdue invoices - Total: $${financialData.invoices.overdueAmount.toLocaleString()}`)
+      toast.success(`Reminders sent for ${financialData.invoices.overdue} invoices`)
     } catch {
       toast.dismiss()
-      toast.success(`Reminder emails queued for ${financialData.invoices.overdue} overdue invoices - Total: $${financialData.invoices.overdueAmount.toLocaleString()}`)
+      toast.success(`Reminder emails queued for ${financialData.invoices.overdue} invoices`)
     }
   }
 
   const handleRecordPayment = async (id: number) => {
     const payment = upcomingPayments.find((_, index) => index === id)
-
-    logger.info('Recording payment', {
-      paymentId: id,
-      client: payment?.client,
-      amount: payment?.amount,
-      status: payment?.status
-    })
 
     if (!payment) {
       toast.error('Payment not found')
@@ -903,10 +762,8 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
 
       toast.dismiss()
 
-      // Update local state - mark payment as completed
       setUpcomingPayments(prev => prev.filter((_, index) => index !== id))
 
-      // Update financial overview
       setFinancialData(prev => ({
         ...prev,
         overview: {
@@ -922,7 +779,6 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
         }
       }))
 
-      // Add to recent transactions
       setRecentTransactions(prev => [{
         id: Date.now(),
         type: 'income',
@@ -932,29 +788,21 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
         status: 'completed'
       }, ...prev.slice(0, 4)])
 
-      toast.success(`Payment recorded - ${payment.client} - $${payment.amount.toLocaleString()}`)
+      toast.success(`Payment recorded - ${payment.client}`)
     } catch {
       toast.dismiss()
-      toast.success(`Payment logged - ${payment.client} - $${payment.amount.toLocaleString()}`)
+      toast.success(`Payment logged - ${payment.client}`)
     }
   }
 
   const handleRefreshDashboard = async () => {
-    logger.info('Refreshing dashboard', {
-      totalRevenue: financialData.overview.totalRevenue,
-      netProfit: financialData.overview.netProfit,
-      totalInvoices: financialData.invoices.total
-    })
-
     try {
       toast.loading('Refreshing dashboard...')
 
-      // Trigger real data refresh
       if (refresh) {
         await refresh()
       }
 
-      // Re-fetch data from API
       const res = await fetch('/api/financial/overview')
 
       toast.dismiss()
@@ -972,25 +820,18 @@ Collection Rate,${((financialData.invoices.paidAmount / financialData.invoices.t
         }
       }
 
-      toast.success(`Dashboard refreshed - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()}`)
+      toast.success('Dashboard refreshed')
     } catch {
       toast.dismiss()
-      toast.success(`Dashboard refreshed - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()}`)
+      toast.success('Dashboard refreshed')
     }
   }
 
   const handleGenerateFinancialForecast = () => {
     const projectedRevenue = financialData.overview.totalRevenue * (1 + financialData.overview.monthlyGrowth / 100)
     const projectedProfit = financialData.overview.netProfit * (1 + financialData.overview.monthlyGrowth / 100)
-    const projectedExpenses = financialData.overview.totalExpenses * 1.02 // Assume 2% expense growth
+    const projectedExpenses = financialData.overview.totalExpenses * 1.02
 
-    logger.info('Generating financial forecast', {
-      currentRevenue: financialData.overview.totalRevenue,
-      projectedRevenue,
-      growthRate: financialData.overview.monthlyGrowth
-    })
-
-    // Generate real forecast report
     const forecastReport = `Financial Forecast Report - ${new Date().toLocaleDateString()}
 
 Current Performance:
@@ -1021,20 +862,13 @@ Annual Projection: $${Math.round(financialData.overview.totalRevenue * 12 * (1 +
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success(`Forecast complete - Projected revenue: $${Math.round(projectedRevenue).toLocaleString()} (+${financialData.overview.monthlyGrowth}%)`)
+    toast.success('Forecast complete')
   }
 
   const handleTaxReport = () => {
     const taxableIncome = financialData.overview.totalRevenue - financialData.overview.totalExpenses
-    const estimatedTax = taxableIncome * 0.25 // Assume 25% tax rate
+    const estimatedTax = taxableIncome * 0.25
 
-    logger.info('Generating tax report', {
-      totalRevenue: financialData.overview.totalRevenue,
-      totalExpenses: financialData.overview.totalExpenses,
-      taxableIncome
-    })
-
-    // Generate real tax report
     const taxReport = `Tax Preparation Report - ${new Date().toLocaleDateString()}
 
 Income Summary:
@@ -1064,7 +898,7 @@ Note: This is an estimate. Consult a tax professional for accurate tax preparati
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success(`Tax report generated - Taxable income: $${taxableIncome.toLocaleString()}`)
+    toast.success('Tax report generated')
   }
 
   const handleFinancialAudit = () => {
@@ -1073,14 +907,6 @@ Note: This is an estimate. Consult a tax professional for accurate tax preparati
     const expenseTotal = recentTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0)
     const discrepancy = Math.abs((incomeTotal - expenseTotal) - financialData.overview.netProfit)
 
-    logger.info('Running financial audit', {
-      totalRevenue: financialData.overview.totalRevenue,
-      totalExpenses: financialData.overview.totalExpenses,
-      transactionCount,
-      discrepancy
-    })
-
-    // Generate audit report
     const auditReport = `Financial Audit Report - ${new Date().toLocaleDateString()}
 
 Audit Summary:
@@ -1119,7 +945,7 @@ Recommendations: ${financialData.invoices.overdue > 0 ? 'Follow up on overdue in
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success(`Audit complete - ${transactionCount} transactions analyzed - ${discrepancy < 1000 ? '0 discrepancies' : 'Review recommended'}`)
+    toast.success(`Audit complete - ${transactionCount} transactions analyzed`)
   }
 
   // Calculate progress percentages for goals
@@ -1130,7 +956,7 @@ Recommendations: ${financialData.invoices.overdue > 0 ? 'Follow up on overdue in
     ? (financialData.goals.yearlyProgress / financialData.goals.yearlyTarget) * 100
     : 0
 
-  // A+++ LOADING STATE
+  // Loading state
   if (isLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -1152,7 +978,7 @@ Recommendations: ${financialData.invoices.overdue > 0 ? 'Follow up on overdue in
     )
   }
 
-  // A+++ ERROR STATE
+  // Error state
   if (error) {
     return (
       <div className="container mx-auto p-6">
@@ -1167,10 +993,8 @@ Recommendations: ${financialData.invoices.overdue > 0 ? 'Follow up on overdue in
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        {/* Title + Icon */}
         <div>
           <div className="flex items-center gap-3">
-            {/* Gradient icon container */}
             <div className="p-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg">
               <DollarSign className="h-6 w-6 text-white" />
             </div>
@@ -1202,7 +1026,7 @@ Recommendations: ${financialData.invoices.overdue > 0 ? 'Follow up on overdue in
         </div>
       </div>
 
-      {/* AI REVENUE INSIGHTS WIDGET */}
+      {/* AI Revenue Insights Widget */}
       {showAIWidget && userId && revenueData && (
         <div className="mb-6">
           <RevenueInsightsWidget
