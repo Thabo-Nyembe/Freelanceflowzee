@@ -62,11 +62,9 @@ interface Reward {
 // ============================================================================
 
 export default function ReferralsPage() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState('KAZI-ACME-45K')
@@ -79,7 +77,6 @@ export default function ReferralsPage() {
   const [loyaltyPoints, setLoyaltyPoints] = useState(0)
   const [totalCommission, setTotalCommission] = useState(0)
 
-  // A+++ LOAD REFERRAL DATA
   useEffect(() => {
     const loadReferralData = async () => {
       try {
@@ -193,13 +190,7 @@ export default function ReferralsPage() {
         setTotalCommission(3600)
 
         setIsLoading(false)
-        announce('Referral system loaded successfully', 'polite')
-        logger.info('Referral data loaded', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          totalReferrals: referralsList.length,
-          loyaltyPoints: 2000
-        })
-      } catch (err) {
+        announce('Referral system loaded successfully', 'polite')      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load referral data')
         setIsLoading(false)
         announce('Error loading referral system', 'assertive')
@@ -218,14 +209,7 @@ export default function ReferralsPage() {
     toast.promise(
       (async () => {
         await navigator.clipboard.writeText(referralCode)
-        setCopiedToClipboard(true)
-
-        logger.info('Referral code copied', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          code: referralCode
-        })
-
-        setTimeout(() => {
+        setCopiedToClipboard(true)        setTimeout(() => {
           setCopiedToClipboard(false)
         }, 2000)
       })(),
@@ -244,13 +228,7 @@ export default function ReferralsPage() {
   const handleCopyReferralLink = () => {
     toast.promise(
       (async () => {
-        await navigator.clipboard.writeText(referralLink)
-
-        logger.info('Referral link copied', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          link: referralLink
-        })
-      })(),
+        await navigator.clipboard.writeText(referralLink)      })(),
       {
         loading: 'Copying referral link...',
         success: 'Referral link copied - Ready to share with your network',
@@ -265,15 +243,7 @@ export default function ReferralsPage() {
 
   const handleShareReferral = async (platform: 'email' | 'whatsapp' | 'twitter' | 'linkedin') => {
     try {
-      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`
-
-      logger.info('Referral share initiated', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        platform,
-        code: referralCode
-      })
-
-      let shareUrl = ''
+      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`      let shareUrl = ''
 
       switch (platform) {
         case 'email':
@@ -294,14 +264,11 @@ export default function ReferralsPage() {
           break
       }
 
-      toast.success('Opening share dialog...', {
-        description: `Share your referral link on ${platform.charAt(0).toUpperCase() + platform.slice(1)}`
+      toast.success('Opening share dialog...'`
       })
     } catch (error) {
       logger.error('Failed to share referral', { error, platform })
-      toast.error('Failed to open share dialog', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to open share dialog')
     }
   }
 
@@ -310,17 +277,7 @@ export default function ReferralsPage() {
   // ============================================================================
 
   const handleViewReferralDetails = (referralId: number) => {
-    const referral = referrals.find(r => r.id === referralId)
-
-    logger.info('Referral details viewed', {
-      referralId,
-      referralName: referral?.name,
-      status: referral?.status
-    })
-
-    toast.info(`Loading details for ${referral?.name}...`, {
-      description: 'Viewing referral history and earnings'
-    })
+    const referral = referrals.find(r => r.id === referralId)    toast.info(`Loading details for ${referral?.name}...`)
   }
 
   // ============================================================================
@@ -329,15 +286,7 @@ export default function ReferralsPage() {
 
   const handleClaimReward = async (rewardId: number) => {
     try {
-      const reward = rewards.find(r => r.id === rewardId)
-
-      logger.info('Reward claim initiated', {
-        rewardId,
-        rewardTitle: reward?.title,
-        points: reward?.points
-      })
-
-      const response = await fetch('/api/loyalty/claim-reward', {
+      const reward = rewards.find(r => r.id === rewardId)      const response = await fetch('/api/loyalty/claim-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -353,11 +302,7 @@ export default function ReferralsPage() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Reward claimed successfully', { rewardId })
-
-        toast.success('Reward claimed!', {
-          description: `You earned ${reward?.points} loyalty points`
+      if (result.success) {        toast.success('Reward claimed!' loyalty points`
         })
 
         // Update local state
@@ -365,9 +310,7 @@ export default function ReferralsPage() {
       }
     } catch (error: any) {
       logger.error('Failed to claim reward', { error, rewardId })
-      toast.error('Failed to claim reward', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to claim reward')
     }
   }
 
@@ -378,18 +321,10 @@ export default function ReferralsPage() {
   const handleRedeemPoints = async (points: number) => {
     try {
       if (loyaltyPoints < points) {
-        toast.error('Insufficient points', {
-          description: `You need ${points - loyaltyPoints} more points`
+        toast.error('Insufficient points' more points`
         })
         return
-      }
-
-      logger.info('Points redemption initiated', {
-        points,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      const response = await fetch('/api/loyalty/redeem-points', {
+      }      const response = await fetch('/api/loyalty/redeem-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -406,20 +341,14 @@ export default function ReferralsPage() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Points redeemed successfully', { points })
-
-        toast.success('Points redeemed!', {
-          description: `${points} points converted to account credit`
+      if (result.success) {        toast.success('Points redeemed!' points converted to account credit`
         })
 
         setLoyaltyPoints(prev => prev - points)
       }
     } catch (error: any) {
       logger.error('Failed to redeem points', { error, points })
-      toast.error('Failed to redeem points', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to redeem points')
     }
   }
 
