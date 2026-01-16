@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useQATestCases, useQAMutations, QATestCase } from '@/lib/hooks/use-qa'
-import { createClient } from '@/lib/supabase/client'
 import {
   Target,
   CheckCircle2,
@@ -317,7 +316,7 @@ const mockQAActivities = [
 // Mock quick actions removed - using state-driven qaQuickActions instead
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
-  const supabase = createClient()
+
   const [activeTab, setActiveTab] = useState('cases')
   const [settingsTab, setSettingsTab] = useState('general')
   const [status, setStatus] = useState<TestStatus | 'all'>('all')
@@ -572,7 +571,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsRunningAllTests(false)
     }
-  }, [supabase, executeTest, refetch])
+  }, [ executeTest, refetch])
 
   const handleCreateTestCase = useCallback(async () => {
     if (!newTestForm.test_name.trim()) {
@@ -626,9 +625,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingRun(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_test_runs')
         .insert({
@@ -657,7 +660,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsCreatingRun(false)
     }
-  }, [newRunForm, supabase])
+  }, [newRunForm, ])
 
   const handleReportDefect = useCallback(async () => {
     if (!newDefectForm.title.trim()) {
@@ -667,9 +670,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingDefect(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_defects')
         .insert({
@@ -697,7 +704,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsCreatingDefect(false)
     }
-  }, [newDefectForm, supabase])
+  }, [newDefectForm, ])
 
   const handleCreateMilestone = useCallback(async () => {
     if (!newMilestoneForm.name.trim()) {
@@ -707,9 +714,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingMilestone(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_milestones')
         .insert({
@@ -737,7 +748,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsCreatingMilestone(false)
     }
-  }, [newMilestoneForm, supabase])
+  }, [newMilestoneForm, ])
 
   const handleExportResults = useCallback(async () => {
     setIsExporting(true)
@@ -773,7 +784,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsExporting(false)
     }
-  }, [supabase])
+  }, [])
 
   const handleRerunFailedTests = useCallback(async () => {
     toast.loading('Rerunning failed tests...', { id: 'rerun' })
@@ -800,7 +811,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } catch (error: any) {
       toast.error('Rerun failed')
     }
-  }, [supabase, executeTest, refetch])
+  }, [ executeTest, refetch])
 
   const handleExecuteSelectedTest = useCallback(async (testCaseId: string) => {
     setIsExecutingTest(true)
@@ -857,7 +868,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } catch (error: any) {
       toast.error('Report generation failed')
     }
-  }, [supabase])
+  }, [])
 
   const handleRunAllTests = useCallback(async () => {
     setIsRunningAllTests(true)
@@ -887,7 +898,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsRunningAllTests(false)
     }
-  }, [supabase, executeTest, refetch])
+  }, [ executeTest, refetch])
 
   // Handler for creating test suite
   const handleCreateSuite = useCallback(async () => {
@@ -897,9 +908,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     }
     setIsCreatingSuite(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_test_suites')
         .insert({
@@ -930,6 +945,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     }
     setIsUpdatingDefect(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_defects')
         .update({
@@ -953,7 +970,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsUpdatingDefect(false)
     }
-  }, [selectedDefect, editDefectForm, supabase])
+  }, [selectedDefect, editDefectForm, ])
 
   // Handler for generating reports
   const handleGenerateReportType = useCallback(async (reportType: string) => {
@@ -1005,7 +1022,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsGeneratingReport(false)
     }
-  }, [supabase])
+  }, [])
 
   // Handler for creating environment
   const handleCreateEnvironment = useCallback(async () => {
@@ -1015,9 +1032,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     }
     setIsCreatingEnvironment(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_environments')
         .insert({
@@ -1040,18 +1061,22 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsCreatingEnvironment(false)
     }
-  }, [newEnvironmentForm, supabase])
+  }, [newEnvironmentForm, ])
 
   // Handler for connecting integration
   const handleConnectIntegration = useCallback(async (integration: { name: string; type: string; status: string }) => {
     setIsConnectingIntegration(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Toggle connection status
       const newStatus = integration.status === 'connected' ? 'disconnected' : 'connected'
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('qa_integrations')
         .upsert({
@@ -1073,17 +1098,23 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsConnectingIntegration(false)
     }
-  }, [supabase])
+  }, [])
 
   // Handler for deleting all test data
   const handleDeleteAllData = useCallback(async () => {
     setIsDeletingData(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Delete all test-related data for this user
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('qa_test_cases').update({ deleted_at: new Date().toISOString() }).eq('user_id', user.id)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('qa_defects').delete().eq('user_id', user.id)
 
       toast.success('Data deleted')
@@ -1094,7 +1125,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsDeletingData(false)
     }
-  }, [supabase, refetch])
+  }, [ refetch])
 
   // Handler for resuming test run
   const handleResumeRun = useCallback(async () => {
@@ -1161,7 +1192,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsDownloadingReport(false)
     }
-  }, [supabase])
+  }, [])
 
   // Handler for running specific suite
   const handleRunSpecificSuite = useCallback(async (suiteName: string, testCount: number) => {
@@ -1192,7 +1223,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     } finally {
       setIsRunningAllTests(false)
     }
-  }, [supabase, executeTest, refetch])
+  }, [ executeTest, refetch])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
