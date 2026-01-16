@@ -244,7 +244,7 @@ const mappedAddOns: AddOn[] = useMemo(() => dbAddOns.map((dbAddOn): AddOn => ({
 4. Sync mapped data to local state via useEffect
 5. Replace mutation handlers with hook mutations
 
-#### 4. 3d-modeling-v2 ✅ (Commit: TBD)
+#### 4. 3d-modeling-v2 ✅ (Commit: be3f45d3)
 **File:** `app/(app)/dashboard/3d-modeling-v2/3d-modeling-client.tsx` (2,570 lines)
 **Migration Date:** January 16, 2026
 **Complexity:** Medium (schema mapping required, straightforward byte-to-MB conversion)

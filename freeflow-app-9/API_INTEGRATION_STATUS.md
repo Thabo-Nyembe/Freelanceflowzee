@@ -354,7 +354,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1.5 hours
    - **Complexity:** Medium (schema mapping required, but straightforward field-to-field conversion)
 
-4. `3d-modeling-v2` - ✅ **MIGRATED** (2,570 lines, +43 net) - Commit: TBD
+4. `3d-modeling-v2` - ✅ **MIGRATED** (2,570 lines, +43 net) - Commit: `be3f45d3`
    - **Pattern:** Hook integration with schema mapping (UI Model3D ↔ DB ThreeDModel)
    - **Tables:** three_d_models
    - **Mapping:** Database fields (title, file_size bytes) → UI fields (name, file_size_mb)
