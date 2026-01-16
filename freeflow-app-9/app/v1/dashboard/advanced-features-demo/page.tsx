@@ -33,7 +33,6 @@ import { toast } from 'sonner'
 import { useAISuggestions, useContentGeneration, type ContentType, type ToneType } from '@/lib/ai-suggestions'
 import { usePresence, useBroadcast } from '@/hooks/use-realtime'
 
-// A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
@@ -124,9 +123,7 @@ function AIContentDemo() {
 
     try {
       await generate(prompt, contentType, { tone, fixGrammar: true })
-      toast.success('Content generated successfully!')
-      logger.info('Content generated', { contentType, tone, promptLength: prompt.length })
-    } catch (error) {
+      toast.success('Content generated successfully!')    } catch (error) {
       toast.error('Failed to generate content')
       logger.error('Content generation failed', { error })
     }

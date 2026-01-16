@@ -183,33 +183,21 @@ const arCollaborationReducer = (
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_SESSIONS':
-      logger.info('Setting sessions', { count: action.sessions.length })
-      return { ...state, sessions: action.sessions, isLoading: false }
+    case 'SET_SESSIONS':      return { ...state, sessions: action.sessions, isLoading: false }
 
-    case 'ADD_SESSION':
-      logger.info('Session added', {
-        sessionId: action.session.id,
-        sessionName: action.session.name,
-        environment: action.session.environment
-      })
-      return {
+    case 'ADD_SESSION':      return {
         ...state,
         sessions: [action.session, ...state.sessions],
         isLoading: false
       }
 
-    case 'UPDATE_SESSION':
-      logger.info('Session updated', { sessionId: action.session.id })
-      return {
+    case 'UPDATE_SESSION':      return {
         ...state,
         sessions: state.sessions.map(s => s.id === action.session.id ? action.session : s),
         selectedSession: state.selectedSession?.id === action.session.id ? action.session : state.selectedSession
       }
 
-    case 'DELETE_SESSION':
-      logger.info('Session deleted', { sessionId: action.sessionId })
-      return {
+    case 'DELETE_SESSION':      return {
         ...state,
         sessions: state.sessions.filter(s => s.id !== action.sessionId),
         selectedSession: state.selectedSession?.id === action.sessionId ? null : state.selectedSession
@@ -246,13 +234,7 @@ const arCollaborationReducer = (
       logger.error('Error occurred', { error: action.error })
       return { ...state, error: action.error, isLoading: false }
 
-    case 'JOIN_SESSION':
-      logger.info('Participant joining session', {
-        sessionId: action.sessionId,
-        participantId: action.participant.id,
-        device: action.participant.device
-      })
-      return {
+    case 'JOIN_SESSION':      return {
         ...state,
         sessions: state.sessions.map(s =>
           s.id === action.sessionId
@@ -265,12 +247,7 @@ const arCollaborationReducer = (
         )
       }
 
-    case 'LEAVE_SESSION':
-      logger.info('Participant leaving session', {
-        sessionId: action.sessionId,
-        participantId: action.participantId
-      })
-      return {
+    case 'LEAVE_SESSION':      return {
         ...state,
         sessions: state.sessions.map(s =>
           s.id === action.sessionId
@@ -283,18 +260,14 @@ const arCollaborationReducer = (
         )
       }
 
-    case 'TOGGLE_RECORDING':
-      logger.info('Toggling recording', { sessionId: action.sessionId })
-      return {
+    case 'TOGGLE_RECORDING':      return {
         ...state,
         sessions: state.sessions.map(s =>
           s.id === action.sessionId ? { ...s, isRecording: !s.isRecording } : s
         )
       }
 
-    case 'TOGGLE_LOCK':
-      logger.info('Toggling session lock', { sessionId: action.sessionId })
-      return {
+    case 'TOGGLE_LOCK':      return {
         ...state,
         sessions: state.sessions.map(s =>
           s.id === action.sessionId ? { ...s, isLocked: !s.isLocked } : s
@@ -354,10 +327,7 @@ const generateMockSessions = (): ARSession[] => {
       createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
     })
-  }
-
-  logger.info('Mock sessions generated', { count: sessions.length })
-  return sessions
+  }  return sessions
 }
 
 // ========================================
@@ -499,18 +469,9 @@ export default function ARCollaborationPage() {
 
   // Load mock data
   useEffect(() => {
-    if (!userId) {
-      logger.info('Waiting for user authentication')
-      return
-    }
-
-    logger.info('Loading initial data', { userId })
-
-    const mockSessions = generateMockSessions()
-    dispatch({ type: 'SET_SESSIONS', sessions: mockSessions })
-
-    logger.info('Initial data loaded', { sessionCount: mockSessions.length, userId })
-    announce('AR collaboration page loaded', 'polite')
+    if (!userId) {      return
+    }    const mockSessions = generateMockSessions()
+    dispatch({ type: 'SET_SESSIONS', sessions: mockSessions })    announce('AR collaboration page loaded', 'polite')
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
@@ -592,16 +553,7 @@ export default function ARCollaborationPage() {
   // HANDLERS
   // ========================================
 
-  const handleCreateSession = async () => {
-    logger.info('Creating AR session', {
-      name: sessionName,
-      environment: sessionEnvironment,
-      maxParticipants,
-      isLocked: sessionIsLocked,
-      userId
-    })
-
-    if (!sessionName.trim()) {
+  const handleCreateSession = async () => {    if (!sessionName.trim()) {
       logger.warn('Session validation failed', { reason: 'Name required' })
       toast.error('Session name is required')
       announce('Session name is required', 'assertive')
@@ -663,17 +615,7 @@ export default function ARCollaborationPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'ADD_SESSION', session: newSession })
-
-      logger.info('AR session created in database', {
-        sessionId: newSession.id,
-        environment: sessionEnvironment,
-        maxParticipants,
-        featuresEnabled: enabledFeatures.length,
-        userId
-      })
-
-      // Reset form
+      dispatch({ type: 'ADD_SESSION', session: newSession })      // Reset form
       setSessionName('')
       setSessionDescription('')
       setSessionEnvironment('office')
@@ -681,43 +623,24 @@ export default function ARCollaborationPage() {
       setSessionIsLocked(false)
       setShowCreateSessionModal(false)
 
-      toast.success('AR session created', {
-        description: `${newSession.name} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
+      toast.success('AR session created' - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
       })
       announce('AR session created', 'polite')
     } catch (error: any) {
       logger.error('Session creation failed', { error: error.message, name: sessionName, userId })
-      toast.error('Failed to create session', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create session')
       announce('Failed to create session', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create session' })
     }
   }
 
-  const handleViewSession = (session: ARSession) => {
-    logger.info('Opening session view', {
-      sessionId: session.id,
-      sessionName: session.name,
-      status: session.status,
-      participants: session.currentParticipants
-    })
-
-    dispatch({ type: 'SELECT_SESSION', session })
+  const handleViewSession = (session: ARSession) => {    dispatch({ type: 'SELECT_SESSION', session })
     setViewSessionTab('overview')
     setShowViewSessionModal(true)
     announce(`Viewing session ${session.name}`, 'polite')
   }
 
-  const handleJoinSession = async (session: ARSession) => {
-    logger.info('Joining AR session', {
-      sessionId: session.id,
-      sessionName: session.name,
-      currentParticipants: session.currentParticipants,
-      maxParticipants: session.maxParticipants
-    })
-
-    if (session.currentParticipants >= session.maxParticipants) {
+  const handleJoinSession = async (session: ARSession) => {    if (session.currentParticipants >= session.maxParticipants) {
       logger.warn('Cannot join session', { reason: 'Session is full', sessionId: session.id })
       toast.error('Session is full')
       announce('Session is full', 'assertive')
@@ -732,9 +655,7 @@ export default function ARCollaborationPage() {
     }
 
     try {
-      toast.info('Entering AR session...', {
-        description: 'Initializing AR environment'
-      })
+      toast.info('Entering AR session...')
 
       const newParticipant: ARParticipant = {
         id: `PART-${Date.now()}`,
@@ -751,17 +672,7 @@ export default function ARCollaborationPage() {
         latency: Math.floor(Math.random() * 100) + 20
       }
 
-      dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })
-
-      logger.info('Joined AR session', {
-        sessionId: session.id,
-        device: newParticipant.device,
-        latency: newParticipant.latency,
-        newParticipantCount: session.currentParticipants + 1
-      })
-
-      toast.success(`Joined ${session.name}`, {
-        description: `${getEnvironmentName(session.environment)} - ${getDeviceName(newParticipant.device)} - Latency: ${newParticipant.latency}ms - ${session.currentParticipants + 1}/${session.maxParticipants} participants`
+      dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })      toast.success(`Joined ${session.name}` - ${getDeviceName(newParticipant.device)} - Latency: ${newParticipant.latency}ms - ${session.currentParticipants + 1}/${session.maxParticipants} participants`
       })
       announce(`Joined ${session.name}`, 'polite')
     } catch (error) {
@@ -771,10 +682,7 @@ export default function ARCollaborationPage() {
     }
   }
 
-  const handleDeleteSession = (sessionId: string) => {
-    logger.info('Deleting session', { sessionId })
-
-    const session = state.sessions.find(s => s.id === sessionId)
+  const handleDeleteSession = (sessionId: string) => {    const session = state.sessions.find(s => s.id === sessionId)
     if (!session) {
       logger.warn('Session not found', { sessionId })
       return
@@ -784,16 +692,7 @@ export default function ARCollaborationPage() {
   }
 
   const handleConfirmDeleteSession = async () => {
-    if (!deleteSession || !userId) return
-
-    logger.info('User confirmed session deletion', {
-      sessionId: deleteSession.id,
-      sessionName: deleteSession.name,
-      environment: deleteSession.environment,
-      userId
-    })
-
-    try {
+    if (!deleteSession || !userId) return    try {
       // Dynamic import for code splitting
       const { deleteSession: deleteSessionFromDB } = await import('@/lib/ar-collaboration-queries')
 
@@ -803,16 +702,7 @@ export default function ARCollaborationPage() {
         throw new Error(deleteError.message || 'Failed to delete session')
       }
 
-      dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
-
-      logger.info('Session deleted from database', {
-        sessionId: deleteSession.id,
-        sessionName: deleteSession.name,
-        userId
-      })
-
-      toast.success('Session deleted', {
-        description: `${deleteSession.name} - ${getEnvironmentName(deleteSession.environment)}`
+      dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })      toast.success('Session deleted' - ${getEnvironmentName(deleteSession.environment)}`
       })
       announce('Session deleted', 'polite')
     } catch (error: any) {
@@ -821,19 +711,14 @@ export default function ARCollaborationPage() {
         sessionId: deleteSession.id,
         userId
       })
-      toast.error('Failed to delete session', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete session')
       announce('Error deleting session', 'assertive')
     } finally {
       setDeleteSession(null)
     }
   }
 
-  const handleToggleRecording = async (sessionId: string) => {
-    logger.info('Toggling recording', { sessionId })
-
-    const session = state.sessions.find(s => s.id === sessionId)
+  const handleToggleRecording = async (sessionId: string) => {    const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
     const newStatus = !session.isRecording
@@ -842,31 +727,17 @@ export default function ARCollaborationPage() {
     if (userId) {
       try {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
-        await updateSession(sessionId, { is_recording: newStatus })
-        logger.info('Recording status persisted to database', { sessionId, recording: newStatus })
-      } catch (error: any) {
+        await updateSession(sessionId, { is_recording: newStatus })      } catch (error: any) {
         logger.error('Failed to persist recording status', { error: error.message })
       }
     }
 
-    dispatch({ type: 'TOGGLE_RECORDING', sessionId })
-
-    logger.info('Recording toggled', {
-      sessionId: session.id,
-      sessionName: session.name,
-      recording: newStatus
-    })
-
-    toast.success(session.isRecording ? 'Recording stopped' : 'Recording started', {
-      description: `${session.name} - ${getEnvironmentName(session.environment)}`
+    dispatch({ type: 'TOGGLE_RECORDING', sessionId })    toast.success(session.isRecording ? 'Recording stopped' : 'Recording started' - ${getEnvironmentName(session.environment)}`
     })
     announce(session.isRecording ? 'Recording stopped' : 'Recording started', 'polite')
   }
 
-  const handleToggleLock = async (sessionId: string) => {
-    logger.info('Toggling session lock', { sessionId })
-
-    const session = state.sessions.find(s => s.id === sessionId)
+  const handleToggleLock = async (sessionId: string) => {    const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
     const newStatus = !session.isLocked
@@ -875,23 +746,12 @@ export default function ARCollaborationPage() {
     if (userId) {
       try {
         const { updateSession } = await import('@/lib/ar-collaboration-queries')
-        await updateSession(sessionId, { is_locked: newStatus })
-        logger.info('Lock status persisted to database', { sessionId, locked: newStatus })
-      } catch (error: any) {
+        await updateSession(sessionId, { is_locked: newStatus })      } catch (error: any) {
         logger.error('Failed to persist lock status', { error: error.message })
       }
     }
 
-    dispatch({ type: 'TOGGLE_LOCK', sessionId })
-
-    logger.info('Session lock toggled', {
-      sessionId: session.id,
-      sessionName: session.name,
-      locked: newStatus
-    })
-
-    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked', {
-      description: `${session.name} - ${session.isLocked ? 'Anyone can join' : 'Requires password'}`
+    dispatch({ type: 'TOGGLE_LOCK', sessionId })    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked' - ${session.isLocked ? 'Anyone can join' : 'Requires password'}`
     })
     announce(session.isLocked ? 'Session unlocked' : 'Session locked', 'polite')
   }
