@@ -478,55 +478,63 @@ export default function FAQClient() {
 
   // Convert DB FAQs to Article format for display
   const articles = useMemo(() => {
-    if (dbFaqs && dbFaqs.length > 0) {
-      return dbFaqs.map(faq => ({
-        id: faq.id,
-        title: faq.question,
-        slug: faq.question.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        content: faq.answer,
-        excerpt: faq.answer.slice(0, 150) + (faq.answer.length > 150 ? '...' : ''),
-        status: faq.status,
-        collectionId: faq.category || 'col-1',
-        author: mockAuthors[0],
-        tags: faq.tags || [],
-        viewCount: faq.views_count || 0,
-        helpfulCount: faq.helpful_count || 0,
-        notHelpfulCount: faq.not_helpful_count || 0,
-        commentCount: 0,
-        shareCount: 0,
-        searchCount: faq.searches_count || 0,
-        avgReadTime: faq.average_read_time || 3,
-        createdAt: faq.created_at,
-        updatedAt: faq.updated_at,
-        publishedAt: faq.status === 'published' ? faq.updated_at : null,
-        featured: false,
-        pinned: faq.priority === 'high' || faq.priority === 'critical',
-        language: 'en',
-        translations: [],
-        relatedArticles: faq.related_faqs || [],
-        versions: []
-      }))
-    }
-    return mockArticles
+    return (dbFaqs || []).map(faq => ({
+      id: faq.id,
+      title: faq.question,
+      slug: faq.question.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      content: faq.answer,
+      excerpt: faq.answer.slice(0, 150) + (faq.answer.length > 150 ? '...' : ''),
+      status: faq.status,
+      collectionId: faq.category || 'col-1',
+      author: mockAuthors[0],
+      tags: faq.tags || [],
+      viewCount: faq.views_count || 0,
+      helpfulCount: faq.helpful_count || 0,
+      notHelpfulCount: faq.not_helpful_count || 0,
+      commentCount: 0,
+      shareCount: 0,
+      searchCount: faq.searches_count || 0,
+      avgReadTime: faq.average_read_time || 3,
+      createdAt: faq.created_at,
+      updatedAt: faq.updated_at,
+      publishedAt: faq.status === 'published' ? faq.updated_at : null,
+      featured: false,
+      pinned: faq.priority === 'high' || faq.priority === 'critical',
+      language: 'en',
+      translations: [],
+      relatedArticles: faq.related_faqs || [],
+      versions: []
+    }))
   }, [dbFaqs])
 
-  // Stats - use real data when available
+  // Stats from database
   const stats = useMemo(() => {
-    if (dbStats && dbStats.total > 0) {
+    if (!dbStats) {
       return {
-        totalArticles: dbStats.total,
-        publishedArticles: dbStats.published,
-        draftArticles: dbStats.draft,
-        totalViews: dbStats.totalViews,
+        totalArticles: 0,
+        publishedArticles: 0,
+        draftArticles: 0,
+        totalViews: 0,
         totalSearches: 0,
-        avgHelpfulRating: dbStats.avgHelpfulness,
-        articlesNeedingReview: dbStats.review,
+        avgHelpfulRating: 0,
+        articlesNeedingReview: 0,
         unansweredQuestions: 0,
         totalCollections: collections.length,
         totalAuthors: mockAuthors.length
       }
     }
-    return mockStats
+    return {
+      totalArticles: dbStats.total,
+      publishedArticles: dbStats.published,
+      draftArticles: dbStats.draft,
+      totalViews: dbStats.totalViews,
+      totalSearches: 0,
+      avgHelpfulRating: dbStats.avgHelpfulness,
+      articlesNeedingReview: dbStats.review,
+      unansweredQuestions: 0,
+      totalCollections: collections.length,
+      totalAuthors: mockAuthors.length
+    }
   }, [dbStats, collections.length])
 
   const filteredArticles = useMemo(() => {
