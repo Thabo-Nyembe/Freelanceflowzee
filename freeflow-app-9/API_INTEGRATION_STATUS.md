@@ -7,9 +7,9 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 162/286 pages integrated (56.6%)
+**Overall Progress:** 165/286 pages integrated (57.7%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 99/223 using Supabase hooks (44.4%) 🚧
+- **V2 Pages:** 102/223 using Supabase hooks (45.7%) 🚧
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated
 
@@ -51,13 +51,13 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 162/286 pages integrated (56.6%)
+**Overall Progress:** 165/286 pages integrated (57.7%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 99/223 (44.4%) 🚧
-**Remaining:** 124 V2 pages need Supabase hook integration
+**V2 Pages (Supabase Hooks):** 102/223 (45.7%) 🚧
+**Remaining:** 121 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -230,7 +230,7 @@ Based on detailed analysis of 21 sample pages:
 - ✅ Real data from database
 - ⚠️ Mock data only for competitive upgrade features (AI insights, predictions)
 
-**Category B: Manual Supabase → Migrated (7 pages) ✅**
+**Category B: Manual Supabase → Migrated (10 pages) ✅**
 - `analytics` - ✅ **MIGRATED** (4,335 → 4,218 LOC, -117 lines) - Now uses extended hooks
 - `crm` - ✅ **MIGRATED** (4,098 → 4,082 LOC, -16 lines) - Now uses extended hooks
 - `data-export` - ✅ **MIGRATED** (5,310 → 5,302 LOC, -8 lines) - Now uses useDataExports hook
@@ -238,7 +238,10 @@ Based on detailed analysis of 21 sample pages:
 - `payroll` - ✅ **MIGRATED** (4,291 → 4,296 LOC, +5 lines) - Now uses usePayrollRuns, usePendingPayrollRuns, usePayrollStats hooks
 - `polls` - ✅ **MIGRATED** (2,510 → 2,465 LOC, -45 lines) - Now uses usePolls hook with real-time subscriptions
 - `help-docs` - ✅ **MIGRATED** (3,030 → 3,029 LOC, -1 line) - Now uses useHelpArticles, useHelpCategories hooks
-- **Total Impact:** 193 lines removed, 33+ manual Supabase queries eliminated, 18 handlers migrated to dynamic imports
+- `courses` - ✅ **MIGRATED** (3,106 → 3,105 LOC, -1 line) - Dynamic imports for 12 handlers (enroll, complete, sections, lectures)
+- `inventory` - ✅ **MIGRATED** (2,829 → 2,836 LOC, +7 lines) - Dynamic imports for 4 handlers (transfers, PO, locations, suppliers)
+- `investor-metrics` - ✅ **MIGRATED** (2,815 → 2,817 LOC, +2 lines) - Dynamic imports for 2 handlers (auth.getUser)
+- **Total Impact:** 185 lines removed, 51+ manual Supabase queries eliminated, 36 handlers migrated to dynamic imports
 
 **Category C: Verified Production-Ready (1 page)**
 - `projects-hub` - ✅ Already using `useProjects()` hook with smart fallback pattern
