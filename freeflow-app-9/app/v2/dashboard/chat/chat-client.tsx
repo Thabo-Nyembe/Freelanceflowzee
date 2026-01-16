@@ -4,7 +4,6 @@
 'use client'
 
 import { useState, useCallback, useMemo, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -257,7 +256,6 @@ interface ChatClientProps {
 
 export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   // Supabase client
-  const supabase = createClient()
 
   // State
   const [activeTab, setActiveTab] = useState('inbox')

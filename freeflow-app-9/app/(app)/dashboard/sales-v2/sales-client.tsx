@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useSalesDeals, SalesDeal } from '@/lib/hooks/use-sales'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -390,7 +389,6 @@ const defaultDealForm = {
 }
 
 export default function SalesClient() {
-  const supabase = createClient()
 
   // Use the sales hook for real data
   const {

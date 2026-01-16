@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -167,7 +166,6 @@ const mockCrmPredictions = crmPredictions
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
-  const supabase = createClient()
 
   // Supabase queries
   const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({

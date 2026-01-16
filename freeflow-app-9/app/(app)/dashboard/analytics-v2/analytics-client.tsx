@@ -1,7 +1,6 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -159,7 +158,6 @@ const mockActivities = analyticsActivities
 const mockQuickActions = analyticsQuickActions
 
 export default function AnalyticsClient() {
-  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')

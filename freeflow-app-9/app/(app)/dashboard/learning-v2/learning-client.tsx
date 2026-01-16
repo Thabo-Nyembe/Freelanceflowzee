@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
 import {
@@ -546,7 +545,6 @@ const mockLearningActivities = [
 // ============================================================================
 
 export default function LearningClient() {
-  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('my-learning')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all')

@@ -39,7 +39,6 @@ import { useCreateSubscription, useActiveSubscriptions } from '@/lib/hooks/use-s
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { useInvoices } from '@/lib/hooks/use-invoices-extended'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 interface Subscription {
@@ -590,6 +589,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
 
   const handleExportBilling = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: billingData, error } = await supabase
         .from('billing')

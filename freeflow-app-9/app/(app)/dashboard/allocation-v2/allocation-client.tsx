@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useAllocations, useAllocationMutations } from '@/lib/hooks/use-allocations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -725,7 +724,6 @@ const initialFormState: AllocationForm = {
 }
 
 export default function AllocationClient() {
-  const supabase = createClient()
 
   // Supabase hooks
   const { allocations: dbAllocations, stats: dbStats, isLoading, refetch } = useAllocations()

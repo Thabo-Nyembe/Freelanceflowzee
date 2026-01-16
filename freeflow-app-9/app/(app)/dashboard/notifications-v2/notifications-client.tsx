@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useNotificationsV2, type NotificationStatusV2, type NotificationTypeV2, type NotificationPriorityV2, type NotificationChannelV2 } from '@/lib/hooks/use-notifications-v2'
 import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -300,7 +299,6 @@ const mockABTests: ABTest[] = [
 
 export default function NotificationsClient() {
   const router = useRouter()
-  const supabase = createClient()
 
   // Use the new comprehensive notifications hook with real Supabase data
   const [statusFilter, setStatusFilter] = useState<NotificationStatusV2 | 'all'>('all')

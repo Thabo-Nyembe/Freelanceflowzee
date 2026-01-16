@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useResources, useResourceMutations } from '@/lib/hooks/use-resources'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -599,7 +598,6 @@ const mockResourcesActivities = [
 // ============================================================================
 
 export default function ResourcesClient() {
-  const supabase = createClient()
 
   // Supabase hooks
   const { resources: dbResources, stats: dbStats, isLoading, refetch } = useResources([], {
