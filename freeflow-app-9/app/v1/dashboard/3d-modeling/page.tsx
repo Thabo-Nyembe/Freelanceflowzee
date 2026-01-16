@@ -17,7 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 
-// A+++ SUPABASE INTEGRATION
 import {
   getProjects,
   getProjectStats
@@ -25,7 +24,6 @@ import {
 
 const logger = createFeatureLogger('3D-Modeling')
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -122,7 +120,6 @@ const LIGHTS: Light[] = [
 ]
 
 export default function ModelingStudioPage() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
   const [isLoading, setIsLoading] = useState(true)
@@ -141,22 +138,15 @@ export default function ModelingStudioPage() {
   const [renderQuality, setRenderQuality] = useState(['medium'])
   const [activeTab, setActiveTab] = useState('objects')
 
-  // A+++ LOAD 3D MODELING DATA FROM SUPABASE
   useEffect(() => {
     const load3DModelingData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-
-        logger.info('Loading 3D Modeling data from Supabase', { userId })
-
-        // Parallel data loading - 2 simultaneous queries
+        setError(null)        // Parallel data loading - 2 simultaneous queries
         const [projectsResult, statsResult] = await Promise.all([
           getProjects(userId),
           getProjectStats(userId)
@@ -170,20 +160,10 @@ export default function ModelingStudioPage() {
           logger.error('Failed to load stats', { error: statsResult.error, userId })
         }
 
-        // Log successful data load
-        logger.info('3D Modeling data loaded', {
-          projectsCount: projectsResult.data?.length || 0,
-          totalScenes: statsResult.data?.total_scenes || 0,
-          totalObjects: statsResult.data?.total_objects || 0,
-          totalRenders: statsResult.data?.total_renders || 0,
-          userId
-        })
-
-        setIsLoading(false)
+        // Log successful data load        setIsLoading(false)
         announce('3D modeling studio loaded successfully', 'polite')
 
-        toast.success('3D Modeling Studio loaded', {
-          description: `${projectsResult.data?.length || 0} projects • ${statsResult.data?.total_scenes || 0} scenes • ${statsResult.data?.total_objects || 0} objects`
+        toast.success('3D Modeling Studio loaded' projects • ${statsResult.data?.total_scenes || 0} scenes • ${statsResult.data?.total_objects || 0} objects`
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load 3D modeling studio'
@@ -191,7 +171,7 @@ export default function ModelingStudioPage() {
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading 3D modeling studio', 'assertive')
-        toast.error('Failed to load 3D Modeling', { description: errorMessage })
+        toast.error('Failed to load 3D Modeling')
       }
     }
 
@@ -203,13 +183,7 @@ export default function ModelingStudioPage() {
   // ============================================
 
   const handleAddObject = useCallback(async (objectType: string) => {
-    try {
-      logger.info('Adding scene object', {
-        objectType,
-        currentObjectsCount: objects.length
-      })
-
-      const newObject: SceneObject = {
+    try {      const newObject: SceneObject = {
         id: `obj-${Date.now()}`,
         name: `${objectType.charAt(0).toUpperCase() + objectType.slice(1)} ${objects.length + 1}`,
         type: objectType as any,
@@ -223,30 +197,14 @@ export default function ModelingStudioPage() {
 
       setObjects([...objects, newObject])
 
-      toast.success(`Object Added: ${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`)
-
-      logger.info('Object added successfully', {
-        objectId: newObject.id,
-        objectName: newObject.name,
-        totalObjects: objects.length + 1
-      })
-    } catch (err) {
+      toast.success(`Object Added: ${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`)    } catch (err) {
       logger.error('Failed to add object', { error: err })
       toast.error('Failed to add object')
     }
   }, [objects])
 
   const handleApplyMaterial = useCallback((materialName: string) => {
-    const material = materials.find(m => m.name === materialName)
-
-    logger.info('Applying material', {
-      materialName,
-      materialType: material?.type,
-      selectedObject: selectedObject?.name,
-      objectsCount: objects.length
-    })
-
-    if (selectedObject) {
+    const material = materials.find(m => m.name === materialName)    if (selectedObject) {
       // Apply material to selected object
       setObjects(prev => prev.map(obj =>
         obj.id === selectedObject ? { ...obj, material: material?.id || 'default' } : obj
@@ -274,16 +232,7 @@ export default function ModelingStudioPage() {
       intensity: 1.0,
       color: '#ffffff',
       position: { x: 0, y: 5, z: 0 }
-    }
-
-    logger.info('Adding light', {
-      lightType,
-      lightId: newLight.id,
-      lightsCount: lights.length + 1,
-      intensity: newLight.intensity
-    })
-
-    setLights([...lights, newLight])
+    }    setLights([...lights, newLight])
 
     toast.success(`Light added: ${lightType} - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`)
   }, [lights])
@@ -450,17 +399,7 @@ export default function ModelingStudioPage() {
         camera: cameraPosition,
         settings: { renderQuality: renderQuality[0] }
       }
-    }
-
-    logger.info('Exporting 3D model', {
-      objectsCount: objects.length,
-      materialsCount: materials.length,
-      lightsCount: lights.length,
-      renderQuality: renderQuality[0],
-      cameraPosition
-    })
-
-    const modelJSON = JSON.stringify(modelData, null, 2)
+    }    const modelJSON = JSON.stringify(modelData, null, 2)
     const blob = new Blob([modelJSON], { type: 'application/json' })
     const fileName = `3d-model-${Date.now()}.json`
     const url = URL.createObjectURL(blob)
@@ -488,9 +427,7 @@ export default function ModelingStudioPage() {
           include_camera: true,
           scale: 1.0
         })
-        if (!error && exportJob) {
-          logger.info('Export job saved to database', { exportJobId: exportJob.id, userId })
-        }
+        if (!error && exportJob) {        }
       } catch (err) {
         logger.error('Failed to save export job', { error: err, userId })
       }
@@ -501,17 +438,7 @@ export default function ModelingStudioPage() {
     const qualityLabels = { 25: 'Low', 50: 'Medium', 75: 'High', 100: 'Ultra' }
     const qualityMap: Record<number, 'low' | 'medium' | 'high' | 'ultra'> = { 25: 'low', 50: 'medium', 75: 'high', 100: 'ultra' }
     const quality = qualityLabels[renderQuality[0] as keyof typeof qualityLabels] || 'Medium'
-    const qualityValue = qualityMap[renderQuality[0] as keyof typeof qualityMap] || 'medium'
-
-    logger.info('Rendering scene', {
-      renderQuality: renderQuality[0],
-      qualityLabel: quality,
-      objectsCount: objects.length,
-      lightsCount: lights.length,
-      visibleObjects: objects.filter(o => o.visible).length
-    })
-
-    toast.success(`Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`)
+    const qualityValue = qualityMap[renderQuality[0] as keyof typeof qualityMap] || 'medium'    toast.success(`Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`)
 
     // Save render job to database if user is authenticated
     if (userId) {
@@ -529,15 +456,10 @@ export default function ModelingStudioPage() {
           enable_ambient_occlusion: qualityValue !== 'low',
           output_format: 'png'
         })
-        if (!error && renderJob) {
-          logger.info('Render job created in database', { renderJobId: renderJob.id, quality: qualityValue, userId })
-
-          // Simulate rendering completion and update job status
+        if (!error && renderJob) {          // Simulate rendering completion and update job status
           setTimeout(async () => {
             try {
-              await updateRenderJobStatus(renderJob.id, 'completed', 100)
-              logger.info('Render job marked complete', { renderJobId: renderJob.id })
-            } catch (err) {
+              await updateRenderJobStatus(renderJob.id, 'completed', 100)            } catch (err) {
               logger.error('Failed to update render job status', { error: err })
             }
           }, 2000)
@@ -550,7 +472,6 @@ export default function ModelingStudioPage() {
     // Rendering simulation handled by toast.promise above
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <>
@@ -575,7 +496,6 @@ export default function ModelingStudioPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <>
@@ -643,13 +563,7 @@ export default function ModelingStudioPage() {
                     <button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        logger.info('Sharing 3D model', {
-                          objectsCount: objects.length,
-                          materialsCount: materials.length,
-                          lightsCount: lights.length
-                        })
-                        // Copy model JSON to clipboard
+                      onClick={() => {                        // Copy model JSON to clipboard
                         const modelData = {
                           objects,
                           materials,
@@ -657,7 +571,7 @@ export default function ModelingStudioPage() {
                           scene: { camera: cameraPosition, settings: { renderQuality: renderQuality[0] } }
                         }
                         navigator.clipboard.writeText(JSON.stringify(modelData, null, 2))
-                        toast.success('Model Copied', { description: `${objects.length} objects, ${materials.length} materials copied to clipboard` })
+                        toast.success('Model Copied' objects, ${materials.length} materials copied to clipboard` })
                       }}
                       data-testid="share-model-btn"
                     >
@@ -680,14 +594,8 @@ export default function ModelingStudioPage() {
                         key={tool.id}
                         variant={selectedTool === tool.id ? "default" : "outline"}
                         size="sm"
-                        onClick={() => {
-                          logger.info('Tool selected', {
-                            toolId: tool.id,
-                            toolLabel: tool.label,
-                            previousTool: selectedTool
-                          })
-                          setSelectedTool(tool.id as any)
-                          toast.success(`${tool.label} Tool`, { description: 'Tool activated' })
+                        onClick={() => {                          setSelectedTool(tool.id as any)
+                          toast.success(`${tool.label} Tool`)
                         }}
                         className="gap-2"
                         data-testid={`3d-tool-${tool.id}-btn`}
@@ -838,14 +746,8 @@ export default function ModelingStudioPage() {
                             key={primitive.id}
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              logger.info('Adding 3D object', {
-                                objectType: primitive.id,
-                                objectName: primitive.name,
-                                objectsCount: objects.length + 1
-                              })
-                              addObject(primitive.id)
-                              toast.success(`${primitive.name} Added`, { description: `${objects.length + 1} total objects in scene` })
+                            onClick={() => {                              addObject(primitive.id)
+                              toast.success(`${primitive.name} Added` total objects in scene` })
                             }}
                             className="gap-2"
                             data-testid={`add-${primitive.id}-btn`}
@@ -882,14 +784,8 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  logger.info('Toggled visibility', {
-                                    objectId: obj.id,
-                                    objectName: obj.name,
-                                    newVisibility: !obj.visible
-                                  })
-                                  updateObjectProperty(obj.id, 'visible', !obj.visible)
-                                  toast.success(`${obj.name} ${!obj.visible ? 'Visible' : 'Hidden'}`, { description: 'Visibility toggled' })
+                                  e.stopPropagation()                                  updateObjectProperty(obj.id, 'visible', !obj.visible)
+                                  toast.success(`${obj.name} ${!obj.visible ? 'Visible' : 'Hidden'}`)
                                 }}
                                 data-testid={`toggle-visibility-${obj.id}-btn`}
                               >
@@ -899,15 +795,8 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  logger.info('Duplicating object', {
-                                    objectId: obj.id,
-                                    objectName: obj.name,
-                                    objectType: obj.type,
-                                    objectsCount: objects.length + 1
-                                  })
-                                  duplicateObject(obj.id)
-                                  toast.success(`${obj.name} Duplicated`, { description: `${objects.length + 1} total objects` })
+                                  e.stopPropagation()                                  duplicateObject(obj.id)
+                                  toast.success(`${obj.name} Duplicated` total objects` })
                                 }}
                                 data-testid={`duplicate-${obj.id}-btn`}
                               >
@@ -917,15 +806,8 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  logger.info('Deleting object', {
-                                    objectId: obj.id,
-                                    objectName: obj.name,
-                                    objectType: obj.type,
-                                    remainingObjects: objects.length - 1
-                                  })
-                                  deleteObject(obj.id)
-                                  toast.success(`${obj.name} Deleted`, { description: `${objects.length - 1} objects remaining` })
+                                  e.stopPropagation()                                  deleteObject(obj.id)
+                                  toast.success(`${obj.name} Deleted` objects remaining` })
                                 }}
                                 data-testid={`delete-${obj.id}-btn`}
                               >
@@ -979,14 +861,8 @@ export default function ModelingStudioPage() {
                             roughness: 0.5,
                             metallic: 0.0,
                             emission: 0
-                          }
-                          logger.info('Adding new material', {
-                            materialId: newMaterial.id,
-                            materialName: newMaterial.name,
-                            materialsCount: materials.length + 1
-                          })
-                          setMaterials([...materials, newMaterial])
-                          toast.success(`${newMaterial.name} Created`, { description: `${materials.length + 1} total materials` })
+                          }                          setMaterials([...materials, newMaterial])
+                          toast.success(`${newMaterial.name} Created` total materials` })
                         }}
                         data-testid="add-material-btn"
                       >
@@ -1054,15 +930,8 @@ export default function ModelingStudioPage() {
                             color: '#ffffff',
                             position: { x: 0, y: 5, z: 0 },
                             enabled: true
-                          }
-                          logger.info('Adding new light', {
-                            lightId: newLight.id,
-                            lightName: newLight.name,
-                            lightType: newLight.type,
-                            lightsCount: lights.length + 1
-                          })
-                          setLights([...lights, newLight])
-                          toast.success(`${newLight.name} Added`, { description: `${newLight.type} light - ${lights.length + 1} total` })
+                          }                          setLights([...lights, newLight])
+                          toast.success(`${newLight.name} Added` light - ${lights.length + 1} total` })
                         }}
                         data-testid="add-light-btn"
                       >
