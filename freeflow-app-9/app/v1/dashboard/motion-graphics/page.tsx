@@ -32,7 +32,6 @@ import {
   calculateStoragePercentage
 } from '@/lib/motion-graphics-utils'
 
-// A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -54,7 +53,6 @@ interface LayerState {
 }
 
 export default function MotionGraphicsPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -86,21 +84,15 @@ export default function MotionGraphicsPage() {
     motionStats?.storageLimit || 1
   )
 
-  // A+++ LOAD MOTION GRAPHICS DATA
   useEffect(() => {
     const loadMotionGraphicsData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading motion graphics data', { userId })
-
-        const { getMotionProjects, getMotionStats } = await import('@/lib/motion-graphics-queries')
+        setError(null)        const { getMotionProjects, getMotionStats } = await import('@/lib/motion-graphics-queries')
 
         const [projectsResult, statsResult] = await Promise.all([
           getMotionProjects(userId),
@@ -111,19 +103,14 @@ export default function MotionGraphicsPage() {
         setMotionStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Motion graphics loaded', {
-          description: `${projectsResult.data?.length || 0} projects from database`
-        })
-        logger.info('Motion graphics data loaded successfully', {
-          projectsCount: projectsResult.data?.length
-        })
-        announce('Motion graphics studio loaded successfully', 'polite')
+        toast.success('Motion graphics loaded' projects from database`
+        })        announce('Motion graphics studio loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load motion graphics studio'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load motion graphics data', { error: errorMessage, userId })
-        toast.error('Failed to load motion graphics', { description: errorMessage })
+        toast.error('Failed to load motion graphics')
         announce('Error loading motion graphics studio', 'assertive')
       }
     }
@@ -140,13 +127,9 @@ export default function MotionGraphicsPage() {
     try {
       const shareUrl = `${window.location.origin}/shared/motion/${project.id}`
       await navigator.clipboard.writeText(shareUrl)
-      toast.success('Share link copied', {
-        description: 'Project share link has been copied to clipboard'
-      })
+      toast.success('Share link copied')
     } catch (error) {
-      toast.error('Failed to copy share link', {
-        description: 'Please try again or copy the URL manually'
-      })
+      toast.error('Failed to copy share link')
     }
   }
 
@@ -173,13 +156,10 @@ export default function MotionGraphicsPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Download started', {
-        description: `${project.name} project file is downloading`
+      toast.success('Download started' project file is downloading`
       })
     } catch (error) {
-      toast.error('Failed to download', {
-        description: 'Could not generate project file'
-      })
+      toast.error('Failed to download')
     }
   }
 
@@ -199,8 +179,7 @@ export default function MotionGraphicsPage() {
       if (!res.ok) throw new Error('Failed to duplicate')
       const newProject = await res.json()
       setMotionProjects(prev => [...prev, newProject])
-      toast.success('Project duplicated', {
-        description: `Created copy: ${project.name} (Copy)`
+      toast.success('Project duplicated' (Copy)`
       })
     } catch (error) {
       // Fallback: add locally if API not available
@@ -211,8 +190,7 @@ export default function MotionGraphicsPage() {
         createdAt: new Date().toISOString()
       }
       setMotionProjects(prev => [...prev, duplicatedProject])
-      toast.success('Project duplicated locally', {
-        description: `Created copy: ${project.name} (Copy)`
+      toast.success('Project duplicated locally' (Copy)`
       })
     }
   }
@@ -229,17 +207,14 @@ export default function MotionGraphicsPage() {
   const handleRotateCanvas = () => {
     const newRotation = (canvasRotation + 90) % 360
     setCanvasRotation(newRotation)
-    toast.success('Rotation applied', {
-      description: `Canvas rotated to ${newRotation} degrees`
+    toast.success('Rotation applied' degrees`
     })
   }
 
   // Real handler: Toggle canvas maximize
   const handleMaximizeCanvas = () => {
     setIsCanvasMaximized(!isCanvasMaximized)
-    toast.success(isCanvasMaximized ? 'Canvas restored' : 'Canvas maximized', {
-      description: isCanvasMaximized ? 'Returned to normal view' : 'Full screen canvas mode'
-    })
+    toast.success(isCanvasMaximized ? 'Canvas restored' : 'Canvas maximized')
   }
 
   // Real handler: Add new layer
@@ -251,8 +226,7 @@ export default function MotionGraphicsPage() {
       locked: false
     }
     setLayers(prev => [...prev, newLayer])
-    toast.success('New layer added', {
-      description: `Created: ${newLayer.name}`
+    toast.success('New layer added'`
     })
   }
 
@@ -263,8 +237,7 @@ export default function MotionGraphicsPage() {
     ))
     const layer = layers.find(l => l.id === layerId)
     const newState = layer ? !layer.visible : true
-    toast.success(`Layer ${newState ? 'shown' : 'hidden'}`, {
-      description: `${layer?.name || 'Layer'} is now ${newState ? 'visible' : 'hidden'}`
+    toast.success(`Layer ${newState ? 'shown' : 'hidden'}` is now ${newState ? 'visible' : 'hidden'}`
     })
   }
 
@@ -275,8 +248,7 @@ export default function MotionGraphicsPage() {
     ))
     const layer = layers.find(l => l.id === layerId)
     const newState = layer ? !layer.locked : true
-    toast.success(`Layer ${newState ? 'locked' : 'unlocked'}`, {
-      description: `${layer?.name || 'Layer'} is now ${newState ? 'locked' : 'editable'}`
+    toast.success(`Layer ${newState ? 'locked' : 'unlocked'}` is now ${newState ? 'locked' : 'editable'}`
     })
   }
 
@@ -284,8 +256,7 @@ export default function MotionGraphicsPage() {
   const handleSkipBack = () => {
     const newTime = Math.max(0, currentTime - 5)
     setCurrentTime(newTime)
-    toast.success('Skipped backward', {
-      description: `Moved to frame ${newTime}`
+    toast.success('Skipped backward'`
     })
   }
 
@@ -293,12 +264,10 @@ export default function MotionGraphicsPage() {
   const handleSkipForward = () => {
     const newTime = Math.min(100, currentTime + 5)
     setCurrentTime(newTime)
-    toast.success('Skipped forward', {
-      description: `Moved to frame ${newTime}`
+    toast.success('Skipped forward'`
     })
   }
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -340,7 +309,6 @@ export default function MotionGraphicsPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -822,7 +790,7 @@ export default function MotionGraphicsPage() {
                     className="w-64 bg-slate-900/50 border-gray-700"
                   />
                   <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
-                    toast.info('Filter assets', { description: 'Opening asset filter panel' })
+                    toast.info('Filter assets')
                   }}>
                     <Filter className="w-4 h-4" />
                   </Button>
