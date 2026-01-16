@@ -7,13 +7,11 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
-// A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// A++++ DYNAMIC IMPORTS - Lazy load heavy components for better performance
 const EnhancedDashboardWidget = dynamic(
   () => import('@/components/ui/enhanced-dashboard-widgets').then(mod => mod.EnhancedDashboardWidget),
   { loading: () => <CardSkeleton />, ssr: false }
@@ -128,7 +126,6 @@ type NotificationType = {
 }
 
 export default function AdvancedMicroFeaturesPage() {
-  // A+++ STATE MANAGEMENT
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -198,17 +195,11 @@ export default function AdvancedMicroFeaturesPage() {
   const [comments, setComments] = React.useState<any[]>([])
   const [showChartSettings, setShowChartSettings] = React.useState(false)
 
-  // A+++ LOAD ADVANCED MICRO FEATURES DATA
   React.useEffect(() => {
     const loadAdvancedMicroFeaturesData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
-      }
-
-      logger.info('Loading advanced micro features data', { userId })
-      try {
+      }      try {
         setIsLoading(true)
         setError(null)
 
@@ -232,7 +223,6 @@ export default function AdvancedMicroFeaturesPage() {
     loadAdvancedMicroFeaturesData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
   const mockUsers = useMemo(() => [
     { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Designer' },
     { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Developer', isTyping: true },
@@ -246,9 +236,7 @@ export default function AdvancedMicroFeaturesPage() {
   // ============================================================================
 
   // Widget handlers
-  const handleWidgetRefresh = useCallback(() => {
-    logger.info('Refreshing dashboard widget')
-    // Simulate refresh with new random data
+  const handleWidgetRefresh = useCallback(() => {    // Simulate refresh with new random data
     const newValue = Math.floor(40000 + Math.random() * 20000)
     const newChange = parseFloat((Math.random() * 20 - 5).toFixed(1))
     setWidgetData(prev => prev ? {
@@ -265,37 +253,27 @@ export default function AdvancedMicroFeaturesPage() {
     toast.success('Widget data refreshed')
   }, [])
 
-  const handleWidgetSettings = useCallback(() => {
-    logger.info('Opening widget settings')
-    setShowWidgetSettings(prev => !prev)
+  const handleWidgetSettings = useCallback(() => {    setShowWidgetSettings(prev => !prev)
     toast.success(showWidgetSettings ? 'Settings closed' : 'Settings opened')
   }, [showWidgetSettings])
 
-  const handleWidgetMaximize = useCallback(() => {
-    logger.info('Maximizing widget')
-    setIsWidgetMaximized(prev => !prev)
+  const handleWidgetMaximize = useCallback(() => {    setIsWidgetMaximized(prev => !prev)
     toast.success(isWidgetMaximized ? 'Widget restored' : 'Widget maximized')
   }, [isWidgetMaximized])
 
   // Notification handlers
-  const handleMarkAsRead = useCallback((id: string) => {
-    logger.info('Marking notification as read', { notificationId: id })
-    setNotifications(prev => prev.map(n =>
+  const handleMarkAsRead = useCallback((id: string) => {    setNotifications(prev => prev.map(n =>
       n.id === id ? { ...n, read: true } : n
     ))
     toast.success('Notification marked as read')
   }, [])
 
-  const handleClearAllNotifications = useCallback(() => {
-    logger.info('Clearing all notifications')
-    setNotifications([])
+  const handleClearAllNotifications = useCallback(() => {    setNotifications([])
     toast.success('All notifications cleared')
   }, [])
 
   // Chart handlers
-  const handleChartExport = useCallback(() => {
-    logger.info('Exporting chart data')
-    const chartData = [
+  const handleChartExport = useCallback(() => {    const chartData = [
       { month: 'January', revenue: 42000, expenses: 28000, profit: 14000 },
       { month: 'February', revenue: 45000, expenses: 27000, profit: 18000 },
       { month: 'March', revenue: 48000, expenses: 29000, profit: 19000 },
@@ -306,9 +284,7 @@ export default function AdvancedMicroFeaturesPage() {
     downloadAsCsv(chartData, 'revenue-trends-export.csv')
   }, [])
 
-  const handleChartShare = useCallback(async () => {
-    logger.info('Sharing chart')
-    const shareUrl = `${window.location.origin}/dashboard/advanced-micro-features?view=chart&dateRange=6months`
+  const handleChartShare = useCallback(async () => {    const shareUrl = `${window.location.origin}/dashboard/advanced-micro-features?view=chart&dateRange=6months`
     await shareContent({
       title: 'Revenue Trends Chart',
       text: 'Check out this revenue trends visualization',
@@ -316,9 +292,7 @@ export default function AdvancedMicroFeaturesPage() {
     })
   }, [])
 
-  const handleChartSettings = useCallback(() => {
-    logger.info('Opening chart settings')
-    setShowChartSettings(prev => !prev)
+  const handleChartSettings = useCallback(() => {    setShowChartSettings(prev => !prev)
     toast.success(showChartSettings ? 'Chart settings closed' : 'Chart settings opened')
   }, [showChartSettings])
 
@@ -332,33 +306,25 @@ export default function AdvancedMicroFeaturesPage() {
   }, [legendVisibility])
 
   // Table handlers
-  const handleRowClick = useCallback((row: any) => {
-    logger.info('Table row clicked', { rowData: row })
-    // Copy project details to clipboard
+  const handleRowClick = useCallback((row: any) => {    // Copy project details to clipboard
     const details = `Project: ${row.project}\nClient: ${row.client}\nStatus: ${row.status}\nRevenue: ${row.revenue}\nCompletion: ${row.completion}`
     copyToClipboard(details, `${row.project} details copied to clipboard`)
   }, [])
 
   // Presence/User handlers
-  const handleUserClick = useCallback((user: any) => {
-    logger.info('User profile clicked', { userId: user.id, userName: user.name })
-    // Copy user info to clipboard
+  const handleUserClick = useCallback((user: any) => {    // Copy user info to clipboard
     const userInfo = `${user.name} - ${user.role} (${user.status})`
     copyToClipboard(userInfo, `${user.name}'s info copied`)
   }, [])
 
   // Activity handlers
-  const handleActivityClick = useCallback((activity: any) => {
-    logger.info('Activity item clicked', { activityId: activity.id, type: activity.type })
-    // Copy activity info
+  const handleActivityClick = useCallback((activity: any) => {    // Copy activity info
     const activityInfo = `${activity.user.name} ${activity.content} ${activity.target}`
     copyToClipboard(activityInfo, 'Activity details copied')
   }, [])
 
   // Comment handlers
-  const handleAddComment = useCallback((content: string, mentions?: string[], attachments?: any[]) => {
-    logger.info('Adding comment', { contentLength: content.length, mentionsCount: mentions?.length || 0, attachmentsCount: attachments?.length || 0 })
-    const newComment = {
+  const handleAddComment = useCallback((content: string, mentions?: string[], attachments?: any[]) => {    const newComment = {
       id: `comment-${Date.now()}`,
       user: mockUsers[0],
       content,
@@ -372,9 +338,7 @@ export default function AdvancedMicroFeaturesPage() {
     toast.success('Comment posted successfully')
   }, [mockUsers])
 
-  const handleReply = useCallback((commentId: string, content: string) => {
-    logger.info('Replying to comment', { commentId, contentLength: content.length })
-    setComments(prev => prev.map(comment => {
+  const handleReply = useCallback((commentId: string, content: string) => {    setComments(prev => prev.map(comment => {
       if (comment.id === commentId) {
         const reply = {
           id: `reply-${Date.now()}`,
@@ -390,9 +354,7 @@ export default function AdvancedMicroFeaturesPage() {
     toast.success('Reply posted successfully')
   }, [mockUsers])
 
-  const handleLikeComment = useCallback((commentId: string) => {
-    logger.info('Liking comment', { commentId })
-    setComments(prev => prev.map(comment => {
+  const handleLikeComment = useCallback((commentId: string) => {    setComments(prev => prev.map(comment => {
       if (comment.id === commentId) {
         return {
           ...comment,
@@ -406,15 +368,11 @@ export default function AdvancedMicroFeaturesPage() {
   }, [])
 
   // Settings handlers
-  const handleCategoryChange = useCallback((categoryId: string) => {
-    logger.info('Settings category changed', { categoryId })
-    setActiveSettingsCategory(categoryId)
+  const handleCategoryChange = useCallback((categoryId: string) => {    setActiveSettingsCategory(categoryId)
     toast.success(`Switched to ${categoryId} settings`)
   }, [])
 
-  const handleThemeChange = useCallback((themeId: string) => {
-    logger.info('Theme changed', { themeId })
-    setCurrentTheme(themeId)
+  const handleThemeChange = useCallback((themeId: string) => {    setCurrentTheme(themeId)
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', themeId)
     toast.success(`Theme changed to ${themeId}`)
@@ -590,7 +548,6 @@ export default function AdvancedMicroFeaturesPage() {
     { title: 'Advanced Features', href: '/dashboard/advanced-micro-features', isActive: true }
   ], [])
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -606,7 +563,6 @@ export default function AdvancedMicroFeaturesPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
