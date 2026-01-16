@@ -502,11 +502,9 @@ export default function TicketsClient() {
   const { createTicket, updateTicket, deleteTicket, assignTicket, isCreating, isUpdating, isDeleting } = useTicketMutations()
   const { createMessage, isCreating: isCreatingMessage } = useTicketMessageMutations()
 
-  // Merge mock data with real DB data for display
+  // Convert DB tickets to display format
   const allTickets = useMemo(() => {
-    // Convert DB tickets to display format if available
-    if (dbTickets && dbTickets.length > 0) {
-      return dbTickets.map(t => ({
+    return (dbTickets || []).map(t => ({
         id: t.id,
         ticketNumber: t.ticket_number || `TKT-${t.id.slice(0, 8)}`,
         subject: t.subject,
@@ -539,8 +537,6 @@ export default function TicketsClient() {
         createdAt: t.created_at,
         updatedAt: t.updated_at
       }))
-    }
-    return mockTickets
   }, [dbTickets])
 
   // Stats calculations - uses real data when available
