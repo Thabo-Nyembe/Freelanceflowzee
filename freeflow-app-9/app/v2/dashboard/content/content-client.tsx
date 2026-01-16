@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -331,7 +330,7 @@ const mockContentActivities = [
 ]
 
 export default function ContentClient() {
-  const supabase = createClient()
+
 
   // View and filter state
   const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks' | 'settings'>('entries')
@@ -405,6 +404,8 @@ export default function ContentClient() {
     async function fetchAssets() {
       setAssetsLoading(true)
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -449,16 +450,20 @@ export default function ContentClient() {
     }
 
     fetchAssets()
-  }, [supabase, assetTypeFilter])
+  }, [ assetTypeFilter])
 
   // Fetch webhooks
   useEffect(() => {
     async function fetchWebhooks() {
       setWebhooksLoading(true)
       try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data, error } = await supabase
           .from('webhooks')
           .select('*')
@@ -488,7 +493,7 @@ export default function ContentClient() {
     }
 
     fetchWebhooks()
-  }, [supabase])
+  }, [])
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -830,9 +835,13 @@ export default function ContentClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('assets')
         .update({ deleted_at: new Date().toISOString() })
@@ -860,9 +869,13 @@ export default function ContentClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('webhooks')
         .insert({
@@ -907,9 +920,13 @@ export default function ContentClient() {
 
   const handleToggleWebhook = async (webhook: WebhookConfig) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('webhooks')
         .update({ is_active: !webhook.isActive })
