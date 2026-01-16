@@ -372,7 +372,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const { mutate: updateInventoryItem, loading: updating } = useUpdateInventoryItem()
   const { mutate: deleteInventoryItem, loading: deleting } = useDeleteInventoryItem()
   const { locations: dbLocations } = useInventoryLocations()
-  const supabase = createClient()
 
   // Form state for new product
   const [newProductForm, setNewProductForm] = useState({
@@ -625,6 +624,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingTransfer(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('stock_transfers').insert({
         reference: `TRF-${Date.now()}`,
         origin_location_id: transferForm.originLocationId,
@@ -662,6 +663,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingPO(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('purchase_orders').insert({
         po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
         supplier_id: poForm.supplierId,
@@ -758,6 +761,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingLocation(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('inventory_locations').insert({
         name: locationForm.name,
         address: locationForm.address || null,
@@ -795,6 +800,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingSupplier(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('suppliers').insert({
         name: supplierForm.name,
         email: supplierForm.email || null,
