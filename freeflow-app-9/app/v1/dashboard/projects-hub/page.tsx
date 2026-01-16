@@ -49,7 +49,6 @@ import { motion } from 'framer-motion'
 import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('ProjectsHub')
 
-// A+++ Utilities
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -396,19 +395,11 @@ export default function ProjectsOverviewPage() {
   // AI Panel State
   const [showAIPanel, setShowAIPanel] = useState(true)
 
-  // A+++ Accessibility
   const { announce } = useAnnouncer()
 
   // INFINITE SCROLL
   const handleLoadMoreProjects = React.useCallback(() => {
-    if (displayedProjectsCount < filteredProjects.length) {
-      logger.info('Loading more projects', {
-        currentCount: displayedProjectsCount,
-        totalProjects: filteredProjects.length,
-        loadingMore: 12
-      })
-
-      setDisplayedProjectsCount(prev => Math.min(prev + 12, filteredProjects.length))
+    if (displayedProjectsCount < filteredProjects.length) {      setDisplayedProjectsCount(prev => Math.min(prev + 12, filteredProjects.length))
 
       toast.success(`Showing ${Math.min(displayedProjectsCount + 12, filteredProjects.length)} of ${filteredProjects.length} projects`)
     }
@@ -425,16 +416,12 @@ export default function ProjectsOverviewPage() {
   }, [filteredProjects, displayedProjectsCount])
 
   // Enhanced Handlers
-  const handleViewProject = (project: Project) => {
-    logger.info('Project view opened', { projectId: project.id, title: project.title })
-    setSelectedProject(project)
+  const handleViewProject = (project: Project) => {    setSelectedProject(project)
     setIsViewModalOpen(true)
   }
 
   // NEW: Handle Edit Project with CRUD modal
-  const handleEditProject = (project: Project) => {
-    logger.info('Project edit opened', { projectId: project.id, title: project.title })
-    setSelectedProject(project)
+  const handleEditProject = (project: Project) => {    setSelectedProject(project)
 
     // Convert UI project to edit form data
     setEditFormData({
@@ -470,10 +457,7 @@ export default function ProjectsOverviewPage() {
       return
     }
 
-    try {
-      logger.info('Updating project', { projectId: selectedProject.id, userId })
-
-      const { data, error } = await updateProject(selectedProject.id, {
+    try {      const { data, error } = await updateProject(selectedProject.id, {
         name: editFormData.name,
         description: editFormData.description,
         client: editFormData.client,
@@ -488,9 +472,7 @@ export default function ProjectsOverviewPage() {
 
       if (error || !data) {
         logger.error('Failed to update project', { error, projectId: selectedProject.id })
-        toast.error('Failed to update project', {
-          description: error?.message || 'Please try again'
-        })
+        toast.error('Failed to update project')
         return
       }
 
@@ -516,14 +498,7 @@ export default function ProjectsOverviewPage() {
         p.id === selectedProject.id ? updatedUIProject : p
       ))
 
-      toast.success(`Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`)
-
-      logger.info('Project updated successfully', {
-        projectId: data.id,
-        projectName: data.name
-      })
-
-      setShowEditModal(false)
+      toast.success(`Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`)      setShowEditModal(false)
       setSelectedProject(null)
 
       announce(`Project ${data.name} updated successfully`, 'polite')
@@ -535,9 +510,7 @@ export default function ProjectsOverviewPage() {
   }
 
   // NEW: Handle Delete Project
-  const handleDeleteProject = (project: Project) => {
-    logger.info('Project delete dialog opened', { projectId: project.id, title: project.title })
-    setSelectedProject(project)
+  const handleDeleteProject = (project: Project) => {    setSelectedProject(project)
     setShowDeleteDialog(true)
   }
 
@@ -549,30 +522,18 @@ export default function ProjectsOverviewPage() {
       return
     }
 
-    try {
-      logger.info('Deleting project', { projectId: selectedProject.id, userId })
-
-      const { success, error } = await deleteProject(selectedProject.id)
+    try {      const { success, error } = await deleteProject(selectedProject.id)
 
       if (error || !success) {
         logger.error('Failed to delete project', { error, projectId: selectedProject.id })
-        toast.error('Failed to delete project', {
-          description: error?.message || 'Please try again'
-        })
+        toast.error('Failed to delete project')
         return
       }
 
       // Remove from local state
       setProjects(projects.filter(p => p.id !== selectedProject.id))
 
-      toast.success(`Project "${selectedProject.title}" deleted. Project has been permanently removed.`)
-
-      logger.info('Project deleted successfully', {
-        projectId: selectedProject.id,
-        projectName: selectedProject.title
-      })
-
-      setShowDeleteDialog(false)
+      toast.success(`Project "${selectedProject.title}" deleted. Project has been permanently removed.`)      setShowDeleteDialog(false)
       setSelectedProject(null)
 
       announce(`Project ${selectedProject.title} deleted`, 'polite')
@@ -587,11 +548,7 @@ export default function ProjectsOverviewPage() {
     if (!newProject.title.trim()) {
       toast.error('Please enter a project title')
       return
-    }
-
-    logger.info('Project creation started', { title: newProject.title, userId })
-
-    try {
+    }    try {
       // Import projects queries utility
       const { createProject } = await import('@/lib/projects-hub-queries')
 
@@ -632,11 +589,7 @@ export default function ProjectsOverviewPage() {
         attachments: [],
         category: createdProject.category,
         tags: []
-      }
-
-      logger.info('Project created successfully in Supabase', { projectId: createdProject.id })
-
-      setProjects([...projects, uiProject])
+      }      setProjects([...projects, uiProject])
       setIsCreateModalOpen(false)
       setNewProject({
         title: '',
@@ -657,18 +610,13 @@ export default function ProjectsOverviewPage() {
       announce(`Project ${newProject.title} created successfully`, 'polite')
     } catch (error: any) {
       logger.error('Failed to create project', { error, userId })
-      toast.error('Failed to create project', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create project')
       announce('Error creating project', 'assertive')
     }
   }
 
   const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Project status update started', { projectId, newStatus, projectName: project?.title })
-
-    try {
+    const project = projects.find(p => p.id === projectId)    try {
       // Import projects queries utility
       const { updateProjectStatus } = await import('@/lib/projects-hub-queries')
 
@@ -686,15 +634,7 @@ export default function ProjectsOverviewPage() {
 
       if (updateError || !updatedProject) {
         throw new Error(updateError?.message || 'Failed to update project status')
-      }
-
-      logger.info('Project status updated successfully in Supabase', {
-        projectId,
-        newStatus: dbStatus,
-        projectName: project?.title
-      })
-
-      // Update local state
+      }      // Update local state
       setProjects(projects.map(p =>
         p.id === projectId ? {
           ...p,
@@ -707,24 +647,18 @@ export default function ProjectsOverviewPage() {
       announce(`Project status changed to ${newStatus}`, 'polite')
     } catch (error: any) {
       logger.error('Failed to update project status', { error, projectId })
-      toast.error('Failed to update project status', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to update project status')
       announce('Error updating project status', 'assertive')
     }
   }
 
   useEffect(() => {
     const loadProjects = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setLoading(false)
+      if (!userId) {        setLoading(false)
         return
       }
 
-      try {
-        logger.info('Loading projects from Supabase', { userId })
-        setLoading(true)
+      try {        setLoading(true)
         setError(null)
 
         // Import projects queries utility
@@ -758,14 +692,7 @@ export default function ProjectsOverviewPage() {
           attachments: [],
           category: p.category,
           tags: p.tags || []
-        }))
-
-        logger.info('Projects loaded from Supabase', {
-          count: transformedProjects.length,
-          total: count
-        })
-
-        // If no projects found, use demo data for investor presentations
+        }))        // If no projects found, use demo data for investor presentations
         const finalProjects = transformedProjects.length > 0 ? transformedProjects : DEMO_PROJECTS;
 
         setProjects(finalProjects)

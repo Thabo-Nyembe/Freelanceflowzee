@@ -70,7 +70,6 @@ interface Category {
 }
 
 export default function ClientKnowledgeBase() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -79,16 +78,8 @@ export default function ClientKnowledgeBase() {
 
   // HANDLERS
   const handleVideoClick = async (video: VideoTutorial) => {
-    try {
-      logger.info('Opening video tutorial', {
-        videoId: video.id,
-        title: video.title,
-        category: video.category
-      })
-
-      // Show loading toast and open video
-      toast.info('Opening video tutorial', {
-        description: `${video.title} - ${video.duration}`
+    try {      // Show loading toast and open video
+      toast.info('Opening video tutorial' - ${video.duration}`
       })
 
       // Open video in new tab or modal
@@ -105,11 +96,7 @@ export default function ClientKnowledgeBase() {
   }
 
   const handleLiveChat = async () => {
-    try {
-      logger.info('Opening live chat support')
-      toast.info('Opening live chat', {
-        description: 'Connecting to support team...'
-      })
+    try {      toast.info('Opening live chat')
 
       // Open live chat widget - integrate with Intercom, Crisp, or similar
       // For now, open support page
@@ -126,9 +113,7 @@ export default function ClientKnowledgeBase() {
   }
 
   const handleSubmitTicket = async () => {
-    try {
-      logger.info('Opening ticket submission form')
-      toast.info('Opening support ticket form')
+    try {      toast.info('Opening support ticket form')
 
       // Navigate to support ticket page
       window.location.href = '/support?action=new-ticket'
@@ -139,11 +124,7 @@ export default function ClientKnowledgeBase() {
   }
 
   const handleCommunityForum = async () => {
-    try {
-      logger.info('Opening community forum')
-      toast.info('Opening community forum', {
-        description: 'Join our community discussions'
-      })
+    try {      toast.info('Opening community forum')
 
       // Navigate to community forum
       window.location.href = '/dashboard/collaboration/workspace'
@@ -154,14 +135,7 @@ export default function ClientKnowledgeBase() {
   }
 
   const handleArticleClick = async (article: Article) => {
-    try {
-      logger.info('Opening article', {
-        articleId: article.id,
-        title: article.title,
-        category: article.category
-      })
-
-      // Track article view
+    try {      // Track article view
       try {
         const { trackArticleView } = await import('@/lib/knowledge-base-queries')
         // await trackArticleView(article.id, userId)
@@ -171,8 +145,7 @@ export default function ClientKnowledgeBase() {
       }
 
       // Open article detail view
-      toast.info(`Opening: ${article.title}`, {
-        description: `${article.readTime} min read`
+      toast.info(`Opening: ${article.title}` min read`
       })
 
       // Navigate to article page
@@ -187,16 +160,10 @@ export default function ClientKnowledgeBase() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')
-
-      logger.info('Marking article as helpful', { articleId })
-
-      const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
+      const { toast } = await import('sonner')      const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
       // await submitArticleFeedback(articleId, userId, 'helpful')
 
-      toast.success('Thank you for your feedback!', {
-        description: 'Marked article as helpful'
-      })
+      toast.success('Thank you for your feedback!')
     } catch (err: any) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('knowledge-base')
@@ -209,11 +176,7 @@ export default function ClientKnowledgeBase() {
   const handleSearchArticles = async (query: string) => {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-
-      logger.info('Searching articles', { query })
-
-      const { searchArticles } = await import('@/lib/knowledge-base-queries')
+      const logger = createFeatureLogger('knowledge-base')      const { searchArticles } = await import('@/lib/knowledge-base-queries')
       // const results = await searchArticles(query, userId)
 
       // Update search results
@@ -613,13 +576,7 @@ export default function ClientKnowledgeBase() {
   // handleArticleClick is defined earlier with full functionality (line 160)
   // handleVideoClick is defined earlier with full functionality (line 79)
 
-  const handleArticleHelpful = (articleId: string, helpful: boolean) => {
-    logger.info('Article feedback received', {
-      articleId,
-      helpful
-    })
-
-    toast.success(helpful ? 'Thanks for your feedback!' : 'We\'ll work on improving this article')
+  const handleArticleHelpful = (articleId: string, helpful: boolean) => {    toast.success(helpful ? 'Thanks for your feedback!' : 'We\'ll work on improving this article')
   }
 
   return (
