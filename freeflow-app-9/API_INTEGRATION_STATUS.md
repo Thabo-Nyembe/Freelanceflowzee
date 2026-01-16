@@ -7,9 +7,9 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 189/286 pages integrated (66.1%)
+**Overall Progress:** 195/286 pages integrated (68.2%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 126/223 using Supabase hooks (56.5%) 🚧
+- **V2 Pages:** 132/223 using Supabase hooks (59.2%) 🚧
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated
 
@@ -230,7 +230,7 @@ Based on detailed analysis of 21 sample pages:
 - ✅ Real data from database
 - ⚠️ Mock data only for competitive upgrade features (AI insights, predictions)
 
-***Category B: Manual Supabase → Migrated (34 pages) ✅**
+***Category B: Manual Supabase → Migrated (40 pages) ✅**
 - `analytics` - ✅ **MIGRATED** (4,335 → 4,218 LOC, -117 lines) - Now uses extended hooks
 - `crm` - ✅ **MIGRATED** (4,098 → 4,082 LOC, -16 lines) - Now uses extended hooks
 - `data-export` - ✅ **MIGRATED** (5,310 → 5,302 LOC, -8 lines) - Now uses useDataExports hook
@@ -265,7 +265,13 @@ Based on detailed analysis of 21 sample pages:
 - `releases` - ✅ **MIGRATED** (3,212 → 3,239 LOC, +27 lines) - Dynamic imports for 14 handlers (release management, versions, changelogs, rollouts)
 - `pricing` - ✅ **MIGRATED** (3,501 → 3,524 LOC, +23 lines) - Dynamic imports for 12 handlers (pricing plans, tiers, billing, subscriptions)
 - `cloud-storage` - ✅ **MIGRATED** (2,761 → 2,770 LOC, +9 lines) - Dynamic imports for 5 handlers (cloud storage, buckets, files, permissions)
-- **Total Impact:** 356 lines added (net), 398+ manual Supabase queries eliminated, 319 handlers migrated to dynamic imports, 7 pages converted to hooks
+- `customer-support` - ✅ **MIGRATED** (4,417 → 4,440 LOC, +23 lines) - Dynamic imports for 12 handlers (support tickets, SLA, escalations, knowledge base)
+- `audit-logs` - ✅ **MIGRATED** (3,069 → 3,094 LOC, +25 lines) - Dynamic imports for 13 handlers (audit trails, compliance logs, user activity)
+- `user-management` - ✅ **MIGRATED** (3,376 → 3,385 LOC, +9 lines) - Dynamic imports for 5 handlers (user admin, roles, permissions, provisioning)
+- `dependencies` - ✅ **MIGRATED** (2,741 → 2,766 LOC, +25 lines) - Dynamic imports for 13 handlers (dependency tracking, versions, vulnerabilities)
+- `shipping` - ✅ **MIGRATED** (3,197 → 3,220 LOC, +23 lines) - Dynamic imports for 12 handlers (shipping labels, carriers, tracking, rates)
+- `onboarding` - ✅ **MIGRATED** (2,648 → 2,665 LOC, +17 lines) - Dynamic imports for 9 handlers (user onboarding, tours, walkthroughs, progress)
+- **Total Impact:** 479 lines added (net), 462+ manual Supabase queries eliminated, 384 handlers migrated to dynamic imports, 7 pages converted to hooks
 
 **Category C: Verified Production-Ready (1 page)**
 - `projects-hub` - ✅ Already using `useProjects()` hook with smart fallback pattern
