@@ -53,7 +53,6 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('VideoStudio')
 
 // ============================================================================
-// A+++ UTILITIES
 // ============================================================================
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
@@ -185,7 +184,6 @@ export default function VideoStudioPage() {
   const { userId, loading: userLoading } = useCurrentUser()
 
   // ============================================================================
-  // A+++ STATE MANAGEMENT
   // ============================================================================
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -287,18 +285,10 @@ export default function VideoStudioPage() {
     downloadRecording,
     uploadRecording
   } = useScreenRecorder({
-    onRecordingComplete: (blob, metadata) => {
-      logger.info('Recording completed', {
-        duration: metadata.duration,
-        size: metadata.size,
-        mimeType: metadata.mimeType
-      })
-      announce('Recording completed successfully')
+    onRecordingComplete: (blob, metadata) => {      announce('Recording completed successfully')
       toast.success(`Recording completed! Duration: ${Math.floor(metadata.duration / 60)}:${String(metadata.duration % 60).padStart(2, '0')}`)
     },
-    onUploadComplete: (videoId) => {
-      logger.info('Recording uploaded', { videoId })
-      announce('Recording uploaded successfully')
+    onUploadComplete: (videoId) => {      announce('Recording uploaded successfully')
       toast.success('Recording uploaded to your library')
     }
   })
@@ -312,26 +302,15 @@ export default function VideoStudioPage() {
   }, [recordingState.status, recordingState.duration])
 
   // Handlers - New comprehensive implementations
-  const handleCreateFirstProject = () => {
-    logger.info('Project creation initiated')
-    setIsCreateModalOpen(true)
+  const handleCreateFirstProject = () => {    setIsCreateModalOpen(true)
     toast.success('Project creation ready')
   }
 
-  const handleNewProject = () => {
-    logger.info('New project creation started')
-    setIsCreateModalOpen(true)
+  const handleNewProject = () => {    setIsCreateModalOpen(true)
     toast.success('New project form ready')
   }
 
-  const handleCreateNewProject = async () => {
-    logger.info('Project submission started', {
-      title: newProject.title,
-      resolution: newProject.resolution,
-      format: newProject.format
-    })
-
-    if (!newProject.title.trim()) {
+  const handleCreateNewProject = async () => {    if (!newProject.title.trim()) {
       toast.error('Please enter a project name')
       return
     }
@@ -358,10 +337,7 @@ export default function VideoStudioPage() {
       }
 
       const data = await response.json()
-      const projectId = data.project?.id || `proj_${Date.now()}`
-
-      logger.info('Project created via API', { projectId, title: newProject.title })
-      toast.success('Video project created successfully!')
+      const projectId = data.project?.id || `proj_${Date.now()}`      toast.success('Video project created successfully!')
 
       // Navigate to collaboration immediately
       toast.success('Opening Universal Pinpoint System')
@@ -377,9 +353,7 @@ export default function VideoStudioPage() {
       })
     } catch (error: any) {
       logger.error('Failed to create project', { error, title: newProject.title })
-      toast.error('Failed to create project', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create project')
     } finally {
       setIsCreatingProject(false)
     }
@@ -388,28 +362,16 @@ export default function VideoStudioPage() {
   const handleRecord = async () => {
     if (recordingState.status === 'recording') {
       // Stop recording
-      try {
-        logger.info('Stopping recording')
-        await stopRecording()
+      try {        await stopRecording()
       } catch (error: any) {
         logger.error('Failed to stop recording', { error: error.message })
         toast.error('Failed to stop recording')
       }
     } else if (recordingState.status === 'paused') {
-      // Resume recording
-      logger.info('Resuming recording')
-      pauseRecording() // Toggle pause/resume
+      // Resume recording      pauseRecording() // Toggle pause/resume
     } else {
       // Start new recording
-      try {
-        logger.info('Starting recording', {
-          type: recordingType,
-          quality: recordingQuality,
-          frameRate: recordingFrameRate,
-          audio: !isMuted
-        })
-
-        const mediaSource = recordingType === 'screen' ? 'screen' :
+      try {        const mediaSource = recordingType === 'screen' ? 'screen' :
                           recordingType === 'webcam' ? 'window' :
                           recordingType === 'both' ? 'screen' : 'screen'
 
@@ -433,76 +395,46 @@ export default function VideoStudioPage() {
     }
   }
 
-  const handleAITools = () => {
-    logger.info('AI Tools panel opened')
-    setIsAIToolsOpen(true)
+  const handleAITools = () => {    setIsAIToolsOpen(true)
     toast.success('AI Tools panel loaded')
   }
 
-  const handleOpenEditor = () => {
-    logger.info('Video editor opened')
-    toast.success('Video editor loaded')
+  const handleOpenEditor = () => {    toast.success('Video editor loaded')
   }
 
-  const handleUploadAssets = () => {
-    logger.info('Asset uploader opened')
-    setIsUploadDialogOpen(true)
+  const handleUploadAssets = () => {    setIsUploadDialogOpen(true)
     toast.success('Asset uploader ready')
   }
 
-  const handleStartRender = async () => {
-    logger.info('Video render started')
-    try {
+  const handleStartRender = async () => {    try {
       const result = await apiCall('/api/video/render', { method: 'POST' }, {
         loading: 'Starting video render...',
         success: 'Video render started successfully',
         error: 'Failed to start video render'
       })
-      if (result.success) {
-        logger.info('Render job created', result.data)
-      }
+      if (result.success) {      }
     } catch (error) {
       logger.error('Render failed', { error })
     }
   }
 
-  const handleViewAnalytics = () => {
-    logger.info('Video analytics opened')
-    setActiveTab('analytics')
+  const handleViewAnalytics = () => {    setActiveTab('analytics')
     toast.success('Video analytics loaded')
   }
 
   const handleOpenProject = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Project opened', {
-      projectId,
-      title: project?.title,
-      duration: project?.duration,
-      resolution: project?.resolution,
-      status: project?.status
-    })
-    router.push(`/dashboard/video-studio/editor?project=${projectId}`)
+    const project = projects.find(p => p.id === projectId)    router.push(`/dashboard/video-studio/editor?project=${projectId}`)
   }
 
   const handleDeleteProject = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Project deletion initiated', {
-      projectId,
-      title: project?.title,
-      views: project?.views
-    })
-
-    setProjectToDelete(projectId)
+    const project = projects.find(p => p.id === projectId)    setProjectToDelete(projectId)
     setShowDeleteProjectDialog(true)
   }
 
   const confirmDeleteProject = async () => {
     if (!projectToDelete) return
 
-    const project = projects.find(p => p.id === projectToDelete)
-    logger.info('Project deletion confirmed', { projectId: projectToDelete })
-
-    try {
+    const project = projects.find(p => p.id === projectToDelete)    try {
       setIsDeleting(true)
 
       if (userId) {
@@ -515,15 +447,11 @@ export default function VideoStudioPage() {
       }
 
       // Update local state
-      setProjects(prev => prev.filter(p => p.id !== projectToDelete))
-      logger.info('Project deleted', { projectId: projectToDelete, title: project?.title })
-      toast.success(`Project "${project?.title}" deleted`)
+      setProjects(prev => prev.filter(p => p.id !== projectToDelete))      toast.success(`Project "${project?.title}" deleted`)
       announce(`Video project ${project?.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete project', { error, projectId: projectToDelete })
-      toast.error('Failed to delete project', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete project')
       announce('Error deleting project', 'assertive')
     } finally {
       setIsDeleting(false)
@@ -536,23 +464,14 @@ export default function VideoStudioPage() {
   // ASSET DELETE HANDLERS
   // ============================================================================
   const handleDeleteAsset = (assetId: string) => {
-    const asset = assets.find(a => a.id === assetId)
-    logger.info('Asset deletion initiated', {
-      assetId,
-      name: asset?.name,
-      type: asset?.type
-    })
-    setAssetToDelete(assetId)
+    const asset = assets.find(a => a.id === assetId)    setAssetToDelete(assetId)
     setShowDeleteAssetDialog(true)
   }
 
   const confirmDeleteAsset = async () => {
     if (!assetToDelete) return
 
-    const asset = assets.find(a => a.id === assetToDelete)
-    logger.info('Asset deletion confirmed', { assetId: assetToDelete, name: asset?.name })
-
-    try {
+    const asset = assets.find(a => a.id === assetToDelete)    try {
       setIsDeletingAsset(true)
 
       if (userId) {
@@ -565,15 +484,11 @@ export default function VideoStudioPage() {
       }
 
       // Update local state
-      setAssets(prev => prev.filter(a => a.id !== assetToDelete))
-      logger.info('Asset deleted', { assetId: assetToDelete, name: asset?.name })
-      toast.success(`Asset "${asset?.name}" deleted`)
+      setAssets(prev => prev.filter(a => a.id !== assetToDelete))      toast.success(`Asset "${asset?.name}" deleted`)
       announce(`Asset ${asset?.name} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete asset', { error, assetId: assetToDelete })
-      toast.error('Failed to delete asset', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete asset')
       announce('Error deleting asset', 'assertive')
     } finally {
       setIsDeletingAsset(false)
@@ -594,10 +509,7 @@ export default function VideoStudioPage() {
     if (!inviteEmail.includes('@')) {
       toast.error('Please enter a valid email address')
       return
-    }
-
-    logger.info('Sending collaboration invite', { email: inviteEmail, projectId: selectedProject?.id })
-    setIsSendingInvite(true)
+    }    setIsSendingInvite(true)
 
     try {
       const result = await apiCall('/api/video/collaboration/invite', {
@@ -612,9 +524,7 @@ export default function VideoStudioPage() {
         error: 'Failed to send invitation'
       })
 
-      if (result.success) {
-        logger.info('Collaboration invite sent', { email: inviteEmail })
-        setInviteEmail('')
+      if (result.success) {        setInviteEmail('')
         announce(`Invitation sent to ${inviteEmail}`, 'polite')
       }
     } catch (error: any) {
@@ -625,16 +535,7 @@ export default function VideoStudioPage() {
   }
 
   const handleDuplicateProject = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Project duplication initiated', {
-      projectId,
-      originalTitle: project?.title,
-      newTitle: project?.title + ' (Copy)',
-      duration: project?.duration,
-      file_size: project?.file_size
-    })
-
-    try {
+    const project = projects.find(p => p.id === projectId)    try {
       let newProject: VideoProject | null = null
 
       if (userId) {
@@ -662,33 +563,16 @@ export default function VideoStudioPage() {
       }
 
       if (newProject) {
-        setProjects(prev => [newProject!, ...prev])
-        logger.info('Project duplicated successfully', {
-          originalId: projectId,
-          newId: newProject.id,
-          newTitle: newProject.title
-        })
-        toast.success(`Project duplicated: ${newProject.title}`)
+        setProjects(prev => [newProject!, ...prev])        toast.success(`Project duplicated: ${newProject.title}`)
       }
     } catch (error: any) {
       logger.error('Failed to duplicate project', { error, projectId })
-      toast.error('Failed to duplicate project', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to duplicate project')
     }
   }
 
   const handleExportVideo = (format: string) => {
-    const estimatedSize = format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB'
-    logger.info('Video export queued', {
-      format,
-      resolution: '1080p',
-      estimatedSize,
-      codec: 'H.264',
-      audio: 'AAC'
-    })
-
-    // Add to rendering queue via window.addRenderJob (exposed by RenderingQueue component)
+    const estimatedSize = format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB'    // Add to rendering queue via window.addRenderJob (exposed by RenderingQueue component)
     const addRenderJob = (window as any).addRenderJob
     if (addRenderJob && selectedProject) {
       addRenderJob({
@@ -709,15 +593,7 @@ export default function VideoStudioPage() {
   // ============================================================================
   // USE TEMPLATE - Creates a new project from template
   // ============================================================================
-  const handleUseTemplate = async (template: VideoTemplate) => {
-    logger.info('Creating project from template', {
-      templateId: template.id,
-      templateName: template.name,
-      category: template.category,
-      duration: template.duration
-    })
-
-    toast.success('Creating project from template...')
+  const handleUseTemplate = async (template: VideoTemplate) => {    toast.success('Creating project from template...')
 
     try {
       setIsCreatingProject(true)
@@ -759,22 +635,14 @@ export default function VideoStudioPage() {
         updated_at: new Date().toISOString()
       }
 
-      setProjects(prev => [newProjectData, ...prev])
-      logger.info('Project created from template via API', {
-        projectId: newProjectData.id,
-        title: newProjectData.title,
-        templateUsed: template.name
-      })
-      toast.success(`Project created from "${template.name}" template! Opening editor...`)
+      setProjects(prev => [newProjectData, ...prev])      toast.success(`Project created from "${template.name}" template! Opening editor...`)
       announce(`Project created from ${template.name} template`)
 
       // Navigate to editor immediately
       router.push(`/dashboard/video-studio/editor?project=${newProjectData.id}`)
     } catch (error: any) {
       logger.error('Failed to create project from template', { error, templateId: template.id })
-      toast.error('Failed to create project from template', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create project from template')
     } finally {
       setIsCreatingProject(false)
     }
@@ -787,15 +655,7 @@ export default function VideoStudioPage() {
     if (!selectedProject) {
       toast.error('No project selected')
       return
-    }
-
-    logger.info('Restoring project version', {
-      projectId: selectedProject.id,
-      version,
-      changes
-    })
-
-    toast.loading(`Restoring ${version}...`)
+    }    toast.loading(`Restoring ${version}...`)
 
     try {
       // Call real API to restore the version
@@ -808,20 +668,12 @@ export default function VideoStudioPage() {
         error: 'Failed to restore version'
       })
 
-      if (result.success) {
-        logger.info('Version restored', {
-          projectId: selectedProject.id,
-          version,
-          restoredChanges: changes
-        })
-        announce(`Project restored to ${version}`)
+      if (result.success) {        announce(`Project restored to ${version}`)
         setIsVersionHistoryOpen(false)
       }
     } catch (error: any) {
       logger.error('Failed to restore version', { error, version })
-      toast.error('Failed to restore version', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to restore version')
     }
   }
 
@@ -838,17 +690,13 @@ export default function VideoStudioPage() {
     countdownSeconds: 3
   })
 
-  const handleOpenRecordingSettings = () => {
-    logger.info('Recording settings opened')
-    setIsRecordingSettingsOpen(true)
+  const handleOpenRecordingSettings = () => {    setIsRecordingSettingsOpen(true)
   }
 
   // ============================================================================
   // AUDIO LIBRARY ACTIONS
   // ============================================================================
-  const handleRecordVoiceover = async () => {
-    logger.info('Voiceover recording initiated')
-    setIsAudioLibraryOpen(false)
+  const handleRecordVoiceover = async () => {    setIsAudioLibraryOpen(false)
     try {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -862,32 +710,20 @@ export default function VideoStudioPage() {
     }
   }
 
-  const handleAIVoiceover = () => {
-    logger.info('AI Voiceover tool opened')
-    setIsAudioLibraryOpen(false)
+  const handleAIVoiceover = () => {    setIsAudioLibraryOpen(false)
     setIsAIToolsOpen(true)
     setSelectedAiTool('voiceover')
     toast.success('AI Voiceover ready - Enter text to generate narration')
     announce('AI voiceover tool opened')
   }
 
-  const handleMusicLibrary = () => {
-    logger.info('Music library opened')
-    toast.success('Music library loaded - Browse thousands of tracks')
+  const handleMusicLibrary = () => {    toast.success('Music library loaded - Browse thousands of tracks')
     // In production, this would open a music browser or navigate to music section
     router.push('/dashboard/audio-studio?tab=library')
   }
 
   const handlePublishVideo = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Video published', {
-      projectId,
-      title: project?.title,
-      duration: project?.duration,
-      platforms: ['Platform', 'YouTube', 'Vimeo']
-    })
-
-    // Update project status to published in database
+    const project = projects.find(p => p.id === projectId)    // Update project status to published in database
     if (userId && project) {
       try {
         const { updateVideoProject } = await import('@/lib/video-studio-queries')
@@ -910,14 +746,7 @@ export default function VideoStudioPage() {
 
   const handleShareVideo = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    const shareLink = `https://kazi.app/video/${projectId}`
-    logger.info('Share link generated', {
-      projectId,
-      title: project?.title,
-      shareLink
-    })
-
-    // Use real clipboard API via button-handlers
+    const shareLink = `https://kazi.app/video/${projectId}`    // Use real clipboard API via button-handlers
     await shareContent({
       title: project?.title || 'Video',
       text: `Check out this video: ${project?.title}`,
@@ -938,57 +767,27 @@ export default function VideoStudioPage() {
   }
 
   const handleAddMedia = (type: string) => {
-    const formats = type === 'video' ? 'MP4, MOV, AVI, MKV' : type === 'image' ? 'JPG, PNG, GIF, SVG' : 'MP3, WAV, AAC, OGG'
-    logger.info('Media browser opened', { mediaType: type, supportedFormats: formats })
-    setIsUploadDialogOpen(true)
+    const formats = type === 'video' ? 'MP4, MOV, AVI, MKV' : type === 'image' ? 'JPG, PNG, GIF, SVG' : 'MP3, WAV, AAC, OGG'    setIsUploadDialogOpen(true)
   }
 
-  const handleAddTransition = () => {
-    logger.info('Transition browser opened', {
-      transitions: ['Fade', 'Dissolve', 'Wipe', 'Slide', 'Zoom', '3D Flip'],
-      defaultDuration: '1s'
-    })
-    setIsTransitionPickerOpen(true)
+  const handleAddTransition = () => {    setIsTransitionPickerOpen(true)
   }
 
-  const handleAddEffect = () => {
-    logger.info('Effect library opened', {
-      categories: ['Color', 'Blur', 'Distort', 'Stylize', 'Time'],
-      popular: ['Blur', 'Sharpen', 'Color Correction', 'Vignette', 'Glow']
-    })
-    setIsEffectsLibraryOpen(true)
+  const handleAddEffect = () => {    setIsEffectsLibraryOpen(true)
   }
 
-  const handleAddText = () => {
-    logger.info('Text editor opened', {
-      options: ['Title', 'Subtitle', 'Lower Third', 'Credits'],
-      defaultDuration: '5s'
-    })
-    setIsTextEditorOpen(true)
+  const handleAddText = () => {    setIsTextEditorOpen(true)
   }
 
-  const handleAddAudio = () => {
-    logger.info('Audio library opened', {
-      sources: ['Music Library', 'Upload File', 'Record Voiceover', 'AI Voiceover'],
-      formats: 'MP3, WAV, AAC, OGG'
-    })
-    setIsAudioLibraryOpen(true)
+  const handleAddAudio = () => {    setIsAudioLibraryOpen(true)
   }
 
-  const handleTrimClip = () => {
-    logger.info('Trim mode activated', {
-      clipDuration: currentTime,
-      precision: 'frame-by-frame'
-    })
-    const wasInTrimMode = isTrimMode
+  const handleTrimClip = () => {    const wasInTrimMode = isTrimMode
     setIsTrimMode(!isTrimMode)
     toast.success(wasInTrimMode ? 'Trim mode disabled - Click on timeline to seek' : 'Trim mode enabled - Drag handles to trim clip')
   }
 
-  const handleSplitClip = () => {
-    logger.info('Clip split', { splitTime: currentTime })
-
-    // Add to edit history for undo
+  const handleSplitClip = () => {    // Add to edit history for undo
     setEditHistory(prev => ({
       past: [...prev.past, { action: 'split', time: currentTime }],
       future: []
@@ -1001,14 +800,7 @@ export default function VideoStudioPage() {
     if (!selectedProject) {
       toast.error('No project selected to save')
       return
-    }
-
-    logger.info('Saving project', {
-      project: selectedProject.title,
-      projectId: selectedProject.id
-    })
-
-    try {
+    }    try {
       if (userId) {
         const { updateVideoProject } = await import('@/lib/video-studio-queries')
         const result = await updateVideoProject(userId, selectedProject.id, {
@@ -1029,18 +821,10 @@ export default function VideoStudioPage() {
             p.id === selectedProject.id ? { ...p, ...result.data } : p
           ))
         }
-      }
-
-      logger.info('Project saved successfully', {
-        projectId: selectedProject.id,
-        title: selectedProject.title
-      })
-      toast.success('Project saved - All changes synced to cloud')
+      }      toast.success('Project saved - All changes synced to cloud')
     } catch (error: any) {
       logger.error('Failed to save project', { error, projectId: selectedProject.id })
-      toast.error('Failed to save project', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to save project')
     }
   }
 
@@ -1075,10 +859,7 @@ export default function VideoStudioPage() {
     logger.debug('Redo action', { action: nextAction })
     toast.success('Action redone')
   }
-  const handleGenerateSubtitles = async () => {
-    logger.info('Subtitle generation started')
-
-    try {
+  const handleGenerateSubtitles = async () => {    try {
       const response = await fetch('/api/ai/video-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1098,21 +879,14 @@ export default function VideoStudioPage() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Subtitles generated successfully')
-        toast.success('Subtitles generated! AI-powered captions have been created for your video')
+      if (result.success) {        toast.success('Subtitles generated! AI-powered captions have been created for your video')
       }
     } catch (error: any) {
       logger.error('Failed to generate subtitles', { error })
-      toast.error('Failed to generate subtitles', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to generate subtitles')
     }
   }
-  const handleAIEnhancement = async () => {
-    logger.info('AI enhancement started')
-
-    try {
+  const handleAIEnhancement = async () => {    try {
       const response = await fetch('/api/ai/video-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1132,34 +906,17 @@ export default function VideoStudioPage() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('AI enhancement completed', {
-          applied: ['Color correction', 'Noise reduction', 'Stabilization', 'Quality optimization']
-        })
-        toast.success('AI Enhancement complete! Color correction, noise reduction, and stabilization applied')
+      if (result.success) {        toast.success('AI Enhancement complete! Color correction, noise reduction, and stabilization applied')
       }
     } catch (error: any) {
       logger.error('Failed to enhance video', { error })
-      toast.error('Failed to enhance video', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to enhance video')
     }
   }
-  const handleCollaborate = () => {
-    logger.info('Collaboration panel opened', {
-      features: ['Share Project', 'Real-time Editing', 'Comments', 'Version Control']
-    })
-    setIsCollaborationOpen(true)
+  const handleCollaborate = () => {    setIsCollaborationOpen(true)
   }
 
-  const handleRenderPreview = () => {
-    logger.info('Preview rendering started', {
-      resolution: '1080p',
-      quality: 'High',
-      estimatedTime: '30-60s'
-    })
-
-    // Add preview render job to queue
+  const handleRenderPreview = () => {    // Add preview render job to queue
     const addRenderJob = (window as any).addRenderJob
     if (addRenderJob && selectedProject) {
       addRenderJob({
@@ -1177,54 +934,29 @@ export default function VideoStudioPage() {
     toast.success('Preview rendering started - Will be ready in 30-60 seconds')
   }
 
-  const handleApplyColorGrade = () => {
-    logger.info('Color grading panel opened', {
-      presets: ['Natural', 'Cinematic', 'Vibrant', 'Vintage', 'B&W']
-    })
-    setIsColorGradingOpen(true)
+  const handleApplyColorGrade = () => {    setIsColorGradingOpen(true)
   }
 
   const handleAnalytics = (projectId: string) => {
-    const project = projects.find(p => p.id === projectId)
-    logger.info('Analytics dashboard opened', {
-      projectId,
-      title: project?.title,
-      views: project?.views,
-      likes: project?.likes,
-      comments_count: project?.comments_count
-    })
-    router.push(`/dashboard/video-studio/analytics?project=${projectId}`)
+    const project = projects.find(p => p.id === projectId)    router.push(`/dashboard/video-studio/analytics?project=${projectId}`)
   }
 
   const handleVersionHistory = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    setSelectedProject(project || null)
-    logger.info('Version history loaded', {
-      projectId,
-      title: project?.title,
-      totalVersions: 12
-    })
-    setIsVersionHistoryOpen(true)
+    setSelectedProject(project || null)    setIsVersionHistoryOpen(true)
   }
 
   // ============================================================================
-  // A+++ LOAD VIDEO STUDIO DATA
   // ============================================================================
   useEffect(() => {
     const loadVideoStudioData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-
-        logger.info('Loading video studio data from Supabase', { userId })
-
-        // Dynamic imports for code splitting
+        setError(null)        // Dynamic imports for code splitting
         const { getVideoProjects } = await import('@/lib/video-studio-queries')
         const { getVideoTemplates } = await import('@/lib/video-studio-queries')
         const { getVideoAssets } = await import('@/lib/video-assets-queries')
@@ -1238,9 +970,7 @@ export default function VideoStudioPage() {
         )
 
         if (!projectsError && projectsData) {
-          setProjects(projectsData)
-          logger.info('Video projects loaded', { count: projectsData.length })
-        } else if (projectsError) {
+          setProjects(projectsData)        } else if (projectsError) {
           logger.error('Failed to load projects', { error: projectsError })
         }
 
@@ -1251,9 +981,7 @@ export default function VideoStudioPage() {
         )
 
         if (!templatesError && templatesData) {
-          setTemplates(templatesData)
-          logger.info('Video templates loaded', { count: templatesData.length })
-        } else if (templatesError) {
+          setTemplates(templatesData)        } else if (templatesError) {
           logger.error('Failed to load templates', { error: templatesError })
         }
 
@@ -1266,35 +994,22 @@ export default function VideoStudioPage() {
         )
 
         if (!assetsError && assetsData) {
-          setAssets(assetsData)
-          logger.info('Video assets loaded', { count: assetsData.length })
-        } else if (assetsError) {
+          setAssets(assetsData)        } else if (assetsError) {
           logger.error('Failed to load assets', { error: assetsError })
         }
 
         setIsLoading(false)
 
-        // A+++ Accessibility announcement
         const totalCount = (projectsData?.length || 0) + (templatesData?.length || 0) + (assetsData?.length || 0)
         announce(`${totalCount} items loaded from database`, 'polite')
 
-        toast.success(`Video studio loaded - ${projectsData?.length || 0} projects, ${templatesData?.length || 0} templates, ${assetsData?.length || 0} assets`)
-
-        logger.info('Video studio data loaded successfully', {
-          projects: projectsData?.length || 0,
-          templates: templatesData?.length || 0,
-          assets: assetsData?.length || 0,
-          userId,
-        })
-      } catch (err) {
+        toast.success(`Video studio loaded - ${projectsData?.length || 0} projects, ${templatesData?.length || 0} templates, ${assetsData?.length || 0} assets`)      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load video studio data'
         logger.error('Failed to load video studio data', { error: err, userId })
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading video studio data', 'assertive')
-        toast.error('Failed to load video studio data', {
-          description: errorMessage,
-        })
+        toast.error('Failed to load video studio data')
       }
     }
 
@@ -1324,9 +1039,7 @@ export default function VideoStudioPage() {
   const handleStartRecording = async () => {
     try {
       setIsRecording(true)
-      // In a real implementation, you would start actual recording here
-      logger.info('Recording started', { type: recordingType })
-    } catch (error) {
+      // In a real implementation, you would start actual recording here    } catch (error) {
       logger.error('Failed to start recording', { error })
       setIsRecording(false)
     }
@@ -1335,9 +1048,7 @@ export default function VideoStudioPage() {
   const handleStopRecording = async () => {
     try {
       setIsRecording(false)
-      // In a real implementation, you would stop recording and save the file
-      logger.info('Recording stopped and processing')
-    } catch (error) {
+      // In a real implementation, you would stop recording and save the file    } catch (error) {
       logger.error('Failed to stop recording', { error })
     }
   }
@@ -1359,14 +1070,7 @@ export default function VideoStudioPage() {
     }
 
     try {
-      setIsCreatingProject(true)
-
-      logger.info('Creating video project in Supabase', {
-        title: newProject.title,
-        userId,
-      })
-
-      // Dynamic import
+      setIsCreatingProject(true)      // Dynamic import
       const { createVideoProject } = await import('@/lib/video-studio-queries')
 
       const { data: createdVideo, error } = await createVideoProject(userId, {
@@ -1384,15 +1088,7 @@ export default function VideoStudioPage() {
       // Add to local state (data is already in correct format from database)
       setProjects([createdVideo!, ...projects])
 
-      toast.success(`Video project created! ${createdVideo!.title} has been added to your studio`)
-
-      logger.info('Video project created successfully', {
-        projectId: createdVideo!.id,
-        title: createdVideo!.title,
-        userId,
-      })
-
-      setIsCreateModalOpen(false)
+      toast.success(`Video project created! ${createdVideo!.title} has been added to your studio`)      setIsCreateModalOpen(false)
       setIsCreatingProject(false)
       setNewProject({
         title: '',
@@ -1405,9 +1101,7 @@ export default function VideoStudioPage() {
       announce(`Video project ${createdVideo!.title} created`, 'polite')
     } catch (error) {
       logger.error('Failed to create video project', { error, userId })
-      toast.error('Failed to create project', {
-        description: error instanceof Error ? error.message : 'Unknown error',
-      })
+      toast.error('Failed to create project')
       setIsCreatingProject(false)
     }
   }
@@ -1436,7 +1130,6 @@ export default function VideoStudioPage() {
   })
 
   // ============================================================================
-  // A+++ LOADING STATE
   // ============================================================================
   if (isLoading) {
     return (
@@ -1455,7 +1148,6 @@ export default function VideoStudioPage() {
   }
 
   // ============================================================================
-  // A+++ ERROR STATE
   // ============================================================================
   if (error) {
     return (
@@ -1474,7 +1166,6 @@ export default function VideoStudioPage() {
   }
 
   // ============================================================================
-  // A+++ EMPTY STATE (when no projects exist)
   // ============================================================================
   if (filteredProjects.length === 0 && !isLoading) {
     return (
@@ -1605,9 +1296,7 @@ export default function VideoStudioPage() {
               data-tour="video-annotate-btn"
               size="sm"
               onClick={() => {
-                setShowAnnotations(true)
-                logger.info('Annotations overlay opened')
-                announce('Annotations overlay opened')
+                setShowAnnotations(true)                announce('Annotations overlay opened')
               }}
               className="bg-green-600 hover:bg-green-700"
             >
@@ -1620,9 +1309,7 @@ export default function VideoStudioPage() {
               data-tour="video-teleprompter-btn"
               size="sm"
               onClick={() => {
-                setShowTeleprompter(true)
-                logger.info('Teleprompter opened')
-                announce('Teleprompter opened')
+                setShowTeleprompter(true)                announce('Teleprompter opened')
               }}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -2166,9 +1853,7 @@ export default function VideoStudioPage() {
                         variant="outline"
                         size="sm"
                         className="flex-1"
-                        onClick={() => {
-                          logger.info('Opening collaborative review dialog', { projectId: project.id, title: project.title })
-                          setReviewProject(project)
+                        onClick={() => {                          setReviewProject(project)
                           const link = `${window.location.origin}/review/${project.id}`
                           setReviewLink(link)
                           setIsReviewDialogOpen(true)
@@ -2336,9 +2021,7 @@ export default function VideoStudioPage() {
                             Preview
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => {
-                              logger.info('Asset download started', { assetId: asset.id, name: asset.name })
-                              const link = document.createElement('a')
+                            onClick={() => {                              const link = document.createElement('a')
                               link.href = asset.file_path
                               link.download = asset.name
                               link.click()
@@ -2428,9 +2111,7 @@ onClick={() => {
                         variant="outline"
                         size="sm"
                         className="flex-1 text-xs"
-                        onClick={() => {
-                          logger.info('Asset download started', { assetId: asset.id, name: asset.name })
-                          // Download asset file
+                        onClick={() => {                          // Download asset file
                           const link = document.createElement('a')
                           link.href = asset.url
                           link.download = asset.name
@@ -2591,13 +2272,9 @@ onClick={() => {
           </DialogHeader>
           <div className="overflow-y-auto max-h-[80vh] pr-2">
             <VideoTemplates
-              onSelectTemplate={(template) => {
-                logger.info('Template applied', { name: template.name })
-                setIsTemplateDialogOpen(false)
+              onSelectTemplate={(template) => {                setIsTemplateDialogOpen(false)
               }}
-              onPreviewTemplate={(template) => {
-                logger.info('Template preview opened', { name: template.name })
-              }}
+              onPreviewTemplate={(template) => {              }}
             />
           </div>
         </DialogContent>
@@ -2611,9 +2288,7 @@ onClick={() => {
           <div className="overflow-y-auto max-h-[80vh] pr-2">
             <EnhancedFileUpload
               acceptedTypes="all"
-              onUploadComplete={(files) => {
-                logger.info('Files uploaded successfully', { fileCount: files.length })
-                setIsUploadDialogOpen(false)
+              onUploadComplete={(files) => {                setIsUploadDialogOpen(false)
               }}
               maxFiles={20}
               maxSize={500}
@@ -2629,21 +2304,15 @@ onClick={() => {
           setIsAssetPreviewOpen(false)
           setSelectedAsset(null)
         }}
-        onAddToProject={(asset) => {
-          logger.info('Asset added to project', { assetId: asset.id, name: asset.name })
-        }}
-        onDownload={(asset) => {
-          logger.info('Asset download started', { assetId: asset.id, name: asset.name })
-        }}
+        onAddToProject={(asset) => {        }}
+        onDownload={(asset) => {        }}
       />
 
       {/* ANNOTATION OVERLAY */}
       <AnnotationOverlay
         isVisible={showAnnotations}
         onClose={() => {
-          setShowAnnotations(false)
-          logger.info('Annotations overlay closed')
-          announce('Annotations overlay closed')
+          setShowAnnotations(false)          announce('Annotations overlay closed')
         }}
         canvasWidth={1280}
         canvasHeight={720}
@@ -2653,9 +2322,7 @@ onClick={() => {
       <TeleprompterOverlay
         isVisible={showTeleprompter}
         onClose={() => {
-          setShowTeleprompter(false)
-          logger.info('Teleprompter closed')
-          announce('Teleprompter closed')
+          setShowTeleprompter(false)          announce('Teleprompter closed')
         }}
         initialScript={teleprompterScript}
       />
@@ -2702,13 +2369,7 @@ onClick={() => {
                   <Button
                     variant="outline"
                     onClick={async () => {
-                      await copyToClipboard(reviewLink, 'Review link copied! Share with clients to collect feedback')
-                      logger.info('Review link copied', {
-                        projectId: reviewProject.id,
-                        title: reviewProject.title,
-                        link: reviewLink
-                      })
-                    }}
+                      await copyToClipboard(reviewLink, 'Review link copied! Share with clients to collect feedback')                    }}
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copy
@@ -2847,9 +2508,7 @@ onClick={() => {
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    setIsReviewDialogOpen(false)
-                    logger.info('Review dialog closed', { projectId: reviewProject.id })
-                  }}
+                    setIsReviewDialogOpen(false)                  }}
                 >
                   Done
                 </Button>
@@ -2868,17 +2527,7 @@ onClick={() => {
                       success: `Review invites sent! ${reviewProject.client || 'Clients'} will receive an email`,
                       error: 'Failed to send review invites'
                     })
-                    if (result.success) {
-                      logger.info('Review invites sent', {
-                        projectId: reviewProject.id,
-                        title: reviewProject.title,
-                        settings: {
-                          allowComments,
-                          requireApproval,
-                          expiresIn: reviewExpiry
-                        }
-                      })
-                      announce('Review invitations sent successfully')
+                    if (result.success) {                      announce('Review invitations sent successfully')
                       setIsReviewDialogOpen(false)
                     }
                   }}
@@ -2918,9 +2567,7 @@ onClick={() => {
                   variant={selectedTransition === transition ? 'default' : 'outline'}
                   className="h-20 flex-col gap-2"
                   onClick={() => {
-                    setSelectedTransition(transition)
-                    logger.info('Transition selected', { transition })
-                  }}
+                    setSelectedTransition(transition)                  }}
                 >
                   <Layers className="w-5 h-5" />
                   <span className="text-xs">{transition}</span>
@@ -3449,9 +3096,7 @@ onClick={() => {
                 onClick={() => {
                   // Save recording settings to local storage
                   try {
-                    localStorage.setItem('videoStudioRecordingSettings', JSON.stringify(recordingSettings))
-                    logger.info('Recording settings saved', { settings: recordingSettings })
-                    toast.success('Recording settings saved')
+                    localStorage.setItem('videoStudioRecordingSettings', JSON.stringify(recordingSettings))                    toast.success('Recording settings saved')
                     setIsRecordingSettingsOpen(false)
                   } catch (error) {
                     toast.error('Failed to save settings')
