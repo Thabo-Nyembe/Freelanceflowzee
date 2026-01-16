@@ -11,7 +11,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 // ============================================================================
-// A+++ UTILITIES
 // ============================================================================
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
@@ -62,7 +61,6 @@ type ViewMode = 'projects' | 'recorder' | 'library' | 'templates'
 
 export default function AudioStudioPage() {
   // ============================================================================
-  // A+++ STATE MANAGEMENT
   // ============================================================================
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -85,22 +83,16 @@ export default function AudioStudioPage() {
   const [selectedQuality, setSelectedQuality] = useState('high')
 
   // ============================================================================
-  // A+++ LOAD AUDIO STUDIO DATA
   // ============================================================================
   useEffect(() => {
     const loadAudioStudioData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading audio studio data', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getAudioProjects, getAudioFiles, getAudioLibraries, getAudioStats } = await import('@/lib/audio-studio-queries')
 
         // Load all audio studio data in parallel
@@ -122,24 +114,13 @@ export default function AudioStudioPage() {
         setAudioStats(statsResult.data || null)
 
         setIsLoading(false)
-        announce('Audio studio loaded successfully', 'polite')
-        logger.info('Audio studio data loaded successfully', {
-          projectCount: projectsResult.data?.length || 0,
-          fileCount: filesResult.data?.length || 0,
-          hasStats: !!statsResult.data,
-          userId
-        })
-
-        toast.success('Audio studio loaded', {
-          description: `${projectsResult.data?.length || 0} projects, ${filesResult.data?.length || 0} files`
+        announce('Audio studio loaded successfully', 'polite')        toast.success('Audio studio loaded' projects, ${filesResult.data?.length || 0} files`
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load audio studio'
         logger.error('Failed to load audio studio data', { error: errorMessage, userId })
         setError(errorMessage)
-        toast.error('Failed to load audio studio', {
-          description: errorMessage
-        })
+        toast.error('Failed to load audio studio')
         setIsLoading(false)
         announce('Error loading audio studio', 'assertive')
       }
@@ -167,7 +148,6 @@ export default function AudioStudioPage() {
   }
 
   // ============================================================================
-  // A+++ LOADING STATE
   // ============================================================================
   if (isLoading) {
     return (
@@ -191,7 +171,6 @@ export default function AudioStudioPage() {
   }
 
   // ============================================================================
-  // A+++ ERROR STATE
   // ============================================================================
   if (error) {
     return (
@@ -214,7 +193,6 @@ export default function AudioStudioPage() {
   }
 
   // ============================================================================
-  // A+++ EMPTY STATE (when no audio projects exist)
   // ============================================================================
   if (audioProjects.length === 0 && viewMode === 'projects' && !isLoading) {
     return (
@@ -387,8 +365,7 @@ export default function AudioStudioPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => {
                                 setSelectedProject(project)
-                                toast.success('Project opened', {
-                                  description: `Now editing "${project.name}"`
+                                toast.success('Project opened'"`
                                 })
                               }}>
                                 <Edit className="w-4 h-4 mr-2" />
@@ -396,9 +373,7 @@ export default function AudioStudioPage() {
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => {
                                 navigator.clipboard.writeText(`${window.location.origin}/audio/${project.id}`)
-                                toast.success('Link copied', {
-                                  description: 'Project link copied to clipboard'
-                                })
+                                toast.success('Link copied')
                               }}>
                                 <Copy className="w-4 h-4 mr-2" />
                                 Duplicate
@@ -407,8 +382,7 @@ export default function AudioStudioPage() {
                               <DropdownMenuItem
                                 className="text-red-500"
                                 onClick={() => {
-                                  toast.success('Project deleted', {
-                                    description: `"${project.name}" has been removed`
+                                  toast.success('Project deleted'" has been removed`
                                   })
                                 }}
                               >
@@ -453,12 +427,7 @@ export default function AudioStudioPage() {
                           <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
                             const shareUrl = `${window.location.origin}/audio/${project.id}`
                             navigator.clipboard.writeText(shareUrl)
-                            toast.success('Share link copied!', {
-                              description: 'Project link copied to clipboard',
-                              action: {
-                                label: 'Open',
-                                onClick: () => window.open(shareUrl, '_blank')
-                              }
+                            toast.success('Share link copied!'
                             })
                           }}>
                             <Share2 className="w-4 h-4" />
@@ -470,8 +439,7 @@ export default function AudioStudioPage() {
                             document.body.appendChild(link)
                             link.click()
                             document.body.removeChild(link)
-                            toast.success('Download started', {
-                              description: `Downloading "${project.name}.${project.format}"`
+                            toast.success('Download started'.${project.format}"`
                             })
                           }}>
                             <Download className="w-4 h-4" />
@@ -638,8 +606,7 @@ export default function AudioStudioPage() {
 
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                          toast.success(`Now playing: ${file.name}`, {
-                            description: `Duration: ${formatDuration(file.duration)} | Format: ${file.format.toUpperCase()}`,
+                          toast.success(`Now playing: ${file.name}` | Format: ${file.format.toUpperCase()}`,
                             action: {
                               label: 'Stop',
                               onClick: () => toast.info('Playback stopped')
@@ -655,8 +622,7 @@ export default function AudioStudioPage() {
                           document.body.appendChild(link)
                           link.click()
                           document.body.removeChild(link)
-                          toast.success('Download started', {
-                            description: `Downloading "${file.name}" (${formatFileSize(file.size)})`
+                          toast.success('Download started'" (${formatFileSize(file.size)})`
                           })
                         }}>
                           <Download className="w-4 h-4" />
@@ -679,12 +645,7 @@ export default function AudioStudioPage() {
                     className="w-64 bg-slate-900/50 border-gray-700"
                   />
                   <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
-                    toast.info('Filter Options', {
-                      description: 'Filter by format, duration, date, or tags',
-                      action: {
-                        label: 'Apply',
-                        onClick: () => toast.success('Filters applied')
-                      }
+                    toast.info('Filter Options'
                     })
                   }}>
                     <Filter className="w-4 h-4" />
