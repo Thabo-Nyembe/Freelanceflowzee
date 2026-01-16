@@ -2073,8 +2073,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Show database funnels first, then mock funnels as fallback */}
-              {(dbFunnels.length > 0 ? dbFunnels : mockFunnels).map((funnel) => (
+              {dbFunnels.map((funnel) => (
                 <Card key={funnel.id} className="hover:shadow-lg transition-all cursor-pointer group">
                   <CardHeader onClick={() => setSelectedFunnel(funnel)}>
                     <div className="flex items-center justify-between">
@@ -2469,8 +2468,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Show database reports first, then mock reports as fallback */}
-              {(dbReports.length > 0 ? dbReports : mockReports).map((report) => (
+              {dbReports.map((report) => (
                 <Card key={report.id} className="hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -2596,8 +2594,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Show database dashboards first, then mock dashboards as fallback */}
-              {(dbDashboards.length > 0 ? dbDashboards : mockDashboards).map((dashboard) => (
+              {dbDashboards.map((dashboard) => (
                 <Card key={dashboard.id} className="hover:shadow-lg transition-all cursor-pointer group">
                   <CardHeader>
                     <div className="flex items-center justify-between">

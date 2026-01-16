@@ -631,13 +631,12 @@ export default function TimeTrackingClient() {
     return () => clearInterval(interval)
   }, [isTimerRunning])
 
-  // Compute stats from real database entries when available, fallback to mock data
+  // Compute stats from real database entries
   const stats = useMemo(() => {
-    // Use database entries if available, otherwise fallback to mock
-    const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
-      duration_hours: e.durationHours,
-      is_billable: e.isBillable,
-      billable_amount: e.billableAmount,
+    const entries = (dbTimeEntries || []).map(e => ({
+      duration_hours: e.duration_hours,
+      is_billable: e.is_billable,
+      billable_amount: e.billable_amount,
       status: e.status
     }))
 
@@ -721,17 +720,7 @@ export default function TimeTrackingClient() {
 
   // Real Export Handler - generates and downloads CSV
   const handleExportTimesheet = async (format: 'csv' | 'json' = 'csv') => {
-    const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
-      id: e.id,
-      title: e.title,
-      project_name: e.projectName,
-      start_time: e.startTime,
-      end_time: e.endTime,
-      duration_hours: e.durationHours,
-      is_billable: e.isBillable,
-      billable_amount: e.billableAmount,
-      status: e.status
-    }))
+    const entries = dbTimeEntries || []
 
     toast.promise(
       (async () => {
@@ -861,7 +850,7 @@ export default function TimeTrackingClient() {
     toast.promise(
       (async () => {
         const allData = {
-          timeEntries: dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries,
+          timeEntries: dbTimeEntries || [],
           projects: mockProjects,
           team: mockTeam,
           invoices: mockInvoices,
@@ -1135,11 +1124,7 @@ export default function TimeTrackingClient() {
                   </div>
                   <span className="text-sm text-gray-500">
                     Total: {(() => {
-                      const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
-                        start_time: e.startTime,
-                        project_id: e.projectId,
-                        duration_hours: e.durationHours
-                      }))
+                      const entries = dbTimeEntries || []
                       const filteredEntries = entries.filter((e: any) => {
                         const matchDate = !filters.dateFrom || new Date(e.start_time).toDateString() === new Date(filters.dateFrom).toDateString()
                         const matchProject = !filters.projectId || e.project_id === filters.projectId
@@ -1152,18 +1137,7 @@ export default function TimeTrackingClient() {
                 </div>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {/* Show database entries if available, otherwise show mock data - with filtering */}
-                {(dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
-                  id: e.id,
-                  title: e.title,
-                  status: e.status,
-                  is_billable: e.isBillable,
-                  project_id: e.projectId,
-                  start_time: e.startTime,
-                  end_time: e.endTime,
-                  duration_hours: e.durationHours,
-                  billable_amount: e.billableAmount
-                }))).filter((entry: any) => {
+                {(dbTimeEntries || []).filter((entry: any) => {
                   const matchDate = !filters.dateFrom || new Date(entry.start_time).toDateString() === new Date(filters.dateFrom).toDateString()
                   const matchProject = !filters.projectId || entry.project_id === filters.projectId
                   const isToday = new Date(entry.start_time).toDateString() === new Date().toDateString()
