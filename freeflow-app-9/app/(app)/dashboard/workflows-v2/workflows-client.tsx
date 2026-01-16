@@ -164,157 +164,6 @@ interface WorkflowFolder {
 // MOCK DATA
 // ============================================================================
 
-const mockWorkflows: Workflow[] = [
-  {
-    id: '1',
-    name: 'New Lead to CRM + Slack',
-    description: 'When a new form submission comes in, add to CRM and notify sales team',
-    status: 'active',
-    folder: 'Sales',
-    steps: [
-      { id: 's1', type: 'trigger', app: 'Typeform', appIcon: '📝', name: 'New Form Response', description: 'Triggers on form submission', config: {}, position: 1 },
-      { id: 's2', type: 'action', app: 'HubSpot', appIcon: '🔶', name: 'Create Contact', description: 'Adds contact to CRM', config: {}, position: 2 },
-      { id: 's3', type: 'action', app: 'Slack', appIcon: '💬', name: 'Send Message', description: 'Notifies #sales channel', config: {}, position: 3 }
-    ],
-    trigger: 'Typeform - New Response',
-    lastRun: '2024-12-25T10:30:00Z',
-    totalRuns: 1247,
-    successRate: 99.2,
-    avgRunTime: '2.3s',
-    createdAt: '2024-01-15T08:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z',
-    owner: 'Sarah Chen',
-    isStarred: true,
-    tags: ['sales', 'leads', 'automation']
-  },
-  {
-    id: '2',
-    name: 'GitHub to Jira Sync',
-    description: 'Create Jira tickets from GitHub issues and sync status updates',
-    status: 'active',
-    folder: 'Engineering',
-    steps: [
-      { id: 's1', type: 'trigger', app: 'GitHub', appIcon: '🐙', name: 'New Issue', description: 'Triggers on new issue', config: {}, position: 1 },
-      { id: 's2', type: 'filter', app: 'Filter', appIcon: '🔍', name: 'Check Labels', description: 'Only bugs and features', config: {}, position: 2 },
-      { id: 's3', type: 'action', app: 'Jira', appIcon: '📋', name: 'Create Issue', description: 'Creates Jira ticket', config: {}, position: 3 },
-      { id: 's4', type: 'action', app: 'Slack', appIcon: '💬', name: 'Notify Team', description: 'Posts to #dev-tickets', config: {}, position: 4 }
-    ],
-    trigger: 'GitHub - New Issue',
-    lastRun: '2024-12-25T09:45:00Z',
-    totalRuns: 892,
-    successRate: 98.5,
-    avgRunTime: '3.1s',
-    createdAt: '2024-02-20T10:00:00Z',
-    updatedAt: '2024-12-19T11:20:00Z',
-    owner: 'Mike Johnson',
-    isStarred: true,
-    tags: ['engineering', 'github', 'jira']
-  },
-  {
-    id: '3',
-    name: 'Invoice Payment Reminder',
-    description: 'Send automated payment reminders for overdue invoices',
-    status: 'active',
-    folder: 'Finance',
-    steps: [
-      { id: 's1', type: 'trigger', app: 'Schedule', appIcon: '⏰', name: 'Daily at 9 AM', description: 'Runs every day', config: {}, position: 1 },
-      { id: 's2', type: 'action', app: 'Stripe', appIcon: '💳', name: 'Get Overdue', description: 'Fetches overdue invoices', config: {}, position: 2 },
-      { id: 's3', type: 'action', app: 'Gmail', appIcon: '📧', name: 'Send Reminder', description: 'Emails customer', config: {}, position: 3 },
-      { id: 's4', type: 'action', app: 'Slack', appIcon: '💬', name: 'Log Action', description: 'Logs to #finance', config: {}, position: 4 }
-    ],
-    trigger: 'Schedule - Daily',
-    lastRun: '2024-12-25T09:00:00Z',
-    totalRuns: 365,
-    successRate: 100,
-    avgRunTime: '4.5s',
-    createdAt: '2024-03-10T09:00:00Z',
-    updatedAt: '2024-12-18T16:45:00Z',
-    owner: 'Lisa Park',
-    isStarred: false,
-    tags: ['finance', 'invoices', 'email']
-  },
-  {
-    id: '4',
-    name: 'Customer Onboarding',
-    description: 'Automated onboarding sequence for new customers',
-    status: 'paused',
-    folder: 'Customer Success',
-    steps: [
-      { id: 's1', type: 'trigger', app: 'Stripe', appIcon: '💳', name: 'New Subscription', description: 'Triggers on signup', config: {}, position: 1 },
-      { id: 's2', type: 'action', app: 'Intercom', appIcon: '💁', name: 'Create User', description: 'Adds to Intercom', config: {}, position: 2 },
-      { id: 's3', type: 'delay', app: 'Delay', appIcon: '⏳', name: 'Wait 1 Day', description: 'Pauses for 24h', config: {}, position: 3 },
-      { id: 's4', type: 'action', app: 'Gmail', appIcon: '📧', name: 'Welcome Email', description: 'Sends onboarding guide', config: {}, position: 4 }
-    ],
-    trigger: 'Stripe - New Subscription',
-    lastRun: '2024-12-20T15:30:00Z',
-    totalRuns: 456,
-    successRate: 97.8,
-    avgRunTime: '86400s',
-    createdAt: '2024-04-05T11:00:00Z',
-    updatedAt: '2024-12-15T10:00:00Z',
-    owner: 'Alex Wong',
-    isStarred: false,
-    tags: ['onboarding', 'customers']
-  },
-  {
-    id: '5',
-    name: 'Social Media Scheduler',
-    description: 'Cross-post content from blog to social media platforms',
-    status: 'error',
-    folder: 'Marketing',
-    steps: [
-      { id: 's1', type: 'trigger', app: 'WordPress', appIcon: '📰', name: 'New Post', description: 'Triggers on publish', config: {}, position: 1 },
-      { id: 's2', type: 'action', app: 'Twitter', appIcon: '🐦', name: 'Post Tweet', description: 'Shares to Twitter', config: {}, position: 2 },
-      { id: 's3', type: 'action', app: 'LinkedIn', appIcon: '💼', name: 'Share Post', description: 'Shares to LinkedIn', config: {}, position: 3 }
-    ],
-    trigger: 'WordPress - New Post',
-    lastRun: '2024-12-24T14:20:00Z',
-    totalRuns: 234,
-    successRate: 85.5,
-    avgRunTime: '5.2s',
-    createdAt: '2024-05-15T14:00:00Z',
-    updatedAt: '2024-12-24T14:20:00Z',
-    owner: 'Emma Davis',
-    isStarred: false,
-    tags: ['marketing', 'social']
-  }
-]
-
-const mockRuns: WorkflowRun[] = [
-  { id: 'r1', workflowId: '1', workflowName: 'New Lead to CRM + Slack', status: 'success', startedAt: '2024-12-25T10:30:00Z', completedAt: '2024-12-25T10:30:02Z', duration: '2.1s', stepsCompleted: 3, totalSteps: 3, dataIn: { email: 'lead@example.com' }, dataOut: { contactId: '12345' } },
-  { id: 'r2', workflowId: '2', workflowName: 'GitHub to Jira Sync', status: 'success', startedAt: '2024-12-25T09:45:00Z', completedAt: '2024-12-25T09:45:03Z', duration: '3.2s', stepsCompleted: 4, totalSteps: 4, dataIn: { issue: '#456' }, dataOut: { jiraKey: 'DEV-789' } },
-  { id: 'r3', workflowId: '3', workflowName: 'Invoice Payment Reminder', status: 'success', startedAt: '2024-12-25T09:00:00Z', completedAt: '2024-12-25T09:00:04Z', duration: '4.5s', stepsCompleted: 4, totalSteps: 4, dataIn: { invoiceCount: 3 }, dataOut: { emailsSent: 3 } },
-  { id: 'r4', workflowId: '5', workflowName: 'Social Media Scheduler', status: 'error', startedAt: '2024-12-24T14:20:00Z', duration: '2.8s', stepsCompleted: 1, totalSteps: 3, error: 'Twitter API rate limit exceeded', dataIn: { postTitle: 'New Blog Post' }, dataOut: {} },
-  { id: 'r5', workflowId: '1', workflowName: 'New Lead to CRM + Slack', status: 'success', startedAt: '2024-12-25T08:15:00Z', completedAt: '2024-12-25T08:15:02Z', duration: '2.3s', stepsCompleted: 3, totalSteps: 3, dataIn: { email: 'another@example.com' }, dataOut: { contactId: '12346' } },
-  { id: 'r6', workflowId: '2', workflowName: 'GitHub to Jira Sync', status: 'running', startedAt: '2024-12-25T10:32:00Z', duration: '0.5s', stepsCompleted: 2, totalSteps: 4, dataIn: { issue: '#457' }, dataOut: {} }
-]
-
-const mockApps: ConnectedApp[] = [
-  { id: '1', name: 'Slack', icon: '💬', category: 'Communication', status: 'connected', connectedAt: '2024-01-10T08:00:00Z', lastUsed: '2024-12-25T10:30:00Z', workflows: 8, permissions: ['read', 'write', 'channels'] },
-  { id: '2', name: 'HubSpot', icon: '🔶', category: 'CRM', status: 'connected', connectedAt: '2024-02-15T10:00:00Z', lastUsed: '2024-12-25T10:30:00Z', workflows: 5, permissions: ['contacts', 'deals'] },
-  { id: '3', name: 'GitHub', icon: '🐙', category: 'Developer', status: 'connected', connectedAt: '2024-03-01T09:00:00Z', lastUsed: '2024-12-25T09:45:00Z', workflows: 4, permissions: ['repo', 'issues'] },
-  { id: '4', name: 'Gmail', icon: '📧', category: 'Email', status: 'connected', connectedAt: '2024-01-20T11:00:00Z', lastUsed: '2024-12-25T09:00:00Z', workflows: 6, permissions: ['send', 'read'] },
-  { id: '5', name: 'Stripe', icon: '💳', category: 'Payments', status: 'connected', connectedAt: '2024-02-01T08:00:00Z', lastUsed: '2024-12-25T09:00:00Z', workflows: 3, permissions: ['invoices', 'subscriptions'] },
-  { id: '6', name: 'Twitter', icon: '🐦', category: 'Social', status: 'error', connectedAt: '2024-04-10T14:00:00Z', lastUsed: '2024-12-24T14:20:00Z', workflows: 1, permissions: ['tweet'] },
-  { id: '7', name: 'Jira', icon: '📋', category: 'Project Management', status: 'connected', connectedAt: '2024-03-15T10:00:00Z', lastUsed: '2024-12-25T09:45:00Z', workflows: 3, permissions: ['issues', 'projects'] },
-  { id: '8', name: 'Google Sheets', icon: '📊', category: 'Productivity', status: 'connected', connectedAt: '2024-01-25T09:00:00Z', lastUsed: '2024-12-23T15:00:00Z', workflows: 7, permissions: ['read', 'write'] }
-]
-
-const mockTemplates: WorkflowTemplate[] = [
-  { id: '1', name: 'Lead to CRM Pipeline', description: 'Automatically add form leads to your CRM', category: 'Sales', apps: ['Typeform', 'HubSpot', 'Slack'], usageCount: 15420, rating: 4.8, steps: 3, isPremium: false },
-  { id: '2', name: 'GitHub Issue Tracker', description: 'Sync GitHub issues with project management', category: 'Engineering', apps: ['GitHub', 'Jira', 'Slack'], usageCount: 12350, rating: 4.7, steps: 4, isPremium: false },
-  { id: '3', name: 'Invoice Payment Flow', description: 'Automate invoice reminders and follow-ups', category: 'Finance', apps: ['Stripe', 'Gmail', 'Slack'], usageCount: 8920, rating: 4.6, steps: 4, isPremium: true },
-  { id: '4', name: 'Social Media Publisher', description: 'Cross-post content to multiple platforms', category: 'Marketing', apps: ['WordPress', 'Twitter', 'LinkedIn'], usageCount: 21580, rating: 4.5, steps: 3, isPremium: false },
-  { id: '5', name: 'Customer Onboarding', description: 'Welcome sequence for new customers', category: 'Customer Success', apps: ['Stripe', 'Intercom', 'Gmail'], usageCount: 9870, rating: 4.9, steps: 5, isPremium: true }
-]
-
-const mockFolders: WorkflowFolder[] = [
-  { id: '1', name: 'Sales', color: 'blue', workflowCount: 5 },
-  { id: '2', name: 'Engineering', color: 'purple', workflowCount: 4 },
-  { id: '3', name: 'Finance', color: 'green', workflowCount: 3 },
-  { id: '4', name: 'Marketing', color: 'orange', workflowCount: 6 },
-  { id: '5', name: 'Customer Success', color: 'pink', workflowCount: 4 }
-]
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -379,28 +228,6 @@ const getStepIcon = (type: WorkflowStep['type']) => {
 // ENHANCED COMPETITIVE UPGRADE MOCK DATA - Zapier/Make Level
 // ============================================================================
 
-const mockWorkflowsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Efficiency', description: 'Workflows processed 15K+ tasks this week with 99.8% success rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Slack integration approaching API rate limit. Consider optimization.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'info' as const, title: 'New Templates', description: '12 new workflow templates available for CRM automation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
-]
-
-const mockWorkflowsCollaborators = [
-  { id: '1', name: 'Automation Lead', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Integration Specialist', avatar: '/avatars/integration.jpg', status: 'online' as const, role: 'Specialist' },
-  { id: '3', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
-]
-
-const mockWorkflowsPredictions = [
-  { id: '1', title: 'Execution Forecast', prediction: 'Workflow volume expected to increase 40% during month-end', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Savings', prediction: 'Automation saved 120 hours of manual work this month', confidence: 95, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockWorkflowsActivities = [
-  { id: '1', user: 'System', action: 'Executed', target: 'Customer Onboarding workflow 250 times', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Automation Lead', action: 'Updated', target: 'Invoice Processing workflow triggers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Failed', target: 'Data Sync workflow - API timeout', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
 
 // Quick actions are now defined inside the component to use useState setters for dialogs
 
@@ -454,11 +281,11 @@ export default function WorkflowsClient() {
   const stats = useMemo(() => {
     const totalWorkflows = (dbWorkflows || []).length
     const activeWorkflows = (dbWorkflows || []).filter(w => w.status === 'active').length
-    const totalRuns = mockRuns.length // Keep mock for runs until run tracking is implemented
-    const successfulRuns = mockRuns.filter(r => r.status === 'success').length
+    const totalRuns = 0
+    const successfulRuns = 0
     const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0
     const errorWorkflows = (dbWorkflows || []).filter(w => w.status === 'failed').length
-    const connectedApps = mockApps.filter(a => a.status === 'connected').length
+    const connectedApps = 0
     const tasksSaved = (dbWorkflows || []).reduce((acc, w) => acc + (w.total_steps || 0), 0)
 
     return {
@@ -882,7 +709,7 @@ export default function WorkflowsClient() {
                 >
                   All Folders
                 </Button>
-                {mockFolders.map((folder) => (
+                {[].map((folder) => (
                   <Button
                     key={folder.id}
                     variant={folderFilter === folder.name ? 'default' : 'outline'}
@@ -1014,7 +841,7 @@ export default function WorkflowsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRuns.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-blue-200 text-sm">Recent Runs</p>
                   </div>
                 </div>
@@ -1030,7 +857,7 @@ export default function WorkflowsClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockRuns.map((run) => (
+                  {[].map((run) => (
                     <div key={run.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedRun(run)}>
                       <div className="flex items-center gap-4">
                         <div className={`w-3 h-3 rounded-full ${run.status === 'success' ? 'bg-green-500' : run.status === 'error' ? 'bg-red-500' : run.status === 'running' ? 'bg-blue-500 animate-pulse' : 'bg-yellow-500'}`} />
@@ -1066,7 +893,7 @@ export default function WorkflowsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Integrations</p>
                   </div>
                 </div>
@@ -1084,7 +911,7 @@ export default function WorkflowsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockApps.map((app) => (
+              {[].map((app) => (
                 <Card key={app.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1139,7 +966,7 @@ export default function WorkflowsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-amber-200 text-sm">Templates</p>
                   </div>
                 </div>
@@ -1153,7 +980,7 @@ export default function WorkflowsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockTemplates.map((template) => (
+              {[].map((template) => (
                 <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-3">
@@ -1994,18 +1821,18 @@ export default function WorkflowsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockWorkflowsAIInsights}
+              insights={[]}
               title="Workflow Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockWorkflowsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockWorkflowsPredictions}
+              predictions={[]}
               title="Automation Forecasts"
             />
           </div>
@@ -2013,7 +1840,7 @@ export default function WorkflowsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockWorkflowsActivities}
+            activities={[]}
             title="Workflow Activity"
             maxItems={5}
           />

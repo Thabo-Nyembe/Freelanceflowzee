@@ -109,35 +109,6 @@ interface Coupon {
   status: 'active' | 'expired' | 'disabled'
 }
 
-// Mock Data
-const MOCK_PRODUCTS: Product[] = [
-  { id: 'p1', name: 'Premium Headphones', description: 'High-quality wireless headphones with noise cancellation', price: 299, compareAtPrice: 349, category: 'Electronics', inventory: 150, status: 'active', images: [], rating: 4.8, reviews: 234, sales: 1250, sku: 'ELEC-HP-001', createdAt: '2024-01-15' },
-  { id: 'p2', name: 'Smart Watch Pro', description: 'Advanced smartwatch with health monitoring features', price: 399, category: 'Electronics', inventory: 75, status: 'active', images: [], rating: 4.6, reviews: 189, sales: 890, sku: 'ELEC-SW-002', createdAt: '2024-01-10' },
-  { id: 'p3', name: 'Organic Cotton T-Shirt', description: 'Sustainable and comfortable cotton t-shirt', price: 45, compareAtPrice: 55, category: 'Apparel', inventory: 500, status: 'active', images: [], rating: 4.5, reviews: 567, sales: 3200, sku: 'APP-TS-001', createdAt: '2024-01-08' },
-  { id: 'p4', name: 'Laptop Stand', description: 'Ergonomic aluminum laptop stand', price: 79, category: 'Accessories', inventory: 0, status: 'out_of_stock', images: [], rating: 4.7, reviews: 123, sales: 780, sku: 'ACC-LS-001', createdAt: '2024-01-05' },
-  { id: 'p5', name: 'Wireless Charger', description: 'Fast wireless charging pad', price: 49, category: 'Electronics', inventory: 200, status: 'active', images: [], rating: 4.4, reviews: 345, sales: 1560, sku: 'ELEC-WC-001', createdAt: '2024-01-01' },
-]
-
-const MOCK_ORDERS: Order[] = [
-  { id: 'o1', orderNumber: 'ORD-2024-001', customer: { name: 'John Smith', email: 'john@example.com' }, items: [{ name: 'Premium Headphones', quantity: 1, price: 299 }], total: 299, status: 'delivered', paymentStatus: 'paid', shippingAddress: '123 Main St, New York, NY 10001', createdAt: '2024-01-15' },
-  { id: 'o2', orderNumber: 'ORD-2024-002', customer: { name: 'Sarah Johnson', email: 'sarah@example.com' }, items: [{ name: 'Smart Watch Pro', quantity: 1, price: 399 }, { name: 'Wireless Charger', quantity: 2, price: 98 }], total: 497, status: 'shipped', paymentStatus: 'paid', shippingAddress: '456 Oak Ave, Los Angeles, CA 90001', createdAt: '2024-01-14' },
-  { id: 'o3', orderNumber: 'ORD-2024-003', customer: { name: 'Michael Brown', email: 'michael@example.com' }, items: [{ name: 'Organic Cotton T-Shirt', quantity: 3, price: 135 }], total: 135, status: 'processing', paymentStatus: 'paid', shippingAddress: '789 Pine Rd, Chicago, IL 60601', createdAt: '2024-01-13' },
-  { id: 'o4', orderNumber: 'ORD-2024-004', customer: { name: 'Emily Davis', email: 'emily@example.com' }, items: [{ name: 'Laptop Stand', quantity: 1, price: 79 }], total: 79, status: 'pending', paymentStatus: 'pending', shippingAddress: '321 Elm St, Houston, TX 77001', createdAt: '2024-01-12' },
-]
-
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: 'c1', name: 'John Smith', email: 'john@example.com', totalOrders: 12, totalSpent: 2450, lastOrder: '2024-01-15', status: 'active' },
-  { id: 'c2', name: 'Sarah Johnson', email: 'sarah@example.com', totalOrders: 8, totalSpent: 1890, lastOrder: '2024-01-14', status: 'active' },
-  { id: 'c3', name: 'Michael Brown', email: 'michael@example.com', totalOrders: 5, totalSpent: 675, lastOrder: '2024-01-13', status: 'active' },
-  { id: 'c4', name: 'Emily Davis', email: 'emily@example.com', totalOrders: 3, totalSpent: 320, lastOrder: '2024-01-12', status: 'inactive' },
-]
-
-const MOCK_COUPONS: Coupon[] = [
-  { id: 'cp1', code: 'WELCOME20', type: 'percentage', value: 20, usageLimit: 500, usedCount: 234, expiresAt: '2024-03-31', status: 'active' },
-  { id: 'cp2', code: 'SAVE50', type: 'fixed', value: 50, usageLimit: 100, usedCount: 67, expiresAt: '2024-02-28', status: 'active' },
-  { id: 'cp3', code: 'FLASH25', type: 'percentage', value: 25, usageLimit: 200, usedCount: 200, expiresAt: '2024-01-31', status: 'expired' },
-]
-
 // AI Insights Mock Data
 const ecommerceAIInsights = [
   { id: '1', type: 'success' as const, title: 'Sales Growth', description: 'Revenue increased by 23% compared to last month. Best-selling category: Electronics.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Sales' },
@@ -264,10 +235,10 @@ export default function EcommerceClient() {
           fetch('/api/orders').catch(() => null)
         ])
 
-        setProducts(productsRes?.ok ? (await productsRes.json()).products : MOCK_PRODUCTS)
-        setOrders(ordersRes?.ok ? (await ordersRes.json()).orders : MOCK_ORDERS)
-        setCustomers(MOCK_CUSTOMERS)
-        setCoupons(MOCK_COUPONS)
+        setProducts(productsRes?.ok ? (await productsRes.json()).products : [])
+        setOrders(ordersRes?.ok ? (await ordersRes.json()).orders : [])
+        setCustomers([])
+        setCoupons([])
         setIsLoading(false)
       } catch (err) {
         setError('Failed to load ecommerce data')

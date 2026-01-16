@@ -147,216 +147,6 @@ interface UserGroup {
   isSystem: boolean
 }
 
-// Mock Data
-const mockRoles: Role[] = [
-  {
-    id: '1',
-    name: 'Super Administrator',
-    description: 'Full system access with all permissions. Reserved for system administrators.',
-    roleCode: 'SUPER_ADMIN',
-    type: 'admin',
-    status: 'active',
-    accessLevel: 'full',
-    permissions: [],
-    totalUsers: 3,
-    activeUsers: 3,
-    isSystem: true,
-    isDefault: false,
-    canDelegate: true,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-12-20T10:00:00Z',
-    createdBy: 'System',
-    tags: ['system', 'security-critical'],
-    hierarchy: 1,
-    childRoles: ['admin', 'manager'],
-    groups: ['administrators']
-  },
-  {
-    id: '2',
-    name: 'Administrator',
-    description: 'Administrative access for managing users, roles, and system settings.',
-    roleCode: 'ADMIN',
-    type: 'admin',
-    status: 'active',
-    accessLevel: 'full',
-    permissions: [],
-    totalUsers: 12,
-    activeUsers: 10,
-    isSystem: true,
-    isDefault: false,
-    canDelegate: true,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-12-18T15:30:00Z',
-    createdBy: 'System',
-    tags: ['system', 'management'],
-    hierarchy: 2,
-    parentRole: 'SUPER_ADMIN',
-    childRoles: ['manager'],
-    groups: ['administrators', 'staff']
-  },
-  {
-    id: '3',
-    name: 'Manager',
-    description: 'Team management access including user oversight and reporting capabilities.',
-    roleCode: 'MANAGER',
-    type: 'manager',
-    status: 'active',
-    accessLevel: 'write',
-    permissions: [],
-    totalUsers: 45,
-    activeUsers: 38,
-    isSystem: true,
-    isDefault: false,
-    canDelegate: true,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-12-15T09:00:00Z',
-    createdBy: 'System',
-    tags: ['system', 'team-lead'],
-    hierarchy: 3,
-    parentRole: 'ADMIN',
-    childRoles: ['user'],
-    groups: ['managers', 'staff']
-  },
-  {
-    id: '4',
-    name: 'Standard User',
-    description: 'Default role for regular platform users with standard access permissions.',
-    roleCode: 'USER',
-    type: 'user',
-    status: 'active',
-    accessLevel: 'write',
-    permissions: [],
-    totalUsers: 1250,
-    activeUsers: 980,
-    isSystem: true,
-    isDefault: true,
-    canDelegate: false,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-12-10T14:00:00Z',
-    createdBy: 'System',
-    tags: ['system', 'default'],
-    hierarchy: 4,
-    parentRole: 'MANAGER',
-    childRoles: ['viewer'],
-    groups: ['users']
-  },
-  {
-    id: '5',
-    name: 'Viewer',
-    description: 'Read-only access for viewing content without modification privileges.',
-    roleCode: 'VIEWER',
-    type: 'viewer',
-    status: 'active',
-    accessLevel: 'read',
-    permissions: [],
-    totalUsers: 320,
-    activeUsers: 245,
-    isSystem: true,
-    isDefault: false,
-    canDelegate: false,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-12-05T11:00:00Z',
-    createdBy: 'System',
-    tags: ['system', 'read-only'],
-    hierarchy: 5,
-    parentRole: 'USER',
-    childRoles: [],
-    groups: ['viewers', 'guests']
-  },
-  {
-    id: '6',
-    name: 'Finance Team',
-    description: 'Custom role for finance department with billing and reporting access.',
-    roleCode: 'FINANCE',
-    type: 'custom',
-    status: 'active',
-    accessLevel: 'write',
-    permissions: [],
-    totalUsers: 18,
-    activeUsers: 16,
-    isSystem: false,
-    isDefault: false,
-    canDelegate: false,
-    createdAt: '2024-03-15T10:00:00Z',
-    updatedAt: '2024-12-20T16:00:00Z',
-    createdBy: 'admin@company.com',
-    tags: ['finance', 'billing', 'reports'],
-    hierarchy: 4,
-    parentRole: 'MANAGER',
-    childRoles: [],
-    groups: ['finance-team']
-  },
-  {
-    id: '7',
-    name: 'API Service Account',
-    description: 'Service account for API integrations with limited scope.',
-    roleCode: 'API_SERVICE',
-    type: 'service',
-    status: 'active',
-    accessLevel: 'restricted',
-    permissions: [],
-    totalUsers: 8,
-    activeUsers: 8,
-    isSystem: false,
-    isDefault: false,
-    canDelegate: false,
-    expiresAt: '2025-12-31T23:59:59Z',
-    createdAt: '2024-06-01T09:00:00Z',
-    updatedAt: '2024-12-01T12:00:00Z',
-    createdBy: 'admin@company.com',
-    tags: ['service', 'api', 'integration'],
-    hierarchy: 5,
-    childRoles: [],
-    groups: ['service-accounts']
-  }
-]
-
-const mockPermissions: Permission[] = [
-  { id: '1', name: 'View Users', code: 'users:read', description: 'View user profiles and lists', category: 'Users', resource: 'users', actions: ['read'], isGranted: true },
-  { id: '2', name: 'Create Users', code: 'users:create', description: 'Create new user accounts', category: 'Users', resource: 'users', actions: ['create'], isGranted: true },
-  { id: '3', name: 'Edit Users', code: 'users:update', description: 'Modify user information', category: 'Users', resource: 'users', actions: ['update'], isGranted: true },
-  { id: '4', name: 'Delete Users', code: 'users:delete', description: 'Remove user accounts', category: 'Users', resource: 'users', actions: ['delete'], isGranted: false },
-  { id: '5', name: 'View Roles', code: 'roles:read', description: 'View role definitions', category: 'Roles', resource: 'roles', actions: ['read'], isGranted: true },
-  { id: '6', name: 'Manage Roles', code: 'roles:manage', description: 'Create and modify roles', category: 'Roles', resource: 'roles', actions: ['create', 'update', 'delete'], isGranted: false },
-  { id: '7', name: 'View Reports', code: 'reports:read', description: 'Access analytics and reports', category: 'Reports', resource: 'reports', actions: ['read'], isGranted: true },
-  { id: '8', name: 'Export Data', code: 'data:export', description: 'Export data from the system', category: 'Data', resource: 'data', actions: ['export'], isGranted: true },
-  { id: '9', name: 'System Settings', code: 'settings:manage', description: 'Configure system settings', category: 'Settings', resource: 'settings', actions: ['read', 'update'], isGranted: false },
-  { id: '10', name: 'Billing Access', code: 'billing:manage', description: 'Access billing and payments', category: 'Billing', resource: 'billing', actions: ['read', 'update'], isGranted: false }
-]
-
-const mockUserAssignments: UserAssignment[] = [
-  { id: '1', userId: 'u1', userName: 'John Smith', email: 'john@company.com', roleId: '1', roleName: 'Super Administrator', assignedAt: '2024-01-15T10:00:00Z', assignedBy: 'System', status: 'active', lastAccess: '2024-12-25T08:30:00Z' },
-  { id: '2', userId: 'u2', userName: 'Sarah Johnson', email: 'sarah@company.com', roleId: '2', roleName: 'Administrator', assignedAt: '2024-02-01T09:00:00Z', assignedBy: 'john@company.com', status: 'active', lastAccess: '2024-12-24T16:45:00Z' },
-  { id: '3', userId: 'u3', userName: 'Mike Wilson', email: 'mike@company.com', roleId: '3', roleName: 'Manager', assignedAt: '2024-03-10T14:00:00Z', assignedBy: 'sarah@company.com', status: 'active', lastAccess: '2024-12-25T09:15:00Z' },
-  { id: '4', userId: 'u4', userName: 'Emily Brown', email: 'emily@company.com', roleId: '4', roleName: 'Standard User', assignedAt: '2024-04-20T11:00:00Z', assignedBy: 'mike@company.com', status: 'active', lastAccess: '2024-12-23T12:00:00Z' },
-  { id: '5', userId: 'u5', userName: 'David Lee', email: 'david@company.com', roleId: '4', roleName: 'Standard User', assignedAt: '2024-05-15T10:30:00Z', assignedBy: 'sarah@company.com', status: 'active', lastAccess: '2024-12-22T18:30:00Z' },
-  { id: '6', userId: 'u6', userName: 'Lisa Chen', email: 'lisa@company.com', roleId: '6', roleName: 'Finance Team', assignedAt: '2024-06-01T09:00:00Z', assignedBy: 'john@company.com', status: 'active', lastAccess: '2024-12-24T14:20:00Z' }
-]
-
-const mockPolicies: AccessPolicy[] = [
-  { id: '1', name: 'Admin MFA Required', description: 'Require MFA for all admin role access', type: 'conditional', priority: 1, roles: ['SUPER_ADMIN', 'ADMIN'], permissions: ['*'], conditions: [{ field: 'mfa', operator: 'equals', value: 'true' }], active: true, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-01T00:00:00Z' },
-  { id: '2', name: 'Office Hours Only', description: 'Restrict access to office hours for certain roles', type: 'conditional', priority: 2, roles: ['USER', 'VIEWER'], permissions: ['data:export'], conditions: [{ field: 'time', operator: 'between', value: '09:00-18:00' }], active: true, createdAt: '2024-02-15T00:00:00Z', updatedAt: '2024-11-15T00:00:00Z' },
-  { id: '3', name: 'Block External IPs', description: 'Deny admin access from external networks', type: 'deny', priority: 1, roles: ['ADMIN'], permissions: ['settings:manage'], conditions: [{ field: 'ip', operator: 'not_in', value: '10.0.0.0/8' }], active: true, createdAt: '2024-03-01T00:00:00Z', updatedAt: '2024-10-20T00:00:00Z' },
-  { id: '4', name: 'Allow API Access', description: 'Allow API service accounts full API access', type: 'allow', priority: 3, roles: ['API_SERVICE'], permissions: ['api:*'], conditions: [], active: true, createdAt: '2024-06-01T00:00:00Z', updatedAt: '2024-12-01T00:00:00Z' }
-]
-
-const mockAuditLogs: AuditLog[] = [
-  { id: '1', action: 'role.assigned', actor: 'sarah@company.com', target: 'emily@company.com', targetType: 'user', details: 'Assigned role: Standard User', timestamp: '2024-12-25T10:30:00Z', ipAddress: '10.0.1.50', success: true },
-  { id: '2', action: 'role.updated', actor: 'john@company.com', target: 'Finance Team', targetType: 'role', details: 'Added permission: reports:read', timestamp: '2024-12-24T15:45:00Z', ipAddress: '10.0.1.10', success: true },
-  { id: '3', action: 'permission.denied', actor: 'mike@company.com', target: 'settings:manage', targetType: 'permission', details: 'Attempted access denied by policy', timestamp: '2024-12-24T14:20:00Z', ipAddress: '192.168.1.100', success: false },
-  { id: '4', action: 'role.created', actor: 'sarah@company.com', target: 'Marketing Team', targetType: 'role', details: 'New custom role created', timestamp: '2024-12-23T11:00:00Z', ipAddress: '10.0.1.25', success: true },
-  { id: '5', action: 'policy.updated', actor: 'john@company.com', target: 'Admin MFA Required', targetType: 'policy', details: 'Modified condition parameters', timestamp: '2024-12-22T09:30:00Z', ipAddress: '10.0.1.10', success: true }
-]
-
-const mockUserGroups: UserGroup[] = [
-  { id: '1', name: 'Administrators', description: 'System administrators with full access', memberCount: 15, roles: ['SUPER_ADMIN', 'ADMIN'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-20T10:00:00Z', createdBy: 'System', isSystem: true },
-  { id: '2', name: 'Staff', description: 'Regular staff members', memberCount: 245, roles: ['USER', 'MANAGER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-15T09:00:00Z', createdBy: 'System', isSystem: true },
-  { id: '3', name: 'Managers', description: 'Team managers with oversight permissions', memberCount: 45, roles: ['MANAGER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-10T14:00:00Z', createdBy: 'System', isSystem: true },
-  { id: '4', name: 'Finance Team', description: 'Finance department members', memberCount: 18, roles: ['FINANCE', 'USER'], status: 'active', createdAt: '2024-03-15T10:00:00Z', updatedAt: '2024-12-20T16:00:00Z', createdBy: 'admin@company.com', isSystem: false },
-  { id: '5', name: 'Viewers', description: 'Read-only access users', memberCount: 320, roles: ['VIEWER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-05T11:00:00Z', createdBy: 'System', isSystem: true },
-  { id: '6', name: 'Guests', description: 'External guest users', memberCount: 85, roles: ['VIEWER'], status: 'active', createdAt: '2024-02-01T09:00:00Z', updatedAt: '2024-11-30T15:00:00Z', createdBy: 'admin@company.com', isSystem: false },
-  { id: '7', name: 'Service Accounts', description: 'API and integration accounts', memberCount: 8, roles: ['API_SERVICE'], status: 'active', createdAt: '2024-06-01T09:00:00Z', updatedAt: '2024-12-01T12:00:00Z', createdBy: 'admin@company.com', isSystem: false }
-]
 
 // Helper functions
 const getStatusColor = (status: RoleStatus): string => {
@@ -409,29 +199,6 @@ const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockRolesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Access Control', description: 'Role-based security 100% compliant. All permissions properly scoped.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '2', type: 'info' as const, title: 'Role Optimization', description: '3 roles have overlapping permissions. Consider consolidation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'warning' as const, title: 'Unused Roles', description: '2 roles have no assigned users. Review for cleanup.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
-]
-
-const mockRolesCollaborators = [
-  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'HR Lead', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR' },
-]
-
-const mockRolesPredictions = [
-  { id: '1', title: 'Role Growth', prediction: '5 new roles needed for Q2 expansion', confidence: 78, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Permission Audit', prediction: 'Audit due in 30 days', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockRolesActivities = [
-  { id: '1', user: 'Admin', action: 'Created role', target: 'Project Manager', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'System', action: 'Auto-assigned', target: '12 users to Developer role', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Security', action: 'Updated permissions for', target: 'Admin role', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
 
 // Quick actions will be defined inside the component to access state setters and handlers
 
@@ -524,7 +291,7 @@ export default function RolesClient() {
     const systemRoles = rolesData.filter(r => r.isSystem).length
     const customRoles = rolesData.filter(r => !r.isSystem).length
     const activeRoles = rolesData.filter(r => r.status === 'active').length
-    const activePolicies = mockPolicies.filter(p => p.active).length
+    const activePolicies = 0
 
     return {
       totalRoles: rolesData.length,
@@ -533,14 +300,14 @@ export default function RolesClient() {
       customRoles,
       totalUsers,
       activeUsers,
-      totalPermissions: mockPermissions.length,
+      totalPermissions: 0,
       activePolicies
     }
   }, [combinedRoles])
 
   // Filtered roles
   const filteredRoles = useMemo(() => {
-    const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles
+    const rolesData = combinedRoles || []
     return rolesData.filter(role => {
       const matchesSearch = searchQuery === '' ||
         role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -554,7 +321,7 @@ export default function RolesClient() {
   // Grouped permissions by category
   const permissionsByCategory = useMemo(() => {
     const grouped: Record<string, Permission[]> = {}
-    mockPermissions.forEach(perm => {
+    [].forEach(perm => {
       if (!grouped[perm.category]) {
         grouped[perm.category] = []
       }
@@ -749,7 +516,7 @@ export default function RolesClient() {
 
   // Export audit logs as JSON
   const handleExportAuditLogs = () => {
-    const blob = new Blob([JSON.stringify(mockAuditLogs, null, 2)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify([], null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -761,7 +528,7 @@ export default function RolesClient() {
 
   // Export user assignments as JSON
   const handleExportUserAssignments = () => {
-    const blob = new Blob([JSON.stringify(mockUserAssignments, null, 2)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify([], null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -783,7 +550,7 @@ export default function RolesClient() {
     toast.info('Evaluating', { description: 'Evaluating access policies...' })
     // Simulate policy evaluation
     setTimeout(() => {
-      toast.success('Evaluated', { description: `${mockPolicies.filter(p => p.active).length} active policies evaluated` })
+      toast.success('Evaluated', { description: `0 active policies evaluated` })
     }, 1000)
   }
 
@@ -1097,7 +864,7 @@ export default function RolesClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAuditLogs.slice(0, 4).map((log) => (
+                    {[].slice(0, 4).map((log) => (
                       <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`p-2 rounded-lg ${log.success ? 'bg-green-100' : 'bg-red-100'}`}>
@@ -1402,15 +1169,15 @@ export default function RolesClient() {
                     <p className="text-xs text-amber-100">Categories</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPermissions.filter(p => p.isGranted).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-amber-100">Granted</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPermissions.filter(p => !p.isGranted).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-amber-100">Denied</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPermissions.filter(p => p.conditions && p.conditions.length > 0).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-amber-100">Conditional</p>
                   </div>
                 </div>
@@ -1501,23 +1268,23 @@ export default function RolesClient() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserAssignments.length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-blue-100">Total</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.status === 'active').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-blue-100">Active</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.status === 'expired').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-blue-100">Expired</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserAssignments.filter(a => a.expiresAt).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-blue-100">Temporary</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{new Set(mockUserAssignments.map(a => a.roleName)).size}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-blue-100">Roles Used</p>
                   </div>
                 </div>
@@ -1526,9 +1293,9 @@ export default function RolesClient() {
               {/* Assignment Status Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
-                  { status: 'Active', count: mockUserAssignments.filter(a => a.status === 'active').length, color: 'green', icon: UserCheck },
-                  { status: 'Expired', count: mockUserAssignments.filter(a => a.status === 'expired').length, color: 'red', icon: UserX },
-                  { status: 'Suspended', count: mockUserAssignments.filter(a => a.status === 'suspended').length, color: 'orange', icon: AlertTriangle },
+                  { status: 'Active', count: 0, color: 'green', icon: UserCheck },
+                  { status: 'Expired', count: 0, color: 'red', icon: UserX },
+                  { status: 'Suspended', count: 0, color: 'orange', icon: AlertTriangle },
                   { status: 'Pending', count: 0, color: 'blue', icon: Clock },
                 ].map((item, i) => (
                   <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
@@ -1560,7 +1327,7 @@ export default function RolesClient() {
                 <CardContent>
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-4">
-                      {mockUserAssignments.map((assignment) => (
+                      {[].map((assignment) => (
                         <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                           <div className="flex items-center gap-4">
                             <Avatar>
@@ -1615,23 +1382,23 @@ export default function RolesClient() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPolicies.length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-green-100">Total</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.active).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-green-100">Active</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'allow').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-green-100">Allow</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'deny').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-green-100">Deny</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockPolicies.filter(p => p.type === 'conditional').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-green-100">Conditional</p>
                   </div>
                 </div>
@@ -1640,9 +1407,9 @@ export default function RolesClient() {
               {/* Policy Type Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[
-                  { type: 'Allow', desc: 'Grant access when conditions match', color: 'green', count: mockPolicies.filter(p => p.type === 'allow').length },
-                  { type: 'Deny', desc: 'Block access explicitly', color: 'red', count: mockPolicies.filter(p => p.type === 'deny').length },
-                  { type: 'Conditional', desc: 'Context-aware access decisions', color: 'blue', count: mockPolicies.filter(p => p.type === 'conditional').length },
+                  { type: 'Allow', desc: 'Grant access when conditions match', color: 'green', count: 0 },
+                  { type: 'Deny', desc: 'Block access explicitly', color: 'red', count: 0 },
+                  { type: 'Conditional', desc: 'Context-aware access decisions', color: 'blue', count: 0 },
                 ].map((item, i) => (
                   <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardContent className="p-4">
@@ -1674,7 +1441,7 @@ export default function RolesClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockPolicies.map((policy) => (
+                    {[].map((policy) => (
                       <div key={policy.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-start gap-3">
@@ -1738,19 +1505,19 @@ export default function RolesClient() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAuditLogs.length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-slate-200">Total Events</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAuditLogs.filter(l => l.success).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-slate-200">Successful</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAuditLogs.filter(l => !l.success).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-slate-200">Failed</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{new Set(mockAuditLogs.map(l => l.actor)).size}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-slate-200">Actors</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1763,10 +1530,10 @@ export default function RolesClient() {
               {/* Audit Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
-                  { label: 'Role Changes', count: mockAuditLogs.filter(l => l.targetType === 'role').length, icon: Shield, color: 'purple' },
-                  { label: 'User Changes', count: mockAuditLogs.filter(l => l.targetType === 'user').length, icon: Users, color: 'blue' },
-                  { label: 'Permission Changes', count: mockAuditLogs.filter(l => l.targetType === 'permission').length, icon: Key, color: 'amber' },
-                  { label: 'Policy Changes', count: mockAuditLogs.filter(l => l.targetType === 'policy').length, icon: FolderLock, color: 'green' },
+                  { label: 'Role Changes', count: 0, icon: Shield, color: 'purple' },
+                  { label: 'User Changes', count: 0, icon: Users, color: 'blue' },
+                  { label: 'Permission Changes', count: 0, icon: Key, color: 'amber' },
+                  { label: 'Policy Changes', count: 0, icon: FolderLock, color: 'green' },
                 ].map((item, i) => (
                   <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardContent className="p-4 text-center">
@@ -1794,7 +1561,7 @@ export default function RolesClient() {
                 <CardContent>
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-3">
-                      {mockAuditLogs.map((log) => (
+                      {[].map((log) => (
                         <div key={log.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                           <div className="flex items-start gap-4">
                             <div className={`p-2 rounded-lg ${log.success ? 'bg-green-100' : 'bg-red-100'}`}>
@@ -1845,23 +1612,23 @@ export default function RolesClient() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserGroups.length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-rose-100">Total Groups</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserGroups.filter(g => g.status === 'active').length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-rose-100">Active</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserGroups.reduce((sum, g) => sum + g.memberCount, 0)}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-rose-100">Total Members</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockUserGroups.filter(g => g.isSystem).length}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-rose-100">System Groups</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{new Set(mockUserGroups.flatMap(g => g.roles)).size}</p>
+                    <p className="text-2xl font-bold">0</p>
                     <p className="text-xs text-rose-100">Roles Linked</p>
                   </div>
                 </div>
@@ -1870,10 +1637,10 @@ export default function RolesClient() {
               {/* Group Status Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {[
-                  { label: 'Active Groups', count: mockUserGroups.filter(g => g.status === 'active').length, icon: CheckCircle, color: 'green' },
-                  { label: 'Inactive Groups', count: mockUserGroups.filter(g => g.status === 'inactive').length, icon: AlertCircle, color: 'gray' },
-                  { label: 'System Groups', count: mockUserGroups.filter(g => g.isSystem).length, icon: Crown, color: 'amber' },
-                  { label: 'Custom Groups', count: mockUserGroups.filter(g => !g.isSystem).length, icon: UsersRound, color: 'purple' },
+                  { label: 'Active Groups', count: 0, icon: CheckCircle, color: 'green' },
+                  { label: 'Inactive Groups', count: 0, icon: AlertCircle, color: 'gray' },
+                  { label: 'System Groups', count: 0, icon: Crown, color: 'amber' },
+                  { label: 'Custom Groups', count: 0, icon: UsersRound, color: 'purple' },
                 ].map((item, i) => (
                   <Card key={i} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardContent className="p-4 text-center">
@@ -1903,7 +1670,7 @@ export default function RolesClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mockUserGroups.map((group) => (
+                    {[].map((group) => (
                       <Card key={group.id} className="bg-gray-50 dark:bg-gray-700/50 border-0">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -2221,18 +1988,18 @@ export default function RolesClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockRolesAIInsights}
+                insights={[]}
                 title="Role Intelligence"
                 onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockRolesCollaborators}
+                collaborators={[]}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockRolesPredictions}
+                predictions={[]}
                 title="Role Forecasts"
               />
             </div>
@@ -2240,7 +2007,7 @@ export default function RolesClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockRolesActivities}
+              activities={[]}
               title="Role Activity"
               maxItems={5}
             />

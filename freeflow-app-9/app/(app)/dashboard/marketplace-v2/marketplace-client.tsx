@@ -213,126 +213,7 @@ interface Webhook {
   createdAt: string
 }
 
-// Mock Data
-const mockVendors: Vendor[] = [
-  { id: 'v1', name: 'ProTools Inc', description: 'Enterprise productivity solutions powering 10,000+ businesses worldwide', website: 'https://protools.com', email: 'contact@protools.com', phone: '+1-555-0123', status: 'verified', productCount: 12, totalSales: 4520, totalRevenue: 245000, rating: 4.8, reviewCount: 234, isVerified: true, isFeatured: true, joinedAt: '2022-01-15', location: 'San Francisco, CA', supportEmail: 'support@protools.com', responseTime: '< 2 hours' },
-  { id: 'v2', name: 'DataFlow Labs', description: 'Advanced analytics and business intelligence solutions', website: 'https://dataflow.io', email: 'hello@dataflow.io', status: 'verified', productCount: 8, totalSales: 3200, totalRevenue: 186000, rating: 4.6, reviewCount: 156, isVerified: true, isFeatured: true, joinedAt: '2022-06-20', location: 'New York, NY', supportEmail: 'help@dataflow.io', responseTime: '< 4 hours' },
-  { id: 'v3', name: 'SecureStack', description: 'Enterprise security and compliance automation', website: 'https://securestack.dev', email: 'team@securestack.dev', status: 'featured', productCount: 5, totalSales: 2800, totalRevenue: 312000, rating: 4.9, reviewCount: 89, isVerified: true, isFeatured: true, joinedAt: '2023-02-10', location: 'Austin, TX', supportEmail: 'security@securestack.dev', responseTime: '< 1 hour' },
-  { id: 'v4', name: 'AutomateHQ', description: 'Workflow automation and integration platform', website: 'https://automatehq.com', email: 'info@automatehq.com', status: 'active', productCount: 6, totalSales: 1890, totalRevenue: 94500, rating: 4.5, reviewCount: 78, isVerified: true, isFeatured: false, joinedAt: '2023-05-15', location: 'Seattle, WA', supportEmail: 'support@automatehq.com', responseTime: '< 6 hours' }
-]
-
-const mockProducts: Product[] = [
-  {
-    id: 'p1', name: 'Analytics Pro', description: 'Comprehensive analytics dashboard with real-time insights, custom reports, AI-powered predictions, and advanced data visualization.', shortDescription: 'Advanced analytics for modern businesses', vendor: mockVendors[1], category: 'analytics', subcategory: 'Business Intelligence', price: 49, compareAtPrice: 79, pricingModel: 'subscription', status: 'active', images: [], rating: 4.8, reviewCount: 234, downloads: 15420, installs: 12350, activeInstalls: 11200, isFeatured: true, isVerified: true, isBestseller: true, isNew: false, tags: ['analytics', 'dashboard', 'reporting', 'AI', 'visualization'], createdAt: '2023-06-15', updatedAt: '2024-01-10', version: '3.2.1', compatibility: ['Chrome', 'Firefox', 'Safari', 'Edge'], features: ['Real-time analytics', 'Custom dashboards', 'AI insights', 'Export to PDF/CSV', '50+ integrations'], requirements: ['Modern browser', 'Internet connection'],
-    changelog: [{ version: '3.2.1', date: '2024-01-10', changes: ['Bug fixes', 'Performance improvements'] }]
-  },
-  {
-    id: 'p2', name: 'TaskMaster', description: 'Complete project management solution with kanban boards, time tracking, team collaboration, and resource management.', shortDescription: 'Project management made simple', vendor: mockVendors[0], category: 'productivity', subcategory: 'Project Management', price: 29, pricingModel: 'subscription', status: 'active', images: [], rating: 4.6, reviewCount: 456, downloads: 28900, installs: 24500, activeInstalls: 22100, isFeatured: true, isVerified: true, isBestseller: true, isNew: false, tags: ['project management', 'kanban', 'collaboration', 'time tracking'], createdAt: '2023-03-20', updatedAt: '2024-01-12', version: '2.8.0', compatibility: ['Chrome', 'Firefox', 'Safari'], features: ['Kanban boards', 'Time tracking', 'Team chat', 'File sharing', 'Gantt charts'], requirements: ['Modern browser'],
-    changelog: [{ version: '2.8.0', date: '2024-01-12', changes: ['New Gantt view', 'Improved mobile experience'] }]
-  },
-  {
-    id: 'p3', name: 'SecureVault', description: 'Enterprise-grade security solution with end-to-end encryption, access control, audit logging, and compliance automation.', shortDescription: 'Protect your sensitive data', vendor: mockVendors[2], category: 'security', subcategory: 'Data Protection', price: 99, compareAtPrice: 149, pricingModel: 'subscription', status: 'active', images: [], rating: 4.9, reviewCount: 89, downloads: 8500, installs: 7200, activeInstalls: 6800, isFeatured: false, isVerified: true, isBestseller: false, isNew: false, tags: ['security', 'encryption', 'compliance', 'audit'], createdAt: '2023-09-01', updatedAt: '2024-01-08', version: '1.5.2', compatibility: ['All browsers'], features: ['End-to-end encryption', 'Access control', 'Audit logs', 'Compliance reports', 'SSO integration'], requirements: ['Enterprise plan'],
-    changelog: [{ version: '1.5.2', date: '2024-01-08', changes: ['SOC2 compliance updates'] }]
-  },
-  {
-    id: 'p4', name: 'FormBuilder Pro', description: 'Drag-and-drop form builder with conditional logic, payment integrations, and advanced analytics.', shortDescription: 'Build forms in minutes', vendor: mockVendors[0], category: 'productivity', subcategory: 'Forms', price: 0, pricingModel: 'freemium', status: 'active', images: [], rating: 4.5, reviewCount: 678, downloads: 45200, installs: 38900, activeInstalls: 35000, isFeatured: false, isVerified: true, isBestseller: true, isNew: false, tags: ['forms', 'surveys', 'no-code', 'payments'], createdAt: '2022-11-10', updatedAt: '2024-01-05', version: '4.1.0', compatibility: ['All browsers'], features: ['Drag-and-drop builder', 'Conditional logic', '50+ integrations', 'Payment collection', 'Analytics'], requirements: ['None'],
-    changelog: [{ version: '4.1.0', date: '2024-01-05', changes: ['Stripe integration', 'New templates'] }]
-  },
-  {
-    id: 'p5', name: 'Email Automator', description: 'Automated email marketing with templates, A/B testing, scheduling, and performance analytics.', shortDescription: 'Automate your email campaigns', vendor: mockVendors[1], category: 'marketing', subcategory: 'Email Marketing', price: 39, pricingModel: 'subscription', status: 'active', images: [], rating: 4.4, reviewCount: 312, downloads: 18700, installs: 15400, activeInstalls: 14200, isFeatured: true, isVerified: true, isBestseller: false, isNew: false, tags: ['email', 'automation', 'marketing', 'templates'], createdAt: '2023-05-25', updatedAt: '2024-01-11', version: '2.3.0', compatibility: ['Chrome', 'Firefox', 'Safari'], features: ['Email templates', 'A/B testing', 'Analytics', 'Segmentation', 'Drip campaigns'], requirements: ['Email list'],
-    changelog: [{ version: '2.3.0', date: '2024-01-11', changes: ['AI subject line generator'] }]
-  },
-  {
-    id: 'p6', name: 'WorkflowBot', description: 'AI-powered workflow automation with 500+ integrations, custom triggers, and advanced logic.', shortDescription: 'Automate anything', vendor: mockVendors[3], category: 'automation', subcategory: 'Workflow', price: 59, pricingModel: 'subscription', status: 'active', images: [], rating: 4.7, reviewCount: 145, downloads: 12800, installs: 10200, activeInstalls: 9500, isFeatured: true, isVerified: true, isBestseller: false, isNew: true, tags: ['automation', 'workflow', 'integrations', 'AI'], createdAt: '2024-01-01', updatedAt: '2024-01-15', version: '1.0.0', compatibility: ['All platforms'], features: ['500+ integrations', 'Custom triggers', 'AI actions', 'Team collaboration', 'Version control'], requirements: ['API access'],
-    changelog: [{ version: '1.0.0', date: '2024-01-01', changes: ['Initial release'] }]
-  }
-]
-
-const mockCollections: Collection[] = [
-  { id: 'c1', name: 'Staff Picks', description: 'Hand-selected by our team for exceptional quality', productCount: 12, image: '', isFeatured: true, curator: 'Editorial Team', createdAt: '2024-01-01' },
-  { id: 'c2', name: 'New This Week', description: 'Fresh additions to the marketplace', productCount: 8, image: '', isFeatured: true, curator: 'System', createdAt: '2024-01-15' },
-  { id: 'c3', name: 'Essential Tools', description: 'Must-have apps for every business', productCount: 15, image: '', isFeatured: true, curator: 'Editorial Team', createdAt: '2023-12-01' },
-  { id: 'c4', name: 'Top Free Apps', description: 'Best free tools available', productCount: 20, image: '', isFeatured: false, curator: 'System', createdAt: '2024-01-10' },
-  { id: 'c5', name: 'Enterprise Solutions', description: 'Built for scale and security', productCount: 10, image: '', isFeatured: true, curator: 'Enterprise Team', createdAt: '2023-11-15' },
-  { id: 'c6', name: 'AI & Automation', description: 'Smart tools powered by AI', productCount: 18, image: '', isFeatured: true, curator: 'AI Team', createdAt: '2024-01-08' }
-]
-
-const mockReviews: Review[] = [
-  { id: 'r1', productId: 'p1', productName: 'Analytics Pro', author: { name: 'John Davidson', company: 'TechCorp' }, rating: 5, title: 'Excellent analytics tool!', content: 'This has transformed how we track our business metrics. The AI insights are surprisingly accurate and have helped us identify trends we would have missed.', pros: ['Easy to use', 'Great visualizations', 'Accurate AI predictions'], cons: ['Steep learning curve initially'], helpful: 45, notHelpful: 2, createdAt: '2024-01-10', verified: true, status: 'approved', response: { content: 'Thank you for the wonderful review! We\'re glad the AI insights are helping your team.', date: '2024-01-11' } },
-  { id: 'r2', productId: 'p1', productName: 'Analytics Pro', author: { name: 'Sarah Miller' }, rating: 4, title: 'Great features, minor bugs', content: 'Love the dashboard customization. Had some issues with exports but support was helpful and responsive.', pros: ['Customizable dashboards', 'Great support'], cons: ['Export bugs', 'Occasional slow loading'], helpful: 23, notHelpful: 1, createdAt: '2024-01-08', verified: true, status: 'approved' },
-  { id: 'r3', productId: 'p2', productName: 'TaskMaster', author: { name: 'Mike Roberts', company: 'StartupXYZ' }, rating: 5, title: 'Best project management tool', content: 'We switched from competitors and never looked back. The kanban feature is amazing and the mobile app works flawlessly.', pros: ['Intuitive UI', 'Great mobile app', 'Excellent integrations'], cons: [], helpful: 67, notHelpful: 3, createdAt: '2024-01-05', verified: true, status: 'approved' },
-  { id: 'r4', productId: 'p3', productName: 'SecureVault', author: { name: 'Emily Chen', company: 'FinanceHub' }, rating: 5, title: 'Essential for compliance', content: 'The compliance reporting alone is worth the price. Passed our SOC2 audit with flying colors thanks to SecureVault.', pros: ['Compliance ready', 'Excellent documentation', 'Fast support'], cons: ['Premium pricing'], helpful: 34, notHelpful: 0, createdAt: '2024-01-03', verified: true, status: 'approved' },
-  { id: 'r5', productId: 'p4', productName: 'FormBuilder Pro', author: { name: 'Alex Thompson' }, rating: 4, title: 'Great free tier', content: 'The free tier is generous enough for small businesses. Upgraded to pro for payment collection and it\'s been smooth.', pros: ['Generous free tier', 'Easy to use', 'Good templates'], cons: ['Limited conditional logic on free plan'], helpful: 89, notHelpful: 5, createdAt: '2024-01-01', verified: true, status: 'approved' }
-]
-
-const mockOrders: Order[] = [
-  { id: 'o1', orderNumber: 'ORD-2024-001234', product: { id: 'p1', name: 'Analytics Pro', vendor: 'DataFlow Labs' }, customer: { name: 'Acme Corp', email: 'billing@acme.com', company: 'Acme Corporation' }, status: 'completed', amount: 49, currency: 'USD', paymentMethod: 'Credit Card', license: 'LIC-APR-001234', date: '2024-01-15', expiresAt: '2025-01-15', invoice: 'INV-001234' },
-  { id: 'o2', orderNumber: 'ORD-2024-001235', product: { id: 'p2', name: 'TaskMaster', vendor: 'ProTools Inc' }, customer: { name: 'Tech Solutions', email: 'finance@techsol.io' }, status: 'completed', amount: 29, currency: 'USD', paymentMethod: 'PayPal', license: 'LIC-TM-001235', date: '2024-01-14', expiresAt: '2025-01-14', invoice: 'INV-001235' },
-  { id: 'o3', orderNumber: 'ORD-2024-001236', product: { id: 'p3', name: 'SecureVault', vendor: 'SecureStack' }, customer: { name: 'FinanceHub Ltd', email: 'accounts@finhub.com', company: 'FinanceHub Ltd' }, status: 'processing', amount: 99, currency: 'USD', paymentMethod: 'Wire Transfer', license: 'Pending', date: '2024-01-16' },
-  { id: 'o4', orderNumber: 'ORD-2024-001230', product: { id: 'p5', name: 'Email Automator', vendor: 'DataFlow Labs' }, customer: { name: 'Marketing Pro', email: 'team@marketpro.co' }, status: 'refunded', amount: 39, currency: 'USD', paymentMethod: 'Credit Card', license: 'Revoked', date: '2024-01-10', invoice: 'INV-001230' },
-  { id: 'o5', orderNumber: 'ORD-2024-001237', product: { id: 'p6', name: 'WorkflowBot', vendor: 'AutomateHQ' }, customer: { name: 'Startup Inc', email: 'hello@startup.io' }, status: 'pending', amount: 59, currency: 'USD', paymentMethod: 'Credit Card', license: 'Pending', date: '2024-01-16' }
-]
-
-const mockCoupons: Coupon[] = [
-  { id: 'c1', code: 'WELCOME20', type: 'percentage', value: 20, products: ['all'], usageLimit: 500, usedCount: 234, minPurchase: 29, expiresAt: '2024-03-31', status: 'active', createdAt: '2024-01-01' },
-  { id: 'c2', code: 'SUMMER50', type: 'fixed', value: 50, products: ['p1', 'p2', 'p3'], usageLimit: 100, usedCount: 67, minPurchase: 99, expiresAt: '2024-06-30', status: 'active', createdAt: '2024-01-10' },
-  { id: 'c3', code: 'FREETRIAL', type: 'free_trial', value: 14, products: ['all'], usageLimit: 1000, usedCount: 456, expiresAt: '2024-12-31', status: 'active', createdAt: '2024-01-01' },
-  { id: 'c4', code: 'NEWYEAR25', type: 'percentage', value: 25, products: ['all'], usageLimit: 200, usedCount: 200, expiresAt: '2024-01-31', status: 'expired', createdAt: '2023-12-25' }
-]
-
-const mockBundles: Bundle[] = [
-  { id: 'b1', name: 'Productivity Suite', description: 'Complete productivity toolkit including TaskMaster, FormBuilder Pro, and Email Automator', products: ['p2', 'p4', 'p5'], discount: 30, price: 59, originalPrice: 84, sales: 156, status: 'active', createdAt: '2024-01-01' },
-  { id: 'b2', name: 'Analytics Bundle', description: 'Full analytics stack with Analytics Pro and WorkflowBot', products: ['p1', 'p6'], discount: 25, price: 81, originalPrice: 108, sales: 89, status: 'active', createdAt: '2024-01-05' },
-  { id: 'b3', name: 'Enterprise Security Pack', description: 'Comprehensive security solution for enterprise customers', products: ['p3'], discount: 15, price: 84, originalPrice: 99, sales: 34, status: 'draft', createdAt: '2024-01-10' }
-]
-
-const mockPaymentProviders: PaymentProvider[] = [
-  { id: 'pp1', name: 'Stripe', type: 'card', status: 'active', transactions: 4560, volume: 342000, fee: 2.9, logo: 'stripe' },
-  { id: 'pp2', name: 'PayPal', type: 'wallet', status: 'active', transactions: 2340, volume: 186000, fee: 3.49, logo: 'paypal' },
-  { id: 'pp3', name: 'Apple Pay', type: 'wallet', status: 'active', transactions: 890, volume: 67000, fee: 2.9, logo: 'apple' },
-  { id: 'pp4', name: 'Wire Transfer', type: 'bank', status: 'active', transactions: 45, volume: 156000, fee: 0.5, logo: 'bank' },
-  { id: 'pp5', name: 'Crypto (ETH/BTC)', type: 'crypto', status: 'pending', transactions: 0, volume: 0, fee: 1.0, logo: 'crypto' }
-]
-
-const mockAPIKeys: APIKey[] = [
-  { id: 'ak1', name: 'Production API', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read', 'write', 'delete'], lastUsed: '2024-01-16 09:23', createdAt: '2023-06-15', status: 'active' },
-  { id: 'ak2', name: 'Staging API', key: 'sk_test_xxxxxxxxxxxxxxxx', permissions: ['read', 'write'], lastUsed: '2024-01-15 14:45', createdAt: '2023-08-20', status: 'active' },
-  { id: 'ak3', name: 'Analytics Integration', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read'], lastUsed: '2024-01-16 08:00', createdAt: '2024-01-01', status: 'active' },
-  { id: 'ak4', name: 'Old Mobile App', key: 'STRIPE_KEY_PLACEHOLDER', permissions: ['read'], lastUsed: '2023-11-30', createdAt: '2022-03-10', status: 'revoked' }
-]
-
-const mockWebhooks: Webhook[] = [
-  { id: 'wh1', url: 'https://api.acme.com/webhooks/marketplace', events: ['order.created', 'order.completed', 'review.created'], status: 'active', lastTriggered: '2024-01-16 09:15', successRate: 99.8, createdAt: '2023-06-01' },
-  { id: 'wh2', url: 'https://hooks.slack.com/services/xxx', events: ['order.created', 'review.flagged'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, createdAt: '2023-08-15' },
-  { id: 'wh3', url: 'https://analytics.internal.io/ingest', events: ['install', 'uninstall', 'usage'], status: 'failed', lastTriggered: '2024-01-14 23:45', successRate: 78.5, createdAt: '2024-01-01' }
-]
-
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Shopify App Store Level
-// ============================================================================
-
-const mockMarketplaceAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Top Seller', description: 'Your product "Analytics Pro" has reached 10K+ installs. Featured badge earned!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Review Alert', description: '2 negative reviews received today. Response recommended within 24h.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Reviews' },
-  { id: '3', type: 'info' as const, title: 'Market Trend', description: 'AI-powered tools are trending. Consider adding AI features to boost visibility.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-]
-
-const mockMarketplaceCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockMarketplacePredictions = [
-  { id: '1', title: 'Revenue Forecast', prediction: 'Marketplace revenue expected to grow 25% next quarter', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Install Growth', prediction: 'New products could reach 5K installs in first month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockMarketplaceActivities = [
-  { id: '1', user: 'Customer', action: 'Purchased', target: 'Pro Analytics subscription', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Product Manager', action: 'Published', target: 'New version 2.5.0', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Support', action: 'Resolved', target: 'Customer support ticket #4521', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Mock Data - REMOVED (Batch #7 Migration)
 
 // Helper functions for real marketplace actions
 const installApp = async (appId: string, appName: string) => {
@@ -422,7 +303,7 @@ export default function MarketplaceClient() {
   const [analyticsTab, setAnalyticsTab] = useState('overview')
   const [followedVendors, setFollowedVendors] = useState<string[]>([])
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
-  const [mockAPIKeysState, setMockAPIKeysState] = useState(mockAPIKeys)
+  const [mockAPIKeysState, setMockAPIKeysState] = useState([])
 
   // Database state
   const [dbApps, setDbApps] = useState<any[]>([])

@@ -158,194 +158,7 @@ interface SceneObject {
   expanded?: boolean
 }
 
-// Mock data
-const mockModels: Model3D[] = [
-  {
-    id: '1',
-    name: 'Product Showcase Stand',
-    description: 'Modern minimalist product display stand with adjustable height',
-    status: 'published',
-    format: 'GLTF',
-    polygon_count: 12450,
-    vertex_count: 8320,
-    texture_count: 4,
-    material_count: 3,
-    file_size_mb: 24.5,
-    render_quality: 'high',
-    last_render_time_sec: 45,
-    thumbnail_url: null,
-    created_at: '2024-01-10',
-    updated_at: '2024-01-14',
-    is_public: true,
-    downloads: 234,
-    views: 1250,
-    tags: ['product', 'display', 'minimal'],
-    scene_id: 'scene-1'
-  },
-  {
-    id: '2',
-    name: 'Character Rig - Warrior',
-    description: 'Fully rigged warrior character with 120 bone skeleton',
-    status: 'draft',
-    format: 'FBX',
-    polygon_count: 45600,
-    vertex_count: 32100,
-    texture_count: 8,
-    material_count: 6,
-    file_size_mb: 156.2,
-    render_quality: 'ultra',
-    last_render_time_sec: 180,
-    thumbnail_url: null,
-    created_at: '2024-01-08',
-    updated_at: '2024-01-15',
-    is_public: false,
-    downloads: 0,
-    views: 45,
-    tags: ['character', 'rigged', 'warrior', 'game'],
-    scene_id: 'scene-2'
-  },
-  {
-    id: '3',
-    name: 'Modern Villa Exterior',
-    description: 'Architectural visualization of contemporary villa',
-    status: 'rendering',
-    format: 'OBJ',
-    polygon_count: 89500,
-    vertex_count: 67200,
-    texture_count: 24,
-    material_count: 18,
-    file_size_mb: 345.8,
-    render_quality: 'ultra',
-    last_render_time_sec: 0,
-    thumbnail_url: null,
-    created_at: '2024-01-05',
-    updated_at: '2024-01-15',
-    is_public: false,
-    downloads: 0,
-    views: 12,
-    tags: ['architecture', 'villa', 'exterior', 'modern'],
-    scene_id: 'scene-3'
-  },
-  {
-    id: '4',
-    name: 'Sci-Fi Vehicle Concept',
-    description: 'Futuristic hover vehicle for game asset',
-    status: 'published',
-    format: 'BLEND',
-    polygon_count: 28900,
-    vertex_count: 21400,
-    texture_count: 6,
-    material_count: 5,
-    file_size_mb: 78.4,
-    render_quality: 'high',
-    last_render_time_sec: 92,
-    thumbnail_url: null,
-    created_at: '2024-01-02',
-    updated_at: '2024-01-12',
-    is_public: true,
-    downloads: 567,
-    views: 2340,
-    tags: ['vehicle', 'sci-fi', 'game', 'concept'],
-    scene_id: null
-  }
-]
 
-const mockMaterials: Material[] = [
-  { id: '1', name: 'Brushed Aluminum', type: 'metal', color: '#C0C0C0', roughness: 0.4, metalness: 1.0, opacity: 1.0, thumbnail: null, is_custom: false },
-  { id: '2', name: 'Red Plastic', type: 'basic', color: '#E53935', roughness: 0.6, metalness: 0.0, opacity: 1.0, thumbnail: null, is_custom: false },
-  { id: '3', name: 'Clear Glass', type: 'glass', color: '#FFFFFF', roughness: 0.0, metalness: 0.0, opacity: 0.2, thumbnail: null, is_custom: false },
-  { id: '4', name: 'Oak Wood', type: 'pbr', color: '#8B4513', roughness: 0.7, metalness: 0.0, opacity: 1.0, thumbnail: null, is_custom: true },
-  { id: '5', name: 'Gold', type: 'metal', color: '#FFD700', roughness: 0.2, metalness: 1.0, opacity: 1.0, thumbnail: null, is_custom: false },
-  { id: '6', name: 'Concrete', type: 'pbr', color: '#808080', roughness: 0.9, metalness: 0.0, opacity: 1.0, thumbnail: null, is_custom: false },
-  { id: '7', name: 'Leather', type: 'fabric', color: '#654321', roughness: 0.5, metalness: 0.0, opacity: 1.0, thumbnail: null, is_custom: true },
-  { id: '8', name: 'Chrome', type: 'metal', color: '#E8E8E8', roughness: 0.1, metalness: 1.0, opacity: 1.0, thumbnail: null, is_custom: false }
-]
-
-const mockTextures: Texture[] = [
-  { id: '1', name: 'Wood Diffuse', type: 'diffuse', resolution: '4096x4096', format: 'png', size_mb: 12.4, thumbnail: null },
-  { id: '2', name: 'Wood Normal', type: 'normal', resolution: '4096x4096', format: 'png', size_mb: 8.2, thumbnail: null },
-  { id: '3', name: 'Metal Roughness', type: 'roughness', resolution: '2048x2048', format: 'png', size_mb: 3.1, thumbnail: null },
-  { id: '4', name: 'Concrete AO', type: 'ao', resolution: '2048x2048', format: 'png', size_mb: 2.8, thumbnail: null },
-  { id: '5', name: 'HDRI Studio', type: 'diffuse', resolution: '8192x4096', format: 'hdr', size_mb: 45.6, thumbnail: null },
-  { id: '6', name: 'Fabric Normal', type: 'normal', resolution: '2048x2048', format: 'png', size_mb: 4.2, thumbnail: null }
-]
-
-const mockRenderJobs: RenderJob[] = [
-  { id: '1', model_id: '3', model_name: 'Modern Villa Exterior', quality: 'ultra', status: 'rendering', progress: 67, started_at: '2024-01-15T10:30:00', completed_at: null, estimated_time_sec: 420, output_format: 'png', resolution: '4K' },
-  { id: '2', model_id: '1', model_name: 'Product Showcase Stand', quality: 'high', status: 'queued', progress: 0, started_at: null, completed_at: null, estimated_time_sec: 120, output_format: 'png', resolution: '2K' },
-  { id: '3', model_id: '4', model_name: 'Sci-Fi Vehicle Concept', quality: 'high', status: 'completed', progress: 100, started_at: '2024-01-15T09:00:00', completed_at: '2024-01-15T09:15:00', estimated_time_sec: 180, output_format: 'exr', resolution: '4K' }
-]
-
-const mockSceneHierarchy: SceneObject[] = [
-  {
-    id: 'scene',
-    name: 'Scene',
-    type: 'empty',
-    visible: true,
-    locked: false,
-    expanded: true,
-    children: [
-      {
-        id: 'camera-main',
-        name: 'Main Camera',
-        type: 'camera',
-        visible: true,
-        locked: false,
-        children: []
-      },
-      {
-        id: 'light-group',
-        name: 'Lighting',
-        type: 'group',
-        visible: true,
-        locked: false,
-        expanded: true,
-        children: [
-          { id: 'sun', name: 'Sun Light', type: 'light', visible: true, locked: false, children: [] },
-          { id: 'fill', name: 'Fill Light', type: 'light', visible: true, locked: false, children: [] },
-          { id: 'rim', name: 'Rim Light', type: 'light', visible: false, locked: false, children: [] }
-        ]
-      },
-      {
-        id: 'model-group',
-        name: 'Models',
-        type: 'group',
-        visible: true,
-        locked: false,
-        expanded: true,
-        children: [
-          { id: 'mesh-1', name: 'Base_Mesh', type: 'mesh', visible: true, locked: false, children: [] },
-          { id: 'mesh-2', name: 'Detail_Parts', type: 'mesh', visible: true, locked: true, children: [] },
-          { id: 'mesh-3', name: 'Glass_Elements', type: 'mesh', visible: true, locked: false, children: [] }
-        ]
-      }
-    ]
-  }
-]
-
-// Competitive Upgrade Mock Data - Blender/Maya-level 3D Modeling Intelligence
-const mock3DAIInsights = [
-  { id: '1', type: 'opportunity' as const, title: 'Render Optimization', description: 'GPU utilization at 95% - optimal performance!', impact: 'low' as const, createdAt: new Date() },
-  { id: '2', type: 'alert' as const, title: 'High Poly Count', description: 'Scene exceeds 5M polygons - consider LOD optimization.', impact: 'high' as const, createdAt: new Date() },
-  { id: '3', type: 'recommendation' as const, title: 'AI Mesh Suggestion', description: 'Topology flow could improve with edge loop adjustments.', impact: 'medium' as const, createdAt: new Date() },
-]
-
-const mock3DCollaborators = [
-  { id: '1', name: '3D Lead', avatar: '/avatars/3d-lead.jpg', color: '#8b5cf6', status: 'online' as const },
-  { id: '2', name: 'Texture Artist', avatar: '/avatars/texture.jpg', color: '#3b82f6', status: 'online' as const },
-  { id: '3', name: 'Rigger', avatar: '/avatars/rigger.jpg', color: '#22c55e', status: 'away' as const },
-]
-
-const mock3DPredictions = [
-  { label: 'Render Completion', currentValue: 45, predictedValue: 100, confidence: 92, trend: 'up' as const, timeframe: '4 hours', factors: [{ name: 'GPU utilization', impact: 'positive' as const, weight: 0.7 }, { name: 'Scene complexity', impact: 'negative' as const, weight: 0.3 }] },
-  { label: 'Asset Pipeline', currentValue: 60, predictedValue: 100, confidence: 85, trend: 'up' as const, timeframe: '2 hours', factors: [{ name: 'LOD generation', impact: 'positive' as const, weight: 0.6 }, { name: 'Texture streaming', impact: 'positive' as const, weight: 0.4 }] },
-]
-
-const mock3DActivities = [
-  { id: '1', type: 'update' as const, title: 'Updated 4K PBR materials for hero model', user: { id: '1', name: 'Texture Artist' }, timestamp: new Date() },
-  { id: '2', type: 'status_change' as const, title: 'Approved character animation rig', user: { id: '2', name: '3D Lead' }, timestamp: new Date(Date.now() - 3600000) },
-  { id: '3', type: 'create' as const, title: 'Started facial blend shapes', user: { id: '3', name: 'Rigger' }, timestamp: new Date(Date.now() - 7200000) },
-]
 
 export default function ThreeDModelingClient() {
   const [activeTab, setActiveTab] = useState('models')
@@ -385,8 +198,8 @@ export default function ThreeDModelingClient() {
     tags: dbModel.tags
   })), [dbModels])
 
-  // Use mapped models or fallback to mock data
-  const [models, setModels] = useState<Model3D[]>(mockModels)
+  // Use mapped models or fallback to empty array
+  const [models, setModels] = useState<Model3D[]>([])
 
   useEffect(() => {
     setModels(mappedModels)
@@ -455,8 +268,8 @@ export default function ThreeDModelingClient() {
   const handleExportModels = useCallback(() => {
     const exportData = {
       models: models,
-      materials: mockMaterials,
-      textures: mockTextures,
+      materials: [],
+      textures: [],
       exportedAt: new Date().toISOString(),
       format: 'FBX, OBJ, GLTF'
     }
@@ -900,7 +713,7 @@ export default function ThreeDModelingClient() {
                   <Palette className="w-5 h-5 text-pink-600 dark:text-pink-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockMaterials.length}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Materials</p>
                 </div>
               </div>
@@ -1135,7 +948,7 @@ export default function ThreeDModelingClient() {
                 </CardHeader>
                 <CardContent className="p-2">
                   <ScrollArea className="h-[400px]">
-                    {mockSceneHierarchy.map(node => renderSceneNode(node))}
+                    {[].map(node => renderSceneNode(node))}
                   </ScrollArea>
                 </CardContent>
               </Card>
@@ -1225,7 +1038,7 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMaterials.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Materials</p>
                   </div>
                 </div>
@@ -1240,7 +1053,7 @@ export default function ThreeDModelingClient() {
               </Button>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {mockMaterials.map((material) => (
+              {[].map((material) => (
                 <Card key={material.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
@@ -1286,7 +1099,7 @@ export default function ThreeDModelingClient() {
               </Button>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {mockTextures.map((texture) => (
+              {[].map((texture) => (
                 <Card key={texture.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg mb-3 flex items-center justify-center">
@@ -1319,11 +1132,11 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRenderJobs.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-orange-200 text-sm">In Queue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRenderJobs.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1351,7 +1164,7 @@ export default function ThreeDModelingClient() {
               </Button>
             </div>
             <div className="space-y-4">
-              {mockRenderJobs.map((job) => (
+              {[].map((job) => (
                 <Card key={job.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-4">
@@ -2059,18 +1872,18 @@ export default function ThreeDModelingClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mock3DAIInsights}
+              insights={[]}
               title="3D Modeling Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mock3DCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mock3DPredictions}
+              predictions={[]}
               title="Render Forecasts"
             />
           </div>
@@ -2078,7 +1891,7 @@ export default function ThreeDModelingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mock3DActivities}
+            activities={[]}
             title="3D Activity"
             maxItems={5}
           />

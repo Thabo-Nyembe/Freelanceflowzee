@@ -107,207 +107,6 @@ interface WorkflowStats {
   timeSaved: string
 }
 
-// Mock data for demo
-const mockWorkflows: KaziWorkflow[] = [
-  {
-    id: '1',
-    name: 'New Client Onboarding',
-    description: 'Automatically welcome new clients and set up initial tasks',
-    trigger_type: 'event',
-    trigger_config: { event_type: 'client.created' },
-    actions: [
-      { type: 'email', name: 'Welcome Email' },
-      { type: 'create-task', name: 'Schedule Call' },
-      { type: 'notification', name: 'Notify Team' }
-    ],
-    is_active: true,
-    run_count: 156,
-    success_rate: 98.7,
-    last_run_at: new Date(Date.now() - 3600000).toISOString(),
-    category: 'sales',
-    tags: ['client', 'onboarding'],
-    created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
-    updated_at: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    id: '2',
-    name: 'Invoice Reminder',
-    description: 'Send reminders for overdue invoices',
-    trigger_type: 'schedule',
-    trigger_config: { frequency: 'daily', time: '09:00' },
-    actions: [
-      { type: 'condition', name: 'Check Due Date' },
-      { type: 'email', name: 'Send Reminder' }
-    ],
-    is_active: true,
-    run_count: 89,
-    success_rate: 100,
-    last_run_at: new Date(Date.now() - 7200000).toISOString(),
-    next_run_at: new Date(Date.now() + 36000000).toISOString(),
-    category: 'finance',
-    tags: ['invoice', 'reminder'],
-    created_at: new Date(Date.now() - 86400000 * 45).toISOString(),
-    updated_at: new Date(Date.now() - 86400000 * 2).toISOString()
-  },
-  {
-    id: '3',
-    name: 'Project Milestone Notification',
-    description: 'Notify stakeholders when project milestones are reached',
-    trigger_type: 'event',
-    trigger_config: { event_type: 'milestone.completed' },
-    actions: [
-      { type: 'email', name: 'Notify Client' },
-      { type: 'slack-message', name: 'Team Update' },
-      { type: 'update-record', name: 'Update Status' }
-    ],
-    is_active: true,
-    run_count: 34,
-    success_rate: 94.1,
-    last_run_at: new Date(Date.now() - 86400000).toISOString(),
-    category: 'operations',
-    tags: ['project', 'milestone'],
-    created_at: new Date(Date.now() - 86400000 * 60).toISOString(),
-    updated_at: new Date(Date.now() - 86400000 * 5).toISOString()
-  },
-  {
-    id: '4',
-    name: 'Weekly Report Generation',
-    description: 'Generate and send weekly performance reports',
-    trigger_type: 'schedule',
-    trigger_config: { frequency: 'weekly', day: 1, time: '08:00' },
-    actions: [
-      { type: 'api-call', name: 'Fetch Data' },
-      { type: 'create-task', name: 'Review Report' },
-      { type: 'email', name: 'Send Report' }
-    ],
-    is_active: false,
-    run_count: 12,
-    success_rate: 91.7,
-    last_run_at: new Date(Date.now() - 604800000).toISOString(),
-    category: 'operations',
-    tags: ['report', 'weekly'],
-    created_at: new Date(Date.now() - 86400000 * 90).toISOString(),
-    updated_at: new Date(Date.now() - 86400000 * 7).toISOString()
-  }
-]
-
-const mockTemplates: WorkflowTemplate[] = [
-  {
-    id: 't1',
-    name: 'Client Welcome Series',
-    description: 'Automated email series for new clients',
-    category: 'sales',
-    icon: 'Users',
-    trigger_type: 'event',
-    actions: [],
-    usage_count: 1250,
-    tags: ['popular', 'email']
-  },
-  {
-    id: 't2',
-    name: 'Project Kickoff',
-    description: 'Set up tasks and notifications for new projects',
-    category: 'operations',
-    icon: 'FolderOpen',
-    trigger_type: 'event',
-    actions: [],
-    usage_count: 890,
-    tags: ['project']
-  },
-  {
-    id: 't3',
-    name: 'Payment Follow-up',
-    description: 'Automated payment reminders and escalation',
-    category: 'finance',
-    icon: 'FileText',
-    trigger_type: 'schedule',
-    actions: [],
-    usage_count: 756,
-    tags: ['invoice', 'payment']
-  },
-  {
-    id: 't4',
-    name: 'Lead Nurturing',
-    description: 'Engage leads with targeted content',
-    category: 'marketing',
-    icon: 'Target',
-    trigger_type: 'schedule',
-    actions: [],
-    usage_count: 634,
-    tags: ['leads', 'marketing']
-  }
-]
-
-const mockExecutionHistory: WorkflowExecution[] = [
-  {
-    id: 'exec-1',
-    workflow_id: '1',
-    workflow_name: 'New Client Onboarding',
-    status: 'success',
-    started_at: new Date(Date.now() - 3600000).toISOString(),
-    completed_at: new Date(Date.now() - 3598000).toISOString(),
-    execution_time_ms: 2000,
-    trigger_type: 'event',
-    actions_completed: 3,
-    actions_total: 3
-  },
-  {
-    id: 'exec-2',
-    workflow_id: '2',
-    workflow_name: 'Invoice Reminder',
-    status: 'success',
-    started_at: new Date(Date.now() - 7200000).toISOString(),
-    completed_at: new Date(Date.now() - 7197500).toISOString(),
-    execution_time_ms: 2500,
-    trigger_type: 'schedule',
-    actions_completed: 2,
-    actions_total: 2
-  },
-  {
-    id: 'exec-3',
-    workflow_id: '3',
-    workflow_name: 'Project Milestone Notification',
-    status: 'failed',
-    started_at: new Date(Date.now() - 86400000).toISOString(),
-    completed_at: new Date(Date.now() - 86398000).toISOString(),
-    execution_time_ms: 2000,
-    error_message: 'Failed to send Slack message: Channel not found',
-    trigger_type: 'event',
-    actions_completed: 1,
-    actions_total: 3
-  },
-  {
-    id: 'exec-4',
-    workflow_id: '1',
-    workflow_name: 'New Client Onboarding',
-    status: 'success',
-    started_at: new Date(Date.now() - 172800000).toISOString(),
-    completed_at: new Date(Date.now() - 172797000).toISOString(),
-    execution_time_ms: 3000,
-    trigger_type: 'event',
-    actions_completed: 3,
-    actions_total: 3
-  },
-  {
-    id: 'exec-5',
-    workflow_id: '4',
-    workflow_name: 'Weekly Report Generation',
-    status: 'cancelled',
-    started_at: new Date(Date.now() - 604800000).toISOString(),
-    trigger_type: 'schedule',
-    actions_completed: 1,
-    actions_total: 3
-  }
-]
-
-const mockStats: WorkflowStats = {
-  totalWorkflows: 24,
-  activeWorkflows: 18,
-  totalExecutions: 3456,
-  successRate: 97.2,
-  avgExecutionTime: 2.4,
-  timeSaved: '127 hours'
-}
 
 // Trigger icons
 const triggerIcons: Record<string, React.ReactNode> = {
@@ -345,7 +144,7 @@ const executionStatusColors: Record<string, string> = {
 }
 
 export default function KaziWorkflowsClient() {
-  // Use the Kazi Workflows hook with mock data fallback
+  // Use the Kazi Workflows hook
   const {
     workflows,
     stats: apiStats,
@@ -359,8 +158,8 @@ export default function KaziWorkflowsClient() {
     updateWorkflow
   } = useKaziWorkflows()
 
-  const [templates] = useState<WorkflowTemplate[]>(mockTemplates)
-  const [executionHistory, setExecutionHistory] = useState<WorkflowExecution[]>(mockExecutionHistory)
+  const [templates] = useState<WorkflowTemplate[]>([])
+  const [executionHistory] = useState<WorkflowExecution[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')

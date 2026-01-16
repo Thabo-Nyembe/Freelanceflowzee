@@ -141,304 +141,6 @@ interface Balance {
   currency: string
 }
 
-// Mock Data
-const mockBalance: Balance = {
-  available: 125432.50,
-  pending: 34567.80,
-  reserved: 5000.00,
-  currency: 'USD'
-}
-
-const mockTransactions: Transaction[] = [
-  {
-    id: 'txn_1',
-    type: 'payment',
-    amount: 5000.00,
-    fee: 175.00,
-    net: 4825.00,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Website Development Project',
-    customer: 'Acme Corp',
-    connectedAccount: 'acct_1',
-    platformFee: 250.00,
-    createdAt: '2024-12-23T10:30:00Z',
-    metadata: { project_id: 'proj_123', invoice: 'INV-001' }
-  },
-  {
-    id: 'txn_2',
-    type: 'payment',
-    amount: 2500.00,
-    fee: 87.50,
-    net: 2412.50,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Logo Design Package',
-    customer: 'Tech Startup Inc',
-    connectedAccount: 'acct_2',
-    platformFee: 125.00,
-    createdAt: '2024-12-22T15:45:00Z',
-    metadata: { project_id: 'proj_124' }
-  },
-  {
-    id: 'txn_3',
-    type: 'payout',
-    amount: 3500.00,
-    fee: 0,
-    net: 3500.00,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Weekly payout',
-    customer: null,
-    connectedAccount: 'acct_1',
-    platformFee: 0,
-    createdAt: '2024-12-21T09:00:00Z',
-    metadata: {}
-  },
-  {
-    id: 'txn_4',
-    type: 'payment',
-    amount: 8500.00,
-    fee: 297.50,
-    net: 8202.50,
-    currency: 'USD',
-    status: 'pending',
-    description: 'Mobile App Development - Phase 1',
-    customer: 'Enterprise Solutions',
-    connectedAccount: 'acct_3',
-    platformFee: 425.00,
-    createdAt: '2024-12-23T14:20:00Z',
-    metadata: { project_id: 'proj_125', milestone: '1' }
-  },
-  {
-    id: 'txn_5',
-    type: 'refund',
-    amount: -500.00,
-    fee: 0,
-    net: -500.00,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Partial refund - scope reduction',
-    customer: 'Tech Startup Inc',
-    connectedAccount: null,
-    platformFee: 0,
-    createdAt: '2024-12-20T11:30:00Z',
-    metadata: { original_txn: 'txn_2' }
-  },
-  {
-    id: 'txn_6',
-    type: 'fee',
-    amount: -45.00,
-    fee: 0,
-    net: -45.00,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Platform fee - December',
-    customer: null,
-    connectedAccount: null,
-    platformFee: 0,
-    createdAt: '2024-12-01T00:00:00Z',
-    metadata: {}
-  }
-]
-
-const mockConnectedAccounts: ConnectedAccount[] = [
-  {
-    id: 'acct_1',
-    businessName: 'WebDev Pro LLC',
-    email: 'billing@webdevpro.com',
-    country: 'US',
-    type: 'company',
-    status: 'active',
-    payoutsEnabled: true,
-    chargesEnabled: true,
-    balance: { available: 12500.00, pending: 3500.00 },
-    requirements: { currentlyDue: [], pastDue: [], eventuallyDue: [] },
-    createdAt: '2024-01-15T00:00:00Z',
-    lastPayout: '2024-12-21T09:00:00Z',
-    totalVolume: 156000.00,
-    totalPayouts: 142000.00
-  },
-  {
-    id: 'acct_2',
-    businessName: 'Creative Design Studio',
-    email: 'hello@creativedesign.co',
-    country: 'US',
-    type: 'company',
-    status: 'active',
-    payoutsEnabled: true,
-    chargesEnabled: true,
-    balance: { available: 8200.00, pending: 2500.00 },
-    requirements: { currentlyDue: [], pastDue: [], eventuallyDue: ['tax_id'] },
-    createdAt: '2024-03-20T00:00:00Z',
-    lastPayout: '2024-12-20T09:00:00Z',
-    totalVolume: 89000.00,
-    totalPayouts: 78000.00
-  },
-  {
-    id: 'acct_3',
-    businessName: 'John Smith',
-    email: 'john@freelance.dev',
-    country: 'US',
-    type: 'individual',
-    status: 'pending',
-    payoutsEnabled: false,
-    chargesEnabled: true,
-    balance: { available: 0, pending: 8500.00 },
-    requirements: {
-      currentlyDue: ['bank_account', 'ssn_last_4'],
-      pastDue: [],
-      eventuallyDue: []
-    },
-    createdAt: '2024-12-15T00:00:00Z',
-    lastPayout: null,
-    totalVolume: 8500.00,
-    totalPayouts: 0
-  },
-  {
-    id: 'acct_4',
-    businessName: 'Marketing Agency Plus',
-    email: 'accounts@marketingplus.io',
-    country: 'CA',
-    type: 'company',
-    status: 'restricted',
-    payoutsEnabled: false,
-    chargesEnabled: false,
-    balance: { available: 5600.00, pending: 0 },
-    requirements: {
-      currentlyDue: [],
-      pastDue: ['verification_document'],
-      eventuallyDue: []
-    },
-    createdAt: '2024-06-10T00:00:00Z',
-    lastPayout: '2024-11-15T09:00:00Z',
-    totalVolume: 45000.00,
-    totalPayouts: 39400.00
-  }
-]
-
-const mockPayouts: Payout[] = [
-  {
-    id: 'po_1',
-    amount: 3500.00,
-    currency: 'USD',
-    status: 'paid',
-    arrivalDate: '2024-12-21T00:00:00Z',
-    method: 'standard',
-    destination: '****4242',
-    connectedAccount: 'acct_1',
-    description: 'Weekly payout',
-    createdAt: '2024-12-19T09:00:00Z'
-  },
-  {
-    id: 'po_2',
-    amount: 2800.00,
-    currency: 'USD',
-    status: 'in_transit',
-    arrivalDate: '2024-12-24T00:00:00Z',
-    method: 'standard',
-    destination: '****5678',
-    connectedAccount: 'acct_2',
-    description: 'Weekly payout',
-    createdAt: '2024-12-22T09:00:00Z'
-  },
-  {
-    id: 'po_3',
-    amount: 1500.00,
-    currency: 'USD',
-    status: 'pending',
-    arrivalDate: '2024-12-26T00:00:00Z',
-    method: 'standard',
-    destination: '****4242',
-    connectedAccount: 'acct_1',
-    description: 'Scheduled payout',
-    createdAt: '2024-12-23T09:00:00Z'
-  },
-  {
-    id: 'po_4',
-    amount: 5000.00,
-    currency: 'USD',
-    status: 'paid',
-    arrivalDate: '2024-12-20T00:00:00Z',
-    method: 'instant',
-    destination: '****4242',
-    connectedAccount: 'acct_1',
-    description: 'Instant payout',
-    createdAt: '2024-12-20T14:30:00Z'
-  }
-]
-
-const mockDisputes: Dispute[] = [
-  {
-    id: 'dp_1',
-    amount: 500.00,
-    currency: 'USD',
-    status: 'needs_response',
-    reason: 'product_not_received',
-    transactionId: 'txn_old_1',
-    customer: 'customer@example.com',
-    dueBy: '2024-12-30T00:00:00Z',
-    createdAt: '2024-12-20T10:00:00Z',
-    evidence: { submitted: false, dueDate: '2024-12-30T00:00:00Z' }
-  },
-  {
-    id: 'dp_2',
-    amount: 250.00,
-    currency: 'USD',
-    status: 'under_review',
-    reason: 'duplicate',
-    transactionId: 'txn_old_2',
-    customer: 'buyer@company.com',
-    dueBy: '2024-12-25T00:00:00Z',
-    createdAt: '2024-12-15T14:00:00Z',
-    evidence: { submitted: true, dueDate: '2024-12-25T00:00:00Z' }
-  },
-  {
-    id: 'dp_3',
-    amount: 1200.00,
-    currency: 'USD',
-    status: 'won',
-    reason: 'fraudulent',
-    transactionId: 'txn_old_3',
-    customer: 'suspect@fake.com',
-    dueBy: '2024-12-10T00:00:00Z',
-    createdAt: '2024-11-28T09:00:00Z',
-    evidence: { submitted: true, dueDate: '2024-12-10T00:00:00Z' }
-  }
-]
-
-// Enhanced Competitive Upgrade Mock Data - Escrow Context
-const mockEscrowAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Pending Payouts', description: '3 payouts totaling $12,500 awaiting verification. Review required.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Payouts' },
-  { id: '2', type: 'success' as const, title: 'Volume Increase', description: 'Transaction volume up 25% this month. Platform growing well!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
-  { id: '3', type: 'info' as const, title: 'Dispute Resolution', description: '2 disputes resolved favorably this week. Win rate: 85%', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Disputes' },
-]
-
-const mockEscrowCollaborators = [
-  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Treasury Manager', lastActive: 'Now' },
-  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Risk & Compliance', lastActive: '8m ago' },
-  { id: '3', name: 'Support Team', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Merchant Support', lastActive: '25m ago' },
-]
-
-const mockEscrowPredictions = [
-  { id: '1', label: 'Monthly Volume', current: 125000, target: 150000, predicted: 140000, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Platform Fee Revenue', current: 3750, target: 4500, predicted: 4200, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Dispute Rate', current: 1.2, target: 0.8, predicted: 1.0, confidence: 75, trend: 'down' as const },
-]
-
-const mockEscrowActivities = [
-  { id: '1', user: 'Finance Lead', action: 'approved', target: 'payout of $5,000 to Seller #245', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'System', action: 'processed', target: '15 transactions totaling $8,500', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'Compliance Officer', action: 'flagged', target: 'transaction for review', timestamp: '1h ago', type: 'warning' as const },
-]
-
-// Quick actions - base structure, actual actions bound inside component for real functionality
-const mockEscrowQuickActionsBase = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T' },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P' },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D' },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R' },
-]
 
 export default function EscrowClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -519,61 +221,54 @@ export default function EscrowClient() {
   // Quick actions with real functionality
   const mockEscrowQuickActions = useMemo(() => [
     {
-      ...mockEscrowQuickActionsBase[0],
+      id: '1',
+      label: 'New Transfer',
+      icon: 'Send',
+      shortcut: 'T',
       action: () => {
         setShowCreatePayout(true)
       }
     },
     {
-      ...mockEscrowQuickActionsBase[1],
+      id: '2',
+      label: 'View Payouts',
+      icon: 'DollarSign',
+      shortcut: 'P',
       action: () => {
         setActiveTab('payouts')
         toast.success('Viewing payouts')
       }
     },
     {
-      ...mockEscrowQuickActionsBase[2],
+      id: '3',
+      label: 'Disputes',
+      icon: 'AlertTriangle',
+      shortcut: 'D',
       action: () => {
         setActiveTab('disputes')
         toast.success('Viewing disputes')
       }
     },
     {
-      ...mockEscrowQuickActionsBase[3],
+      id: '4',
+      label: 'Reports',
+      icon: 'BarChart3',
+      shortcut: 'R',
       action: () => {
-        // Export transactions as CSV report
-        const reportData = mockTransactions.map(t => ({
-          id: t.id,
-          type: t.type,
-          amount: t.amount,
-          fee: t.fee,
-          net: t.net,
-          status: t.status,
-          description: t.description,
-          customer: t.customer || 'N/A',
-          date: new Date(t.createdAt).toLocaleDateString()
-        }))
-        downloadAsCsv(reportData, `escrow-transactions-${new Date().toISOString().split('T')[0]}.csv`)
+        toast.success('Reports feature coming soon')
       }
     },
   ], [])
 
-  // Stats - combining mock data with real escrow stats
-  const totalVolume = mockTransactions.filter(t => t.type === 'payment' && t.status === 'succeeded')
-    .reduce((sum, t) => sum + t.amount, 0)
-  const platformFees = mockTransactions.filter(t => t.type === 'payment' && t.status === 'succeeded')
-    .reduce((sum, t) => sum + t.platformFee, 0)
-  const activeAccounts = mockConnectedAccounts.filter(a => a.status === 'active').length
-  const pendingDisputes = mockDisputes.filter(d => d.status === 'needs_response').length
+  // Stats - using real escrow data
+  const totalVolume = 0
+  const platformFees = 0
+  const activeAccounts = 0
+  const pendingDisputes = 0
 
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter(t => {
-      const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           t.customer?.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesType = transactionFilter === 'all' || t.type === transactionFilter
-      return matchesSearch && matchesType
-    })
+    return []
   }, [searchQuery, transactionFilter])
 
   const getTransactionIcon = (type: TransactionType) => {
@@ -1014,14 +709,14 @@ export default function EscrowClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                 <div className="text-emerald-200 text-sm mb-1">Available Balance</div>
-                <div className="text-3xl font-bold text-white">{formatCurrency(mockBalance.available)}</div>
+                <div className="text-3xl font-bold text-white">{formatCurrency(0)}</div>
                 <div className="text-emerald-200 text-xs mt-1 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" /> Ready to withdraw
                 </div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                 <div className="text-emerald-200 text-sm mb-1">Pending</div>
-                <div className="text-3xl font-bold text-white">{formatCurrency(mockBalance.pending)}</div>
+                <div className="text-3xl font-bold text-white">{formatCurrency(0)}</div>
                 <div className="text-emerald-200 text-xs mt-1">Processing payments</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
@@ -1096,7 +791,7 @@ export default function EscrowClient() {
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {mockTransactions.slice(0, 5).map(txn => {
+                  {[].map((txn: Transaction) => {
                     const Icon = getTransactionIcon(txn.type)
                     return (
                       <div
@@ -1137,7 +832,7 @@ export default function EscrowClient() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Total Accounts</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{mockConnectedAccounts.length}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{0}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Active</span>
@@ -1146,7 +841,7 @@ export default function EscrowClient() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Needs Attention</span>
                       <span className="font-semibold text-orange-600">
-                        {mockConnectedAccounts.filter(a => a.requirements.currentlyDue.length > 0).length}
+                        {0}
                       </span>
                     </div>
                   </div>
@@ -1483,7 +1178,7 @@ export default function EscrowClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockPayouts.map(payout => (
+                  {[].map((payout: Payout) => (
                     <tr key={payout.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-6 py-4">
                         <div>
@@ -1536,7 +1231,7 @@ export default function EscrowClient() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockConnectedAccounts.map(account => (
+              {[].map((account: ConnectedAccount) => (
                 <div
                   key={account.id}
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:border-emerald-500/50 transition-colors cursor-pointer"
@@ -1627,7 +1322,7 @@ export default function EscrowClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockDisputes.map(dispute => (
+                  {[].map((dispute: Dispute) => (
                     <tr key={dispute.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-6 py-4">
                         <div>
@@ -2139,18 +1834,18 @@ export default function EscrowClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockEscrowAIInsights}
+              insights={[]}
               title="Escrow Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockEscrowCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockEscrowPredictions}
+              predictions={[]}
               title="Transaction Forecasts"
             />
           </div>
@@ -2158,7 +1853,7 @@ export default function EscrowClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockEscrowActivities}
+            activities={[]}
             title="Transaction Activity"
             maxItems={5}
           />
@@ -2267,7 +1962,7 @@ export default function EscrowClient() {
                     <SelectValue placeholder="Select an account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockConnectedAccounts.filter(a => a.payoutsEnabled).map(account => (
+                    {[].map((account: ConnectedAccount) => (
                       <SelectItem key={account.id} value={account.id}>{account.businessName}</SelectItem>
                     ))}
                   </SelectContent>

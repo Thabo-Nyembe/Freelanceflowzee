@@ -235,63 +235,8 @@ interface Notification {
 }
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - REMOVED (Batch #7 Migration)
 // ============================================================================
-
-const mockNotifications: Notification[] = [
-  { id: '1', title: 'New Team Message', message: 'Sarah mentioned you in #design-team', type: 'info', priority: 'normal', status: 'unread', channel: 'slack', createdAt: '2024-01-28T14:30:00Z', sender: 'Sarah Chen', category: 'mentions', isStarred: false, actionUrl: '/messages', actionLabel: 'View Message' },
-  { id: '2', title: 'Deployment Complete', message: 'Production deployment v2.4.0 succeeded', type: 'success', priority: 'high', status: 'unread', channel: 'push', createdAt: '2024-01-28T14:15:00Z', category: 'system', isStarred: true },
-  { id: '3', title: 'Payment Received', message: 'Invoice #INV-2024-0042 paid - $2,450.00', type: 'success', priority: 'normal', status: 'read', channel: 'email', createdAt: '2024-01-28T12:00:00Z', category: 'billing', isStarred: false },
-  { id: '4', title: 'Storage Warning', message: 'You have used 85% of your storage quota', type: 'warning', priority: 'high', status: 'unread', channel: 'in_app', createdAt: '2024-01-28T10:00:00Z', category: 'system', isStarred: false, actionUrl: '/settings/storage', actionLabel: 'Upgrade Storage' },
-  { id: '5', title: 'Security Alert', message: 'New login from unknown device in New York', type: 'error', priority: 'urgent', status: 'unread', channel: 'push', createdAt: '2024-01-28T09:30:00Z', category: 'security', isStarred: true, actionUrl: '/security', actionLabel: 'Review Activity' },
-  { id: '6', title: 'Weekly Report Ready', message: 'Your team performance report is ready to view', type: 'info', priority: 'low', status: 'read', channel: 'email', createdAt: '2024-01-27T08:00:00Z', category: 'reports', isStarred: false },
-  { id: '7', title: 'Task Assigned', message: 'Mike assigned you to "Update API documentation"', type: 'info', priority: 'normal', status: 'read', channel: 'in_app', createdAt: '2024-01-26T16:00:00Z', sender: 'Mike Johnson', category: 'tasks', isStarred: false },
-  { id: '8', title: 'Comment on PR #234', message: 'Alex commented: "LGTM, ready to merge"', type: 'info', priority: 'normal', status: 'archived', channel: 'slack', createdAt: '2024-01-26T14:00:00Z', sender: 'Alex Kim', category: 'code', isStarred: false }
-]
-
-const mockCampaigns: Campaign[] = [
-  { id: 'c1', name: 'Product Launch Announcement', status: 'sent', channel: 'push', segment: 'All Users', title: 'New Feature Alert!', message: 'Check out our amazing new dashboard features', sentAt: '2024-01-28T10:00:00Z', createdAt: '2024-01-27T15:00:00Z', createdBy: 'admin@company.com', priority: 'high', stats: { sent: 15420, delivered: 14890, opened: 8234, clicked: 3456, converted: 892, unsubscribed: 12, bounced: 45, complained: 3 } },
-  { id: 'c2', name: 'Weekly Digest', status: 'scheduled', channel: 'email', segment: 'Active Users', title: 'Your Weekly Summary', message: 'Here\'s what happened this week...', scheduledAt: '2024-01-29T09:00:00Z', createdAt: '2024-01-28T14:00:00Z', createdBy: 'marketing@company.com', priority: 'normal', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
-  { id: 'c3', name: 'Re-engagement Campaign', status: 'sending', channel: 'push', segment: 'Inactive 30 Days', title: 'We miss you!', message: 'Come back and see what\'s new', createdAt: '2024-01-28T08:00:00Z', createdBy: 'growth@company.com', priority: 'normal', stats: { sent: 5234, delivered: 4890, opened: 1234, clicked: 567, converted: 89, unsubscribed: 23, bounced: 12, complained: 1 } },
-  { id: 'c4', name: 'Flash Sale Alert', status: 'draft', channel: 'sms', segment: 'Premium Users', title: '50% Off Today Only!', message: 'Use code FLASH50 for 50% off', createdAt: '2024-01-28T16:00:00Z', createdBy: 'sales@company.com', priority: 'urgent', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
-  { id: 'c5', name: 'Security Update Notice', status: 'sent', channel: 'email', segment: 'All Users', title: 'Important Security Update', message: 'We have updated our security protocols', sentAt: '2024-01-25T14:00:00Z', createdAt: '2024-01-25T10:00:00Z', createdBy: 'security@company.com', priority: 'high', stats: { sent: 25430, delivered: 24890, opened: 18234, clicked: 5456, converted: 0, unsubscribed: 8, bounced: 120, complained: 0 } }
-]
-
-const mockSegments: Segment[] = [
-  { id: 's1', name: 'All Users', description: 'All registered users', filters: [], userCount: 25430, createdAt: '2024-01-01', isDefault: true, lastUpdated: '2024-01-28' },
-  { id: 's2', name: 'Active Users', description: 'Users active in last 7 days', filters: [{ field: 'last_seen', operator: 'gt', value: '7d' }], userCount: 18920, createdAt: '2024-01-15', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's3', name: 'Premium Users', description: 'Users with premium subscription', filters: [{ field: 'plan', operator: 'equals', value: 'premium' }], userCount: 4560, createdAt: '2024-01-10', isDefault: false, lastUpdated: '2024-01-27' },
-  { id: 's4', name: 'Inactive 30 Days', description: 'Users inactive for 30+ days', filters: [{ field: 'last_seen', operator: 'lt', value: '30d' }], userCount: 3210, createdAt: '2024-01-20', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's5', name: 'New Users', description: 'Users registered in last 7 days', filters: [{ field: 'created_at', operator: 'gt', value: '7d' }], userCount: 1250, createdAt: '2024-01-25', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's6', name: 'Mobile Users', description: 'Users primarily on mobile devices', filters: [{ field: 'device_type', operator: 'equals', value: 'mobile' }], userCount: 12340, createdAt: '2024-01-18', isDefault: false, lastUpdated: '2024-01-26' }
-]
-
-const mockTemplates: Template[] = [
-  { id: 't1', name: 'Welcome Message', channel: 'push', title: 'Welcome to {{app_name}}!', message: 'Hey {{name}}, great to have you!', variables: ['app_name', 'name'], usageCount: 15420, category: 'Onboarding', isDefault: true },
-  { id: 't2', name: 'Order Confirmation', channel: 'email', title: 'Order #{{order_id}} Confirmed', message: 'Your order has been confirmed and will ship soon.', variables: ['order_id'], usageCount: 8900, category: 'Transactional', isDefault: false },
-  { id: 't3', name: 'Reminder', channel: 'push', title: 'Don\'t forget!', message: '{{task_name}} is due {{due_date}}', variables: ['task_name', 'due_date'], usageCount: 5670, category: 'Reminders', isDefault: false },
-  { id: 't4', name: 'Promotion', channel: 'sms', title: '{{discount}}% Off!', message: 'Use code {{code}} for {{discount}}% off. Ends {{expiry}}.', variables: ['discount', 'code', 'expiry'], usageCount: 3450, category: 'Marketing', isDefault: false },
-  { id: 't5', name: 'Security Alert', channel: 'email', title: 'Security Alert: {{alert_type}}', message: 'We detected {{alert_type}} on your account from {{location}}.', variables: ['alert_type', 'location'], usageCount: 2340, category: 'Security', isDefault: true },
-  { id: 't6', name: 'Slack Notification', channel: 'slack', title: '{{channel}} Update', message: '{{user}} posted in #{{channel}}: {{preview}}', variables: ['channel', 'user', 'preview'], usageCount: 45000, category: 'Collaboration', isDefault: false }
-]
-
-const mockAutomations: Automation[] = [
-  { id: 'a1', name: 'Welcome Series', description: 'Send welcome emails over 7 days', status: 'active', trigger: { type: 'event', config: { event: 'user.created' } }, actions: [{ id: 'a1-1', type: 'send_notification', config: { template: 't1' } }, { id: 'a1-2', type: 'wait', config: { duration: '1d' } }, { id: 'a1-3', type: 'send_notification', config: { template: 't2' } }], stats: { totalTriggered: 5420, totalCompleted: 4890, totalFailed: 45, conversionRate: 32.5 }, createdAt: '2024-01-01', lastTriggered: '2024-01-28T14:30:00Z' },
-  { id: 'a2', name: 'Cart Abandonment', description: 'Remind users about abandoned carts', status: 'active', trigger: { type: 'event', config: { event: 'cart.abandoned' } }, actions: [{ id: 'a2-1', type: 'wait', config: { duration: '1h' } }, { id: 'a2-2', type: 'send_notification', config: { channel: 'email' } }], stats: { totalTriggered: 2340, totalCompleted: 2100, totalFailed: 12, conversionRate: 18.5 }, createdAt: '2024-01-10', lastTriggered: '2024-01-28T12:00:00Z' },
-  { id: 'a3', name: 'Re-engagement Flow', description: 'Win back inactive users', status: 'paused', trigger: { type: 'segment_entry', config: { segment: 's4' } }, actions: [{ id: 'a3-1', type: 'send_notification', config: { channel: 'push' } }], stats: { totalTriggered: 890, totalCompleted: 756, totalFailed: 23, conversionRate: 8.2 }, createdAt: '2024-01-15' },
-  { id: 'a4', name: 'Daily Digest', description: 'Send daily activity summary', status: 'active', trigger: { type: 'schedule', config: { cron: '0 9 * * *' } }, actions: [{ id: 'a4-1', type: 'send_notification', config: { template: 't6' } }], stats: { totalTriggered: 12500, totalCompleted: 12450, totalFailed: 5, conversionRate: 45.2 }, createdAt: '2024-01-05', lastTriggered: '2024-01-28T09:00:00Z' }
-]
-
-const mockWebhooks: WebhookEndpoint[] = [
-  { id: 'w1', name: 'Slack Integration', url: 'https://hooks.slack.com/services/xxx', events: ['notification.sent', 'notification.failed'], status: 'active', secret: 'whsec_xxx', createdAt: '2024-01-10', lastDelivery: '2024-01-28T14:30:00Z', successRate: 99.8 },
-  { id: 'w2', name: 'Analytics Webhook', url: 'https://analytics.example.com/webhook', events: ['campaign.completed', 'user.converted'], status: 'active', secret: 'whsec_yyy', createdAt: '2024-01-15', lastDelivery: '2024-01-28T10:00:00Z', successRate: 98.5 },
-  { id: 'w3', name: 'CRM Sync', url: 'https://crm.example.com/api/notifications', events: ['notification.opened', 'notification.clicked'], status: 'failed', secret: 'whsec_zzz', createdAt: '2024-01-20', lastDelivery: '2024-01-27T16:00:00Z', successRate: 45.2 }
-]
-
-const mockABTests: ABTest[] = [
-  { id: 'ab1', name: 'Subject Line Test', variants: [{ id: 'v1', name: 'Variant A', title: 'Don\'t miss out!', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4890, opened: 1956, clicked: 489, converted: 98, unsubscribed: 2, bounced: 10, complained: 0 } }, { id: 'v2', name: 'Variant B', title: 'New features just for you', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4895, opened: 2203, clicked: 551, converted: 132, unsubscribed: 1, bounced: 8, complained: 0 } }], winner: 'v2', status: 'completed', confidenceLevel: 95.2, startDate: '2024-01-20', endDate: '2024-01-25' },
-  { id: 'ab2', name: 'CTA Button Test', variants: [{ id: 'v3', name: 'Get Started', title: 'Welcome!', message: 'Click to get started', percentage: 50, stats: { sent: 2500, delivered: 2450, opened: 980, clicked: 245, converted: 49, unsubscribed: 0, bounced: 5, complained: 0 } }, { id: 'v4', name: 'Learn More', title: 'Welcome!', message: 'Click to learn more', percentage: 50, stats: { sent: 2500, delivered: 2455, opened: 982, clicked: 196, converted: 39, unsubscribed: 1, bounced: 4, complained: 0 } }], status: 'running', confidenceLevel: 78.5, startDate: '2024-01-26' }
-]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -354,11 +299,11 @@ export default function NotificationsClient() {
   const [showABTestDialog, setShowABTestDialog] = useState(false)
 
   // New state for functional handlers
-  const [segments, setSegments] = useState(mockSegments)
-  const [templates, setTemplates] = useState(mockTemplates)
-  const [automations, setAutomations] = useState(mockAutomations)
-  const [abTests, setAbTests] = useState(mockABTests)
-  const [webhooks, setWebhooks] = useState(mockWebhooks)
+  const [segments, setSegments] = useState([])
+  const [templates, setTemplates] = useState([])
+  const [automations, setAutomations] = useState([])
+  const [abTests, setAbTests] = useState([])
+  const [webhooks, setWebhooks] = useState([])
   const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
   const [showAutomationAnalyticsDialog, setShowAutomationAnalyticsDialog] = useState(false)
