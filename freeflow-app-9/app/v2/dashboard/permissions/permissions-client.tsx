@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -248,7 +247,6 @@ const mockPermissionsActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
-  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [userStatusFilter, setUserStatusFilter] = useState<UserStatus | 'all'>('all')
@@ -448,7 +446,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { error } = await supabase.from('roles').insert({
@@ -482,6 +480,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignPermission = async (roleId: string, roleName: string, permission: string) => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: roleData, error: fetchError } = await supabase
         .from('roles')
         .select('permissions')
@@ -511,6 +511,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleRevokePermission = async (roleId: string, roleName: string, permission: string) => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: roleData, error: fetchError } = await supabase
         .from('roles')
         .select('permissions')
@@ -554,6 +556,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleExportPermissions = async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -574,6 +578,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAuditPermissions = async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: roles, error: rolesError } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (rolesError) throw rolesError
       const { data: assignments, error: assignError } = await supabase.from('role_assignments').select('*').is('deleted_at', null)
@@ -599,7 +605,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       // Note: User creation typically involves auth - this creates a profile entry
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       toast.success('User invited'` })
@@ -619,7 +625,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Groups would need their own table - showing pattern
@@ -636,7 +642,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignUserToRole = async (userId: string, roleId: string) => {
     setIsLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { error } = await supabase.from('role_assignments').insert({
