@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { usePolls } from '@/lib/hooks/use-polls'
 import {
   ClipboardList,
   Plus,
@@ -540,7 +541,11 @@ interface DbPoll {
 // ============================================================================
 
 export default function PollsClient() {
-  const supabase = createClient()
+  // Hooks
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+  const { polls: dbPolls = [], loading: isLoading, refetch, createPoll, updatePoll, deletePoll, mutating: isSaving } = usePolls()
+
   const [activeTab, setActiveTab] = useState('forms')
   const [forms, setForms] = useState<Form[]>(mockForms)
   const [templates] = useState<FormTemplate[]>(mockTemplates)
@@ -555,10 +560,14 @@ export default function PollsClient() {
   const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [dbPolls, setDbPolls] = useState<DbPoll[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  // Fetch user ID
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -595,45 +604,19 @@ export default function PollsClient() {
     { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
   ], [])
 
-  // Fetch polls from Supabase
-  const fetchPolls = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('polls')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbPolls(data || [])
-    } catch (error) {
-      console.error('Error fetching polls:', error)
-      toast.error('Failed to load polls')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [supabase])
-
   // Create poll
   const handleCreatePoll = async () => {
     if (!formData.question.trim()) {
       toast.error('Please enter a question')
       return
     }
+    if (!userId) {
+      toast.error('Please sign in to create polls')
+      return
+    }
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create polls')
-        return
-      }
-
-      const { error } = await supabase.from('polls').insert({
-        user_id: user.id,
+      await createPoll({
+        user_id: userId,
         question: formData.question,
         description: formData.description || null,
         poll_type: formData.poll_type,
@@ -644,32 +627,22 @@ export default function PollsClient() {
         ends_at: formData.ends_at || null
       })
 
-      if (error) throw error
-
       toast.success('Poll created successfully')
       setShowCreateDialog(false)
       resetForm()
-      fetchPolls()
+      refetch()
     } catch (error) {
       console.error('Error creating poll:', error)
       toast.error('Failed to create poll')
-    } finally {
-      setIsSaving(false)
     }
   }
 
   // Update poll status
   const handleUpdatePollStatus = async (pollId: string, newStatus: PollStatus) => {
     try {
-      const { error } = await supabase
-        .from('polls')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', pollId)
-
-      if (error) throw error
-
+      await updatePoll(pollId, { status: newStatus, updated_at: new Date().toISOString() })
       toast.success(`Poll ${newStatus === 'active' ? 'activated' : newStatus}`)
-      fetchPolls()
+      refetch()
     } catch (error) {
       console.error('Error updating poll:', error)
       toast.error('Failed to update poll')
@@ -679,15 +652,9 @@ export default function PollsClient() {
   // Delete poll
   const handleDeletePoll = async (pollId: string) => {
     try {
-      const { error } = await supabase
-        .from('polls')
-        .delete()
-        .eq('id', pollId)
-
-      if (error) throw error
-
+      await deletePoll(pollId)
       toast.success('Poll deleted successfully')
-      fetchPolls()
+      refetch()
     } catch (error) {
       console.error('Error deleting poll:', error)
       toast.error('Failed to delete poll')
@@ -696,13 +663,10 @@ export default function PollsClient() {
 
   // Duplicate poll
   const handleDuplicatePollDb = async (poll: DbPoll) => {
+    if (!userId) return
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { error } = await supabase.from('polls').insert({
-        user_id: user.id,
+      await createPoll({
+        user_id: userId,
         question: `${poll.question} (Copy)`,
         description: poll.description,
         poll_type: poll.poll_type,
@@ -711,15 +675,11 @@ export default function PollsClient() {
         is_public: poll.is_public
       })
 
-      if (error) throw error
-
       toast.success('Poll duplicated successfully')
-      fetchPolls()
+      refetch()
     } catch (error) {
       console.error('Error duplicating poll:', error)
       toast.error('Failed to duplicate poll')
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -750,11 +710,6 @@ export default function PollsClient() {
       options: prev.options.filter(o => o.id !== id)
     }))
   }
-
-  // Load polls on mount
-  useEffect(() => {
-    fetchPolls()
-  }, [fetchPolls])
 
   const filteredForms = useMemo(() => {
     return forms.filter(form => {
@@ -1137,7 +1092,7 @@ export default function PollsClient() {
                       <Download className="w-4 h-4" />
                       Export All
                     </Button>
-                    <Button variant="outline" onClick={fetchPolls} disabled={isLoading} className="flex items-center gap-2">
+                    <Button variant="outline" onClick={refetch} disabled={isLoading} className="flex items-center gap-2">
                       <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
