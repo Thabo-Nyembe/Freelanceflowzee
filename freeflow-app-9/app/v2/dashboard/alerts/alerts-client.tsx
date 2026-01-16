@@ -467,10 +467,9 @@ export default function AlertsClient() {
     return mapping[severity] || 'info'
   }
 
-  // Filter alerts - use mapped DB alerts, falling back to mock if empty
-  const alertsToFilter = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
+  // Filter alerts - use mapped DB alerts from database
   const filteredAlerts = useMemo(() => {
-    return alertsToFilter.filter(alert => {
+    return mappedAlerts.filter(alert => {
       const matchesSearch = alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            alert.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            alert.service.toLowerCase().includes(searchQuery.toLowerCase())
@@ -478,11 +477,11 @@ export default function AlertsClient() {
       const matchesStatus = selectedStatus === 'all' || alert.status === selectedStatus
       return matchesSearch && matchesSeverity && matchesStatus
     })
-  }, [alertsToFilter, searchQuery, selectedSeverity, selectedStatus])
+  }, [mappedAlerts, searchQuery, selectedSeverity, selectedStatus])
 
-  // Stats - use real DB stats when available
+  // Stats - use real DB data
   const alertStats = useMemo(() => {
-    const alertsSource = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
+    const alertsSource = mappedAlerts
     const triggered = alertsSource.filter(a => a.status === 'triggered').length
     const acknowledged = alertsSource.filter(a => a.status === 'acknowledged').length
     const resolved = alertsSource.filter(a => a.status === 'resolved').length
