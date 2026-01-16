@@ -25,9 +25,7 @@ export default function AIContentStudioPage() {
   const { announce } = useAnnouncer()
 
   useEffect(() => {
-    if (userId) {
-      logger.info('AI Content Studio page loaded', { userId })
-      announce('AI Content Studio loaded', 'polite')
+    if (userId) {      announce('AI Content Studio loaded', 'polite')
     }
   }, [userId, announce])
 
