@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import {
   Bot,
   Send,
@@ -445,7 +444,7 @@ const mockAIAssistantQuickActions = [
 ]
 
 export default function AIAssistantClient() {
-  const supabase = createClient()
+
 
   // Use the AI Assistant hook for real Supabase operations
   const {
@@ -716,6 +715,8 @@ export default function AIAssistantClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -779,6 +780,8 @@ export default function AIAssistantClient() {
     }
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -836,6 +839,8 @@ export default function AIAssistantClient() {
     if (!file) return
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -909,6 +914,8 @@ export default function AIAssistantClient() {
   // Handle file delete - Supabase operation
   const handleDeleteFile = async (fileId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('ai_knowledge_files')
         .delete()
@@ -965,6 +972,8 @@ export default function AIAssistantClient() {
 
     try {
       // Delete all messages for this conversation
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('ai_messages')
         .delete()

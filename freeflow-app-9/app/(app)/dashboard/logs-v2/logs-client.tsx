@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -522,7 +521,7 @@ const mockLogsQuickActionsPlaceholder = [] as const
 // ============== MAIN COMPONENT ==============
 
 export default function LogsClient() {
-  const supabase = createClient()
+
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('explorer')
@@ -615,6 +614,8 @@ export default function LogsClient() {
   const fetchSystemLogs = useCallback(async () => {
     if (!userId) return
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_logs')
         .select('*')
@@ -627,11 +628,13 @@ export default function LogsClient() {
     } catch (err) {
       console.error('Error fetching system logs:', err)
     }
-  }, [userId, supabase])
+  }, [userId, ])
 
   // Fetch access logs
   const fetchAccessLogs = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -642,11 +645,13 @@ export default function LogsClient() {
     } catch (err) {
       console.error('Error fetching access logs:', err)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch activity logs
   const fetchActivityLogs = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
@@ -657,7 +662,7 @@ export default function LogsClient() {
     } catch (err) {
       console.error('Error fetching activity logs:', err)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch data on user change
   useEffect(() => {
@@ -681,7 +686,7 @@ export default function LogsClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, userId])
+  }, [ userId])
 
   const toggleLogExpand = (logId: string) => {
     setExpandedLogs(prev =>
@@ -722,6 +727,8 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .insert({
@@ -748,6 +755,8 @@ export default function LogsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .update({ is_archived: true, archived_at: new Date().toISOString() })
@@ -790,6 +799,8 @@ export default function LogsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .update({ deleted_at: new Date().toISOString() })
