@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 149/286 pages integrated (52.1%)
+**Overall Progress:** 151/286 pages integrated (52.8%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 143/223 using Supabase hooks (64.1%) 🚧
-  - **Mock → Database:** 20/157 migrated (12.7%) 🎉 NEW!
+- **V2 Pages:** 145/223 using Supabase hooks (65.0%) 🚧
+  - **Mock → Database:** 22/157 migrated (14.0%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -610,6 +610,38 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** Batch migration with ai-design-v2 and api-keys-v2, ~4 lines removed. Pre-existing template literal errors (lines 1372, 1438, 2607) unrelated to migration.
    - **Migration Time:** ~2 minutes (batched)
    - **Complexity:** Low (single useEffect pattern, straightforward removal)
+
+21. `roles-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #1) - Commit: b65679e5
+   - **Pattern:** Completion of partial integration - removed dual ternary fallback patterns
+   - **Tables:** roles (via use-roles hook)
+   - **Hook Features:** Already integrated with useRoles (fetchRoles mutations)
+   - **Mapping:** Already implemented - DB Role → UI Role with field transformations
+   - **Cleanup:** Removed TWO ternary fallback patterns:
+     1. combinedRoles useMemo (line 516): `return dbRolesMapped.length > 0 ? dbRolesMapped : mockRoles`
+     2. stats calculation (line 521): `const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles`
+   - **Before (combinedRoles):** `return dbRolesMapped.length > 0 ? dbRolesMapped : mockRoles`
+   - **After (combinedRoles):** `return dbRolesMapped` - direct return without fallback
+   - **Before (stats):** `const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles`
+   - **After (stats):** `const rolesData = combinedRoles` - direct assignment without fallback
+   - **Impact:** Now uses 100% database data for roles display and stats calculation
+   - **Kept as Mock:** mockPermissions, mockPolicies (separate entities, will be migrated separately)
+   - **Note:** Batch migration with logs-v2, ~2 lines removed
+   - **Migration Time:** ~2 minutes (batched)
+   - **Complexity:** Low (two ternary fallbacks, straightforward removal)
+
+22. `logs-v2` (app/(app)/dashboard) - ✅ **MIGRATED** (Batch #2) - Commit: b65679e5
+   - **Pattern:** Completion of partial integration - removed single ternary fallback pattern
+   - **Tables:** system_logs (via use-log-extended hook - useLogs)
+   - **Hook Features:** Already integrated with useLogs (fetch, refresh)
+   - **Mapping:** Already implemented - DB SystemLog → UI Log
+   - **Cleanup:** Removed single ternary fallback in handleExportLogs (line 779):
+   - **Before:** `const logsToExport = dbSystemLogs.length > 0 ? dbSystemLogs : mockLogs`
+   - **After:** `const logsToExport = dbSystemLogs` - direct assignment without fallback
+   - **Impact:** Now uses 100% database data for logs export functionality
+   - **Kept as Mock:** None for export (uses all database logs)
+   - **Note:** Batch migration with roles-v2, ~1 line removed
+   - **Migration Time:** ~1 minute (batched)
+   - **Complexity:** Low (single ternary fallback in handler, straightforward removal)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
