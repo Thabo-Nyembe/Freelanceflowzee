@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Play,
@@ -527,7 +526,7 @@ const mockTestingQuickActions = [
 ]
 
 export default function TestingClient() {
-  const supabase = createClient()
+
 
   // Core state
   const [activeTab, setActiveTab] = useState('runs')
@@ -592,9 +591,13 @@ export default function TestingClient() {
   // Fetch tests from Supabase
   const fetchTests = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('feature_tests')
         .select('*')
@@ -608,7 +611,7 @@ export default function TestingClient() {
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchTests()
@@ -623,12 +626,16 @@ export default function TestingClient() {
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create tests')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('feature_tests').insert({
         name: formState.name,
         path: formState.file_path || `tests/${formState.suite_name.toLowerCase()}/${formState.name.toLowerCase().replace(/\s+/g, '-')}.spec.ts`,
@@ -659,8 +666,12 @@ export default function TestingClient() {
   // Run/trigger test
   const handleRunTest = async (testId: string, testName: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('test_runs').insert({
         test_id: testId,
         user_id: user?.id,
@@ -685,6 +696,8 @@ export default function TestingClient() {
   // Update test status
   const handleUpdateTestStatus = async (testId: string, newStatus: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feature_tests')
         .update({
@@ -706,6 +719,8 @@ export default function TestingClient() {
   // Delete test
   const handleDeleteTest = async (testId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('feature_tests')
         .delete()
@@ -724,6 +739,8 @@ export default function TestingClient() {
   // Export results
   const handleExportResults = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('test_runs')
         .select('*, feature_tests(*)')
@@ -804,6 +821,8 @@ export default function TestingClient() {
   // Rerun failed tests
   const handleRerunFailed = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('feature_tests')
         .select('id, name')
@@ -889,6 +908,8 @@ export default function TestingClient() {
   // Screenshot handler
   const handleLoadScreenshots = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('test_artifacts')
         .select('*')
@@ -912,6 +933,8 @@ export default function TestingClient() {
   // Video handler
   const handleLoadVideos = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('test_artifacts')
         .select('*')
@@ -935,6 +958,8 @@ export default function TestingClient() {
   // Trace handler
   const handleLoadTraces = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('test_artifacts')
         .select('*')
