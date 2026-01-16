@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 140/286 pages integrated (49.0%)
+**Overall Progress:** 141/286 pages integrated (49.3%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 134/223 using Supabase hooks (60.1%) 🚧
-  - **Mock → Database:** 11/157 migrated (7.0%) 🎉 NEW!
+- **V2 Pages:** 135/223 using Supabase hooks (60.5%) 🚧
+  - **Mock → Database:** 12/157 migrated (7.6%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -472,6 +472,20 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Kept as Mock:** None (all add-on data now from database)
    - **Note:** Clean migration, no pre-existing errors
    - **Migration Time:** ~5 minutes (was 95% complete, only needed fallback removal)
+   - **Complexity:** Low (page was already integrated, just needed final cleanup)
+
+12. `announcements` (app/v2/dashboard) - ✅ **MIGRATED** (3,537 lines) - Commit: TBD
+   - **Pattern:** Completion of partial integration - removed mock fallback pattern
+   - **Tables:** announcements (via use-announcements hook)
+   - **Hook Features:** Already integrated with createAnnouncement, updateAnnouncement, deleteAnnouncement mutations
+   - **Mapping:** Already implemented - DB Announcement → UI Announcement with field transformations (announcement_type → type, scheduled_for → scheduledAt, expires_at → expiresAt, is_pinned → isPinned, is_featured → isFeatured, views_count → metrics.views)
+   - **Cleanup:** Removed mock fallback check from useMemo (lines 428-431)
+   - **Before:** `if (!dbAnnouncements || dbAnnouncements.length === 0) return mockAnnouncements`
+   - **After:** Direct mapping without fallback - `return dbAnnouncements.map(...)`
+   - **Impact:** Now uses 100% database data for announcements display
+   - **Kept as Mock:** changelog, segments (separate entities, will be migrated separately)
+   - **Note:** Clean migration, no errors introduced, 3 lines removed
+   - **Migration Time:** ~3 minutes (was 95% complete, only needed fallback removal)
    - **Complexity:** Low (page was already integrated, just needed final cleanup)
 
 **Migration Pattern Established:**
