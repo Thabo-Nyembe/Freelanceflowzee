@@ -146,212 +146,6 @@ interface ComplianceControl {
   owner: string
 }
 
-// Mock data
-const mockVulnerabilities: Vulnerability[] = [
-  {
-    id: '1',
-    title: 'Remote Code Execution in Apache Log4j',
-    description: 'A critical vulnerability in Apache Log4j library allows remote code execution via crafted log messages.',
-    cveId: 'CVE-2021-44228',
-    cvssScore: 10.0,
-    severity: 'critical',
-    status: 'in-progress',
-    affectedAsset: 'prod-api-server-01',
-    assetType: 'server',
-    discoveredAt: '2024-01-15',
-    dueDate: '2024-01-20',
-    assignee: 'John Smith',
-    remediation: 'Upgrade Log4j to version 2.17.0 or later. Apply JVM mitigation flag as temporary fix.',
-    exploitAvailable: true,
-    patchAvailable: true,
-    category: 'Remote Code Execution'
-  },
-  {
-    id: '2',
-    title: 'SQL Injection in User Authentication',
-    description: 'The login form is vulnerable to SQL injection attacks, potentially allowing unauthorized access.',
-    cveId: 'CVE-2024-1234',
-    cvssScore: 9.1,
-    severity: 'critical',
-    status: 'open',
-    affectedAsset: 'web-app-portal',
-    assetType: 'application',
-    discoveredAt: '2024-01-14',
-    dueDate: '2024-01-18',
-    remediation: 'Use parameterized queries and input validation. Implement WAF rules.',
-    exploitAvailable: true,
-    patchAvailable: false,
-    category: 'Injection'
-  },
-  {
-    id: '3',
-    title: 'Outdated SSL/TLS Configuration',
-    description: 'Server supports deprecated TLS 1.0 and 1.1 protocols with weak cipher suites.',
-    cveId: 'N/A',
-    cvssScore: 7.5,
-    severity: 'high',
-    status: 'open',
-    affectedAsset: 'load-balancer-01',
-    assetType: 'network',
-    discoveredAt: '2024-01-12',
-    dueDate: '2024-01-25',
-    assignee: 'Sarah Wilson',
-    remediation: 'Disable TLS 1.0/1.1, enable only TLS 1.2+ with strong cipher suites.',
-    exploitAvailable: false,
-    patchAvailable: true,
-    category: 'Cryptographic Issues'
-  },
-  {
-    id: '4',
-    title: 'Cross-Site Scripting (XSS) in Dashboard',
-    description: 'Reflected XSS vulnerability in search functionality allows script injection.',
-    cveId: 'CVE-2024-2345',
-    cvssScore: 6.1,
-    severity: 'medium',
-    status: 'resolved',
-    affectedAsset: 'admin-dashboard',
-    assetType: 'application',
-    discoveredAt: '2024-01-10',
-    dueDate: '2024-01-20',
-    assignee: 'Mike Chen',
-    remediation: 'Implement proper output encoding and Content Security Policy headers.',
-    exploitAvailable: true,
-    patchAvailable: true,
-    category: 'Cross-Site Scripting'
-  },
-  {
-    id: '5',
-    title: 'Sensitive Data Exposure in API Response',
-    description: 'API endpoints expose sensitive user data including email addresses in responses.',
-    cveId: 'N/A',
-    cvssScore: 5.3,
-    severity: 'medium',
-    status: 'open',
-    affectedAsset: 'api-gateway',
-    assetType: 'application',
-    discoveredAt: '2024-01-08',
-    dueDate: '2024-01-30',
-    remediation: 'Filter sensitive fields from API responses. Implement proper data masking.',
-    exploitAvailable: false,
-    patchAvailable: false,
-    category: 'Sensitive Data Exposure'
-  },
-  {
-    id: '6',
-    title: 'Missing Security Headers',
-    description: 'Application lacks security headers like X-Frame-Options, X-Content-Type-Options.',
-    cveId: 'N/A',
-    cvssScore: 4.3,
-    severity: 'low',
-    status: 'open',
-    affectedAsset: 'web-app-portal',
-    assetType: 'application',
-    discoveredAt: '2024-01-05',
-    dueDate: '2024-02-01',
-    remediation: 'Configure web server to include required security headers.',
-    exploitAvailable: false,
-    patchAvailable: true,
-    category: 'Security Misconfiguration'
-  }
-]
-
-const mockAudits: SecurityAudit[] = [
-  {
-    id: '1',
-    name: 'Q1 2024 Vulnerability Assessment',
-    auditCode: 'SEC-2024-001',
-    description: 'Comprehensive vulnerability scan of all production systems',
-    type: 'vulnerability-scan',
-    status: 'passed',
-    severity: 'high',
-    scheduledAt: '2024-01-15',
-    startedAt: '2024-01-15T09:00:00',
-    completedAt: '2024-01-15T18:00:00',
-    duration: 32400,
-    scope: ['Production Servers', 'Databases', 'API Gateway'],
-    findings: { critical: 2, high: 5, medium: 12, low: 28, info: 45 },
-    compliance: ['SOC2', 'ISO27001'],
-    securityScore: 82,
-    passRate: 94,
-    auditor: 'Security Team',
-    assets: 156,
-    progress: 100
-  },
-  {
-    id: '2',
-    name: 'SOC2 Type II Audit',
-    auditCode: 'SEC-2024-002',
-    description: 'Annual SOC2 compliance audit for enterprise customers',
-    type: 'compliance',
-    status: 'in-progress',
-    severity: 'medium',
-    scheduledAt: '2024-01-10',
-    startedAt: '2024-01-10T10:00:00',
-    scope: ['All Systems', 'Policies', 'Access Controls'],
-    findings: { critical: 0, high: 2, medium: 8, low: 15, info: 22 },
-    compliance: ['SOC2'],
-    securityScore: 88,
-    passRate: 91,
-    auditor: 'External Auditor - Deloitte',
-    assets: 234,
-    progress: 65
-  },
-  {
-    id: '3',
-    name: 'Web Application Penetration Test',
-    auditCode: 'SEC-2024-003',
-    description: 'External penetration test of customer-facing web applications',
-    type: 'penetration-test',
-    status: 'scheduled',
-    severity: 'high',
-    scheduledAt: '2024-02-01',
-    scope: ['Web Portal', 'API Endpoints', 'Mobile API'],
-    findings: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
-    compliance: ['PCI-DSS'],
-    securityScore: 0,
-    passRate: 0,
-    auditor: 'CrowdStrike Red Team',
-    assets: 45,
-    progress: 0
-  },
-  {
-    id: '4',
-    name: 'Cloud Infrastructure Security Review',
-    auditCode: 'SEC-2024-004',
-    description: 'Security assessment of AWS and Azure cloud environments',
-    type: 'cloud-security',
-    status: 'warning',
-    severity: 'medium',
-    scheduledAt: '2024-01-08',
-    startedAt: '2024-01-08T14:00:00',
-    completedAt: '2024-01-10T16:00:00',
-    duration: 180000,
-    scope: ['AWS Production', 'Azure DR', 'IAM Policies'],
-    findings: { critical: 1, high: 8, medium: 15, low: 23, info: 34 },
-    compliance: ['CIS', 'NIST'],
-    securityScore: 75,
-    passRate: 82,
-    auditor: 'Cloud Security Team',
-    assets: 89,
-    progress: 100
-  }
-]
-
-const mockAssets: Asset[] = [
-  { id: '1', name: 'prod-api-server-01', type: 'server', ip: '10.0.1.15', hostname: 'api01.prod.internal', os: 'Ubuntu 22.04', status: 'online', riskScore: 85, vulnerabilities: 12, lastScanned: '2024-01-15', owner: 'DevOps', criticality: 'critical', tags: ['production', 'api'] },
-  { id: '2', name: 'prod-db-primary', type: 'database', ip: '10.0.2.10', hostname: 'db01.prod.internal', os: 'PostgreSQL 15', status: 'online', riskScore: 72, vulnerabilities: 5, lastScanned: '2024-01-14', owner: 'DBA Team', criticality: 'critical', tags: ['production', 'database'] },
-  { id: '3', name: 'web-app-portal', type: 'application', ip: 'N/A', hostname: 'portal.company.com', status: 'online', riskScore: 68, vulnerabilities: 8, lastScanned: '2024-01-15', owner: 'Engineering', criticality: 'high', tags: ['production', 'web'] },
-  { id: '4', name: 'aws-eks-cluster', type: 'container', ip: 'N/A', hostname: 'eks.us-east-1', status: 'online', riskScore: 45, vulnerabilities: 3, lastScanned: '2024-01-13', owner: 'Platform', criticality: 'high', tags: ['production', 'kubernetes'] },
-  { id: '5', name: 'corp-vpn-gateway', type: 'network', ip: '203.0.113.50', hostname: 'vpn.company.com', status: 'online', riskScore: 35, vulnerabilities: 2, lastScanned: '2024-01-12', owner: 'IT Security', criticality: 'medium', tags: ['infrastructure', 'vpn'] }
-]
-
-const mockControls: ComplianceControl[] = [
-  { id: '1', controlId: 'CC1.1', framework: 'SOC2', title: 'Control Environment', description: 'COSO Principle 1: Demonstrates commitment to integrity and ethical values', status: 'compliant', evidence: 'Code of conduct reviewed annually', lastAssessed: '2024-01-10', owner: 'HR' },
-  { id: '2', controlId: 'CC2.1', framework: 'SOC2', title: 'Communication and Information', description: 'Internal communication of objectives', status: 'compliant', evidence: 'Monthly security newsletters', lastAssessed: '2024-01-10', owner: 'Security' },
-  { id: '3', controlId: 'A.5.1', framework: 'ISO27001', title: 'Information Security Policies', description: 'Policies for information security', status: 'partial', evidence: 'Policy review in progress', lastAssessed: '2024-01-08', owner: 'CISO' },
-  { id: '4', controlId: 'Art. 5', framework: 'GDPR', title: 'Principles of Processing', description: 'Lawfulness, fairness and transparency', status: 'compliant', evidence: 'Privacy policy updated', lastAssessed: '2024-01-05', owner: 'Legal' },
-  { id: '5', controlId: '164.308(a)', framework: 'HIPAA', title: 'Administrative Safeguards', description: 'Security management process', status: 'non-compliant', evidence: 'Risk assessment overdue', lastAssessed: '2024-01-02', owner: 'Compliance' }
-]
 
 const complianceFrameworks = [
   { id: 'SOC2', name: 'SOC 2 Type II', score: 94, controls: 89, passed: 84, icon: ShieldCheck },
@@ -362,39 +156,6 @@ const complianceFrameworks = [
   { id: 'NIST', name: 'NIST CSF', score: 81, controls: 98, passed: 79, icon: Building2 }
 ]
 
-// Enhanced Competitive Upgrade Mock Data - Security Audit Context
-const mockSecurityAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Critical Vulnerabilities', description: '3 critical CVEs detected in production. Immediate patching recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Vulnerabilities' },
-  { id: '2', type: 'success' as const, title: 'Compliance Improved', description: 'SOC 2 compliance score increased to 94%. Great progress!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '3', type: 'info' as const, title: 'Scan Scheduled', description: 'Weekly vulnerability scan scheduled for Sunday 2 AM UTC.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Scans' },
-]
-
-const mockSecurityCollaborators = [
-  { id: '1', name: 'Alex Security', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Security Lead', lastActive: 'Now' },
-  { id: '2', name: 'Jordan Dev', avatar: '/avatars/jordan.jpg', status: 'online' as const, role: 'DevSecOps', lastActive: '5m ago' },
-  { id: '3', name: 'Sam Analyst', avatar: '/avatars/sam.jpg', status: 'away' as const, role: 'SOC Analyst', lastActive: '20m ago' },
-]
-
-const mockSecurityPredictions = [
-  { id: '1', label: 'Security Score', current: 87, target: 95, predicted: 91, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Vulnerabilities', current: 12, target: 5, predicted: 8, confidence: 75, trend: 'down' as const },
-  { id: '3', label: 'Compliance Rate', current: 89, target: 98, predicted: 94, confidence: 80, trend: 'up' as const },
-]
-
-const mockSecurityActivities = [
-  { id: '1', user: 'Alex Security', action: 'completed', target: 'penetration test', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Jordan Dev', action: 'patched', target: 'CVE-2024-1234', timestamp: '30m ago', type: 'success' as const },
-  { id: '3', user: 'Sam Analyst', action: 'flagged', target: 'suspicious login attempt', timestamp: '1h ago', type: 'warning' as const },
-]
-
-// Quick actions config - handlers set in component
-const mockSecurityQuickActionsConfig = [
-  { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S' },
-  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A' },
-  { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R' },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T' },
-]
-
 export default function SecurityAuditClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -403,6 +164,12 @@ export default function SecurityAuditClient() {
   const [selectedAudit, setSelectedAudit] = useState<SecurityAudit | null>(null)
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Data state
+  const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([])
+  const [audits, setAudits] = useState<SecurityAudit[]>([])
+  const [assets, setAssets] = useState<Asset[]>([])
+  const [controls, setControls] = useState<ComplianceControl[]>([])
 
   // Dialog states for button handlers
   const [showFiltersDialog, setShowFiltersDialog] = useState(false)
@@ -711,7 +478,7 @@ export default function SecurityAuditClient() {
                   {/* Recent Critical Vulnerabilities */}
                   <h4 className="font-medium mb-3">Recent Critical Findings</h4>
                   <div className="space-y-3">
-                    {mockVulnerabilities.filter(v => v.severity === 'critical' || v.severity === 'high').slice(0, 3).map(vuln => (
+                    {vulnerabilities.filter(v => v.severity === 'critical' || v.severity === 'high').slice(0, 3).map(vuln => (
                       <div
                         key={vuln.id}
                         className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -773,7 +540,7 @@ export default function SecurityAuditClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAudits.slice(0, 3).map(audit => (
+                    {audits.slice(0, 3).map(audit => (
                       <div
                         key={audit.id}
                         className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
@@ -807,7 +574,7 @@ export default function SecurityAuditClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAssets.filter(a => a.riskScore > 60).map(asset => {
+                    {assets.filter(a => a.riskScore > 60).map(asset => {
                       const AssetIcon = getAssetIcon(asset.type)
                       return (
                         <div key={asset.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -1086,19 +853,19 @@ export default function SecurityAuditClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAudits.length}</div>
+                  <div className="text-2xl font-bold">{audits.length}</div>
                   <div className="text-sm text-purple-100">Total Audits</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'passed').length}</div>
+                  <div className="text-2xl font-bold">{audits.filter(a => a.status === 'passed').length}</div>
                   <div className="text-sm text-purple-100">Passed</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'in-progress').length}</div>
+                  <div className="text-2xl font-bold">{audits.filter(a => a.status === 'in-progress').length}</div>
                   <div className="text-sm text-purple-100">In Progress</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAudits.filter(a => a.status === 'scheduled').length}</div>
+                  <div className="text-2xl font-bold">{audits.filter(a => a.status === 'scheduled').length}</div>
                   <div className="text-sm text-purple-100">Scheduled</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1109,7 +876,7 @@ export default function SecurityAuditClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockAudits.map(audit => (
+              {audits.map(audit => (
                 <Card
                   key={audit.id}
                   className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer"
@@ -1177,23 +944,23 @@ export default function SecurityAuditClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAssets.length}</div>
+                  <div className="text-2xl font-bold">{assets.length}</div>
                   <div className="text-sm text-emerald-100">Total Assets</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.status === 'online').length}</div>
+                  <div className="text-2xl font-bold">{assets.filter(a => a.status === 'online').length}</div>
                   <div className="text-sm text-emerald-100">Online</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.criticality === 'critical').length}</div>
+                  <div className="text-2xl font-bold">{assets.filter(a => a.criticality === 'critical').length}</div>
                   <div className="text-sm text-emerald-100">Critical</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAssets.reduce((sum, a) => sum + a.vulnerabilities, 0)}</div>
+                  <div className="text-2xl font-bold">{assets.reduce((sum, a) => sum + a.vulnerabilities, 0)}</div>
                   <div className="text-sm text-emerald-100">Vulnerabilities</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockAssets.filter(a => a.riskScore > 60).length}</div>
+                  <div className="text-2xl font-bold">{assets.filter(a => a.riskScore > 60).length}</div>
                   <div className="text-sm text-emerald-100">High Risk</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1215,7 +982,7 @@ export default function SecurityAuditClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockAssets.map(asset => {
+                  {assets.map(asset => {
                     const AssetIcon = getAssetIcon(asset.type)
                     return (
                       <div key={asset.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -1346,7 +1113,7 @@ export default function SecurityAuditClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockControls.map(control => (
+                  {controls.map(control => (
                     <div key={control.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                         <FileCheck className="h-5 w-5 text-gray-600" />
@@ -1716,18 +1483,18 @@ export default function SecurityAuditClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSecurityAIInsights}
+              insights={[]}
               title="Security Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSecurityCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSecurityPredictions}
+              predictions={[]}
               title="Security Forecasts"
             />
           </div>
@@ -1735,12 +1502,12 @@ export default function SecurityAuditClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSecurityActivities}
+            activities={[]}
             title="Security Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSecurityQuickActionsConfig.map(action => ({
+            actions={[].map(action => ({
               ...action,
               action: async () => {
                 switch(action.id) {

@@ -609,11 +609,11 @@ export default function AppStoreClient() {
 
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('discover')
-  const [apps, setApps] = useState<App[]>(mockApps)
-  const [reviews, setReviews] = useState<Review[]>(mockReviews)
-  const [collections, setCollections] = useState<AppCollection[]>(mockCollections)
-  const [updates, setUpdates] = useState<AppUpdate[]>(mockUpdates)
-  const [analytics, setAnalytics] = useState<Analytics>(mockAnalytics)
+  const [apps, setApps] = useState<App[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [collections, setCollections] = useState<AppCollection[]>([])
+  const [updates, setUpdates] = useState<AppUpdate[]>([])
+  const [analytics, setAnalytics] = useState<Analytics>({ totalInstalls: 0, activeApps: 0, totalReviews: 0, averageRating: 0 })
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<AppCategory | 'all'>('all')
@@ -709,11 +709,11 @@ export default function AppStoreClient() {
           inAppPurchases: false,
           tags: p.tags || []
         }))
-        setApps(mappedApps.length > 0 ? mappedApps : mockApps)
+        setApps(mappedApps)
       }
     } catch (error: any) {
       console.error('Error fetching apps:', error)
-      // Keep mock data if database fetch fails
+      setApps([])
     } finally {
       setLoading(false)
     }

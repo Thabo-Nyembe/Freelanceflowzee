@@ -373,7 +373,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   })
 
   const { settings, createSetting, updateSetting, deleteSetting, refetch } = useAdminSettings({})
-  const displaySettings = settings.length > 0 ? settings : initialSettings
+  const displaySettings = settings || []
 
   // Calculate stats
   const overallHealth = mockResources.filter(r => r.status === 'healthy').length / mockResources.length * 100

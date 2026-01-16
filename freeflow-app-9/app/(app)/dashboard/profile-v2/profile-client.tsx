@@ -1141,7 +1141,7 @@ export default function ProfileClient() {
       isPinned: false,
       assessmentStatus: 'not-taken' as AssessmentStatus
     }))
-    const displaySkills = dbSkills.length > 0 ? dbSkills : mockSkills
+    const displaySkills = dbSkills || []
 
     return displaySkills.filter((skill: any) => {
       const matchesCategory = selectedSkillCategory === 'all' || skill.category === selectedSkillCategory
@@ -1211,7 +1211,7 @@ export default function ProfileClient() {
     media: [],
     achievements: exp.achievements
   }))
-  const displayExperiences = dbExperiences.length > 0 ? dbExperiences : mockExperiences
+  const displayExperiences = dbExperiences || []
 
   // Display education - use DB data if available
   const dbEducation = (education || []).map(edu => ({
@@ -1226,7 +1226,7 @@ export default function ProfileClient() {
     description: '',
     societies: []
   }))
-  const displayEducation = dbEducation.length > 0 ? dbEducation : mockEducation
+  const displayEducation = dbEducation || []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">

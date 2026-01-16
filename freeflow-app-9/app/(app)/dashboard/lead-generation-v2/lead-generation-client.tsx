@@ -640,7 +640,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   } = useLeads(initialLeads || [], initialStats || defaultStats)
 
   // Convert hook leads to the component's Lead type for display (use mock data as fallback)
-  const displayLeads = hookLeads.length > 0 ? hookLeads.map(hl => ({
+  const displayLeads = (hookLeads || []).length > 0 ? (hookLeads || []).map(hl => ({
     id: hl.id,
     firstName: hl.name.split(' ')[0] || hl.name,
     lastName: hl.name.split(' ').slice(1).join(' ') || '',

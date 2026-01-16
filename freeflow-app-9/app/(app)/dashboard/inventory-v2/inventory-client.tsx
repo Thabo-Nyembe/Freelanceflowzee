@@ -179,179 +179,6 @@ interface InventoryStats {
   inventoryAccuracy: number
 }
 
-// Mock data
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    title: 'Classic Cotton T-Shirt',
-    description: 'Premium quality cotton t-shirt',
-    vendor: 'Textile Co',
-    productType: 'Apparel',
-    tags: ['clothing', 'basics', 'cotton'],
-    status: 'active',
-    variants: [
-      { id: 'v1', sku: 'TSH-BLK-S', barcode: '123456789001', option1: 'Black', option2: 'S', option3: null, price: 29.99, costPrice: 12.00, quantity: 45, weight: 0.2, weightUnit: 'kg' },
-      { id: 'v2', sku: 'TSH-BLK-M', barcode: '123456789002', option1: 'Black', option2: 'M', option3: null, price: 29.99, costPrice: 12.00, quantity: 82, weight: 0.2, weightUnit: 'kg' },
-      { id: 'v3', sku: 'TSH-BLK-L', barcode: '123456789003', option1: 'Black', option2: 'L', option3: null, price: 29.99, costPrice: 12.00, quantity: 5, weight: 0.2, weightUnit: 'kg' },
-      { id: 'v4', sku: 'TSH-WHT-S', barcode: '123456789004', option1: 'White', option2: 'S', option3: null, price: 29.99, costPrice: 12.00, quantity: 67, weight: 0.2, weightUnit: 'kg' },
-      { id: 'v5', sku: 'TSH-WHT-M', barcode: '123456789005', option1: 'White', option2: 'M', option3: null, price: 29.99, costPrice: 12.00, quantity: 0, weight: 0.2, weightUnit: 'kg' },
-    ],
-    totalQuantity: 199,
-    totalValue: 5967.01,
-    images: ['/products/tshirt.jpg'],
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z'
-  },
-  {
-    id: '2',
-    title: 'Wireless Bluetooth Earbuds',
-    description: 'High-quality wireless earbuds with noise cancellation',
-    vendor: 'TechSound',
-    productType: 'Electronics',
-    tags: ['audio', 'wireless', 'bluetooth'],
-    status: 'active',
-    variants: [
-      { id: 'v6', sku: 'EBD-BLK', barcode: '223456789001', option1: 'Black', option2: null, option3: null, price: 79.99, costPrice: 35.00, quantity: 120, weight: 0.05, weightUnit: 'kg' },
-      { id: 'v7', sku: 'EBD-WHT', barcode: '223456789002', option1: 'White', option2: null, option3: null, price: 79.99, costPrice: 35.00, quantity: 85, weight: 0.05, weightUnit: 'kg' },
-    ],
-    totalQuantity: 205,
-    totalValue: 16397.95,
-    images: ['/products/earbuds.jpg'],
-    createdAt: '2024-02-20T09:00:00Z',
-    updatedAt: '2024-12-18T11:00:00Z'
-  },
-  {
-    id: '3',
-    title: 'Organic Coffee Beans',
-    description: 'Premium single-origin coffee beans',
-    vendor: 'BeanMasters',
-    productType: 'Food & Beverage',
-    tags: ['coffee', 'organic', 'fair-trade'],
-    status: 'active',
-    variants: [
-      { id: 'v8', sku: 'COF-250', barcode: '323456789001', option1: '250g', option2: null, option3: null, price: 14.99, costPrice: 6.00, quantity: 8, weight: 0.25, weightUnit: 'kg' },
-      { id: 'v9', sku: 'COF-500', barcode: '323456789002', option1: '500g', option2: null, option3: null, price: 24.99, costPrice: 10.00, quantity: 45, weight: 0.5, weightUnit: 'kg' },
-      { id: 'v10', sku: 'COF-1KG', barcode: '323456789003', option1: '1kg', option2: null, option3: null, price: 39.99, costPrice: 16.00, quantity: 22, weight: 1, weightUnit: 'kg' },
-    ],
-    totalQuantity: 75,
-    totalValue: 2124.25,
-    images: ['/products/coffee.jpg'],
-    createdAt: '2024-03-10T08:00:00Z',
-    updatedAt: '2024-12-19T16:45:00Z'
-  },
-  {
-    id: '4',
-    title: 'Leather Messenger Bag',
-    description: 'Genuine leather messenger bag with laptop compartment',
-    vendor: 'LeatherCraft',
-    productType: 'Accessories',
-    tags: ['bags', 'leather', 'business'],
-    status: 'active',
-    variants: [
-      { id: 'v11', sku: 'BAG-BRN', barcode: '423456789001', option1: 'Brown', option2: null, option3: null, price: 149.99, costPrice: 65.00, quantity: 18, weight: 1.2, weightUnit: 'kg' },
-      { id: 'v12', sku: 'BAG-BLK', barcode: '423456789002', option1: 'Black', option2: null, option3: null, price: 149.99, costPrice: 65.00, quantity: 24, weight: 1.2, weightUnit: 'kg' },
-    ],
-    totalQuantity: 42,
-    totalValue: 6299.58,
-    images: ['/products/bag.jpg'],
-    createdAt: '2024-04-05T11:00:00Z',
-    updatedAt: '2024-12-17T09:20:00Z'
-  },
-  {
-    id: '5',
-    title: 'Smart Fitness Watch',
-    description: 'Advanced fitness tracking with heart rate monitor',
-    vendor: 'FitTech',
-    productType: 'Electronics',
-    tags: ['fitness', 'wearable', 'smart'],
-    status: 'draft',
-    variants: [
-      { id: 'v13', sku: 'WATCH-BLK', barcode: '523456789001', option1: 'Black', option2: null, option3: null, price: 199.99, costPrice: 85.00, quantity: 0, weight: 0.08, weightUnit: 'kg' },
-      { id: 'v14', sku: 'WATCH-SLV', barcode: '523456789002', option1: 'Silver', option2: null, option3: null, price: 199.99, costPrice: 85.00, quantity: 0, weight: 0.08, weightUnit: 'kg' },
-    ],
-    totalQuantity: 0,
-    totalValue: 0,
-    images: ['/products/watch.jpg'],
-    createdAt: '2024-05-15T14:00:00Z',
-    updatedAt: '2024-12-15T10:00:00Z'
-  }
-]
-
-const mockLocations: Location[] = [
-  { id: 'loc1', name: 'Main Warehouse', address: '123 Industrial Blvd', city: 'Los Angeles', country: 'USA', type: 'warehouse', isDefault: true, productCount: 156, totalValue: 245000 },
-  { id: 'loc2', name: 'Downtown Store', address: '456 Main Street', city: 'Los Angeles', country: 'USA', type: 'store', isDefault: false, productCount: 89, totalValue: 78000 },
-  { id: 'loc3', name: 'East Coast Fulfillment', address: '789 Commerce Dr', city: 'New York', country: 'USA', type: 'fulfillment', isDefault: false, productCount: 124, totalValue: 167000 },
-  { id: 'loc4', name: 'EU Distribution Center', address: '10 Logistics Way', city: 'Amsterdam', country: 'Netherlands', type: 'warehouse', isDefault: false, productCount: 67, totalValue: 89000 },
-]
-
-const mockTransfers: StockTransfer[] = [
-  { id: 'tr1', reference: 'TRF-001', originLocation: 'Main Warehouse', destinationLocation: 'Downtown Store', status: 'in_transit', items: [{ productId: '1', productName: 'Classic Cotton T-Shirt', sku: 'TSH-BLK-M', quantity: 25 }], createdAt: '2024-12-20T10:00:00Z', expectedArrival: '2024-12-22T16:00:00Z', notes: 'Restock for holiday season' },
-  { id: 'tr2', reference: 'TRF-002', originLocation: 'Main Warehouse', destinationLocation: 'East Coast Fulfillment', status: 'pending', items: [{ productId: '2', productName: 'Wireless Bluetooth Earbuds', sku: 'EBD-BLK', quantity: 50 }, { productId: '2', productName: 'Wireless Bluetooth Earbuds', sku: 'EBD-WHT', quantity: 30 }], createdAt: '2024-12-21T09:00:00Z', expectedArrival: '2024-12-26T12:00:00Z', notes: 'Q1 inventory prep' },
-  { id: 'tr3', reference: 'TRF-003', originLocation: 'EU Distribution Center', destinationLocation: 'Downtown Store', status: 'received', items: [{ productId: '4', productName: 'Leather Messenger Bag', sku: 'BAG-BRN', quantity: 10 }], createdAt: '2024-12-15T11:00:00Z', expectedArrival: '2024-12-18T14:00:00Z', notes: '' },
-]
-
-const mockPurchaseOrders: PurchaseOrder[] = [
-  { id: 'po1', poNumber: 'PO-2024-001', supplierId: 'sup1', supplierName: 'Textile Co', status: 'sent', items: [{ productId: '1', productName: 'Classic Cotton T-Shirt', sku: 'TSH-BLK-L', quantity: 100, unitCost: 12.00 }, { productId: '1', productName: 'Classic Cotton T-Shirt', sku: 'TSH-WHT-M', quantity: 75, unitCost: 12.00 }], subtotal: 2100, tax: 210, total: 2310, expectedDate: '2024-12-28T00:00:00Z', createdAt: '2024-12-18T14:00:00Z', notes: 'Urgent restock' },
-  { id: 'po2', poNumber: 'PO-2024-002', supplierId: 'sup2', supplierName: 'TechSound', status: 'partial', items: [{ productId: '2', productName: 'Wireless Bluetooth Earbuds', sku: 'EBD-BLK', quantity: 200, unitCost: 35.00 }], subtotal: 7000, tax: 700, total: 7700, expectedDate: '2024-12-30T00:00:00Z', createdAt: '2024-12-10T10:00:00Z', notes: '' },
-  { id: 'po3', poNumber: 'PO-2024-003', supplierId: 'sup3', supplierName: 'FitTech', status: 'draft', items: [{ productId: '5', productName: 'Smart Fitness Watch', sku: 'WATCH-BLK', quantity: 50, unitCost: 85.00 }, { productId: '5', productName: 'Smart Fitness Watch', sku: 'WATCH-SLV', quantity: 50, unitCost: 85.00 }], subtotal: 8500, tax: 850, total: 9350, expectedDate: '2025-01-15T00:00:00Z', createdAt: '2024-12-21T16:00:00Z', notes: 'New product launch' },
-]
-
-const mockSuppliers: Supplier[] = [
-  { id: 'sup1', name: 'Textile Co', email: 'orders@textileco.com', phone: '+1-555-0101', address: '500 Fabric Lane, Chicago, IL', country: 'USA', leadTime: 14, paymentTerms: 'Net 30', productCount: 12, totalOrders: 45, totalSpent: 125000, rating: 4.8 },
-  { id: 'sup2', name: 'TechSound', email: 'wholesale@techsound.com', phone: '+1-555-0102', address: '200 Audio Way, San Jose, CA', country: 'USA', leadTime: 21, paymentTerms: 'Net 45', productCount: 8, totalOrders: 28, totalSpent: 89000, rating: 4.5 },
-  { id: 'sup3', name: 'FitTech', email: 'b2b@fittech.com', phone: '+86-755-1234', address: '88 Innovation Rd, Shenzhen', country: 'China', leadTime: 35, paymentTerms: 'Net 60', productCount: 5, totalOrders: 12, totalSpent: 67000, rating: 4.2 },
-  { id: 'sup4', name: 'BeanMasters', email: 'partners@beanmasters.co', phone: '+57-1-234-5678', address: 'Zona Cafetera, Manizales', country: 'Colombia', leadTime: 28, paymentTerms: 'Net 30', productCount: 3, totalOrders: 18, totalSpent: 34000, rating: 4.9 },
-  { id: 'sup5', name: 'LeatherCraft', email: 'sales@leathercraft.it', phone: '+39-02-1234567', address: 'Via dei Pellettieri 25, Florence', country: 'Italy', leadTime: 21, paymentTerms: 'Net 30', productCount: 6, totalOrders: 22, totalSpent: 78000, rating: 4.7 },
-]
-
-const mockAdjustments: InventoryAdjustment[] = [
-  { id: 'adj1', type: 'decrease', productId: '3', productName: 'Organic Coffee Beans', sku: 'COF-250', locationId: 'loc1', locationName: 'Main Warehouse', quantityBefore: 15, quantityAfter: 8, reason: 'Damaged in storage', adjustedBy: 'John Smith', adjustedAt: '2024-12-20T14:30:00Z' },
-  { id: 'adj2', type: 'increase', productId: '1', productName: 'Classic Cotton T-Shirt', sku: 'TSH-BLK-M', locationId: 'loc2', locationName: 'Downtown Store', quantityBefore: 57, quantityAfter: 82, reason: 'Transfer received', adjustedBy: 'Sarah Johnson', adjustedAt: '2024-12-19T11:00:00Z' },
-  { id: 'adj3', type: 'correction', productId: '2', productName: 'Wireless Bluetooth Earbuds', sku: 'EBD-WHT', locationId: 'loc3', locationName: 'East Coast Fulfillment', quantityBefore: 90, quantityAfter: 85, reason: 'Inventory count discrepancy', adjustedBy: 'Mike Brown', adjustedAt: '2024-12-18T16:45:00Z' },
-]
-
-const mockStats: InventoryStats = {
-  totalProducts: 5,
-  totalVariants: 14,
-  totalValue: 30788.79,
-  lowStockItems: 2,
-  outOfStockItems: 3,
-  totalLocations: 4,
-  pendingTransfers: 2,
-  openPurchaseOrders: 2,
-  avgTurnoverRate: 4.2,
-  inventoryAccuracy: 98.5
-}
-
-// Enhanced Competitive Upgrade Mock Data - Inventory Context
-const mockInventoryAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Low Stock Alert', description: '3 products below reorder point. Auto-purchase orders recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Stock' },
-  { id: '2', type: 'success' as const, title: 'Inventory Optimization', description: 'Warehouse efficiency improved 12% after recent reorganization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Operations' },
-  { id: '3', type: 'info' as const, title: 'Demand Forecast', description: 'Expected 25% increase in electronics demand next month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
-]
-
-const mockInventoryCollaborators = [
-  { id: '1', name: 'Tom Rodriguez', avatar: '/avatars/tom.jpg', status: 'online' as const, role: 'Warehouse Manager', lastActive: 'Now' },
-  { id: '2', name: 'Nancy Lee', avatar: '/avatars/nancy.jpg', status: 'online' as const, role: 'Inventory Analyst', lastActive: '3m ago' },
-  { id: '3', name: 'Carlos Mendez', avatar: '/avatars/carlos.jpg', status: 'away' as const, role: 'Procurement', lastActive: '30m ago' },
-  { id: '4', name: 'Anna Brown', avatar: '/avatars/anna.jpg', status: 'offline' as const, role: 'Logistics', lastActive: '3h ago' },
-]
-
-const mockInventoryPredictions = [
-  { id: '1', label: 'Stock Turnover Rate', current: 4.2, target: 5.0, predicted: 4.8, confidence: 80, trend: 'up' as const },
-  { id: '2', label: 'Inventory Accuracy', current: 98.5, target: 99.5, predicted: 99.2, confidence: 85, trend: 'up' as const },
-  { id: '3', label: 'Fulfillment Rate', current: 94, target: 98, predicted: 97, confidence: 78, trend: 'up' as const },
-]
-
-const mockInventoryActivities = [
-  { id: '1', user: 'Tom Rodriguez', action: 'received', target: 'PO-2024-089 shipment', timestamp: '8m ago', type: 'success' as const },
-  { id: '2', user: 'Nancy Lee', action: 'flagged', target: '5 items for recount', timestamp: '20m ago', type: 'warning' as const },
-  { id: '3', user: 'Carlos Mendez', action: 'created', target: 'purchase order PO-2024-090', timestamp: '45m ago', type: 'info' as const },
-  { id: '4', user: 'Anna Brown', action: 'completed', target: 'stock transfer to Store #3', timestamp: '1h ago', type: 'success' as const },
-]
-
-// Quick actions are now handled via component state and real handlers
-// These will be configured inside the component with access to state setters
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
@@ -499,7 +326,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   }
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return []// mockProducts.filter(product => {
       const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.variants.some(v => v.sku.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -974,15 +801,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <Package className="w-4 h-4" />
                 Total Products
               </div>
-              <div className="text-2xl font-bold">{mockStats.totalProducts}</div>
-              <div className="text-xs text-white/60">{mockStats.totalVariants} variants</div>
+              <div className="text-2xl font-bold">{0}</div>
+              <div className="text-xs text-white/60">{0} variants</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <DollarSign className="w-4 h-4" />
                 Total Value
               </div>
-              <div className="text-2xl font-bold">${(mockStats.totalValue / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">${(0 / 1000).toFixed(1)}K</div>
               <div className="text-xs text-white/60">Across all locations</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -990,15 +817,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <AlertTriangle className="w-4 h-4" />
                 Low Stock
               </div>
-              <div className="text-2xl font-bold text-yellow-300">{mockStats.lowStockItems}</div>
-              <div className="text-xs text-white/60">{mockStats.outOfStockItems} out of stock</div>
+              <div className="text-2xl font-bold text-yellow-300">{0}</div>
+              <div className="text-xs text-white/60">{0} out of stock</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <RefreshCw className="w-4 h-4" />
                 Turnover Rate
               </div>
-              <div className="text-2xl font-bold">{mockStats.avgTurnoverRate}x</div>
+              <div className="text-2xl font-bold">{0}x</div>
               <div className="text-xs text-white/60">Monthly average</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -1006,7 +833,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <CheckCircle2 className="w-4 h-4" />
                 Accuracy
               </div>
-              <div className="text-2xl font-bold">{mockStats.inventoryAccuracy}%</div>
+              <div className="text-2xl font-bold">{0}%</div>
               <div className="text-xs text-white/60">Last count</div>
             </div>
           </div>
@@ -1166,7 +993,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Total SKUs</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockProducts.length}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{0}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">
@@ -1269,7 +1096,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   Warehouse Capacity
                 </h4>
                 <div className="space-y-3">
-                  {mockLocations.slice(0, 3).map((loc) => (
+                  {[].map((loc) => (
                     <div key={loc.id} className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">{loc.name}</span>
@@ -1441,7 +1268,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockLocations.map((location) => {
+              {[].map((location) => {
                 const LocationIcon = getLocationIcon(location.type)
                 return (
                   <div key={location.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
@@ -1514,7 +1341,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </tr>
                 </thead>
                 <tbody>
-                  {mockTransfers.map((transfer) => (
+                  {[].map((transfer) => (
                     <tr key={transfer.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{transfer.reference}</td>
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{transfer.originLocation}</td>
@@ -1568,7 +1395,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPurchaseOrders.map((po) => (
+                  {[].map((po) => (
                     <tr key={po.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{po.poNumber}</td>
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{po.supplierName}</td>
@@ -1616,7 +1443,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockSuppliers.map((supplier) => (
+              {[].map((supplier) => (
                 <div key={supplier.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -1683,7 +1510,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </tr>
                 </thead>
                 <tbody>
-                  {mockAdjustments.map((adj) => (
+                  {[].map((adj) => (
                     <tr key={adj.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
                         {new Date(adj.adjustedAt).toLocaleString()}
@@ -1841,7 +1668,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         </button>
                       </div>
                       <div className="space-y-3">
-                        {mockLocations.map((loc) => (
+                        {[].map((loc) => (
                           <div key={loc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -2154,7 +1981,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockInventoryAIInsights}
+              insights={[]}
               title="Inventory Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
@@ -2163,11 +1990,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockInventoryCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockInventoryPredictions}
+              predictions={[]}
               title="Inventory Forecasts"
             />
           </div>
@@ -2176,7 +2003,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockInventoryActivities}
+            activities={[]}
             title="Warehouse Activity"
             maxItems={5}
           />
@@ -2434,13 +2261,13 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <select
                 value={poForm.supplierId}
                 onChange={(e) => {
-                  const sup = mockSuppliers.find(s => s.id === e.target.value)
+                  const sup = [].find(s => s.id === e.target.value)
                   setPoForm(prev => ({ ...prev, supplierId: e.target.value, supplierName: sup?.name || '' }))
                 }}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
               >
                 <option value="">Select supplier...</option>
-                {mockSuppliers.map(sup => (
+                {[].map(sup => (
                   <option key={sup.id} value={sup.id}>{sup.name}</option>
                 ))}
               </select>

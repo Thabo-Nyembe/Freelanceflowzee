@@ -1063,7 +1063,7 @@ export default function ReleasesClient() {
   // Filter releases based on search and filters
   const filteredReleases = useMemo(() => {
     // Use mock data if no real data exists
-    const dataToFilter = releases.length > 0 ? releases.map(r => ({
+    const dataToFilter = (releases || []).length > 0 ? (releases || []).map(r => ({
       id: r.id,
       version: r.version,
       name: r.release_name,

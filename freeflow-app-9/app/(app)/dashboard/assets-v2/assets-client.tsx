@@ -745,9 +745,9 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const [itemToEdit, setItemToEdit] = useState<DigitalAsset | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Use Supabase data if available, fallback to mock
-  const assets = dbAssets && dbAssets.length > 0 ? mockAssets : mockAssets
-  const collections = dbCollections && dbCollections.length > 0 ? mockCollections : mockCollections
+  // Use Supabase data directly
+  const assets = dbAssets || []
+  const collections = dbCollections || []
   const brandPortal = mockBrandPortal
 
   // Computed Statistics

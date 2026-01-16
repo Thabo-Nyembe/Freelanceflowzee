@@ -135,141 +135,6 @@ interface AIDesignStats {
   favoriteCount: number
 }
 
-// Mock data
-const mockGenerations: Generation[] = [
-  {
-    id: '1',
-    prompt: 'A majestic dragon flying over a neon-lit cyberpunk city at night, highly detailed, cinematic lighting',
-    negativePrompt: 'blurry, low quality',
-    style: 'digital_art',
-    model: 'midjourney_v6',
-    aspectRatio: '16:9',
-    quality: 'high',
-    status: 'completed',
-    imageUrl: '/generated/dragon-city.jpg',
-    thumbnailUrl: '/generated/dragon-city-thumb.jpg',
-    seed: 12345678,
-    likes: 245,
-    views: 1842,
-    downloads: 89,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-23T14:30:00Z',
-    generationTime: 12500,
-    creditsUsed: 5
-  },
-  {
-    id: '2',
-    prompt: 'Serene Japanese garden with cherry blossoms, koi pond, traditional architecture, morning mist',
-    style: 'photorealistic',
-    model: 'midjourney_v6',
-    aspectRatio: '3:2',
-    quality: 'ultra',
-    status: 'completed',
-    imageUrl: '/generated/japanese-garden.jpg',
-    thumbnailUrl: '/generated/japanese-garden-thumb.jpg',
-    seed: 98765432,
-    likes: 189,
-    views: 1256,
-    downloads: 67,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-23T10:15:00Z',
-    generationTime: 18200,
-    creditsUsed: 8
-  },
-  {
-    id: '3',
-    prompt: 'Portrait of a warrior princess with flowing silver hair, intricate armor, fantasy style',
-    style: 'anime',
-    model: 'midjourney_v6',
-    aspectRatio: '2:3',
-    quality: 'high',
-    status: 'processing',
-    likes: 0,
-    views: 0,
-    downloads: 0,
-    isFavorite: false,
-    isPublic: false,
-    createdAt: '2024-12-24T08:45:00Z',
-    creditsUsed: 5
-  },
-  {
-    id: '4',
-    prompt: 'Abstract geometric patterns with gold and marble textures, luxury design',
-    style: 'minimalist',
-    model: 'dalle_3',
-    aspectRatio: '1:1',
-    quality: 'standard',
-    status: 'completed',
-    imageUrl: '/generated/abstract-geo.jpg',
-    thumbnailUrl: '/generated/abstract-geo-thumb.jpg',
-    seed: 55667788,
-    likes: 78,
-    views: 534,
-    downloads: 23,
-    isFavorite: false,
-    isPublic: true,
-    createdAt: '2024-12-22T16:20:00Z',
-    generationTime: 8500,
-    creditsUsed: 3
-  },
-  {
-    id: '5',
-    prompt: 'Cozy coffee shop interior, warm lighting, rustic wood, plants, hygge atmosphere',
-    style: 'photorealistic',
-    model: 'stable_diffusion',
-    aspectRatio: '16:9',
-    quality: 'high',
-    status: 'completed',
-    imageUrl: '/generated/coffee-shop.jpg',
-    thumbnailUrl: '/generated/coffee-shop-thumb.jpg',
-    seed: 11223344,
-    likes: 156,
-    views: 892,
-    downloads: 45,
-    isFavorite: false,
-    isPublic: true,
-    createdAt: '2024-12-21T09:30:00Z',
-    generationTime: 11200,
-    creditsUsed: 5
-  },
-  {
-    id: '6',
-    prompt: 'Futuristic sports car, sleek design, holographic elements, studio lighting',
-    style: '3d_render',
-    model: 'midjourney_v6',
-    aspectRatio: '16:9',
-    quality: 'ultra',
-    status: 'upscaling',
-    imageUrl: '/generated/sports-car.jpg',
-    thumbnailUrl: '/generated/sports-car-thumb.jpg',
-    seed: 44556677,
-    likes: 312,
-    views: 2156,
-    downloads: 134,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-20T14:45:00Z',
-    generationTime: 15800,
-    creditsUsed: 8
-  }
-]
-
-const mockCollections: Collection[] = [
-  { id: '1', name: 'Fantasy Worlds', description: 'Epic fantasy landscapes and characters', itemCount: 24, isPrivate: false, createdAt: '2024-12-01' },
-  { id: '2', name: 'Architecture', description: 'Modern and futuristic buildings', itemCount: 18, isPrivate: false, createdAt: '2024-11-15' },
-  { id: '3', name: 'Character Designs', description: 'Character concepts and portraits', itemCount: 32, isPrivate: true, createdAt: '2024-12-10' },
-  { id: '4', name: 'Product Mockups', description: 'Commercial product visualizations', itemCount: 15, isPrivate: true, createdAt: '2024-12-18' }
-]
-
-const mockPromptHistory: PromptHistory[] = [
-  { id: '1', prompt: 'A majestic dragon flying over a neon-lit cyberpunk city', style: 'digital_art', usedAt: '2024-12-23T14:30:00Z', resultCount: 4, isFavorite: true },
-  { id: '2', prompt: 'Serene Japanese garden with cherry blossoms', style: 'photorealistic', usedAt: '2024-12-23T10:15:00Z', resultCount: 4, isFavorite: true },
-  { id: '3', prompt: 'Abstract geometric patterns with gold textures', style: 'minimalist', usedAt: '2024-12-22T16:20:00Z', resultCount: 4, isFavorite: false },
-  { id: '4', prompt: 'Cozy coffee shop interior, warm lighting', style: 'photorealistic', usedAt: '2024-12-21T09:30:00Z', resultCount: 4, isFavorite: false },
-  { id: '5', prompt: 'Futuristic sports car with holographic elements', style: '3d_render', usedAt: '2024-12-20T14:45:00Z', resultCount: 4, isFavorite: true }
-]
 
 const styleTemplates: StyleTemplate[] = [
   { id: '1', name: 'Cinematic', description: 'Movie-quality dramatic lighting', preview: '/styles/cinematic.jpg', style: 'photorealistic', promptModifiers: 'cinematic lighting, dramatic, film grain, anamorphic', isPopular: true, usageCount: 12500 },
@@ -333,38 +198,6 @@ const formatDate = (date: string) => {
   })
 }
 
-// Enhanced Competitive Upgrade Mock Data - AI Design Context
-const mockAIDesignInsights = [
-  { id: '1', type: 'success' as const, title: 'Style Trending', description: 'Photorealistic style generating 40% more engagement this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-  { id: '2', type: 'info' as const, title: 'Credits Optimization', description: 'Switch to batch mode for 25% credit savings on multiple generations.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Efficiency' },
-  { id: '3', type: 'warning' as const, title: 'Queue Alert', description: 'High demand detected. Consider scheduling generations for off-peak hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'System' },
-]
-
-const mockAIDesignCollaborators = [
-  { id: '1', name: 'Maya Chen', avatar: '/avatars/maya.jpg', status: 'online' as const, role: 'Creative Director', lastActive: 'Now' },
-  { id: '2', name: 'Oliver Park', avatar: '/avatars/oliver.jpg', status: 'online' as const, role: 'AI Artist', lastActive: '5m ago' },
-  { id: '3', name: 'Sophie Miller', avatar: '/avatars/sophie.jpg', status: 'away' as const, role: 'Designer', lastActive: '20m ago' },
-]
-
-const mockAIDesignPredictions = [
-  { id: '1', label: 'Generation Success Rate', current: 94, target: 98, predicted: 96, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Avg Generation Time', current: 12, target: 8, predicted: 10, confidence: 75, trend: 'down' as const },
-  { id: '3', label: 'Monthly Credits Used', current: 450, target: 500, predicted: 480, confidence: 82, trend: 'up' as const },
-]
-
-const mockAIDesignActivities = [
-  { id: '1', user: 'Maya Chen', action: 'generated', target: '4K landscape image', timestamp: '2m ago', type: 'success' as const },
-  { id: '2', user: 'Oliver Park', action: 'upscaled', target: 'product photo batch', timestamp: '15m ago', type: 'info' as const },
-  { id: '3', user: 'Sophie Miller', action: 'saved', target: 'style preset "Neon Dreams"', timestamp: '30m ago', type: 'info' as const },
-]
-
-// Quick actions config - handlers set in component
-const mockAIDesignQuickActionsConfig = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G' },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B' },
-  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U' },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S' },
-]
 
 export default function AIDesignClient() {
 
@@ -389,9 +222,9 @@ export default function AIDesignClient() {
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Database state
-  const [generations, setGenerations] = useState<Generation[]>(mockGenerations)
-  const [collections, setCollections] = useState<Collection[]>(mockCollections)
-  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>(mockPromptHistory)
+  const [generations, setGenerations] = useState<Generation[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>([])
 
   // Database integration with useAIDesigns hook
   const {
@@ -469,7 +302,12 @@ export default function AIDesignClient() {
     creditsUsed: generations.reduce((sum, g) => sum + g.creditsUsed, 0),
     totalLikes: generations.reduce((sum, g) => sum + g.likes, 0),
     totalDownloads: generations.reduce((sum, g) => sum + g.downloads, 0),
-    avgGenerationTime: generations.filter(g => g.generationTime).reduce((sum, g) => sum + (g.generationTime || 0), 0) / (generations.filter(g => g.generationTime).length || 1),
+    avgGenerationTime: (() => {
+      const withTimes = generations.filter(g => g.generationTime)
+      return withTimes.length > 0
+        ? withTimes.reduce((sum, g) => sum + (g.generationTime || 0), 0) / withTimes.length
+        : 0
+    })(),
     favoriteCount: generations.filter(g => g.isFavorite).length
   }), [generations])
 
@@ -798,7 +636,7 @@ export default function AIDesignClient() {
                 <span className="text-xs text-gray-500 dark:text-gray-400">Collections</span>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {mockCollections.length}
+                {collections.length}
               </div>
               <div className="flex items-center gap-1 text-xs text-indigo-600">
                 <span>Organized</span>
@@ -928,7 +766,7 @@ export default function AIDesignClient() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockGenerations.slice(0, 4).map((gen) => (
+                {generations.slice(0, 4).map((gen) => (
                   <div key={gen.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600" />
@@ -1070,7 +908,7 @@ export default function AIDesignClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {mockGenerations.slice(0, 4).map((gen) => (
+                      {generations.slice(0, 4).map((gen) => (
                         <div
                           key={gen.id}
                           className="relative aspect-square rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden cursor-pointer group"
@@ -1247,7 +1085,7 @@ export default function AIDesignClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockGenerations.length}</div>
+                      <div className="text-2xl font-bold">{generations.length}</div>
                       <div className="text-sm text-pink-100">Total Images</div>
                     </div>
                     <div className="text-center">
@@ -1270,11 +1108,11 @@ export default function AIDesignClient() {
             {/* Gallery Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
-                { style: 'photorealistic', count: mockGenerations.filter(g => g.style === 'photorealistic').length, icon: Image, color: 'blue' },
-                { style: 'digital_art', count: mockGenerations.filter(g => g.style === 'digital_art').length, icon: Paintbrush, color: 'purple' },
-                { style: 'anime', count: mockGenerations.filter(g => g.style === 'anime').length, icon: Sparkles, color: 'pink' },
-                { style: '3d_render', count: mockGenerations.filter(g => g.style === '3d_render').length, icon: Layers, color: 'indigo' },
-                { style: 'oil_painting', count: mockGenerations.filter(g => g.style === 'oil_painting').length, icon: Palette, color: 'amber' }
+                { style: 'photorealistic', count: generations.filter(g => g.style === 'photorealistic').length, icon: Image, color: 'blue' },
+                { style: 'digital_art', count: generations.filter(g => g.style === 'digital_art').length, icon: Paintbrush, color: 'purple' },
+                { style: 'anime', count: generations.filter(g => g.style === 'anime').length, icon: Sparkles, color: 'pink' },
+                { style: '3d_render', count: generations.filter(g => g.style === '3d_render').length, icon: Layers, color: 'indigo' },
+                { style: 'oil_painting', count: generations.filter(g => g.style === 'oil_painting').length, icon: Palette, color: 'amber' }
               ].map((stat, idx) => (
                 <Card key={idx} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                   <CardContent className="p-3 text-center">
@@ -1997,18 +1835,18 @@ export default function AIDesignClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAIDesignInsights}
+              insights={[]}
               title="AI Design Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAIDesignCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAIDesignPredictions}
+              predictions={[]}
               title="Generation Forecasts"
             />
           </div>
@@ -2016,12 +1854,12 @@ export default function AIDesignClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAIDesignActivities}
+            activities={[]}
             title="Design Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAIDesignQuickActionsConfig.map(action => ({
+            actions={[].map(action => ({
               ...action,
               action: () => {
                 switch(action.id) {

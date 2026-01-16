@@ -3048,7 +3048,7 @@ export default function EventsClient() {
                 return
               }
               const recipientEmails = emailRecipients === 'all'
-                ? mockAttendees.map(a => a.email)
+                ? (mockAttendees || []).map(a => a.email)
                 : [mockAttendees[0]?.email].filter(Boolean)
 
               // Try API first, fallback to mailto

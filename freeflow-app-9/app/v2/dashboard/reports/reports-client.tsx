@@ -476,9 +476,9 @@ export default function ReportsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Data loading state
-  const [reports, setReports] = useState<Report[]>(mockReports)
-  const [dataSources, setDataSources] = useState<DataSource[]>(mockDataSources)
-  const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>(mockScheduledReports)
+  const [reports, setReports] = useState<Report[]>([])
+  const [dataSources, setDataSources] = useState<DataSource[]>([])
+  const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>([])
   const [isLoadingReports, setIsLoadingReports] = useState(false)
   const [isLoadingDataSources, setIsLoadingDataSources] = useState(false)
   const [isLoadingScheduled, setIsLoadingScheduled] = useState(false)
@@ -511,12 +511,11 @@ export default function ReportsClient() {
           folder: r.config?.folder || 'Uncategorized',
           tags: r.tags || []
         }))
-        setReports(transformedReports.length > 0 ? transformedReports : mockReports)
+        setReports(transformedReports)
       }
     } catch (error) {
       console.error('Failed to load reports:', error)
-      // Keep mock data on error
-      setReports(mockReports)
+      setReports([])
     } finally {
       setIsLoadingReports(false)
     }

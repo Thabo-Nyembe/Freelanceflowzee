@@ -203,322 +203,6 @@ interface Report {
 }
 
 // ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const mockClients: Client[] = [
-  {
-    id: 'client-1',
-    name: 'Acme Corporation',
-    email: 'billing@acme.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Acme Corporation',
-    address: '123 Business Ave',
-    city: 'New York',
-    state: 'NY',
-    zip: '10001',
-    country: 'USA',
-    website: 'www.acme.com',
-    taxId: 'XX-XXXXXXX',
-    paymentTerms: 30,
-    creditLimit: 50000,
-    balance: 12500,
-    totalPaid: 87500,
-    invoiceCount: 24,
-    lastInvoiceDate: '2024-12-15',
-    createdAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 'client-2',
-    name: 'TechStart Inc',
-    email: 'accounts@techstart.io',
-    phone: '+1 (555) 234-5678',
-    company: 'TechStart Inc',
-    address: '456 Innovation Blvd',
-    city: 'San Francisco',
-    state: 'CA',
-    zip: '94102',
-    country: 'USA',
-    paymentTerms: 15,
-    creditLimit: 25000,
-    balance: 4500,
-    totalPaid: 45500,
-    invoiceCount: 12,
-    lastInvoiceDate: '2024-12-18',
-    createdAt: '2024-03-20T14:00:00Z'
-  },
-  {
-    id: 'client-3',
-    name: 'Global Industries',
-    email: 'finance@globalind.com',
-    phone: '+1 (555) 345-6789',
-    company: 'Global Industries Ltd',
-    address: '789 Enterprise Way',
-    city: 'Chicago',
-    state: 'IL',
-    zip: '60601',
-    country: 'USA',
-    paymentTerms: 45,
-    creditLimit: 100000,
-    balance: 28750,
-    totalPaid: 171250,
-    invoiceCount: 36,
-    lastInvoiceDate: '2024-12-20',
-    createdAt: '2023-06-10T09:00:00Z'
-  }
-]
-
-const mockInvoices: Invoice[] = [
-  {
-    id: 'inv-1',
-    invoiceNumber: 'INV-2024-001',
-    type: 'standard',
-    status: 'paid',
-    client: {
-      id: 'client-1',
-      name: 'Acme Corporation',
-      email: 'billing@acme.com',
-      company: 'Acme Corporation'
-    },
-    lineItems: [
-      { id: 'li-1', description: 'Web Development Services', quantity: 40, unitPrice: 150, taxRate: 8, discount: 0, total: 6480 },
-      { id: 'li-2', description: 'UI/UX Design', quantity: 20, unitPrice: 125, taxRate: 8, discount: 10, total: 2430 }
-    ],
-    subtotal: 8500,
-    taxAmount: 680,
-    discountAmount: 250,
-    total: 8930,
-    amountPaid: 8930,
-    amountDue: 0,
-    currency: 'USD',
-    issueDate: '2024-11-15',
-    dueDate: '2024-12-15',
-    paidDate: '2024-12-10',
-    sentDate: '2024-11-15',
-    viewedDate: '2024-11-16',
-    terms: 'Net 30',
-    payments: [
-      { id: 'pay-1', invoiceId: 'inv-1', amount: 8930, method: 'bank_transfer', date: '2024-12-10', reference: 'TXN-123456' }
-    ],
-    lateFeeApplied: false,
-    template: 'professional',
-    tags: ['priority', 'web'],
-    createdAt: '2024-11-15T10:00:00Z',
-    updatedAt: '2024-12-10T14:30:00Z'
-  },
-  {
-    id: 'inv-2',
-    invoiceNumber: 'INV-2024-002',
-    type: 'standard',
-    status: 'overdue',
-    client: {
-      id: 'client-2',
-      name: 'TechStart Inc',
-      email: 'accounts@techstart.io',
-      company: 'TechStart Inc'
-    },
-    lineItems: [
-      { id: 'li-3', description: 'Mobile App Development', quantity: 80, unitPrice: 175, taxRate: 8.5, discount: 0, total: 15190 },
-      { id: 'li-4', description: 'API Integration', quantity: 16, unitPrice: 150, taxRate: 8.5, discount: 0, total: 2604 }
-    ],
-    subtotal: 16400,
-    taxAmount: 1394,
-    discountAmount: 0,
-    total: 17794,
-    amountPaid: 0,
-    amountDue: 17794,
-    currency: 'USD',
-    issueDate: '2024-11-01',
-    dueDate: '2024-11-15',
-    sentDate: '2024-11-01',
-    viewedDate: '2024-11-02',
-    terms: 'Net 15',
-    payments: [],
-    lateFee: 500,
-    lateFeeApplied: true,
-    template: 'modern',
-    tags: ['mobile', 'urgent'],
-    createdAt: '2024-11-01T09:00:00Z',
-    updatedAt: '2024-12-01T10:00:00Z'
-  },
-  {
-    id: 'inv-3',
-    invoiceNumber: 'INV-2024-003',
-    type: 'standard',
-    status: 'partial',
-    client: {
-      id: 'client-3',
-      name: 'Global Industries',
-      email: 'finance@globalind.com',
-      company: 'Global Industries Ltd'
-    },
-    lineItems: [
-      { id: 'li-5', description: 'Enterprise Software License', quantity: 1, unitPrice: 25000, taxRate: 0, discount: 5, total: 23750 },
-      { id: 'li-6', description: 'Implementation Services', quantity: 100, unitPrice: 200, taxRate: 8, discount: 0, total: 21600 },
-      { id: 'li-7', description: 'Training (10 sessions)', quantity: 10, unitPrice: 500, taxRate: 8, discount: 0, total: 5400 }
-    ],
-    subtotal: 50000,
-    taxAmount: 2160,
-    discountAmount: 1250,
-    total: 50910,
-    amountPaid: 25000,
-    amountDue: 25910,
-    currency: 'USD',
-    issueDate: '2024-12-01',
-    dueDate: '2025-01-15',
-    sentDate: '2024-12-01',
-    viewedDate: '2024-12-02',
-    terms: 'Net 45',
-    payments: [
-      { id: 'pay-2', invoiceId: 'inv-3', amount: 25000, method: 'credit_card', date: '2024-12-05', reference: 'CC-789012' }
-    ],
-    lateFeeApplied: false,
-    template: 'enterprise',
-    tags: ['enterprise', 'software'],
-    createdAt: '2024-12-01T11:00:00Z',
-    updatedAt: '2024-12-05T15:00:00Z'
-  },
-  {
-    id: 'inv-4',
-    invoiceNumber: 'INV-2024-004',
-    type: 'recurring',
-    status: 'sent',
-    client: {
-      id: 'client-1',
-      name: 'Acme Corporation',
-      email: 'billing@acme.com',
-      company: 'Acme Corporation'
-    },
-    lineItems: [
-      { id: 'li-8', description: 'Monthly Maintenance Retainer', quantity: 1, unitPrice: 3500, taxRate: 8, discount: 0, total: 3780 }
-    ],
-    subtotal: 3500,
-    taxAmount: 280,
-    discountAmount: 0,
-    total: 3780,
-    amountPaid: 0,
-    amountDue: 3780,
-    currency: 'USD',
-    issueDate: '2024-12-20',
-    dueDate: '2025-01-20',
-    sentDate: '2024-12-20',
-    terms: 'Net 30',
-    recurring: {
-      frequency: 'monthly',
-      nextDate: '2025-01-20',
-      occurrences: 12
-    },
-    payments: [],
-    lateFeeApplied: false,
-    template: 'professional',
-    tags: ['recurring', 'maintenance'],
-    createdAt: '2024-12-20T08:00:00Z',
-    updatedAt: '2024-12-20T08:00:00Z'
-  },
-  {
-    id: 'inv-5',
-    invoiceNumber: 'EST-2024-001',
-    type: 'estimate',
-    status: 'pending',
-    client: {
-      id: 'client-2',
-      name: 'TechStart Inc',
-      email: 'accounts@techstart.io',
-      company: 'TechStart Inc'
-    },
-    lineItems: [
-      { id: 'li-9', description: 'E-commerce Platform Development', quantity: 200, unitPrice: 150, taxRate: 8.5, discount: 10, total: 29295 },
-      { id: 'li-10', description: 'Payment Gateway Integration', quantity: 24, unitPrice: 175, taxRate: 8.5, discount: 0, total: 4557 },
-      { id: 'li-11', description: 'SEO Optimization', quantity: 40, unitPrice: 100, taxRate: 8.5, discount: 0, total: 4340 }
-    ],
-    subtotal: 35200,
-    taxAmount: 2992,
-    discountAmount: 3000,
-    total: 35192,
-    amountPaid: 0,
-    amountDue: 35192,
-    currency: 'USD',
-    issueDate: '2024-12-22',
-    dueDate: '2025-01-22',
-    terms: 'Valid for 30 days',
-    payments: [],
-    lateFeeApplied: false,
-    template: 'modern',
-    tags: ['estimate', 'ecommerce'],
-    createdAt: '2024-12-22T10:00:00Z',
-    updatedAt: '2024-12-22T10:00:00Z'
-  },
-  {
-    id: 'inv-6',
-    invoiceNumber: 'INV-2024-005',
-    type: 'standard',
-    status: 'draft',
-    client: {
-      id: 'client-3',
-      name: 'Global Industries',
-      email: 'finance@globalind.com',
-      company: 'Global Industries Ltd'
-    },
-    lineItems: [
-      { id: 'li-12', description: 'Consulting Services', quantity: 20, unitPrice: 250, taxRate: 8, discount: 0, total: 5400 }
-    ],
-    subtotal: 5000,
-    taxAmount: 400,
-    discountAmount: 0,
-    total: 5400,
-    amountPaid: 0,
-    amountDue: 5400,
-    currency: 'USD',
-    issueDate: '2024-12-23',
-    dueDate: '2025-02-06',
-    terms: 'Net 45',
-    payments: [],
-    lateFeeApplied: false,
-    template: 'enterprise',
-    tags: ['consulting'],
-    createdAt: '2024-12-23T14:00:00Z',
-    updatedAt: '2024-12-23T14:00:00Z'
-  }
-]
-
-const mockExpenses: Expense[] = [
-  { id: 'exp-1', description: 'Software Licenses', category: 'Software', amount: 1250, date: '2024-12-15', vendor: 'Adobe', billable: true, clientId: 'client-1', status: 'approved' },
-  { id: 'exp-2', description: 'Cloud Hosting', category: 'Infrastructure', amount: 850, date: '2024-12-18', vendor: 'AWS', billable: true, clientId: 'client-2', status: 'approved' },
-  { id: 'exp-3', description: 'Office Supplies', category: 'Office', amount: 245, date: '2024-12-20', vendor: 'Staples', billable: false, status: 'pending' },
-  { id: 'exp-4', description: 'Travel - Client Meeting', category: 'Travel', amount: 675, date: '2024-12-22', vendor: 'Delta Airlines', billable: true, clientId: 'client-3', status: 'approved' }
-]
-
-const mockReport: Report = {
-  period: 'December 2024',
-  totalInvoiced: 121996,
-  totalPaid: 33930,
-  totalPending: 69772,
-  totalOverdue: 18294,
-  invoiceCount: 6,
-  avgInvoiceValue: 20332,
-  avgPaymentTime: 12.5,
-  topClients: [
-    { clientId: 'client-3', name: 'Global Industries', amount: 56310 },
-    { clientId: 'client-2', name: 'TechStart Inc', amount: 52986 },
-    { clientId: 'client-1', name: 'Acme Corporation', amount: 12710 }
-  ],
-  revenueByMonth: [
-    { month: 'Jul', amount: 42500 },
-    { month: 'Aug', amount: 38750 },
-    { month: 'Sep', amount: 51200 },
-    { month: 'Oct', amount: 47800 },
-    { month: 'Nov', amount: 55400 },
-    { month: 'Dec', amount: 121996 }
-  ],
-  paymentsByMethod: [
-    { method: 'bank_transfer', amount: 42500, count: 15 },
-    { method: 'credit_card', amount: 35750, count: 28 },
-    { method: 'check', amount: 12400, count: 8 },
-    { method: 'paypal', amount: 8650, count: 12 }
-  ]
-}
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -597,34 +281,6 @@ const getDaysOverdue = (dueDate: string) => {
   return diffDays > 0 ? diffDays : 0
 }
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE DATA
-// ============================================================================
-
-const mockInvoicingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Revenue Optimization', description: 'Invoice collection rate improved 15% this month with automated reminders.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '2', type: 'info' as const, title: 'Cash Flow Forecast', description: 'Expected $45,000 in payments within 7 days based on due dates.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
-  { id: '3', type: 'warning' as const, title: 'Overdue Invoices', description: '8 invoices totaling $12,500 are over 30 days overdue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Collections' },
-]
-
-const mockInvoicingCollaborators = [
-  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Accounting', lastActive: 'Now' },
-  { id: '2', name: 'AR Manager', avatar: '/avatars/ar.jpg', status: 'online' as const, role: 'Collections', lastActive: '5m ago' },
-  { id: '3', name: 'Controller', avatar: '/avatars/controller.jpg', status: 'away' as const, role: 'Finance', lastActive: '30m ago' },
-]
-
-const mockInvoicingPredictions = [
-  { id: '1', label: 'Monthly Revenue', current: 85000, target: 100000, predicted: 92000, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Collection Rate', current: 87, target: 95, predicted: 91, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Avg Days to Pay', current: 28, target: 21, predicted: 25, confidence: 72, trend: 'down' as const },
-]
-
-const mockInvoicingActivities = [
-  { id: '1', user: 'Finance Lead', action: 'created', target: 'Invoice #INV-2024-156', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'System', action: 'received payment', target: '$3,500 from ABC Corp', timestamp: '45m ago', type: 'success' as const },
-  { id: '3', user: 'AR Manager', action: 'sent reminder', target: '5 overdue invoices', timestamp: '2h ago', type: 'info' as const },
-]
-
 // Quick actions are defined inside the component to access state setters
 
 // ============================================================================
@@ -636,8 +292,20 @@ export default function InvoicingClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [clients, setClients] = useState<Client[]>([])
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses)
-  const [report, setReport] = useState<Report>(mockReport)
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [report, setReport] = useState<Report>({
+    period: '',
+    totalInvoiced: 0,
+    totalPaid: 0,
+    totalPending: 0,
+    totalOverdue: 0,
+    invoiceCount: 0,
+    avgInvoiceValue: 0,
+    avgPaymentTime: 0,
+    topClients: [],
+    revenueByMonth: [],
+    paymentsByMethod: []
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
@@ -785,10 +453,10 @@ export default function InvoicingClient() {
     }
   }, [ transformInvoice])
 
-  // Fetch clients (simplified - using mock for now as clients table may differ)
+  // Fetch clients (simplified - using empty array for now as clients table may differ)
   const fetchClients = useCallback(async () => {
-    // For now, use mock clients - can be extended to fetch from a clients table
-    setClients(mockClients)
+    // For now, use empty clients - can be extended to fetch from a clients table
+    setClients([])
   }, [])
 
   // Create new invoice in Supabase
@@ -2191,18 +1859,18 @@ export default function InvoicingClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockInvoicingAIInsights}
+              insights={[]}
               title="Invoicing Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockInvoicingCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockInvoicingPredictions}
+              predictions={[]}
               title="Revenue Forecasts"
             />
           </div>
@@ -2210,7 +1878,7 @@ export default function InvoicingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockInvoicingActivities}
+            activities={[]}
             title="Invoicing Activity"
             maxItems={5}
           />

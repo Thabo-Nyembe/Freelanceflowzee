@@ -223,106 +223,6 @@ interface HRIntegration {
 }
 
 // Mock Data
-const mockEmployees: Employee[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', phone: '+1-555-0101', position: 'VP of Engineering', department: 'Engineering', level: 'L7', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2020-03-15', location: 'San Francisco, CA', salary: 280000, equity: 50000, performanceScore: 98, projectsCount: 12, directReports: 8, skills: ['Leadership', 'Architecture', 'Python', 'Go'] },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', phone: '+1-555-0102', position: 'Senior Engineer', department: 'Engineering', level: 'L5', manager: 'Sarah Chen', managerId: '1', status: 'active', hireDate: '2021-06-01', location: 'New York, NY', salary: 180000, equity: 25000, performanceScore: 92, projectsCount: 8, directReports: 0, skills: ['React', 'TypeScript', 'Node.js'] },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', phone: '+1-555-0103', position: 'Product Manager', department: 'Product', level: 'L5', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2021-09-15', location: 'Austin, TX', salary: 165000, equity: 20000, performanceScore: 95, projectsCount: 6, directReports: 2, skills: ['Product Strategy', 'Analytics', 'User Research'] },
-  { id: '4', name: 'Alex Kim', email: 'alex@company.com', phone: '+1-555-0104', position: 'UX Designer', department: 'Design', level: 'L4', manager: 'Emily Davis', managerId: '3', status: 'active', hireDate: '2022-01-10', location: 'Remote', salary: 140000, equity: 15000, performanceScore: 88, projectsCount: 10, directReports: 0, skills: ['Figma', 'User Testing', 'Design Systems'] },
-  { id: '5', name: 'Jordan Lee', email: 'jordan@company.com', phone: '+1-555-0105', position: 'Software Engineer', department: 'Engineering', level: 'L4', manager: 'Sarah Chen', managerId: '1', status: 'onboarding', hireDate: '2024-01-15', location: 'Seattle, WA', salary: 150000, equity: 18000, performanceScore: 0, projectsCount: 0, directReports: 0, skills: ['Python', 'AWS', 'Machine Learning'] },
-  { id: '6', name: 'Taylor Swift', email: 'taylor@company.com', phone: '+1-555-0106', position: 'Marketing Manager', department: 'Marketing', level: 'L5', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2021-04-20', location: 'Los Angeles, CA', salary: 155000, equity: 18000, performanceScore: 91, projectsCount: 5, directReports: 3, skills: ['Growth', 'Content', 'SEO'] }
-]
-
-const mockTimeOffRequests: TimeOffRequest[] = [
-  { id: '1', employeeId: '2', employeeName: 'Mike Johnson', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', days: 5, status: 'pending' },
-  { id: '2', employeeId: '4', employeeName: 'Alex Kim', type: 'sick', startDate: '2024-01-25', endDate: '2024-01-25', days: 1, status: 'approved' },
-  { id: '3', employeeId: '1', employeeName: 'Sarah Chen', type: 'personal', startDate: '2024-02-01', endDate: '2024-02-02', days: 2, status: 'approved' },
-  { id: '4', employeeId: '6', employeeName: 'Taylor Swift', type: 'vacation', startDate: '2024-03-01', endDate: '2024-03-08', days: 7, status: 'pending' }
-]
-
-const mockReviews: PerformanceReview[] = [
-  { id: '1', employeeId: '2', employeeName: 'Mike Johnson', reviewerId: '1', reviewerName: 'Sarah Chen', period: 'Q4 2023', overallScore: 4.5, strengths: ['Technical expertise', 'Team collaboration'], improvements: ['Documentation'], goals: ['Lead project', 'Mentor junior devs'], status: 'completed', createdAt: '2024-01-10' },
-  { id: '2', employeeId: '4', employeeName: 'Alex Kim', reviewerId: '3', reviewerName: 'Emily Davis', period: 'Q4 2023', overallScore: 4.2, strengths: ['Creative design', 'User empathy'], improvements: ['Time management'], goals: ['Design system update'], status: 'in_progress', createdAt: '2024-01-08' },
-  { id: '3', employeeId: '6', employeeName: 'Taylor Swift', reviewerId: '0', reviewerName: 'Alex CEO', period: 'Q4 2023', overallScore: 4.3, strengths: ['Growth mindset', 'Data-driven'], improvements: ['Cross-team communication'], goals: ['Launch campaign'], status: 'completed', createdAt: '2024-01-05' }
-]
-
-const mockOnboardingTasks: OnboardingTask[] = [
-  { id: '1', employeeId: '5', title: 'Complete I-9 Form', description: 'Employment eligibility verification', dueDate: '2024-01-20', completed: true, category: 'paperwork' },
-  { id: '2', employeeId: '5', title: 'Setup Workstation', description: 'Computer, monitors, peripherals', dueDate: '2024-01-21', completed: true, category: 'setup' },
-  { id: '3', employeeId: '5', title: 'Security Training', description: 'Complete mandatory security awareness', dueDate: '2024-01-25', completed: false, category: 'training' },
-  { id: '4', employeeId: '5', title: 'Meet with Manager', description: '1:1 introduction and goal setting', dueDate: '2024-01-22', completed: true, category: 'intro' },
-  { id: '5', employeeId: '5', title: 'Team Introductions', description: 'Meet team members', dueDate: '2024-01-23', completed: false, category: 'intro' }
-]
-
-const mockOrgChart: OrgNode = {
-  id: '0', name: 'Alex CEO', position: 'Chief Executive Officer', department: 'Executive',
-  children: [
-    { id: '1', name: 'Sarah Chen', position: 'VP Engineering', department: 'Engineering', children: [
-      { id: '2', name: 'Mike Johnson', position: 'Senior Engineer', department: 'Engineering' },
-      { id: '5', name: 'Jordan Lee', position: 'Software Engineer', department: 'Engineering' }
-    ]},
-    { id: '3', name: 'Emily Davis', position: 'Product Manager', department: 'Product', children: [
-      { id: '4', name: 'Alex Kim', position: 'UX Designer', department: 'Design' }
-    ]},
-    { id: '6', name: 'Taylor Swift', position: 'Marketing Manager', department: 'Marketing' }
-  ]
-}
-
-const mockCourses: TrainingCourse[] = [
-  { id: '1', title: 'Security Awareness Training', description: 'Annual mandatory security training', category: 'Compliance', duration: '2 hours', status: 'completed', progress: 100, mandatory: true, completedDate: '2024-01-10' },
-  { id: '2', title: 'Leadership Fundamentals', description: 'Core leadership skills for managers', category: 'Leadership', duration: '8 hours', status: 'in_progress', progress: 65, mandatory: false, dueDate: '2024-02-28' },
-  { id: '3', title: 'Diversity & Inclusion', description: 'Building inclusive workplaces', category: 'Compliance', duration: '1.5 hours', status: 'not_started', progress: 0, mandatory: true, dueDate: '2024-01-31' },
-  { id: '4', title: 'Advanced Python', description: 'Python best practices and patterns', category: 'Technical', duration: '12 hours', status: 'in_progress', progress: 40, mandatory: false },
-  { id: '5', title: 'Project Management', description: 'Agile and Scrum methodologies', category: 'Skills', duration: '6 hours', status: 'completed', progress: 100, mandatory: false, completedDate: '2023-12-15' }
-]
-
-const mockDocuments: EmployeeDocument[] = [
-  { id: '1', name: 'Employment Contract - Mike Johnson.pdf', type: 'contract', uploadedBy: 'HR Admin', uploadedAt: '2021-06-01', size: '2.4 MB', status: 'active' },
-  { id: '2', name: 'W-4 Tax Form.pdf', type: 'tax', uploadedBy: 'Mike Johnson', uploadedAt: '2024-01-05', size: '156 KB', status: 'active' },
-  { id: '3', name: 'Driver License Copy.jpg', type: 'id', uploadedBy: 'Mike Johnson', uploadedAt: '2021-06-01', size: '890 KB', status: 'expired', expiresAt: '2024-01-15' },
-  { id: '4', name: 'AWS Certification.pdf', type: 'certification', uploadedBy: 'Mike Johnson', uploadedAt: '2023-08-20', size: '512 KB', status: 'active', expiresAt: '2025-08-20' },
-  { id: '5', name: 'NDA Agreement.pdf', type: 'policy', uploadedBy: 'HR Admin', uploadedAt: '2021-06-01', size: '345 KB', status: 'pending_signature' }
-]
-
-const mockBenefits: Benefit[] = [
-  { id: '1', name: 'Medical Insurance', type: 'health', provider: 'Blue Cross Blue Shield', enrollmentStatus: 'enrolled', cost: 650, employerContribution: 520, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '2', name: 'Dental Insurance', type: 'dental', provider: 'Delta Dental', enrollmentStatus: 'enrolled', cost: 85, employerContribution: 68, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '3', name: 'Vision Insurance', type: 'vision', provider: 'VSP', enrollmentStatus: 'enrolled', cost: 25, employerContribution: 20, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '4', name: 'Life Insurance', type: 'life', provider: 'MetLife', enrollmentStatus: 'enrolled', cost: 0, employerContribution: 45, coverageLevel: '2x Salary', effectiveDate: '2024-01-01' },
-  { id: '5', name: '401(k) Plan', type: '401k', provider: 'Fidelity', enrollmentStatus: 'enrolled', cost: 800, employerContribution: 400, coverageLevel: '6% match', effectiveDate: '2021-07-01' },
-  { id: '6', name: 'HSA Account', type: 'hsa', provider: 'Optum Bank', enrollmentStatus: 'enrolled', cost: 200, employerContribution: 100, coverageLevel: 'Individual', effectiveDate: '2024-01-01' }
-]
-
-const mockGoals: Goal[] = [
-  { id: '1', employeeId: '2', title: 'Lead Q1 Feature Development', description: 'Successfully deliver the new authentication system', category: 'performance', progress: 75, status: 'in_progress', dueDate: '2024-03-31', createdAt: '2024-01-01', keyResults: [{ title: 'Complete design review', progress: 100 }, { title: 'Implement core features', progress: 80 }, { title: 'Deploy to production', progress: 45 }] },
-  { id: '2', employeeId: '2', title: 'Improve Code Quality', description: 'Reduce technical debt and increase test coverage', category: 'development', progress: 60, status: 'in_progress', dueDate: '2024-06-30', createdAt: '2024-01-01', keyResults: [{ title: 'Increase test coverage to 80%', progress: 65 }, { title: 'Reduce critical bugs by 50%', progress: 55 }] },
-  { id: '3', employeeId: '2', title: 'Mentor Junior Developers', description: 'Support the growth of 2 junior team members', category: 'team', progress: 40, status: 'in_progress', dueDate: '2024-12-31', createdAt: '2024-01-01', keyResults: [{ title: 'Weekly 1:1 meetings', progress: 60 }, { title: 'Code review sessions', progress: 35 }, { title: 'Knowledge sharing presentations', progress: 25 }] },
-  { id: '4', employeeId: '1', title: 'Team Growth & Hiring', description: 'Expand engineering team to meet company goals', category: 'company', progress: 30, status: 'at_risk', dueDate: '2024-06-30', createdAt: '2024-01-01', keyResults: [{ title: 'Hire 5 new engineers', progress: 20 }, { title: 'Reduce time-to-hire to 30 days', progress: 40 }] }
-]
-
-const mockSurveys: Survey[] = [
-  { id: '1', title: 'Q1 2024 Employee Engagement', type: 'engagement', status: 'active', responseRate: 78, avgScore: 4.2, createdAt: '2024-01-15', closesAt: '2024-01-31', responses: 47, totalInvited: 60 },
-  { id: '2', title: 'Weekly Pulse Check', type: 'pulse', status: 'completed', responseRate: 92, avgScore: 4.5, createdAt: '2024-01-08', closesAt: '2024-01-12', responses: 55, totalInvited: 60 },
-  { id: '3', title: 'Manager Feedback Survey', type: 'feedback', status: 'draft', responseRate: 0, avgScore: 0, createdAt: '2024-01-20', closesAt: '2024-02-28', responses: 0, totalInvited: 12 }
-]
-
-const mockTeamMetrics: TeamMetric[] = [
-  { id: '1', label: 'Employee Engagement', value: 85, previousValue: 82, trend: 'up', category: 'engagement' },
-  { id: '2', label: 'eNPS Score', value: 72, previousValue: 68, trend: 'up', category: 'satisfaction' },
-  { id: '3', label: 'Performance Score', value: 91, previousValue: 89, trend: 'up', category: 'performance' },
-  { id: '4', label: 'Retention Rate', value: 94, previousValue: 96, trend: 'down', category: 'retention' },
-  { id: '5', label: 'Training Completion', value: 78, previousValue: 75, trend: 'up', category: 'performance' },
-  { id: '6', label: 'Goal Completion', value: 65, previousValue: 60, trend: 'up', category: 'performance' }
-]
-
-const mockIntegrations: HRIntegration[] = [
-  { id: '1', name: 'ADP Payroll', type: 'payroll', status: 'connected', lastSync: '2024-01-16 09:00', icon: 'dollar' },
-  { id: '2', name: 'Gusto Benefits', type: 'benefits', status: 'connected', lastSync: '2024-01-16 08:00', icon: 'heart' },
-  { id: '3', name: 'Greenhouse ATS', type: 'ats', status: 'connected', lastSync: '2024-01-16 07:30', icon: 'users' },
-  { id: '4', name: 'Checkr', type: 'background', status: 'connected', lastSync: '2024-01-15 18:00', icon: 'shield' },
-  { id: '5', name: 'Okta SSO', type: 'identity', status: 'connected', lastSync: '2024-01-16 09:15', icon: 'key' },
-  { id: '6', name: 'Slack', type: 'communication', status: 'connected', lastSync: '2024-01-16 09:10', icon: 'message' }
-]
-
 export default function EmployeesClient() {
   const [activeTab, setActiveTab] = useState('directory')
   const [searchQuery, setSearchQuery] = useState('')
@@ -516,7 +416,7 @@ export default function EmployeesClient() {
   }
 
   const filteredEmployees = useMemo(() => {
-    return mockEmployees.filter(emp => {
+    return [].filter(emp => {
       const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            emp.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -597,7 +497,7 @@ export default function EmployeesClient() {
 
   // Handlers
   const handleExportEmployees = () => {
-    const exportData = mockEmployees.map(emp => ({
+    const exportData = [].map(emp => ({
       Name: emp.name,
       Email: emp.email,
       Phone: emp.phone || '',
@@ -633,7 +533,7 @@ export default function EmployeesClient() {
     }
   }
 
-  const handleApproveTimeOff = async (request: typeof mockTimeOffRequests[0]) => {
+  const handleApproveTimeOff = async (request: typeof [][0]) => {
     const result = await apiPost(`/api/employees/time-off/${request.id}/approve`, {
       status: 'approved'
     }, {
@@ -646,7 +546,7 @@ export default function EmployeesClient() {
     }
   }
 
-  const handleRejectTimeOff = async (request: typeof mockTimeOffRequests[0]) => {
+  const handleRejectTimeOff = async (request: typeof [][0]) => {
     const result = await apiPost(`/api/employees/time-off/${request.id}/reject`, {
       status: 'rejected'
     }, {
@@ -739,7 +639,7 @@ export default function EmployeesClient() {
                     <p className="text-blue-200 text-sm">Employees</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEmployees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{[].filter(e => e.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -988,7 +888,7 @@ export default function EmployeesClient() {
 
           {/* Org Chart Tab */}
           <TabsContent value="org-chart" className="mt-6">
-            <Card className="border-gray-200 dark:border-gray-700"><CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader><CardContent>{renderOrgNode(mockOrgChart)}</CardContent></Card>
+            <Card className="border-gray-200 dark:border-gray-700"><CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader><CardContent>{renderOrgNode(null)}</CardContent></Card>
           </TabsContent>
 
           {/* Time Off Tab */}
@@ -1003,11 +903,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeOffRequests.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{[].filter(r => r.status === 'pending').length}</p>
                     <p className="text-emerald-200 text-sm">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeOffRequests.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-emerald-200 text-sm">Requests</p>
                   </div>
                 </div>
@@ -1032,7 +932,7 @@ export default function EmployeesClient() {
                 }
               }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {mockTimeOffRequests.map(request => (
+                {[].map(request => (
                   <div key={request.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{request.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
                     <div className="flex-1"><p className="font-medium">{request.employeeName}</p><p className="text-sm text-gray-500">{request.type.charAt(0).toUpperCase() + request.type.slice(1)} • {request.days} day{request.days > 1 ? 's' : ''}</p></div>
@@ -1056,11 +956,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReviews.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-orange-200 text-sm">Reviews</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReviews.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{[].filter(r => r.status === 'completed').length}</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1085,13 +985,13 @@ export default function EmployeesClient() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
                   <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-blue-600">{stats.avgPerformance}%</p><p className="text-sm text-gray-500 mt-2">Average Performance Score</p></CardContent></Card>
-                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-green-600">{mockReviews.filter(r => r.status === 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Completed Reviews</p></CardContent></Card>
-                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-amber-600">{mockReviews.filter(r => r.status !== 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Pending Reviews</p></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-green-600">{[].filter(r => r.status === 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Completed Reviews</p></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-amber-600">{[].filter(r => r.status !== 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Pending Reviews</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Recent Reviews</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockReviews.map(review => (
+                    {[].map(review => (
                       <div key={review.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3"><Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{review.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><div><p className="font-medium">{review.employeeName}</p><p className="text-sm text-gray-500">{review.period} • Reviewer: {review.reviewerName}</p></div></div>
@@ -1113,7 +1013,7 @@ export default function EmployeesClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>OKRs & Goals</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {mockGoals.map(goal => (
+                  {[].map(goal => (
                     <div key={goal.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <div><h4 className="font-semibold">{goal.title}</h4><p className="text-sm text-gray-500">{goal.description}</p></div>
@@ -1138,7 +1038,7 @@ export default function EmployeesClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Metrics</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockTeamMetrics.map(metric => (
+                    {[].map(metric => (
                       <div key={metric.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div><p className="font-medium">{metric.label}</p><p className="text-xs text-gray-500">{metric.category}</p></div>
                         <div className="flex items-center gap-3">
@@ -1182,11 +1082,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOnboardingTasks.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-pink-200 text-sm">Tasks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOnboardingTasks.filter(t => t.completed).length}</p>
+                    <p className="text-3xl font-bold">{[].filter(t => t.completed).length}</p>
                     <p className="text-pink-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1197,9 +1097,9 @@ export default function EmployeesClient() {
               <Card className="md:col-span-2">
                 <CardHeader><CardTitle>Onboarding Progress - Jordan Lee</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="mb-6"><div className="flex items-center justify-between mb-2"><span className="text-sm font-medium">Overall Completion</span><span className="text-sm font-medium">{mockOnboardingTasks.filter(t => t.completed).length}/{mockOnboardingTasks.length} tasks</span></div><Progress value={(mockOnboardingTasks.filter(t => t.completed).length / mockOnboardingTasks.length) * 100} className="h-3" /></div>
+                  <div className="mb-6"><div className="flex items-center justify-between mb-2"><span className="text-sm font-medium">Overall Completion</span><span className="text-sm font-medium">{[].filter(t => t.completed).length}/{[].length} tasks</span></div><Progress value={([].filter(t => t.completed).length / [].length) * 100} className="h-3" /></div>
                   <div className="space-y-3">
-                    {mockOnboardingTasks.map(task => (
+                    {[].map(task => (
                       <div key={task.id} className={`flex items-center gap-4 p-4 rounded-lg border ${task.completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200' : 'bg-white dark:bg-gray-800 border-gray-200'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${task.completed ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>{task.completed ? <CheckCircle className="h-5 w-5" /> : <div className="w-3 h-3 rounded-full border-2" />}</div>
                         <div className="flex-1"><p className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>{task.title}</p><p className="text-sm text-gray-500">{task.description}</p></div>
@@ -1232,11 +1132,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">${([].reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
                     <p className="text-purple-200 text-sm">Total Payroll</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p>
+                    <p className="text-3xl font-bold">${([].reduce((sum, e) => sum + e.salary, 0) / [].length / 1000).toFixed(0)}K</p>
                     <p className="text-purple-200 text-sm">Avg Salary</p>
                   </div>
                 </div>
@@ -1252,7 +1152,7 @@ export default function EmployeesClient() {
                 ))}
               </div>
               <Button variant="outline" onClick={() => {
-                const compensationData = mockEmployees.map(emp => ({
+                const compensationData = [].map(emp => ({
                   Name: emp.name,
                   Position: emp.position,
                   Department: emp.department,
@@ -1269,8 +1169,8 @@ export default function EmployeesClient() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(stats.totalPayroll / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Annual Payroll</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg Salary</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${([].reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${([].reduce((sum, e) => sum + e.salary, 0) / [].length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg Salary</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">92%</p><p className="text-sm text-gray-500">Market Competitive</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
@@ -1279,7 +1179,7 @@ export default function EmployeesClient() {
                     <table className="w-full">
                       <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Level</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Base Salary</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equity</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Comp</th></tr></thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {mockEmployees.map(emp => (
+                        {[].map(emp => (
                           <tr key={emp.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="px-4 py-4"><div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{emp.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><div><p className="font-medium">{emp.name}</p><p className="text-xs text-gray-500">{emp.position}</p></div></div></td>
                             <td className="px-4 py-4"><Badge variant="outline">{emp.level}</Badge></td>
@@ -1298,15 +1198,15 @@ export default function EmployeesClient() {
             {compensationTab === 'benefits' && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${mockBenefits.reduce((sum, b) => sum + b.employerContribution, 0).toLocaleString()}</p><p className="text-sm text-gray-500">Monthly Employer Cost</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockBenefits.filter(b => b.enrollmentStatus === 'enrolled').length}/{mockBenefits.length}</p><p className="text-sm text-gray-500">Enrolled Benefits</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${[].reduce((sum, b) => sum + b.employerContribution, 0).toLocaleString()}</p><p className="text-sm text-gray-500">Monthly Employer Cost</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">{[].filter(b => b.enrollmentStatus === 'enrolled').length}/{[].length}</p><p className="text-sm text-gray-500">Enrolled Benefits</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">95%</p><p className="text-sm text-gray-500">Enrollment Rate</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">Jan 1</p><p className="text-sm text-gray-500">Next Open Enrollment</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Benefits Enrollment</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockBenefits.map(benefit => (
+                    {[].map(benefit => (
                       <div key={benefit.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${benefit.type === 'health' ? 'bg-red-100' : benefit.type === '401k' ? 'bg-green-100' : 'bg-blue-100'}`}>
@@ -1337,11 +1237,11 @@ export default function EmployeesClient() {
                   <CardHeader><CardTitle>Equity Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity Pool</p></div>
-                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg per Employee</p></div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">${([].reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity Pool</p></div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">${([].reduce((sum, e) => sum + (e.equity || 0), 0) / [].length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg per Employee</p></div>
                     </div>
                     <div className="space-y-3">
-                      {mockEmployees.filter(e => e.equity).map(emp => (
+                      {[].filter(e => e.equity).map(emp => (
                         <div key={emp.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
                           <div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{emp.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="font-medium">{emp.name}</span></div>
                           <span className="font-bold text-green-600">${(emp.equity || 0).toLocaleString()}</span>
@@ -1386,11 +1286,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-3xl font-bold">{[].length}</p>
                     <p className="text-cyan-200 text-sm">Courses</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.filter(c => c.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{[].filter(c => c.status === 'completed').length}</p>
                     <p className="text-cyan-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1398,15 +1298,15 @@ export default function EmployeesClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockCourses.length}</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{mockCourses.filter(c => c.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-blue-600">{mockCourses.filter(c => c.status === 'in_progress').length}</p><p className="text-sm text-gray-500">In Progress</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-600">{mockCourses.filter(c => c.mandatory && c.status !== 'completed').length}</p><p className="text-sm text-gray-500">Mandatory Pending</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{[].length}</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{[].filter(c => c.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-blue-600">{[].filter(c => c.status === 'in_progress').length}</p><p className="text-sm text-gray-500">In Progress</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-600">{[].filter(c => c.mandatory && c.status !== 'completed').length}</p><p className="text-sm text-gray-500">Mandatory Pending</p></CardContent></Card>
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader><CardTitle>Training Courses</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                {mockCourses.map(course => (
+                {[].map(course => (
                   <div key={course.id} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${course.status === 'completed' ? 'bg-green-100' : course.status === 'in_progress' ? 'bg-blue-100' : 'bg-gray-100'}`}>
                       {course.status === 'completed' ? <CheckCircle className="h-6 w-6 text-green-600" /> : course.status === 'in_progress' ? <Play className="h-6 w-6 text-blue-600" /> : <BookOpen className="h-6 w-6 text-gray-600" />}
@@ -1949,7 +1849,7 @@ export default function EmployeesClient() {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockIntegrations.map(integration => (
+                        {[].map(integration => (
                           <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
@@ -2041,7 +1941,7 @@ export default function EmployeesClient() {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockDocuments.map(doc => (
+                        {[].map(doc => (
                           <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -2144,11 +2044,11 @@ export default function EmployeesClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockEmployees.length}</div>
+                            <div className="text-2xl font-bold">{[].length}</div>
                             <div className="text-sm text-gray-500">Employees</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockDocuments.length}</div>
+                            <div className="text-2xl font-bold">{[].length}</div>
                             <div className="text-sm text-gray-500">Documents</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -2159,16 +2059,16 @@ export default function EmployeesClient() {
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1" onClick={() => {
                             const allData = {
-                              employees: mockEmployees,
-                              timeOffRequests: mockTimeOffRequests,
-                              reviews: mockReviews,
-                              onboardingTasks: mockOnboardingTasks,
-                              courses: mockCourses,
-                              documents: mockDocuments,
-                              benefits: mockBenefits,
-                              goals: mockGoals,
-                              surveys: mockSurveys,
-                              teamMetrics: mockTeamMetrics,
+                              employees: [],
+                              timeOffRequests: [],
+                              reviews: [],
+                              onboardingTasks: [],
+                              courses: [],
+                              documents: [],
+                              benefits: [],
+                              goals: [],
+                              surveys: [],
+                              teamMetrics: [],
                               exportDate: new Date().toISOString()
                             }
                             const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' })
@@ -2234,8 +2134,8 @@ export default function EmployeesClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           const complianceData = {
                             generatedAt: new Date().toISOString(),
-                            totalEmployees: mockEmployees.length,
-                            activeEmployees: mockEmployees.filter(e => e.status === 'active').length,
+                            totalEmployees: [].length,
+                            activeEmployees: [].filter(e => e.status === 'active').length,
                             gdprCompliant: true,
                             dataEncryption: true,
                             auditLogging: true,
@@ -2465,7 +2365,7 @@ export default function EmployeesClient() {
         <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Create New Goal</DialogTitle><DialogDescription>Set an OKR or performance goal for an employee</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{mockEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{[].map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Goal Title</Label><Input placeholder="Lead Q1 Feature Development" className="mt-1" /></div>
               <div><Label>Description</Label><Input placeholder="Describe the goal..." className="mt-1" /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="performance">Performance</SelectItem><SelectItem value="development">Development</SelectItem><SelectItem value="team">Team</SelectItem><SelectItem value="company">Company</SelectItem></SelectContent></Select></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
@@ -2538,9 +2438,9 @@ export default function EmployeesClient() {
         <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Start Performance Review</DialogTitle><DialogDescription>Begin a performance review cycle for an employee</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{mockEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{[].map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Review Period</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select period" /></SelectTrigger><SelectContent><SelectItem value="q1">Q1 2024</SelectItem><SelectItem value="q2">Q2 2024</SelectItem><SelectItem value="annual">Annual 2024</SelectItem></SelectContent></Select></div>
-              <div><Label>Reviewer</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select reviewer" /></SelectTrigger><SelectContent>{mockEmployees.filter(e => e.directReports > 0).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Reviewer</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select reviewer" /></SelectTrigger><SelectContent>{[].filter(e => e.directReports > 0).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>

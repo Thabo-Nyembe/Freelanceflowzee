@@ -306,7 +306,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [connectionMenuOpen, setConnectionMenuOpen] = useState<string | null>(null)
 
   const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
-  const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
+  const displayWorkflows = dbWorkflows || workflows || []
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {

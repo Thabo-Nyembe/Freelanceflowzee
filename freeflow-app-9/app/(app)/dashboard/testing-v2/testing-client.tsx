@@ -194,262 +194,6 @@ interface BrowserConfig {
   deviceEmulation?: string
 }
 
-// Mock Data
-const mockTestSpecs: TestSpec[] = [
-  {
-    id: '1',
-    name: 'should login with valid credentials',
-    file: 'tests/auth/login.spec.ts',
-    suite: 'Authentication',
-    status: 'passed',
-    duration: 2450,
-    browser: 'chromium',
-    retries: 0,
-    steps: [
-      { id: '1', action: 'navigate', value: '/login', duration: 450, status: 'passed' },
-      { id: '2', action: 'fill', selector: '[data-testid="email"]', value: 'user@test.com', duration: 120, status: 'passed' },
-      { id: '3', action: 'fill', selector: '[data-testid="password"]', value: '****', duration: 85, status: 'passed' },
-      { id: '4', action: 'click', selector: '[data-testid="submit"]', duration: 95, status: 'passed' },
-      { id: '5', action: 'waitForURL', value: '/dashboard', duration: 1700, status: 'passed' }
-    ],
-    screenshots: ['login-success.png']
-  },
-  {
-    id: '2',
-    name: 'should show error for invalid password',
-    file: 'tests/auth/login.spec.ts',
-    suite: 'Authentication',
-    status: 'passed',
-    duration: 1850,
-    browser: 'chromium',
-    retries: 0,
-    steps: [
-      { id: '1', action: 'navigate', value: '/login', duration: 420, status: 'passed' },
-      { id: '2', action: 'fill', selector: '[data-testid="email"]', value: 'user@test.com', duration: 110, status: 'passed' },
-      { id: '3', action: 'fill', selector: '[data-testid="password"]', value: 'wrong', duration: 78, status: 'passed' },
-      { id: '4', action: 'click', selector: '[data-testid="submit"]', duration: 92, status: 'passed' },
-      { id: '5', action: 'expect', selector: '[data-testid="error"]', value: 'toBeVisible', duration: 1150, status: 'passed' }
-    ]
-  },
-  {
-    id: '3',
-    name: 'should create new project',
-    file: 'tests/projects/create.spec.ts',
-    suite: 'Projects',
-    status: 'failed',
-    duration: 5420,
-    browser: 'chromium',
-    retries: 1,
-    error: 'Timeout exceeded while waiting for selector [data-testid="project-card"]',
-    steps: [
-      { id: '1', action: 'navigate', value: '/projects', duration: 520, status: 'passed' },
-      { id: '2', action: 'click', selector: '[data-testid="new-project"]', duration: 150, status: 'passed' },
-      { id: '3', action: 'fill', selector: '[data-testid="name"]', value: 'Test Project', duration: 95, status: 'passed' },
-      { id: '4', action: 'click', selector: '[data-testid="save"]', duration: 180, status: 'passed' },
-      { id: '5', action: 'waitForSelector', selector: '[data-testid="project-card"]', duration: 4475, status: 'failed' }
-    ],
-    screenshots: ['project-create-failed.png']
-  },
-  {
-    id: '4',
-    name: 'should display dashboard metrics',
-    file: 'tests/dashboard/metrics.spec.ts',
-    suite: 'Dashboard',
-    status: 'passed',
-    duration: 3200,
-    browser: 'firefox',
-    retries: 0,
-    steps: [
-      { id: '1', action: 'navigate', value: '/dashboard', duration: 680, status: 'passed' },
-      { id: '2', action: 'expect', selector: '[data-testid="revenue"]', value: 'toBeVisible', duration: 450, status: 'passed' },
-      { id: '3', action: 'expect', selector: '[data-testid="users"]', value: 'toBeVisible', duration: 420, status: 'passed' },
-      { id: '4', action: 'expect', selector: '[data-testid="chart"]', value: 'toBeVisible', duration: 1650, status: 'passed' }
-    ],
-    video: 'dashboard-metrics.webm'
-  },
-  {
-    id: '5',
-    name: 'should handle API errors gracefully',
-    file: 'tests/api/error-handling.spec.ts',
-    suite: 'API',
-    status: 'flaky',
-    duration: 2800,
-    browser: 'chromium',
-    retries: 2,
-    steps: [
-      { id: '1', action: 'route', value: '**/api/data', duration: 50, status: 'passed' },
-      { id: '2', action: 'navigate', value: '/data', duration: 520, status: 'passed' },
-      { id: '3', action: 'expect', selector: '[data-testid="error-message"]', value: 'toBeVisible', duration: 2230, status: 'passed' }
-    ]
-  },
-  {
-    id: '6',
-    name: 'should match visual snapshot',
-    file: 'tests/visual/homepage.spec.ts',
-    suite: 'Visual',
-    status: 'passed',
-    duration: 4500,
-    browser: 'webkit',
-    retries: 0,
-    steps: [
-      { id: '1', action: 'navigate', value: '/', duration: 850, status: 'passed' },
-      { id: '2', action: 'screenshot', value: 'homepage.png', duration: 320, status: 'passed' },
-      { id: '3', action: 'expect', value: 'toMatchSnapshot', duration: 3330, status: 'passed' }
-    ],
-    screenshots: ['homepage.png', 'homepage-diff.png']
-  }
-]
-
-const mockTestSuites: TestSuite[] = [
-  {
-    id: '1',
-    name: 'tests',
-    path: 'tests/',
-    tests: 48,
-    passed: 42,
-    failed: 4,
-    skipped: 2,
-    duration: 125000,
-    expanded: true,
-    children: [
-      {
-        id: '2',
-        name: 'auth',
-        path: 'tests/auth/',
-        tests: 12,
-        passed: 12,
-        failed: 0,
-        skipped: 0,
-        duration: 28000,
-        expanded: true,
-        children: [
-          { id: '3', name: 'login.spec.ts', path: 'tests/auth/login.spec.ts', tests: 6, passed: 6, failed: 0, skipped: 0, duration: 14000 },
-          { id: '4', name: 'register.spec.ts', path: 'tests/auth/register.spec.ts', tests: 4, passed: 4, failed: 0, skipped: 0, duration: 9000 },
-          { id: '5', name: 'logout.spec.ts', path: 'tests/auth/logout.spec.ts', tests: 2, passed: 2, failed: 0, skipped: 0, duration: 5000 }
-        ]
-      },
-      {
-        id: '6',
-        name: 'projects',
-        path: 'tests/projects/',
-        tests: 15,
-        passed: 12,
-        failed: 2,
-        skipped: 1,
-        duration: 45000,
-        children: [
-          { id: '7', name: 'create.spec.ts', path: 'tests/projects/create.spec.ts', tests: 5, passed: 3, failed: 2, skipped: 0, duration: 18000 },
-          { id: '8', name: 'update.spec.ts', path: 'tests/projects/update.spec.ts', tests: 5, passed: 5, failed: 0, skipped: 0, duration: 15000 },
-          { id: '9', name: 'delete.spec.ts', path: 'tests/projects/delete.spec.ts', tests: 5, passed: 4, failed: 0, skipped: 1, duration: 12000 }
-        ]
-      },
-      {
-        id: '10',
-        name: 'dashboard',
-        path: 'tests/dashboard/',
-        tests: 8,
-        passed: 8,
-        failed: 0,
-        skipped: 0,
-        duration: 22000
-      },
-      {
-        id: '11',
-        name: 'api',
-        path: 'tests/api/',
-        tests: 10,
-        passed: 8,
-        failed: 1,
-        skipped: 1,
-        duration: 18000
-      },
-      {
-        id: '12',
-        name: 'visual',
-        path: 'tests/visual/',
-        tests: 3,
-        passed: 2,
-        failed: 1,
-        skipped: 0,
-        duration: 12000
-      }
-    ]
-  }
-]
-
-const mockTestRuns: TestRun[] = [
-  {
-    id: '1',
-    name: 'Full E2E Suite',
-    branch: 'main',
-    commit: 'abc1234',
-    status: 'passed',
-    startTime: new Date('2024-12-23T10:00:00'),
-    endTime: new Date('2024-12-23T10:12:30'),
-    duration: 750000,
-    totalTests: 48,
-    passed: 45,
-    failed: 2,
-    skipped: 1,
-    flaky: 1,
-    coverage: 87.5,
-    browsers: ['chromium', 'firefox', 'webkit'],
-    parallel: 4,
-    triggeredBy: 'GitHub Actions',
-    specs: mockTestSpecs
-  },
-  {
-    id: '2',
-    name: 'Smoke Tests',
-    branch: 'feature/auth',
-    commit: 'def5678',
-    status: 'failed',
-    startTime: new Date('2024-12-23T09:30:00'),
-    endTime: new Date('2024-12-23T09:35:45'),
-    duration: 345000,
-    totalTests: 12,
-    passed: 10,
-    failed: 2,
-    skipped: 0,
-    flaky: 0,
-    coverage: 65.2,
-    browsers: ['chromium'],
-    parallel: 2,
-    triggeredBy: 'Manual',
-    specs: mockTestSpecs.slice(0, 3)
-  },
-  {
-    id: '3',
-    name: 'Visual Regression',
-    branch: 'main',
-    commit: 'ghi9012',
-    status: 'running',
-    startTime: new Date('2024-12-23T10:15:00'),
-    duration: 180000,
-    totalTests: 8,
-    passed: 5,
-    failed: 0,
-    skipped: 0,
-    flaky: 0,
-    coverage: 0,
-    browsers: ['chromium', 'webkit'],
-    parallel: 2,
-    triggeredBy: 'Schedule',
-    specs: []
-  }
-]
-
-const mockBrowserConfigs: BrowserConfig[] = [
-  { type: 'chromium', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
-  { type: 'firefox', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
-  { type: 'webkit', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
-  { type: 'edge', enabled: false, headless: true, viewport: { width: 1280, height: 720 } }
-]
-
-const mockCIConfigs: CIConfig[] = [
-  { name: 'GitHub Actions', provider: 'github', status: 'connected', lastSync: new Date('2024-12-23T10:00:00') },
-  { name: 'GitLab CI', provider: 'gitlab', status: 'pending', lastSync: new Date('2024-12-22T15:30:00') }
-]
 
 // Helper Functions
 const formatDuration = (ms: number): string => {
@@ -493,48 +237,22 @@ const getBrowserIcon = (browser: BrowserType): React.ReactNode => {
   }
 }
 
-// Enhanced Competitive Upgrade Mock Data - Testing Context
-const mockTestingAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Flaky Tests Detected', description: '3 tests showing intermittent failures. Consider adding retries or fixing race conditions.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '2', type: 'success' as const, title: 'Coverage Improved', description: 'Code coverage increased to 87% after latest test additions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Coverage' },
-  { id: '3', type: 'info' as const, title: 'Performance Insight', description: 'Parallel execution reduced total run time by 45%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-]
-
-const mockTestingCollaborators = [
-  { id: '1', name: 'Jake Martinez', avatar: '/avatars/jake.jpg', status: 'online' as const, role: 'QA Lead', lastActive: 'Now' },
-  { id: '2', name: 'Natalie Chen', avatar: '/avatars/natalie.jpg', status: 'online' as const, role: 'Test Engineer', lastActive: '4m ago' },
-  { id: '3', name: 'Ryan Foster', avatar: '/avatars/ryan.jpg', status: 'away' as const, role: 'Developer', lastActive: '18m ago' },
-]
-
-const mockTestingPredictions = [
-  { id: '1', label: 'Pass Rate', current: 94.5, target: 98, predicted: 96.2, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Avg Run Duration', current: 8.5, target: 6, predicted: 7.2, confidence: 78, trend: 'down' as const },
-  { id: '3', label: 'Test Coverage', current: 87, target: 95, predicted: 91, confidence: 80, trend: 'up' as const },
-]
-
-const mockTestingActivities = [
-  { id: '1', user: 'Jake Martinez', action: 'triggered', target: 'full regression suite', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Natalie Chen', action: 'fixed', target: 'flaky login test', timestamp: '20m ago', type: 'success' as const },
-  { id: '3', user: 'Ryan Foster', action: 'added', target: '12 new unit tests', timestamp: '45m ago', type: 'success' as const },
-]
-
-// Quick actions config - handlers set in component
-const mockTestingQuickActionsConfig = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R' },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V' },
-  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D' },
-  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N' },
-]
 
 export default function TestingClient() {
 
 
   // Core state
   const [activeTab, setActiveTab] = useState('runs')
-  const [selectedRun, setSelectedRun] = useState<TestRun | null>(mockTestRuns[0])
+  const [testRuns, setTestRuns] = useState<TestRun[]>([])
+  const [selectedRun, setSelectedRun] = useState<TestRun | null>(null)
   const [selectedSpec, setSelectedSpec] = useState<TestSpec | null>(null)
-  const [suites, setSuites] = useState<TestSuite[]>(mockTestSuites)
-  const [browserConfigs, setBrowserConfigs] = useState<BrowserConfig[]>(mockBrowserConfigs)
+  const [suites, setSuites] = useState<TestSuite[]>([])
+  const [browserConfigs, setBrowserConfigs] = useState<BrowserConfig[]>([
+    { type: 'chromium', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
+    { type: 'firefox', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
+    { type: 'webkit', enabled: true, headless: true, viewport: { width: 1280, height: 720 } },
+    { type: 'edge', enabled: false, headless: true, viewport: { width: 1280, height: 720 } }
+  ])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<TestStatus | 'all'>('all')
   const [showRunDialog, setShowRunDialog] = useState(false)
@@ -542,6 +260,10 @@ export default function TestingClient() {
   const [showSettings, setShowSettings] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Additional state
+  const [testSpecs, setTestSpecs] = useState<TestSpec[]>([])
+  const [ciConfigs, setCiConfigs] = useState<CIConfig[]>([])
 
   // Supabase state
   const [dbTests, setDbTests] = useState<DbTestCase[]>([])
@@ -568,14 +290,19 @@ export default function TestingClient() {
 
   // Calculate stats
   const overallStats = useMemo(() => {
-    const total = mockTestRuns.reduce((sum, r) => sum + r.totalTests, 0)
-    const passed = mockTestRuns.reduce((sum, r) => sum + r.passed, 0)
-    const failed = mockTestRuns.reduce((sum, r) => sum + r.failed, 0)
-    const avgDuration = mockTestRuns.reduce((sum, r) => sum + r.duration, 0) / mockTestRuns.length
-    const avgCoverage = mockTestRuns.filter(r => r.coverage > 0).reduce((sum, r) => sum + r.coverage, 0) /
-      mockTestRuns.filter(r => r.coverage > 0).length
-    return { total, passed, failed, avgDuration, avgCoverage, passRate: (passed / total) * 100 }
-  }, [])
+    if (testRuns.length === 0) {
+      return { total: 0, passed: 0, failed: 0, avgDuration: 0, avgCoverage: 0, passRate: 0 }
+    }
+    const total = testRuns.reduce((sum, r) => sum + r.totalTests, 0)
+    const passed = testRuns.reduce((sum, r) => sum + r.passed, 0)
+    const failed = testRuns.reduce((sum, r) => sum + r.failed, 0)
+    const avgDuration = testRuns.reduce((sum, r) => sum + r.duration, 0) / testRuns.length
+    const runsWithCoverage = testRuns.filter(r => r.coverage > 0)
+    const avgCoverage = runsWithCoverage.length > 0
+      ? runsWithCoverage.reduce((sum, r) => sum + r.coverage, 0) / runsWithCoverage.length
+      : 0
+    return { total, passed, failed, avgDuration, avgCoverage, passRate: total > 0 ? (passed / total) * 100 : 0 }
+  }, [testRuns])
 
   // Toggle suite expansion
   const toggleSuite = (suiteId: string) => {
@@ -1021,7 +748,7 @@ export default function TestingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockTestRuns.length}</p>
+                    <p className="text-3xl font-bold">{testRuns.length}</p>
                     <p className="text-indigo-200 text-sm">Recent Runs</p>
                   </div>
                 </div>
@@ -1062,7 +789,7 @@ export default function TestingClient() {
               {/* Runs List */}
               <div className="lg:col-span-1 space-y-3">
                 <h3 className="font-semibold text-gray-900 dark:text-white">Recent Runs</h3>
-                {mockTestRuns.map(run => (
+                {testRuns.map(run => (
                   <div
                     key={run.id}
                     onClick={() => setSelectedRun(run)}
@@ -1197,7 +924,7 @@ export default function TestingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockTestSuites[0]?.tests || 0}</p>
+                    <p className="text-3xl font-bold">{suites[0]?.tests || 0}</p>
                     <p className="text-green-200 text-sm">Total Tests</p>
                   </div>
                 </div>
@@ -1279,7 +1006,7 @@ export default function TestingClient() {
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Recent Failures</h3>
                   <div className="space-y-3">
-                    {mockTestSpecs.filter(s => s.status === 'failed' || s.status === 'flaky').map(spec => (
+                    {testSpecs.filter(s => s.status === 'failed' || s.status === 'flaky').map(spec => (
                       <div
                         key={spec.id}
                         className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800"
@@ -1315,7 +1042,7 @@ export default function TestingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockTestSpecs.length}</p>
+                    <p className="text-3xl font-bold">{testSpecs.length}</p>
                     <p className="text-blue-200 text-sm">Test Specs</p>
                   </div>
                 </div>
@@ -1329,9 +1056,9 @@ export default function TestingClient() {
                 { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { setStatusFilter('all'); toast.success('All filters cleared'); } },
                 { icon: XCircle, label: 'Failed Only', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setStatusFilter('failed') },
                 { icon: CheckCircle2, label: 'Passed Only', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setStatusFilter('passed') },
-                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { const screenshotTests = mockTestSpecs.filter(t => t.screenshots?.length); toast.success(`Found ${screenshotTests.length} tests with screenshots`); } },
-                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => { const videoTests = mockTestSpecs.filter(t => t.video); toast.success(`Found ${videoTests.length} tests with video recordings`); } },
-                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { const tracedTests = mockTestSpecs.filter(t => t.steps?.length); toast.success(`Found ${tracedTests.length} tests with traces`); } },
+                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { const screenshotTests = testSpecs.filter(t => t.screenshots?.length); toast.success(`Found ${screenshotTests.length} tests with screenshots`); } },
+                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => { const videoTests = testSpecs.filter(t => t.video); toast.success(`Found ${videoTests.length} tests with video recordings`); } },
+                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { const tracedTests = testSpecs.filter(t => t.steps?.length); toast.success(`Found ${tracedTests.length} tests with traces`); } },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: fetchTests },
               ].map((action, i) => (
                 <button
@@ -1372,7 +1099,7 @@ export default function TestingClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {mockTestSpecs.map(spec => (
+                    {testSpecs.map(spec => (
                       <tr key={spec.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4">
                           <div>
@@ -1573,7 +1300,7 @@ export default function TestingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockCIConfigs.length}</p>
+                    <p className="text-3xl font-bold">{ciConfigs.length}</p>
                     <p className="text-orange-200 text-sm">Integrations</p>
                   </div>
                 </div>
@@ -1606,7 +1333,7 @@ export default function TestingClient() {
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4">CI Integrations</h3>
                 <div className="space-y-3">
-                  {mockCIConfigs.map(config => (
+                  {ciConfigs.map(config => (
                     <div key={config.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
@@ -1947,7 +1674,7 @@ export default defineConfig({
                         <CardDescription>Connect with your CI/CD pipelines</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockCIConfigs.map((config, i) => (
+                        {ciConfigs.map((config, i) => (
                           <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                             <div className="flex items-center gap-3">
                               <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -2249,18 +1976,18 @@ export default defineConfig({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockTestingAIInsights}
+              insights={[]}
               title="Testing Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockTestingCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockTestingPredictions}
+              predictions={[]}
               title="Test Metrics Forecast"
             />
           </div>
@@ -2268,12 +1995,12 @@ export default defineConfig({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockTestingActivities}
+            activities={[]}
             title="Testing Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTestingQuickActionsConfig.map(action => ({
+            actions={[].map(action => ({
               ...action,
               action: async () => {
                 switch(action.id) {
