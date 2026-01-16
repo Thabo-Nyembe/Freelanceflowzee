@@ -61,12 +61,11 @@ export default function FinancialOverviewPage() {
   })
 
   useEffect(() => {
-    if (userLoading) return // Wait for auth to complete
+    if (userLoading) return
 
     if (userId) {
       loadFinancialOverview()
     } else {
-      // No user logged in, stop loading
       setIsLoading(false)
     }
   }, [userId, userLoading])
@@ -81,16 +80,12 @@ export default function FinancialOverviewPage() {
       setIsLoading(true)
       setError(null)
 
-      logger.info('Loading financial overview from Supabase', { userId })
-
-      // Dynamic import for code splitting
       const {
         getTransactions,
         getFinancialOverview,
         getFinancialInsights
       } = await import('@/lib/financial-queries')
 
-      // Load data in parallel
       const [transactionsResult, overviewResult, insightsResult] = await Promise.all([
         getTransactions(userId, { startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }),
         getFinancialOverview(userId),
@@ -101,7 +96,6 @@ export default function FinancialOverviewPage() {
         throw new Error('Failed to load financial data')
       }
 
-      // Transform transactions to UI format
       const transformedTransactions = (transactionsResult.data || []).map(t => ({
         id: t.id,
         type: t.type as 'income' | 'expense',
@@ -124,7 +118,6 @@ export default function FinancialOverviewPage() {
       }))
       setTransactions(transformedTransactions)
 
-      // Use real overview data
       setOverview(overviewResult.data ? {
         totalRevenue: overviewResult.data.total_revenue || 0,
         monthlyRevenue: overviewResult.data.total_revenue || 0,
@@ -139,7 +132,6 @@ export default function FinancialOverviewPage() {
         accountsPayable: 0
       } : null)
 
-      // Transform insights to UI format
       const transformedInsights = (insightsResult.data || []).map(i => ({
         id: i.id,
         type: i.type as any,
@@ -152,33 +144,22 @@ export default function FinancialOverviewPage() {
         category: i.category as any
       }))
       setInsights(transformedInsights)
-
-      // Invoices can be added when getInvoices query is available
       setInvoices([])
 
       setIsLoading(false)
-      toast.success('Financial data loaded', {
-        description: `${transformedTransactions.length} transactions, ${transformedInsights.length} insights`
-      })
-      logger.info('Financial overview loaded successfully from Supabase', {
-        transactionCount: transformedTransactions.length,
-        insightCount: transformedInsights.length,
-        userId
-      })
+      toast.success(`Financial data loaded - ${transformedTransactions.length} transactions`)
       announce('Financial overview loaded successfully', 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load financial overview'
       setError(errorMessage)
       setIsLoading(false)
-      logger.error('Failed to load financial overview', { error: err, userId })
-      toast.error('Failed to load financial data', { description: errorMessage })
+      logger.error('Failed to load financial overview', { error: err })
+      toast.error(errorMessage)
       announce('Error loading financial overview', 'assertive')
     }
   }
 
   const handleExportData = async () => {
-    logger.info('Export overview data initiated')
-
     try {
       const response = await fetch('/api/financial/export', {
         method: 'POST',
@@ -201,13 +182,10 @@ export default function FinancialOverviewPage() {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      toast.success('Overview exported successfully', {
-        description: `${transactions.length} transactions included`
-      })
-      logger.info('Overview exported', { transactionCount: transactions.length })
+      toast.success('Overview exported successfully')
     } catch (error: any) {
       logger.error('Export failed', { error })
-      toast.error('Export failed', { description: error.message })
+      toast.error(error.message || 'Export failed')
     }
   }
 
@@ -246,15 +224,11 @@ export default function FinancialOverviewPage() {
 
       if (error) throw error
 
-      // Add to local state
       setTransactions(prev => [data, ...prev])
 
-      toast.success('Transaction added', {
-        description: `${transactionForm.type === 'income' ? '+' : '-'}${formatCurrency(amount)}`
-      })
+      toast.success(`Transaction added - ${transactionForm.type === 'income' ? '+' : '-'}${formatCurrency(amount)}`)
       announce('Transaction added successfully', 'polite')
 
-      // Reset form
       setTransactionForm({
         type: 'income',
         amount: '',
@@ -273,8 +247,6 @@ export default function FinancialOverviewPage() {
   }, [userId, transactionForm, announce])
 
   const handleImplementInsight = async (insight: FinancialInsight) => {
-    logger.info('Implement insight', { insightId: insight.id, title: insight.title })
-
     try {
       const response = await fetch('/api/financial/insights', {
         method: 'POST',
@@ -287,25 +259,14 @@ export default function FinancialOverviewPage() {
 
       if (!response.ok) throw new Error('Failed to implement insight')
 
-      const result = await response.json()
-
-      toast.success('Insight implementation started', {
-        description: `Potential value: ${formatCurrency(insight.potentialValue)}`
-      })
-
-      logger.info('Insight implemented', {
-        insightId: insight.id,
-        potentialValue: insight.potentialValue
-      })
+      toast.success(`Insight implementation started - Potential: ${formatCurrency(insight.potentialValue)}`)
     } catch (error: any) {
-      logger.error('Failed to implement insight', { error, insightId: insight.id })
-      toast.error('Implementation failed', { description: error.message })
+      logger.error('Failed to implement insight', { error })
+      toast.error(error.message || 'Implementation failed')
     }
   }
 
   const handleGenerateReport = async (reportType: string) => {
-    logger.info('Generate report from overview', { reportType })
-
     try {
       const response = await fetch('/api/financial/reports', {
         method: 'POST',
@@ -322,16 +283,10 @@ export default function FinancialOverviewPage() {
 
       if (!response.ok) throw new Error('Report generation failed')
 
-      const result = await response.json()
-
-      toast.success('Report generated', {
-        description: `${reportType} report is ready`
-      })
-
-      logger.info('Report generated', { reportType, success: result.success })
+      toast.success(`${reportType} report is ready`)
     } catch (error: any) {
-      logger.error('Report generation failed', { error, reportType })
-      toast.error('Report generation failed', { description: error.message })
+      logger.error('Report generation failed', { error })
+      toast.error(error.message || 'Report generation failed')
     }
   }
 
@@ -615,7 +570,6 @@ export default function FinancialOverviewPage() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            {/* Transaction Type */}
             <div className="space-y-2">
               <Label>Type</Label>
               <select
@@ -630,7 +584,6 @@ export default function FinancialOverviewPage() {
               </select>
             </div>
 
-            {/* Amount */}
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <div className="relative">
@@ -648,7 +601,6 @@ export default function FinancialOverviewPage() {
               </div>
             </div>
 
-            {/* Category */}
             <div className="space-y-2">
               <Label>Category</Label>
               <select
@@ -679,7 +631,6 @@ export default function FinancialOverviewPage() {
               </select>
             </div>
 
-            {/* Date */}
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
               <Input
@@ -690,7 +641,6 @@ export default function FinancialOverviewPage() {
               />
             </div>
 
-            {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description (optional)</Label>
               <Textarea
