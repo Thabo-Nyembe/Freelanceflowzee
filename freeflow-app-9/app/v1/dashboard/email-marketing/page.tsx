@@ -16,7 +16,6 @@ import {
 } from '@/lib/email-marketing-utils'
 import { CampaignStatus } from '@/lib/email-marketing-types'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -30,7 +29,6 @@ const logger = createFeatureLogger('EmailMarketingPage')
 type ViewMode = 'overview' | 'campaigns' | 'subscribers' | 'automation' | 'templates'
 
 export default function EmailMarketingPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -74,21 +72,15 @@ export default function EmailMarketingPage() {
     { id: 3, name: 'Re-engagement', trigger: 'Inactive 30 days', status: 'paused', emails: 4, sent: 156, opened: 78 }
   ])
 
-  // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading email marketing data', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getEmailCampaigns, getEmailSubscribers, getEmailMarketingStats, getEmailTemplates } = await import('@/lib/email-marketing-queries')
 
         // Load campaigns, subscribers, stats, and templates in parallel
@@ -110,19 +102,13 @@ export default function EmailMarketingPage() {
         setTemplates(templatesResult.data || [])
 
         setIsLoading(false)
-        toast.success(`Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`)
-        logger.info('Email marketing data loaded successfully', {
-          campaignsCount: campaignsResult.data?.length,
-          subscribersCount: subscribersResult.data?.length,
-          templatesCount: templatesResult.data?.length
-        })
-        announce('Email marketing data loaded successfully', 'polite')
+        toast.success(`Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`)        announce('Email marketing data loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load email marketing data'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load email marketing data', { error: errorMessage, userId })
-        toast.error('Failed to load email marketing', { description: errorMessage })
+        toast.error('Failed to load email marketing')
         announce('Error loading email marketing data', 'assertive')
       }
     }
@@ -151,24 +137,13 @@ export default function EmailMarketingPage() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
-      const { toast } = await import('sonner')
-
-      logger.info('Sending campaign', {
-        userId,
-        campaignId: campaign.id,
-        campaignName: campaign.name,
-        recipientCount: campaign.recipientCount || campaign.recipient_count
-      })
-
-      const { sendCampaign } = await import('@/lib/email-marketing-queries')
+      const { toast } = await import('sonner')      const { sendCampaign } = await import('@/lib/email-marketing-queries')
 
       const sendPromise = sendCampaign(campaign.id).then(result => {
         if (result.error) {
           logger.error('Failed to send campaign', { error: result.error })
           throw new Error('Failed to send campaign')
-        }
-        logger.info('Campaign sent successfully', { campaignId: campaign.id })
-        return result
+        }        return result
       })
 
       toast.promise(sendPromise, {
@@ -212,15 +187,7 @@ export default function EmailMarketingPage() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
-      const { toast } = await import('sonner')
-
-      logger.info('Duplicating campaign', {
-        userId,
-        campaignId: campaign.id,
-        campaignName: campaign.name
-      })
-
-      const { createEmailCampaign } = await import('@/lib/email-marketing-queries')
+      const { toast } = await import('sonner')      const { createEmailCampaign } = await import('@/lib/email-marketing-queries')
 
       const newCampaignName = `${campaign.name} (Copy)`
 
@@ -250,15 +217,7 @@ export default function EmailMarketingPage() {
         logger.error('Failed to duplicate campaign', { error })
         toast.error('Failed to duplicate campaign')
         return
-      }
-
-      logger.info('Campaign duplicated successfully', {
-        originalId: campaign.id,
-        newId: data.id,
-        newName: newCampaignName
-      })
-
-      toast.success(`Campaign duplicated: ${newCampaignName}`)
+      }      toast.success(`Campaign duplicated: ${newCampaignName}`)
 
       // Add to local state
       setCampaigns(prev => [data, ...prev])
@@ -373,9 +332,7 @@ export default function EmailMarketingPage() {
           opened_count: 0
         })
         if (error) throw error
-        if (data?.id) automationId = data.id
-        logger.info('Automation created in database', { automationId })
-      }
+        if (data?.id) automationId = data.id      }
 
       const newAutomation = {
         id: automationId,
@@ -393,7 +350,7 @@ export default function EmailMarketingPage() {
       announce('Automation created successfully', 'polite')
     } catch (error: any) {
       logger.error('Failed to create automation', { error: error.message })
-      toast.error('Failed to create automation', { description: error.message || 'Please try again' })
+      toast.error('Failed to create automation')
     }
   }, [automationForm, userId, announce])
 
@@ -406,9 +363,7 @@ export default function EmailMarketingPage() {
       if (userId) {
         const { toggleAutomationStatus } = await import('@/lib/email-marketing-queries')
         const { error } = await toggleAutomationStatus(String(id), newStatus as any)
-        if (error) throw error
-        logger.info('Automation status updated in database', { id, newStatus })
-      }
+        if (error) throw error      }
 
       setAutomations(prev => prev.map(a =>
         a.id === id
@@ -428,9 +383,7 @@ export default function EmailMarketingPage() {
       if (userId) {
         const { deleteEmailAutomation } = await import('@/lib/email-marketing-queries')
         const { error } = await deleteEmailAutomation(String(id))
-        if (error) throw error
-        logger.info('Automation deleted from database', { id })
-      }
+        if (error) throw error      }
 
       setAutomations(prev => prev.filter(a => a.id !== id))
       toast.success('Automation deleted successfully')
@@ -443,14 +396,11 @@ export default function EmailMarketingPage() {
 
   const handleCreateTemplate = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create templates' })
+      toast.error('Authentication required')
       return
     }
 
-    try {
-      logger.info('Creating email template', { userId })
-
-      const { createEmailTemplate, getEmailTemplates } = await import('@/lib/email-marketing-queries')
+    try {      const { createEmailTemplate, getEmailTemplates } = await import('@/lib/email-marketing-queries')
 
       const newTemplate = {
         name: 'New Email Template',
@@ -468,11 +418,7 @@ export default function EmailMarketingPage() {
         toast.error('Failed to create template')
         announce('Failed to create template', 'assertive')
         return
-      }
-
-      logger.info('Template created successfully', { templateId: data?.id })
-
-      toast.success('Template created - Start customizing your new template')
+      }      toast.success('Template created - Start customizing your new template')
       announce('Template created successfully', 'polite')
 
       // Reload templates
@@ -1032,7 +978,6 @@ export default function EmailMarketingPage() {
     </div>
   )
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
@@ -1057,7 +1002,6 @@ export default function EmailMarketingPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
