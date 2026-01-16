@@ -34,7 +34,6 @@ import {
   estimateExportTime
 } from '@/lib/report-builder-utils'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -47,7 +46,6 @@ const logger = createFeatureLogger('CustomReportsPage')
 type BuilderStep = 'template' | 'customize' | 'preview' | 'export'
 
 export default function CustomReportBuilderPage() {
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -68,21 +66,15 @@ export default function CustomReportBuilderPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  // A+++ LOAD REPORT BUILDER DATA
   useEffect(() => {
     const loadReportBuilderData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading custom reports data', { userId })
-
-        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
+        setError(null)        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
 
         const [templatesResult, reportsResult, statsResult] = await Promise.all([
           getReportTemplates({ is_public: true }),
@@ -95,20 +87,14 @@ export default function CustomReportBuilderPage() {
         setReportsStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Reports loaded', {
-          description: `${templatesResult.data?.length || 0} templates, ${reportsResult.data?.length || 0} custom reports`
-        })
-        logger.info('Custom reports data loaded successfully', {
-          templates: templatesResult.data?.length,
-          reports: reportsResult.data?.length
-        })
-        announce('Report builder loaded successfully', 'polite')
+        toast.success('Reports loaded' templates, ${reportsResult.data?.length || 0} custom reports`
+        })        announce('Report builder loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load report builder'
         setError(errorMessage)
         setIsLoading(false)
         logger.error('Failed to load custom reports data', { error: errorMessage, userId })
-        toast.error('Failed to load reports', { description: errorMessage })
+        toast.error('Failed to load reports')
         announce('Error loading report builder', 'assertive')
       }
     }
@@ -190,7 +176,6 @@ export default function CustomReportBuilderPage() {
     }
   ] : []
 
-  // A+++ LOADING STATE
   if (isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden">
@@ -217,7 +202,6 @@ export default function CustomReportBuilderPage() {
     )
   }
 
-  // A+++ ERROR STATE
   if (error) {
     return (
       <div className="min-h-screen relative overflow-hidden">

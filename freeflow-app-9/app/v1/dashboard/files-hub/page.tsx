@@ -25,7 +25,6 @@ import {
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -110,29 +109,19 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_FILES':
-      logger.info('Setting files', { count: action.files.length })
-      return { ...state, files: action.files }
+    case 'SET_FILES':      return { ...state, files: action.files }
 
-    case 'ADD_FILE':
-      logger.info('File added', { fileId: action.file.id, fileName: action.file.name, fileType: action.file.type })
-      return { ...state, files: [action.file, ...state.files] }
+    case 'ADD_FILE':      return { ...state, files: [action.file, ...state.files] }
 
-    case 'ADD_FILES':
-      logger.info('Multiple files added', { count: action.payload.length })
-      return { ...state, files: [...action.payload, ...state.files] }
+    case 'ADD_FILES':      return { ...state, files: [...action.payload, ...state.files] }
 
-    case 'UPDATE_FILE':
-      logger.info('File updated', { fileId: action.file.id, fileName: action.file.name })
-      return {
+    case 'UPDATE_FILE':      return {
         ...state,
         files: state.files.map(f => f.id === action.file.id ? action.file : f)
       }
 
     case 'DELETE_FILE':
-      const deletedFile = state.files.find(f => f.id === action.fileId)
-      logger.info('File deleted', { fileId: action.fileId, fileName: deletedFile?.name })
-      return {
+      const deletedFile = state.files.find(f => f.id === action.fileId)      return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
         selectedFile: state.selectedFile?.id === action.fileId ? null : state.selectedFile
@@ -168,23 +157,17 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
           : [...state.selectedFiles, action.fileId]
       }
 
-    case 'CLEAR_SELECTED_FILES':
-      logger.info('Cleared selected files', { clearedCount: state.selectedFiles.length })
-      return { ...state, selectedFiles: [] }
+    case 'CLEAR_SELECTED_FILES':      return { ...state, selectedFiles: [] }
 
     case 'TOGGLE_STAR':
-      const starredFile = state.files.find(f => f.id === action.fileId)
-      logger.info('Toggled file star', { fileId: action.fileId, newStarred: !starredFile?.starred })
-      return {
+      const starredFile = state.files.find(f => f.id === action.fileId)      return {
         ...state,
         files: state.files.map(f =>
           f.id === action.fileId ? { ...f, starred: !f.starred } : f
         )
       }
 
-    case 'SET_FOLDER':
-      logger.info('Folder changed', { folder: action.folder })
-      return { ...state, currentFolder: action.folder }
+    case 'SET_FOLDER':      return { ...state, currentFolder: action.folder }
 
     default:
       return state
@@ -202,7 +185,6 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
 // ============================================================================
 
 export default function FilesHubPage() {
-  // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
 
   // REDUCER STATE
@@ -253,18 +235,12 @@ export default function FilesHubPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        return
+      if (!userId) {        return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)
-
-        logger.info('Loading files from Supabase', { userId })
-
-        // Dynamic import for code splitting
+        setError(null)        // Dynamic import for code splitting
         const { getFiles, getFolders } = await import('@/lib/files-hub-queries')
 
         const { data: filesData, error: filesError } = await getFiles(
@@ -307,21 +283,13 @@ export default function FilesHubPage() {
         setIsPageLoading(false)
         announce(`${transformedFiles.length} files loaded from database`, 'polite')
 
-        toast.success(`${transformedFiles.length} files loaded from Supabase - ${formatFileSize(filesData.reduce((sum, f) => sum + f.size, 0))} total`)
-
-        logger.info('Files loaded successfully', {
-          count: transformedFiles.length,
-          userId
-        })
-      } catch (err) {
+        toast.success(`${transformedFiles.length} files loaded from Supabase - ${formatFileSize(filesData.reduce((sum, f) => sum + f.size, 0))} total`)      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load files'
         logger.error('Failed to load files', { error: err, userId })
         setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading files', 'assertive')
-        toast.error('Failed to load files', {
-          description: errorMessage
-        })
+        toast.error('Failed to load files')
       }
     }
 
@@ -419,14 +387,14 @@ export default function FilesHubPage() {
   const handleUploadFiles = async () => {
     if (!userId) {
       logger.warn('Upload failed', { reason: 'User not authenticated' })
-      toast.error('Authentication required', { description: 'Please log in to upload files' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     if (!uploadFiles || uploadFiles.length === 0) {
       logger.warn('Upload validation failed', { reason: 'No files selected' })
-      toast.error('No files selected', { description: 'Please select at least one file to upload' })
+      toast.error('No files selected')
       return
     }
 
@@ -437,15 +405,7 @@ export default function FilesHubPage() {
 
     // Create supabase client for storage operations
     const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-
-    logger.info('Starting file upload', {
-      fileCount: files.length,
-      totalSize: files.reduce((sum, f) => sum + f.size, 0),
-      userId
-    })
-
-    for (const file of files) {
+    const supabase = createClient()    for (const file of files) {
       try {
         // 1. Validate file size (50MB limit)
         const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
@@ -459,15 +419,7 @@ export default function FilesHubPage() {
         const fileExt = file.name.split('.').pop() || 'bin'
         const timestamp = Date.now()
         const randomId = Math.random().toString(36).substring(7)
-        const storagePath = `${userId}/${timestamp}-${randomId}.${fileExt}`
-
-        logger.info('Uploading file to storage', {
-          fileName: file.name,
-          storagePath,
-          size: file.size
-        })
-
-        // 3. Upload to Supabase Storage
+        const storagePath = `${userId}/${timestamp}-${randomId}.${fileExt}`        // 3. Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase
           .storage
           .from('user-files')
@@ -489,14 +441,7 @@ export default function FilesHubPage() {
         const { data: { publicUrl } } = supabase
           .storage
           .from('user-files')
-          .getPublicUrl(storagePath)
-
-        logger.info('File uploaded to storage', {
-          fileName: file.name,
-          publicUrl
-        })
-
-        // 5. Determine file type
+          .getPublicUrl(storagePath)        // 5. Determine file type
         const ext = getFileExtension(file.name)
         const type = getFileType(ext)
 
@@ -563,14 +508,7 @@ export default function FilesHubPage() {
           accessLevel: fileRecord.access_level
         }
 
-        uploadedFiles.push(uiFile)
-
-        logger.info('File upload complete', {
-          fileId: fileRecord.id,
-          fileName: file.name
-        })
-
-      } catch (error) {
+        uploadedFiles.push(uiFile)      } catch (error) {
         logger.error('Unexpected upload error', {
           error,
           fileName: file.name
@@ -603,13 +541,7 @@ export default function FilesHubPage() {
       })
 
       announce(`${failedFiles.length} files failed to upload`, 'assertive')
-    }
-
-    logger.info('Upload batch complete', {
-      successful: uploadedFiles.length,
-      failed: failedFiles.length
-    })
-  }
+    }  }
 
   const handleDeleteFile = async (fileId: string) => {
     if (!userId) {
@@ -623,13 +555,7 @@ export default function FilesHubPage() {
       return
     }
 
-    try {
-      logger.info('Deleting file', {
-        fileId,
-        fileName: file.name
-      })
-
-      // 1. Get file details from database to get storage_path
+    try {      // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
         .from('files')
         .select('storage_path, storage_provider')
@@ -679,14 +605,7 @@ export default function FilesHubPage() {
       dispatch({ type: 'DELETE_FILE', fileId })
 
       toast.success(`Deleted ${file.name}`)
-      announce(`Deleted ${file.name}`, 'polite')
-
-      logger.info('File deleted successfully', {
-        fileId,
-        fileName: file.name
-      })
-
-    } catch (error) {
+      announce(`Deleted ${file.name}`, 'polite')    } catch (error) {
       logger.error('Deletion error', {
         error,
         fileId
@@ -705,15 +624,7 @@ export default function FilesHubPage() {
 
     const filesToDelete = state.files.filter(f => state.selectedFiles.includes(f.id))
     const fileNames = filesToDelete.map(f => f.name)
-    const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)
-
-    logger.info('Bulk delete initiated in Supabase', {
-      fileCount: state.selectedFiles.length,
-      fileNames: fileNames.slice(0, 5),
-      totalSize
-    })
-
-    try {
+    const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)    try {
       setIsSaving(true)
 
       // Dynamic import
@@ -727,22 +638,13 @@ export default function FilesHubPage() {
         dispatch({ type: 'DELETE_FILE', fileId })
       })
 
-      dispatch({ type: 'CLEAR_SELECTED_FILES' })
-
-      logger.info('Bulk delete completed', {
-        deletedCount: filesToDelete.length,
-        totalSize
-      })
-
-      toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
+      dispatch({ type: 'CLEAR_SELECTED_FILES' })      toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
     } catch (error: any) {
       logger.error('Bulk delete failed', {
         error: error.message,
         fileCount: state.selectedFiles.length
       })
-      toast.error('Failed to delete files', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete files')
     } finally {
       setIsSaving(false)
     }
@@ -760,13 +662,7 @@ export default function FilesHubPage() {
       return
     }
 
-    try {
-      logger.info('Downloading file', {
-        fileId: file.id,
-        fileName: file.name
-      })
-
-      // 1. Get file details from database to get storage_path
+    try {      // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
         .from('files')
         .select('storage_path, storage_provider')
@@ -818,13 +714,7 @@ export default function FilesHubPage() {
 
         toast.success(`Downloaded ${file.name} - Size: ${formatFileSize(file.size)}`)
 
-        announce(`Downloaded ${file.name}`, 'polite')
-
-        logger.info('File downloaded successfully', {
-          fileId: file.id,
-          fileName: file.name
-        })
-      } else {
+        announce(`Downloaded ${file.name}`, 'polite')      } else {
         // Fallback for files without storage_path (e.g., old files)
         const a = document.createElement('a')
         a.href = file.url
@@ -855,7 +745,7 @@ export default function FilesHubPage() {
 
     if (!shareEmails.trim()) {
       logger.warn('Share validation failed', { reason: 'No email addresses provided' })
-      toast.error('Email required', { description: 'Please enter at least one email address' })
+      toast.error('Email required')
       return
     }
 
@@ -864,17 +754,7 @@ export default function FilesHubPage() {
       return
     }
 
-    const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)
-
-    logger.info('File share initiated', {
-      fileId: state.selectedFile.id,
-      fileName: state.selectedFile.name,
-      recipientCount: emails.length,
-      recipients: emails,
-      userId
-    })
-
-    try {
+    const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -898,16 +778,7 @@ export default function FilesHubPage() {
 
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsShareModalOpen(false)
-      setShareEmails('')
-
-      logger.info('File shared successfully to database', {
-        fileId: state.selectedFile.id,
-        fileName: state.selectedFile.name,
-        recipientCount: emails.length,
-        userId
-      })
-
-      toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
+      setShareEmails('')      toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
       announce('File shared successfully', 'polite')
     } catch (error: any) {
       logger.error('File share failed', {
@@ -916,9 +787,7 @@ export default function FilesHubPage() {
         fileName: state.selectedFile.name,
         userId
       })
-      toast.error('Failed to share file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to share file')
       announce('Error sharing file', 'assertive')
     } finally {
       setIsSaving(false)
@@ -938,17 +807,7 @@ export default function FilesHubPage() {
     if (!userId) {
       toast.error('Please log in to move files')
       return
-    }
-
-    logger.info('Moving file', {
-      fileId: state.selectedFile.id,
-      fileName: state.selectedFile.name,
-      fromFolder: state.selectedFile.folder,
-      toFolder: moveToFolder,
-      userId
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -964,17 +823,7 @@ export default function FilesHubPage() {
       const updatedFile = { ...state.selectedFile, folder: moveToFolder }
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsMoveModalOpen(false)
-      setMoveToFolder('')
-
-      logger.info('File moved successfully to database', {
-        fileId: state.selectedFile.id,
-        fileName: state.selectedFile.name,
-        fromFolder: previousFolder,
-        toFolder: moveToFolder,
-        userId
-      })
-
-      toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
+      setMoveToFolder('')      toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
       announce('File moved successfully', 'polite')
     } catch (error: any) {
       logger.error('File move failed', {
@@ -983,9 +832,7 @@ export default function FilesHubPage() {
         fileName: state.selectedFile.name,
         userId
       })
-      toast.error('Failed to move file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to move file')
       announce('Error moving file', 'assertive')
     } finally {
       setIsSaving(false)
@@ -1000,15 +847,7 @@ export default function FilesHubPage() {
       return
     }
 
-    const newStarred = !file.starred
-
-    logger.info(newStarred ? 'Starring file in Supabase' : 'Unstarring file in Supabase', {
-      fileId,
-      fileName: file.name,
-      starred: newStarred
-    })
-
-    try {
+    const newStarred = !file.starred    try {
       // Dynamic import
       const { toggleFileStar } = await import('@/lib/files-hub-queries')
 
@@ -1025,31 +864,14 @@ export default function FilesHubPage() {
         fileId,
         fileName: file.name
       })
-      toast.error('Failed to update favorite', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to update favorite')
     }
   }
 
-  const handleViewFile = (file: FileItem) => {
-    logger.info('Opening file view', {
-      fileId: file.id,
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size
-    })
-
-    const updatedFile = { ...file, views: file.views + 1 }
+  const handleViewFile = (file: FileItem) => {    const updatedFile = { ...file, views: file.views + 1 }
     dispatch({ type: 'UPDATE_FILE', file: updatedFile })
     dispatch({ type: 'SELECT_FILE', file: updatedFile })
-    setIsViewModalOpen(true)
-
-    logger.info('File view modal opened', {
-      fileId: file.id,
-      fileName: file.name,
-      newViewCount: file.views + 1
-    })
-  }
+    setIsViewModalOpen(true)  }
 
   // ============================================================================
   // FILE DISPLAY HELPERS - Using imported utilities
