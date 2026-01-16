@@ -493,7 +493,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       setShowRefundDialog(false)
       setRefundForm({ amount: '', reason: 'requested_by_customer' })
     } catch (error) {
-      toast.error('Failed to issue refund', { description: (error as Error).message })
+      toast.error('Failed to issue refund')
     } finally {
       setIsSubmitting(false)
     }
@@ -522,7 +522,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       setShowInvoiceDialog(false)
       setInvoiceForm({ customerId: '', description: '', amount: '', dueDate: '', sendEmail: true })
     } catch (error) {
-      toast.error('Failed to create invoice', { description: (error as Error).message })
+      toast.error('Failed to create invoice')
     } finally {
       setIsSubmitting(false)
     }
@@ -546,7 +546,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       setShowCustomerDialog(false)
       setCustomerForm({ name: '', email: '', phone: '', description: '' })
     } catch (error) {
-      toast.error('Failed to add customer', { description: (error as Error).message })
+      toast.error('Failed to add customer')
     } finally {
       setIsSubmitting(false)
     }
@@ -564,9 +564,9 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       a.href = url
       a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`
       a.click()
-      toast.success('Export completed', { description: 'Transaction data exported to CSV' })
+      toast.success('Export completed')
     } catch (error) {
-      toast.error('Export failed', { description: (error as Error).message })
+      toast.error('Export failed')
     }
   }
 
@@ -574,9 +574,9 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       await refetch()
-      toast.success('Reconciliation complete', { description: 'Accounts have been reconciled' })
+      toast.success('Reconciliation complete')
     } catch (error) {
-      toast.error('Reconciliation failed', { description: (error as Error).message })
+      toast.error('Reconciliation failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -586,9 +586,9 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       await deleteTransaction(transactionId)
-      toast.success('Transaction voided', { description: `Transaction ${transactionId} has been voided` })
+      toast.success('Transaction voided' has been voided` })
     } catch (error) {
-      toast.error('Failed to void transaction', { description: (error as Error).message })
+      toast.error('Failed to void transaction')
     } finally {
       setIsSubmitting(false)
     }
@@ -612,11 +612,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         client_name: newPaymentForm.customerName,
         notes: `Customer email: ${newPaymentForm.customerEmail}, Payment method: ${newPaymentForm.paymentMethod}`
       })
-      toast.success('Payment created successfully!', { description: `Charged ${formatCurrency(amount * 100)} to ${newPaymentForm.customerName}` })
+      toast.success('Payment created successfully!' to ${newPaymentForm.customerName}` })
       setShowNewPaymentDialog(false)
       setNewPaymentForm({ customerName: '', customerEmail: '', amount: '', description: '', paymentMethod: 'card', currency: 'USD' })
     } catch (error) {
-      toast.error('Failed to create payment', { description: (error as Error).message })
+      toast.error('Failed to create payment')
     } finally {
       setIsSubmitting(false)
     }
@@ -641,11 +641,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         client_name: payment?.customer.name || 'Unknown Customer',
         notes: `Original payment: ${quickRefundForm.paymentId}, Reason: ${quickRefundForm.reason}`
       })
-      toast.success('Refund issued successfully!', { description: `Refunded ${formatCurrency(refundAmount * 100)}` })
+      toast.success('Refund issued successfully!'` })
       setShowQuickRefundDialog(false)
       setQuickRefundForm({ paymentId: '', amount: '', reason: 'requested_by_customer' })
     } catch (error) {
-      toast.error('Failed to issue refund', { description: (error as Error).message })
+      toast.error('Failed to issue refund')
     } finally {
       setIsSubmitting(false)
     }
@@ -683,10 +683,10 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Report exported successfully!', { description: `Exported ${displayTransactions.length} transactions` })
+      toast.success('Report exported successfully!' transactions` })
       setShowExportDialog(false)
     } catch (error) {
-      toast.error('Failed to export report', { description: (error as Error).message })
+      toast.error('Failed to export report')
     } finally {
       setIsSubmitting(false)
     }
@@ -2035,7 +2035,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             <AIInsightsPanel
               insights={mockTransactionsAIInsights}
               title="Transaction Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

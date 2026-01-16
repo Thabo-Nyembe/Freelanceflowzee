@@ -674,9 +674,7 @@ export default function TestingClient() {
 
       if (error) throw error
 
-      toast.success(`Test "${testName}" executed`, {
-        description: 'Test run completed successfully'
-      })
+      toast.success(`Test "${testName}" executed`)
       fetchTests()
     } catch (error) {
       console.error('Error running test:', error)
@@ -742,9 +740,7 @@ export default function TestingClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export completed', {
-        description: 'Test results exported successfully'
-      })
+      toast.success('Export completed')
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export results')
@@ -758,8 +754,7 @@ export default function TestingClient() {
       const res = await fetch('/api/testing/run', { method: 'POST' })
       if (!res.ok) throw new Error('Test run failed')
       const data = await res.json()
-      toast.success('Test run completed', {
-        description: `${data.testsRun || mockTestSpecs.length + dbTests.length} tests executed`
+      toast.success('Test run completed' tests executed`
       })
     } catch {
       toast.error('Test run failed')
@@ -821,9 +816,7 @@ export default function TestingClient() {
         return
       }
 
-      toast.info(`Rerunning ${data.length} failed tests`, {
-        description: 'Test execution started...'
-      })
+      toast.info(`Rerunning ${data.length} failed tests`)
 
       for (const test of data) {
         await handleRunTest(test.id, test.name)
@@ -885,16 +878,12 @@ export default function TestingClient() {
 
   // Filter dialog handler
   const handleOpenFilterDialog = () => {
-    toast.info('Filter options', {
-      description: 'Use the status filters to refine results'
-    })
+    toast.info('Filter options')
   }
 
   // File open handler
   const handleOpenFile = () => {
-    toast.info('File selection', {
-      description: 'Select a test file from the explorer to view'
-    })
+    toast.info('File selection')
   }
 
   // Screenshot handler
@@ -2273,7 +2262,7 @@ export default defineConfig({
             <AIInsightsPanel
               insights={mockTestingAIInsights}
               title="Testing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

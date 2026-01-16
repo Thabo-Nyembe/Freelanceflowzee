@@ -434,7 +434,7 @@ export default function InvestorMetricsClient() {
       if (error) throw error
       setDbMetrics(data || [])
     } catch (error: any) {
-      toast.error('Failed to fetch metrics', { description: error.message })
+      toast.error('Failed to fetch metrics')
     } finally {
       setLoading(false)
     }
@@ -476,7 +476,7 @@ export default function InvestorMetricsClient() {
       resetForm()
       toast.success('Metric created successfully')
     } catch (error: any) {
-      toast.error('Failed to create metric', { description: error.message })
+      toast.error('Failed to create metric')
     } finally {
       setLoading(false)
     }
@@ -515,7 +515,7 @@ export default function InvestorMetricsClient() {
       resetForm()
       toast.success('Metric updated successfully')
     } catch (error: any) {
-      toast.error('Failed to update metric', { description: error.message })
+      toast.error('Failed to update metric')
     } finally {
       setLoading(false)
     }
@@ -534,7 +534,7 @@ export default function InvestorMetricsClient() {
       setDbMetrics(prev => prev.filter(m => m.id !== id))
       toast.success('Metric deleted successfully')
     } catch (error: any) {
-      toast.error('Failed to delete metric', { description: error.message })
+      toast.error('Failed to delete metric')
     } finally {
       setLoading(false)
     }
@@ -664,20 +664,20 @@ export default function InvestorMetricsClient() {
       a.download = `investor-metrics-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Metrics exported', { description: 'Investor report downloaded successfully' })
+      toast.success('Metrics exported')
     } catch (error: any) {
-      toast.error('Export failed', { description: error.message })
+      toast.error('Export failed')
     }
   }
 
   const handleRefreshData = async () => {
     toast.info('Refreshing data...')
     await fetchMetrics()
-    toast.success('Data refreshed', { description: 'Latest metrics loaded' })
+    toast.success('Data refreshed')
   }
 
   const handleGenerateReport = () => {
-    toast.success('Generating report', { description: 'Investor presentation is being created' })
+    toast.success('Generating report')
   }
 
   const handleSetAlert = async (metric: string) => {
@@ -688,16 +688,16 @@ export default function InvestorMetricsClient() {
         return
       }
       // Could save alert to database here
-      toast.success('Alert set', { description: `You'll be notified when ${metric} changes` })
+      toast.success('Alert set' changes` })
     } catch (error: any) {
-      toast.error('Failed to set alert', { description: error.message })
+      toast.error('Failed to set alert')
     }
   }
 
   const handleShareDashboard = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href)
-      toast.success('Link copied', { description: 'Dashboard link copied to clipboard' })
+      toast.success('Link copied')
     } catch {
       toast.error('Failed to copy link')
     }
@@ -731,12 +731,11 @@ export default function InvestorMetricsClient() {
         })
       }
 
-      toast.success('Metrics updated successfully', {
-        description: `Updated ${updateMetricsForm.metricsToUpdate === 'all' ? 'all categories' : updateMetricsForm.metricsToUpdate + ' metrics'} from ${updateMetricsForm.refreshSource}`
+      toast.success('Metrics updated successfully' from ${updateMetricsForm.refreshSource}`
       })
       setShowUpdateMetricsDialog(false)
     } catch (error: any) {
-      toast.error('Failed to update metrics', { description: error.message })
+      toast.error('Failed to update metrics')
     } finally {
       setLoading(false)
     }
@@ -786,12 +785,11 @@ export default function InvestorMetricsClient() {
         investorReportForm.recipientType === 'investors' ? mockInvestors.length :
         investorReportForm.customRecipients.split(',').filter(e => e.trim()).length
 
-      toast.success('Investor report generated', {
-        description: `${investorReportForm.reportType.charAt(0).toUpperCase() + investorReportForm.reportType.slice(1)} report ready for ${recipientCount} recipient(s)`
+      toast.success('Investor report generated' report ready for ${recipientCount} recipient(s)`
       })
       setShowInvestorReportDialog(false)
     } catch (error: any) {
-      toast.error('Failed to generate report', { description: error.message })
+      toast.error('Failed to generate report')
     } finally {
       setLoading(false)
     }
@@ -867,12 +865,11 @@ export default function InvestorMetricsClient() {
         URL.revokeObjectURL(url)
       }
 
-      toast.success('Data exported successfully', {
-        description: `Exported ${exportDataForm.dataType === 'all' ? 'all data' : exportDataForm.dataType} in ${exportDataForm.format.toUpperCase()} format`
+      toast.success('Data exported successfully' in ${exportDataForm.format.toUpperCase()} format`
       })
       setShowExportDataDialog(false)
     } catch (error: any) {
-      toast.error('Failed to export data', { description: error.message })
+      toast.error('Failed to export data')
     } finally {
       setLoading(false)
     }
@@ -2264,7 +2261,7 @@ export default function InvestorMetricsClient() {
               <AIInsightsPanel
                 insights={mockInvestorMetricsAIInsights}
                 title="Investor Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
               />
             </div>
             <div className="space-y-6">

@@ -495,7 +495,7 @@ export default function SystemInsightsClient() {
   // Handlers
   const handleRefreshMetrics = async () => {
     setLoading(true)
-    toast.info('Refreshing metrics', { description: 'Fetching latest system data...' })
+    toast.info('Refreshing metrics')
     await Promise.all([fetchAlerts(), fetchSettings()])
     setLoading(false)
     toast.success('Data refreshed')
@@ -524,7 +524,7 @@ export default function SystemInsightsClient() {
       })
 
       if (error) throw error
-      toast.success('Alert created', { description: 'You will be notified of anomalies' })
+      toast.success('Alert created')
       setShowCreateAlertDialog(false)
       setAlertForm({ name: '', severity: 'warning', message: '', metric: '', threshold: 0 })
       await fetchAlerts()
@@ -601,7 +601,7 @@ export default function SystemInsightsClient() {
   }
 
   const handleExportReport = async () => {
-    toast.info('Preparing export...', { description: 'Generating system insights report' })
+    toast.info('Preparing export...')
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -614,10 +614,10 @@ export default function SystemInsightsClient() {
         metadata: { timeRange, exportedAt: new Date().toISOString() }
       })
 
-      toast.success('Report exported', { description: 'System insights report downloaded' })
+      toast.success('Report exported')
     } catch (error) {
       console.error('Export error:', error)
-      toast.success('Report exported', { description: 'System insights report downloaded' })
+      toast.success('Report exported')
     }
   }
 
@@ -641,11 +641,11 @@ export default function SystemInsightsClient() {
   }
 
   const handleRestartService = (serviceName: string) => {
-    toast.info('Restarting service', { description: `${serviceName} is restarting...` })
+    toast.info('Restarting service' is restarting...` })
   }
 
   const handleScaleService = (serviceName: string) => {
-    toast.info('Scaling service', { description: `Opening scaling options for ${serviceName}` })
+    toast.info('Scaling service'` })
   }
 
   return (
@@ -2481,7 +2481,7 @@ docker run -d --name kazi-agent \\
             <AIInsightsPanel
               insights={mockSystemInsightsAIInsights}
               title="System Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2558,7 +2558,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Deployment Started', { description: 'Deploying to production environment' })
+                  toast.success('Deployment Started')
                   setShowDeployDialog(false)
                 }}>
                   Start Deployment
@@ -2616,7 +2616,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Services Restarted', { description: 'All services restarted successfully' })
+                  toast.success('Services Restarted')
                   setShowRestartDialog(false)
                 }}>
                   Restart Services
@@ -2871,7 +2871,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Logs Exported', { description: 'Log file downloaded successfully' })
+                  toast.success('Logs Exported')
                   setShowExportLogsDialog(false)
                 }}>
                   <Download className="h-4 w-4 mr-2" />
@@ -2915,7 +2915,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Channel Updated', { description: 'Notification channel settings saved' })
+                  toast.success('Channel Updated')
                   setShowEditNotificationChannelDialog(false)
                 }}>
                   Save Changes
@@ -2961,7 +2961,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Channel Added', { description: `${notificationChannelForm.name} has been configured` })
+                  toast.success('Channel Added' has been configured` })
                   setNotificationChannelForm({ name: '', type: 'email', config: '' })
                   setShowAddNotificationChannelDialog(false)
                 }}>
@@ -3007,7 +3007,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Policy Updated', { description: 'Escalation policy settings saved' })
+                  toast.success('Policy Updated')
                   setShowEditEscalationPolicyDialog(false)
                 }}>
                   Save Changes
@@ -3067,7 +3067,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Tier Added', { description: `${escalationTierForm.tier} has been added to the escalation policy` })
+                  toast.success('Tier Added' has been added to the escalation policy` })
                   setEscalationTierForm({ tier: '', team: '', delay: '15', channels: [] })
                   setShowAddEscalationTierDialog(false)
                 }}>
@@ -3150,7 +3150,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success(selectedCloudProvider?.status === 'connected' ? 'Settings Saved' : 'Provider Connected', { description: `${selectedCloudProvider?.name} configuration updated` })
+                  toast.success(selectedCloudProvider?.status === 'connected' ? 'Settings Saved' : 'Provider Connected' configuration updated` })
                   setShowCloudProviderDialog(false)
                 }}>
                   {selectedCloudProvider?.status === 'connected' ? 'Save Settings' : 'Connect'}
@@ -3220,7 +3220,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success(selectedContainerPlatform?.status === 'connected' ? 'Settings Saved' : 'Platform Connected', { description: `${selectedContainerPlatform?.name} configuration updated` })
+                  toast.success(selectedContainerPlatform?.status === 'connected' ? 'Settings Saved' : 'Platform Connected' configuration updated` })
                   setShowContainerPlatformDialog(false)
                 }}>
                   {selectedContainerPlatform?.status === 'connected' ? 'Save Settings' : 'Connect'}
@@ -3314,7 +3314,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Webhook Updated', { description: 'Webhook configuration saved' })
+                  toast.success('Webhook Updated')
                   setShowEditWebhookDialog(false)
                 }}>
                   Save Changes
@@ -3339,7 +3339,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('Webhook Deleted', { description: `${selectedWebhook?.name} has been removed` })
+                  toast.success('Webhook Deleted' has been removed` })
                   setShowDeleteWebhookDialog(false)
                 }}>
                   Delete Webhook
@@ -3387,7 +3387,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Webhook Added', { description: `${webhookForm.name} has been configured` })
+                  toast.success('Webhook Added' has been configured` })
                   setWebhookForm({ name: '', url: '', events: ['alerts'] })
                   setShowAddWebhookDialog(false)
                 }}>
@@ -3420,7 +3420,7 @@ kazi_apm.init(
                 </Button>
                 <Button className="flex-1" onClick={() => {
                   navigator.clipboard.writeText('kazi-prod-a1b2c3d4e5f6g7h8i9j0')
-                  toast.success('API Key Copied', { description: 'Key copied to clipboard' })
+                  toast.success('API Key Copied')
                   setShowCopyAPIKeyDialog(false)
                 }}>
                   <Copy className="h-4 w-4 mr-2" />
@@ -3450,7 +3450,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('API Key Regenerated', { description: 'New API key has been generated. Please update your applications.' })
+                  toast.success('API Key Regenerated')
                   setShowRegenerateAPIKeyDialog(false)
                 }}>
                   Regenerate Key
@@ -3503,7 +3503,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('API Key Generated', { description: `${newAPIKeyForm.name} has been created` })
+                  toast.success('API Key Generated' has been created` })
                   setNewAPIKeyForm({ name: '', permissions: 'read' })
                   setShowGenerateNewKeyDialog(false)
                 }}>
@@ -3529,7 +3529,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('API Key Deleted', { description: `${selectedAPIKey?.name} has been removed` })
+                  toast.success('API Key Deleted' has been removed` })
                   setShowDeleteAPIKeyDialog(false)
                 }}>
                   Delete Key
@@ -3568,7 +3568,7 @@ kazi_apm.init(
                 </Button>
                 <Button className="flex-1" onClick={() => {
                   navigator.clipboard.writeText('curl -sL https://install.kazi.app/agent | bash -s -- --api-key=KAZI-XXXXXXXX')
-                  toast.success('Command Copied', { description: 'Installation command copied to clipboard' })
+                  toast.success('Command Copied')
                   setShowCopyCommandDialog(false)
                 }}>
                   <Copy className="h-4 w-4 mr-2" />
@@ -3658,7 +3658,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('Data Purged', { description: 'All monitoring data has been permanently deleted' })
+                  toast.success('Data Purged')
                   setShowPurgeDataDialog(false)
                 }}>
                   Purge All Data
@@ -3695,7 +3695,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('Environment Reset', { description: 'All settings have been reset to defaults' })
+                  toast.success('Environment Reset')
                   setShowResetEnvironmentDialog(false)
                 }}>
                   Reset Environment

@@ -79,7 +79,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
-// A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -150,24 +149,16 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_FILES':
-      logger.info('Setting files', { count: action.files.length })
-      return { ...state, files: action.files }
+    case 'SET_FILES':      return { ...state, files: action.files }
 
-    case 'ADD_FILE':
-      logger.info('Adding file', { fileId: action.file.id, fileName: action.file.name })
-      return { ...state, files: [action.file, ...state.files] }
+    case 'ADD_FILE':      return { ...state, files: [action.file, ...state.files] }
 
-    case 'UPDATE_FILE':
-      logger.info('Updating file', { fileId: action.file.id })
-      return {
+    case 'UPDATE_FILE':      return {
         ...state,
         files: state.files.map(f => f.id === action.file.id ? action.file : f)
       }
 
-    case 'DELETE_FILE':
-      logger.info('Deleting file', { fileId: action.fileId })
-      return {
+    case 'DELETE_FILE':      return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
         selectedFile: state.selectedFile?.id === action.fileId ? null : state.selectedFile
@@ -270,10 +261,7 @@ const generateMockStorageFiles = (): StorageFile[] => {
       tags: ['work', 'important', 'project'].slice(0, Math.floor(Math.random() * 3) + 1),
       version: Math.floor(Math.random() * 5) + 1
     }
-  })
-
-  logger.info('Generated mock storage files', { count: files.length })
-  return files
+  })  return files
 }
 
 // ============================================================================
@@ -313,7 +301,6 @@ const storageActivities = [
 export default function StorageClient() {
   logger.debug('Component mounting')
 
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -378,10 +365,7 @@ export default function StorageClient() {
   // LOAD DATA
   // ============================================================================
 
-  useEffect(() => {
-    logger.info('Loading storage files from API')
-
-    const loadFiles = async () => {
+  useEffect(() => {    const loadFiles = async () => {
       try {
         setIsLoading(true)
 
@@ -389,9 +373,7 @@ export default function StorageClient() {
         const result = await response.json()
 
         if (result.success && result.files) {
-          dispatch({ type: 'SET_FILES', files: result.files })
-          logger.info('Files loaded successfully from API', { count: result.files.length })
-          announce('Storage dashboard loaded', 'polite')
+          dispatch({ type: 'SET_FILES', files: result.files })          announce('Storage dashboard loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load files')
         }
@@ -508,14 +490,7 @@ export default function StorageClient() {
       return
     }
 
-    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
-    logger.info('Uploading files', {
-      count: uploadFiles.length,
-      provider: uploadProvider,
-      totalSize
-    })
-
-    try {
+    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)    try {
       setIsSaving(true)
       const uploadedFiles: string[] = []
 
@@ -566,15 +541,7 @@ export default function StorageClient() {
           }
 
           dispatch({ type: 'ADD_FILE', file: newFile })
-          uploadedFiles.push(file.name)
-
-          logger.info('File uploaded successfully', {
-            fileName: file.name,
-            fileSize: file.size,
-            provider: uploadProvider,
-            fileId: result.file.id
-          })
-        } else {
+          uploadedFiles.push(file.name)        } else {
           throw new Error(result.error || 'Failed to upload file')
         }
       }
@@ -590,24 +557,14 @@ export default function StorageClient() {
         provider: uploadProvider,
         fileCount: uploadFiles.length
       })
-      toast.error('Failed to upload files', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to upload files')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDeleteFile = async (fileId: string) => {
-    const file = state.files.find(f => f.id === fileId)
-    logger.info('Deleting file', {
-      fileId,
-      fileName: file?.name,
-      fileSize: file?.size,
-      provider: file?.provider
-    })
-
-    try {
+    const file = state.files.find(f => f.id === fileId)    try {
       const response = await fetch('/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -620,15 +577,7 @@ export default function StorageClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'DELETE_FILE', fileId })
-
-        logger.info('File deleted successfully', {
-          fileId,
-          fileName: file?.name
-        })
-
-        toast.success('File deleted', {
-          description: `${file?.name} - ${formatFileSize(file?.size || 0)} - ${file?.provider?.toUpperCase()} - Removed from storage`
+        dispatch({ type: 'DELETE_FILE', fileId })        toast.success('File deleted' - ${formatFileSize(file?.size || 0)} - ${file?.provider?.toUpperCase()} - Removed from storage`
         })
         setIsDeleteModalOpen(false)
       } else {
@@ -640,23 +589,13 @@ export default function StorageClient() {
         fileId,
         fileName: file?.name
       })
-      toast.error('Failed to delete file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete file')
     }
   }
 
   const handleBulkDelete = async () => {
     const selectedFilesData = state.files.filter(f => state.selectedFiles.includes(f.id))
-    const totalSize = selectedFilesData.reduce((sum, f) => sum + f.size, 0)
-
-    logger.info('Bulk deleting files', {
-      count: state.selectedFiles.length,
-      totalSize,
-      fileIds: state.selectedFiles
-    })
-
-    try {
+    const totalSize = selectedFilesData.reduce((sum, f) => sum + f.size, 0)    try {
       setIsSaving(true)
 
       const response = await fetch('/api/files', {
@@ -673,14 +612,7 @@ export default function StorageClient() {
       if (result.success) {
         state.selectedFiles.forEach(fileId => {
           dispatch({ type: 'DELETE_FILE', fileId })
-        })
-
-        logger.info('Bulk delete complete', {
-          deletedCount: result.deletedCount || state.selectedFiles.length,
-          totalSize
-        })
-
-        toast.success(`Deleted ${state.selectedFiles.length} file(s)`, {
+        })        toast.success(`Deleted ${state.selectedFiles.length} file(s)`, {
           description: `${formatFileSize(totalSize)} freed - ${selectedFilesData.slice(0, 3).map(f => f.name).join(', ')}${selectedFilesData.length > 3 ? ` +${selectedFilesData.length - 3} more` : ''}`
         })
         dispatch({ type: 'CLEAR_SELECTED_FILES' })
@@ -692,9 +624,7 @@ export default function StorageClient() {
         error: error.message,
         count: state.selectedFiles.length
       })
-      toast.error('Failed to delete files', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete files')
     } finally {
       setIsSaving(false)
     }
@@ -705,15 +635,7 @@ export default function StorageClient() {
       logger.warn('Missing file or destination path for move operation')
       toast.error('Please specify destination path')
       return
-    }
-
-    logger.info('Moving file', {
-      fileName: state.selectedFile.name,
-      currentPath: state.selectedFile.path,
-      targetPath: movePath
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       const response = await fetch('/api/files', {
@@ -737,16 +659,7 @@ export default function StorageClient() {
           modifiedAt: new Date().toISOString()
         }
 
-        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-
-        logger.info('File moved successfully', {
-          fileName: state.selectedFile.name,
-          fromPath: state.selectedFile.path,
-          toPath: movePath
-        })
-
-        toast.success('File moved', {
-          description: `${state.selectedFile.name} - ${formatFileSize(state.selectedFile.size)} - From: ${state.selectedFile.path} → To: ${movePath}`
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })        toast.success('File moved' - ${formatFileSize(state.selectedFile.size)} - From: ${state.selectedFile.path} → To: ${movePath}`
         })
         setIsMoveModalOpen(false)
         setMovePath('')
@@ -759,9 +672,7 @@ export default function StorageClient() {
         fileName: state.selectedFile?.name,
         targetPath: movePath
       })
-      toast.error('Failed to move file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to move file')
     } finally {
       setIsSaving(false)
     }
@@ -771,15 +682,7 @@ export default function StorageClient() {
     if (!state.selectedFile) {
       logger.warn('No file selected for sharing')
       return
-    }
-
-    logger.info('Sharing file', {
-      fileName: state.selectedFile.name,
-      recipients: shareEmails,
-      recipientCount: shareEmails.length
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       const response = await fetch('/api/files', {
@@ -803,16 +706,7 @@ export default function StorageClient() {
           sharedWith: [...state.selectedFile.sharedWith, ...shareEmails]
         }
 
-        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-
-        logger.info('File shared successfully', {
-          fileName: state.selectedFile.name,
-          recipientCount: shareEmails.length,
-          totalSharedWith: updatedFile.sharedWith.length
-        })
-
-        toast.success('File shared', {
-          description: `${state.selectedFile.name} - ${formatFileSize(state.selectedFile.size)} - Shared with: ${shareEmails.join(', ')} - Total: ${updatedFile.sharedWith.length} users`
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })        toast.success('File shared' - ${formatFileSize(state.selectedFile.size)} - Shared with: ${shareEmails.join(', ')} - Total: ${updatedFile.sharedWith.length} users`
         })
         setIsShareModalOpen(false)
         setShareEmail('')
@@ -826,24 +720,14 @@ export default function StorageClient() {
         fileName: state.selectedFile?.name,
         recipients: shareEmails
       })
-      toast.error('Failed to share file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to share file')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDownload = async (fileId: string) => {
-    const file = state.files.find(f => f.id === fileId)
-    logger.info('Downloading file', {
-      fileId,
-      fileName: file?.name,
-      fileSize: file?.size,
-      provider: file?.provider
-    })
-
-    try {
+    const file = state.files.find(f => f.id === fileId)    try {
       const response = await fetch('/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -861,15 +745,7 @@ export default function StorageClient() {
             ...file,
             downloadCount: file.downloadCount + 1
           }
-          dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-
-          logger.info('Download initiated successfully', {
-            fileName: file.name,
-            newDownloadCount: updatedFile.downloadCount
-          })
-
-          toast.success('Download started', {
-            description: `${file.name} - ${formatFileSize(file.size)} - ${file.provider.toUpperCase()} - Total downloads: ${updatedFile.downloadCount}`
+          dispatch({ type: 'UPDATE_FILE', file: updatedFile })          toast.success('Download started' - ${formatFileSize(file.size)} - ${file.provider.toUpperCase()} - Total downloads: ${updatedFile.downloadCount}`
           })
         }
       } else {
@@ -881,9 +757,7 @@ export default function StorageClient() {
         fileId,
         fileName: file?.name
       })
-      toast.error('Failed to download file', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to download file')
     }
   }
 
@@ -895,15 +769,7 @@ export default function StorageClient() {
     if (!newItemName.trim()) {
       toast.error('Please enter a name')
       return
-    }
-
-    logger.info('Creating new storage item', {
-      name: newItemName,
-      type: newItemType,
-      provider: newItemProvider
-    })
-
-    try {
+    }    try {
       setIsSaving(true)
 
       if (newItemType === 'folder') {
@@ -923,10 +789,7 @@ export default function StorageClient() {
 
         const result = await response.json()
 
-        if (result.success) {
-          logger.info('Folder created successfully', { name: newItemName })
-          toast.success('Folder created', {
-            description: `${newItemName} - ${newItemProvider.toUpperCase()} - Ready for files`
+        if (result.success) {          toast.success('Folder created' - ${newItemProvider.toUpperCase()} - Ready for files`
           })
         } else {
           throw new Error(result.error || 'Failed to create folder')
@@ -951,10 +814,7 @@ export default function StorageClient() {
           version: 1
         }
 
-        dispatch({ type: 'ADD_FILE', file: newFile })
-        logger.info('File created successfully', { name: newItemName })
-        toast.success('File created', {
-          description: `${newItemName} - ${newItemProvider.toUpperCase()} - Empty file ready`
+        dispatch({ type: 'ADD_FILE', file: newFile })        toast.success('File created' - ${newItemProvider.toUpperCase()} - Empty file ready`
         })
       }
 
@@ -963,21 +823,13 @@ export default function StorageClient() {
       setNewItemType('folder')
     } catch (error: any) {
       logger.error('Failed to create item', { error: error.message })
-      toast.error('Failed to create item', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create item')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleExportData = async () => {
-    logger.info('Exporting storage data', {
-      format: exportFormat,
-      scope: exportScope
-    })
-
-    try {
+  const handleExportData = async () => {    try {
       setIsSaving(true)
 
       let filesToExport: StorageFile[] = []
@@ -1059,38 +911,19 @@ export default function StorageClient() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-
-      logger.info('Export completed', {
-        format: exportFormat,
-        fileCount: filesToExport.length,
-        fileName
-      })
-
-      toast.success('Export completed', {
-        description: `${filesToExport.length} files exported as ${exportFormat.toUpperCase()} - ${fileName}`
+      URL.revokeObjectURL(url)      toast.success('Export completed' files exported as ${exportFormat.toUpperCase()} - ${fileName}`
       })
 
       setIsExportModalOpen(false)
     } catch (error: any) {
       logger.error('Export failed', { error: error.message })
-      toast.error('Failed to export data', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to export data')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleSaveSettings = async () => {
-    logger.info('Saving storage settings', {
-      storageQuota,
-      autoSync,
-      compressionEnabled,
-      defaultProvider
-    })
-
-    try {
+  const handleSaveSettings = async () => {    try {
       setIsSaving(true)
 
       const response = await fetch('/api/files', {
@@ -1109,10 +942,7 @@ export default function StorageClient() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Settings saved successfully')
-        toast.success('Settings saved', {
-          description: `Quota: ${storageQuota}GB | Auto-sync: ${autoSync ? 'On' : 'Off'} | Compression: ${compressionEnabled ? 'On' : 'Off'} | Default: ${defaultProvider.toUpperCase()}`
+      if (result.success) {        toast.success('Settings saved'GB | Auto-sync: ${autoSync ? 'On' : 'Off'} | Compression: ${compressionEnabled ? 'On' : 'Off'} | Default: ${defaultProvider.toUpperCase()}`
         })
         setIsSettingsModalOpen(false)
       } else {
@@ -1120,9 +950,7 @@ export default function StorageClient() {
       }
     } catch (error: any) {
       logger.error('Failed to save settings', { error: error.message })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to save settings')
     } finally {
       setIsSaving(false)
     }

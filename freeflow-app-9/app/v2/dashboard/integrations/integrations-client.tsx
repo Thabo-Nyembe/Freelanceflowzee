@@ -489,7 +489,7 @@ export default function IntegrationsClient() {
   const handleDeleteIntegration = async (app: Integration) => {
     const result = await deleteIntegration(app.id)
     if (result) {
-      toast.success('Integration removed', { description: `${app.name} has been removed` })
+      toast.success('Integration removed' has been removed` })
       setSelectedApp(null)
     }
   }
@@ -526,7 +526,7 @@ export default function IntegrationsClient() {
       setShowCreateZapDialog(false)
       setWorkflowForm({ name: '', description: '', type: 'integration', priority: 'medium' })
     } else {
-      toast.error('Failed to create zap', { description: result.error })
+      toast.error('Failed to create zap')
     }
   }
 
@@ -556,7 +556,7 @@ export default function IntegrationsClient() {
   const handleDeleteZap = async (zap: WorkflowType) => {
     const result = await deleteWorkflow(zap.id)
     if (result.success) {
-      toast.success('Zap deleted', { description: `${zap.name} has been removed` })
+      toast.success('Zap deleted' has been removed` })
       setSelectedZap(null)
     }
   }
@@ -596,7 +596,7 @@ export default function IntegrationsClient() {
       setShowCreateWebhookDialog(false)
       setWebhookForm({ name: '', description: '', url: '', events: [] })
     } else {
-      toast.error('Failed to create webhook', { description: result.error })
+      toast.error('Failed to create webhook')
     }
   }
 
@@ -622,7 +622,7 @@ export default function IntegrationsClient() {
   const handleDeleteWebhook = async (webhook: WebhookType) => {
     const result = await deleteWebhook(webhook.id)
     if (result.success) {
-      toast.success('Webhook deleted', { description: `${webhook.name} has been removed` })
+      toast.success('Webhook deleted' has been removed` })
       setSelectedWebhook(null)
     }
   }
@@ -686,7 +686,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Zaps exported successfully', { description: `${workflows.length} zaps exported` })
+    toast.success('Zaps exported successfully' zaps exported` })
   }
 
   const handleEditZap = (zap: WorkflowType) => {
@@ -720,7 +720,7 @@ export default function IntegrationsClient() {
       setZapToEdit(null)
       setWorkflowForm({ name: '', description: '', type: 'integration', priority: 'medium' })
     } else {
-      toast.error('Failed to update zap', { description: result.error })
+      toast.error('Failed to update zap')
     }
   }
 
@@ -744,7 +744,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Integrations exported successfully', { description: `${integrations.length} integrations exported` })
+    toast.success('Integrations exported successfully' integrations exported` })
   }
 
   // Task Action Handlers
@@ -812,7 +812,7 @@ export default function IntegrationsClient() {
       action: {
         label: 'Clear',
         onClick: () => {
-          toast.success('Task history cleared', { description: 'All historical tasks have been removed' })
+          toast.success('Task history cleared')
         }
       },
       cancel: {
@@ -842,7 +842,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Task history exported', { description: `${mockTasks.length} tasks exported` })
+    toast.success('Task history exported' tasks exported` })
   }
 
   // Webhook Action Handlers
@@ -923,7 +923,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Webhooks exported successfully', { description: `${webhooks.length} webhooks exported` })
+    toast.success('Webhooks exported successfully' webhooks exported` })
   }
 
   const handleRevealWebhookSecret = async (webhook: WebhookType) => {
@@ -1027,7 +1027,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Analytics exported', { description: 'All analytics data exported successfully' })
+    toast.success('Analytics exported')
   }
 
   // API Key Handlers
@@ -1101,8 +1101,7 @@ export default function IntegrationsClient() {
 
   // AI Insight Handler
   const handleAiInsightAction = (insight: { id: string; type: string; title: string }) => {
-    toast.info(`Acting on: ${insight.title}`, {
-      description: `Insight type: ${insight.type}`,
+    toast.info(`Acting on: ${insight.title}``,
       action: {
         label: 'View Details',
         onClick: () => setActiveTab('analytics')
@@ -3008,7 +3007,7 @@ export default function IntegrationsClient() {
                   a.download = 'recovery-codes.txt'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Recovery codes downloaded', { description: '8 recovery codes saved to file' })
+                  toast.success('Recovery codes downloaded')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download Recovery Codes
@@ -3032,7 +3031,7 @@ export default function IntegrationsClient() {
                         toast.error('Please enter a phone number')
                         return
                       }
-                      toast.success('SMS backup enabled', { description: `Verification code sent to ${smsBackupPhone}` })
+                      toast.success('SMS backup enabled'` })
                       setShowSmsBackupInput(false)
                     }}>
                       Verify

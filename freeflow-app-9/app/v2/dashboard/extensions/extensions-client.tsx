@@ -591,8 +591,7 @@ export default function ExtensionsClient() {
   const handleBrowseApply = () => {
     setCategoryFilter(browseCategory)
     setBrowseDialogOpen(false)
-    toast.success('Filters applied', {
-      description: `Showing ${browseCategory === 'all' ? 'all categories' : browseCategory} sorted by ${browseSortBy}`
+    toast.success('Filters applied' sorted by ${browseSortBy}`
     })
   }
 
@@ -605,14 +604,12 @@ export default function ExtensionsClient() {
       hasUpdate: Math.random() > 0.5
     }))
     setUpdateResults(results)
-    toast.success('Update check complete', { description: `Found ${results.filter(r => r.hasUpdate).length} updates available` })
+    toast.success('Update check complete' updates available` })
   }
 
   const handleInstallUpdates = () => {
     if (selectedUpdates.length === 0) {
-      toast.error('No updates selected', {
-        description: 'Please select at least one extension to update'
-      })
+      toast.error('No updates selected')
       return
     }
 
@@ -630,9 +627,7 @@ export default function ExtensionsClient() {
   // Manage extensions handlers
   const handleManageAction = () => {
     if (selectedManagedExtensions.length === 0) {
-      toast.error('No extensions selected', {
-        description: 'Please select at least one extension to manage'
-      })
+      toast.error('No extensions selected')
       return
     }
 
@@ -653,9 +648,7 @@ export default function ExtensionsClient() {
   // Submit extension handler
   const handleSubmitExtension = () => {
     if (!submitExtensionName || !submitExtensionDescription || !submitExtensionCategory || !submitExtensionVersion) {
-      toast.error('Missing required fields', {
-        description: 'Please fill in all required fields'
-      })
+      toast.error('Missing required fields')
       return
     }
     toast.success(`${submitExtensionName} has been submitted for review`)
@@ -694,9 +687,7 @@ export default function ExtensionsClient() {
   // Pack extension handler
   const handlePackExtension = () => {
     if (!packSourceDir) {
-      toast.error('Source directory required', {
-        description: 'Please specify the extension source directory'
-      })
+      toast.error('Source directory required')
       return
     }
     toast.success('Extension packed to my-extension.crx')
@@ -714,9 +705,7 @@ export default function ExtensionsClient() {
   // Copy API key handler
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(apiKey)
-    toast.success('API key copied', {
-      description: 'API key has been copied to clipboard'
-    })
+    toast.success('API key copied')
   }
 
   // View docs handler
@@ -735,9 +724,7 @@ export default function ExtensionsClient() {
   // Import settings handler
   const handleImportSettings = () => {
     if (!importFile) {
-      toast.error('No file selected', {
-        description: 'Please select a settings file to import'
-      })
+      toast.error('No file selected')
       return
     }
     toast.success('Settings imported successfully')
@@ -785,8 +772,7 @@ export default function ExtensionsClient() {
   const handleShareExtension = (method: string) => {
     const extensionUrl = `https://extensions.freeflow.app/${selectedExtension?.id || ''}`
     navigator.clipboard.writeText(extensionUrl)
-    toast.success('Link copied', {
-      description: `Extension link copied to clipboard for sharing via ${method}`
+    toast.success('Link copied'`
     })
     setShareExtensionDialogOpen(false)
   }
@@ -794,9 +780,7 @@ export default function ExtensionsClient() {
   // Report extension handler
   const handleReportExtension = () => {
     if (!reportReason) {
-      toast.error('Reason required', {
-        description: 'Please select a reason for reporting'
-      })
+      toast.error('Reason required')
       return
     }
     toast.success('Report submitted. We will review this extension.')
@@ -2022,7 +2006,7 @@ export default function ExtensionsClient() {
             <AIInsightsPanel
               insights={mockExtensionsAIInsights}
               title="Extensions Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2839,7 +2823,7 @@ export default function ExtensionsClient() {
                 input.onchange = (e) => {
                   const files = (e.target as HTMLInputElement).files
                   if (files && files.length > 0) {
-                    toast.success(`Selected folder with ${files.length} files`, { description: 'Ready to load extension' })
+                    toast.success(`Selected folder with ${files.length} files`)
                   }
                 }
                 input.click()

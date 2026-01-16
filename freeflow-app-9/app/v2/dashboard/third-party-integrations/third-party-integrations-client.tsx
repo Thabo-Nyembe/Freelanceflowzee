@@ -481,8 +481,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Integration added successfully', {
-      description: `${newIntegration.name} has been connected to your account`
+    toast.success('Integration added successfully' has been connected to your account`
     })
     setShowAddIntegrationDialog(false)
     setNewIntegration({ name: '', apiKey: '', webhookUrl: '', category: 'crm' })
@@ -518,8 +517,7 @@ export default function ThirdPartyIntegrationsClient() {
 
   const handleConfirmDisconnect = () => {
     setConnections(prev => prev.filter(c => c.app.name !== selectedIntegrationForAction))
-    toast.success('Integration disconnected', {
-      description: `${selectedIntegrationForAction} has been removed from your account`
+    toast.success('Integration disconnected' has been removed from your account`
     })
     setShowDisconnectConfirmDialog(false)
     setSelectedIntegrationForAction('')
@@ -535,19 +533,17 @@ export default function ThirdPartyIntegrationsClient() {
         body: JSON.stringify({ action: 'sync', integration: selectedIntegrationForAction })
       })
       if (!res.ok) throw new Error('Sync failed')
-      toast.success('Sync completed', {
-        description: `${selectedIntegrationForAction} data has been refreshed`
+      toast.success('Sync completed' data has been refreshed`
       })
     } catch {
-      toast.error('Sync failed', { description: 'Please try again' })
+      toast.error('Sync failed')
     }
     setShowRefreshSyncDialog(false)
     setSelectedIntegrationForAction('')
   }
 
   const handleSaveConfig = () => {
-    toast.success('Configuration saved', {
-      description: `Settings for ${selectedIntegrationForAction} have been updated`
+    toast.success('Configuration saved' have been updated`
     })
     setShowConfigureDialog(false)
     setSelectedIntegrationForAction('')
@@ -555,25 +551,19 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Danger zone handlers
   const handlePauseAllZaps = () => {
-    toast.success('All zaps paused', {
-      description: 'All active zaps have been stopped'
-    })
+    toast.success('All zaps paused')
     setShowPauseAllDialog(false)
   }
 
   const handleDeleteAllConnections = () => {
     setConnections([])
-    toast.success('All connections deleted', {
-      description: 'All app connections have been removed'
-    })
+    toast.success('All connections deleted')
     setShowDeleteAllConnectionsDialog(false)
   }
 
   const handleResetSettings = () => {
     setConfigSettings({ syncInterval: '15', retryOnError: true, logLevel: 'info' })
-    toast.success('Settings reset', {
-      description: 'All settings have been restored to defaults'
-    })
+    toast.success('Settings reset')
     setShowResetSettingsDialog(false)
   }
 
@@ -583,16 +573,14 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Zap created successfully', {
-      description: `${newZap.name} has been created and is ready to activate`
+    toast.success('Zap created successfully' has been created and is ready to activate`
     })
     setShowCreateZapDialog(false)
     setNewZap({ name: '', description: '', triggerApp: '', actionApp: '' })
   }
 
   const handleApplyFilters = () => {
-    toast.success('Filters applied', {
-      description: `Showing ${filterOptions.status === 'all' ? 'all' : filterOptions.status} items from the last ${filterOptions.dateRange} days`
+    toast.success('Filters applied' items from the last ${filterOptions.dateRange} days`
     })
     setShowFilterZapsDialog(false)
     setShowFilterHistoryDialog(false)
@@ -600,21 +588,17 @@ export default function ThirdPartyIntegrationsClient() {
 
   const handleToggleZapStatus = (zap: Zap) => {
     const newStatus = zap.status === 'active' ? 'paused' : 'active'
-    toast.success(`Zap ${newStatus === 'active' ? 'activated' : 'paused'}`, {
-      description: `${zap.name} is now ${newStatus}`
+    toast.success(`Zap ${newStatus === 'active' ? 'activated' : 'paused'}` is now ${newStatus}`
     })
   }
 
   const handleEditZapSubmit = () => {
-    toast.success('Zap updated', {
-      description: 'Your changes have been saved'
-    })
+    toast.success('Zap updated')
     setShowEditZapDialog(false)
   }
 
   const handleManageAppSubmit = () => {
-    toast.success('App settings updated', {
-      description: `${selectedAppForAction?.name} configuration has been saved`
+    toast.success('App settings updated' configuration has been saved`
     })
     setShowManageAppDialog(false)
     setSelectedAppForAction(null)
@@ -626,17 +610,14 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   const handleConnectAppSubmit = () => {
-    toast.success('App connected', {
-      description: `${selectedAppForAction?.name} has been connected to your account`
+    toast.success('App connected' has been connected to your account`
     })
     setShowConnectAppDialog(false)
     setSelectedAppForAction(null)
   }
 
   const handleRefreshHistory = () => {
-    toast.success('History refreshed', {
-      description: 'Execution logs have been updated'
-    })
+    toast.success('History refreshed')
   }
 
   const handleViewExecutionDetails = (log: ExecutionLog) => {
@@ -1863,7 +1844,7 @@ export default function ThirdPartyIntegrationsClient() {
                           <Button variant="outline" className="flex items-center gap-2" onClick={() => {
                             const configData = JSON.stringify(configSettings, null, 2)
                             navigator.clipboard.writeText(configData)
-                            toast.success('Configuration cloned', { description: 'Settings have been copied to clipboard' })
+                            toast.success('Configuration cloned')
                           }}>
                             <Copy className="w-4 h-4" />
                             Clone Configuration
@@ -1941,7 +1922,7 @@ export default function ThirdPartyIntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2424,8 +2405,7 @@ export default function ThirdPartyIntegrationsClient() {
                 variant="outline"
                 className="w-full justify-start gap-3 h-auto py-3"
                 onClick={() => {
-                  toast.success('OAuth flow initiated', {
-                    description: `Redirecting to ${selectedIntegrationForAction} authorization page...`
+                  toast.success('OAuth flow initiated' authorization page...`
                   })
                   setShowConnectIntegrationDialog(false)
                 }}
@@ -3132,8 +3112,7 @@ export default function ThirdPartyIntegrationsClient() {
                   variant="outline"
                   className="w-full justify-start gap-3 h-auto py-3"
                   onClick={() => {
-                    toast.success('OAuth flow initiated', {
-                      description: `Redirecting to ${selectedAppForAction.name} authorization page...`
+                    toast.success('OAuth flow initiated' authorization page...`
                     })
                     setShowConnectAppDialog(false)
                   }}
@@ -3229,9 +3208,7 @@ export default function ThirdPartyIntegrationsClient() {
                 </Button>
                 {selectedLogForDetails.status === 'error' && (
                   <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={() => {
-                    toast.success('Retrying execution', {
-                      description: 'The zap is being re-run with the same trigger data'
-                    })
+                    toast.success('Retrying execution')
                     setShowExecutionDetailsDialog(false)
                   }}>
                     <RefreshCcw className="h-4 w-4 mr-2" />

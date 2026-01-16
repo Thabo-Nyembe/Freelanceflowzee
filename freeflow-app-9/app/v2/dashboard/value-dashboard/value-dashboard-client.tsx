@@ -119,11 +119,9 @@ const valueDashboardActivities = [
 
 
 export default function ValueDashboardClient() {
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -175,7 +173,6 @@ export default function ValueDashboardClient() {
     { id: '6', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
   ]
 
-  // A+++ LOAD VALUE DATA
   useEffect(() => {
     const loadValueDashboardData = async () => {
       try {
@@ -239,13 +236,7 @@ export default function ValueDashboardClient() {
         await new Promise(resolve => requestAnimationFrame(resolve))
 
         setIsLoading(false)
-        announce('Value dashboard loaded successfully', 'polite')
-        logger.info('Value dashboard data loaded', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          totalInvested: KAZI_CLIENT_DATA.clientInfo.totalInvestment,
-          completedProjects: KAZI_CLIENT_DATA.clientInfo.completedProjects
-        })
-      } catch (err) {
+        announce('Value dashboard loaded successfully', 'polite')      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load value dashboard')
         setIsLoading(false)
         announce('Error loading value dashboard', 'assertive')
@@ -262,15 +253,7 @@ export default function ValueDashboardClient() {
 
   const handleExportReport = async () => {
     try {
-      setIsExporting(true)
-
-      logger.info('Report export initiated', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        period: selectedPeriod,
-        timestamp: new Date().toISOString()
-      })
-
-      const response = await fetch('/api/reports/export-roi', {
+      setIsExporting(true)      const response = await fetch('/api/reports/export-roi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -288,12 +271,7 @@ export default function ValueDashboardClient() {
 
       const result = await response.json()
 
-      if (result.success) {
-        logger.info('Report exported successfully', { period: selectedPeriod })
-
-        toast.success('Report exported successfully!', {
-          description: 'Download link sent to your email'
-        })
+      if (result.success) {        toast.success('Report exported successfully!')
 
         // Create download link
         const downloadUrl = URL.createObjectURL(
@@ -307,9 +285,7 @@ export default function ValueDashboardClient() {
       }
     } catch (error: any) {
       logger.error('Failed to export report', { error, period: selectedPeriod })
-      toast.error('Failed to export report', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to export report')
     } finally {
       setIsExporting(false)
     }
@@ -319,15 +295,7 @@ export default function ValueDashboardClient() {
   // HANDLER 2: VIEW DETAILED METRICS
   // ============================================================================
 
-  const handleViewDetailedMetrics = (metricLabel: string) => {
-    logger.info('Detailed metrics viewed', {
-      metric: metricLabel,
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.info(`Loading detailed metrics for ${metricLabel}...`, {
-      description: 'Showing trend analysis and breakdown'
-    })
+  const handleViewDetailedMetrics = (metricLabel: string) => {    toast.info(`Loading detailed metrics for ${metricLabel}...`)
   }
 
   // ============================================================================
@@ -340,24 +308,14 @@ export default function ValueDashboardClient() {
       return
     }
 
-    try {
-      logger.info('Dashboard share initiated', {
-        email: shareEmail,
-        permission: sharePermission,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      toast.success('Dashboard shared successfully!', {
-        description: `Invitation sent to ${shareEmail} with ${sharePermission} access`
+    try {      toast.success('Dashboard shared successfully!' with ${sharePermission} access`
       })
 
       setShareEmail('')
       setShowShareDialog(false)
     } catch (error: any) {
       logger.error('Failed to share dashboard', { error })
-      toast.error('Failed to share dashboard', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to share dashboard')
     }
   }
 
@@ -367,15 +325,7 @@ export default function ValueDashboardClient() {
 
   const handleExportWithFormat = async () => {
     try {
-      setIsExporting(true)
-
-      logger.info('Export initiated', {
-        format: selectedExportFormat,
-        dateRange: exportDateRange,
-        clientName: KAZI_CLIENT_DATA.clientInfo.name
-      })
-
-      // Call export API
+      setIsExporting(true)      // Call export API
       const res = await fetch('/api/dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -417,9 +367,7 @@ export default function ValueDashboardClient() {
       setShowExportDialog(false)
     } catch (error: any) {
       logger.error('Export failed', { error, format: selectedExportFormat })
-      toast.error('Export failed', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Export failed')
     } finally {
       setIsExporting(false)
     }
@@ -429,17 +377,7 @@ export default function ValueDashboardClient() {
   // HANDLER 5: SAVE SETTINGS
   // ============================================================================
 
-  const handleSaveSettings = () => {
-    logger.info('Settings saved', {
-      autoRefresh: autoRefreshEnabled,
-      emailReports: emailReportsEnabled,
-      currency: selectedCurrency,
-      chartStyle: chartStyle
-    })
-
-    toast.success('Settings saved successfully!', {
-      description: 'Your preferences have been updated'
-    })
+  const handleSaveSettings = () => {    toast.success('Settings saved successfully!')
 
     setShowSettingsDialog(false)
   }
@@ -448,14 +386,7 @@ export default function ValueDashboardClient() {
   // HANDLER 6: CUSTOMIZE DASHBOARD
   // ============================================================================
 
-  const handleCustomizeDashboard = () => {
-    logger.info('Dashboard customization saved', {
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.success('Dashboard customized!', {
-      description: 'Your layout preferences have been saved'
-    })
+  const handleCustomizeDashboard = () => {    toast.success('Dashboard customized!')
 
     setShowCustomizeDialog(false)
   }
@@ -464,15 +395,7 @@ export default function ValueDashboardClient() {
   // HANDLER 7: CONFIGURE WIDGETS
   // ============================================================================
 
-  const handleConfigureWidgets = () => {
-    logger.info('Widget configuration saved', {
-      config: widgetConfig,
-      clientName: KAZI_CLIENT_DATA.clientInfo.name
-    })
-
-    toast.success('Widgets configured!', {
-      description: 'Your widget preferences have been saved'
-    })
+  const handleConfigureWidgets = () => {    toast.success('Widgets configured!')
 
     setShowConfigureWidgetsDialog(false)
   }
@@ -484,9 +407,7 @@ export default function ValueDashboardClient() {
   const handleToggleAutoRefresh = () => {
     setAutoRefreshEnabled(prev => {
       const newValue = !prev
-      toast.success(newValue ? 'Auto-refresh enabled' : 'Auto-refresh disabled', {
-        description: newValue ? 'Data will refresh every 5 minutes' : 'Manual refresh only'
-      })
+      toast.success(newValue ? 'Auto-refresh enabled' : 'Auto-refresh disabled')
       return newValue
     })
   }
@@ -498,9 +419,7 @@ export default function ValueDashboardClient() {
   const handleConfigureEmailReports = () => {
     setEmailReportsEnabled(prev => {
       const newValue = !prev
-      toast.success(newValue ? 'Email reports enabled' : 'Email reports disabled', {
-        description: newValue ? 'You will receive weekly summaries' : 'Email reports turned off'
-      })
+      toast.success(newValue ? 'Email reports enabled' : 'Email reports disabled')
       return newValue
     })
   }
@@ -514,9 +433,7 @@ export default function ValueDashboardClient() {
     const currentIndex = currencies.indexOf(selectedCurrency)
     const nextCurrency = currencies[(currentIndex + 1) % currencies.length]
     setSelectedCurrency(nextCurrency)
-    toast.success(`Currency changed to ${nextCurrency}`, {
-      description: 'All values will be displayed in ' + nextCurrency
-    })
+    toast.success(`Currency changed to ${nextCurrency}`)
   }
 
   // ============================================================================
@@ -528,9 +445,7 @@ export default function ValueDashboardClient() {
     const currentIndex = styles.indexOf(chartStyle)
     const nextStyle = styles[(currentIndex + 1) % styles.length]
     setChartStyle(nextStyle)
-    toast.success(`Chart style changed to ${nextStyle}`, {
-      description: 'Charts will now display in ' + nextStyle + ' style'
-    })
+    toast.success(`Chart style changed to ${nextStyle}`)
   }
 
   // ============================================================================
@@ -553,15 +468,7 @@ export default function ValueDashboardClient() {
       color: 'blue'
     }
 
-    setRoiMetrics(prev => [...prev, newMetric])
-
-    logger.info('New metric created', {
-      metricName: newMetricName,
-      metricValue: newMetricValue
-    })
-
-    toast.success('Metric created successfully!', {
-      description: `${newMetricName} has been added to your dashboard`
+    setRoiMetrics(prev => [...prev, newMetric])    toast.success('Metric created successfully!' has been added to your dashboard`
     })
 
     setNewMetricName('')
@@ -680,9 +587,7 @@ export default function ValueDashboardClient() {
                     key={period}
                     variant={selectedPeriod === period ? 'default' : 'outline'}
                     onClick={() => {
-                      setSelectedPeriod(period)
-                      logger.info('Period changed', { period })
-                      toast.info(`Viewing ${period === 'all' ? 'all time' : period} data`, { description: 'Dashboard updated with selected period' })
+                      setSelectedPeriod(period)                      toast.info(`Viewing ${period === 'all' ? 'all time' : period} data`)
                     }}
                   >
                     {period === '3m' ? '3 Months' : period === '6m' ? '6 Months' : period === '12m' ? '12 Months' : 'All Time'}
@@ -1073,7 +978,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('pdf')
-                    toast.info('PDF format selected', { description: 'Export will generate a formatted report' })
+                    toast.info('PDF format selected')
                   }}
                 >
                   <FileText className="h-5 w-5 mb-1" />
@@ -1085,7 +990,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('csv')
-                    toast.info('CSV format selected', { description: 'Export will generate spreadsheet data' })
+                    toast.info('CSV format selected')
                   }}
                 >
                   <FileSpreadsheet className="h-5 w-5 mb-1" />
@@ -1097,7 +1002,7 @@ export default function ValueDashboardClient() {
                   className="h-20 flex flex-col"
                   onClick={() => {
                     setSelectedExportFormat('json')
-                    toast.info('JSON format selected', { description: 'Export will generate API-compatible data' })
+                    toast.info('JSON format selected')
                   }}
                 >
                   <FileCode className="h-5 w-5 mb-1" />
@@ -1114,7 +1019,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('3m')
-                    toast.info('3 month range selected', { description: 'Export will include last 3 months of data' })
+                    toast.info('3 month range selected')
                   }}
                 >
                   3 Months
@@ -1124,7 +1029,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('6m')
-                    toast.info('6 month range selected', { description: 'Export will include last 6 months of data' })
+                    toast.info('6 month range selected')
                   }}
                 >
                   6 Months
@@ -1134,7 +1039,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setExportDateRange('12m')
-                    toast.info('12 month range selected', { description: 'Export will include full year of data' })
+                    toast.info('12 month range selected')
                   }}
                 >
                   12 Months
@@ -1270,7 +1175,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setSharePermission('view')
-                    toast.info('View-only access selected', { description: 'Recipients can view but not edit' })
+                    toast.info('View-only access selected')
                   }}
                 >
                   <Eye className="h-4 w-4 mr-1" />
@@ -1281,7 +1186,7 @@ export default function ValueDashboardClient() {
                   size="sm"
                   onClick={() => {
                     setSharePermission('edit')
-                    toast.info('Edit access selected', { description: 'Recipients can view and modify data' })
+                    toast.info('Edit access selected')
                   }}
                 >
                   <Edit className="h-4 w-4 mr-1" />
@@ -1418,7 +1323,7 @@ export default function ValueDashboardClient() {
                     size="sm"
                     className="bg-blue-500 text-white hover:bg-blue-600"
                     onClick={() => {
-                      toast.success('Blue theme applied!', { description: 'Dashboard colors updated' })
+                      toast.success('Blue theme applied!')
                     }}
                   >
                     Blue
@@ -1428,7 +1333,7 @@ export default function ValueDashboardClient() {
                     size="sm"
                     className="bg-purple-500 text-white hover:bg-purple-600"
                     onClick={() => {
-                      toast.success('Purple theme applied!', { description: 'Dashboard colors updated' })
+                      toast.success('Purple theme applied!')
                     }}
                   >
                     Purple
@@ -1438,7 +1343,7 @@ export default function ValueDashboardClient() {
                     size="sm"
                     className="bg-green-500 text-white hover:bg-green-600"
                     onClick={() => {
-                      toast.success('Green theme applied!', { description: 'Dashboard colors updated' })
+                      toast.success('Green theme applied!')
                     }}
                   >
                     Green
@@ -1448,7 +1353,7 @@ export default function ValueDashboardClient() {
                     size="sm"
                     className="bg-gray-700 text-white hover:bg-gray-800"
                     onClick={() => {
-                      toast.success('Dark theme applied!', { description: 'Dashboard colors updated' })
+                      toast.success('Dark theme applied!')
                     }}
                   >
                     Dark
@@ -1462,7 +1367,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.success('Low density mode applied!', { description: 'Showing fewer data points' })
+                      toast.success('Low density mode applied!')
                     }}
                   >
                     Low
@@ -1471,7 +1376,7 @@ export default function ValueDashboardClient() {
                     variant="default"
                     size="sm"
                     onClick={() => {
-                      toast.success('Medium density mode applied!', { description: 'Balanced data display' })
+                      toast.success('Medium density mode applied!')
                     }}
                   >
                     Medium
@@ -1480,7 +1385,7 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.success('High density mode applied!', { description: 'Showing maximum data points' })
+                      toast.success('High density mode applied!')
                     }}
                   >
                     High

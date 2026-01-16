@@ -213,18 +213,13 @@ export default function OperationsClient() {
   // Load operations data
   useEffect(() => {
     const loadOperations = async () => {
-      if (!userId) {
-        logger.info('Waiting for user authentication')
-        setIsLoading(false)
+      if (!userId) {        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)
-        logger.info('Loading operations data', { userId })
-
-        const { getTeamMembers } = await import('@/lib/admin-overview-queries')
+        setError(null)        const { getTeamMembers } = await import('@/lib/admin-overview-queries')
 
         const teamResult = await getTeamMembers(userId)
         setTeamMembers(teamResult.data || [])
@@ -232,19 +227,12 @@ export default function OperationsClient() {
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
-        toast.success('Operations loaded', {
-          description: `${teamResult.data?.length || 0} team members loaded`
-        })
-        logger.info('Operations loaded', {
-          success: true,
-          memberCount: teamResult.data?.length || 0,
-          roleCount: 0
-        })
-      } catch (err) {
+        toast.success('Operations loaded' team members loaded`
+        })      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load operations'
         setError(errorMessage)
         setIsLoading(false)
-        toast.error('Failed to load operations', { description: errorMessage })
+        toast.error('Failed to load operations')
         announce('Error loading operations', 'assertive')
         logger.error('Operations load failed', { error: err })
       }
@@ -256,15 +244,12 @@ export default function OperationsClient() {
   // Button 1: Invite User
   const handleInviteUser = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to invite users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Inviting new user', { userId })
-
-      const newUser = {
+    try {      const newUser = {
         email: 'newuser@company.com',
         role: 'member' as UserRole,
         department: 'General'
@@ -278,11 +263,8 @@ export default function OperationsClient() {
         invited_by: userId
       })
 
-      toast.success('Invitation Sent', {
-        description: `Invitation email sent to ${newUser.email} successfully`
-      })
-      logger.info('User invited', { success: true, email: newUser.email })
-      announce('User invitation sent', 'polite')
+      toast.success('Invitation Sent' successfully`
+      })      announce('User invitation sent', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -290,7 +272,7 @@ export default function OperationsClient() {
       setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invite failed'
-      toast.error('Invite Failed', { description: message })
+      toast.error('Invite Failed')
       logger.error('Invite user failed', { error })
       announce('Failed to send invitation', 'assertive')
     }
@@ -299,15 +281,12 @@ export default function OperationsClient() {
   // Button 2: Edit User
   const handleEditUser = async (targetUserId: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to edit users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Editing user', { targetUserId })
-
-      // Note: Using getUserById and updating profile
+    try {      // Note: Using getUserById and updating profile
       // Future: Create updateUser function in user-management-queries
       const { getUserById } = await import('@/lib/user-management-queries')
       const user = await getUserById(targetUserId)
@@ -325,11 +304,7 @@ export default function OperationsClient() {
 
       if (!response.ok) throw new Error('Failed to edit user')
 
-      toast.success('User Updated', {
-        description: 'User information has been updated successfully'
-      })
-      logger.info('User edited', { success: true, targetUserId })
-      announce('User updated successfully', 'polite')
+      toast.success('User Updated')      announce('User updated successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -337,7 +312,7 @@ export default function OperationsClient() {
       setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
+      toast.error('Edit Failed')
       logger.error('Edit user failed', { error })
       announce('Failed to edit user', 'assertive')
     }
@@ -352,23 +327,17 @@ export default function OperationsClient() {
     if (!deleteUser) return
 
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       setDeleteUser(null)
       return
     }
 
-    try {
-      logger.info('Deleting user', { targetUserId: deleteUser.id, userId })
-
-      const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
+    try {      const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
       await deleteUserQuery(deleteUser.id)
 
-      toast.success('User Deleted', {
-        description: `${deleteUser.name} has been permanently removed from the team`
-      })
-      logger.info('User deleted', { success: true, targetUserId: deleteUser.id })
-      announce('User deleted successfully', 'polite')
+      toast.success('User Deleted' has been permanently removed from the team`
+      })      announce('User deleted successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -376,7 +345,7 @@ export default function OperationsClient() {
       setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
+      toast.error('Delete Failed')
       logger.error('Delete user failed', { error })
       announce('Failed to delete user', 'assertive')
     } finally {
@@ -387,22 +356,16 @@ export default function OperationsClient() {
   // Button 4: Deactivate User
   const handleDeactivateUser = async (targetUserId: string, userName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to deactivate users' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Deactivating user', { targetUserId, userId })
-
-      const { deactivateUser } = await import('@/lib/user-management-queries')
+    try {      const { deactivateUser } = await import('@/lib/user-management-queries')
       await deactivateUser(targetUserId)
 
-      toast.success('User Deactivated', {
-        description: `${userName} has been deactivated and will no longer have access`
-      })
-      logger.info('User deactivated', { success: true, targetUserId })
-      announce('User deactivated successfully', 'polite')
+      toast.success('User Deactivated' has been deactivated and will no longer have access`
+      })      announce('User deactivated successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -410,7 +373,7 @@ export default function OperationsClient() {
       setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Deactivate failed'
-      toast.error('Deactivate Failed', { description: message })
+      toast.error('Deactivate Failed')
       logger.error('Deactivate user failed', { error })
       announce('Failed to deactivate user', 'assertive')
     }
@@ -419,22 +382,16 @@ export default function OperationsClient() {
   // Button 5: Change Role
   const handleChangeRole = async (targetUserId: string, userName: string, newRole: UserRole) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to change roles' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Changing user role', { targetUserId, newRole, userId })
-
-      const { updateUserRole } = await import('@/lib/user-management-queries')
+    try {      const { updateUserRole } = await import('@/lib/user-management-queries')
       await updateUserRole(targetUserId, newRole)
 
-      toast.success('Role Changed', {
-        description: `${userName} has been assigned the ${newRole} role`
-      })
-      logger.info('User role changed', { success: true, targetUserId, newRole })
-      announce(`User role changed to ${newRole}`, 'polite')
+      toast.success('Role Changed' has been assigned the ${newRole} role`
+      })      announce(`User role changed to ${newRole}`, 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -442,7 +399,7 @@ export default function OperationsClient() {
       setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Role change failed'
-      toast.error('Role Change Failed', { description: message })
+      toast.error('Role Change Failed')
       logger.error('Change role failed', { error })
       announce('Failed to change role', 'assertive')
     }
@@ -451,15 +408,12 @@ export default function OperationsClient() {
   // Button 6: Set Permissions
   const handleSetPermissions = async (roleId: string, roleName: string) => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to set permissions' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Setting permissions', { roleId, userId })
-
-      // Using team-management-queries for role permissions
+    try {      // Using team-management-queries for role permissions
       const { updateRolePermission } = await import('@/lib/team-management-queries')
 
       // Update permissions for the role
@@ -468,17 +422,14 @@ export default function OperationsClient() {
         is_active: true
       })
 
-      toast.success('Permissions Updated', {
-        description: `Permissions for ${roleName} role have been updated successfully`
-      })
-      logger.info('Permissions set', { success: true, roleId })
-      announce('Permissions updated successfully', 'polite')
+      toast.success('Permissions Updated' role have been updated successfully`
+      })      announce('Permissions updated successfully', 'polite')
 
       // Reload roles (if needed)
       // Note: Future enhancement - add getRoles to reload role data
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Update failed'
-      toast.error('Update Failed', { description: message })
+      toast.error('Update Failed')
       logger.error('Set permissions failed', { error })
       announce('Failed to update permissions', 'assertive')
     }
@@ -487,36 +438,30 @@ export default function OperationsClient() {
   // Button 7: View Activity Log
   const handleViewActivityLog = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to view activity' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
     const willShow = !showActivityLog
 
-    try {
-      logger.info('Opening activity log', { userId })
-
-      if (willShow) {
+    try {      if (willShow) {
         // Load activity data when opening
         const { getRecentActivity } = await import('@/lib/user-management-queries')
         const activity = await getRecentActivity(50)
         setActivityData(activity || [])
 
-        toast.info('Activity Log', {
-          description: `Showing ${activity?.length || 0} recent activities`
+        toast.info('Activity Log' recent activities`
         })
       } else {
-        toast.info('Activity Log', {
-          description: 'Hiding activity log'
-        })
+        toast.info('Activity Log')
       }
 
       setShowActivityLog(willShow)
       announce(willShow ? 'Activity log shown' : 'Activity log hidden', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load activity'
-      toast.error('Load Failed', { description: message })
+      toast.error('Load Failed')
       logger.error('Load activity failed', { error })
       announce('Failed to load activity log', 'assertive')
     }
@@ -525,31 +470,22 @@ export default function OperationsClient() {
   // Button 8: Refresh Operations
   const handleRefreshOperations = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to refresh operations' })
+      toast.error('Authentication required')
       announce('Authentication required', 'assertive')
       return
     }
 
-    try {
-      logger.info('Refreshing operations data', { userId })
-
-      // Use getAllUsers from user-management-queries
+    try {      // Use getAllUsers from user-management-queries
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
 
       setTeamMembers(users || [])
 
-      toast.success('Operations Refreshed', {
-        description: `Reloaded ${users?.length || 0} team members successfully`
-      })
-      logger.info('Operations refresh completed', {
-        success: true,
-        memberCount: users?.length || 0
-      })
-      announce('Operations refreshed successfully', 'polite')
+      toast.success('Operations Refreshed' team members successfully`
+      })      announce('Operations refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
-      toast.error('Refresh Failed', { description: message })
+      toast.error('Refresh Failed')
       logger.error('Operations refresh failed', { error })
       announce('Failed to refresh operations', 'assertive')
     }
@@ -558,20 +494,17 @@ export default function OperationsClient() {
   // Handler: Create New Item
   const handleCreateNewItem = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to create items' })
+      toast.error('Authentication required')
       return
     }
 
     if (!newItemData.name.trim()) {
-      toast.error('Validation Error', { description: 'Item name is required' })
+      toast.error('Validation Error')
       return
     }
 
     try {
-      setIsCreatingItem(true)
-      logger.info('Creating new item', { userId, itemData: newItemData })
-
-      // For tasks, we can use projects or tasks API
+      setIsCreatingItem(true)      // For tasks, we can use projects or tasks API
       if (newItemData.type === 'task') {
         const response = await fetch('/api/tasks', {
           method: 'POST',
@@ -587,16 +520,11 @@ export default function OperationsClient() {
         })
 
         if (!response.ok) {
-          // Fallback: Just show success for demo
-          logger.info('Task API not available, simulating creation')
-        }
+          // Fallback: Just show success for demo        }
       }
 
-      toast.success('Item Created', {
-        description: `${newItemData.type.charAt(0).toUpperCase() + newItemData.type.slice(1)} "${newItemData.name}" has been created successfully`
-      })
-      logger.info('Item created', { success: true, itemData: newItemData })
-      announce(`${newItemData.type} created successfully`, 'polite')
+      toast.success('Item Created' "${newItemData.name}" has been created successfully`
+      })      announce(`${newItemData.type} created successfully`, 'polite')
 
       // Reset form and close dialog
       setNewItemData({ name: '', type: 'task', description: '', priority: 'medium', assignee: '' })
@@ -606,7 +534,7 @@ export default function OperationsClient() {
       handleRefreshOperations()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to create item'
-      toast.error('Creation Failed', { description: message })
+      toast.error('Creation Failed')
       logger.error('Create item failed', { error })
       announce('Failed to create item', 'assertive')
     } finally {
@@ -617,15 +545,12 @@ export default function OperationsClient() {
   // Handler: Export Data
   const handleExportData = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to export data' })
+      toast.error('Authentication required')
       return
     }
 
     try {
-      setIsExporting(true)
-      logger.info('Exporting data', { userId, exportOptions: exportData })
-
-      // Prepare export data based on selections
+      setIsExporting(true)      // Prepare export data based on selections
       const dataToExport: any = {
         exportedAt: new Date().toISOString(),
         exportedBy: userId,
@@ -708,16 +633,13 @@ export default function OperationsClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export Complete', {
-        description: `Data exported successfully as ${filename}`
-      })
-      logger.info('Data exported', { success: true, filename, format: exportData.format })
-      announce('Data exported successfully', 'polite')
+      toast.success('Export Complete'`
+      })      announce('Data exported successfully', 'polite')
 
       setShowExportDialog(false)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to export data'
-      toast.error('Export Failed', { description: message })
+      toast.error('Export Failed')
       logger.error('Export data failed', { error })
       announce('Failed to export data', 'assertive')
     } finally {
@@ -728,15 +650,12 @@ export default function OperationsClient() {
   // Handler: Save Settings
   const handleSaveSettings = async () => {
     if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to save settings' })
+      toast.error('Authentication required')
       return
     }
 
     try {
-      setIsSavingSettings(true)
-      logger.info('Saving settings', { userId, settings: settingsData })
-
-      // Save settings to localStorage and optionally to backend
+      setIsSavingSettings(true)      // Save settings to localStorage and optionally to backend
       localStorage.setItem('operations-settings', JSON.stringify(settingsData))
 
       // Try to save to backend if available
@@ -750,23 +669,15 @@ export default function OperationsClient() {
           })
         })
 
-        if (!response.ok) {
-          logger.info('Settings API not available, saved to localStorage only')
-        }
-      } catch {
-        logger.info('Settings API not available, saved to localStorage only')
-      }
+        if (!response.ok) {        }
+      } catch {      }
 
-      toast.success('Settings Saved', {
-        description: 'Your operations settings have been updated successfully'
-      })
-      logger.info('Settings saved', { success: true, settings: settingsData })
-      announce('Settings saved successfully', 'polite')
+      toast.success('Settings Saved')      announce('Settings saved successfully', 'polite')
 
       setShowSettingsDialog(false)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to save settings'
-      toast.error('Save Failed', { description: message })
+      toast.error('Save Failed')
       logger.error('Save settings failed', { error })
       announce('Failed to save settings', 'assertive')
     } finally {

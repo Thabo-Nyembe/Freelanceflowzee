@@ -568,7 +568,7 @@ export default function AlertsClient() {
   // Handlers - Real Supabase operations
   const handleCreateAlert = async () => {
     if (!newAlertForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Alert title is required' })
+      toast.error('Validation Error')
       return
     }
     try {
@@ -582,7 +582,7 @@ export default function AlertsClient() {
         status: 'active',
         triggered_at: new Date().toISOString()
       })
-      toast.success('Alert Created', { description: `"${newAlertForm.title}" has been created` })
+      toast.success('Alert Created'" has been created` })
       setShowCreateDialog(false)
       setNewAlertForm({
         title: '',
@@ -594,61 +594,61 @@ export default function AlertsClient() {
         tagInput: ''
       })
     } catch (err) {
-      toast.error('Failed to Create Alert', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Create Alert')
     }
   }
 
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
       await acknowledgeAlert(alertId)
-      toast.success('Alert Acknowledged', { description: `Alert has been acknowledged` })
+      toast.success('Alert Acknowledged')
     } catch (err) {
-      toast.error('Failed to Acknowledge', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Acknowledge')
     }
   }
 
   const handleResolveAlert = async (alertId: string) => {
     try {
       await resolveAlert(alertId)
-      toast.success('Alert Resolved', { description: `Alert has been resolved` })
+      toast.success('Alert Resolved')
     } catch (err) {
-      toast.error('Failed to Resolve', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Resolve')
     }
   }
 
   const handleEscalateAlert = async (alertId: string) => {
     try {
       await escalateAlert(alertId)
-      toast.success('Alert Escalated', { description: `Alert has been escalated to the next tier` })
+      toast.success('Alert Escalated')
     } catch (err) {
-      toast.error('Failed to Escalate', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Escalate')
     }
   }
 
   const handleMuteAlert = async (alertId: string, alertName: string) => {
     try {
       await snoozeAlert(alertId, 60) // 60 minutes
-      toast.info('Alert Snoozed', { description: `"${alertName}" snoozed for 1 hour` })
+      toast.info('Alert Snoozed'" snoozed for 1 hour` })
     } catch (err) {
-      toast.error('Failed to Snooze', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Snooze')
     }
   }
 
   const handleDeleteAlert = async (alertId: string) => {
     try {
       await deleteAlert(alertId)
-      toast.success('Alert Deleted', { description: `Alert has been removed` })
+      toast.success('Alert Deleted')
     } catch (err) {
-      toast.error('Failed to Delete', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Delete')
     }
   }
 
   const handleDismissAlert = async (alertId: string) => {
     try {
       await updateAlert(alertId, { status: 'resolved', resolved_at: new Date().toISOString() })
-      toast.info('Alert Dismissed', { description: `Alert has been dismissed` })
+      toast.info('Alert Dismissed')
     } catch (err) {
-      toast.error('Failed to Dismiss', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Failed to Dismiss')
     }
   }
 
@@ -724,9 +724,9 @@ export default function AlertsClient() {
               const filterSection = document.querySelector('[data-filter-section]')
               if (filterSection) {
                 filterSection.scrollIntoView({ behavior: 'smooth' })
-                toast.success('Filters Ready', { description: 'Use the dropdowns above to filter alerts' })
+                toast.success('Filters Ready')
               } else {
-                toast.info('Filter Options', { description: 'Use the dropdowns above to filter alerts' })
+                toast.info('Filter Options')
               }
             }}>
               <Filter className="h-4 w-4 mr-2" />
@@ -1007,9 +1007,9 @@ export default function AlertsClient() {
                             const phoneNumber = schedule.currentOnCall.phone.replace(/\D/g, '')
                             if (phoneNumber) {
                               window.location.href = `tel:${phoneNumber}`
-                              toast.success('Call Initiated', { description: `Calling ${schedule.currentOnCall.name}` })
+                              toast.success('Call Initiated'` })
                             } else {
-                              toast.error('No Phone Number', { description: 'Phone number not available' })
+                              toast.error('No Phone Number')
                             }
                           }}>
                             <Phone className="h-3 w-3 mr-1" />
@@ -1018,9 +1018,9 @@ export default function AlertsClient() {
                           <Button size="sm" variant="outline" onClick={() => {
                             if (schedule.currentOnCall.email) {
                               window.location.href = `mailto:${schedule.currentOnCall.email}`
-                              toast.success('Email Client Opened', { description: `Composing email to ${schedule.currentOnCall.email}` })
+                              toast.success('Email Client Opened'` })
                             } else {
-                              toast.error('No Email Address', { description: 'Email address not available' })
+                              toast.error('No Email Address')
                             }
                           }}>
                             <Mail className="h-3 w-3 mr-1" />
@@ -1062,7 +1062,7 @@ export default function AlertsClient() {
                   <CardTitle>Service Directory</CardTitle>
                   <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
                     // Open dialog or navigate to service creation
-                    toast.info('Add Service', { description: 'Service creation dialog ready' })
+                    toast.info('Add Service')
                   }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Service
@@ -1103,7 +1103,7 @@ export default function AlertsClient() {
                       </div>
 
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.info('Settings', { description: `${service.name} settings loaded` })
+                        toast.info('Settings' settings loaded` })
                       }}>
                         <Settings className="h-4 w-4" />
                       </Button>
@@ -1146,7 +1146,7 @@ export default function AlertsClient() {
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-sm text-gray-500">{policy.services} services using this policy</span>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.info('Policy Editor', { description: `Editing "${policy.name}" escalation policy` })
+                        toast.info('Policy Editor'" escalation policy` })
                       }}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
@@ -1165,7 +1165,7 @@ export default function AlertsClient() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Integrations</CardTitle>
                   <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
-                    toast.info('Integration Marketplace', { description: 'Browse available integrations' })
+                    toast.info('Integration Marketplace')
                   }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Integration
@@ -1206,12 +1206,11 @@ export default function AlertsClient() {
                       <div className="flex items-center gap-2">
                         <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => {
                           const action = checked ? 'enabled' : 'disabled'
-                          toast.success(checked ? 'Integration Enabled' : 'Integration Disabled', {
-                            description: `${integration.name} has been ${action}`
+                          toast.success(checked ? 'Integration Enabled' : 'Integration Disabled' has been ${action}`
                           })
                         }} />
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.info('Settings', { description: `${integration.name} settings ready` })
+                          toast.info('Settings' settings ready` })
                         }}>
                           <Settings className="h-4 w-4" />
                         </Button>
@@ -1454,21 +1453,20 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Settings', { description: `${channel.name} configuration ready` })
+                                toast.info('Settings' configuration ready` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => {
                                 const action = checked ? 'enabled' : 'disabled'
-                                toast.success(`${channel.name} ${action}`, {
-                                  description: `Notifications ${action}`
+                                toast.success(`${channel.name} ${action}``
                                 })
                               }} />
                             </div>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full mt-4" onClick={() => {
-                          toast.info('Channel Configuration', { description: 'Opening notification channel setup' })
+                          toast.info('Channel Configuration')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
@@ -1587,12 +1585,12 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Settings', { description: `Editing ${policy.tier} escalation settings` })
+                                toast.info('Settings' escalation settings` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
-                                toast.success('Tier Removed', { description: `${policy.tier} has been removed from escalation` })
+                                toast.success('Tier Removed' has been removed from escalation` })
                               }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -1600,7 +1598,7 @@ export default function AlertsClient() {
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Escalation Tier', { description: 'Creating new escalation tier configuration' })
+                          toast.info('Escalation Tier')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
@@ -1629,7 +1627,7 @@ export default function AlertsClient() {
                             <div className="flex items-center gap-3">
                               <Badge variant="outline">{schedule.rotation}</Badge>
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Schedule Editor', { description: `Editing ${schedule.name} rotation` })
+                                toast.info('Schedule Editor' rotation` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1637,7 +1635,7 @@ export default function AlertsClient() {
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Schedule Configuration', { description: 'Setting up new on-call schedule' })
+                          toast.info('Schedule Configuration')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Schedule
@@ -1799,9 +1797,7 @@ export default function AlertsClient() {
                               // Simulate API key generation
                               const newKey = 'kazi-alerts-' + Math.random().toString(36).substring(2, 15)
                               navigator.clipboard.writeText(newKey)
-                              toast.success('API Key Regenerated', {
-                                description: 'New key copied to clipboard'
-                              })
+                              toast.success('API Key Regenerated')
                             }}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
@@ -1819,7 +1815,7 @@ export default function AlertsClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => {
-                                  toast.info('Edit Webhook', { description: `Configuring webhook: ${webhook.url}` })
+                                  toast.info('Edit Webhook'` })
                                 }}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -1838,7 +1834,7 @@ export default function AlertsClient() {
                           ))}
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Add Webhook', { description: 'Opening webhook configuration...' })
+                          toast.info('Add Webhook')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
@@ -1875,21 +1871,20 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Edit Rule', { description: `Configuring rule: ${rule.name}` })
+                                toast.info('Edit Rule'` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => {
                                 const action = checked ? 'enabled' : 'disabled'
-                                toast.success(checked ? 'Rule Enabled' : 'Rule Disabled', {
-                                  description: `"${rule.name}" has been ${action}`
+                                toast.success(checked ? 'Rule Enabled' : 'Rule Disabled'" has been ${action}`
                                 })
                               }} />
                             </div>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Create Rule', { description: 'Opening rule builder...' })
+                          toast.info('Create Rule')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Rule
@@ -1915,14 +1910,14 @@ export default function AlertsClient() {
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info('Edit Routing', { description: `Configuring route: ${route.service}` })
+                              toast.info('Edit Routing'` })
                             }}>
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Add Routing Rule', { description: 'Opening routing configuration...' })
+                          toast.info('Add Routing Rule')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Routing Rule
@@ -2176,7 +2171,7 @@ export default function AlertsClient() {
             <AIInsightsPanel
               insights={mockAlertsAIInsights}
               title="Alert Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2480,7 +2475,7 @@ export default function AlertsClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowAcknowledgeDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Alerts Acknowledged', { description: 'Selected alerts have been acknowledged' })
+                toast.success('Alerts Acknowledged')
                 setShowAcknowledgeDialog(false)
               }}>
                 <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -2534,7 +2529,7 @@ export default function AlertsClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowEscalateDialog(false)}>Cancel</Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Alert Escalated', { description: 'Alert has been escalated to the next tier' })
+                toast.success('Alert Escalated')
                 setShowEscalateDialog(false)
               }}>
                 <ArrowUp className="h-4 w-4 mr-2" />
@@ -2591,7 +2586,7 @@ export default function AlertsClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowSilenceDialog(false)}>Cancel</Button>
               <Button className="bg-gray-600 hover:bg-gray-700" onClick={() => {
-                toast.success('Alerts Silenced', { description: 'Selected alerts have been silenced' })
+                toast.success('Alerts Silenced')
                 setShowSilenceDialog(false)
               }}>
                 <VolumeX className="h-4 w-4 mr-2" />
@@ -2675,7 +2670,7 @@ export default function AlertsClient() {
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowCreateRuleDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Rule Created', { description: 'New alert rule has been created and enabled' })
+                toast.success('Rule Created')
                 setShowCreateRuleDialog(false)
               }}>
                 <Target className="h-4 w-4 mr-2" />
@@ -2762,7 +2757,7 @@ export default function AlertsClient() {
               <Button variant="outline" onClick={() => setShowMonitoringIntegrationDialog(false)}>Cancel</Button>
               {selectedMonitoringIntegration?.status === 'connected' ? (
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                  toast.success('Integration Updated', { description: `${selectedMonitoringIntegration?.name} settings have been saved` })
+                  toast.success('Integration Updated' settings have been saved` })
                   setShowMonitoringIntegrationDialog(false)
                 }}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -2770,7 +2765,7 @@ export default function AlertsClient() {
                 </Button>
               ) : (
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.success('Integration Connected', { description: `${selectedMonitoringIntegration?.name} has been connected successfully` })
+                  toast.success('Integration Connected' has been connected successfully` })
                   setShowMonitoringIntegrationDialog(false)
                 }}>
                   <Link2 className="h-4 w-4 mr-2" />
@@ -2870,7 +2865,7 @@ export default function AlertsClient() {
               <Button variant="outline" onClick={() => setShowTicketingIntegrationDialog(false)}>Cancel</Button>
               {selectedTicketingIntegration?.status === 'connected' ? (
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                  toast.success('Integration Updated', { description: `${selectedTicketingIntegration?.name} settings have been saved` })
+                  toast.success('Integration Updated' settings have been saved` })
                   setShowTicketingIntegrationDialog(false)
                 }}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -2878,7 +2873,7 @@ export default function AlertsClient() {
                 </Button>
               ) : (
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.success('Integration Connected', { description: `${selectedTicketingIntegration?.name} has been connected successfully` })
+                  toast.success('Integration Connected' has been connected successfully` })
                   setShowTicketingIntegrationDialog(false)
                 }}>
                   <Link2 className="h-4 w-4 mr-2" />

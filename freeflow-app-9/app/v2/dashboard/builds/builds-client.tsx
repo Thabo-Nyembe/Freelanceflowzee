@@ -902,26 +902,21 @@ export default function BuildsClient() {
 
   // Handlers
   const handleTriggerBuild = () => {
-    toast.info('Build triggered', {
-      description: 'Starting new build...'
-    })
+    toast.info('Build triggered')
   }
 
   const handleCancelBuild = (build: Build) => {
-    toast.success('Build cancelled', {
-      description: `Build #${build.number} has been cancelled`
+    toast.success('Build cancelled' has been cancelled`
     })
   }
 
   const handleRetryBuild = (build: Build) => {
-    toast.info('Retrying build', {
-      description: `Restarting build #${build.number}`
+    toast.info('Retrying build'`
     })
   }
 
   const handleDownloadArtifact = (artifactName: string) => {
-    toast.success('Download started', {
-      description: `Downloading ${artifactName}`
+    toast.success('Download started'`
     })
   }
 
@@ -941,7 +936,7 @@ export default function BuildsClient() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={() => {
-              toast.info('Refreshing...', { description: 'Fetching latest build data' })
+              toast.info('Refreshing...')
             }}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -2049,7 +2044,7 @@ export default function BuildsClient() {
               <Button
                 className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
                 onClick={() => {
-                  toast.success('Build started', { description: 'New build has been queued' })
+                  toast.success('Build started')
                   setShowNewBuildDialog(false)
                 }}
               >
@@ -2097,7 +2092,7 @@ export default function BuildsClient() {
               <Button
                 className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
                 onClick={() => {
-                  toast.success('Build retry initiated', { description: 'The build will restart shortly' })
+                  toast.success('Build retry initiated')
                   setShowRetryBuildDialog(false)
                 }}
               >
@@ -2130,7 +2125,7 @@ export default function BuildsClient() {
                   ))}
                 </select>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success('Download started', { description: 'Build logs are being downloaded...' })
+                  toast.success('Download started')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
@@ -2198,7 +2193,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
-                toast.success('Workflow started', { description: 'The workflow has been triggered' })
+                toast.success('Workflow started')
                 setShowRunWorkflowDialog(false)
               }}>
                 <Play className="w-4 h-4 mr-2" />
@@ -2228,7 +2223,7 @@ export default function BuildsClient() {
                     <span className="font-mono text-sm">{branch}</span>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
-                    toast.info('Branch selected', { description: `Selected branch: ${branch}` })
+                    toast.info('Branch selected'` })
                     setShowBranchesDialog(false)
                   }}>
                     Select
@@ -2264,7 +2259,7 @@ export default function BuildsClient() {
                     <p className="text-xs text-gray-500">Build #{artifact.build_number} - {formatBytes(artifact.size_bytes)}</p>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
-                    toast.success('Download started', { description: `Downloading ${artifact.name}...` })
+                    toast.success('Download started'...` })
                   }}>
                     <Download className="w-4 h-4" />
                   </Button>

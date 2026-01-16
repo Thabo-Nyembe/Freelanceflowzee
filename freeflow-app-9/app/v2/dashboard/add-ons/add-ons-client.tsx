@@ -521,56 +521,47 @@ export default function AddOnsClient() {
 
   // Handlers
   const handleInstallAddOn = (addOnName: string) => {
-    toast.success('Installing add-on', {
-      description: `"${addOnName}" is being installed...`
+    toast.success('Installing add-on'" is being installed...`
     })
   }
 
   const handleUninstallAddOn = (addOnName: string) => {
-    toast.info('Uninstalling add-on', {
-      description: `Removing "${addOnName}"...`
+    toast.info('Uninstalling add-on'"...`
     })
   }
 
   const handleUpdateAddOn = (addOnName: string) => {
-    toast.info('Updating add-on', {
-      description: `Updating "${addOnName}" to latest version...`
+    toast.info('Updating add-on'" to latest version...`
     })
   }
 
   const handleViewAddOnDetails = (addOnName: string) => {
-    toast.info('Loading details', {
-      description: `Opening "${addOnName}" details...`
+    toast.info('Loading details'" details...`
     })
   }
 
   const handlePurchaseAddOn = (addOnName: string) => {
-    toast.info('Purchase', {
-      description: `Opening checkout for "${addOnName}"...`
+    toast.info('Purchase'"...`
     })
   }
 
   const handleConfigureAddOn = (addOnName: string) => {
-    toast.info('Opening settings', {
-      description: `Configuring "${addOnName}"...`
+    toast.info('Opening settings'"...`
     })
   }
 
   const handleDisableAddOn = (addOnName: string) => {
-    toast.warning('Add-on disabled', {
-      description: `"${addOnName}" has been disabled.`
+    toast.warning('Add-on disabled'" has been disabled.`
     })
   }
 
   const handleEnableAddOn = (addOnName: string) => {
-    toast.success('Add-on enabled', {
-      description: `"${addOnName}" is now active.`
+    toast.success('Add-on enabled'" is now active.`
     })
   }
 
   const handleLearnMore = (addOnName: string) => {
-    toast.info('Opening documentation', {
-      description: `Loading "${addOnName}" documentation...`
+    toast.info('Opening documentation'" documentation...`
     })
   }
 
@@ -589,15 +580,11 @@ export default function AddOnsClient() {
   }
 
   const handleOpenDocumentation = () => {
-    toast.info('Opening documentation', {
-      description: 'Loading developer documentation...'
-    })
+    toast.info('Opening documentation')
   }
 
   const handleOpenAPIReference = () => {
-    toast.info('Opening API Reference', {
-      description: 'Loading API documentation...'
-    })
+    toast.info('Opening API Reference')
   }
 
   const handleImportSettings = () => {
@@ -1845,7 +1832,7 @@ export default function AddOnsClient() {
             <AIInsightsPanel
               insights={mockAddOnsAIInsights}
               title="Add-On Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2064,9 +2051,7 @@ export default function AddOnsClient() {
                   className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
                   onClick={() => {
                     setShowUpdateAllDialog(false)
-                    toast.success('Update check complete', {
-                      description: 'All add-ons are up to date!'
-                    })
+                    toast.success('Update check complete')
                   }}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -2396,9 +2381,7 @@ export default function AddOnsClient() {
                         if (prev >= 100) {
                           clearInterval(interval)
                           setSecurityScanRunning(false)
-                          toast.success('Security scan complete', {
-                            description: 'All add-ons passed security checks!'
-                          })
+                          toast.success('Security scan complete')
                           return 100
                         }
                         return prev + 10
@@ -2528,9 +2511,7 @@ export default function AddOnsClient() {
                   className="bg-gradient-to-r from-orange-500 to-pink-600 text-white"
                   onClick={() => {
                     setShowSubmitDialog(false)
-                    toast.success('Submission started', {
-                      description: 'Your add-on is being reviewed. This may take 2-3 business days.'
-                    })
+                    toast.success('Submission started')
                   }}
                 >
                   <Upload className="w-4 h-4 mr-2" />
@@ -2609,8 +2590,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowFiltersDialog(false)
-                  toast.success('Filters applied', {
-                    description: `Showing ${filteredAddOns.length} add-ons`
+                  toast.success('Filters applied' add-ons`
                   })
                 }}>
                   Apply Filters
@@ -2678,8 +2658,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowAdvancedSearchDialog(false)
-                  toast.success('Search applied', {
-                    description: `Found ${filteredAddOns.length} add-ons`
+                  toast.success('Search applied' add-ons`
                   })
                 }}>
                   <Search className="w-4 h-4 mr-2" />
@@ -2728,9 +2707,7 @@ export default function AddOnsClient() {
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                   onClick={() => {
                     setShowRequestCategoryDialog(false)
-                    toast.success('Request submitted', {
-                      description: 'Your category request has been submitted for review.'
-                    })
+                    toast.success('Request submitted')
                   }}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -2772,9 +2749,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowImportSettingsDialog(false)
-                  toast.success('Settings imported', {
-                    description: 'Your add-on settings have been imported successfully.'
-                  })
+                  toast.success('Settings imported')
                 }}>
                   <Upload className="w-4 h-4 mr-2" />
                   Import
@@ -2826,9 +2801,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowExportSettingsDialog(false)
-                  toast.success('Settings exported', {
-                    description: 'Your settings file is ready for download.'
-                  })
+                  toast.success('Settings exported')
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
@@ -2866,9 +2839,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button variant="destructive" onClick={() => {
                   setShowResetAllDialog(false)
-                  toast.success('Settings reset', {
-                    description: 'All add-on settings have been reset to defaults.'
-                  })
+                  toast.success('Settings reset')
                 }}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Reset All

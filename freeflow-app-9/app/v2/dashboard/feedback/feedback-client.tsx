@@ -586,7 +586,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
       if (error) throw error
 
-      toast.success('Idea submitted', { description: 'Your feedback has been submitted successfully' })
+      toast.success('Idea submitted')
       setFormData({ title: '', description: '', category: 'feature', product: 'core', tags: '' })
       setShowSubmitDialog(false)
       fetchFeedback()
@@ -671,7 +671,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete', { description: 'Your feedback data has been exported' })
+      toast.success('Export complete')
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export feedback')
@@ -888,7 +888,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Legacy handlers for mock data compatibility
   const handleVote = (idea: Idea) => {
     // For mock ideas, just show toast - real DB items use handleVoteFeedback
-    toast.success('Vote recorded', { description: `You voted for "${idea.title}"` })
+    toast.success('Vote recorded'"` })
   }
 
   return (
@@ -2196,7 +2196,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <AIInsightsPanel
               insights={mockFeedbackAIInsights}
               title="Feedback Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2981,7 +2981,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button onClick={() => {
-                  toast.success('Domain verification initiated', { description: 'DNS propagation may take up to 48 hours' })
+                  toast.success('Domain verification initiated')
                   setShowVerifyDomainDialog(false)
                 }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -3109,7 +3109,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="destructive" onClick={() => {
                   const newKey = `fbk_${Math.random().toString(36).substring(2, 15)}`
                   navigator.clipboard.writeText(newKey)
-                  toast.success('API key regenerated', { description: 'New key copied to clipboard' })
+                  toast.success('API key regenerated')
                   setShowRegenerateApiKeyDialog(false)
                 }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -3146,7 +3146,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="destructive" onClick={() => {
                   const newSecret = `whsec_${Math.random().toString(36).substring(2, 20)}`
                   navigator.clipboard.writeText(newSecret)
-                  toast.success('Webhook secret regenerated', { description: 'New secret copied to clipboard' })
+                  toast.success('Webhook secret regenerated')
                   setShowRegenerateWebhookSecretDialog(false)
                 }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -3192,7 +3192,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button onClick={() => {
-                  toast.success('Test webhook sent', { description: 'Check your endpoint for the payload' })
+                  toast.success('Test webhook sent')
                   setShowTestWebhookDialog(false)
                 }} className="flex-1">
                   <Send className="w-4 h-4 mr-2" />
@@ -3310,7 +3310,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('All votes have been reset', { description: `Reset votes on ${mockIdeas.length} ideas` })
+                  toast.success('All votes have been reset' ideas` })
                   setShowResetVotesDialog(false)
                 }} className="flex-1">
                   Reset All Votes
@@ -3344,7 +3344,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('All ideas have been archived', { description: `Archived ${mockIdeas.length} ideas` })
+                  toast.success('All ideas have been archived' ideas` })
                   setShowArchiveAllDialog(false)
                 }} className="flex-1">
                   Archive All Ideas
@@ -3378,7 +3378,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.error('Portal deleted permanently', { description: 'All data has been removed' })
+                  toast.error('Portal deleted permanently')
                   setShowDeletePortalDialog(false)
                 }} className="flex-1">
                   Delete Portal Forever

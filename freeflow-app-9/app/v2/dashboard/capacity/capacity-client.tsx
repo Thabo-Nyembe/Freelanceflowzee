@@ -475,8 +475,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       toast.error('Please select a team member and project')
       return
     }
-    toast.success('Allocation created', {
-      description: `Successfully allocated ${allocationForm.hoursPerWeek}h/week`
+    toast.success('Allocation created'h/week`
     })
     setAllocateDialogOpen(false)
     setAllocationForm({
@@ -494,8 +493,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   }
 
   const handleSubmitBalance = () => {
-    toast.success('Workload balanced', {
-      description: `Target utilization set to ${balanceForm.targetUtilization}%`
+    toast.success('Workload balanced'%`
     })
     setBalanceDialogOpen(false)
   }
@@ -505,17 +503,14 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   }
 
   const handleGenerateReport = () => {
-    toast.success('Report generated', {
-      description: `${reportForm.reportType} report (${reportForm.format.toUpperCase()}) is ready`
+    toast.success('Report generated' report (${reportForm.format.toUpperCase()}) is ready`
     })
     setReportDialogOpen(false)
   }
 
   // Export schedule handler
   const handleExportSchedule = () => {
-    toast.success('Schedule exported', {
-      description: 'Team schedule has been exported to Excel'
-    })
+    toast.success('Schedule exported')
   }
 
   // Add new team member handler
@@ -524,8 +519,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Team member added', {
-      description: `${newMemberForm.name} has been added to the team`
+    toast.success('Team member added' has been added to the team`
     })
     setAddMemberDialogOpen(false)
     setNewMemberForm({
@@ -544,8 +538,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Project created', {
-      description: `${newProjectForm.name} has been created`
+    toast.success('Project created' has been created`
     })
     setAddProjectDialogOpen(false)
     setNewProjectForm({
@@ -566,8 +559,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     const member = mockTeamMembers.find(m => m.id === timeOffForm.memberId)
-    toast.success('Time off scheduled', {
-      description: `${timeOffForm.type} scheduled for ${member?.name}`
+    toast.success('Time off scheduled' scheduled for ${member?.name}`
     })
     setTimeOffDialogOpen(false)
     setTimeOffForm({
@@ -586,8 +578,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     const fromMember = mockTeamMembers.find(m => m.id === reassignForm.fromMemberId)
     const toMember = mockTeamMembers.find(m => m.id === reassignForm.toMemberId)
-    toast.success('Resources reassigned', {
-      description: `${reassignForm.hours}h reassigned from ${fromMember?.name} to ${toMember?.name}`
+    toast.success('Resources reassigned'h reassigned from ${fromMember?.name} to ${toMember?.name}`
     })
     setReassignDialogOpen(false)
     setReassignForm({
@@ -604,8 +595,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       toast.error('Please fill in subject and message')
       return
     }
-    toast.success('Notification sent', {
-      description: `Message sent to ${notifyForm.recipients === 'all' ? 'all team members' : 'selected members'}`
+    toast.success('Notification sent'`
     })
     setNotifyDialogOpen(false)
     setNotifyForm({
@@ -623,8 +613,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       toast.error('Please enter a department name')
       return
     }
-    toast.success('Department added', {
-      description: `${newDepartmentName} department has been created`
+    toast.success('Department added' department has been created`
     })
     setAddDepartmentDialogOpen(false)
     setNewDepartmentName('')
@@ -632,16 +621,14 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   // Edit department handler
   const handleEditDepartment = () => {
-    toast.success('Department updated', {
-      description: `${selectedDepartment} settings have been saved`
+    toast.success('Department updated' settings have been saved`
     })
     setEditDepartmentDialogOpen(false)
   }
 
   // Edit status handler
   const handleEditStatus = () => {
-    toast.success('Status updated', {
-      description: `${selectedStatus} status has been updated`
+    toast.success('Status updated' status has been updated`
     })
     setEditStatusDialogOpen(false)
   }
@@ -649,29 +636,25 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   // Schedule navigation handlers
   const handlePreviousWeek = () => {
     setSelectedWeek(prev => prev - 1)
-    toast.info('Previous week', {
-      description: `Showing week ${selectedWeek - 1 < 0 ? selectedWeek - 1 : selectedWeek - 1}`
+    toast.info('Previous week'`
     })
   }
 
   const handleThisWeek = () => {
     setSelectedWeek(0)
-    toast.info('Current week', {
-      description: 'Showing current week schedule'
-    })
+    toast.info('Current week')
   }
 
   const handleNextWeek = () => {
     setSelectedWeek(prev => prev + 1)
-    toast.info('Next week', {
-      description: `Showing week +${selectedWeek + 1}`
+    toast.info('Next week'`
     })
   }
 
   // Overview quick action handlers
   const handleTeamView = () => {
     setActiveTab('team')
-    toast.info('Team view', { description: 'Switched to team capacity view' })
+    toast.info('Team view')
   }
 
   const handleAnalytics = () => {
@@ -680,22 +663,21 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   const handleScheduleView = () => {
     setActiveTab('schedule')
-    toast.info('Schedule view', { description: 'Switched to schedule view' })
+    toast.info('Schedule view')
   }
 
   const handleForecastView = () => {
     setActiveTab('forecast')
-    toast.info('Forecast view', { description: 'Switched to capacity forecast' })
+    toast.info('Forecast view')
   }
 
   const handleOverloadView = () => {
     const overbooked = mockTeamMembers.filter(m => m.status === 'overbooked')
     if (overbooked.length > 0) {
-      toast.warning('Overloaded members', {
-        description: `${overbooked.length} team member(s) are overbooked: ${overbooked.map(m => m.name).join(', ')}`
+      toast.warning('Overloaded members' team member(s) are overbooked: ${overbooked.map(m => m.name).join(', ')}`
       })
     } else {
-      toast.success('No overloads', { description: 'All team members are within capacity' })
+      toast.success('No overloads')
     }
   }
 
@@ -705,20 +687,18 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   const handleSettingsView = () => {
     setActiveTab('settings')
-    toast.info('Settings', { description: 'Switched to settings view' })
+    toast.info('Settings')
   }
 
   // Team quick action handlers
   const handleViewAllTeam = () => {
-    toast.info('All team members', {
-      description: `Showing all ${mockTeamMembers.length} team members`
+    toast.info('All team members' team members`
     })
   }
 
   const handleUtilizationView = () => {
     const avgUtil = Math.round(mockTeamMembers.reduce((s, m) => s + m.utilizationRate, 0) / mockTeamMembers.length)
-    toast.info('Team utilization', {
-      description: `Average team utilization: ${avgUtil}%`
+    toast.info('Team utilization'%`
     })
   }
 
@@ -728,40 +708,29 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   // Integration handlers
   const handleConnectIntegration = (name: string) => {
-    toast.success('Connection initiated', {
-      description: `Connecting to ${name}...`
+    toast.success('Connection initiated'...`
     })
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API key regenerated', {
-      description: 'New API key has been generated. Please update your integrations.'
-    })
+    toast.success('API key regenerated')
   }
 
   const handleExportData = () => {
-    toast.success('Data exported', {
-      description: 'All capacity data has been exported to JSON'
-    })
+    toast.success('Data exported')
   }
 
   const handleImportData = () => {
-    toast.info('Import data', {
-      description: 'Select a file to import capacity data'
-    })
+    toast.info('Import data')
   }
 
   // Danger zone handlers
   const handleClearAllocations = () => {
-    toast.warning('Allocations cleared', {
-      description: 'All team allocations have been removed'
-    })
+    toast.warning('Allocations cleared')
   }
 
   const handleResetCapacityData = () => {
-    toast.warning('Data reset', {
-      description: 'All capacity planning data has been reset to defaults'
-    })
+    toast.warning('Data reset')
   }
 
   // Quick actions with real dialog functionality
@@ -1869,7 +1838,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899'].map(color => (
                               <button
                                 key={color}
-                                onClick={() => { setSelectedProjectColor(color); toast.success('Color selected', { description: `Default project color set to ${color}` }); }}
+                                onClick={() => { setSelectedProjectColor(color); toast.success('Color selected'` }); }}
                                 className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${selectedProjectColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : 'border-white'}`}
                                 style={{ backgroundColor: color }}
                               />
@@ -2253,7 +2222,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <AIInsightsPanel
               insights={mockCapacityAIInsights}
               title="Capacity Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

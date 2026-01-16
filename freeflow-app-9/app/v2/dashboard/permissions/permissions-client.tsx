@@ -443,7 +443,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   // Handlers - Real CRUD Operations
   const handleCreateRole = async () => {
     if (!newRole.role_name || !newRole.display_name) {
-      toast.error('Validation Error', { description: 'Role name and display name are required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -468,12 +468,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         priority: 1
       })
       if (error) throw error
-      toast.success('Role Created', { description: `${newRole.display_name} has been created` })
+      toast.success('Role Created' has been created` })
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error creating role', { description: err.message })
+      toast.error('Error creating role')
     } finally {
       setIsLoading(false)
     }
@@ -491,7 +491,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
       const currentPermissions = roleData?.permissions || []
       if (currentPermissions.includes(permission)) {
-        toast.info('Already assigned', { description: `${permission} is already assigned to ${roleName}` })
+        toast.info('Already assigned' is already assigned to ${roleName}` })
         return
       }
 
@@ -499,10 +499,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: [...currentPermissions, permission]
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission assigned', { description: `${permission} added to ${roleName}` })
+      toast.success('Permission assigned' added to ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error assigning permission', { description: err.message })
+      toast.error('Error assigning permission')
     } finally {
       setIsLoading(false)
     }
@@ -525,10 +525,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: updatedPermissions
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission revoked', { description: `${permission} removed from ${roleName}` })
+      toast.success('Permission revoked' removed from ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error revoking permission', { description: err.message })
+      toast.error('Error revoking permission')
     } finally {
       setIsLoading(false)
     }
@@ -541,11 +541,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         deleted_at: new Date().toISOString()
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Role deleted', { description: `${roleName} has been deleted` })
+      toast.success('Role deleted' has been deleted` })
       setSelectedRole(null)
       refetchRoles?.()
     } catch (err: any) {
-      toast.error('Error deleting role', { description: err.message })
+      toast.error('Error deleting role')
     } finally {
       setIsLoading(false)
     }
@@ -563,9 +563,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.download = `permissions-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Export complete', { description: 'Permission matrix downloaded' })
+      toast.success('Export complete')
     } catch (err: any) {
-      toast.error('Export failed', { description: err.message })
+      toast.error('Export failed')
     } finally {
       setIsLoading(false)
     }
@@ -582,11 +582,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const unusedRoles = roles?.filter(r => r.current_users === 0) || []
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
-      toast.success('Audit complete', {
-        description: `Found ${unusedRoles.length} unused roles and ${expiredAssignments.length} expired assignments`
+      toast.success('Audit complete' unused roles and ${expiredAssignments.length} expired assignments`
       })
     } catch (err: any) {
-      toast.error('Audit failed', { description: err.message })
+      toast.error('Audit failed')
     } finally {
       setIsLoading(false)
     }
@@ -594,7 +593,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   const handleCreateUser = async () => {
     if (!newUser.email || !newUser.firstName || !newUser.lastName) {
-      toast.error('Validation Error', { description: 'Email, first name, and last name are required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -603,11 +602,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      toast.success('User invited', { description: `Invitation sent to ${newUser.email}` })
+      toast.success('User invited'` })
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
     } catch (err: any) {
-      toast.error('Error creating user', { description: err.message })
+      toast.error('Error creating user')
     } finally {
       setIsLoading(false)
     }
@@ -615,7 +614,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   const handleCreateGroup = async () => {
     if (!newGroup.name) {
-      toast.error('Validation Error', { description: 'Group name is required' })
+      toast.error('Validation Error')
       return
     }
     setIsLoading(true)
@@ -624,11 +623,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (!user) throw new Error('Not authenticated')
 
       // Groups would need their own table - showing pattern
-      toast.success('Group created', { description: `${newGroup.name} has been created` })
+      toast.success('Group created' has been created` })
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
     } catch (err: any) {
-      toast.error('Error creating group', { description: err.message })
+      toast.error('Error creating group')
     } finally {
       setIsLoading(false)
     }
@@ -651,10 +650,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         assigned_by_id: user.id
       })
       if (error) throw error
-      toast.success('User assigned', { description: 'User has been assigned to the role' })
+      toast.success('User assigned')
       refetchAssignments?.()
     } catch (err: any) {
-      toast.error('Error assigning user', { description: err.message })
+      toast.error('Error assigning user')
     } finally {
       setIsLoading(false)
     }
@@ -2022,13 +2021,13 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               onInsightAction={(insight) => {
                 switch (insight.type) {
                   case 'warning':
-                    toast.warning(insight.title, { description: 'Security review initiated' })
+                    toast.warning(insight.title)
                     break
                   case 'success':
-                    toast.success(insight.title, { description: 'Recommendation applied successfully' })
+                    toast.success(insight.title)
                     break
                   case 'info':
-                    toast.info(insight.title, { description: 'Analytics review in progress' })
+                    toast.info(insight.title)
                     break
                   default:
                     toast.success(`${insight.title} action completed`)
@@ -2494,7 +2493,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setFilterOptions({ department: '', role: '', mfaStatus: 'all', loginActivity: 'all' })}>Reset</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Filters applied', { description: 'User list has been filtered' })
+                toast.success('Filters applied')
                 setShowAdvancedFiltersDialog(false)
               }}>Apply Filters</Button>
             </DialogFooter>
@@ -2534,7 +2533,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 Reset Password
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Session revoked', { description: `All sessions for ${selectedUserForOptions?.displayName} have been revoked` })
+                toast.success('Session revoked' have been revoked` })
                 setShowUserOptionsDialog(false)
               }}>
                 <LockKeyhole className="w-4 h-4" />
@@ -2609,10 +2608,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowCreatePolicyDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newPolicy.name) {
-                  toast.error('Validation Error', { description: 'Policy name is required' })
+                  toast.error('Validation Error')
                   return
                 }
-                toast.success('Policy created', { description: `${newPolicy.name} has been created successfully` })
+                toast.success('Policy created' has been created successfully` })
                 setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
                 setShowCreatePolicyDialog(false)
               }}>
@@ -2666,10 +2665,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowAddApplicationDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newApplication.name) {
-                  toast.error('Validation Error', { description: 'Application name is required' })
+                  toast.error('Validation Error')
                   return
                 }
-                toast.success('Application added', { description: `${newApplication.name} has been added successfully` })
+                toast.success('Application added' has been added successfully` })
                 setNewApplication({ name: '', type: 'saml', ssoEnabled: true })
                 setShowAddApplicationDialog(false)
               }}>
@@ -2724,7 +2723,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 a.download = filename
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete', { description: `Downloaded ${filename}` })
+                toast.success('Export complete'` })
                 setShowExportLogsDialog(false)
               }}>
                 Export Logs
@@ -2759,7 +2758,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowCopyTokenDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
                 await navigator.clipboard.writeText('scim_token_xxxxxxxxxxxxxxxxxx')
-                toast.success('Token copied', { description: 'Bearer token has been copied to clipboard' })
+                toast.success('Token copied')
                 setShowCopyTokenDialog(false)
               }}>
                 <Copy className="w-4 h-4 mr-2" />
@@ -2793,7 +2792,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateTokenDialog(false)}>Cancel</Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Token regenerated', { description: 'New SCIM token has been generated. Please copy it now.' })
+                toast.success('Token regenerated')
                 setShowRegenerateTokenDialog(false)
               }}>
                 Regenerate Token
@@ -2843,10 +2842,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newMapping.source || !newMapping.target) {
-                  toast.error('Validation Error', { description: 'Source and target fields are required' })
+                  toast.error('Validation Error')
                   return
                 }
-                toast.success('Mapping added', { description: `${newMapping.source} -> ${newMapping.target}` })
+                toast.success('Mapping added' -> ${newMapping.target}` })
                 setNewMapping({ source: '', target: '', required: false })
                 setShowAddMappingDialog(false)
               }}>
@@ -2869,21 +2868,21 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-2">
               <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
                 await navigator.clipboard.writeText(`${selectedAPIKey?.prefix}xxxxxxxxxxxx`)
-                toast.success('API key copied', { description: 'Key has been copied to clipboard' })
+                toast.success('API key copied')
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <Copy className="w-4 h-4" />
                 Copy API Key
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('API key rotated', { description: 'New key has been generated' })
+                toast.success('API key rotated')
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4" />
                 Rotate Key
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={() => {
-                toast.success('API key revoked', { description: `${selectedAPIKey?.name} has been revoked` })
+                toast.success('API key revoked' has been revoked` })
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <AlertTriangle className="w-4 h-4" />
@@ -2941,10 +2940,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newWebhook.url) {
-                  toast.error('Validation Error', { description: 'Webhook URL is required' })
+                  toast.error('Validation Error')
                   return
                 }
-                toast.success('Webhook added', { description: 'Webhook endpoint has been configured' })
+                toast.success('Webhook added')
                 setNewWebhook({ url: '', events: [] })
                 setShowAddWebhookDialog(false)
               }}>
@@ -2977,7 +2976,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Sync complete', { description: 'Directory synchronized successfully' })
+                      toast.success('Sync complete')
                     }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync Now
@@ -3025,7 +3024,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </Button>
               {selectedDirectoryIntegration?.status !== 'connected' && (
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.success('Connected', { description: `${selectedDirectoryIntegration?.name} has been connected` })
+                  toast.success('Connected' has been connected` })
                   setShowDirectoryConfigDialog(false)
                 }}>
                   Connect
@@ -3058,7 +3057,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Sync complete', { description: 'HR data synchronized successfully' })
+                      toast.success('Sync complete')
                     }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync Now
@@ -3098,7 +3097,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </Button>
               {!selectedHRIntegration?.connected && (
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.success('Connected', { description: `${selectedHRIntegration?.name} has been connected` })
+                  toast.success('Connected' has been connected` })
                   setShowHRIntegrationDialog(false)
                 }}>
                   Connect
@@ -3149,7 +3148,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 a.download = `permissions-export-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete', { description: 'Data export has been downloaded' })
+                toast.success('Export complete')
                 setShowExportDataDialog(false)
               }}>
                 Export Data
@@ -3182,7 +3181,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetPermissionsDialog(false)}>Cancel</Button>
               <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('Permissions reset', { description: 'All permissions have been reset to defaults' })
+                toast.success('Permissions reset')
                 setShowResetPermissionsDialog(false)
               }}>
                 Reset Permissions
@@ -3214,7 +3213,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRevokeSessionsDialog(false)}>Cancel</Button>
               <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('Sessions revoked', { description: 'All users must re-authenticate' })
+                toast.success('Sessions revoked')
                 setShowRevokeSessionsDialog(false)
               }}>
                 Revoke All Sessions
@@ -3250,7 +3249,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAPIKeysDialog(false)}>Cancel</Button>
               <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('API keys deleted', { description: 'All API keys have been revoked' })
+                toast.success('API keys deleted')
                 setShowDeleteAPIKeysDialog(false)
               }}>
                 Delete All Keys
@@ -3310,7 +3309,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('User updated', { description: `${selectedUser?.displayName} has been updated` })
+                toast.success('User updated' has been updated` })
                 setShowEditUserDialog(false)
               }}>
                 Save Changes
@@ -3346,7 +3345,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetPasswordDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Reset email sent', { description: `Password reset email sent to ${selectedUser?.email}` })
+                toast.success('Reset email sent'` })
                 setShowResetPasswordDialog(false)
               }}>
                 Send Reset Email
@@ -3379,7 +3378,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLockAccountDialog(false)}>Cancel</Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Account locked', { description: `${selectedUser?.displayName || selectedUserForOptions?.displayName} has been suspended` })
+                toast.success('Account locked' has been suspended` })
                 setShowLockAccountDialog(false)
               }}>
                 Lock Account
@@ -3418,7 +3417,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       </div>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Member added', { description: `${user.displayName} has been added to ${selectedGroup?.name}` })
+                      toast.success('Member added' has been added to ${selectedGroup?.name}` })
                     }}>Add</Button>
                   </div>
                 ))}
@@ -3465,7 +3464,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditGroupDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Group updated', { description: `${selectedGroup?.name} has been updated` })
+                toast.success('Group updated' has been updated` })
                 setShowEditGroupDialog(false)
               }}>
                 Save Changes
@@ -3559,7 +3558,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditRoleDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Role updated', { description: `${selectedRole?.displayName} has been updated` })
+                toast.success('Role updated' has been updated` })
                 setShowEditRoleDialog(false)
               }}>
                 Save Changes
@@ -3610,10 +3609,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newAPIKey.name) {
-                  toast.error('Validation Error', { description: 'Key name is required' })
+                  toast.error('Validation Error')
                   return
                 }
-                toast.success('API key created', { description: 'New API key has been generated. Copy it now!' })
+                toast.success('API key created')
                 setNewAPIKey({ name: '', environment: 'production' })
                 setShowAPIKeyDialog(false)
               }}>
