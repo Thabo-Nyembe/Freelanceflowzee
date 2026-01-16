@@ -357,7 +357,7 @@ export default function KaziWorkflowsClient() {
     duplicateWorkflow,
     createWorkflow,
     updateWorkflow
-  } = useKaziWorkflows({ useMockData: true })
+  } = useKaziWorkflows()
 
   const [templates] = useState<WorkflowTemplate[]>(mockTemplates)
   const [executionHistory, setExecutionHistory] = useState<WorkflowExecution[]>(mockExecutionHistory)
