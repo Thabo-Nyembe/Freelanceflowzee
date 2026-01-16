@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -267,7 +266,7 @@ const mockSupportActivities = [
 // Quick actions will be defined inside the component to access state setters
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
-  const supabase = createClient()
+
 
   const [activeTab, setActiveTab] = useState('tickets')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
@@ -386,6 +385,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const fetchTickets = useCallback(async () => {
     setIsLoading(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -400,7 +401,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchTickets()
@@ -489,12 +490,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
     setIsSubmitting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create tickets')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('support_tickets').insert({
         user_id: user.id,
         subject: ticketForm.subject,
@@ -525,6 +530,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Assign agent to ticket
   const handleAssignAgent = async (ticketId: string, agentId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -548,8 +555,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Resolve ticket
   const handleResolveTicket = async (ticketId: string, notes?: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -575,6 +586,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Escalate ticket
   const handleEscalateTicket = async (ticketId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -598,8 +611,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Send reply to ticket
   const handleSendTicketReply = async (ticketId: string, message: string, isInternal: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('support_ticket_replies').insert({
         ticket_id: ticketId,
         message: message,
@@ -612,6 +629,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       if (error) throw error
 
       // Update first response time if not set
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase
         .from('support_tickets')
         .update({
@@ -633,6 +652,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Delete ticket
   const handleDeleteTicket = async (ticketId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({ deleted_at: new Date().toISOString() })
@@ -652,6 +673,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Export tickets
   const handleExportTickets = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')

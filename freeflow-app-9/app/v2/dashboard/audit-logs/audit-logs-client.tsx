@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -669,7 +668,7 @@ const mockAuditActivities = [
 // ============================================================================
 
 export default function AuditLogsClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('events')
@@ -720,9 +719,13 @@ export default function AuditLogsClient() {
   const fetchAuditLogs = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -738,14 +741,18 @@ export default function AuditLogsClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch alert rules from database
   const fetchAlertRules = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_alert_rules')
         .select('*')
@@ -759,17 +766,21 @@ export default function AuditLogsClient() {
       console.error('Error fetching alert rules:', error)
       toast.error('Failed to load alert rules')
     }
-  }, [supabase])
+  }, [])
 
   // Create audit log entry
   const createAuditLog = async (logData: Partial<DbAuditLog>) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('audit_logs').insert({
         user_id: user.id,
         log_type: logData.log_type || 'system',
@@ -799,12 +810,16 @@ export default function AuditLogsClient() {
   const handleCreateAlertRule = async () => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create alert rules')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('audit_alert_rules').insert({
         user_id: user.id,
         rule_name: ruleFormData.rule_name,
@@ -836,6 +851,8 @@ export default function AuditLogsClient() {
     if (!editingRule) return
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({
@@ -868,6 +885,8 @@ export default function AuditLogsClient() {
   // Delete alert rule
   const handleDeleteAlertRule = async (ruleId: string) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ deleted_at: new Date().toISOString() })
@@ -886,6 +905,8 @@ export default function AuditLogsClient() {
   // Toggle alert rule status
   const handleToggleRuleStatus = async (ruleId: string, isActive: boolean) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ is_active: isActive, updated_at: new Date().toISOString() })
@@ -932,9 +953,13 @@ export default function AuditLogsClient() {
   // Export audit logs
   const handleExportAuditLogs = async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')

@@ -32,7 +32,6 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUserManagement, type ManagedUser, type UserRole, type UserStatus } from '@/lib/hooks/use-user-management'
-import { createClient } from '@/lib/supabase/client'
 
 interface Role {
   id: string
@@ -152,7 +151,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users.length > 0 ? users : initialUsers
-  const supabase = createClient()
+
 
   // Form state for inviting new user
   const [inviteForm, setInviteForm] = useState({
@@ -290,6 +289,8 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
     setInviting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -384,6 +385,8 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       if (!authUser) throw new Error('Not authenticated')
 
       // Log the password reset request
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       await supabase.from('audit_logs').insert({
         user_id: authUser.id,
         action: 'password_reset_requested',
@@ -408,6 +411,8 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const handleExportUsers = async () => {
     setExporting(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -503,9 +508,13 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
     setCreatingRole(true)
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase.from('user_roles').insert({
         user_id: user.id,
         name: roleForm.name,
