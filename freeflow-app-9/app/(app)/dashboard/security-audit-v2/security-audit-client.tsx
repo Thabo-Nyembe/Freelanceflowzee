@@ -502,26 +502,20 @@ export default function SecurityAuditClient() {
 
   // Handlers
   const handleStartScan = () => {
-    toast.info('Scan started', {
-      description: 'Security scan is running...'
-    })
+    toast.info('Scan started')
   }
 
   const handleResolveVulnerability = (vuln: Vulnerability) => {
-    toast.success('Marked as resolved', {
-      description: `"${vuln.title}" has been marked as resolved`
+    toast.success('Marked as resolved'" has been marked as resolved`
     })
   }
 
   const handleExportAudit = () => {
-    toast.success('Export started', {
-      description: 'Audit report is being exported'
-    })
+    toast.success('Export started')
   }
 
   const handleCreateTicket = (vuln: Vulnerability) => {
-    toast.success('Ticket created', {
-      description: `Ticket created for "${vuln.title}"`
+    toast.success('Ticket created'"`
     })
   }
 
@@ -1735,7 +1729,7 @@ export default function SecurityAuditClient() {
             <AIInsightsPanel
               insights={mockSecurityAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2003,7 +1997,7 @@ export default function SecurityAuditClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowExportDialog(false)
-                  toast.success('Exporting PDF report...', { description: 'Your report will be downloaded shortly' })
+                  toast.success('Exporting PDF report...')
                 }}>
                   <FileText className="h-8 w-8 text-red-600 mb-2" />
                   <h4 className="font-medium">PDF Report</h4>
@@ -2011,7 +2005,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowExportDialog(false)
-                  toast.success('Exporting CSV data...', { description: 'Your data will be downloaded shortly' })
+                  toast.success('Exporting CSV data...')
                 }}>
                   <FileText className="h-8 w-8 text-green-600 mb-2" />
                   <h4 className="font-medium">CSV Export</h4>
@@ -2019,7 +2013,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowExportDialog(false)
-                  toast.success('Exporting JSON data...', { description: 'Your data will be downloaded shortly' })
+                  toast.success('Exporting JSON data...')
                 }}>
                   <FileText className="h-8 w-8 text-blue-600 mb-2" />
                   <h4 className="font-medium">JSON Export</h4>
@@ -2027,7 +2021,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowExportDialog(false)
-                  toast.success('Generating executive summary...', { description: 'Your summary will be ready shortly' })
+                  toast.success('Generating executive summary...')
                 }}>
                   <BarChart3 className="h-8 w-8 text-purple-600 mb-2" />
                   <h4 className="font-medium">Executive Summary</h4>
@@ -2078,7 +2072,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
                   setShowScheduleDialog(false)
-                  toast.success('Audit scheduled', { description: 'You will receive a notification when it starts' })
+                  toast.success('Audit scheduled')
                 }}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule
@@ -2131,7 +2125,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
                   setShowNewAuditDialog(false)
-                  toast.success('Audit created', { description: 'Your new audit is ready to configure' })
+                  toast.success('Audit created')
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Audit
@@ -2152,7 +2146,7 @@ export default function SecurityAuditClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowDiscoverDialog(false)
-                  toast.info('Network scan started', { description: 'Discovering assets on your network...' })
+                  toast.info('Network scan started')
                 }}>
                   <Network className="h-8 w-8 text-blue-600 mb-2" />
                   <h4 className="font-medium">Network Scan</h4>
@@ -2160,7 +2154,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowDiscoverDialog(false)
-                  toast.info('Cloud discovery started', { description: 'Discovering cloud resources...' })
+                  toast.info('Cloud discovery started')
                 }}>
                   <Cloud className="h-8 w-8 text-cyan-600 mb-2" />
                   <h4 className="font-medium">Cloud Discovery</h4>
@@ -2168,7 +2162,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowDiscoverDialog(false)
-                  toast.info('Container scan started', { description: 'Discovering containers and images...' })
+                  toast.info('Container scan started')
                 }}>
                   <Layers className="h-8 w-8 text-purple-600 mb-2" />
                   <h4 className="font-medium">Container Scan</h4>
@@ -2176,7 +2170,7 @@ export default function SecurityAuditClient() {
                 </div>
                 <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
                   setShowDiscoverDialog(false)
-                  toast.info('Agent-based discovery started', { description: 'Collecting data from installed agents...' })
+                  toast.info('Agent-based discovery started')
                 }}>
                   <Server className="h-8 w-8 text-green-600 mb-2" />
                   <h4 className="font-medium">Agent Discovery</h4>
@@ -2243,7 +2237,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
                   setShowAddAssetDialog(false)
-                  toast.success('Asset added', { description: 'The new asset has been added to inventory' })
+                  toast.success('Asset added')
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Asset
@@ -2272,28 +2266,28 @@ export default function SecurityAuditClient() {
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
                   setActiveTab('vulnerabilities')
-                  toast.success('Filtering vulnerabilities', { description: `Showing vulnerabilities for ${selectedAssetForMenu.name}` })
+                  toast.success('Filtering vulnerabilities'` })
                 }}>
                   <Bug className="h-4 w-4 mr-2" />
                   View Vulnerabilities
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.info('Asset details', { description: `Viewing details for ${selectedAssetForMenu.name}` })
+                  toast.info('Asset details'` })
                 }}>
                   <FileText className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.success('Edit mode', { description: `Editing ${selectedAssetForMenu.name}` })
+                  toast.success('Edit mode'` })
                 }}>
                   <Settings className="h-4 w-4 mr-2" />
                   Edit Asset
                 </Button>
                 <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.error('Asset removed', { description: `${selectedAssetForMenu.name} has been removed` })
+                  toast.error('Asset removed' has been removed` })
                 }}>
                   <AlertTriangle className="h-4 w-4 mr-2" />
                   Remove Asset
@@ -2333,7 +2327,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
                   setShowAssessDialog(false)
-                  toast.info('Assessment started', { description: 'Running compliance assessment across selected frameworks...' })
+                  toast.info('Assessment started')
                 }}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Start Assessment
@@ -2373,7 +2367,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
                   setShowResetDialog(false)
-                  toast.success('Settings reset', { description: 'All settings have been reset to defaults' })
+                  toast.success('Settings reset')
                 }}>
                   Reset All Settings
                 </Button>
@@ -2428,7 +2422,7 @@ export default function SecurityAuditClient() {
                 </Button>
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
                   setShowAssignDialog(false)
-                  toast.success('Vulnerability assigned', { description: 'The team member has been notified' })
+                  toast.success('Vulnerability assigned')
                 }}>
                   <Users className="h-4 w-4 mr-2" />
                   Assign
@@ -2484,7 +2478,7 @@ export default function SecurityAuditClient() {
                   if (selectedVulnerability) {
                     handleCreateTicket(selectedVulnerability)
                   }
-                  toast.success('Remediation started', { description: 'Tracking ticket has been created' })
+                  toast.success('Remediation started')
                 }}>
                   <Play className="h-4 w-4 mr-2" />
                   Start Remediation

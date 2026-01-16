@@ -604,17 +604,13 @@ export default function AIAssistantClient() {
         }
       } else if (result.error) {
         setAiError(result.error)
-        toast.error('AI Error', {
-          description: result.error
-        })
+        toast.error('AI Error')
       }
     } catch (err) {
       console.error('Error sending message:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response'
       setAiError(errorMessage)
-      toast.error('Failed to send message', {
-        description: errorMessage
-      })
+      toast.error('Failed to send message')
     } finally {
       setIsTyping(false)
     }
@@ -642,15 +638,11 @@ export default function AIAssistantClient() {
     try {
       await navigator.clipboard.writeText(content)
       setCopiedId(id)
-      toast.success('Copied to clipboard!', {
-        description: 'Response has been copied'
-      })
+      toast.success('Copied to clipboard!')
       setTimeout(() => setCopiedId(null), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
-      toast.error('Failed to copy', {
-        description: 'Could not access clipboard'
-      })
+      toast.error('Failed to copy')
     }
   }
 
@@ -658,14 +650,10 @@ export default function AIAssistantClient() {
   const handleNewConversation = async () => {
     try {
       await createConversation('New Chat', selectedMode, selectedModel)
-      toast.success('Conversation created', {
-        description: 'New conversation started successfully'
-      })
+      toast.success('Conversation created')
     } catch (err) {
       console.error('Error creating conversation:', err)
-      toast.error('Failed to create conversation', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to create conversation')
     }
   }
 
@@ -674,14 +662,11 @@ export default function AIAssistantClient() {
     try {
       await hookToggleStar(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred', {
-        description: `Conversation has been ${conv?.is_starred ? 'unstarred' : 'starred'}`
+      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred'`
       })
     } catch (err) {
       console.error('Error toggling star:', err)
-      toast.error('Failed to update conversation', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to update conversation')
     }
   }
 
@@ -690,14 +675,10 @@ export default function AIAssistantClient() {
     try {
       await deleteConversation(id)
       setShowDeleteConfirm(null)
-      toast.success('Conversation deleted', {
-        description: 'The conversation has been removed'
-      })
+      toast.success('Conversation deleted')
     } catch (err) {
       console.error('Error deleting conversation:', err)
-      toast.error('Failed to delete conversation', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to delete conversation')
     }
   }
 
@@ -706,14 +687,11 @@ export default function AIAssistantClient() {
     try {
       await toggleArchive(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived', {
-        description: `Conversation has been ${conv?.is_archived ? 'restored' : 'archived'}`
+      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived'`
       })
     } catch (err) {
       console.error('Error archiving conversation:', err)
-      toast.error('Failed to archive conversation', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to archive conversation')
     }
   }
 
@@ -722,8 +700,7 @@ export default function AIAssistantClient() {
     setInputMessage(prompt.prompt)
     setActiveTab('chat')
     inputRef.current?.focus()
-    toast.success('Prompt loaded!', {
-      description: `"${prompt.name}" template ready to use`
+    toast.success('Prompt loaded!'" template ready to use`
     })
     // Increment usage count locally
     setPrompts(prev => prev.map(p =>
@@ -734,9 +711,7 @@ export default function AIAssistantClient() {
   // Handle create assistant - Supabase operation
   const handleCreateAssistant = async () => {
     if (!assistantForm.name.trim()) {
-      toast.error('Name required', {
-        description: 'Please enter a name for the assistant'
-      })
+      toast.error('Name required')
       return
     }
 
@@ -788,23 +763,18 @@ export default function AIAssistantClient() {
         tools: []
       })
 
-      toast.success('Assistant created', {
-        description: `${assistantForm.name} has been created successfully`
+      toast.success('Assistant created' has been created successfully`
       })
     } catch (err) {
       console.error('Error creating assistant:', err)
-      toast.error('Failed to create assistant', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to create assistant')
     }
   }
 
   // Handle create prompt - Supabase operation
   const handleCreatePrompt = async () => {
     if (!promptForm.name.trim() || !promptForm.prompt.trim()) {
-      toast.error('Required fields missing', {
-        description: 'Please enter a name and prompt template'
-      })
+      toast.error('Required fields missing')
       return
     }
 
@@ -852,14 +822,11 @@ export default function AIAssistantClient() {
         variables: []
       })
 
-      toast.success('Prompt template created', {
-        description: `${promptForm.name} has been saved to your library`
+      toast.success('Prompt template created' has been saved to your library`
       })
     } catch (err) {
       console.error('Error creating prompt:', err)
-      toast.error('Failed to create prompt', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to create prompt')
     }
   }
 
@@ -914,8 +881,7 @@ export default function AIAssistantClient() {
 
       setFiles(prev => [newFile, ...prev])
 
-      toast.success('File uploaded', {
-        description: `${file.name} is being processed`
+      toast.success('File uploaded' is being processed`
       })
 
       // Process file via API
@@ -927,8 +893,7 @@ export default function AIAssistantClient() {
         setFiles(prev => prev.map(f =>
           f.id === newFile.id ? { ...f, status: 'ready', chunks: processedData?.chunks || Math.floor(file.size / 1000) } : f
         ))
-        toast.success('File ready', {
-          description: `${file.name} has been processed and is ready to use`
+        toast.success('File ready' has been processed and is ready to use`
         })
       }).catch(() => {
         setFiles(prev => prev.map(f =>
@@ -937,9 +902,7 @@ export default function AIAssistantClient() {
       })
     } catch (err) {
       console.error('Error uploading file:', err)
-      toast.error('Failed to upload file', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to upload file')
     }
   }
 
@@ -954,23 +917,17 @@ export default function AIAssistantClient() {
       if (error) throw error
 
       setFiles(prev => prev.filter(f => f.id !== fileId))
-      toast.success('File deleted', {
-        description: 'The file has been removed from your knowledge base'
-      })
+      toast.success('File deleted')
     } catch (err) {
       console.error('Error deleting file:', err)
-      toast.error('Failed to delete file', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to delete file')
     }
   }
 
   // Handle export chat
   const handleExportChat = async () => {
     if (!activeConversation || messages.length === 0) {
-      toast.error('No messages to export', {
-        description: 'Start a conversation first'
-      })
+      toast.error('No messages to export')
       return
     }
 
@@ -995,14 +952,10 @@ export default function AIAssistantClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Chat exported', {
-        description: 'Your conversation has been exported as JSON'
-      })
+      toast.success('Chat exported')
     } catch (err) {
       console.error('Error exporting chat:', err)
-      toast.error('Failed to export chat', {
-        description: 'Please try again'
-      })
+      toast.error('Failed to export chat')
     }
   }
 
@@ -1022,14 +975,10 @@ export default function AIAssistantClient() {
       // Refresh messages
       fetchMessages(activeConversation.id)
 
-      toast.success('History cleared', {
-        description: 'Conversation history has been cleared'
-      })
+      toast.success('History cleared')
     } catch (err) {
       console.error('Error clearing history:', err)
-      toast.error('Failed to clear history', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to clear history')
     }
   }
 
@@ -1043,14 +992,10 @@ export default function AIAssistantClient() {
 
       await updateConversation(activeConversation.id, { title })
 
-      toast.success('Conversation saved', {
-        description: 'Title has been updated'
-      })
+      toast.success('Conversation saved')
     } catch (err) {
       console.error('Error saving conversation:', err)
-      toast.error('Failed to save conversation', {
-        description: err instanceof Error ? err.message : 'Please try again'
-      })
+      toast.error('Failed to save conversation')
     }
   }
 
@@ -2075,7 +2020,7 @@ export default function AIAssistantClient() {
             <AIInsightsPanel
               insights={mockAIAssistantAIInsights}
               title="AI Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

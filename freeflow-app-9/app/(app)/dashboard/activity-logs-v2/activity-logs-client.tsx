@@ -615,9 +615,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     setLevelFilter('all')
     setSourceFilter('all')
     setTimeRange('1h')
-    toast.success('Filters cleared', {
-      description: 'All log filters have been reset'
-    })
+    toast.success('Filters cleared')
   }
 
   const handleClearLogs = async () => {
@@ -782,8 +780,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleApplyFilters = () => {
     setShowFilterDialog(false)
-    toast.success('Filters applied', {
-      description: `Level: ${levelFilter}, Source: ${sourceFilter}, Time: ${timeRange}`
+    toast.success('Filters applied', Source: ${sourceFilter}, Time: ${timeRange}`
     })
   }
 
@@ -793,8 +790,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleApplyDateRange = () => {
     if (dateRangeStart && dateRangeEnd) {
-      toast.success('Date range applied', {
-        description: `From ${dateRangeStart} to ${dateRangeEnd}`
+      toast.success('Date range applied' to ${dateRangeEnd}`
       })
     } else {
       toast.error('Please select both start and end dates')
@@ -808,9 +804,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     setAlertName('')
     setAlertThreshold(10)
     setAlertLevel('error')
-    toast.info('Create alert rule', {
-      description: 'Configure alert conditions and notifications'
-    })
+    toast.info('Create alert rule')
   }
 
   const handleCreateAlertRule = async () => {
@@ -930,9 +924,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
 
   const handleAddParser = () => {
-    toast.success('Custom parser added', {
-      description: 'Parser will be applied to incoming logs'
-    })
+    toast.success('Custom parser added')
     setShowParserDialog(false)
   }
 
@@ -941,9 +933,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
 
   const handleConnectIntegration = (name: string) => {
-    toast.success(`Connected to ${name}`, {
-      description: 'Integration is now active'
-    })
+    toast.success(`Connected to ${name}`)
   }
 
   const handleOpenApiKeyDialog = () => {
@@ -998,41 +988,29 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     setSearchQuery(query.query)
     if (query.filters.source) setSourceFilter(query.filters.source[0] as LogSource)
     if (query.filters.tags) {
-      toast.info(`Running query: ${query.name}`, {
-        description: query.query
-      })
+      toast.info(`Running query: ${query.name}`)
     }
     toast.success(`Query "${query.name}" applied`)
   }
 
   const handleDeleteSavedQuery = (queryId: string) => {
-    toast.success('Query deleted', {
-      description: 'Saved query has been removed'
-    })
+    toast.success('Query deleted')
   }
 
   const handleToggleParser = (parserName: string, enabled: boolean) => {
-    toast.success(`Parser ${enabled ? 'enabled' : 'disabled'}`, {
-      description: parserName
-    })
+    toast.success(`Parser ${enabled ? 'enabled' : 'disabled'}`)
   }
 
   const handleToggleAlertRule = (ruleName: string, enabled: boolean) => {
-    toast.success(`Alert rule ${enabled ? 'enabled' : 'disabled'}`, {
-      description: ruleName
-    })
+    toast.success(`Alert rule ${enabled ? 'enabled' : 'disabled'}`)
   }
 
   const handleConnectChannel = (channelName: string) => {
-    toast.success(`Connecting to ${channelName}...`, {
-      description: 'Opening authentication flow'
-    })
+    toast.success(`Connecting to ${channelName}...`)
   }
 
   const handleConfigureStorage = (storageName: string) => {
-    toast.info(`Configuring ${storageName}`, {
-      description: 'Storage settings opened'
-    })
+    toast.info(`Configuring ${storageName}`)
   }
 
   // Quick actions with real functionality
@@ -2342,7 +2320,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Logs Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

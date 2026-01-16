@@ -586,11 +586,11 @@ export default function FAQClient() {
   // Create new article/FAQ
   const handleCreateArticle = useCallback(async (publishImmediately = false) => {
     if (!newArticle.title.trim()) {
-      toast.error('Validation Error', { description: 'Title is required' })
+      toast.error('Validation Error')
       return
     }
     if (!newArticle.content.trim()) {
-      toast.error('Validation Error', { description: 'Content is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -614,15 +614,13 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Created', {
-        description: publishImmediately
-          ? `"${newArticle.title}" has been published`
+      toast.success('Article Created'" has been published`
           : `"${newArticle.title}" saved as draft`
       })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to create article' })
+      toast.error('Error')
     }
   }, [newArticle, createFAQ, resetForm])
 
@@ -631,10 +629,10 @@ export default function FAQClient() {
     try {
       const { data, error } = await updateFAQ(articleId, updates)
       if (error) throw new Error(error)
-      toast.success('Article Updated', { description: 'Changes have been saved' })
+      toast.success('Article Updated')
       return data
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update article' })
+      toast.error('Error')
       return null
     }
   }, [updateFAQ])
@@ -644,9 +642,9 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'published' })
       if (error) throw new Error(error)
-      toast.success('Article Published', { description: `"${article.title}" is now public` })
+      toast.success('Article Published'" is now public` })
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to publish article' })
+      toast.error('Error')
     }
   }, [updateFAQ])
 
@@ -655,10 +653,10 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'archived' })
       if (error) throw new Error(error)
-      toast.success('Article Archived', { description: `"${article.title}" has been archived` })
+      toast.success('Article Archived'" has been archived` })
       setSelectedArticle(null)
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to archive article' })
+      toast.error('Error')
     }
   }, [updateFAQ])
 
@@ -674,12 +672,12 @@ export default function FAQClient() {
     try {
       const { success, error } = await deleteFAQ(articleToDelete)
       if (error) throw new Error(error)
-      toast.success('Article Deleted', { description: 'Article has been permanently deleted' })
+      toast.success('Article Deleted')
       setShowDeleteDialog(false)
       setArticleToDelete(null)
       setSelectedArticle(null)
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to delete article' })
+      toast.error('Error')
     }
   }, [articleToDelete, deleteFAQ])
 
@@ -688,11 +686,9 @@ export default function FAQClient() {
     try {
       const { error } = await markHelpful(articleId, helpful)
       if (error) throw new Error(error)
-      toast.success('Feedback Recorded', {
-        description: helpful ? 'Thank you for your feedback!' : 'We\'ll work to improve this article'
-      })
+      toast.success('Feedback Recorded')
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to record feedback' })
+      toast.error('Error')
     }
   }, [markHelpful])
 
@@ -710,7 +706,7 @@ export default function FAQClient() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Articles exported to CSV file' })
+    toast.success('Export Complete')
   }, [articles])
 
   // Edit article - open dialog with pre-filled form
@@ -744,11 +740,11 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Updated', { description: `"${newArticle.title}" has been updated` })
+      toast.success('Article Updated'" has been updated` })
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to update article' })
+      toast.error('Error')
     }
   }, [editingArticle, newArticle, updateFAQ, resetForm])
 
@@ -779,7 +775,7 @@ export default function FAQClient() {
 
   const handleSaveCollection = useCallback(() => {
     if (!newCollection.name.trim()) {
-      toast.error('Validation Error', { description: 'Collection name is required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -790,7 +786,7 @@ export default function FAQClient() {
           ? { ...col, ...newCollection, updatedAt: new Date().toISOString() }
           : col
       ))
-      toast.success('Collection Updated', { description: `"${newCollection.name}" has been updated` })
+      toast.success('Collection Updated'" has been updated` })
     } else {
       // Create new collection
       const newCol: Collection = {
@@ -807,7 +803,7 @@ export default function FAQClient() {
         updatedAt: new Date().toISOString()
       }
       setCollectionsOrder(prev => [...prev, newCol])
-      toast.success('Collection Created', { description: `"${newCollection.name}" has been created` })
+      toast.success('Collection Created'" has been created` })
     }
     setShowCollectionDialog(false)
   }, [newCollection, editingCollection, collectionsOrder.length])
@@ -815,19 +811,19 @@ export default function FAQClient() {
   const handleDeleteCollection = useCallback((collectionId: string) => {
     const collection = collectionsOrder.find(c => c.id === collectionId)
     if (collection && collection.articleCount > 0) {
-      toast.error('Cannot Delete', { description: 'Collection has articles. Move or delete them first.' })
+      toast.error('Cannot Delete')
       return
     }
     setCollectionsOrder(prev => prev.filter(c => c.id !== collectionId))
-    toast.success('Collection Deleted', { description: 'Collection has been removed' })
+    toast.success('Collection Deleted')
   }, [collectionsOrder])
 
   const handleToggleReorderMode = useCallback(() => {
     setReorderMode(prev => {
       if (prev) {
-        toast.success('Reorder Saved', { description: 'Collection order has been updated' })
+        toast.success('Reorder Saved')
       } else {
-        toast.info('Reorder Mode', { description: 'Drag collections to reorder them. Click Done when finished.' })
+        toast.info('Reorder Mode')
       }
       return !prev
     })
@@ -874,7 +870,7 @@ export default function FAQClient() {
       shortcut: 'N',
       action: () => {
         setShowCreateDialog(true)
-        toast.success('Article Editor Opened', { description: 'Create a new FAQ article with rich formatting' })
+        toast.success('Article Editor Opened')
       }
     },
     {
@@ -886,7 +882,7 @@ export default function FAQClient() {
         const searchInput = document.querySelector('input[placeholder="Search articles..."]') as HTMLInputElement
         if (searchInput) {
           searchInput.focus()
-          toast.success('Search Ready', { description: 'Browse 150+ articles in your knowledge base' })
+          toast.success('Search Ready')
         }
       }
     },
@@ -897,7 +893,7 @@ export default function FAQClient() {
       shortcut: 'A',
       action: () => {
         setActiveTab('analytics')
-        toast.success('Analytics Loaded', { description: 'View article views, helpfulness ratings, and search trends' })
+        toast.success('Analytics Loaded')
       }
     },
     {
@@ -907,7 +903,7 @@ export default function FAQClient() {
       shortcut: 'T',
       action: () => {
         setActiveTab('settings')
-        toast.success('Settings Loaded', { description: 'Configure categories, SEO, and display options' })
+        toast.success('Settings Loaded')
       }
     },
   ], [])
@@ -1291,7 +1287,7 @@ export default function FAQClient() {
                   <p className="text-xs text-gray-500">{reorderMode ? 'Click to save' : 'Change order'}</p>
                 </div>
               </button>
-              <button onClick={() => { setStatusFilter('archived'); setActiveTab('articles'); toast.success('Archive View', { description: 'Showing archived articles' }) }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
+              <button onClick={() => { setStatusFilter('archived'); setActiveTab('articles'); toast.success('Archive View') }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                 <div className="w-10 h-10 bg-gray-500 rounded-lg flex items-center justify-center">
                   <Archive className="w-5 h-5 text-white" />
                 </div>
@@ -1927,7 +1923,7 @@ export default function FAQClient() {
                           languageDialog.querySelector('#cancel-btn')?.addEventListener('click', () => { languageDialog.close(); languageDialog.remove() })
                           languageDialog.querySelector('#add-btn')?.addEventListener('click', () => {
                             const select = languageDialog.querySelector('#language-select') as HTMLSelectElement
-                            toast.success('Language added', { description: `${select.options[select.selectedIndex].text} is now available` })
+                            toast.success('Language added' is now available` })
                             languageDialog.close()
                             languageDialog.remove()
                           })
@@ -1965,12 +1961,12 @@ export default function FAQClient() {
                               )}
                               <button onClick={() => {
                                 window.open('/dashboard/faq-v2/language-editor', '_blank')
-                                toast.info('Opening Language Editor', { description: 'Language settings editor opened in new tab' })
+                                toast.info('Opening Language Editor')
                               }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
                                 <Edit className="w-4 h-4 text-gray-500" />
                               </button>
                               {lang !== helpCenterSettings.defaultLanguage && (
-                                <button onClick={() => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { toast.success('Language Removed', { description: `${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'} has been removed` }) } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                                <button onClick={() => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { toast.success('Language Removed' has been removed` }) } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </button>
                               )}
@@ -2039,7 +2035,7 @@ export default function FAQClient() {
                             <button onClick={() => {
                               if (integration.connected) {
                                 window.open(`/dashboard/faq-v2/integrations/${integration.name.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
-                                toast.info(`Managing ${integration.name}`, { description: 'Opening integration settings...' })
+                                toast.info(`Managing ${integration.name}`)
                               } else {
                                 toast.promise(
                                   fetch(`/api/faq/integrations/${integration.name.toLowerCase().replace(/\s+/g, '-')}`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
@@ -2073,10 +2069,10 @@ export default function FAQClient() {
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                               readOnly
                             />
-                            <button onClick={() => { navigator.clipboard.writeText(apiKey).then(() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })).catch(() => toast.error('Copy Failed', { description: 'Could not copy to clipboard' })) }} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                            <button onClick={() => { navigator.clipboard.writeText(apiKey).then(() => toast.success('API Key Copied')).catch(() => toast.error('Copy Failed')) }} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
                               <Copy className="w-4 h-4" />
                             </button>
-                            <button onClick={() => { if (confirm('Regenerate API key? This will invalidate your current key.')) { const newKey = 'faq_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API Key Regenerated', { description: 'Your new API key has been generated' }) } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
+                            <button onClick={() => { if (confirm('Regenerate API key? This will invalidate your current key.')) { const newKey = 'faq_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API Key Regenerated') } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
                               Regenerate
                             </button>
                           </div>
@@ -2211,13 +2207,13 @@ export default function FAQClient() {
                         </button>
                         <button onClick={() => {
                           window.open('/dashboard/faq-v2/version-history', '_blank')
-                          toast.success('Version history loaded', { description: 'Timeline view opened in new tab' })
+                          toast.success('Version history loaded')
                         }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <History className="w-5 h-5 text-purple-600 mb-2" />
                           <p className="font-medium">Version History</p>
                           <p className="text-xs text-gray-500">View all article revisions</p>
                         </button>
-                        <button onClick={() => { setStatusFilter('published'); setActiveTab('articles'); setBulkSelectionMode(true); toast.success('Bulk Archive Mode', { description: 'Select articles to archive from the list' }) }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
+                        <button onClick={() => { setStatusFilter('published'); setActiveTab('articles'); setBulkSelectionMode(true); toast.success('Bulk Archive Mode') }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
                           <Archive className="w-5 h-5 text-amber-600 mb-2" />
                           <p className="font-medium">Bulk Archive</p>
                           <p className="text-xs text-gray-500">Archive multiple articles</p>
@@ -2236,7 +2232,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
                             <p className="text-xs text-gray-500">Clear all view counts and feedback</p>
                           </div>
-                          <button onClick={async () => { if (confirm('Reset all analytics data? This cannot be undone.')) { try { for (const faq of dbFaqs) { await updateFAQ(faq.id, { views_count: 0, helpful_count: 0, not_helpful_count: 0, searches_count: 0 }) } toast.success('Analytics Reset', { description: 'All view counts and feedback have been cleared' }) } catch { toast.error('Failed to reset analytics') } } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
+                          <button onClick={async () => { if (confirm('Reset all analytics data? This cannot be undone.')) { try { for (const faq of dbFaqs) { await updateFAQ(faq.id, { views_count: 0, helpful_count: 0, not_helpful_count: 0, searches_count: 0 }) } toast.success('Analytics Reset') } catch { toast.error('Failed to reset analytics') } } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
                             Reset
                           </button>
                         </div>
@@ -2245,7 +2241,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Articles</p>
                             <p className="text-xs text-gray-500">Permanently delete all content</p>
                           </div>
-                          <button onClick={async () => { if (confirm('DELETE ALL ARTICLES? This action is PERMANENT and cannot be undone!')) { if (confirm('Are you absolutely sure? This will delete all FAQ articles.')) { try { for (const faq of dbFaqs) { await deleteFAQ(faq.id) } toast.success('All Articles Deleted', { description: 'All content has been permanently removed' }) } catch { toast.error('Failed to delete articles') } } } }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                          <button onClick={async () => { if (confirm('DELETE ALL ARTICLES? This action is PERMANENT and cannot be undone!')) { if (confirm('Are you absolutely sure? This will delete all FAQ articles.')) { try { for (const faq of dbFaqs) { await deleteFAQ(faq.id) } toast.success('All Articles Deleted') } catch { toast.error('Failed to delete articles') } } } }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
                             Delete All
                           </button>
                         </div>
@@ -2264,7 +2260,7 @@ export default function FAQClient() {
             <AIInsightsPanel
               insights={mockFAQAIInsights}
               title="Knowledge Base Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

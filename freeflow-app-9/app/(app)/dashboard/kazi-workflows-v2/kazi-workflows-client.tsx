@@ -502,9 +502,7 @@ export default function KaziWorkflowsClient() {
   // Run workflow wrapper
   const runWorkflow = useCallback((id: string) => {
     executeWorkflow(id)
-    toast.success('Workflow started', {
-      description: 'The workflow is now running.'
-    })
+    toast.success('Workflow started')
   }, [executeWorkflow])
 
   // Handle run workflow from dialog
@@ -512,8 +510,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     executeWorkflow(selectedWorkflow.id)
     setIsRunDialogOpen(false)
-    toast.success('Workflow started', {
-      description: `"${selectedWorkflow.name}" is now running.`
+    toast.success('Workflow started'" is now running.`
     })
   }, [selectedWorkflow, executeWorkflow])
 
@@ -522,17 +519,14 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     removeWorkflow(selectedWorkflow.id)
     setIsDeleteDialogOpen(false)
-    toast.success('Workflow deleted', {
-      description: `"${selectedWorkflow.name}" has been deleted.`
+    toast.success('Workflow deleted'" has been deleted.`
     })
   }, [selectedWorkflow, removeWorkflow])
 
   // Handle create workflow
   const handleCreateWorkflow = useCallback(async () => {
     if (!newWorkflow.name) {
-      toast.error('Validation error', {
-        description: 'Workflow name is required.'
-      })
+      toast.error('Validation error')
       return
     }
     await createWorkflow({
@@ -544,9 +538,7 @@ export default function KaziWorkflowsClient() {
     })
     setIsCreateDialogOpen(false)
     setNewWorkflow({ name: '', description: '', trigger_type: 'manual', category: 'operations' })
-    toast.success('Workflow created', {
-      description: 'Opening workflow builder...'
-    })
+    toast.success('Workflow created')
   }, [newWorkflow, createWorkflow])
 
   // Handle edit workflow
@@ -554,9 +546,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     await updateWorkflow(selectedWorkflow.id, selectedWorkflow)
     setIsEditDialogOpen(false)
-    toast.success('Workflow updated', {
-      description: 'Your changes have been saved.'
-    })
+    toast.success('Workflow updated')
   }, [selectedWorkflow, updateWorkflow])
 
   // Handle save settings
@@ -564,9 +554,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     await updateWorkflow(selectedWorkflow.id, selectedWorkflow)
     setIsSettingsDialogOpen(false)
-    toast.success('Settings saved', {
-      description: 'Workflow settings have been updated.'
-    })
+    toast.success('Settings saved')
   }, [selectedWorkflow, updateWorkflow])
 
   // Handle export
@@ -585,17 +573,14 @@ export default function KaziWorkflowsClient() {
     a.click()
     URL.revokeObjectURL(url)
     setIsExportDialogOpen(false)
-    toast.success('Workflow exported', {
-      description: `Exported as ${exportFormat.toUpperCase()} file.`
+    toast.success('Workflow exported' file.`
     })
   }, [selectedWorkflow, exportFormat])
 
   // Handle import
   const handleImport = useCallback(async () => {
     if (!importFile) {
-      toast.error('No file selected', {
-        description: 'Please select a workflow file to import.'
-      })
+      toast.error('No file selected')
       return
     }
     try {
@@ -610,13 +595,10 @@ export default function KaziWorkflowsClient() {
       })
       setIsImportDialogOpen(false)
       setImportFile(null)
-      toast.success('Workflow imported', {
-        description: `"${data.name}" has been imported successfully.`
+      toast.success('Workflow imported'" has been imported successfully.`
       })
     } catch (error) {
-      toast.error('Import failed', {
-        description: 'Invalid workflow file format.'
-      })
+      toast.error('Import failed')
     }
   }, [importFile, createWorkflow])
 
@@ -625,8 +607,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     duplicateWorkflow(selectedWorkflow.id)
     setIsDuplicateDialogOpen(false)
-    toast.success('Workflow duplicated', {
-      description: `"${duplicateName}" has been created.`
+    toast.success('Workflow duplicated'" has been created.`
     })
   }, [selectedWorkflow, duplicateName, duplicateWorkflow])
 
@@ -635,8 +616,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     await updateWorkflow(selectedWorkflow.id, { ...selectedWorkflow, status: 'archived' as any })
     setIsArchiveDialogOpen(false)
-    toast.success('Workflow archived', {
-      description: `"${selectedWorkflow.name}" has been archived.`
+    toast.success('Workflow archived'" has been archived.`
     })
   }, [selectedWorkflow, updateWorkflow])
 
@@ -651,48 +631,38 @@ export default function KaziWorkflowsClient() {
       status: 'draft'
     })
     setIsTemplateDialogOpen(false)
-    toast.success('Workflow created from template', {
-      description: 'Opening workflow builder...'
-    })
+    toast.success('Workflow created from template')
   }, [selectedTemplate, createWorkflow])
 
   // Handle share
   const handleShare = useCallback(() => {
     if (!selectedWorkflow || !shareEmail) {
-      toast.error('Missing information', {
-        description: 'Please enter an email address.'
-      })
+      toast.error('Missing information')
       return
     }
     // Simulate sharing
     setIsShareDialogOpen(false)
-    toast.success('Workflow shared', {
-      description: `Invitation sent to ${shareEmail}.`
+    toast.success('Workflow shared'.`
     })
   }, [selectedWorkflow, shareEmail])
 
   // Handle save global settings
   const handleSaveGlobalSettings = useCallback(() => {
     setIsGlobalSettingsDialogOpen(false)
-    toast.success('Global settings saved', {
-      description: 'Your workflow preferences have been updated.'
-    })
+    toast.success('Global settings saved')
   }, [globalSettings])
 
   // Handle retry execution
   const handleRetryExecution = useCallback((execution: WorkflowExecution) => {
     setIsExecutionDetailsDialogOpen(false)
     executeWorkflow(execution.workflow_id)
-    toast.success('Workflow restarted', {
-      description: `Retrying "${execution.workflow_name}".`
+    toast.success('Workflow restarted'".`
     })
   }, [executeWorkflow])
 
   // Handle refresh workflows
   const handleRefreshWorkflows = useCallback(() => {
-    toast.success('Workflows refreshed', {
-      description: 'All workflow data has been updated.'
-    })
+    toast.success('Workflows refreshed')
   }, [])
 
   // Format time ago
@@ -1038,8 +1008,7 @@ export default function KaziWorkflowsClient() {
                                 checked={workflow.status === "active"}
                                 onCheckedChange={() => {
                                   toggleWorkflowStatus(workflow.id)
-                                  toast.success(workflow.status === 'active' ? 'Workflow paused' : 'Workflow activated', {
-                                    description: `"${workflow.name}" has been ${workflow.status === 'active' ? 'paused' : 'activated'}.`
+                                  toast.success(workflow.status === 'active' ? 'Workflow paused' : 'Workflow activated'" has been ${workflow.status === 'active' ? 'paused' : 'activated'}.`
                                   })
                                 }}
                               />
@@ -1183,9 +1152,7 @@ export default function KaziWorkflowsClient() {
                     <CardDescription>View recent workflow executions and their results</CardDescription>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => {
-                    toast.success('History refreshed', {
-                      description: 'Execution history has been updated.'
-                    })
+                    toast.success('History refreshed')
                   }}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh
@@ -1438,8 +1405,7 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info(`Editing: ${action.name}`, {
-                            description: `Configure ${action.type} settings and parameters`
+                          toast.info(`Editing: ${action.name}` settings and parameters`
                           })
                         }}>
                           <Edit className="h-3 w-3" />
@@ -1447,9 +1413,7 @@ export default function KaziWorkflowsClient() {
                       </div>
                     ))}
                     <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                      toast.info('Add Workflow Action', {
-                        description: 'Select from: Send Email, HTTP Request, Transform Data, Conditional Branch, Delay'
-                      })
+                      toast.info('Add Workflow Action')
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Action
@@ -2107,8 +2071,7 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info(`Editing: ${action.name}`, {
-                            description: `Configure ${action.type} settings and parameters`
+                          toast.info(`Editing: ${action.name}` settings and parameters`
                           })
                         }}>
                           <Edit className="h-3 w-3" />
@@ -2116,9 +2079,7 @@ export default function KaziWorkflowsClient() {
                       </div>
                     ))}
                     <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                      toast.info('Add Workflow Action', {
-                        description: 'Select from: Send Email, HTTP Request, Transform Data, Conditional Branch, Delay'
-                      })
+                      toast.info('Add Workflow Action')
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add Action

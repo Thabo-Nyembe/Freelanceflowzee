@@ -189,9 +189,7 @@ export default function KaziAutomationsClient() {
   // Run automation
   const runAutomation = useCallback((id: string) => {
     executeAutomation(id)
-    toast.success('Automation started', {
-      description: 'The automation is now running'
-    })
+    toast.success('Automation started')
   }, [executeAutomation])
 
   // Open settings
@@ -272,8 +270,7 @@ export default function KaziAutomationsClient() {
     const automation = automations.find(a => a.id === id)
     toggleAutomationStatus(id)
     const newStatus = automation?.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus === 'active' ? 'activated' : 'paused'}`, {
-      description: `"${automation?.name}" is now ${newStatus}`
+    toast.success(`Automation ${newStatus === 'active' ? 'activated' : 'paused'}`" is now ${newStatus}`
     })
   }, [toggleAutomationStatus, automations])
 
@@ -281,8 +278,7 @@ export default function KaziAutomationsClient() {
   const deleteAutomation = useCallback((id: string) => {
     const automation = automations.find(a => a.id === id)
     removeAutomation(id)
-    toast.success('Automation deleted', {
-      description: `"${automation?.name}" has been deleted`
+    toast.success('Automation deleted'" has been deleted`
     })
     setIsDeleteDialogOpen(false)
     setAutomationToDelete(null)
@@ -291,7 +287,7 @@ export default function KaziAutomationsClient() {
   // Handle create automation
   const handleCreateAutomation = useCallback(async () => {
     if (!newAutomation.name) {
-      toast.error('Validation error', { description: 'Name is required' })
+      toast.error('Validation error')
       return
     }
     setIsLoading(true)
@@ -306,11 +302,10 @@ export default function KaziAutomationsClient() {
       })
       setIsCreateDialogOpen(false)
       setNewAutomation({ name: '', description: '', trigger_type: 'event', category: 'productivity' })
-      toast.success('Automation created', {
-        description: `"${newAutomation.name}" has been created successfully`
+      toast.success('Automation created'" has been created successfully`
       })
     } catch {
-      toast.error('Failed to create automation', { description: 'Please try again' })
+      toast.error('Failed to create automation')
     } finally {
       setIsLoading(false)
     }
@@ -323,11 +318,9 @@ export default function KaziAutomationsClient() {
     try {
       await updateAutomation(selectedAutomation.id, selectedAutomation)
       setIsSettingsDialogOpen(false)
-      toast.success('Settings saved', {
-        description: 'Automation settings have been updated'
-      })
+      toast.success('Settings saved')
     } catch {
-      toast.error('Failed to save settings', { description: 'Please try again' })
+      toast.error('Failed to save settings')
     } finally {
       setIsLoading(false)
     }
@@ -340,11 +333,10 @@ export default function KaziAutomationsClient() {
     try {
       await updateAutomation(selectedAutomation.id, selectedAutomation)
       setIsEditDialogOpen(false)
-      toast.success('Automation updated', {
-        description: `"${selectedAutomation.name}" has been updated`
+      toast.success('Automation updated'" has been updated`
       })
     } catch {
-      toast.error('Failed to update automation', { description: 'Please try again' })
+      toast.error('Failed to update automation')
     } finally {
       setIsLoading(false)
     }
@@ -357,11 +349,10 @@ export default function KaziAutomationsClient() {
     try {
       await duplicateAutomation(selectedAutomation.id)
       setIsDuplicateDialogOpen(false)
-      toast.success('Automation duplicated', {
-        description: `A copy of "${selectedAutomation.name}" has been created`
+      toast.success('Automation duplicated'" has been created`
       })
     } catch {
-      toast.error('Failed to duplicate automation', { description: 'Please try again' })
+      toast.error('Failed to duplicate automation')
     } finally {
       setIsLoading(false)
     }
@@ -374,11 +365,10 @@ export default function KaziAutomationsClient() {
     try {
       await executeAutomation(selectedAutomation.id)
       setIsRunDialogOpen(false)
-      toast.success('Automation executed', {
-        description: `"${selectedAutomation.name}" is now running`
+      toast.success('Automation executed'" is now running`
       })
     } catch {
-      toast.error('Failed to run automation', { description: 'Please try again' })
+      toast.error('Failed to run automation')
     } finally {
       setIsLoading(false)
     }
@@ -404,12 +394,12 @@ export default function KaziAutomationsClient() {
         ]
       })
       if (success) {
-        toast.success('Test passed', { description: 'Automation test completed successfully' })
+        toast.success('Test passed')
       } else {
-        toast.error('Test failed', { description: 'Some tests did not pass' })
+        toast.error('Test failed')
       }
     } catch {
-      toast.error('Test error', { description: 'An unexpected error occurred' })
+      toast.error('Test error')
     } finally {
       setIsLoading(false)
     }
@@ -432,8 +422,7 @@ export default function KaziAutomationsClient() {
       URL.revokeObjectURL(url)
 
       setIsExportDialogOpen(false)
-      toast.success('Export complete', {
-        description: `${automations.length} automations exported as ${exportFormat.toUpperCase()}`
+      toast.success('Export complete' automations exported as ${exportFormat.toUpperCase()}`
       })
     } else {
       // Export single automation
@@ -450,8 +439,7 @@ export default function KaziAutomationsClient() {
       URL.revokeObjectURL(url)
 
       setIsExportDialogOpen(false)
-      toast.success('Export complete', {
-        description: `"${selectedAutomation.name}" exported as ${exportFormat.toUpperCase()}`
+      toast.success('Export complete'" exported as ${exportFormat.toUpperCase()}`
       })
     }
   }, [selectedAutomation, automations, exportFormat])
@@ -459,7 +447,7 @@ export default function KaziAutomationsClient() {
   // Handle import
   const handleImport = useCallback(async () => {
     if (!importFile) {
-      toast.error('No file selected', { description: 'Please select a file to import' })
+      toast.error('No file selected')
       return
     }
     setIsLoading(true)
@@ -469,7 +457,7 @@ export default function KaziAutomationsClient() {
 
       // Validate and import
       if (Array.isArray(data)) {
-        toast.success('Import complete', { description: `${data.length} automations imported` })
+        toast.success('Import complete' automations imported` })
       } else if (data.name) {
         await createAutomation({
           name: data.name,
@@ -479,13 +467,13 @@ export default function KaziAutomationsClient() {
           actions: data.actions || [],
           status: 'draft'
         })
-        toast.success('Import complete', { description: `"${data.name}" imported successfully` })
+        toast.success('Import complete'" imported successfully` })
       }
 
       setIsImportDialogOpen(false)
       setImportFile(null)
     } catch {
-      toast.error('Import failed', { description: 'Invalid file format. Please use a valid JSON file.' })
+      toast.error('Import failed')
     } finally {
       setIsLoading(false)
     }
@@ -501,11 +489,9 @@ export default function KaziAutomationsClient() {
         trigger_type: 'schedule'
       })
       setIsScheduleDialogOpen(false)
-      toast.success('Schedule saved', {
-        description: 'Automation schedule has been updated'
-      })
+      toast.success('Schedule saved')
     } catch {
-      toast.error('Failed to save schedule', { description: 'Please try again' })
+      toast.error('Failed to save schedule')
     } finally {
       setIsLoading(false)
     }
@@ -521,11 +507,9 @@ export default function KaziAutomationsClient() {
         trigger_type: 'webhook'
       })
       setIsWebhookDialogOpen(false)
-      toast.success('Webhook configured', {
-        description: 'Webhook trigger has been set up'
-      })
+      toast.success('Webhook configured')
     } catch {
-      toast.error('Failed to configure webhook', { description: 'Please try again' })
+      toast.error('Failed to configure webhook')
     } finally {
       setIsLoading(false)
     }
@@ -536,7 +520,7 @@ export default function KaziAutomationsClient() {
     if (!selectedAutomation) return
     const webhookUrl = `https://api.kazi.app/webhooks/automations/${selectedAutomation.id}`
     navigator.clipboard.writeText(webhookUrl)
-    toast.success('Copied to clipboard', { description: 'Webhook URL copied' })
+    toast.success('Copied to clipboard')
   }, [selectedAutomation])
 
   // Format time
@@ -713,7 +697,7 @@ export default function KaziAutomationsClient() {
                 size="sm"
                 onClick={() => {
                   setIsTemplateDialogOpen(true)
-                  toast.info('Templates', { description: 'Browse all automation templates' })
+                  toast.info('Templates')
                 }}
               >
                 View All
@@ -734,8 +718,7 @@ export default function KaziAutomationsClient() {
                       category: 'productivity'
                     })
                     setIsCreateDialogOpen(true)
-                    toast.info('Quick Setup', {
-                      description: `Setting up "${qa.name}"...`
+                    toast.info('Quick Setup'"...`
                     })
                   }}
                 >
@@ -1035,8 +1018,7 @@ export default function KaziAutomationsClient() {
                       <Switch
                         checked={rule.active}
                         onCheckedChange={(checked) => {
-                          toast.success(`Rule ${checked ? 'enabled' : 'disabled'}`, {
-                            description: `"${rule.name}" has been ${checked ? 'enabled' : 'disabled'}`
+                          toast.success(`Rule ${checked ? 'enabled' : 'disabled'}`" has been ${checked ? 'enabled' : 'disabled'}`
                           })
                         }}
                       />
@@ -1310,7 +1292,7 @@ export default function KaziAutomationsClient() {
                           size="sm"
                           variant="ghost"
                           onClick={() => {
-                            toast.info('Edit Action', { description: `Editing action: ${action.type}` })
+                            toast.info('Edit Action'` })
                           }}
                         >
                           <Edit className="h-3 w-3" />
@@ -1322,7 +1304,7 @@ export default function KaziAutomationsClient() {
                       size="sm"
                       className="w-full"
                       onClick={() => {
-                        toast.info('Add Automation Action', { description: 'Select from: Send Notification, Update Record, Create Task, Send Webhook, Run Script' })
+                        toast.info('Add Automation Action')
                       }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -1641,7 +1623,7 @@ export default function KaziAutomationsClient() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  toast.success('Logs exported', { description: 'Log file downloaded' })
+                  toast.success('Logs exported')
                 }}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -2183,7 +2165,7 @@ export default function KaziAutomationsClient() {
                       })
                       setIsTemplateDialogOpen(false)
                       setIsCreateDialogOpen(true)
-                      toast.info('Template selected', { description: `Using "${template.name}" template` })
+                      toast.info('Template selected'" template` })
                     }}
                   >
                     <div className={cn(

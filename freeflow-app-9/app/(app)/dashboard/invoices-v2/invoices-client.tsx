@@ -379,13 +379,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         status: 'sent',
         sent_date: new Date().toISOString()
       })
-      toast.success('Invoice sent', {
-        description: `Invoice #${invoice.invoice_number} sent to ${invoice.client_name}`
+      toast.success('Invoice sent' sent to ${invoice.client_name}`
       })
     } catch (error) {
-      toast.error('Failed to send invoice', {
-        description: 'An error occurred while sending the invoice'
-      })
+      toast.error('Failed to send invoice')
     }
   }
 
@@ -398,13 +395,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         amount_paid: invoice.total_amount,
         amount_due: 0
       })
-      toast.success('Invoice marked as paid', {
-        description: `Invoice #${invoice.invoice_number} has been marked as paid`
+      toast.success('Invoice marked as paid' has been marked as paid`
       })
     } catch (error) {
-      toast.error('Failed to mark invoice as paid', {
-        description: 'An error occurred while updating the invoice'
-      })
+      toast.error('Failed to mark invoice as paid')
     }
   }
 
@@ -412,13 +406,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const handleDeleteInvoice = async (invoice: Invoice) => {
     try {
       await deleteInvoice(invoice.id)
-      toast.success('Invoice deleted', {
-        description: `Invoice #${invoice.invoice_number} has been deleted`
+      toast.success('Invoice deleted' has been deleted`
       })
     } catch (error) {
-      toast.error('Failed to delete invoice', {
-        description: 'An error occurred while deleting the invoice'
-      })
+      toast.error('Failed to delete invoice')
     }
   }
 
@@ -426,13 +417,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const handleVoidInvoice = async (invoice: Invoice) => {
     try {
       await updateInvoice(invoice.id, { status: 'cancelled' })
-      toast.info('Invoice voided', {
-        description: `Invoice #${invoice.invoice_number} has been cancelled`
+      toast.info('Invoice voided' has been cancelled`
       })
     } catch (error) {
-      toast.error('Failed to void invoice', {
-        description: 'An error occurred while voiding the invoice'
-      })
+      toast.error('Failed to void invoice')
     }
   }
 
@@ -461,13 +449,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         terms_and_conditions: invoice.terms_and_conditions,
         issue_date: new Date().toISOString().split('T')[0]
       } as any)
-      toast.success('Invoice duplicated', {
-        description: `Copy of invoice #${invoice.invoice_number} created`
+      toast.success('Invoice duplicated' created`
       })
     } catch (error) {
-      toast.error('Failed to duplicate invoice', {
-        description: 'An error occurred while duplicating the invoice'
-      })
+      toast.error('Failed to duplicate invoice')
     }
   }
 
@@ -478,13 +463,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
         last_reminder_sent_at: new Date().toISOString()
       })
-      toast.success('Reminder sent', {
-        description: `Payment reminder sent for invoice #${invoice.invoice_number}`
+      toast.success('Reminder sent'`
       })
     } catch (error) {
-      toast.error('Failed to send reminder', {
-        description: 'An error occurred while sending the reminder'
-      })
+      toast.error('Failed to send reminder')
     }
   }
 
@@ -521,7 +503,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        toast.success('Export completed', { description: `${data.length} invoices exported to CSV` })
+        toast.success('Export completed' invoices exported to CSV` })
       } else {
         const jsonContent = JSON.stringify(data, null, 2)
         const blob = new Blob([jsonContent], { type: 'application/json' })
@@ -533,7 +515,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        toast.success('Export completed', { description: `${data.length} invoices exported to JSON` })
+        toast.success('Export completed' invoices exported to JSON` })
       }
     } catch (error) {
       toast.error('Failed to export invoices')
@@ -847,9 +829,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                 inv.status === 'overdue' || inv.status === 'sent'
               )
               if (overdueInvoices.length === 0) {
-                toast.info('No invoices to remind', {
-                  description: 'All invoices are either paid or in draft status'
-                })
+                toast.info('No invoices to remind')
                 return
               }
               for (const inv of overdueInvoices) {
@@ -1462,10 +1442,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                                         }
                                         toast.success(`${gateway.name} connection initiated`)
                                       } else {
-                                        toast.info(`${gateway.name} requires setup`, { description: 'Configure API credentials in Settings → Integrations' })
+                                        toast.info(`${gateway.name} requires setup`)
                                       }
                                     } catch {
-                                      toast.info(`${gateway.name} requires setup`, { description: 'Configure API credentials in Settings → Integrations' })
+                                      toast.info(`${gateway.name} requires setup`)
                                     }
                                   }
                                 }}>
@@ -1686,10 +1666,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                                         }
                                         toast.success(`${app.name} OAuth started`)
                                       } else {
-                                        toast.info(`${app.name} requires setup`, { description: 'Configure OAuth credentials in Settings → Integrations' })
+                                        toast.info(`${app.name} requires setup`)
                                       }
                                     } catch {
-                                      toast.info(`${app.name} requires setup`, { description: 'Configure OAuth credentials in Settings → Integrations' })
+                                      toast.info(`${app.name} requires setup`)
                                     }
                                   }
                                 }}>
@@ -1922,14 +1902,14 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                 if (insight.type === 'warning' && insight.category === 'Collections') {
                   // Navigate to overdue invoices
                   setActiveTab('overdue')
-                  toast.info('Showing overdue invoices', { description: 'Review and send reminders to clients' })
+                  toast.info('Showing overdue invoices')
                 } else if (insight.type === 'success') {
-                  toast.success(insight.title, { description: insight.description })
+                  toast.success(insight.title)
                 } else if (insight.type === 'info' && insight.category === 'Forecast') {
                   // Show forecast details
-                  toast.info('Revenue Forecast', { description: insight.description })
+                  toast.info('Revenue Forecast')
                 } else {
-                  toast.info(insight.title, { description: insight.description })
+                  toast.info(insight.title)
                 }
               }}
             />

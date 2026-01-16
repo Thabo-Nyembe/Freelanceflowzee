@@ -550,11 +550,11 @@ export default function AnalyticsClient() {
   // CRUD Operations
   const handleCreateFunnel = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a funnel' })
+      toast.error('Error')
       return
     }
     if (!funnelForm.name.trim()) {
-      toast.error('Error', { description: 'Funnel name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -572,12 +572,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Funnel created', { description: `"${funnelForm.name}" has been created` })
+      toast.success('Funnel created'" has been created` })
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnel(false)
       fetchFunnels()
     } catch (err: any) {
-      toast.error('Error creating funnel', { description: err.message })
+      toast.error('Error creating funnel')
     } finally {
       setIsLoading(false)
     }
@@ -593,10 +593,10 @@ export default function AnalyticsClient() {
         .eq('id', funnelId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Funnel deleted', { description: 'Funnel has been removed' })
+      toast.success('Funnel deleted')
       fetchFunnels()
     } catch (err: any) {
-      toast.error('Error deleting funnel', { description: err.message })
+      toast.error('Error deleting funnel')
     } finally {
       setIsLoading(false)
     }
@@ -604,11 +604,11 @@ export default function AnalyticsClient() {
 
   const handleCreateReport = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a report' })
+      toast.error('Error')
       return
     }
     if (!reportForm.name.trim()) {
-      toast.error('Error', { description: 'Report name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -629,12 +629,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Report created', { description: `"${reportForm.name}" has been created` })
+      toast.success('Report created'" has been created` })
       setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
       setShowCreateReport(false)
       fetchReports()
     } catch (err: any) {
-      toast.error('Error creating report', { description: err.message })
+      toast.error('Error creating report')
     } finally {
       setIsLoading(false)
     }
@@ -650,10 +650,10 @@ export default function AnalyticsClient() {
         .eq('id', reportId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report running', { description: `"${reportName}" is being generated` })
+      toast.success('Report running'" is being generated` })
       fetchReports()
     } catch (err: any) {
-      toast.error('Error running report', { description: err.message })
+      toast.error('Error running report')
     } finally {
       setIsLoading(false)
     }
@@ -669,10 +669,10 @@ export default function AnalyticsClient() {
         .eq('id', reportId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report deleted', { description: 'Report has been removed' })
+      toast.success('Report deleted')
       fetchReports()
     } catch (err: any) {
-      toast.error('Error deleting report', { description: err.message })
+      toast.error('Error deleting report')
     } finally {
       setIsLoading(false)
     }
@@ -680,11 +680,11 @@ export default function AnalyticsClient() {
 
   const handleCreateDashboard = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to create a dashboard' })
+      toast.error('Error')
       return
     }
     if (!dashboardForm.name.trim()) {
-      toast.error('Error', { description: 'Dashboard name is required' })
+      toast.error('Error')
       return
     }
     setIsLoading(true)
@@ -703,12 +703,12 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard created', { description: `"${dashboardForm.name}" has been created` })
+      toast.success('Dashboard created'" has been created` })
       setDashboardForm({ name: '', description: '', is_default: false })
       setShowCreateDashboard(false)
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error creating dashboard', { description: err.message })
+      toast.error('Error creating dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -724,10 +724,10 @@ export default function AnalyticsClient() {
         .eq('id', dashboardId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Dashboard deleted', { description: 'Dashboard has been removed' })
+      toast.success('Dashboard deleted')
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error deleting dashboard', { description: err.message })
+      toast.error('Error deleting dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -736,9 +736,9 @@ export default function AnalyticsClient() {
   const handleShareDashboard = async (dashboardId: string) => {
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/dashboard/analytics-v2?dashboard=${dashboardId}`)
-      toast.success('Link copied', { description: 'Dashboard share link copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Failed to copy link', { description: 'Please try again' })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -760,10 +760,10 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard duplicated', { description: `"${dashboard.name}" has been duplicated` })
+      toast.success('Dashboard duplicated'" has been duplicated` })
       fetchDashboards()
     } catch (err: any) {
-      toast.error('Error duplicating dashboard', { description: err.message })
+      toast.error('Error duplicating dashboard')
     } finally {
       setIsLoading(false)
     }
@@ -890,9 +890,9 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
       if (customDateRange.end) shareUrl.searchParams.set('endDate', customDateRange.end)
       if (selectedFilters.metrics.length > 0) shareUrl.searchParams.set('metrics', selectedFilters.metrics.join(','))
       await navigator.clipboard.writeText(shareUrl.toString())
-      toast.success('Link copied', { description: 'Share link with filters copied to clipboard' })
+      toast.success('Link copied')
     } catch (err) {
-      toast.error('Failed to copy link', { description: 'Please try again' })
+      toast.error('Failed to copy link')
     }
   }
 
@@ -967,7 +967,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
   // Clear all filters
   const handleClearFilters = () => {
     setSelectedFilters({ metrics: [], dimensions: [], segments: [] })
-    toast.success('Filters cleared', { description: 'All filters have been removed' })
+    toast.success('Filters cleared')
   }
 
   // Toggle filter selection
@@ -992,8 +992,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     }
     setTimeRange('custom')
     setShowCustomDatePicker(false)
-    toast.success('Custom date range applied', {
-      description: `${customDateRange.start} to ${customDateRange.end}`
+    toast.success('Custom date range applied' to ${customDateRange.end}`
     })
     handleRefresh()
   }
@@ -1001,11 +1000,11 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
   // Save current view as a custom report
   const handleSaveCustomReport = async () => {
     if (!userId) {
-      toast.error('Error', { description: 'You must be logged in to save a report' })
+      toast.error('Error')
       return
     }
     if (!savedReportName.trim()) {
-      toast.error('Error', { description: 'Report name is required' })
+      toast.error('Error')
       return
     }
 
@@ -1079,9 +1078,9 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
         refreshEvents(),
         refreshRevenue(),
       ])
-      toast.success('Data refreshed', { description: 'All analytics data updated from Supabase' })
+      toast.success('Data refreshed')
     } catch (err) {
-      toast.error('Refresh failed', { description: 'Please try again' })
+      toast.error('Refresh failed')
       setAnalyticsError('Failed to refresh analytics data')
     } finally {
       setIsLoading(false)
@@ -1105,9 +1104,9 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
           notification_channels: ['email', 'in_app']
         })
       if (error) throw error
-      toast.success('Alert created', { description: `Alert set for "${selectedMetric.name}"` })
+      toast.success('Alert created'"` })
     } catch (err: any) {
-      toast.error('Error creating alert', { description: err.message })
+      toast.error('Error creating alert')
     } finally {
       setIsLoading(false)
     }
@@ -1781,7 +1780,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                         className={chartType === 'line' ? 'bg-indigo-100 text-indigo-600' : ''}
                         onClick={() => {
                           setChartType('line')
-                          toast.success('Line chart view', { description: 'Switched to line chart visualization' })
+                          toast.success('Line chart view')
                         }}
                       >
                         <LineChart className="h-4 w-4" />
@@ -1792,7 +1791,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                         className={chartType === 'bar' ? 'bg-indigo-100 text-indigo-600' : ''}
                         onClick={() => {
                           setChartType('bar')
-                          toast.success('Bar chart view', { description: 'Switched to bar chart visualization' })
+                          toast.success('Bar chart view')
                         }}
                       >
                         <BarChart3 className="h-4 w-4" />
@@ -1803,7 +1802,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                         className={chartType === 'area' ? 'bg-indigo-100 text-indigo-600' : ''}
                         onClick={() => {
                           setChartType('area')
-                          toast.success('Area chart view', { description: 'Switched to area chart visualization' })
+                          toast.success('Area chart view')
                         }}
                       >
                         <AreaChart className="h-4 w-4" />
@@ -1840,7 +1839,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                     </div>
                     <Button variant="link" className="text-indigo-600" onClick={() => {
                       setActiveTab('funnels')
-                      toast.success('Viewing funnel details', { description: 'Switched to funnels tab' })
+                      toast.success('Viewing funnel details')
                     }}>
                       View Details <ChevronRight className="h-4 w-4" />
                     </Button>
@@ -1973,7 +1972,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </Select>
                 <Button onClick={() => {
                   setShowMetricCreator(true)
-                  toast.success('Metric creator opened', { description: 'Create a custom metric' })
+                  toast.success('Metric creator opened')
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
@@ -2220,7 +2219,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </Select>
                 <Button onClick={() => {
                   setShowCohortCreator(true)
-                  toast.success('Cohort creator opened', { description: 'Configure your new cohort analysis' })
+                  toast.success('Cohort creator opened')
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Cohort
@@ -2521,7 +2520,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           recipients: (report.recipients || []).join(', ')
                         })
                         setShowCreateReport(true)
-                        toast.success('Editing report', { description: `Modify "${report.name}"` })
+                        toast.success('Editing report'"` })
                       }}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
@@ -2920,9 +2919,9 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
   'https://analytics.kazi.app/track.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','kaziLayer','KAZI-XXXXXXXX');
 </script>`)
-                              toast.success('Code copied', { description: 'Tracking code copied to clipboard' })
+                              toast.success('Code copied')
                             } catch (err) {
-                              toast.error('Failed to copy', { description: 'Please try again' })
+                              toast.error('Failed to copy')
                             }
                           }}>
                             <Copy className="h-4 w-4 mr-2" />

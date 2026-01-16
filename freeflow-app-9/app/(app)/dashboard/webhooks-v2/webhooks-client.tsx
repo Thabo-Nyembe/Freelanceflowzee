@@ -548,7 +548,7 @@ export default function WebhooksClient({
   // CRUD Handlers with Supabase integration
   const handleSaveWebhook = async () => {
     if (!formData.name || !formData.url) {
-      toast.error('Validation Error', { description: 'Name and URL are required' })
+      toast.error('Validation Error')
       return
     }
 
@@ -567,10 +567,10 @@ export default function WebhooksClient({
           custom_headers: formData.custom_headers
         })
         if (result.success) {
-          toast.success('Webhook updated', { description: `"${formData.name}" has been updated` })
+          toast.success('Webhook updated'" has been updated` })
           setShowEndpointDialog(false)
         } else {
-          toast.error('Update failed', { description: result.error })
+          toast.error('Update failed')
         }
       } else {
         // Create new webhook
@@ -586,10 +586,10 @@ export default function WebhooksClient({
           status: 'active'
         })
         if (result.success) {
-          toast.success('Webhook created', { description: `"${formData.name}" has been created` })
+          toast.success('Webhook created'" has been created` })
           setShowEndpointDialog(false)
         } else {
-          toast.error('Creation failed', { description: result.error })
+          toast.error('Creation failed')
         }
       }
     } finally {
@@ -600,9 +600,9 @@ export default function WebhooksClient({
   const handleDeleteWebhook = async (id: string, name: string) => {
     const result = await deleteWebhook(id)
     if (result.success) {
-      toast.success('Webhook deleted', { description: `"${name}" has been deleted` })
+      toast.success('Webhook deleted'" has been deleted` })
     } else {
-      toast.error('Delete failed', { description: result.error })
+      toast.error('Delete failed')
     }
   }
 
@@ -610,19 +610,19 @@ export default function WebhooksClient({
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
     const result = await toggleStatus(id, newStatus as 'active' | 'paused')
     if (result.success) {
-      toast.success('Status updated', { description: `Webhook is now ${newStatus}` })
+      toast.success('Status updated'` })
     } else {
-      toast.error('Status update failed', { description: result.error })
+      toast.error('Status update failed')
     }
   }
 
   const handleTestWebhookDelivery = async (id: string) => {
-    toast.info('Testing webhook', { description: 'Sending test payload...' })
+    toast.info('Testing webhook')
     const result = await testWebhook(id)
     if (result.success) {
-      toast.success('Test sent', { description: 'Test delivery has been queued' })
+      toast.success('Test sent')
     } else {
-      toast.error('Test failed', { description: result.error })
+      toast.error('Test failed')
     }
     setShowTestDialog(false)
   }
@@ -642,9 +642,9 @@ export default function WebhooksClient({
     const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
     const result = await updateWebhook(id, { secret: newSecret })
     if (result.success) {
-      toast.success('Secret rotated', { description: 'New signing secret has been generated' })
+      toast.success('Secret rotated')
     } else {
-      toast.error('Rotation failed', { description: result.error })
+      toast.error('Rotation failed')
     }
   }
 
@@ -685,9 +685,9 @@ export default function WebhooksClient({
     if (!webhookToDelete) return
     const result = await deleteWebhook(webhookToDelete.id)
     if (result.success) {
-      toast.success('Webhook deleted', { description: `"${webhookToDelete.name}" has been permanently deleted` })
+      toast.success('Webhook deleted'" has been permanently deleted` })
     } else {
-      toast.error('Delete failed', { description: result.error })
+      toast.error('Delete failed')
     }
     setShowDeleteConfirmDialog(false)
     setWebhookToDelete(null)
@@ -705,11 +705,11 @@ export default function WebhooksClient({
     const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
     const result = await updateWebhook(webhookForSecret.id, { secret: newSecret })
     if (result.success) {
-      toast.success('Secret regenerated', { description: 'New signing secret has been generated. Update your endpoint configuration.' })
+      toast.success('Secret regenerated')
       navigator.clipboard.writeText(newSecret)
       toast.info('Secret copied to clipboard')
     } else {
-      toast.error('Regeneration failed', { description: result.error })
+      toast.error('Regeneration failed')
     }
     setShowRegenerateSecretDialog(false)
     setWebhookForSecret(null)
@@ -749,9 +749,7 @@ export default function WebhooksClient({
       toast.success(`${selectedIntegration.name} installed successfully!`)
       setShowIntegrationDialog(false)
     } catch (error) {
-      toast.error(`Failed to install ${selectedIntegration.name}`, {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error(`Failed to install ${selectedIntegration.name}`)
     }
   }
 
@@ -776,7 +774,7 @@ export default function WebhooksClient({
     })
     setShowTemplateDialog(false)
     setShowEndpointDialog(true)
-    toast.info('Template loaded', { description: 'Customize and save your webhook' })
+    toast.info('Template loaded')
   }
 
   // View event payload example
@@ -841,11 +839,9 @@ export default function WebhooksClient({
       setShowImportDialog(false)
     } catch (error) {
       if (error instanceof SyntaxError) {
-        toast.error('Invalid configuration file', { description: 'File must be valid JSON' })
+        toast.error('Invalid configuration file')
       } else {
-        toast.error('Failed to import configuration', {
-          description: error instanceof Error ? error.message : 'Unknown error'
-        })
+        toast.error('Failed to import configuration')
       }
     }
   }
@@ -873,9 +869,7 @@ export default function WebhooksClient({
       toast.success('All delivery logs cleared')
       setShowClearLogsDialog(false)
     } catch (error) {
-      toast.error('Failed to clear logs', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to clear logs')
     }
   }
 
@@ -916,9 +910,7 @@ export default function WebhooksClient({
       toast.success('All settings reset to defaults')
       setShowResetConfigDialog(false)
     } catch (error) {
-      toast.error('Failed to reset configuration', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to reset configuration')
     }
   }
 
@@ -962,9 +954,7 @@ export default function WebhooksClient({
         toast.success('API key regenerated successfully')
       }
     } catch (error) {
-      toast.error('Failed to regenerate API key', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to regenerate API key')
     }
   }
 
@@ -1004,9 +994,7 @@ export default function WebhooksClient({
       setShowTestDialog(false)
       setWebhookToTest(null)
     } catch (error) {
-      toast.error('Test delivery failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Test delivery failed')
     }
   }
 
@@ -1034,9 +1022,7 @@ export default function WebhooksClient({
       toast.success('Delivery retry queued')
       setShowLogDialog(false)
     } catch (error) {
-      toast.error('Failed to retry delivery', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to retry delivery')
     }
   }
 
@@ -1065,9 +1051,7 @@ export default function WebhooksClient({
 
       toast.success('Settings saved successfully')
     } catch (error) {
-      toast.error('Failed to save settings', {
-        description: error instanceof Error ? error.message : 'Unknown error'
-      })
+      toast.error('Failed to save settings')
     }
   }
 
@@ -1160,7 +1144,7 @@ export default function WebhooksClient({
       action: async () => {
         const firstActiveWebhook = webhooks.find(w => w.status === 'active')
         if (!firstActiveWebhook) {
-          toast.error('No active webhooks', { description: 'Create or activate a webhook first' })
+          toast.error('No active webhooks')
           return
         }
         toast.promise(
@@ -1184,7 +1168,7 @@ export default function WebhooksClient({
       shortcut: 'L',
       action: () => {
         setActiveTab('logs')
-        toast.success('Viewing delivery logs', { description: 'Request/response history and errors' })
+        toast.success('Viewing delivery logs')
       }
     },
     {
@@ -2420,7 +2404,7 @@ export default function WebhooksClient({
             <AIInsightsPanel
               insights={mockWebhooksAIInsights}
               title="Webhooks Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

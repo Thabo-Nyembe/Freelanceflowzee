@@ -711,15 +711,12 @@ export default function EscrowClient() {
         metadata: { description: newEscrowForm.description }
       })
 
-      toast.success('Escrow created successfully', {
-        description: `Created escrow for "${newEscrowForm.projectTitle}"`
+      toast.success('Escrow created successfully'"`
       })
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
     } catch (error: any) {
-      toast.error('Failed to create escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -751,16 +748,13 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await releaseFunds(selectedEscrowDeposit.id, amount)
-      toast.success('Funds released successfully', {
-        description: `Released ${formatCurrency(amount)} for "${selectedEscrowDeposit.project_title}"`
+      toast.success('Funds released successfully' for "${selectedEscrowDeposit.project_title}"`
       })
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
     } catch (error: any) {
-      toast.error('Failed to release funds', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to release funds')
     } finally {
       setIsSubmitting(false)
     }
@@ -770,13 +764,9 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'refunded' })
-      toast.success('Refund requested', {
-        description: 'Your refund request has been submitted and is being processed'
-      })
+      toast.success('Refund requested')
     } catch (error: any) {
-      toast.error('Failed to request refund', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to request refund')
     } finally {
       setIsSubmitting(false)
     }
@@ -808,16 +798,12 @@ export default function EscrowClient() {
           }
         }
       })
-      toast.success('Dispute opened', {
-        description: 'A dispute case has been opened and is under review'
-      })
+      toast.success('Dispute opened')
       setShowDisputeDialog(false)
       resetDisputeForm()
       setSelectedEscrowDeposit(null)
     } catch (error: any) {
-      toast.error('Failed to open dispute', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to open dispute')
     } finally {
       setIsSubmitting(false)
     }
@@ -832,13 +818,10 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
-      toast.success('Escrow cancelled', {
-        description: `Escrow for "${deposit.project_title}" has been cancelled`
+      toast.success('Escrow cancelled'" has been cancelled`
       })
     } catch (error: any) {
-      toast.error('Failed to cancel escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to cancel escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -853,13 +836,10 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await deleteDeposit(deposit.id)
-      toast.success('Escrow deleted', {
-        description: `Escrow for "${deposit.project_title}" has been deleted`
+      toast.success('Escrow deleted'" has been deleted`
       })
     } catch (error: any) {
-      toast.error('Failed to delete escrow', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to delete escrow')
     } finally {
       setIsSubmitting(false)
     }
@@ -898,15 +878,12 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Payout created', {
-        description: `${payoutForm.method === 'instant' ? 'Instant payout' : 'Standard payout'} of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
+      toast.success('Payout created' of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
       })
       setShowCreatePayout(false)
       resetPayoutForm()
     } catch (error: any) {
-      toast.error('Failed to create payout', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to create payout')
     } finally {
       setIsSubmitting(false)
     }
@@ -933,15 +910,12 @@ export default function EscrowClient() {
       // You could store the invitation in a table here
       // For now we just show success
 
-      toast.success('Invitation sent', {
-        description: `An invitation has been sent to ${inviteForm.email}`
+      toast.success('Invitation sent'`
       })
       setShowInviteAccount(false)
       resetInviteForm()
     } catch (error: any) {
-      toast.error('Failed to send invitation', {
-        description: error.message || 'Please try again'
-      })
+      toast.error('Failed to send invitation')
     } finally {
       setIsSubmitting(false)
     }
@@ -2160,7 +2134,7 @@ export default function EscrowClient() {
             <AIInsightsPanel
               insights={mockEscrowAIInsights}
               title="Escrow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

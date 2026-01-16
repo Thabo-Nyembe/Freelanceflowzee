@@ -679,9 +679,7 @@ export default function TestingClient() {
 
       if (error) throw error
 
-      toast.success(`Test "${testName}" executed`, {
-        description: 'Test run completed successfully'
-      })
+      toast.success(`Test "${testName}" executed`)
       fetchTests()
     } catch (error) {
       console.error('Error running test:', error)
@@ -762,9 +760,7 @@ export default function TestingClient() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Export completed', {
-        description: 'Test results exported successfully'
-      })
+      toast.success('Export completed')
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export results')
@@ -778,8 +774,7 @@ export default function TestingClient() {
       setIsRunning(false)
       setShowRunDialog(false)
       if (res.ok) {
-        toast.success('Test run completed', {
-          description: `${mockTestSpecs.length + dbTests.length} tests executed`
+        toast.success('Test run completed' tests executed`
         })
       } else {
         toast.error('Test run failed')
@@ -843,9 +838,7 @@ export default function TestingClient() {
         return
       }
 
-      toast.info(`Rerunning ${data.length} failed tests`, {
-        description: 'Test execution started...'
-      })
+      toast.info(`Rerunning ${data.length} failed tests`)
 
       for (const test of data) {
         await handleRunTest(test.id, test.name)
@@ -1956,7 +1949,7 @@ export default defineConfig({
                           </div>
                         ))}
                         <Button variant="outline" className="w-full mt-4" onClick={() => {
-                          toast.info('Integration Setup', { description: 'Opening integration configuration wizard...' })
+                          toast.info('Integration Setup')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Integration
@@ -1992,7 +1985,7 @@ export default defineConfig({
                                   }
                                 )
                               } else {
-                                toast.info('Connect Service', { description: `Opening ${service.name} authentication...` })
+                                toast.info('Connect Service' authentication...` })
                               }
                             }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
@@ -2066,7 +2059,7 @@ export default defineConfig({
                         <Button variant="outline" className="w-full" onClick={() => {
                           const varName = prompt('Enter variable name:', 'NEW_VAR')
                           if (varName && varName.trim()) {
-                            toast.success('Variable added', { description: `${varName} has been added to your environment` })
+                            toast.success('Variable added' has been added to your environment` })
                           }
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
@@ -2174,7 +2167,7 @@ export default defineConfig({
                               <p className="text-sm text-gray-500">3 browsers installed (890 MB)</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Browser Manager', { description: 'Opening browser installation manager...' })}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Browser Manager')}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2239,7 +2232,7 @@ export default defineConfig({
             <AIInsightsPanel
               insights={mockTestingAIInsights}
               title="Testing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

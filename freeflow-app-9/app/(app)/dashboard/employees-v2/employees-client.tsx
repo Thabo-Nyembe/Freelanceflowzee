@@ -1028,7 +1028,7 @@ export default function EmployeesClient() {
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => {
                 const dates = prompt('Enter start date (YYYY-MM-DD):')
                 if (dates) {
-                  toast.success('Time off request submitted', { description: `Request for ${dates} submitted for approval` })
+                  toast.success('Time off request submitted' submitted for approval` })
                 }
               }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
@@ -2342,7 +2342,7 @@ export default function EmployeesClient() {
             <AIInsightsPanel
               insights={employeesAIInsights}
               title="HR Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
@@ -2407,18 +2407,7 @@ export default function EmployeesClient() {
                       handleOpenEditDialog(matchingDbEmployee)
                     } else {
                       // No DB match - suggest adding employee
-                      toast.info('Employee not in database', {
-                        description: 'This employee is from sample data. Add them to edit.',
-                        action: {
-                          label: 'Add Employee',
-                          onClick: () => {
-                            setNewEmployeeForm({
-                              name: selectedEmployee.name,
-                              email: selectedEmployee.email,
-                              department: selectedEmployee.department,
-                              position: selectedEmployee.position,
-                              startDate: selectedEmployee.hireDate
-                            })
+                      toast.info('Employee not in database')
                             setShowProfileDialog(false)
                             setShowAddDialog(true)
                           }
@@ -2488,9 +2477,9 @@ export default function EmployeesClient() {
                     const keyResultsContainer = document.querySelector('[data-key-results]')
                     if (keyResultsContainer) {
                       const count = keyResultsContainer.children.length
-                      toast.success('Key result added', { description: `Key Result ${count + 1} field added` })
+                      toast.success('Key result added' field added` })
                     } else {
-                      toast.success('Key result added', { description: 'New key result field added' })
+                      toast.success('Key result added')
                     }
                   }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>

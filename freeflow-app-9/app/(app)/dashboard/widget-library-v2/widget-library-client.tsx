@@ -368,47 +368,37 @@ export default function WidgetLibraryClient() {
   const handleInstallWidget = async (widget: Widget) => {
     const { success, error } = await installWidget(widget.id)
     if (success) {
-      toast.success('Widget installed', {
-        description: `"${widget.name}" has been added to your project`
+      toast.success('Widget installed'" has been added to your project`
       })
     } else {
-      toast.error('Installation failed', {
-        description: error || 'Could not install widget'
-      })
+      toast.error('Installation failed')
     }
   }
 
   const handleUninstallWidget = async (widget: Widget) => {
     const { success, error } = await uninstallWidget(widget.id)
     if (success) {
-      toast.success('Widget uninstalled', {
-        description: `"${widget.name}" has been removed from your project`
+      toast.success('Widget uninstalled'" has been removed from your project`
       })
     } else {
-      toast.error('Uninstall failed', {
-        description: error || 'Could not uninstall widget'
-      })
+      toast.error('Uninstall failed')
     }
   }
 
   const handleToggleBookmark = async (widget: Widget) => {
     const { success, isBookmarked, error } = await toggleBookmark(widget.id)
     if (success) {
-      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved', {
-        description: isBookmarked
-          ? `"${widget.name}" saved to your collection`
+      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved'" saved to your collection`
           : `"${widget.name}" removed from saved`
       })
     } else {
-      toast.error('Action failed', {
-        description: error || 'Could not update bookmark'
-      })
+      toast.error('Action failed')
     }
   }
 
   const handlePublishWidget = async () => {
     if (!newWidgetForm.name.trim()) {
-      toast.error('Validation error', { description: 'Widget name is required' })
+      toast.error('Validation error')
       return
     }
 
@@ -430,8 +420,7 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Widget published', {
-        description: `"${newWidgetForm.name}" is now available in the library`
+      toast.success('Widget published'" is now available in the library`
       })
       setShowPublishDialog(false)
       setNewWidgetForm({
@@ -447,15 +436,13 @@ export default function WidgetLibraryClient() {
         github_url: ''
       })
     } else {
-      toast.error('Publishing failed', {
-        description: error || 'Could not publish widget'
-      })
+      toast.error('Publishing failed')
     }
   }
 
   const handleCreateCollection = async () => {
     if (!newCollectionForm.name.trim()) {
-      toast.error('Validation error', { description: 'Collection name is required' })
+      toast.error('Validation error')
       return
     }
 
@@ -465,49 +452,36 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Collection created', {
-        description: `"${newCollectionForm.name}" collection is ready`
+      toast.success('Collection created'" collection is ready`
       })
       setShowCollectionDialog(false)
       setNewCollectionForm({ name: '', description: '' })
     } else {
-      toast.error('Creation failed', {
-        description: error || 'Could not create collection'
-      })
+      toast.error('Creation failed')
     }
   }
 
   const handleExportConfig = async () => {
     const { success, error } = await exportWidgetConfig()
     if (success) {
-      toast.success('Config exported', {
-        description: 'Widget configuration downloaded successfully'
-      })
+      toast.success('Config exported')
     } else {
-      toast.error('Export failed', {
-        description: error || 'Could not export configuration'
-      })
+      toast.error('Export failed')
     }
   }
 
   const handleClearCache = async () => {
     await clearCache()
-    toast.success('Cache cleared', {
-      description: 'Widget cache has been refreshed'
-    })
+    toast.success('Cache cleared')
     setShowConfirmDialog(null)
   }
 
   const handleResetSettings = async () => {
     const { success, error } = await resetSettings()
     if (success) {
-      toast.success('Settings reset', {
-        description: 'All settings restored to defaults'
-      })
+      toast.success('Settings reset')
     } else {
-      toast.error('Reset failed', {
-        description: error || 'Could not reset settings'
-      })
+      toast.error('Reset failed')
     }
     setShowConfirmDialog(null)
   }
@@ -515,13 +489,9 @@ export default function WidgetLibraryClient() {
   const handleUninstallAll = async () => {
     const { success, error } = await uninstallAllWidgets()
     if (success) {
-      toast.success('All widgets uninstalled', {
-        description: 'All widgets have been removed from your project'
-      })
+      toast.success('All widgets uninstalled')
     } else {
-      toast.error('Uninstall failed', {
-        description: error || 'Could not uninstall widgets'
-      })
+      toast.error('Uninstall failed')
     }
     setShowConfirmDialog(null)
   }
@@ -1529,7 +1499,7 @@ export default function WidgetLibraryClient() {
             <AIInsightsPanel
               insights={mockWidgetLibAIInsights}
               title="Widget Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

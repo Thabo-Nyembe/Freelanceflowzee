@@ -517,8 +517,7 @@ export default function GalleryClient() {
         setIsBulkEditMode(!isBulkEditMode)
         setSelectedBulkItems(new Set())
         toast.success(
-          isBulkEditMode ? 'Bulk edit mode disabled' : 'Bulk edit mode enabled',
-          { description: isBulkEditMode ? 'Exited bulk edit mode' : 'Select multiple items to edit at once' }
+          isBulkEditMode ? 'Bulk edit mode disabled' : 'Bulk edit mode enabled'
         )
       }
     },
@@ -531,9 +530,9 @@ export default function GalleryClient() {
         const galleryUrl = `${window.location.origin}/gallery`
         try {
           await navigator.clipboard.writeText(galleryUrl)
-          toast.success('Gallery link copied', { description: 'Share link copied to clipboard' })
+          toast.success('Gallery link copied')
         } catch {
-          toast.error('Failed to copy', { description: 'Could not copy share link' })
+          toast.error('Failed to copy')
         }
       }
     },
@@ -592,7 +591,7 @@ export default function GalleryClient() {
   // Handlers - Real Supabase Operations
   const handleUploadPhoto = async () => {
     if (!uploadForm.title.trim()) {
-      toast.error('Title required', { description: 'Please enter a title for your photo' })
+      toast.error('Title required')
       return
     }
 
@@ -600,7 +599,7 @@ export default function GalleryClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to upload photos' })
+        toast.error('Authentication required')
         return
       }
 
@@ -620,11 +619,11 @@ export default function GalleryClient() {
         metadata: {}
       })
 
-      toast.success('Photo uploaded', { description: `"${uploadForm.title}" has been uploaded successfully` })
+      toast.success('Photo uploaded'" has been uploaded successfully` })
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
     } catch (error: any) {
-      toast.error('Upload failed', { description: error.message || 'Failed to upload photo' })
+      toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -632,7 +631,7 @@ export default function GalleryClient() {
 
   const handleCreateCollection = async () => {
     if (!collectionForm.name.trim()) {
-      toast.error('Name required', { description: 'Please enter a name for your collection' })
+      toast.error('Name required')
       return
     }
 
@@ -640,7 +639,7 @@ export default function GalleryClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to create collections' })
+        toast.error('Authentication required')
         return
       }
 
@@ -651,11 +650,11 @@ export default function GalleryClient() {
         is_public: collectionForm.is_public
       })
 
-      toast.success('Collection created', { description: `"${collectionForm.name}" has been created` })
+      toast.success('Collection created'" has been created` })
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
     } catch (error: any) {
-      toast.error('Creation failed', { description: error.message || 'Failed to create collection' })
+      toast.error('Creation failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -668,9 +667,9 @@ export default function GalleryClient() {
 
     try {
       await deleteCollection(collection.id)
-      toast.success('Collection deleted', { description: `"${collection.name}" has been deleted` })
+      toast.success('Collection deleted'" has been deleted` })
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete collection' })
+      toast.error('Delete failed')
     }
   }
 
@@ -694,8 +693,7 @@ export default function GalleryClient() {
           like_count: !isCurrentlyLiked ? galleryItem.like_count + 1 : Math.max(0, galleryItem.like_count - 1)
         })
         toast.success(
-          isCurrentlyLiked ? 'Unliked' : 'Liked',
-          { description: isCurrentlyLiked ? 'Removed from your likes' : 'Added to your likes' }
+          isCurrentlyLiked ? 'Unliked' : 'Liked'
         )
       } catch (error: any) {
         // Revert on error
@@ -705,13 +703,12 @@ export default function GalleryClient() {
           newLiked.delete(photoId)
         }
         setLikedItems(newLiked)
-        toast.error('Failed to update like', { description: error.message || 'Please try again' })
+        toast.error('Failed to update like')
       }
     } else {
       // For mock data, just show success
       toast.success(
-        isCurrentlyLiked ? 'Unliked' : 'Liked',
-        { description: isCurrentlyLiked ? 'Removed from your likes' : 'Added to your likes' }
+        isCurrentlyLiked ? 'Unliked' : 'Liked'
       )
     }
   }
@@ -743,8 +740,7 @@ export default function GalleryClient() {
         }
 
         toast.success(
-          isCurrentlySaved ? 'Unsaved' : 'Saved',
-          { description: isCurrentlySaved ? 'Removed from your saved items' : 'Added to your saved items' }
+          isCurrentlySaved ? 'Unsaved' : 'Saved'
         )
       } catch (error: any) {
         // Revert on error
@@ -754,13 +750,12 @@ export default function GalleryClient() {
           newSaved.delete(photoId)
         }
         setSavedItems(newSaved)
-        toast.error('Failed to update', { description: error.message || 'Please try again' })
+        toast.error('Failed to update')
       }
     } else {
       // For mock data, just show success
       toast.success(
-        isCurrentlySaved ? 'Unsaved' : 'Saved',
-        { description: isCurrentlySaved ? 'Removed from your saved items' : 'Added to your saved items' }
+        isCurrentlySaved ? 'Unsaved' : 'Saved'
       )
     }
   }
@@ -774,7 +769,7 @@ export default function GalleryClient() {
       await downloadFile(url, `${title.replace(/[^a-z0-9]/gi, '_')}.jpg`)
     } else {
       // For mock data without real URLs, show info toast
-      toast.info('Demo mode', { description: `In production, "${title}" would download here` })
+      toast.info('Demo mode'" would download here` })
     }
 
     // Track download for gallery items
@@ -808,10 +803,10 @@ export default function GalleryClient() {
 
     try {
       await deleteGalleryItem(item.id)
-      toast.success('Photo deleted', { description: `"${item.title}" has been deleted` })
+      toast.success('Photo deleted'" has been deleted` })
       setSelectedGalleryItem(null)
     } catch (error: any) {
-      toast.error('Delete failed', { description: error.message || 'Failed to delete photo' })
+      toast.error('Delete failed')
     }
   }
 
@@ -827,9 +822,9 @@ export default function GalleryClient() {
         throw new Error('Failed to follow photographer')
       }
 
-      toast.success('Following', { description: `You are now following ${photographerName}` })
+      toast.success('Following'` })
     } catch (error: any) {
-      toast.error('Failed to follow', { description: error.message || 'Please try again' })
+      toast.error('Failed to follow')
     }
   }
 
@@ -840,13 +835,13 @@ export default function GalleryClient() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Invalid file', { description: 'Please select an image file' })
+      toast.error('Invalid file')
       return
     }
 
     // Validate file size (max 50MB)
     if (file.size > 50 * 1024 * 1024) {
-      toast.error('File too large', { description: 'Maximum file size is 50MB' })
+      toast.error('File too large')
       return
     }
 
@@ -854,7 +849,7 @@ export default function GalleryClient() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        toast.error('Authentication required', { description: 'Please sign in to upload photos' })
+        toast.error('Authentication required')
         return
       }
 
@@ -874,9 +869,9 @@ export default function GalleryClient() {
         .getPublicUrl(fileName)
 
       setUploadForm(prev => ({ ...prev, file_url: publicUrl }))
-      toast.success('File uploaded', { description: 'Now add a title and save' })
+      toast.success('File uploaded')
     } catch (error: any) {
-      toast.error('Upload failed', { description: error.message || 'Failed to upload file' })
+      toast.error('Upload failed')
     } finally {
       setIsSubmitting(false)
     }
@@ -2099,7 +2094,7 @@ export default function GalleryClient() {
             <AIInsightsPanel
               insights={mockGalleryAIInsights}
               title="Gallery Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

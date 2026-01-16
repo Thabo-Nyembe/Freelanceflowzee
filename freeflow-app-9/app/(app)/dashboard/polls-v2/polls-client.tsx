@@ -869,7 +869,7 @@ export default function PollsClient() {
       a.href = url
       a.download = 'polls-export.csv'
       a.click()
-      toast.success('Export completed', { description: 'Polls exported to CSV' })
+      toast.success('Export completed')
     } catch {
       toast.error('Export failed')
     }
@@ -2507,7 +2507,7 @@ export default function PollsClient() {
             <AIInsightsPanel
               insights={mockPollsAIInsights}
               title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">

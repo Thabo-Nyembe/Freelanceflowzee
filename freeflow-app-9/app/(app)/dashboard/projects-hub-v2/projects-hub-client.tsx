@@ -1532,7 +1532,7 @@ export default function ProjectsHubClient() {
                             <div className="text-sm text-gray-500">Command-line interface for automation</div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.success('CLI tool download started', { description: 'Check your downloads folder' })
+                            toast.success('CLI tool download started')
                             window.open('/downloads/freeflow-cli', '_blank')
                           }}>
                             <Download className="h-4 w-4 mr-2" />
