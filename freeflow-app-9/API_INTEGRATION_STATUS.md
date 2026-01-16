@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 133/286 pages integrated (46.5%)
+**Overall Progress:** 134/286 pages integrated (46.9%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 127/223 using Supabase hooks (57.0%) 🚧
-  - **Mock → Database:** 4/157 migrated (2.5%) 🎉 NEW!
+- **V2 Pages:** 128/223 using Supabase hooks (57.4%) 🚧
+  - **Mock → Database:** 5/157 migrated (3.2%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 133/286 pages integrated (46.5%)
+**Overall Progress:** 134/286 pages integrated (46.9%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 127/223 (57.0%) 🚧
+**V2 Pages (Supabase Hooks):** 128/223 (57.4%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 4 pages 🎉
-**Remaining:** 96 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 5 pages 🎉
+**Remaining:** 95 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -323,7 +323,7 @@ Based on detailed analysis of 21 sample pages:
 This category tracks pages migrated from mock/setTimeout data to real database integration,
 bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 
-**Pages Migrated: 4/157 (2.5%)**
+**Pages Migrated: 5/157 (3.2%)**
 
 **Completed Migrations:**
 1. `help-center-v2` - ✅ **MIGRATED** (3,257 lines, +67 net) - Commit: `18da5532`
@@ -364,6 +364,17 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~1.5 hours
    - **Complexity:** Medium (schema mapping required, straightforward byte-to-MB conversion)
 
+5. `api-keys-v2` - ✅ **MIGRATED** (3,279 lines, +0 net) - Commit: TBD
+   - **Pattern:** Hook integration with schema mapping + filter support (UI ApiKey ↔ DB ApiKey)
+   - **Tables:** api_keys
+   - **Mapping:** Database fields (last_ip_address) → UI fields (last_used_ip), plus default values for missing fields (rate_limit_per_minute, requests_this_week, last_used_location, rotated_at, rotation_interval_days)
+   - **Write Operations:** Full CRUD hooks available (createKey, updateKey, deleteKey, revokeKey)
+   - **Impact:** Real database integration with filter support (status, keyType, environment), real-time updates, comprehensive API key management
+   - **Kept as Mock:** Applications, webhooks, scopes, API logs (competitive showcase features)
+   - **Fixes:** Fixed pre-existing template literal syntax error (line 2606)
+   - **Migration Time:** ~1 hour
+   - **Complexity:** Medium (schema mapping with default values, multiple filter integration)
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -379,7 +390,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 - audio-studio-v2 (NOTE: Schema mismatch - skip until resolved)
 - Estimated: 10-15 pages can be migrated quickly with existing hooks
 
-**Total Remaining:** 154 V2 pages with mock/setTimeout data need real database integration
+**Total Remaining:** 153 V2 pages with mock/setTimeout data need real database integration
 
 #### Available Hooks Infrastructure
 

@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (4/301 pages migrated - 1.3%) 🎉 FOURTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (5/301 pages migrated - 1.7%) 🎉 FIFTH MILESTONE!
 
 ---
 
@@ -80,7 +80,7 @@
 
 **Goal:** Migrate all 301 pages with mock/setTimeout data to real database integration
 
-**Current Progress:** 4/301 pages migrated (1.3%) 🎉 **FOURTH MILESTONE ACHIEVED!**
+**Current Progress:** 5/301 pages migrated (1.7%) 🎉 **FIFTH MILESTONE ACHIEVED!**
 
 ### Completed Migrations
 
@@ -320,6 +320,100 @@ const mappedModels: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D =>
 4. Sync mapped data to local state via useEffect
 5. Update all dependencies to use mapped data instead of mock data
 
+#### 5. api-keys-v2 ✅ (Commit: TBD)
+**File:** `app/(app)/dashboard/api-keys-v2/api-keys-client.tsx` (3,279 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** Medium (schema mapping with default values, multiple filter integration)
+
+**Before:** Mock data with no hooks
+```typescript
+const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys)
+// No hooks imported, all mock data
+```
+
+**After:** Hook integration with schema mapping and filter support
+```typescript
+const { keys: dbKeys, stats: dbStats, isLoading, error, fetchKeys } = useApiKeys([], {
+  status: filterStatus !== 'all' ? filterStatus as DBApiKey['status'] : undefined,
+  keyType: filterKeyType !== 'all' ? filterKeyType as DBApiKey['key_type'] : undefined,
+  environment: filterEnvironment !== 'all' ? filterEnvironment as DBApiKey['environment'] : undefined
+})
+
+// Map database ApiKeys to UI format with default values for missing fields
+const mappedKeys: ApiKey[] = useMemo(() => dbKeys.map((dbKey): ApiKey => ({
+  id: dbKey.id,
+  name: dbKey.name,
+  description: dbKey.description || '',
+  key_prefix: dbKey.key_prefix,
+  key_code: dbKey.key_code,
+  key_type: dbKey.key_type as KeyType,
+  permission: dbKey.permission as Permission,
+  environment: dbKey.environment,
+  status: dbKey.status as KeyStatus,
+  scopes: dbKey.scopes,
+  rate_limit_per_hour: dbKey.rate_limit_per_hour,
+  rate_limit_per_minute: 0, // Not in DB, default to 0
+  total_requests: dbKey.total_requests,
+  requests_today: dbKey.requests_today,
+  requests_this_week: 0, // Not in DB, default to 0
+  last_used_at: dbKey.last_used_at,
+  last_used_ip: dbKey.last_ip_address,  // Field name mapping
+  last_used_location: null, // Not in DB, default to null
+  created_at: dbKey.created_at,
+  created_by: dbKey.created_by || 'system',
+  expires_at: dbKey.expires_at,
+  rotated_at: null, // Not in DB, default to null
+  rotation_interval_days: null, // Not in DB, default to null
+  ip_whitelist: dbKey.ip_whitelist,
+  allowed_origins: dbKey.allowed_origins,
+  tags: dbKey.tags,
+  metadata: dbKey.metadata as Record<string, string>
+})), [dbKeys])
+```
+
+**Tables Integrated:**
+- `api_keys` - API key management, authentication, scopes, rate limiting
+
+**Schema Mapping Performed:**
+- Database fields → UI fields conversion
+- `last_ip_address` → `last_used_ip` (field name mapping)
+- Default values for missing fields: `rate_limit_per_minute: 0`, `requests_this_week: 0`, `last_used_location: null`, `rotated_at: null`, `rotation_interval_days: null`
+
+**Write Operations Available:**
+- `createKey` - Mutation hook for creating new API keys
+- `updateKey` - Mutation hook for updating key metadata
+- `deleteKey` - Mutation hook for deleting keys
+- `revokeKey` - Mutation hook for revoking keys
+
+**Filters Integrated:**
+- Status filter (active, inactive, expired, revoked)
+- Key type filter (api, webhook, oauth, jwt, service)
+- Environment filter (production, staging, development)
+
+**Dependencies Updated:**
+- Stats calculation now depends on `[apiKeys]` instead of `[]`
+- Filtered keys now uses `apiKeys` instead of `mockApiKeys`
+- Export handler now exports `apiKeys` instead of `mockApiKeys`
+- All 14 references to `mockApiKeys` replaced with `apiKeys`
+
+**Fixes Applied:**
+- Fixed pre-existing template literal syntax error at line 2606
+
+**Impact:**
+- ✅ Real database integration with filter support (status, keyType, environment)
+- ✅ Real-time updates via Supabase subscriptions
+- ✅ Schema mapping with sensible defaults for missing fields
+- ✅ Field name mapping maintains UI compatibility
+- ✅ Full CRUD mutation hooks ready for write operations
+- ✅ Kept mock data for applications, webhooks, scopes, logs (competitive showcase features)
+
+**Pattern Reinforced (schema mapping with default values):**
+1. Import hooks with DB types (ApiKey as DBApiKey)
+2. Call hooks with multiple filter options
+3. Map DB schema to UI schema with useMemo, providing default values for missing fields
+4. Sync mapped data to local state via useEffect
+5. Update all dependencies and references to use mapped data
+
 ### Next Targets (Priority Order)
 
 **Quick Wins** (hooks already available):
@@ -329,7 +423,7 @@ const mappedModels: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D =>
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 297 pages need mock data → database migration
+**Remaining:** 296 pages need mock data → database migration
 
 ---
 

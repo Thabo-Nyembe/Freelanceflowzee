@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useApiKeys, ApiKey as DBApiKey } from '@/lib/hooks/use-api-keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -897,13 +898,66 @@ export default function ApiKeysClient() {
   const [filterKeyType, setFilterKeyType] = useState<string>('all')
   const [expiryDays, setExpiryDays] = useState('30')
 
+  // Database integration with useApiKeys hook
+  const { keys: dbKeys, stats: dbStats, isLoading, error, fetchKeys } = useApiKeys([], {
+    status: filterStatus !== 'all' ? filterStatus as DBApiKey['status'] : undefined,
+    keyType: filterKeyType !== 'all' ? filterKeyType as DBApiKey['key_type'] : undefined,
+    environment: filterEnvironment !== 'all' ? filterEnvironment as DBApiKey['environment'] : undefined
+  })
+
+  // Map database ApiKeys to UI format
+  const mappedKeys: ApiKey[] = useMemo(() => dbKeys.map((dbKey): ApiKey => ({
+    id: dbKey.id,
+    name: dbKey.name,
+    description: dbKey.description || '',
+    key_prefix: dbKey.key_prefix,
+    key_code: dbKey.key_code,
+    key_type: dbKey.key_type as KeyType,
+    permission: dbKey.permission as Permission,
+    environment: dbKey.environment,
+    status: dbKey.status as KeyStatus,
+    scopes: dbKey.scopes,
+    rate_limit_per_hour: dbKey.rate_limit_per_hour,
+    rate_limit_per_minute: 0, // Not in DB, default to 0
+    total_requests: dbKey.total_requests,
+    requests_today: dbKey.requests_today,
+    requests_this_week: 0, // Not in DB, default to 0
+    last_used_at: dbKey.last_used_at,
+    last_used_ip: dbKey.last_ip_address,
+    last_used_location: null, // Not in DB, default to null
+    created_at: dbKey.created_at,
+    created_by: dbKey.created_by || 'system',
+    expires_at: dbKey.expires_at,
+    rotated_at: null, // Not in DB, default to null
+    rotation_interval_days: null, // Not in DB, default to null
+    ip_whitelist: dbKey.ip_whitelist,
+    allowed_origins: dbKey.allowed_origins,
+    tags: dbKey.tags,
+    metadata: dbKey.metadata as Record<string, string>
+  })), [dbKeys])
+
+  // Sync mapped data to local state
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys)
+  useEffect(() => {
+    if (mappedKeys.length > 0) {
+      setApiKeys(mappedKeys)
+    } else if (!isLoading && !error) {
+      setApiKeys(mockApiKeys)
+    }
+  }, [mappedKeys, isLoading, error])
+
+  // Fetch keys on mount
+  useEffect(() => {
+    fetchKeys()
+  }, [fetchKeys])
+
   // Dashboard stats
   const stats = useMemo(() => ({
-    totalKeys: mockApiKeys.length,
-    activeKeys: mockApiKeys.filter(k => k.status === 'active').length,
-    totalRequests: mockApiKeys.reduce((sum, k) => sum + k.total_requests, 0),
-    requestsToday: mockApiKeys.reduce((sum, k) => sum + k.requests_today, 0),
-    expiringSoon: mockApiKeys.filter(k => {
+    totalKeys: apiKeys.length,
+    activeKeys: apiKeys.filter(k => k.status === 'active').length,
+    totalRequests: apiKeys.reduce((sum, k) => sum + k.total_requests, 0),
+    requestsToday: apiKeys.reduce((sum, k) => sum + k.requests_today, 0),
+    expiringSoon: apiKeys.filter(k => {
       if (!k.expires_at) return false
       const days = Math.ceil((new Date(k.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       return days > 0 && days <= 30
@@ -911,16 +965,16 @@ export default function ApiKeysClient() {
     totalApps: mockApplications.length,
     totalWebhooks: mockWebhooks.length,
     failingWebhooks: mockWebhooks.filter(w => w.status === 'failing').length
-  }), [])
+  }), [apiKeys])
 
   // Filtered data
   const filteredKeys = useMemo(() => {
-    return mockApiKeys.filter(key =>
+    return apiKeys.filter(key =>
       key.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       key.key_prefix.toLowerCase().includes(searchQuery.toLowerCase()) ||
       key.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     )
-  }, [searchQuery])
+  }, [apiKeys, searchQuery])
 
   const filteredApps = useMemo(() => {
     return mockApplications.filter(app =>
@@ -1052,7 +1106,7 @@ export default function ApiKeysClient() {
   }
 
   const handleExportKeys = () => {
-    const keysData = mockApiKeys.map(k => ({
+    const keysData = apiKeys.map(k => ({
       name: k.name,
       key_prefix: k.key_prefix,
       status: k.status,
@@ -1108,7 +1162,7 @@ export default function ApiKeysClient() {
       label: 'Rotate Keys',
       icon: 'refresh',
       action: () => {
-        const activeKeys = mockApiKeys.filter(k => k.status === 'active')
+        const activeKeys = apiKeys.filter(k => k.status === 'active')
         toast.promise(
           Promise.all(activeKeys.map(k =>
             navigator.clipboard.writeText(`rotated_${k.key_code}`)
@@ -1202,7 +1256,7 @@ export default function ApiKeysClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiKeys.length}</p>
+                    <p className="text-3xl font-bold">{apiKeys.length}</p>
                     <p className="text-slate-300 text-sm">API Keys</p>
                   </div>
                   <div className="text-center">
@@ -1278,7 +1332,7 @@ export default function ApiKeysClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockApiKeys.slice(0, 5).map((key, index) => (
+                    {apiKeys.slice(0, 5).map((key, index) => (
                       <div key={key.id} className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-r from-slate-500 to-gray-600 flex items-center justify-center text-white text-xs font-bold">
                           {index + 1}
@@ -1344,15 +1398,15 @@ export default function ApiKeysClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiKeys.filter(k => k.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{apiKeys.filter(k => k.status === 'active').length}</p>
                     <p className="text-amber-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiKeys.filter(k => k.status === 'revoked').length}</p>
+                    <p className="text-3xl font-bold">{apiKeys.filter(k => k.status === 'revoked').length}</p>
                     <p className="text-amber-200 text-sm">Revoked</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiKeys.length}</p>
+                    <p className="text-3xl font-bold">{apiKeys.length}</p>
                     <p className="text-amber-200 text-sm">Total</p>
                   </div>
                 </div>
@@ -2238,14 +2292,14 @@ export default function ApiKeysClient() {
             </DialogHeader>
             <div className="py-4">
               <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-                <p className="font-medium text-amber-700 dark:text-amber-400">{mockApiKeys.filter(k => k.status === 'active').length} active keys will be rotated</p>
+                <p className="font-medium text-amber-700 dark:text-amber-400">{apiKeys.filter(k => k.status === 'active').length} active keys will be rotated</p>
                 <p className="text-sm text-amber-600 mt-1">All applications using these keys will need to be updated.</p>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setRotateAllDialogOpen(false)}>Cancel</Button>
               <Button onClick={() => {
-                const activeKeys = mockApiKeys.filter(k => k.status === 'active')
+                const activeKeys = apiKeys.filter(k => k.status === 'active')
                 toast.promise(Promise.resolve(), { loading: `Rotating ${activeKeys.length} keys...`, success: `${activeKeys.length} keys rotated successfully`, error: 'Failed to rotate keys' })
                 setRotateAllDialogOpen(false)
               }}>Rotate All Keys</Button>
@@ -2261,7 +2315,7 @@ export default function ApiKeysClient() {
               <DialogDescription>Select a key to copy to your clipboard.</DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-2 max-h-64 overflow-y-auto">
-              {mockApiKeys.filter(k => k.status === 'active').map(key => (
+              {apiKeys.filter(k => k.status === 'active').map(key => (
                 <div key={key.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => { handleCopyKey(`${key.key_prefix}${key.key_code}`); setCopyKeyDialogOpen(false) }}>
                   <div>
                     <p className="font-medium text-sm">{key.name}</p>
@@ -2284,10 +2338,10 @@ export default function ApiKeysClient() {
             <div className="py-4 space-y-4">
               <div className="space-y-2">
                 <Label>Select Key</Label>
-                <Select onValueChange={(v) => setKeyToAction(mockApiKeys.find(k => k.id === v) || null)}>
+                <Select onValueChange={(v) => setKeyToAction(apiKeys.find(k => k.id === v) || null)}>
                   <SelectTrigger><SelectValue placeholder="Select a key" /></SelectTrigger>
                   <SelectContent>
-                    {mockApiKeys.filter(k => k.status === 'active').map(key => (
+                    {apiKeys.filter(k => k.status === 'active').map(key => (
                       <SelectItem key={key.id} value={key.id}>{key.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2357,10 +2411,10 @@ export default function ApiKeysClient() {
             <div className="py-4 space-y-4">
               <div className="space-y-2">
                 <Label>Select Key</Label>
-                <Select onValueChange={(v) => setKeyToAction(mockApiKeys.find(k => k.id === v) || null)}>
+                <Select onValueChange={(v) => setKeyToAction(apiKeys.find(k => k.id === v) || null)}>
                   <SelectTrigger><SelectValue placeholder="Select a key" /></SelectTrigger>
                   <SelectContent>
-                    {mockApiKeys.map(key => (
+                    {apiKeys.map(key => (
                       <SelectItem key={key.id} value={key.id}>{key.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2549,7 +2603,7 @@ export default function ApiKeysClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => { setFilterEnvironment('all'); setFilterStatus('all'); setFilterKeyType('all') }}>Reset</Button>
               <Button onClick={() => {
-                toast.success('Filters applied', Status: ${filterStatus}, Type: ${filterKeyType}` })
+                toast.success(`Filters applied - Status: ${filterStatus}, Type: ${filterKeyType}`)
                 setFilterDialogOpen(false)
               }}>Apply Filters</Button>
             </DialogFooter>
