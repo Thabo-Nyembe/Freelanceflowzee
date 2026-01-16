@@ -122,7 +122,6 @@ const GALLERY_ITEMS: GalleryItem[] = [
 export default function GalleryPage() {
   const router = useRouter()
 
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -153,11 +152,7 @@ export default function GalleryPage() {
 
         setGalleryItems(data?.items || GALLERY_ITEMS)
         setIsLoading(false)
-        announce('Gallery loaded successfully', 'polite')
-        logger.info('Gallery data loaded', {
-          itemCount: data?.items?.length || GALLERY_ITEMS.length
-        })
-      } catch (err) {
+        announce('Gallery loaded successfully', 'polite')      } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load gallery'
         setError(errorMsg)
         setIsLoading(false)
@@ -189,14 +184,7 @@ export default function GalleryPage() {
   })
 
   // Handle Download
-  const handleDownload = (item: GalleryItem) => {
-    logger.info('Gallery item download initiated', {
-      itemId: item.id,
-      itemName: item.name,
-      fileSize: item.fileSize
-    })
-
-    const downloadPromise = async () => {
+  const handleDownload = (item: GalleryItem) => {    const downloadPromise = async () => {
       const response = await fetch(`/api/gallery/download?itemId=${item.id}`)
       if (!response.ok) throw new Error('Download failed')
 
@@ -209,10 +197,7 @@ export default function GalleryPage() {
         a.download = item.name
         a.click()
         window.URL.revokeObjectURL(url)
-      }
-
-      logger.info('Gallery item downloaded successfully', { itemId: item.id })
-      return true
+      }      return true
     }
 
     toast.promise(downloadPromise(), {
@@ -223,13 +208,7 @@ export default function GalleryPage() {
   }
 
   // Handle Share
-  const handleShare = async (item: GalleryItem) => {
-    logger.info('Gallery item share initiated', {
-      itemId: item.id,
-      itemName: item.name
-    })
-
-    const sharePromise = async () => {
+  const handleShare = async (item: GalleryItem) => {    const sharePromise = async () => {
       const response = await fetch('/api/gallery/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -242,10 +221,7 @@ export default function GalleryPage() {
 
       if (!response.ok) {
         throw new Error('Failed to generate share link')
-      }
-
-      logger.info('Gallery item share link generated', { itemId: item.id })
-      return true
+      }      return true
     }
 
     toast.promise(sharePromise(), {
@@ -258,14 +234,7 @@ export default function GalleryPage() {
   // Handle Delete
   const handleDelete = (itemId: number) => {
     const item = galleryItems.find(i => i.id === itemId)
-    if (!item) return
-
-    logger.info('Gallery item deletion initiated', {
-      itemId,
-      itemName: item.name
-    })
-
-    setDeleteItem({ id: itemId, name: item.name })
+    if (!item) return    setDeleteItem({ id: itemId, name: item.name })
   }
 
   const handleConfirmDelete = async () => {
@@ -285,9 +254,7 @@ export default function GalleryPage() {
         throw new Error('Failed to delete item')
       }
 
-      setGalleryItems(galleryItems.filter(i => i.id !== itemToDelete.id))
-      logger.info('Gallery item deleted successfully', { itemId: itemToDelete.id })
-      return true
+      setGalleryItems(galleryItems.filter(i => i.id !== itemToDelete.id))      return true
     }
 
     toast.promise(deletePromise(), {
@@ -300,16 +267,11 @@ export default function GalleryPage() {
   // Handle Bulk Download
   const handleBulkDownload = async () => {
     if (selectedItems.length === 0) {
-      toast.error('No items selected', {
-        description: 'Select items to download'
-      })
+      toast.error('No items selected')
       return
     }
 
-    const itemCount = selectedItems.length
-    logger.info('Bulk download initiated', { itemCount })
-
-    const bulkDownloadPromise = async () => {
+    const itemCount = selectedItems.length    const bulkDownloadPromise = async () => {
       const response = await fetch('/api/gallery/bulk-download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -318,10 +280,7 @@ export default function GalleryPage() {
 
       if (!response.ok) {
         throw new Error('Failed to prepare download')
-      }
-
-      logger.info('Bulk download prepared', { itemCount })
-      setSelectedItems([])
+      }      setSelectedItems([])
       return true
     }
 
@@ -543,11 +502,7 @@ export default function GalleryPage() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={async () => {
-                              logger.info('Gallery item preview opened', {
-                                itemId: item.id
-                              })
-                              toast.promise(
+                            onClick={async () => {                              toast.promise(
                                 fetch(`/api/gallery/preview?itemId=${item.id}`).then(res => {
                                   if (!res.ok) throw new Error('Preview failed')
                                   return res.json()
