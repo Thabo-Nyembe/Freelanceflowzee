@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { useCloudStorage } from '@/lib/hooks/use-cloud-storage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -476,7 +475,7 @@ const getStorageQuickActions = (onUpload: () => void, onNewFolder: () => void, o
 
 export default function CloudStorageClient() {
   // Initialize Supabase client and hook
-  const supabase = createClient()
+
   const { files: dbFiles, loading: filesLoading, addFile, updateFile, deleteFile, toggleStarred, refetch } = useCloudStorage()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -612,6 +611,8 @@ export default function CloudStorageClient() {
     setUploadProgress(0)
 
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in to upload files' })
@@ -792,12 +793,16 @@ export default function CloudStorageClient() {
       }
 
       // Get download URL from Supabase Storage
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in to download files' })
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase.storage
         .from('cloud-storage')
         .download(file.path)
@@ -841,6 +846,8 @@ export default function CloudStorageClient() {
 
         // Also delete from storage if not a folder
         if (!fileToDelete.isFolder) {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
           await supabase.storage
             .from('cloud-storage')
             .remove([dbFile.file_path])
@@ -889,6 +896,8 @@ export default function CloudStorageClient() {
   // Copy file
   const handleCopy = async (file: CloudFile) => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in' })
@@ -1243,6 +1252,8 @@ export default function CloudStorageClient() {
       try {
         toast.loading(`Opening "${file.name}"...`)
 
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
           toast.dismiss()
@@ -1250,6 +1261,8 @@ export default function CloudStorageClient() {
           return
         }
 
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         const { data, error } = await supabase.storage
           .from('cloud-storage')
           .createSignedUrl(file.path, 3600) // 1 hour expiry

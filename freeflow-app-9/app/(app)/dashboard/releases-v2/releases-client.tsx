@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -560,7 +559,7 @@ const initialFormData: ReleaseFormData = {
 }
 
 export default function ReleasesClient() {
-  const supabase = createClient()
+
 
   // UI State
   const [activeTab, setActiveTab] = useState('releases')
@@ -602,9 +601,13 @@ export default function ReleasesClient() {
   const fetchReleases = useCallback(async () => {
     try {
       setIsLoading(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('releases')
         .select('*')
@@ -620,14 +623,18 @@ export default function ReleasesClient() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch deployments
   const fetchDeployments = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('deployments')
         .select('*')
@@ -639,14 +646,18 @@ export default function ReleasesClient() {
     } catch (error) {
       console.error('Error fetching deployments:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Fetch rollbacks
   const fetchRollbacks = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('rollbacks')
         .select('*')
@@ -658,7 +669,7 @@ export default function ReleasesClient() {
     } catch (error) {
       console.error('Error fetching rollbacks:', error)
     }
-  }, [supabase])
+  }, [])
 
   // Initial data fetch
   useEffect(() => {
@@ -691,12 +702,14 @@ export default function ReleasesClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, fetchDeployments, fetchRollbacks])
+  }, [ fetchDeployments, fetchRollbacks])
 
   // Create release
   const handleCreateRelease = async () => {
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to create a release')
@@ -731,6 +744,8 @@ export default function ReleasesClient() {
         metadata: {}
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('releases')
         .insert(releaseData)
@@ -758,12 +773,16 @@ export default function ReleasesClient() {
 
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to update a release')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('releases')
         .update({
@@ -805,12 +824,16 @@ export default function ReleasesClient() {
 
     try {
       setIsSaving(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to delete a release')
         return
       }
 
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { error } = await supabase
         .from('releases')
         .update({ deleted_at: new Date().toISOString() })
@@ -838,6 +861,8 @@ export default function ReleasesClient() {
 
     try {
       setIsDeploying(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to deploy a release')
@@ -894,6 +919,8 @@ export default function ReleasesClient() {
 
     try {
       setIsRollingBack(true)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to rollback a release')
@@ -1511,12 +1538,16 @@ export default function ReleasesClient() {
                                   if (!dbRelease) return
 
                                   try {
+                                    const { createClient } = await import('@/lib/supabase/client')
+                                    const supabase = createClient()
                                     const { data: { user } } = await supabase.auth.getUser()
                                     if (!user) {
                                       toast.error('You must be logged in to pause deployment')
                                       return
                                     }
 
+                                    const { createClient } = await import('@/lib/supabase/client')
+                                    const supabase = createClient()
                                     const { error } = await supabase
                                       .from('releases')
                                       .update({ status: 'scheduled', updated_at: new Date().toISOString() })
