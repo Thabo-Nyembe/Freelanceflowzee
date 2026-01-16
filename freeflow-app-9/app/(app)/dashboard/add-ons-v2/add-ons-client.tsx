@@ -508,22 +508,13 @@ export default function AddOnsClient() {
     requiredVersion: undefined
   })), [dbAddOns])
 
-  const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
+  // Use mapped database data directly (no mock fallback)
+  const addOns = mappedAddOns
 
   // Fetch initial data
   useEffect(() => {
     fetchAddOns()
   }, [fetchAddOns])
-
-  // Sync database data to local state
-  useEffect(() => {
-    if (mappedAddOns.length > 0) {
-      setAddOns(mappedAddOns)
-    } else if (!isLoading && !error) {
-      // Keep mock data as fallback when no database data
-      setAddOns(mockAddOns)
-    }
-  }, [mappedAddOns, isLoading, error])
   const [showFilterDialog, setShowFilterDialog] = useState(false)
   const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
   const [showCategoryRequestDialog, setShowCategoryRequestDialog] = useState(false)
