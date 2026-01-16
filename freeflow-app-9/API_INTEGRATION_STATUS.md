@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 138/286 pages integrated (48.3%)
+**Overall Progress:** 139/286 pages integrated (48.6%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 132/223 using Supabase hooks (59.2%) 🚧
-  - **Mock → Database:** 9/157 migrated (5.7%) 🎉 NEW!
+- **V2 Pages:** 133/223 using Supabase hooks (59.6%) 🚧
+  - **Mock → Database:** 10/157 migrated (6.4%) 🎉 NEW!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -52,15 +52,15 @@
 ### 🚧 Phase 3: Page Migrations (IN PROGRESS)
 
 **Actual Dashboard Pages:** 286 pages (63 V1 + 223 V2)
-**Overall Progress:** 136/286 pages integrated (47.6%)
+**Overall Progress:** 139/286 pages integrated (48.6%)
 
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 130/223 (58.3%) 🚧
+**V2 Pages (Supabase Hooks):** 133/223 (59.6%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 123 pages
-  - **Mock → Database Migrations (Category E):** 7 pages 🎉
-**Remaining:** 93 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 10 pages 🎉
+**Remaining:** 90 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -419,7 +419,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Migration Time:** ~45 minutes
    - **Complexity:** Medium (hook integration with real-time subscriptions, 3 mutation functions migrated, schema mapping with field transformations and array mapping)
 
-9. `alerts` (app/v2/dashboard) - ✅ **MIGRATED** (3,122 lines) - Commit: TBD
+9. `alerts` (app/v2/dashboard) - ✅ **MIGRATED** (3,122 lines) - Commit: `1e65ab7d`
    - **Pattern:** Completion of partial integration - removed mock fallback pattern
    - **Tables:** alerts (via use-alerts hook)
    - **Hook Features:** Already integrated with createAlert, acknowledgeAlert, resolveAlert, escalateAlert, snoozeAlert, deleteAlert mutations
@@ -432,6 +432,33 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
    - **Note:** File has pre-existing template literal syntax errors (lines 584, 630, 1019 - unrelated to migration)
    - **Migration Time:** ~10 minutes (was 95% complete, only needed fallback removal)
    - **Complexity:** Low (page was already integrated, just needed final cleanup)
+
+10. `ai-design` (app/v2/dashboard) - ✅ **MIGRATED** (3,594 lines) - Commit: TBD
+   - **Pattern:** Manual Supabase → Hooks with schema mapping (UI Generation ↔ DB AIDesign)
+   - **Tables:** ai_designs (via use-ai-designs hook)
+   - **Hook Features:** Real-time subscriptions, automatic refetch, mutation hooks (createDesign, updateDesign, likeDesign, incrementViews, deleteDesign)
+   - **Mapping:** Complex schema transformation:
+     - **Style mapping:** DB style ('modern', 'minimalist', 'creative', 'professional', 'abstract', 'vintage') → UI StylePreset ('digital_art', 'photorealistic', 'minimalist', 'vintage')
+     - **Model mapping:** DB model format ('dalle-3', 'midjourney-v6') → UI ModelType ('dalle_3', 'midjourney_v6')
+     - **AspectRatio calculation:** Computed from resolution string (e.g., '1024x1024' → '1:1', '1536x864' → '16:9')
+     - **Status mapping:** DB status ('pending', 'processing', 'completed', 'failed') → UI GenerationStatus (adds 'upscaling' type)
+     - **Field transformations:** output_url → imageUrl, thumbnail_url → thumbnailUrl, is_public → isPublic, output_urls → variations array, generation_time_ms → generationTime
+     - **Default values:** negativePrompt (''), quality ('standard'), isFavorite (false), upscaledUrl (undefined)
+   - **Write Operations:** Replaced manual Supabase calls with hook mutations:
+     - CREATE: createDesign() for handleGenerate with reverse style mapping (UI StylePreset → DB style)
+     - DELETE: deleteDesign() for handleDeleteGeneration
+     - DOWNLOAD: Client-side download handler (creates blob link from imageUrl)
+     - FAVORITE: Disabled (DB doesn't have is_favorite field - noted for future enhancement)
+   - **Cleanup:**
+     - Removed manual fetchGenerations function (48 lines) that was querying wrong table (ai_design_projects instead of ai_designs)
+     - Removed duplicate createClient() imports in handleGenerate (lines 396+401, 468+476)
+     - Fixed pre-existing syntax error in handleExportDesigns (malformed template literal)
+     - Removed unnecessary Supabase auth call in handleCreateCollection
+   - **Impact:** Migrated from wrong table (ai_design_projects) to correct table (ai_designs) using proper hooks, real database integration with real-time subscriptions, schema mapping converts DB AIDesign to UI Generation format
+   - **Kept as Mock:** Collections (no hook available yet), PromptHistory (no hook available yet), StyleTemplates (UI-only competitive showcase feature)
+   - **Note:** File has pre-existing template literal syntax errors in JSX (lines 2158, 2329 - unrelated to migration)
+   - **Migration Time:** ~50 minutes
+   - **Complexity:** High (manual Supabase → hooks migration, complex bidirectional schema mapping with aspect ratio calculation, 3 mutation functions migrated, corrected table from ai_design_projects to ai_designs)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)

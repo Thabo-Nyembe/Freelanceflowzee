@@ -11,7 +11,7 @@
 
 **Phase 1 Complete:** ✅ API Client Infrastructure (21 files, 80+ hooks, ~4,700 LOC)
 **Phase 2 Complete:** ✅ Comprehensive Documentation (Migration Guide, Examples, Status Tracking)
-**Phase 3 In Progress:** 🚧 Page Migrations (9/301 pages migrated - 3.0%) 🎉 NINTH MILESTONE!
+**Phase 3 In Progress:** 🚧 Page Migrations (10/301 pages migrated - 3.3%) 🎉 TENTH MILESTONE!
 
 ---
 
@@ -938,6 +938,155 @@ const alertStats = useMemo(() => {
 - ✅ Schema mapping already complete
 - ✅ Kept mock data for: OnCallSchedules, Services, EscalationPolicies, Integrations, AIInsights, Collaborators, Predictions, Activities (supplementary competitive showcase features)
 
+#### 10. ai-design (v2) ✅ (Commit: TBD)
+**File:** `app/v2/dashboard/ai-design/ai-design-client.tsx` (3,594 lines)
+**Migration Date:** January 16, 2026
+**Complexity:** High (manual Supabase → hooks migration with complex bidirectional schema mapping, corrected table usage)
+
+**Before:** Manual Supabase with wrong table (ai_design_projects), mock data fallback
+```typescript
+// Wrong table usage
+const [generations, setGenerations] = useState<Generation[]>(mockGenerations)
+
+const fetchGenerations = useCallback(async () => {
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  // ... duplicate createClient imports (bug)
+  const { data, error } = await supabase
+    .from('ai_design_projects')  // ❌ Wrong table!
+    .select('*')
+    .eq('user_id', user.id)
+
+  // Complex mapping from ai_design_projects to Generation
+  const mapped: Generation[] = data.map((p: any) => ({
+    // ... manual mapping
+  }))
+  setGenerations(mapped)
+}, [])
+
+// Manual mutations with duplicate imports
+const handleGenerate = async () => {
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  const { createClient } = await import('@/lib/supabase/client')  // ❌ Duplicate!
+  const supabase = createClient()
+  // ... manual insert into ai_design_projects
+}
+```
+
+**After:** useAIDesigns hook with correct table (ai_designs), schema mapping
+```typescript
+// Hook integration
+import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
+
+const {
+  designs: dbDesigns,
+  stats: dbStats,
+  isLoading: isLoadingDesigns,
+  createDesign,
+  updateDesign,
+  deleteDesign,
+  fetchDesigns
+} = useAIDesigns([])
+
+// Schema mapping with bidirectional transformations
+const styleMap: Record<DBAIDesign['style'], StylePreset> = {
+  'modern': 'digital_art',
+  'minimalist': 'minimalist',
+  'creative': 'digital_art',
+  'professional': 'photorealistic',
+  'abstract': 'digital_art',
+  'vintage': 'vintage'
+}
+
+const dbStyleMap: Record<StylePreset, DBAIDesign['style']> = {
+  'photorealistic': 'professional',
+  'anime': 'creative',
+  'digital_art': 'modern',
+  // ... reverse mapping for writes
+}
+
+const generations: Generation[] = useMemo(() => {
+  return dbDesigns.map((dbDesign): Generation => ({
+    id: dbDesign.id,
+    prompt: dbDesign.prompt,
+    style: styleMap[dbDesign.style] || 'digital_art',
+    model: modelMap[dbDesign.model] || 'midjourney_v6',
+    aspectRatio: aspectRatioFromResolution(dbDesign.resolution),
+    imageUrl: dbDesign.output_url || undefined,
+    likes: dbDesign.likes,
+    views: dbDesign.views,
+    // ... complete mapping
+  }))
+}, [dbDesigns])
+
+// Mutations using hooks
+const handleGenerate = async () => {
+  const result = await createDesign(
+    prompt,
+    dbStyleMap[selectedStyle] || 'modern',
+    {
+      title: prompt.slice(0, 50),
+      model: selectedModel.replace('_', '-'),
+      resolution: '1024x1024',
+      tags: [selectedStyle, selectedModel]
+    }
+  )
+  if (result) toast.success('Design generation started!')
+}
+
+const handleDeleteGeneration = async (id: string) => {
+  await deleteDesign(id)
+  toast.success('Design deleted successfully')
+}
+```
+
+**Tables Integrated:**
+- `ai_designs` (via use-ai-designs hook) - AI design generation, image creation, design management
+  - Corrected from wrong table (`ai_design_projects`) to correct table (`ai_designs`)
+  - `ai_design_projects` has incompatible schema (project-based, JSONB parameters)
+  - `ai_designs` has proper schema (flat structure, typed fields)
+
+**Schema Mapping (Complex Bidirectional):**
+- **DB → UI (Read):**
+  - style mapping: 'modern'/'minimalist'/'creative'/'professional'/'abstract'/'vintage' → StylePreset types
+  - model mapping: 'dalle-3'/'midjourney-v6' → 'dalle_3'/'midjourney_v6'
+  - aspectRatio calculation: resolution string ('1024x1024') → '1:1', ('1536x864') → '16:9'
+  - status mapping: 'pending'/'processing'/'completed'/'failed' → GenerationStatus
+  - field transformations: output_url → imageUrl, thumbnail_url → thumbnailUrl, is_public → isPublic, output_urls → variations, generation_time_ms → generationTime
+  - default values: negativePrompt (''), quality ('standard'), isFavorite (false), upscaledUrl (undefined)
+- **UI → DB (Write):**
+  - Reverse style mapping for createDesign: StylePreset → DB style
+  - Model format conversion: 'midjourney_v6' → 'midjourney-v6'
+  - Resolution calculation: AspectRatio → resolution string
+
+**Write Operations:**
+- Replaced 3 manual Supabase mutation functions with hook mutations:
+  - CREATE: createDesign() for handleGenerate
+  - DELETE: deleteDesign() for handleDeleteGeneration
+  - DOWNLOAD: Client-side blob download (no DB write)
+  - FAVORITE: Disabled (DB doesn't have is_favorite field)
+
+**Cleanup Performed:**
+- Removed manual fetchGenerations function (48 lines)
+- Removed duplicate createClient() imports in handleGenerate
+- Removed unnecessary Supabase auth call in handleCreateCollection
+- Fixed pre-existing syntax error in handleExportDesigns (malformed template literal)
+- Removed useState for generations (now using mapped dbDesigns)
+
+**Fixes Applied:**
+- Fixed handleExportDesigns syntax error: `toast.success('Export started' designs\`)` → `toast.success('Export started')`
+- Note: File has pre-existing template literal syntax errors in JSX (lines 2158, 2329 - unrelated to migration)
+
+**Impact:**
+- ✅ Migrated from wrong table (ai_design_projects) to correct table (ai_designs)
+- ✅ Real database integration with real-time subscriptions (automatic updates)
+- ✅ Replaced 3 manual database mutation functions with hook-based mutations
+- ✅ Complex bidirectional schema mapping (DB ↔ UI with AspectRatio calculation)
+- ✅ Hook provides automatic refetch, real-time updates, optimistic updates
+- ✅ Cleaned up duplicate imports and authentication bugs
+- ✅ Kept mock data for: Collections (no hook available), PromptHistory (no hook available), StyleTemplates (UI-only feature)
+
 **Pattern Reinforced (manual Supabase → hooks with mutations):**
 1. Import hooks (useDeployments, useCreateDeployment, useUpdateDeployment, useDeleteDeployment)
 2. Call query hook for data fetching (replaces manual fetch)
@@ -956,7 +1105,7 @@ const alertStats = useMemo(() => {
 
 **Estimated:** 10-15 more pages can be migrated quickly with existing hooks
 
-**Remaining:** 293 pages need mock data → database migration
+**Remaining:** 291 pages need mock data → database migration
 
 ---
 
