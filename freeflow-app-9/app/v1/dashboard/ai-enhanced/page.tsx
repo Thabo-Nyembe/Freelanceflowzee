@@ -50,7 +50,6 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { toast } from 'sonner'
 
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -139,25 +138,17 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_TOOLS':
-      logger.info('Setting tools', { count: action.tools.length })
-      return { ...state, tools: action.tools }
+    case 'SET_TOOLS':      return { ...state, tools: action.tools }
 
-    case 'ADD_TOOL':
-      logger.info('Adding tool', { toolId: action.tool.id, name: action.tool.name })
-      return { ...state, tools: [action.tool, ...state.tools] }
+    case 'ADD_TOOL':      return { ...state, tools: [action.tool, ...state.tools] }
 
-    case 'UPDATE_TOOL':
-      logger.info('Updating tool', { toolId: action.tool.id, name: action.tool.name })
-      return {
+    case 'UPDATE_TOOL':      return {
         ...state,
         tools: state.tools.map(t => t.id === action.tool.id ? action.tool : t),
         selectedTool: state.selectedTool?.id === action.tool.id ? action.tool : state.selectedTool
       }
 
-    case 'DELETE_TOOL':
-      logger.info('Deleting tool', { toolId: action.toolId })
-      return {
+    case 'DELETE_TOOL':      return {
         ...state,
         tools: state.tools.filter(t => t.id !== action.toolId),
         selectedTool: state.selectedTool?.id === action.toolId ? null : state.selectedTool,
@@ -309,10 +300,7 @@ function generateMockAITools(): AITool[] {
       isFavorite: Math.random() > 0.8,
       version: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`
     }
-  })
-
-  logger.info('Generated mock AI tools', { count: tools.length })
-  return tools
+  })  return tools
 }
 
 // ============================================================================
@@ -371,7 +359,6 @@ function formatTime(seconds: number): string {
 export default function AIEnhancedPage() {
   logger.debug('Component mounting')
 
-  // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
@@ -411,9 +398,7 @@ export default function AIEnhancedPage() {
   // LOAD DATA
   // ============================================================================
 
-  useEffect(() => {
-    logger.info('Loading AI Enhanced tools from Supabase')
-    const loadData = async () => {
+  useEffect(() => {    const loadData = async () => {
       try {
         setIsLoading(true)
         setError(null)
@@ -459,13 +444,9 @@ export default function AIEnhancedPage() {
           version: dbTool.version
         }))
 
-        dispatch({ type: 'SET_TOOLS', tools: uiTools })
+        dispatch({ type: 'SET_TOOLS', tools: uiTools })        announce('AI Enhanced tools loaded successfully', 'polite')
 
-        logger.info('AI Enhanced tools loaded from Supabase', { count: uiTools.length })
-        announce('AI Enhanced tools loaded successfully', 'polite')
-
-        toast.success('AI Enhanced loaded', {
-          description: `${uiTools.length} AI tools available`
+        toast.success('AI Enhanced loaded' AI tools available`
         })
 
         setIsLoading(false)
@@ -565,16 +546,7 @@ export default function AIEnhancedPage() {
   // HANDLERS
   // ============================================================================
 
-  const handleCreateTool = async () => {
-    logger.info('Creating AI tool', {
-      name: toolName,
-      type: toolType,
-      category: toolCategory,
-      model: toolModel,
-      provider: toolProvider
-    })
-
-    if (!toolName || !toolDescription || !toolModel || !toolProvider) {
+  const handleCreateTool = async () => {    if (!toolName || !toolDescription || !toolModel || !toolProvider) {
       logger.warn('Missing required fields for tool creation', {
         hasName: !!toolName,
         hasDescription: !!toolDescription,
@@ -633,16 +605,7 @@ export default function AIEnhancedPage() {
         version: dbTool.version
       }
 
-      dispatch({ type: 'ADD_TOOL', tool: uiTool })
-
-      logger.info('AI tool created successfully', {
-        toolId: uiTool.id,
-        name: uiTool.name,
-        type: uiTool.type,
-        category: uiTool.category
-      })
-
-      toast.success(`AI tool created: ${uiTool.name} - ${uiTool.type} - ${uiTool.category} - Ready to use`)
+      dispatch({ type: 'ADD_TOOL', tool: uiTool })      toast.success(`AI tool created: ${uiTool.name} - ${uiTool.type} - ${uiTool.category} - Ready to use`)
 
       setShowCreateModal(false)
       setToolName('')
@@ -655,41 +618,20 @@ export default function AIEnhancedPage() {
         name: toolName,
         type: toolType
       })
-      toast.error('Failed to create AI tool', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to create AI tool')
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleViewTool = (tool: AITool) => {
-    logger.info('Opening tool details', {
-      toolId: tool.id,
-      name: tool.name,
-      type: tool.type,
-      category: tool.category,
-      usageCount: tool.usageCount,
-      successRate: tool.successRate
-    })
-
-    dispatch({ type: 'SELECT_TOOL', tool })
+  const handleViewTool = (tool: AITool) => {    dispatch({ type: 'SELECT_TOOL', tool })
     setShowViewModal(true)
 
     toast.success(`Viewing: ${tool.name} - ${tool.type} - ${tool.model} - ${formatNumber(tool.usageCount)} uses`)
   }
 
   const handleDeleteTool = async (toolId: string) => {
-    const tool = state.tools.find(t => t.id === toolId)
-
-    logger.info('Deleting AI tool', {
-      toolId,
-      name: tool?.name,
-      type: tool?.type,
-      usageCount: tool?.usageCount
-    })
-
-    try {
+    const tool = state.tools.find(t => t.id === toolId)    try {
       setIsSaving(true)
 
       const { error } = await deleteAIEnhancedTool(toolId)
@@ -698,14 +640,7 @@ export default function AIEnhancedPage() {
         throw error
       }
 
-      dispatch({ type: 'DELETE_TOOL', toolId })
-
-      logger.info('AI tool deleted successfully', {
-        toolId,
-        name: tool?.name
-      })
-
-      toast.success(`AI tool deleted: ${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`)
+      dispatch({ type: 'DELETE_TOOL', toolId })      toast.success(`AI tool deleted: ${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`)
 
       setShowDeleteModal(false)
       setShowViewModal(false)
@@ -714,9 +649,7 @@ export default function AIEnhancedPage() {
         error: error.message,
         toolId
       })
-      toast.error('Failed to delete AI tool', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete AI tool')
     } finally {
       setIsSaving(false)
     }
@@ -724,15 +657,7 @@ export default function AIEnhancedPage() {
 
   const handleBulkDelete = async () => {
     const selectedToolsData = state.tools.filter(t => state.selectedTools.includes(t.id))
-    const totalUsage = selectedToolsData.reduce((sum, t) => sum + t.usageCount, 0)
-
-    logger.info('Bulk deleting AI tools', {
-      count: state.selectedTools.length,
-      toolIds: state.selectedTools,
-      totalUsage
-    })
-
-    try {
+    const totalUsage = selectedToolsData.reduce((sum, t) => sum + t.usageCount, 0)    try {
       setIsSaving(true)
 
       const { error } = await bulkDeleteTools(state.selectedTools)
@@ -743,14 +668,7 @@ export default function AIEnhancedPage() {
 
       state.selectedTools.forEach(id => {
         dispatch({ type: 'DELETE_TOOL', toolId: id })
-      })
-
-      logger.info('Bulk delete complete', {
-        deletedCount: state.selectedTools.length,
-        totalUsage
-      })
-
-      toast.success(`Deleted ${state.selectedTools.length} tool(s): ${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`)
+      })      toast.success(`Deleted ${state.selectedTools.length} tool(s): ${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`)
 
       dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
     } catch (error: any) {
@@ -758,9 +676,7 @@ export default function AIEnhancedPage() {
         error: error.message,
         count: state.selectedTools.length
       })
-      toast.error('Failed to delete tools', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to delete tools')
     } finally {
       setIsSaving(false)
     }
@@ -768,15 +684,7 @@ export default function AIEnhancedPage() {
 
   const handleToggleFavorite = async (toolId: string) => {
     const tool = state.tools.find(t => t.id === toolId)
-    const newFavoriteState = !tool?.isFavorite
-
-    logger.info('Toggling favorite', {
-      toolId,
-      name: tool?.name,
-      isFavorite: newFavoriteState
-    })
-
-    try {
+    const newFavoriteState = !tool?.isFavorite    try {
       // Optimistic update
       dispatch({ type: 'TOGGLE_FAVORITE', toolId })
 
@@ -801,18 +709,7 @@ export default function AIEnhancedPage() {
     if (!tool) {
       logger.warn('Tool not found for execution', { toolId })
       return
-    }
-
-    logger.info('Executing AI tool', {
-      toolId,
-      name: tool.name,
-      type: tool.type,
-      model: tool.model,
-      currentUsageCount: tool.usageCount
-    })
-
-    toast.info(`Running ${tool.name}...`, {
-      description: `${tool.type} - ${tool.model} - ${tool.provider} - Executing...`
+    }    toast.info(`Running ${tool.name}...` - ${tool.model} - ${tool.provider} - Executing...`
     })
 
     try {
@@ -830,16 +727,7 @@ export default function AIEnhancedPage() {
         lastUsed: dbTool.last_used || new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
-
-      logger.info('Tool execution complete', {
-        toolId,
-        name: tool.name,
-        newUsageCount: updatedTool.usageCount
-      })
-
-      toast.success(`${tool.name} completed`, {
-        description: `${tool.type} - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
+      dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })      toast.success(`${tool.name} completed` - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
       })
     } catch (error: any) {
       logger.error('Tool execution failed', {
@@ -847,24 +735,13 @@ export default function AIEnhancedPage() {
         toolId,
         name: tool.name
       })
-      toast.error(`Failed to execute ${tool.name}`, {
-        description: error.message || 'Please try again'
-      })
+      toast.error(`Failed to execute ${tool.name}`)
     }
   }
 
   const handleExport = async () => {
     const totalUsage = filteredAndSortedTools.reduce((sum, t) => sum + t.usageCount, 0)
-    const avgSuccessRate = filteredAndSortedTools.reduce((sum, t) => sum + t.successRate, 0) / filteredAndSortedTools.length
-
-    logger.info('Exporting AI tools', {
-      format: exportFormat,
-      count: filteredAndSortedTools.length,
-      totalUsage,
-      avgSuccessRate
-    })
-
-    try {
+    const avgSuccessRate = filteredAndSortedTools.reduce((sum, t) => sum + t.successRate, 0) / filteredAndSortedTools.length    try {
       setIsSaving(true)
 
       // Client-side export
@@ -893,17 +770,7 @@ export default function AIEnhancedPage() {
       link.href = url
       link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
       link.click()
-      URL.revokeObjectURL(url)
-
-      logger.info('Export complete', {
-        format: exportFormat,
-        count: filteredAndSortedTools.length,
-        fileSize: dataBlob.size,
-        fileName: link.download
-      })
-
-      toast.success(`Exported ${filteredAndSortedTools.length} tools`, {
-        description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${formatNumber(totalUsage)} total uses - ${(avgSuccessRate * 100).toFixed(1)}% avg success - ${link.download}`
+      URL.revokeObjectURL(url)      toast.success(`Exported ${filteredAndSortedTools.length} tools` - ${Math.round(dataBlob.size / 1024)}KB - ${formatNumber(totalUsage)} total uses - ${(avgSuccessRate * 100).toFixed(1)}% avg success - ${link.download}`
       })
 
       setShowExportModal(false)
@@ -913,9 +780,7 @@ export default function AIEnhancedPage() {
         format: exportFormat,
         count: filteredAndSortedTools.length
       })
-      toast.error('Failed to export tools', {
-        description: error.message || 'Please try again later'
-      })
+      toast.error('Failed to export tools')
     } finally {
       setIsSaving(false)
     }
