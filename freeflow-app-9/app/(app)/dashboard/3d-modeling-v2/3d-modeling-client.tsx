@@ -389,12 +389,8 @@ export default function ThreeDModelingClient() {
   const [models, setModels] = useState<Model3D[]>(mockModels)
 
   useEffect(() => {
-    if (mappedModels.length > 0) {
-      setModels(mappedModels)
-    } else if (!isLoading) {
-      setModels(mockModels)
-    }
-  }, [mappedModels, isLoading])
+    setModels(mappedModels)
+  }, [mappedModels])
 
   // Dialog states for buttons
   const [showImportDialog, setShowImportDialog] = useState(false)

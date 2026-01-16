@@ -453,13 +453,8 @@ export default function AIDesignClient() {
 
   // Sync hook data to local state
   useEffect(() => {
-    if (mappedDesigns.length > 0) {
-      setGenerations(mappedDesigns)
-    } else if (!isLoading && !designsError) {
-      // Fallback to mock data if no database records
-      setGenerations(mockGenerations)
-    }
-  }, [mappedDesigns, isLoading, designsError])
+    setGenerations(mappedDesigns)
+  }, [mappedDesigns])
 
   // Fetch designs on mount
   useEffect(() => {

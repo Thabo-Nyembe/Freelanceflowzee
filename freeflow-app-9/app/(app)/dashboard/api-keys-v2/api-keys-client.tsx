@@ -939,12 +939,8 @@ export default function ApiKeysClient() {
   // Sync mapped data to local state
   const [apiKeys, setApiKeys] = useState<ApiKey[]>(mockApiKeys)
   useEffect(() => {
-    if (mappedKeys.length > 0) {
-      setApiKeys(mappedKeys)
-    } else if (!isLoading && !error) {
-      setApiKeys(mockApiKeys)
-    }
-  }, [mappedKeys, isLoading, error])
+    setApiKeys(mappedKeys)
+  }, [mappedKeys])
 
   // Fetch keys on mount
   useEffect(() => {
