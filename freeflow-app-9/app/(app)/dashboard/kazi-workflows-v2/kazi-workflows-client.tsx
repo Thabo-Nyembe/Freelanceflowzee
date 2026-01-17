@@ -20,7 +20,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { useKaziWorkflows, Workflow as KaziWorkflow } from '@/hooks/use-kazi-workflows'
+import {
+  useKaziWorkflows,
+  Workflow as KaziWorkflow,
+  WorkflowTemplate as KaziWorkflowTemplate,
+  WorkflowExecution as KaziWorkflowExecution
+} from '@/hooks/use-kazi-workflows'
 import {
   Workflow as WorkflowIcon,
   Play,
@@ -70,35 +75,12 @@ import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 
-// Types - KaziWorkflow is imported from the hook
+// Types - KaziWorkflow, KaziWorkflowTemplate, KaziWorkflowExecution imported from the hook
+// Use local aliases for convenience
+type WorkflowExecution = KaziWorkflowExecution
+type WorkflowTemplate = KaziWorkflowTemplate
 
-interface WorkflowExecution {
-  id: string
-  workflow_id: string
-  workflow_name: string
-  status: 'pending' | 'running' | 'success' | 'failed' | 'cancelled'
-  started_at: string
-  completed_at?: string
-  execution_time_ms?: number
-  error_message?: string
-  trigger_type: string
-  actions_completed: number
-  actions_total: number
-}
-
-interface WorkflowTemplate {
-  id: string
-  name: string
-  description: string
-  category: string
-  icon: string
-  trigger_type: string
-  actions: any[]
-  usage_count: number
-  tags: string[]
-}
-
-interface WorkflowStats {
+interface DisplayWorkflowStats {
   totalWorkflows: number
   activeWorkflows: number
   totalExecutions: number
@@ -147,6 +129,8 @@ export default function KaziWorkflowsClient() {
   // Use the Kazi Workflows hook
   const {
     workflows,
+    templates,
+    executions: executionHistory,
     stats: apiStats,
     isLoading,
     runningWorkflows,
@@ -155,11 +139,11 @@ export default function KaziWorkflowsClient() {
     deleteWorkflow: removeWorkflow,
     duplicateWorkflow,
     createWorkflow,
-    updateWorkflow
+    updateWorkflow,
+    fetchWorkflows,
+    fetchExecutions
   } = useKaziWorkflows()
 
-  const [templates] = useState<WorkflowTemplate[]>([])
-  const [executionHistory] = useState<WorkflowExecution[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -204,7 +188,7 @@ export default function KaziWorkflowsClient() {
   })
 
   // Compute display stats
-  const stats: WorkflowStats = useMemo(() => ({
+  const stats: DisplayWorkflowStats = useMemo(() => ({
     totalWorkflows: apiStats.totalWorkflows,
     activeWorkflows: apiStats.activeWorkflows,
     totalExecutions: apiStats.totalRuns,
@@ -309,8 +293,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     executeWorkflow(selectedWorkflow.id)
     setIsRunDialogOpen(false)
-    toast.success('Workflow started'" is now running.`
-    })
+    toast.success(`Workflow "${selectedWorkflow.name}" is now running.`)
   }, [selectedWorkflow, executeWorkflow])
 
   // Delete workflow wrapper
@@ -318,8 +301,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     removeWorkflow(selectedWorkflow.id)
     setIsDeleteDialogOpen(false)
-    toast.success('Workflow deleted'" has been deleted.`
-    })
+    toast.success(`Workflow "${selectedWorkflow.name}" has been deleted.`)
   }, [selectedWorkflow, removeWorkflow])
 
   // Handle create workflow
@@ -372,8 +354,7 @@ export default function KaziWorkflowsClient() {
     a.click()
     URL.revokeObjectURL(url)
     setIsExportDialogOpen(false)
-    toast.success('Workflow exported' file.`
-    })
+    toast.success(`Workflow exported to ${exportFormat} file.`)
   }, [selectedWorkflow, exportFormat])
 
   // Handle import
@@ -394,8 +375,7 @@ export default function KaziWorkflowsClient() {
       })
       setIsImportDialogOpen(false)
       setImportFile(null)
-      toast.success('Workflow imported'" has been imported successfully.`
-      })
+      toast.success(`Workflow "${data.name || 'Imported Workflow'}" has been imported successfully.`)
     } catch (error) {
       toast.error('Import failed')
     }
@@ -406,8 +386,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     duplicateWorkflow(selectedWorkflow.id)
     setIsDuplicateDialogOpen(false)
-    toast.success('Workflow duplicated'" has been created.`
-    })
+    toast.success(`Workflow "${duplicateName}" has been created.`)
   }, [selectedWorkflow, duplicateName, duplicateWorkflow])
 
   // Handle archive
@@ -415,8 +394,7 @@ export default function KaziWorkflowsClient() {
     if (!selectedWorkflow) return
     await updateWorkflow(selectedWorkflow.id, { ...selectedWorkflow, status: 'archived' as any })
     setIsArchiveDialogOpen(false)
-    toast.success('Workflow archived'" has been archived.`
-    })
+    toast.success(`Workflow "${selectedWorkflow.name}" has been archived.`)
   }, [selectedWorkflow, updateWorkflow])
 
   // Handle use template
@@ -441,8 +419,7 @@ export default function KaziWorkflowsClient() {
     }
     // Simulate sharing
     setIsShareDialogOpen(false)
-    toast.success('Workflow shared'.`
-    })
+    toast.success(`Workflow shared with ${shareEmail}.`)
   }, [selectedWorkflow, shareEmail])
 
   // Handle save global settings
@@ -455,14 +432,15 @@ export default function KaziWorkflowsClient() {
   const handleRetryExecution = useCallback((execution: WorkflowExecution) => {
     setIsExecutionDetailsDialogOpen(false)
     executeWorkflow(execution.workflow_id)
-    toast.success('Workflow restarted'".`
-    })
+    toast.success(`Workflow "${execution.workflow_name}" restarted.`)
   }, [executeWorkflow])
 
   // Handle refresh workflows
-  const handleRefreshWorkflows = useCallback(() => {
+  const handleRefreshWorkflows = useCallback(async () => {
+    await fetchWorkflows()
+    await fetchExecutions()
     toast.success('Workflows refreshed')
-  }, [])
+  }, [fetchWorkflows, fetchExecutions])
 
   // Format time ago
   const formatTimeAgo = (dateString?: string) => {
@@ -807,8 +785,7 @@ export default function KaziWorkflowsClient() {
                                 checked={workflow.status === "active"}
                                 onCheckedChange={() => {
                                   toggleWorkflowStatus(workflow.id)
-                                  toast.success(workflow.status === 'active' ? 'Workflow paused' : 'Workflow activated'" has been ${workflow.status === 'active' ? 'paused' : 'activated'}.`
-                                  })
+                                  toast.success(`Workflow "${workflow.name}" has been ${workflow.status === 'active' ? 'paused' : 'activated'}.`)
                                 }}
                               />
 
@@ -1204,8 +1181,7 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info(`Editing: ${action.name}` settings and parameters`
-                          })
+                          toast.info(`Editing: ${action.name} settings and parameters`)
                         }}>
                           <Edit className="h-3 w-3" />
                         </Button>
@@ -1870,8 +1846,7 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info(`Editing: ${action.name}` settings and parameters`
-                          })
+                          toast.info(`Editing: ${action.name} settings and parameters`)
                         }}>
                           <Edit className="h-3 w-3" />
                         </Button>

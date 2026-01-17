@@ -384,8 +384,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         status: 'sent',
         sent_date: new Date().toISOString()
       })
-      toast.success('Invoice sent' sent to ${invoice.client_name}`
-      })
+      toast.success(`Invoice ${invoice.invoice_number} sent to ${invoice.client_name}`)
     } catch (error) {
       toast.error('Failed to send invoice')
     }
@@ -400,8 +399,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         amount_paid: invoice.total_amount,
         amount_due: 0
       })
-      toast.success('Invoice marked as paid' has been marked as paid`
-      })
+      toast.success(`Invoice ${invoice.invoice_number} has been marked as paid`)
     } catch (error) {
       toast.error('Failed to mark invoice as paid')
     }
@@ -411,8 +409,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const handleDeleteInvoice = async (invoice: Invoice) => {
     try {
       await deleteInvoice(invoice.id)
-      toast.success('Invoice deleted' has been deleted`
-      })
+      toast.success(`Invoice ${invoice.invoice_number} has been deleted`)
     } catch (error) {
       toast.error('Failed to delete invoice')
     }
@@ -422,8 +419,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const handleVoidInvoice = async (invoice: Invoice) => {
     try {
       await updateInvoice(invoice.id, { status: 'cancelled' })
-      toast.info('Invoice voided' has been cancelled`
-      })
+      toast.info(`Invoice ${invoice.invoice_number} has been cancelled`)
     } catch (error) {
       toast.error('Failed to void invoice')
     }
@@ -454,8 +450,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         terms_and_conditions: invoice.terms_and_conditions,
         issue_date: new Date().toISOString().split('T')[0]
       } as any)
-      toast.success('Invoice duplicated' created`
-      })
+      toast.success(`Invoice duplicated from ${invoice.invoice_number}`)
     } catch (error) {
       toast.error('Failed to duplicate invoice')
     }
@@ -468,8 +463,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
         last_reminder_sent_at: new Date().toISOString()
       })
-      toast.success('Reminder sent'`
-      })
+      toast.success(`Reminder sent for invoice ${invoice.invoice_number}`)
     } catch (error) {
       toast.error('Failed to send reminder')
     }
@@ -508,7 +502,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        toast.success('Export completed' invoices exported to CSV` })
+        toast.success(`${data.length} invoices exported to CSV`)
       } else {
         const jsonContent = JSON.stringify(data, null, 2)
         const blob = new Blob([jsonContent], { type: 'application/json' })
@@ -520,7 +514,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-        toast.success('Export completed' invoices exported to JSON` })
+        toast.success(`${data.length} invoices exported to JSON`)
       }
     } catch (error) {
       toast.error('Failed to export invoices')

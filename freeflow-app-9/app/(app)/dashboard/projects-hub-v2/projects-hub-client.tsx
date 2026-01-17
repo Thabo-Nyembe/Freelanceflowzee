@@ -3,6 +3,11 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useProjects } from '@/lib/hooks/use-projects'
+import { useSprints, useSprintMutations, Sprint as SprintDB } from '@/lib/hooks/use-sprints'
+import { useMilestones, useMilestoneMutations, Milestone as MilestoneDB } from '@/lib/hooks/use-milestones'
+import { useRoadmapInitiatives, useRoadmapMutations, RoadmapInitiative } from '@/lib/hooks/use-roadmap'
+import { useAutomations } from '@/lib/hooks/use-automations'
+import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -325,11 +330,31 @@ export default function ProjectsHubClient() {
     { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['sprint.completed'], status: 'active' },
   ])
   const [localCustomFields, setLocalCustomFields] = useState<CustomField[]>(customFieldsConfig)
-  const [localAutomations, setLocalAutomations] = useState([])
+  const [localAutomations, setLocalAutomations] = useState<Automation[]>([])
   const [localIssues, setLocalIssues] = useState<Issue[]>([])
+  const [localBacklogItems, setLocalBacklogItems] = useState<BacklogItem[]>([])
+  const [localMilestones, setLocalMilestones] = useState<RoadmapItem[]>([])
+  const [localSprints, setLocalSprints] = useState<Sprint[]>([])
 
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
+
+  // Sprints integration - real Supabase data
+  const { sprints: dbSprints, isLoading: sprintsLoading, refetch: refetchSprints } = useSprints()
+  const { createSprint, updateSprint, completeSprint, isCreatingSprint, isCompletingSprint } = useSprintMutations()
+
+  // Milestones integration - real Supabase data
+  const { milestones: dbMilestones, isLoading: milestonesLoading, refetch: refetchMilestones } = useMilestones()
+  const { createMilestone, updateMilestone, isCreating: isCreatingMilestone } = useMilestoneMutations()
+
+  // Roadmap integration - real Supabase data
+  const { data: roadmapInitiatives, isLoading: roadmapLoading, refetch: refetchRoadmap } = useRoadmapInitiatives()
+
+  // Automations integration - real Supabase data
+  const { workflows: dbAutomations, loading: automationsLoading, createWorkflow, updateWorkflow, refetch: refetchAutomations } = useAutomations()
+
+  // Time tracking integration
+  const { timeEntries, loading: timeTrackingLoading, createEntry: createTimeEntry, updateEntry: updateTimeEntry } = useTimeTracking()
 
   // New project form state
   const [newProjectForm, setNewProjectForm] = useState({
@@ -370,6 +395,74 @@ export default function ProjectsHubClient() {
     }
     return [] // Return empty array instead of mock data - real projects from Supabase
   }, [dbProjects])
+
+  // Map database sprints to component format
+  const allSprints: Sprint[] = useMemo(() => {
+    if (dbSprints && dbSprints.length > 0) {
+      return dbSprints.map(s => ({
+        id: s.id,
+        name: s.name || 'Untitled Sprint',
+        goal: s.goal || '',
+        status: (s.status === 'planning' ? 'upcoming' : s.status === 'active' ? 'active' : 'completed') as SprintStatus,
+        startDate: s.start_date || '',
+        endDate: s.end_date || '',
+        velocity: s.velocity || 0,
+        tasksTotal: s.total_tasks || 0,
+        tasksCompleted: s.completed_tasks || 0
+      }))
+    }
+    return []
+  }, [dbSprints])
+
+  // Map database milestones to roadmap format
+  const allRoadmapItems: RoadmapItem[] = useMemo(() => {
+    if (dbMilestones && dbMilestones.length > 0) {
+      return dbMilestones.map(m => ({
+        id: m.id,
+        title: m.name || 'Untitled Milestone',
+        quarter: m.due_date ? `Q${Math.ceil((new Date(m.due_date).getMonth() + 1) / 3)} ${new Date(m.due_date).getFullYear()}` : 'TBD',
+        status: (m.status === 'in-progress' ? 'in_progress' : m.status === 'completed' ? 'completed' : 'planned') as 'planned' | 'in_progress' | 'completed',
+        progress: m.progress || 0,
+        projectIds: []
+      }))
+    }
+    return []
+  }, [dbMilestones])
+
+  // Map roadmap initiatives from real database
+  const allInitiatives = useMemo(() => {
+    if (roadmapInitiatives && Array.isArray(roadmapInitiatives) && roadmapInitiatives.length > 0) {
+      return roadmapInitiatives.map(i => ({
+        id: i.id,
+        title: i.title,
+        quarter: i.quarter || 'TBD',
+        status: i.status,
+        progress: i.progress_percentage || 0,
+        projectIds: []
+      }))
+    }
+    return []
+  }, [roadmapInitiatives])
+
+  // Combined roadmap - use milestones if no initiatives
+  const combinedRoadmap = useMemo(() => {
+    return allInitiatives.length > 0 ? allInitiatives : allRoadmapItems
+  }, [allInitiatives, allRoadmapItems])
+
+  // Map database automations to component format
+  const allAutomations: Automation[] = useMemo(() => {
+    if (dbAutomations && dbAutomations.length > 0) {
+      return dbAutomations.map(a => ({
+        id: a.id,
+        name: a.workflow_name || 'Untitled Automation',
+        trigger: a.trigger_type || 'manual',
+        action: a.steps?.[0]?.action || 'notify',
+        enabled: a.is_enabled || false,
+        runsCount: a.total_executions || 0
+      }))
+    }
+    return []
+  }, [dbAutomations])
 
   // Handle creating a new project - writes to Supabase
   const handleSubmitNewProject = async () => {
@@ -742,15 +835,30 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Roadmap</CardTitle><Button onClick={() => setShowMilestoneDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Milestone</Button></CardHeader>
               <CardContent className="space-y-6">
-                {[].map(item => (
+                {(milestonesLoading || roadmapLoading) && (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      <span>Loading roadmap...</span>
+                    </div>
+                  </div>
+                )}
+                {!milestonesLoading && !roadmapLoading && combinedRoadmap.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <Milestone className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No milestones yet</p>
+                    <p className="text-sm mb-4">Add milestones to track your product roadmap</p>
+                  </div>
+                )}
+                {!milestonesLoading && !roadmapLoading && combinedRoadmap.map(item => (
                   <div key={item.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div><h3 className="font-semibold text-lg">{item.title}</h3><p className="text-sm text-gray-500">{item.quarter}</p></div>
-                      <Badge className={(item.status as string) === 'completed' ? 'bg-green-100 text-green-700' : item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{item.status.replace('_', ' ')}</Badge>
+                      <Badge className={(item.status as string) === 'completed' ? 'bg-green-100 text-green-700' : item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{String(item.status).replace('_', ' ')}</Badge>
                     </div>
                     <div className="flex items-center gap-2 mb-2"><span className="text-sm text-gray-500">{item.progress}% complete</span></div>
                     <Progress value={item.progress} className="h-2" />
-                    <div className="flex items-center gap-2 mt-3"><span className="text-xs text-gray-500">{item.projectIds.length} projects linked</span></div>
+                    <div className="flex items-center gap-2 mt-3"><span className="text-xs text-gray-500">{item.projectIds?.length || 0} projects linked</span></div>
                   </div>
                 ))}
               </CardContent>
@@ -759,25 +867,63 @@ export default function ProjectsHubClient() {
 
           {/* Sprints Tab */}
           <TabsContent value="sprints" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {[].map(sprint => (
-                <Card key={sprint.id} className={`border-gray-200 dark:border-gray-700 ${sprint.status === 'active' ? 'ring-2 ring-blue-500' : ''}`}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between"><CardTitle className="text-lg">{sprint.name}</CardTitle><Badge className={getSprintStatusColor(sprint.status)}>{sprint.status}</Badge></div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500 mb-4">{sprint.goal}</p>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm"><span>Tasks</span><span className="font-medium">{sprint.tasksCompleted}/{sprint.tasksTotal}</span></div>
-                      <Progress value={(sprint.tasksCompleted / sprint.tasksTotal) * 100} className="h-2" />
-                      <div className="flex justify-between text-sm"><span>Velocity</span><span className="font-medium">{sprint.velocity} pts</span></div>
-                      <div className="text-xs text-gray-500">{sprint.startDate} - {sprint.endDate}</div>
-                    </div>
-                    {sprint.status === 'active' && <Button className="w-full mt-4" onClick={() => { setSelectedSprint(sprint); setShowSprintBoardDialog(true) }}><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {sprintsLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <RefreshCw className="h-5 w-5 animate-spin" />
+                  <span>Loading sprints...</span>
+                </div>
+              </div>
+            )}
+            {!sprintsLoading && allSprints.length === 0 && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardContent className="flex flex-col items-center justify-center py-12 text-gray-500">
+                  <RefreshCw className="h-12 w-12 mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">No sprints yet</p>
+                  <p className="text-sm mb-4">Create your first sprint to start tracking progress</p>
+                  <Button onClick={() => {
+                    toast.promise(
+                      createSprint({
+                        name: 'Sprint 1',
+                        goal: 'Initial sprint goals',
+                        status: 'planning',
+                        total_tasks: 0,
+                        completed_tasks: 0,
+                        velocity: 0
+                      }),
+                      {
+                        loading: 'Creating sprint...',
+                        success: () => { refetchSprints(); return 'Sprint created!' },
+                        error: 'Failed to create sprint'
+                      }
+                    )
+                  }} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <Plus className="h-4 w-4 mr-2" />Create Sprint
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            {!sprintsLoading && allSprints.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
+                {allSprints.map(sprint => (
+                  <Card key={sprint.id} className={`border-gray-200 dark:border-gray-700 ${sprint.status === 'active' ? 'ring-2 ring-blue-500' : ''}`}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between"><CardTitle className="text-lg">{sprint.name}</CardTitle><Badge className={getSprintStatusColor(sprint.status)}>{sprint.status}</Badge></div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-500 mb-4">{sprint.goal}</p>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm"><span>Tasks</span><span className="font-medium">{sprint.tasksCompleted}/{sprint.tasksTotal}</span></div>
+                        <Progress value={sprint.tasksTotal > 0 ? (sprint.tasksCompleted / sprint.tasksTotal) * 100 : 0} className="h-2" />
+                        <div className="flex justify-between text-sm"><span>Velocity</span><span className="font-medium">{sprint.velocity} pts</span></div>
+                        <div className="text-xs text-gray-500">{sprint.startDate} - {sprint.endDate}</div>
+                      </div>
+                      {sprint.status === 'active' && <Button className="w-full mt-4" onClick={() => { setSelectedSprint(sprint); setShowSprintBoardDialog(true) }}><Play className="h-4 w-4 mr-2" />View Sprint Board</Button>}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Backlog Tab */}
@@ -785,16 +931,26 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Backlog</CardTitle><Button onClick={() => setShowBacklogItemDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Item</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {[].map(item => (
+                {localBacklogItems.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                    <Layers className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No backlog items</p>
+                    <p className="text-sm mb-4">Add items to your product backlog to start planning</p>
+                  </div>
+                )}
+                {localBacklogItems.map(item => (
                   <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1"><h4 className="font-medium">{item.title}</h4><Badge className={getTypeColor(item.type)}>{item.type}</Badge></div>
                       <p className="text-sm text-gray-500">{item.description}</p>
                     </div>
-                    <Badge variant="outline"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(item.priority).color} mr-1`} />{getPriorityConfig(item.priority).label}</Badge>
+                    <Badge variant="outline"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(item.priority as Priority).color} mr-1`} />{getPriorityConfig(item.priority as Priority).label}</Badge>
                     <Badge variant="secondary">{item.points} pts</Badge>
                     {item.assignee && <Avatar className="h-8 w-8"><AvatarFallback>{item.assignee.slice(0, 2)}</AvatarFallback></Avatar>}
                     {item.sprint && <Badge className="bg-blue-100 text-blue-700">Sprint {item.sprint}</Badge>}
+                    <Button variant="ghost" size="icon" onClick={() => { setLocalBacklogItems(prev => prev.filter(i => i.id !== item.id)); toast.success('Item removed from backlog') }}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </div>
                 ))}
               </CardContent>
@@ -917,23 +1073,31 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader><CardTitle>Issues Overview</CardTitle></CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead><tr className="border-b"><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Key</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Summary</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Priority</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Assignee</th></tr></thead>
-                    <tbody className="divide-y">
-                      {[].map(issue => (
-                        <tr key={issue.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { setSelectedIssue(issue); setShowIssueDialog(true) }}>
-                          <td className="px-4 py-3"><span className="text-blue-600 font-medium">{issue.key}</span></td>
-                          <td className="px-4 py-3"><p className="font-medium">{issue.title}</p></td>
-                          <td className="px-4 py-3"><Badge className={getIssueTypeColor(issue.type)}>{issue.type}</Badge></td>
-                          <td className="px-4 py-3"><Badge className={getIssueStatusColor(issue.status)}>{issue.status.replace('_', ' ')}</Badge></td>
-                          <td className="px-4 py-3"><Badge variant="outline"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(issue.priority).color} mr-1`} />{getPriorityConfig(issue.priority).label}</Badge></td>
-                          <td className="px-4 py-3">{issue.assignee ? <Avatar className="h-6 w-6"><AvatarFallback className="text-xs">{issue.assignee.slice(0, 2)}</AvatarFallback></Avatar> : <span className="text-gray-400">Unassigned</span>}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                {localIssues.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <AlertTriangle className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No issues tracked</p>
+                    <p className="text-sm">Issues from sprints and backlog will appear here</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead><tr className="border-b"><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Key</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Summary</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Priority</th><th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Assignee</th></tr></thead>
+                      <tbody className="divide-y">
+                        {localIssues.map(issue => (
+                          <tr key={issue.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { setSelectedIssue(issue); setShowIssueDialog(true) }}>
+                            <td className="px-4 py-3"><span className="text-blue-600 font-medium">{issue.key}</span></td>
+                            <td className="px-4 py-3"><p className="font-medium">{issue.title}</p></td>
+                            <td className="px-4 py-3"><Badge className={getIssueTypeColor(issue.type)}>{issue.type}</Badge></td>
+                            <td className="px-4 py-3"><Badge className={getIssueStatusColor(issue.status)}>{issue.status.replace('_', ' ')}</Badge></td>
+                            <td className="px-4 py-3"><Badge variant="outline"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(issue.priority).color} mr-1`} />{getPriorityConfig(issue.priority).label}</Badge></td>
+                            <td className="px-4 py-3">{issue.assignee ? <Avatar className="h-6 w-6"><AvatarFallback className="text-xs">{issue.assignee.slice(0, 2)}</AvatarFallback></Avatar> : <span className="text-gray-400">Unassigned</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -943,12 +1107,37 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button onClick={() => setShowAutomationDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
               <CardContent className="space-y-4">
-                {localAutomations.map((auto, autoIdx) => (
+                {automationsLoading && (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      <span>Loading automations...</span>
+                    </div>
+                  </div>
+                )}
+                {!automationsLoading && allAutomations.length === 0 && localAutomations.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                    <Workflow className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No automations yet</p>
+                    <p className="text-sm mb-4">Create workflow automations to streamline your processes</p>
+                  </div>
+                )}
+                {!automationsLoading && [...allAutomations, ...localAutomations].map((auto, autoIdx) => (
                   <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className={`p-2 rounded-lg ${auto.enabled ? 'bg-green-100' : 'bg-gray-100'}`}><Workflow className={`h-5 w-5 ${auto.enabled ? 'text-green-600' : 'text-gray-400'}`} /></div>
                     <div className="flex-1"><h4 className="font-medium">{auto.name}</h4><p className="text-sm text-gray-500">{auto.trigger} → {auto.action}</p></div>
                     <Badge variant="outline">{auto.runsCount} runs</Badge>
-                    <Switch checked={auto.enabled} onCheckedChange={(checked) => { setLocalAutomations(prev => prev.map((a, idx) => idx === autoIdx ? { ...a, enabled: checked } : a)); toast.success(checked ? `Automation "${auto.name}" enabled` : `Automation "${auto.name}" disabled`) }} />
+                    <Switch checked={auto.enabled} onCheckedChange={(checked) => {
+                      if (allAutomations.find(a => a.id === auto.id)) {
+                        // Update database automation
+                        updateWorkflow?.({ id: auto.id, is_enabled: checked })
+                        refetchAutomations()
+                      } else {
+                        // Update local automation
+                        setLocalAutomations(prev => prev.map(a => a.id === auto.id ? { ...a, enabled: checked } : a))
+                      }
+                      toast.success(checked ? `Automation "${auto.name}" enabled` : `Automation "${auto.name}" disabled`)
+                    }} />
                   </div>
                 ))}
               </CardContent>
@@ -957,19 +1146,14 @@ export default function ProjectsHubClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {[].map(template => (
-                <Card key={template.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg cursor-pointer">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-3"><div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg"><FileText className="h-5 w-5 text-blue-600" /></div><Badge variant="outline">{template.category}</Badge></div>
-                    <h3 className="font-semibold mb-1">{template.name}</h3>
-                    <p className="text-sm text-gray-500 mb-4">{template.description}</p>
-                    <div className="flex items-center justify-between text-sm text-gray-500"><span>{template.tasksCount} tasks</span><span>Used {template.usageCount} times</span></div>
-                    <Button className="w-full mt-4" variant="outline" onClick={() => { setSelectedTemplate(template); setShowTemplateDialog(true) }}><Copy className="h-4 w-4 mr-2" />Use Template</Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <FileText className="h-12 w-12 mb-4 text-gray-300" />
+                <p className="text-lg font-medium mb-2">No project templates</p>
+                <p className="text-sm mb-4 text-center">Project templates allow you to quickly create new projects with predefined structures</p>
+                <Button variant="outline"><Plus className="h-4 w-4 mr-2" />Create Template</Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Settings Tab */}
@@ -2106,7 +2290,7 @@ export default function ProjectsHubClient() {
                       body: JSON.stringify({ status: 'in_progress' })
                     })
                     if (!res.ok) throw new Error('Failed to move issue')
-                    setIssues(prev => prev.map(i => i.id === selectedIssue.id ? { ...i, status: 'in_progress' } : i))
+                    setLocalIssues(prev => prev.map(i => i.id === selectedIssue.id ? { ...i, status: 'in_progress' } : i))
                     toast.success(`Issue ${selectedIssue.key} moved to In Progress`, { id: 'move-issue' })
                     setShowIssueDialog(false)
                   } catch {
@@ -2203,7 +2387,8 @@ export default function ProjectsHubClient() {
                 })
                 if (!res.ok) throw new Error('Failed to create milestone')
                 const data = await res.json()
-                setMilestones(prev => [...prev, { id: data.id || `M-${Date.now()}`, title: milestoneForm.title, quarter: milestoneForm.quarter, status: milestoneForm.status, progress: 0 }])
+                setLocalMilestones(prev => [...prev, { id: data.id || `M-${Date.now()}`, title: milestoneForm.title, quarter: milestoneForm.quarter, status: milestoneForm.status as 'planned' | 'in_progress' | 'completed', progress: 0, projectIds: [] }])
+                refetchMilestones()
                 toast.success(`Milestone "${milestoneForm.title}" created`, { id: 'create-milestone' })
                 setShowMilestoneDialog(false)
                 setMilestoneForm({ title: '', quarter: 'Q1 2026', status: 'planned' })
@@ -2248,13 +2433,11 @@ export default function ProjectsHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSprintBoardDialog(false)}>Close</Button>
               <Button onClick={async () => {
+              if (!selectedSprint) return
               toast.loading('Completing sprint...', { id: 'complete-sprint' })
               try {
-                const res = await fetch(`/api/projects/sprints/${selectedSprint?.id}/complete`, { method: 'POST' })
-                if (!res.ok) throw new Error('Failed to complete sprint')
-                if (selectedSprint) {
-                  setSprints(prev => prev.map(s => s.id === selectedSprint.id ? { ...s, status: 'completed' } : s))
-                }
+                await completeSprint({ id: selectedSprint.id })
+                refetchSprints()
                 toast.success('Sprint completed', { id: 'complete-sprint', description: 'Tasks moved to next sprint' })
                 setShowSprintBoardDialog(false)
               } catch {
@@ -2321,7 +2504,7 @@ export default function ProjectsHubClient() {
                 })
                 if (!res.ok) throw new Error('Failed to add backlog item')
                 const data = await res.json()
-                setBacklogItems(prev => [...prev, { id: data.id || `BL-${Date.now()}`, ...backlogForm }])
+                setLocalBacklogItems(prev => [...prev, { id: data.id || `BL-${Date.now()}`, title: backlogForm.title, description: backlogForm.description, type: backlogForm.type as BacklogItem['type'], priority: backlogForm.priority as Priority, points: backlogForm.points }])
                 toast.success(`Backlog item "${backlogForm.title}" created`, { id: 'add-backlog' })
                 setShowBacklogItemDialog(false)
                 setBacklogForm({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 })
@@ -2454,7 +2637,8 @@ export default function ProjectsHubClient() {
                 })
                 if (!res.ok) throw new Error('Failed to create automation')
                 const data = await res.json()
-                setAutomations(prev => [...prev, { id: data.id || `AUTO-${Date.now()}`, ...automationForm }])
+                setLocalAutomations(prev => [...prev, { id: data.id || `AUTO-${Date.now()}`, name: automationForm.name, trigger: automationForm.trigger, action: automationForm.action, enabled: automationForm.enabled, runsCount: 0 }])
+                refetchAutomations()
                 toast.success(`Automation "${automationForm.name}" created`, { id: 'create-automation' })
                 setShowAutomationDialog(false)
                 setAutomationForm({ name: '', trigger: '', action: '', enabled: true })
@@ -2508,7 +2692,7 @@ export default function ProjectsHubClient() {
                 })
                 if (!res.ok) throw new Error('Failed to create project')
                 const data = await res.json()
-                setProjects(prev => [...prev, { id: data.id || `PRJ-${Date.now()}`, name: `${selectedTemplate?.name} Project`, template: selectedTemplate?.name, createdAt: new Date().toISOString() }])
+                fetchProjects() // Refetch projects from database
                 toast.success(`Project created from "${selectedTemplate?.name}" template`, { id: 'create-from-template' })
                 setShowTemplateDialog(false)
               } catch {
@@ -2817,7 +3001,7 @@ export default function ProjectsHubClient() {
                 const res = await fetch('/api/projects/archive-all', { method: 'POST' })
                 if (!res.ok) throw new Error('Archive failed')
                 const projectCount = projects.length
-                setProjects(prev => prev.map(p => ({ ...p, archived: true })))
+                fetchProjects() // Refetch projects to reflect archived status
                 toast.success('All projects archived', { id: 'archive-all', description: `${projectCount} projects archived` })
                 setShowArchiveDialog(false)
               } catch {
@@ -2855,9 +3039,12 @@ export default function ProjectsHubClient() {
               try {
                 const res = await fetch('/api/projects/delete-all', { method: 'DELETE' })
                 if (!res.ok) throw new Error('Delete failed')
-                setProjects([])
-                setIssues([])
-                setBacklogItems([])
+                // Refresh all data from database
+                fetchProjects()
+                refetchSprints()
+                refetchMilestones()
+                setLocalIssues([])
+                setLocalBacklogItems([])
                 toast.success('All data deleted', { id: 'delete-all' })
                 setShowDeleteAllDialog(false)
               } catch {

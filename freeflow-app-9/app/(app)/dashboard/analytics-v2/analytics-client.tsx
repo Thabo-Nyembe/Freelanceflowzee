@@ -1,10 +1,16 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
+// Import World-Class Recharts components
+import { WorldClassLineChart } from '@/components/world-class/charts/line-chart'
+import { WorldClassAreaChart } from '@/components/world-class/charts/area-chart'
+import { WorldClassBarChart } from '@/components/world-class/charts/bar-chart'
+import { WorldClassPieChart } from '@/components/world-class/charts/pie-chart'
 // Import extended analytics hooks for real Supabase data
 import {
   useAnalyticsDailyMetrics,
@@ -16,6 +22,7 @@ import {
   useAnalyticsCohorts as useAnalyticsCohortData,
   useAnalyticsEvents,
   useAnalyticsRevenue,
+  useAnalyticsConversionFunnels,
 } from '@/lib/hooks/use-analytics-extended'
 import {
   DropdownMenu,
@@ -147,6 +154,8 @@ const mockActivities: any[] = []
 const mockQuickActions: any[] = []
 
 export default function AnalyticsClient() {
+  // Initialize Supabase client
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -220,6 +229,7 @@ export default function AnalyticsClient() {
   const { data: cohortData, isLoading: cohortLoading, refresh: refreshCohorts } = useAnalyticsCohortData(userId || undefined)
   const { data: analyticsEvents, isLoading: eventsLoading, refresh: refreshEvents } = useAnalyticsEvents(userId || undefined)
   const { data: revenueData, isLoading: revenueLoading, refresh: refreshRevenue } = useAnalyticsRevenue(userId || undefined)
+  const { data: conversionFunnelsDb, isLoading: funnelsLoading, refresh: refreshFunnels } = useAnalyticsConversionFunnels(userId || undefined)
 
   // Form state for creating funnel
   const [funnelForm, setFunnelForm] = useState({
@@ -340,17 +350,57 @@ export default function AnalyticsClient() {
     }
   }, [userId, supabase])
 
+  // Helper to calculate date range based on timeRange state
+  const getDateRangeFromTimeRange = useCallback(() => {
+    const now = new Date()
+    let start: Date
+
+    if (timeRange === 'custom' && customDateRange.start && customDateRange.end) {
+      return {
+        start: new Date(customDateRange.start),
+        end: new Date(customDateRange.end)
+      }
+    }
+
+    switch (timeRange) {
+      case '7d':
+        start = new Date(now)
+        start.setDate(start.getDate() - 7)
+        break
+      case '14d':
+        start = new Date(now)
+        start.setDate(start.getDate() - 14)
+        break
+      case '30d':
+        start = new Date(now)
+        start.setDate(start.getDate() - 30)
+        break
+      case '90d':
+        start = new Date(now)
+        start.setDate(start.getDate() - 90)
+        break
+      case '1y':
+        start = new Date(now)
+        start.setFullYear(start.getFullYear() - 1)
+        break
+      default:
+        start = new Date(now)
+        start.setDate(start.getDate() - 30)
+    }
+
+    return { start, end: now }
+  }, [timeRange, customDateRange])
+
   const fetchEngagementMetrics = useCallback(async () => {
     if (!userId) return
     try {
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const { start } = getDateRangeFromTimeRange()
 
       const { data, error } = await supabase
         .from('engagement_metrics')
         .select('*')
         .eq('user_id', userId)
-        .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .gte('date', start.toISOString().split('T')[0])
         .order('date', { ascending: false })
       if (error) throw error
       setEngagementData(data || [])
@@ -358,30 +408,34 @@ export default function AnalyticsClient() {
       console.error('Error fetching engagement metrics:', err)
       // Table may not exist, silently fail
     }
-  }, [userId, supabase])
+  }, [userId, supabase, getDateRangeFromTimeRange])
 
   const fetchPlatformMetrics = useCallback(async () => {
     try {
+      const { start } = getDateRangeFromTimeRange()
       const { data, error } = await supabase
         .from('platform_metrics')
         .select('*')
+        .gte('period_start', start.toISOString())
         .order('period_start', { ascending: false })
-        .limit(12)
+        .limit(50)
       if (error) throw error
       setPlatformMetricsData(data || [])
     } catch (err) {
       console.error('Error fetching platform metrics:', err)
       // Table may not exist, silently fail
     }
-  }, [supabase])
+  }, [supabase, getDateRangeFromTimeRange])
 
   const fetchDashboardMetrics = useCallback(async () => {
     if (!userId) return
     try {
+      const { start } = getDateRangeFromTimeRange()
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
         .eq('user_id', userId)
+        .gte('last_updated', start.toISOString())
         .order('last_updated', { ascending: false })
       if (error) throw error
       setDashboardMetricsData(data || [])
@@ -389,7 +443,7 @@ export default function AnalyticsClient() {
       console.error('Error fetching dashboard metrics:', err)
       // Table may not exist, silently fail
     }
-  }, [userId, supabase])
+  }, [userId, supabase, getDateRangeFromTimeRange])
 
   // Fetch all real analytics data when userId is available
   useEffect(() => {
@@ -416,6 +470,20 @@ export default function AnalyticsClient() {
     }
     loadAllAnalytics()
   }, [userId, fetchUserAnalytics, fetchEngagementMetrics, fetchPlatformMetrics, fetchDashboardMetrics])
+
+  // Refetch data when time range changes
+  useEffect(() => {
+    if (userId && !isAnalyticsLoading) {
+      // Refresh all analytics data with new time range
+      Promise.all([
+        fetchEngagementMetrics(),
+        fetchPlatformMetrics(),
+        fetchDashboardMetrics(),
+        refreshDailyMetrics(),
+        refreshRevenue(),
+      ]).catch(err => console.error('Error refreshing analytics for new time range:', err))
+    }
+  }, [timeRange, customDateRange.start, customDateRange.end])
 
   // Compute real metrics from Supabase data
   const computedMetrics = useMemo((): AnalyticsMetric[] => {
@@ -562,7 +630,7 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Funnel created'" has been created` })
+      toast.success(`Funnel "${funnelForm.name}" has been created`)
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnel(false)
       fetchFunnels()
@@ -619,7 +687,7 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Report created'" has been created` })
+      toast.success(`Report "${reportForm.name}" has been created`)
       setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
       setShowCreateReport(false)
       fetchReports()
@@ -640,7 +708,7 @@ export default function AnalyticsClient() {
         .eq('id', reportId)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Report running'" is being generated` })
+      toast.success(`Report "${reportName}" is being generated`)
       fetchReports()
     } catch (err: any) {
       toast.error('Error running report')
@@ -693,7 +761,7 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard created'" has been created` })
+      toast.success(`Dashboard "${dashboardForm.name}" has been created`)
       setDashboardForm({ name: '', description: '', is_default: false })
       setShowCreateDashboard(false)
       fetchDashboards()
@@ -750,7 +818,7 @@ export default function AnalyticsClient() {
         .select()
         .single()
       if (error) throw error
-      toast.success('Dashboard duplicated'" has been duplicated` })
+      toast.success(`Dashboard "${dashboardName}" has been duplicated`)
       fetchDashboards()
     } catch (err: any) {
       toast.error('Error duplicating dashboard')
@@ -982,8 +1050,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     }
     setTimeRange('custom')
     setShowCustomDatePicker(false)
-    toast.success('Custom date range applied' to ${customDateRange.end}`
-    })
+    toast.success(`Custom date range applied: ${customDateRange.start} to ${customDateRange.end}`)
     handleRefresh()
   }
 
@@ -1094,7 +1161,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
           notification_channels: ['email', 'in_app']
         })
       if (error) throw error
-      toast.success('Alert created'"` })
+      toast.success(`Alert created for metric "${alertConfig.metric_name}"`)
     } catch (err: any) {
       toast.error('Error creating alert')
     } finally {
@@ -1371,6 +1438,135 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
 
   // Compute overall loading state
   const isDataLoading = isAnalyticsLoading || dailyMetricsLoading || realtimeLoading || platformLoading
+
+  // Compute chart data from daily metrics for Traffic Overview chart
+  const trafficChartData = useMemo(() => {
+    if (dailyMetrics && dailyMetrics.length > 0) {
+      return dailyMetrics.slice(0, 30).reverse().map((metric: any) => ({
+        date: new Date(metric.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        visitors: metric.visitors || metric.sessions || 0,
+        pageViews: metric.page_views || metric.pageviews || 0,
+      }))
+    }
+    // Fallback data when no metrics available
+    const today = new Date()
+    return Array.from({ length: 14 }, (_, i) => {
+      const date = new Date(today)
+      date.setDate(date.getDate() - (13 - i))
+      return {
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        visitors: 0,
+        pageViews: 0,
+      }
+    })
+  }, [dailyMetrics])
+
+  // Compute revenue chart data
+  const revenueChartData = useMemo(() => {
+    if (revenueData && revenueData.length > 0) {
+      const grouped: Record<string, number> = {}
+      revenueData.forEach((r: any) => {
+        const date = new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        grouped[date] = (grouped[date] || 0) + (parseFloat(r.amount) || 0)
+      })
+      return Object.entries(grouped).map(([date, revenue]) => ({ date, revenue }))
+    }
+    return []
+  }, [revenueData])
+
+  // Compute funnel data from conversion funnels
+  const activeFunnels = useMemo(() => {
+    if (conversionFunnelsDb && conversionFunnelsDb.length > 0) {
+      return conversionFunnelsDb.map((funnel: any) => ({
+        id: funnel.id,
+        name: funnel.name,
+        steps: funnel.steps || [],
+        totalConversion: funnel.total_conversion || 0,
+        status: funnel.status || 'active',
+        createdAt: funnel.created_at,
+      }))
+    }
+    return dbFunnels.length > 0 ? dbFunnels : []
+  }, [conversionFunnelsDb, dbFunnels])
+
+  // Traffic sources data for pie chart
+  const trafficSourcesData = useMemo(() => {
+    // If we have platform metrics with source breakdown
+    if (platformMetricsDb.length > 0 && platformMetricsDb[0]?.traffic_sources) {
+      return platformMetricsDb[0].traffic_sources
+    }
+    // Default sources - these would be replaced by real data
+    return [
+      { name: 'Organic Search', value: 42 },
+      { name: 'Direct', value: 28 },
+      { name: 'Social Media', value: 18 },
+      { name: 'Referral', value: 8 },
+      { name: 'Email', value: 4 },
+    ]
+  }, [platformMetricsDb])
+
+  // Compute cohorts data from database
+  const cohortRows = useMemo(() => {
+    if (cohortData && cohortData.length > 0) {
+      return cohortData.map((cohort: any) => ({
+        cohort: cohort.name || cohort.cohort_name || 'Unknown',
+        users: cohort.user_count || cohort.users || 0,
+        week0: cohort.week_0 || cohort.retention_week_0 || 100,
+        week1: cohort.week_1 || cohort.retention_week_1 || 0,
+        week2: cohort.week_2 || cohort.retention_week_2 || 0,
+        week3: cohort.week_3 || cohort.retention_week_3 || 0,
+        week4: cohort.week_4 || cohort.retention_week_4 || 0,
+        week5: cohort.week_5 || cohort.retention_week_5 || 0,
+        week6: cohort.week_6 || cohort.retention_week_6 || 0,
+        week7: cohort.week_7 || cohort.retention_week_7 || 0,
+      }))
+    }
+    return []
+  }, [cohortData])
+
+  // Compute AI insights from database
+  const insights = useMemo(() => {
+    if (aiInsights && aiInsights.length > 0) {
+      return aiInsights.map((insight: any) => ({
+        id: insight.id,
+        title: insight.title || insight.insight_title,
+        description: insight.description || insight.insight_text,
+        type: insight.type || insight.insight_type || 'info',
+        impact: insight.impact || 'medium',
+        createdAt: insight.created_at,
+      }))
+    }
+    return []
+  }, [aiInsights])
+
+  // Compute user activities from database
+  const activities = useMemo(() => {
+    if (userActivity && userActivity.length > 0) {
+      return userActivity.slice(0, 10).map((activity: any) => ({
+        id: activity.id,
+        type: activity.activity_type || activity.type,
+        description: activity.description || activity.activity_description,
+        timestamp: activity.created_at,
+        user: activity.user_name || 'User',
+      }))
+    }
+    return []
+  }, [userActivity])
+
+  // Quick actions based on analytics state
+  const quickActions = useMemo(() => {
+    const actions = []
+    if (filteredMetrics.length === 0) {
+      actions.push({ id: 'add-metric', label: 'Add your first metric', action: () => setShowMetricCreator(true) })
+    }
+    if (activeFunnels.length === 0) {
+      actions.push({ id: 'create-funnel', label: 'Create a conversion funnel', action: () => setShowCreateFunnel(true) })
+    }
+    if (dbReports.length === 0) {
+      actions.push({ id: 'create-report', label: 'Schedule your first report', action: () => setShowCreateReport(true) })
+    }
+    return actions
+  }, [filteredMetrics, activeFunnels, dbReports])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
@@ -1837,12 +2033,48 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <LineChart className="h-12 w-12 mx-auto text-indigo-400 mb-2" />
-                      <p className="text-sm text-gray-500">Traffic chart visualization</p>
-                    </div>
-                  </div>
+                  {chartType === 'line' && (
+                    <WorldClassLineChart
+                      data={trafficChartData}
+                      xAxisKey="date"
+                      lines={[
+                        { dataKey: 'visitors', name: 'Visitors', color: '#6366f1' },
+                        { dataKey: 'pageViews', name: 'Page Views', color: '#a855f7' },
+                      ]}
+                      height={256}
+                      isLoading={dailyMetricsLoading}
+                      emptyMessage="No traffic data available. Start tracking to see insights."
+                      showLegend={false}
+                    />
+                  )}
+                  {chartType === 'bar' && (
+                    <WorldClassBarChart
+                      data={trafficChartData}
+                      xAxisKey="date"
+                      bars={[
+                        { dataKey: 'visitors', name: 'Visitors', color: '#6366f1' },
+                        { dataKey: 'pageViews', name: 'Page Views', color: '#a855f7' },
+                      ]}
+                      height={256}
+                      isLoading={dailyMetricsLoading}
+                      emptyMessage="No traffic data available. Start tracking to see insights."
+                      showLegend={false}
+                    />
+                  )}
+                  {chartType === 'area' && (
+                    <WorldClassAreaChart
+                      data={trafficChartData}
+                      xAxisKey="date"
+                      areas={[
+                        { dataKey: 'visitors', name: 'Visitors', color: '#6366f1' },
+                        { dataKey: 'pageViews', name: 'Page Views', color: '#a855f7' },
+                      ]}
+                      height={256}
+                      isLoading={dailyMetricsLoading}
+                      emptyMessage="No traffic data available. Start tracking to see insights."
+                      showLegend={false}
+                    />
+                  )}
                   <div className="flex items-center justify-center gap-6 mt-4">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
@@ -1873,15 +2105,25 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {(mockFunnels[0]?.steps || []).map((step, idx) => (
-                      <div key={idx}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium">{step.name}</span>
-                          <span className="text-sm text-gray-500">{step.count?.toLocaleString() || 0} ({step.conversion || 0}%)</span>
+                    {activeFunnels.length > 0 && activeFunnels[0]?.steps?.length > 0 ? (
+                      activeFunnels[0].steps.map((step: any, idx: number) => (
+                        <div key={idx}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">{step.name || step.event_name}</span>
+                            <span className="text-sm text-gray-500">{(step.count || 0).toLocaleString()} ({step.conversion || 0}%)</span>
+                          </div>
+                          <Progress value={activeFunnels[0]?.steps?.[0]?.count ? ((step.count || 0) / activeFunnels[0].steps[0].count) * 100 : 0} className="h-3" />
                         </div>
-                        <Progress value={mockFunnels[0]?.steps?.[0]?.count ? (step.count / mockFunnels[0].steps[0].count) * 100 : 0} className="h-3" />
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Target className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm">No funnels configured yet.</p>
+                        <Button variant="link" className="text-indigo-600 mt-2" onClick={() => setShowCreateFunnel(true)}>
+                          Create your first funnel
+                        </Button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1893,20 +2135,18 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 <CardHeader>
                   <CardTitle>Traffic Sources</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {[
-                    { source: 'Organic Search', value: 42, color: 'bg-indigo-500' },
-                    { source: 'Direct', value: 28, color: 'bg-purple-500' },
-                    { source: 'Social Media', value: 18, color: 'bg-pink-500' },
-                    { source: 'Referral', value: 8, color: 'bg-amber-500' },
-                    { source: 'Email', value: 4, color: 'bg-emerald-500' }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                      <span className="flex-1 text-sm">{item.source}</span>
-                      <span className="text-sm font-medium">{item.value}%</span>
-                    </div>
-                  ))}
+                <CardContent>
+                  <WorldClassPieChart
+                    data={trafficSourcesData}
+                    height={200}
+                    innerRadius={40}
+                    showLabels={false}
+                    showLegend={true}
+                    legendPosition="bottom"
+                    isLoading={platformLoading}
+                    emptyMessage="No traffic source data available"
+                    tooltipFormatter={(value, name) => [`${value}%`, name]}
+                  />
                 </CardContent>
               </Card>
 
@@ -2194,7 +2434,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       const headers = ['Cohort', 'Users', 'Week 0', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7']
                       const csvRows = [
                         headers.join(','),
-                        ...mockCohorts.map(row => [
+                        ...cohortRows.map(row => [
                           `"${row.cohort}"`,
                           row.users,
                           row.week0, row.week1, row.week2, row.week3,
@@ -2269,7 +2509,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       </tr>
                     </thead>
                     <tbody>
-                      {mockCohorts.map((row, idx) => (
+                      {cohortRows.map((row, idx) => (
                         <tr key={idx} className="border-b dark:border-gray-700">
                           <td className="py-3 px-3 text-sm font-medium">{row.cohort}</td>
                           <td className="py-3 px-3 text-sm text-center text-gray-500">{row.users.toLocaleString()}</td>
@@ -2544,7 +2784,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           recipients: (report.recipients || []).join(', ')
                         })
                         setShowCreateReport(true)
-                        toast.success('Editing report'"` })
+                        toast.success(`Editing report "${report.name}"`)
                       }}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
@@ -3551,7 +3791,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                 </TabsContent>
                 <TabsContent value="correlations" className="mt-4">
                   <div className="space-y-3">
-                    {mockMetrics.slice(0, 4).filter(m => m.id !== selectedMetric.id).map((metric) => (
+                    {filteredMetrics.slice(0, 4).filter(m => m.id !== selectedMetric.id).map((metric) => (
                       <div key={metric.id} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <span className="font-medium">{metric.name}</span>
                         <div className="flex items-center gap-2">
@@ -3875,23 +4115,23 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
         {/* AI-Powered Insights Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
-            insights={mockAIInsights}
+            insights={insights}
             onAskQuestion={handleAskAIQuestion}
           />
-          <PredictiveAnalytics predictions={mockPredictions} />
+          <PredictiveAnalytics predictions={analyticsGoals || []} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
           <ActivityFeed
-            activities={mockActivities}
+            activities={activities}
             maxItems={5}
             showFilters={true}
           />
         </div>
 
         {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockQuickActions} />
+        <QuickActionsToolbar actions={quickActions} />
       </div>
     </div>
   )

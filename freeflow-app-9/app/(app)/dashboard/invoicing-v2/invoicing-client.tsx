@@ -80,6 +80,10 @@ import { CardDescription } from '@/components/ui/card'
 
 // World-class guest payment component
 import GuestPaymentModal from '@/components/payments/guest-payment-modal'
+import { createClient } from '@/lib/supabase/client'
+
+// Initialize Supabase client for real-time subscriptions
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - QuickBooks Level Invoicing
@@ -435,8 +439,6 @@ export default function InvoicingClient() {
   // Fetch invoices from Supabase
   const fetchInvoices = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
@@ -475,8 +477,6 @@ export default function InvoicingClient() {
         return null
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('invoices')
         .insert({
@@ -489,12 +489,14 @@ export default function InvoicingClient() {
           tax_rate: 0,
           tax_amount: invoiceData.taxAmount || 0,
           discount_amount: invoiceData.discountAmount || 0,
-          total: invoiceData.total || 0,
+          total_amount: invoiceData.total || 0,
+          amount_due: invoiceData.total || 0,
+          amount_paid: 0,
           currency: invoiceData.currency || 'USD',
           issue_date: invoiceData.issueDate || new Date().toISOString(),
           due_date: invoiceData.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           status: invoiceData.status || 'draft',
-          terms: invoiceData.terms,
+          terms_and_conditions: invoiceData.terms,
           notes: invoiceData.notes,
         })
         .select()
@@ -522,17 +524,15 @@ export default function InvoicingClient() {
       if (updates.status) dbUpdates.status = updates.status
       if (updates.client?.name) dbUpdates.client_name = updates.client.name
       if (updates.client?.email) dbUpdates.client_email = updates.client.email
-      if (updates.total !== undefined) dbUpdates.total = updates.total
+      if (updates.total !== undefined) dbUpdates.total_amount = updates.total
       if (updates.subtotal !== undefined) dbUpdates.subtotal = updates.subtotal
       if (updates.taxAmount !== undefined) dbUpdates.tax_amount = updates.taxAmount
       if (updates.dueDate) dbUpdates.due_date = updates.dueDate
       if (updates.issueDate) dbUpdates.issue_date = updates.issueDate
       if (updates.notes) dbUpdates.notes = updates.notes
-      if (updates.terms) dbUpdates.terms = updates.terms
+      if (updates.terms) dbUpdates.terms_and_conditions = updates.terms
       if (updates.paidDate) dbUpdates.paid_date = updates.paidDate
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('invoices')
         .update(dbUpdates)
@@ -544,19 +544,19 @@ export default function InvoicingClient() {
         return false
       }
 
+      // Refetch to update local state
+      fetchInvoices()
       return true
     } catch (err) {
       console.error('Error updating invoice:', err)
       toast.error('Failed to update invoice')
       return false
     }
-  }, [])
+  }, [fetchInvoices])
 
   // Delete invoice from Supabase
   const deleteInvoice = useCallback(async (invoiceId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('invoices')
         .delete()
@@ -568,13 +568,15 @@ export default function InvoicingClient() {
         return false
       }
 
+      // Refetch to update local state
+      fetchInvoices()
       return true
     } catch (err) {
       console.error('Error deleting invoice:', err)
       toast.error('Failed to delete invoice')
       return false
     }
-  }, [])
+  }, [fetchInvoices])
 
   // Initial data fetch and real-time subscription
   useEffect(() => {
@@ -714,8 +716,7 @@ export default function InvoicingClient() {
     if (!selectedInvoice) return
     const success = await updateInvoice(selectedInvoice.id, { status: 'void' as InvoiceStatus })
     if (success) {
-      toast.success('Invoice voided' has been voided`
-      })
+      toast.success(`Invoice ${selectedInvoice.invoiceNumber} has been voided`)
       setShowInvoiceDialog(false)
     }
   }
@@ -727,8 +728,7 @@ export default function InvoicingClient() {
       paidDate: new Date().toISOString().split('T')[0]
     })
     if (success) {
-      toast.success('Payment recorded'`
-      })
+      toast.success(`Payment recorded for ${selectedInvoice.invoiceNumber}`)
     }
   }
 
@@ -744,9 +744,6 @@ export default function InvoicingClient() {
     amount: number
   }) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-
       // Record the payment in the database
       await supabase.from('payments').insert({
         invoice_id: selectedInvoiceForGuestPayment?.id,

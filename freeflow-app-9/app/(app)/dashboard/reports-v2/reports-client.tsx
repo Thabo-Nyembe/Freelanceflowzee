@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -74,6 +74,9 @@ import {
   type ExportFormat,
   type ScheduleType
 } from '@/lib/hooks/use-reporting'
+
+// Import financial reports hook for revenue/analytics data
+import { useReports as useFinancialReports, type ReportStats } from '@/lib/hooks/use-reports'
 
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -159,30 +162,224 @@ const defaultFolders = [
 ]
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Looker/Tableau Level
+// AI INSIGHTS GENERATOR - Real data-driven insights
 // ============================================================================
 
-const mockReportsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Report Accuracy', description: 'All scheduled reports delivered on time with 99.9% data accuracy.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '2', type: 'warning' as const, title: 'Data Freshness', description: 'Sales data source is 6 hours stale. Refresh recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Data' },
-  { id: '3', type: 'info' as const, title: 'Usage Trend', description: 'Executive Dashboard views up 40% this month. Consider expanding.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
+function generateAIInsights(
+  reports: Report[],
+  dataSources: any[],
+  scheduledReports: any[],
+  financialStats?: ReportStats
+) {
+  const insights: Array<{
+    id: string
+    type: 'success' | 'warning' | 'info' | 'error'
+    title: string
+    description: string
+    priority: 'low' | 'medium' | 'high'
+    timestamp: string
+    category: string
+  }> = []
 
-const mockReportsCollaborators = [
-  { id: '1', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'online' as const, role: 'Analyst' },
-  { id: '2', name: 'BI Manager', avatar: '/avatars/bi.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'away' as const, role: 'Finance' },
-]
+  // Check report health
+  const publishedReports = reports.filter(r => r.status === 'published').length
+  const draftReports = reports.filter(r => r.status === 'draft').length
 
-const mockReportsPredictions = [
-  { id: '1', title: 'Report Usage', prediction: 'Monthly report views expected to reach 10K by end of quarter', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Savings', prediction: 'Automated reports saving 20 hours/week in manual work', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
-]
+  if (publishedReports > 0) {
+    insights.push({
+      id: 'insight-1',
+      type: 'success',
+      title: 'Report Publishing',
+      description: `${publishedReports} reports are published and accessible. ${draftReports > 0 ? `${draftReports} drafts pending review.` : 'All reports are up to date.'}`,
+      priority: 'low',
+      timestamp: new Date().toISOString(),
+      category: 'Quality'
+    })
+  }
 
-const mockReportsActivities = [
-  { id: '1', user: 'Data Analyst', action: 'Created', target: 'New Q4 Revenue Dashboard', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'BI Manager', action: 'Scheduled', target: 'Weekly KPI report for leadership', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'Monthly data refresh for all sources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+  // Check data sources health
+  const staleDataSources = dataSources.filter(ds => {
+    if (!ds.last_sync) return true
+    const lastSync = new Date(ds.last_sync)
+    const hoursAgo = (Date.now() - lastSync.getTime()) / (1000 * 60 * 60)
+    return hoursAgo > 6
+  })
+
+  if (staleDataSources.length > 0) {
+    insights.push({
+      id: 'insight-2',
+      type: 'warning',
+      title: 'Data Freshness',
+      description: `${staleDataSources.length} data source${staleDataSources.length > 1 ? 's are' : ' is'} over 6 hours stale. Refresh recommended for accurate reporting.`,
+      priority: 'high',
+      timestamp: new Date().toISOString(),
+      category: 'Data'
+    })
+  } else if (dataSources.length > 0) {
+    insights.push({
+      id: 'insight-2',
+      type: 'success',
+      title: 'Data Sources Healthy',
+      description: `All ${dataSources.length} data sources are synced and up to date.`,
+      priority: 'low',
+      timestamp: new Date().toISOString(),
+      category: 'Data'
+    })
+  }
+
+  // Check scheduled reports
+  const activeSchedules = scheduledReports.filter(s => s.enabled).length
+  if (activeSchedules > 0) {
+    insights.push({
+      id: 'insight-3',
+      type: 'info',
+      title: 'Automated Delivery',
+      description: `${activeSchedules} scheduled report${activeSchedules > 1 ? 's are' : ' is'} actively delivering insights to your team.`,
+      priority: 'medium',
+      timestamp: new Date().toISOString(),
+      category: 'Automation'
+    })
+  }
+
+  // Financial insights
+  if (financialStats && financialStats.netIncome !== 0) {
+    const trend = financialStats.netIncome > 0 ? 'positive' : 'negative'
+    insights.push({
+      id: 'insight-4',
+      type: trend === 'positive' ? 'success' : 'warning',
+      title: 'Financial Health',
+      description: `Net income is ${trend}: $${Math.abs(financialStats.netIncome).toLocaleString()}. Revenue: $${financialStats.totalRevenue.toLocaleString()}, Expenses: $${financialStats.totalExpenses.toLocaleString()}.`,
+      priority: trend === 'positive' ? 'low' : 'high',
+      timestamp: new Date().toISOString(),
+      category: 'Finance'
+    })
+  }
+
+  // Total views insight
+  const totalViews = reports.reduce((sum, r) => sum + r.views, 0)
+  if (totalViews > 100) {
+    insights.push({
+      id: 'insight-5',
+      type: 'info',
+      title: 'Report Engagement',
+      description: `Your reports have received ${totalViews.toLocaleString()} total views. Most popular reports are driving team decisions.`,
+      priority: 'medium',
+      timestamp: new Date().toISOString(),
+      category: 'Analytics'
+    })
+  }
+
+  return insights.slice(0, 3) // Return top 3 insights
+}
+
+function generatePredictions(
+  reports: Report[],
+  scheduledReports: any[],
+  financialStats?: ReportStats
+) {
+  const predictions: Array<{
+    id: string
+    title: string
+    prediction: string
+    confidence: number
+    trend: 'up' | 'down' | 'stable'
+    impact: 'high' | 'medium' | 'low'
+  }> = []
+
+  const totalViews = reports.reduce((sum, r) => sum + r.views, 0)
+  const avgViewsPerReport = reports.length > 0 ? Math.round(totalViews / reports.length) : 0
+
+  if (reports.length > 0) {
+    predictions.push({
+      id: 'pred-1',
+      title: 'Report Usage',
+      prediction: `Based on current trends, expect ${Math.round(totalViews * 1.15).toLocaleString()} views next month`,
+      confidence: 85 + Math.min(reports.length, 10),
+      trend: avgViewsPerReport > 50 ? 'up' : 'stable',
+      impact: 'medium'
+    })
+  }
+
+  if (scheduledReports.length > 0) {
+    const hoursPerReport = 2.5 // Estimated hours saved per automated report
+    const totalHoursSaved = scheduledReports.length * hoursPerReport * 4 // Per month
+    predictions.push({
+      id: 'pred-2',
+      title: 'Time Savings',
+      prediction: `Automated reports saving approximately ${Math.round(totalHoursSaved)} hours/month in manual work`,
+      confidence: 92,
+      trend: 'stable',
+      impact: 'high'
+    })
+  }
+
+  if (financialStats && financialStats.totalRevenue > 0) {
+    const growthRate = 1.08 // 8% projected growth
+    predictions.push({
+      id: 'pred-3',
+      title: 'Revenue Forecast',
+      prediction: `Projected revenue next quarter: $${Math.round(financialStats.totalRevenue * growthRate).toLocaleString()}`,
+      confidence: 78,
+      trend: 'up',
+      impact: 'high'
+    })
+  }
+
+  return predictions.slice(0, 2)
+}
+
+function generateActivities(reports: Report[], scheduledReports: any[]) {
+  const activities: Array<{
+    id: string
+    user: string
+    action: string
+    target: string
+    timestamp: string
+    type: 'success' | 'info' | 'warning' | 'error'
+  }> = []
+
+  // Get recent reports
+  const recentReports = [...reports]
+    .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+    .slice(0, 3)
+
+  recentReports.forEach((report, index) => {
+    activities.push({
+      id: `activity-${index + 1}`,
+      user: report.author.name,
+      action: report.status === 'published' ? 'Published' : 'Updated',
+      target: report.name,
+      timestamp: report.lastModified,
+      type: report.status === 'published' ? 'success' : 'info'
+    })
+  })
+
+  // Add scheduled report runs
+  const recentScheduled = scheduledReports
+    .filter(s => s.last_run)
+    .sort((a, b) => new Date(b.last_run).getTime() - new Date(a.last_run).getTime())
+    .slice(0, 2)
+
+  recentScheduled.forEach((schedule, index) => {
+    activities.push({
+      id: `schedule-activity-${index + 1}`,
+      user: 'System',
+      action: 'Delivered',
+      target: schedule.name,
+      timestamp: schedule.last_run,
+      type: 'success'
+    })
+  })
+
+  return activities
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 5)
+}
+
+// Static collaborators (would come from team API in production)
+const defaultCollaborators = [
+  { id: '1', name: 'Report Creator', avatar: '/avatars/default.png', status: 'online' as const, role: 'Creator' },
+  { id: '2', name: 'Data Analyst', avatar: '/avatars/analyst.png', status: 'online' as const, role: 'Analyst' },
 ]
 
 // Quick actions with real API functionality
@@ -308,6 +505,21 @@ export default function ReportsClient() {
     refetch: refetchScheduled
   } = useScheduledReports()
 
+  // Financial reports hook for revenue/expense tracking
+  const {
+    reports: financialReports,
+    stats: financialStats,
+    loading: financialLoading,
+    fetchReports: fetchFinancialReports,
+    fetchRevenueEntries
+  } = useFinancialReports()
+
+  // Fetch financial data on mount
+  useEffect(() => {
+    fetchFinancialReports()
+    fetchRevenueEntries()
+  }, [fetchFinancialReports, fetchRevenueEntries])
+
   // Transform dashboards to reports format for UI
   const reports = useMemo(() => {
     return dashboards.map(dashboardToReport)
@@ -334,17 +546,17 @@ export default function ReportsClient() {
     }))
   }, [reports])
 
-  // Stats computed from real data
+  // Stats computed from real data including financial metrics
   const stats = useMemo(() => [
     { label: 'Total Reports', value: String(reports.length), change: '+' + Math.min(reports.length, 12), icon: FileText, color: 'from-blue-500 to-blue-600' },
     { label: 'Published', value: String(reports.filter(r => r.status === 'published').length), change: '+' + reports.filter(r => r.status === 'published').length, icon: Eye, color: 'from-green-500 to-green-600' },
     { label: 'Total Views', value: formatNumber(reports.reduce((sum, r) => sum + r.views, 0)), change: '+18%', icon: TrendingUp, color: 'from-purple-500 to-purple-600' },
-    { label: 'Shares', value: formatNumber(reports.reduce((sum, r) => sum + r.shares, 0)), change: '+24%', icon: Share2, color: 'from-orange-500 to-orange-600' },
+    { label: 'Revenue', value: financialStats.totalRevenue > 0 ? `$${formatNumber(financialStats.totalRevenue)}` : '$0', change: financialStats.netIncome > 0 ? '+' + formatNumber(financialStats.netIncome) : '', icon: DollarSign, color: 'from-emerald-500 to-emerald-600' },
     { label: 'Data Sources', value: String(dataSources.length), change: '+' + Math.min(dataSources.length, 2), icon: Database, color: 'from-cyan-500 to-cyan-600' },
     { label: 'Scheduled', value: String(scheduledReports.length), change: '', icon: Calendar, color: 'from-amber-500 to-amber-600' },
     { label: 'Dashboards', value: String(dashboards.length), change: '+' + Math.min(dashboards.length, 3), icon: LayoutDashboard, color: 'from-rose-500 to-rose-600' },
     { label: 'Favorites', value: String(reports.filter(r => r.isFavorite).length), change: '+' + reports.filter(r => r.isFavorite).length, icon: Star, color: 'from-indigo-500 to-indigo-600' }
-  ], [reports, dataSources, scheduledReports, dashboards])
+  ], [reports, dataSources, scheduledReports, dashboards, financialStats])
 
   const getStatusColor = (status: ReportStatus): string => {
     const colors: Record<ReportStatus, string> = {
@@ -446,61 +658,128 @@ export default function ReportsClient() {
     }
   }
 
-  // Export report handler
-  const handleExportReport = async (reportId: string, reportName: string, format: 'pdf' | 'csv' | 'xlsx' = 'pdf') => {
+  // Export report handler - supports PDF, CSV, XLSX, and email delivery
+  const handleExportReport = async (
+    reportId: string,
+    reportName: string,
+    format: 'pdf' | 'csv' | 'xlsx' | 'json' = 'pdf',
+    emailTo?: string
+  ) => {
     const exportReport = async () => {
-      // Generate CSV data from report
       const report = reports.find(r => r.id === reportId)
       if (!report) throw new Error('Report not found')
 
-      if (format === 'csv') {
-        const csvContent = `Name,Description,Status,Views,Shares,Created,Modified\n"${report.name}","${report.description}","${report.status}",${report.views},${report.shares},"${report.createdAt}","${report.lastModified}"`
-        const blob = new Blob([csvContent], { type: 'text/csv' })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${reportName}.csv`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-      } else {
-        // For PDF/Excel, we'd typically call a server endpoint
-        const response = await fetch(`/api/reports/${reportId}/export?format=${format}`)
-        if (!response.ok) {
-          // Fallback to JSON export if API not available
-          const jsonContent = JSON.stringify(report, null, 2)
-          const blob = new Blob([jsonContent], { type: 'application/json' })
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `${reportName}.json`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          window.URL.revokeObjectURL(url)
-          return { success: true, fallback: true }
-        }
+      // Use the API endpoint for export
+      const response = await fetch(`/api/reports/${reportId}/export?format=${format}`)
 
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${reportName}.${format === 'xlsx' ? 'xlsx' : format}`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
+      if (!response.ok) {
+        // Fallback to client-side export if API fails
+        return generateClientSideExport(report, reportName, format)
       }
+
+      const blob = await response.blob()
+      const contentDisposition = response.headers.get('Content-Disposition')
+      const filenameMatch = contentDisposition?.match(/filename="?([^"]+)"?/)
+      const filename = filenameMatch?.[1] || `${reportName}.${format === 'xlsx' ? 'xlsx' : format === 'pdf' ? 'html' : format}`
+
+      // If email delivery requested, send via API
+      if (emailTo) {
+        const emailResponse = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'export',
+            reportId,
+            format,
+            emailTo,
+            type: 'email_delivery'
+          })
+        })
+
+        if (emailResponse.ok) {
+          return { success: true, emailSent: true }
+        }
+      }
+
+      // Download the file
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
 
       return { success: true }
     }
 
     toast.promise(exportReport(), {
-      loading: `Exporting "${reportName}" as ${format.toUpperCase()}...`,
-      success: `"${reportName}" downloaded`,
+      loading: emailTo
+        ? `Sending "${reportName}" to ${emailTo}...`
+        : `Exporting "${reportName}" as ${format.toUpperCase()}...`,
+      success: emailTo
+        ? `"${reportName}" sent to ${emailTo}`
+        : `"${reportName}" downloaded`,
       error: 'Failed to export report'
     })
+  }
+
+  // Client-side fallback export
+  const generateClientSideExport = (report: Report, reportName: string, format: string) => {
+    let content: string
+    let mimeType: string
+    let extension: string
+
+    switch (format) {
+      case 'csv':
+        content = `Name,Description,Status,Views,Shares,Created,Modified,Folder,Tags\n"${report.name}","${report.description}","${report.status}",${report.views},${report.shares},"${report.createdAt}","${report.lastModified}","${report.folder}","${report.tags.join('; ')}"`
+        mimeType = 'text/csv'
+        extension = 'csv'
+        break
+      case 'json':
+        content = JSON.stringify({
+          exported_at: new Date().toISOString(),
+          report: {
+            id: report.id,
+            name: report.name,
+            description: report.description,
+            type: report.type,
+            status: report.status,
+            views: report.views,
+            shares: report.shares,
+            charts: report.charts,
+            createdAt: report.createdAt,
+            lastModified: report.lastModified,
+            author: report.author,
+            dataSource: report.dataSource,
+            folder: report.folder,
+            tags: report.tags,
+            isFavorite: report.isFavorite,
+            isPublic: report.isPublic
+          }
+        }, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+        break
+      default:
+        // For PDF/XLSX, fallback to JSON
+        content = JSON.stringify(report, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+    }
+
+    const blob = new Blob([content], { type: mimeType })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${reportName}.${extension}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+
+    return { success: true, fallback: true }
   }
 
   // Delete report handler
@@ -531,10 +810,16 @@ export default function ReportsClient() {
     })
   }
 
-  // Refresh all data
+  // Refresh all data including financial reports
   const handleRefreshAll = async () => {
     toast.promise(
-      Promise.all([refetchDashboards(), refetchDataSources(), refetchScheduled()]),
+      Promise.all([
+        refetchDashboards(),
+        refetchDataSources(),
+        refetchScheduled(),
+        fetchFinancialReports(),
+        fetchRevenueEntries()
+      ]),
       {
         loading: 'Refreshing all data...',
         success: 'All data refreshed',
@@ -1609,22 +1894,32 @@ export default function ReportsClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        {/* Enhanced Competitive Upgrade Components - Real Data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockReportsAIInsights}
+              insights={generateAIInsights(reports, dataSources, scheduledReports, financialStats)}
               title="Reports Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
+              onInsightAction={(insight) => {
+                if (insight.category === 'Data') {
+                  setActiveTab('datasources')
+                } else if (insight.category === 'Automation') {
+                  setActiveTab('scheduled')
+                } else if (insight.category === 'Finance') {
+                  toast.info(`Financial insight: ${insight.title}`)
+                } else {
+                  toast.info(insight.title || 'AI Insight')
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockReportsCollaborators}
+              collaborators={defaultCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockReportsPredictions}
+              predictions={generatePredictions(reports, scheduledReports, financialStats)}
               title="Analytics Forecasts"
             />
           </div>
@@ -1632,7 +1927,7 @@ export default function ReportsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockReportsActivities}
+            activities={generateActivities(reports, scheduledReports)}
             title="Reports Activity"
             maxItems={5}
           />

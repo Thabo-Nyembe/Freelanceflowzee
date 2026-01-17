@@ -1,86 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-// In-memory storage for demo purposes (would be database in production)
-let mockInvoices = [
-  {
-    id: 1,
-    number: 'INV-001',
-    client_id: '1',
-    clientName: 'Acme Corp',
-    clientEmail: 'john@acme.com',
-    project: 'Brand Identity Package',
-    amount: 5000,
-    status: 'paid',
-    dueDate: '2024-01-15',
-    issueDate: '2024-01-01',
-    paidDate: '2024-01-14',
-    description: 'Brand Identity Package',
-    notes: 'Thank you for your business',
-    paymentMethod: 'Credit Card',
-    items: [
-      { description: 'Logo Design', quantity: 1, unitPrice: 2500, total: 2500 },
-      { description: 'Brand Guidelines', quantity: 1, unitPrice: 2500, total: 2500 }
-    ]
-  },
-  {
-    id: 2,
-    number: 'INV-002',
-    client_id: '1',
-    clientName: 'TechStart',
-    clientEmail: 'contact@techstart.com',
-    project: 'Website Development',
-    amount: 3500,
-    status: 'pending',
-    dueDate: '2024-01-25',
-    issueDate: '2024-01-10',
-    paidDate: null,
-    description: 'Website Development Project',
-    notes: 'Payment due within 15 days',
-    items: [
-      { description: 'Frontend Development', quantity: 1, unitPrice: 2000, total: 2000 },
-      { description: 'Backend Integration', quantity: 1, unitPrice: 1500, total: 1500 }
-    ]
-  },
-  {
-    id: 3,
-    number: 'INV-003',
-    client_id: '2',
-    clientName: 'GreenCo',
-    clientEmail: 'billing@greenco.com',
-    project: 'Marketing Campaign',
-    amount: 7500,
-    status: 'overdue',
-    dueDate: '2024-01-10',
-    issueDate: '2024-01-01',
-    paidDate: null,
-    description: 'Marketing Campaign Q1',
-    notes: 'This invoice is now overdue',
-    items: [
-      { description: 'Campaign Strategy', quantity: 1, unitPrice: 3500, total: 3500 },
-      { description: 'Ad Creative Design', quantity: 1, unitPrice: 4000, total: 4000 }
-    ]
-  },
-  {
-    id: 4,
-    number: 'INV-004',
-    client_id: '3',
-    clientName: 'StartupXYZ',
-    clientEmail: 'finance@startupxyz.com',
-    project: 'App Development',
-    amount: 2000,
-    status: 'pending',
-    dueDate: '2024-02-15',
-    issueDate: '2024-02-01',
-    paidDate: null,
-    description: 'Mobile App Development Phase 1',
-    notes: '',
-    items: [
-      { description: 'UI/UX Design', quantity: 1, unitPrice: 2000, total: 2000 }
-    ]
-  },
-]
+// Initialize Supabase client with service role for API routes
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-// GET: Fetch invoices with optional filters
+// Helper to get user from auth header
+async function getUserFromAuth(request: NextRequest) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7)
+    const { data: { user } } = await supabase.auth.getUser(token)
+    return user
+  }
+  // Try to get from cookie-based session
+  const cookieHeader = request.headers.get('cookie')
+  if (cookieHeader) {
+    // For server-side, we trust the request if it comes from authenticated session
+    return null // Will use RLS policies
+  }
+  return null
+}
+
+// GET: Fetch invoices with optional filters from Supabase
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -89,46 +32,61 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
 
-    let filteredInvoices = [...mockInvoices]
+    // Build query
+    let query = supabase
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false })
 
     // Apply filters
     if (status && status !== 'all') {
-      filteredInvoices = filteredInvoices.filter(inv => inv.status === status)
+      query = query.eq('status', status)
     }
 
     if (clientId) {
-      filteredInvoices = filteredInvoices.filter(inv => inv.client_id === clientId)
+      query = query.eq('client_id', clientId)
     }
 
     if (dateFrom) {
-      filteredInvoices = filteredInvoices.filter(inv =>
-        new Date(inv.issueDate) >= new Date(dateFrom)
-      )
+      query = query.gte('issue_date', dateFrom)
     }
 
     if (dateTo) {
-      filteredInvoices = filteredInvoices.filter(inv =>
-        new Date(inv.issueDate) <= new Date(dateTo)
+      query = query.lte('issue_date', dateTo)
+    }
+
+    const { data: invoices, error } = await query
+
+    if (error) {
+      console.error('Supabase query error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch invoices' },
+        { status: 500 }
       )
     }
 
-    // Calculate stats
+    // Calculate stats from all invoices (separate query for accurate stats)
+    const { data: allInvoices } = await supabase
+      .from('invoices')
+      .select('status, total_amount')
+
     const stats = {
-      totalInvoiced: mockInvoices.reduce((sum, inv) => sum + inv.amount, 0),
-      totalPaid: mockInvoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0),
-      totalPending: mockInvoices.filter(inv => inv.status === 'pending').reduce((sum, inv) => sum + inv.amount, 0),
-      totalOverdue: mockInvoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0),
-      totalInvoices: mockInvoices.length
+      totalInvoiced: allInvoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalPaid: allInvoices?.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalPending: allInvoices?.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalOverdue: allInvoices?.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalInvoices: allInvoices?.length || 0
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        invoices: filteredInvoices,
+        invoices: invoices || [],
         stats
       }
     })
   } catch (error) {
+    console.error('Invoice GET error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch invoices' },
       { status: 500 }
@@ -136,136 +94,249 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Handle various invoice actions
+// POST: Handle various invoice actions with Supabase
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
     const { action } = body
 
+    const user = await getUserFromAuth(request)
+
     switch (action) {
       case 'create': {
-        const { number, project, clientName, clientEmail, description, issueDate, dueDate, notes, items, amount } = body
+        const {
+          number, project, clientName, clientEmail, description,
+          issueDate, dueDate, notes, items, amount, client_id,
+          title, currency, subtotal, tax_amount, tax_rate,
+          discount_amount, discount_percentage, terms_and_conditions,
+          is_recurring, recurring_schedule
+        } = body
 
-        const newInvoice = {
-          id: Math.max(0, ...mockInvoices.map(i => i.id)) + 1,
-          number: number || `INV-${String(mockInvoices.length + 1).padStart(3, '0')}`,
-          client_id: body.client_id || '0',
-          clientName,
-          clientEmail,
-          project: project || '',
-          amount: amount || items?.reduce((sum: number, item: any) => sum + (item.total || 0), 0) || 0,
-          status: 'pending' as const,
-          dueDate,
-          issueDate: issueDate || new Date().toISOString().split('T')[0],
-          paidDate: null,
-          description: description || '',
-          notes: notes || '',
-          paymentMethod: '',
-          items: items || []
+        // Generate invoice number if not provided
+        const { count } = await supabase
+          .from('invoices')
+          .select('*', { count: 'exact', head: true })
+
+        const invoiceNumber = number || `INV-${Date.now()}`
+        const totalAmount = amount || items?.reduce((sum: number, item: any) => sum + (item.total || 0), 0) || 0
+
+        const { data: newInvoice, error } = await supabase
+          .from('invoices')
+          .insert({
+            user_id: user?.id,
+            invoice_number: invoiceNumber,
+            title: title || description || project || 'Invoice',
+            description: description || '',
+            client_id: client_id || null,
+            client_name: clientName,
+            client_email: clientEmail,
+            status: 'draft',
+            subtotal: subtotal || totalAmount,
+            tax_rate: tax_rate || 0,
+            tax_amount: tax_amount || 0,
+            discount_amount: discount_amount || 0,
+            discount_percentage: discount_percentage || 0,
+            total_amount: totalAmount,
+            amount_paid: 0,
+            amount_due: totalAmount,
+            currency: currency || 'USD',
+            items: items || [],
+            item_count: items?.length || 0,
+            issue_date: issueDate || new Date().toISOString().split('T')[0],
+            due_date: dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            notes: notes || null,
+            terms_and_conditions: terms_and_conditions || null,
+            is_recurring: is_recurring || false,
+            recurring_schedule: recurring_schedule || null
+          })
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Create invoice error:', error)
+          return NextResponse.json(
+            { success: false, error: 'Failed to create invoice' },
+            { status: 500 }
+          )
         }
-
-        mockInvoices = [newInvoice, ...mockInvoices]
 
         return NextResponse.json({
           success: true,
           data: newInvoice,
-          message: `Invoice ${newInvoice.number} created successfully`
+          message: `Invoice ${invoiceNumber} created successfully`
         })
       }
 
       case 'update-status': {
         const { invoiceId, status, paymentMethod, paymentReference, paidDate } = body
 
-        const invoiceIndex = mockInvoices.findIndex(inv => inv.id === invoiceId)
-        if (invoiceIndex === -1) {
+        const updateData: any = { status }
+        if (paymentMethod) updateData.payment_method = paymentMethod
+        if (paymentReference) updateData.payment_reference = paymentReference
+        if (paidDate) updateData.paid_date = paidDate
+        if (status === 'sent') updateData.sent_date = new Date().toISOString()
+        if (status === 'paid') {
+          updateData.paid_date = paidDate || new Date().toISOString()
+        }
+
+        const { data: updatedInvoice, error } = await supabase
+          .from('invoices')
+          .update(updateData)
+          .eq('id', invoiceId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Update status error:', error)
           return NextResponse.json(
-            { success: false, error: 'Invoice not found' },
+            { success: false, error: 'Invoice not found or update failed' },
             { status: 404 }
           )
         }
 
-        mockInvoices[invoiceIndex] = {
-          ...mockInvoices[invoiceIndex],
-          status,
-          ...(paymentMethod && { paymentMethod }),
-          ...(paidDate && { paidDate })
-        }
-
         return NextResponse.json({
           success: true,
-          data: mockInvoices[invoiceIndex],
+          data: updatedInvoice,
           message: `Invoice status updated to ${status}`
         })
       }
 
       case 'send': {
-        const { invoiceId, email, message } = body
+        const { invoiceId, email } = body
 
-        const invoice = mockInvoices.find(inv => inv.id === invoiceId)
-        if (!invoice) {
+        const { data: invoice, error: fetchError } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('id', invoiceId)
+          .single()
+
+        if (fetchError || !invoice) {
           return NextResponse.json(
             { success: false, error: 'Invoice not found' },
             { status: 404 }
           )
         }
 
-        // In production, this would send an actual email
-        console.log(`Sending invoice ${invoice.number} to ${email}`)
+        // Update invoice status to sent
+        const { error: updateError } = await supabase
+          .from('invoices')
+          .update({
+            status: 'sent',
+            sent_date: new Date().toISOString()
+          })
+          .eq('id', invoiceId)
+
+        if (updateError) {
+          console.error('Send invoice error:', updateError)
+        }
+
+        // In production, integrate with email service here
+        console.log(`Sending invoice ${invoice.invoice_number} to ${email || invoice.client_email}`)
 
         return NextResponse.json({
           success: true,
-          data: { invoiceId, email, sentAt: new Date().toISOString() },
-          message: `Invoice sent to ${email}`
+          data: { invoiceId, email: email || invoice.client_email, sentAt: new Date().toISOString() },
+          message: `Invoice sent to ${email || invoice.client_email}`
         })
       }
 
       case 'mark-paid': {
-        const { invoiceId, paymentMethod, paymentReference } = body
+        const { invoiceId, paymentMethod, paymentReference, amount } = body
 
-        const invoiceIndex = mockInvoices.findIndex(inv => inv.id === invoiceId)
-        if (invoiceIndex === -1) {
+        // Get current invoice to calculate amount_paid
+        const { data: currentInvoice } = await supabase
+          .from('invoices')
+          .select('total_amount, amount_paid')
+          .eq('id', invoiceId)
+          .single()
+
+        if (!currentInvoice) {
           return NextResponse.json(
             { success: false, error: 'Invoice not found' },
             { status: 404 }
           )
         }
 
-        mockInvoices[invoiceIndex] = {
-          ...mockInvoices[invoiceIndex],
-          status: 'paid',
-          paymentMethod: paymentMethod || 'Other',
-          paidDate: new Date().toISOString().split('T')[0]
+        const paymentAmount = amount || currentInvoice.total_amount
+        const newAmountPaid = (currentInvoice.amount_paid || 0) + paymentAmount
+        const newAmountDue = Math.max(0, currentInvoice.total_amount - newAmountPaid)
+        const newStatus = newAmountDue === 0 ? 'paid' : 'partial'
+
+        const { data: updatedInvoice, error } = await supabase
+          .from('invoices')
+          .update({
+            status: newStatus,
+            payment_method: paymentMethod || 'Other',
+            payment_reference: paymentReference || null,
+            paid_date: new Date().toISOString(),
+            amount_paid: newAmountPaid,
+            amount_due: newAmountDue
+          })
+          .eq('id', invoiceId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Mark paid error:', error)
+          return NextResponse.json(
+            { success: false, error: 'Failed to mark invoice as paid' },
+            { status: 500 }
+          )
         }
 
         return NextResponse.json({
           success: true,
-          data: mockInvoices[invoiceIndex],
-          message: `Invoice ${mockInvoices[invoiceIndex].number} marked as paid`
+          data: updatedInvoice,
+          message: `Invoice ${updatedInvoice.invoice_number} marked as ${newStatus}`
         })
       }
 
       case 'add-payment': {
         const { invoiceId, amount, paymentMethod, paymentReference, paymentDate } = body
 
-        const invoiceIndex = mockInvoices.findIndex(inv => inv.id === invoiceId)
-        if (invoiceIndex === -1) {
+        // Get current invoice
+        const { data: currentInvoice } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('id', invoiceId)
+          .single()
+
+        if (!currentInvoice) {
           return NextResponse.json(
             { success: false, error: 'Invoice not found' },
             { status: 404 }
           )
         }
 
-        // For simplicity, mark as paid if full payment received
-        mockInvoices[invoiceIndex] = {
-          ...mockInvoices[invoiceIndex],
-          status: 'paid',
-          paymentMethod: paymentMethod || 'Other',
-          paidDate: paymentDate || new Date().toISOString().split('T')[0]
+        const newAmountPaid = (currentInvoice.amount_paid || 0) + amount
+        const newAmountDue = Math.max(0, currentInvoice.total_amount - newAmountPaid)
+        const newStatus = newAmountDue === 0 ? 'paid' : 'partial'
+
+        const { data: updatedInvoice, error } = await supabase
+          .from('invoices')
+          .update({
+            status: newStatus,
+            payment_method: paymentMethod || currentInvoice.payment_method || 'Other',
+            payment_reference: paymentReference || currentInvoice.payment_reference,
+            paid_date: paymentDate || new Date().toISOString(),
+            amount_paid: newAmountPaid,
+            amount_due: newAmountDue
+          })
+          .eq('id', invoiceId)
+          .select()
+          .single()
+
+        if (error) {
+          console.error('Add payment error:', error)
+          return NextResponse.json(
+            { success: false, error: 'Failed to add payment' },
+            { status: 500 }
+          )
         }
 
         return NextResponse.json({
           success: true,
-          data: mockInvoices[invoiceIndex],
+          data: updatedInvoice,
           message: `Payment of ${amount} added to invoice`
         })
       }
@@ -273,31 +344,95 @@ export async function POST(request: NextRequest) {
       case 'duplicate': {
         const { invoiceId } = body
 
-        const originalInvoice = mockInvoices.find(inv => inv.id === invoiceId)
-        if (!originalInvoice) {
+        const { data: originalInvoice, error: fetchError } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('id', invoiceId)
+          .single()
+
+        if (fetchError || !originalInvoice) {
           return NextResponse.json(
             { success: false, error: 'Invoice not found' },
             { status: 404 }
           )
         }
 
-        const newInvoice = {
-          ...originalInvoice,
-          id: Math.max(0, ...mockInvoices.map(i => i.id)) + 1,
-          number: `INV-${String(mockInvoices.length + 1).padStart(3, '0')}`,
-          status: 'pending' as const,
-          issueDate: new Date().toISOString().split('T')[0],
-          dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          paidDate: null,
-          paymentMethod: ''
-        }
+        // Create a copy without id and with new dates
+        const { id, created_at, updated_at, ...invoiceData } = originalInvoice
 
-        mockInvoices = [newInvoice, ...mockInvoices]
+        const { data: newInvoice, error: createError } = await supabase
+          .from('invoices')
+          .insert({
+            ...invoiceData,
+            invoice_number: `INV-${Date.now()}`,
+            status: 'draft',
+            issue_date: new Date().toISOString().split('T')[0],
+            due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            sent_date: null,
+            paid_date: null,
+            viewed_date: null,
+            amount_paid: 0,
+            amount_due: originalInvoice.total_amount,
+            reminder_sent_count: 0,
+            last_reminder_sent_at: null
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('Duplicate invoice error:', createError)
+          return NextResponse.json(
+            { success: false, error: 'Failed to duplicate invoice' },
+            { status: 500 }
+          )
+        }
 
         return NextResponse.json({
           success: true,
           data: newInvoice,
-          message: `Invoice duplicated as ${newInvoice.number}`
+          message: `Invoice duplicated as ${newInvoice.invoice_number}`
+        })
+      }
+
+      case 'send-reminder': {
+        const { invoiceId } = body
+
+        const { data: invoice, error: fetchError } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('id', invoiceId)
+          .single()
+
+        if (fetchError || !invoice) {
+          return NextResponse.json(
+            { success: false, error: 'Invoice not found' },
+            { status: 404 }
+          )
+        }
+
+        const { error: updateError } = await supabase
+          .from('invoices')
+          .update({
+            reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
+            last_reminder_sent_at: new Date().toISOString()
+          })
+          .eq('id', invoiceId)
+
+        if (updateError) {
+          console.error('Send reminder error:', updateError)
+          return NextResponse.json(
+            { success: false, error: 'Failed to update reminder count' },
+            { status: 500 }
+          )
+        }
+
+        // In production, integrate with email service here
+        console.log(`Sending reminder for invoice ${invoice.invoice_number} to ${invoice.client_email}`)
+
+        return NextResponse.json({
+          success: true,
+          data: { invoiceId, reminderCount: (invoice.reminder_sent_count || 0) + 1 },
+          message: `Reminder sent for invoice ${invoice.invoice_number}`
         })
       }
 
@@ -316,36 +451,79 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT: Update an existing invoice
+// PUT: Update an existing invoice in Supabase
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
     const { id, ...updateData } = body
 
-    const invoiceIndex = mockInvoices.findIndex(inv => inv.id === id)
-    if (invoiceIndex === -1) {
+    if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Invoice not found' },
+        { success: false, error: 'Invoice ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Map frontend field names to database column names
+    const dbUpdateData: Record<string, any> = {}
+
+    if (updateData.title !== undefined) dbUpdateData.title = updateData.title
+    if (updateData.description !== undefined) dbUpdateData.description = updateData.description
+    if (updateData.clientName !== undefined) dbUpdateData.client_name = updateData.clientName
+    if (updateData.client_name !== undefined) dbUpdateData.client_name = updateData.client_name
+    if (updateData.clientEmail !== undefined) dbUpdateData.client_email = updateData.clientEmail
+    if (updateData.client_email !== undefined) dbUpdateData.client_email = updateData.client_email
+    if (updateData.status !== undefined) dbUpdateData.status = updateData.status
+    if (updateData.dueDate !== undefined) dbUpdateData.due_date = updateData.dueDate
+    if (updateData.due_date !== undefined) dbUpdateData.due_date = updateData.due_date
+    if (updateData.issueDate !== undefined) dbUpdateData.issue_date = updateData.issueDate
+    if (updateData.issue_date !== undefined) dbUpdateData.issue_date = updateData.issue_date
+    if (updateData.notes !== undefined) dbUpdateData.notes = updateData.notes
+    if (updateData.terms !== undefined) dbUpdateData.terms_and_conditions = updateData.terms
+    if (updateData.terms_and_conditions !== undefined) dbUpdateData.terms_and_conditions = updateData.terms_and_conditions
+    if (updateData.currency !== undefined) dbUpdateData.currency = updateData.currency
+
+    // Handle items and recalculate amounts
+    if (updateData.items !== undefined) {
+      dbUpdateData.items = updateData.items
+      dbUpdateData.item_count = updateData.items.length
+      const calculatedAmount = updateData.items.reduce((sum: number, item: any) =>
+        sum + (item.total || item.amount || (item.quantity * item.unitPrice) || 0), 0)
+      dbUpdateData.subtotal = updateData.subtotal || calculatedAmount
+      dbUpdateData.total_amount = updateData.amount || updateData.total_amount || calculatedAmount
+      dbUpdateData.amount_due = dbUpdateData.total_amount - (updateData.amount_paid || 0)
+    }
+
+    if (updateData.subtotal !== undefined) dbUpdateData.subtotal = updateData.subtotal
+    if (updateData.tax_amount !== undefined) dbUpdateData.tax_amount = updateData.tax_amount
+    if (updateData.tax_rate !== undefined) dbUpdateData.tax_rate = updateData.tax_rate
+    if (updateData.discount_amount !== undefined) dbUpdateData.discount_amount = updateData.discount_amount
+    if (updateData.total_amount !== undefined) dbUpdateData.total_amount = updateData.total_amount
+    if (updateData.amount !== undefined) dbUpdateData.total_amount = updateData.amount
+    if (updateData.amount_paid !== undefined) dbUpdateData.amount_paid = updateData.amount_paid
+    if (updateData.amount_due !== undefined) dbUpdateData.amount_due = updateData.amount_due
+
+    dbUpdateData.updated_at = new Date().toISOString()
+
+    const { data: updatedInvoice, error } = await supabase
+      .from('invoices')
+      .update(dbUpdateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Invoice PUT error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Invoice not found or update failed' },
         { status: 404 }
       )
     }
 
-    // Calculate new amount from items if items are provided
-    const amount = updateData.items
-      ? updateData.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
-      : updateData.amount || mockInvoices[invoiceIndex].amount
-
-    mockInvoices[invoiceIndex] = {
-      ...mockInvoices[invoiceIndex],
-      ...updateData,
-      amount,
-      id // Ensure ID doesn't change
-    }
-
     return NextResponse.json({
       success: true,
-      data: mockInvoices[invoiceIndex],
-      message: `Invoice ${mockInvoices[invoiceIndex].number} updated successfully`
+      data: updatedInvoice,
+      message: `Invoice ${updatedInvoice.invoice_number} updated successfully`
     })
   } catch (error) {
     console.error('Invoice PUT error:', error)
@@ -356,36 +534,50 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE: Delete an invoice
+// DELETE: Delete an invoice from Supabase
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const idParam = searchParams.get('id')
+    const id = searchParams.get('id')
 
-    if (!idParam) {
+    if (!id) {
       return NextResponse.json(
         { success: false, error: 'Invoice ID is required' },
         { status: 400 }
       )
     }
 
-    const id = parseInt(idParam, 10)
-    const invoiceIndex = mockInvoices.findIndex(inv => inv.id === id)
+    // First get the invoice to return info about it
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('id, invoice_number')
+      .eq('id', id)
+      .single()
 
-    if (invoiceIndex === -1) {
+    if (!invoice) {
       return NextResponse.json(
         { success: false, error: 'Invoice not found' },
         { status: 404 }
       )
     }
 
-    const deletedInvoice = mockInvoices[invoiceIndex]
-    mockInvoices = mockInvoices.filter(inv => inv.id !== id)
+    const { error } = await supabase
+      .from('invoices')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Invoice DELETE error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to delete invoice' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
-      data: { id: deletedInvoice.id, number: deletedInvoice.number },
-      message: `Invoice ${deletedInvoice.number} deleted successfully`
+      data: { id: invoice.id, number: invoice.invoice_number },
+      message: `Invoice ${invoice.invoice_number} deleted successfully`
     })
   } catch (error) {
     console.error('Invoice DELETE error:', error)

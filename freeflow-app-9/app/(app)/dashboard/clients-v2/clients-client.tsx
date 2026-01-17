@@ -80,10 +80,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
-
-
-
 // Types
 type ClientStatus = 'lead' | 'prospect' | 'opportunity' | 'customer' | 'churned' | 'inactive'
 type DealStage = 'qualification' | 'discovery' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
@@ -172,157 +168,6 @@ interface Task {
 }
 
 // Mock data
-const mockClients: Client[] = [
-  {
-    id: 'c1',
-    name: 'TechCorp International',
-    company: 'TechCorp International',
-    industry: 'Technology',
-    website: 'https://techcorp.com',
-    status: 'customer',
-    contacts: [
-      { id: 'ct1', name: 'Sarah Chen', email: 'sarah@techcorp.com', phone: '+1 555 0123', title: 'VP of Engineering', isPrimary: true, linkedin: 'linkedin.com/in/sarahchen' }
-    ],
-    primaryContact: { id: 'ct1', name: 'Sarah Chen', email: 'sarah@techcorp.com', phone: '+1 555 0123', title: 'VP of Engineering', isPrimary: true },
-    revenue: 450000,
-    lifetime_value: 1250000,
-    projects: 12,
-    health_score: 92,
-    nps: 9,
-    createdAt: '2023-01-15T10:00:00Z',
-    lastActivity: '2024-12-22T14:30:00Z',
-    tags: ['enterprise', 'technology', 'strategic'],
-    address: { city: 'San Francisco', state: 'CA', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith', 'Emily Davis'],
-    source: 'Inbound',
-    deals: [
-      { id: 'd1', name: 'Platform Expansion Q1', value: 150000, stage: 'negotiation', probability: 75, expectedClose: '2025-01-31', createdAt: '2024-11-01', owner: 'John Smith', products: ['Enterprise Suite', 'API Access'] }
-    ],
-    tier: 'platinum'
-  },
-  {
-    id: 'c2',
-    name: 'Global Innovations Ltd',
-    company: 'Global Innovations Ltd',
-    industry: 'Manufacturing',
-    website: 'https://globalinnovations.com',
-    status: 'customer',
-    contacts: [
-      { id: 'ct2', name: 'Mike Johnson', email: 'mike@globalinnovations.com', phone: '+1 555 0456', title: 'CTO', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct2', name: 'Mike Johnson', email: 'mike@globalinnovations.com', phone: '+1 555 0456', title: 'CTO', isPrimary: true },
-    revenue: 285000,
-    lifetime_value: 780000,
-    projects: 8,
-    health_score: 78,
-    nps: 7,
-    createdAt: '2023-03-20T11:00:00Z',
-    lastActivity: '2024-12-20T09:00:00Z',
-    tags: ['manufacturing', 'mid-market'],
-    address: { city: 'Chicago', state: 'IL', country: 'USA' },
-    owner: 'Emily Davis',
-    team: ['Emily Davis'],
-    source: 'Referral',
-    deals: [
-      { id: 'd2', name: 'Annual Renewal 2025', value: 95000, stage: 'proposal', probability: 90, expectedClose: '2025-02-28', createdAt: '2024-12-01', owner: 'Emily Davis', products: ['Core Platform'] }
-    ],
-    tier: 'gold'
-  },
-  {
-    id: 'c3',
-    name: 'Startup Ventures',
-    company: 'Startup Ventures',
-    industry: 'Venture Capital',
-    website: 'https://startupventures.io',
-    status: 'opportunity',
-    contacts: [
-      { id: 'ct3', name: 'James Wilson', email: 'james@startupventures.io', phone: '+1 555 0789', title: 'Partner', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct3', name: 'James Wilson', email: 'james@startupventures.io', phone: '+1 555 0789', title: 'Partner', isPrimary: true },
-    revenue: 0,
-    lifetime_value: 0,
-    projects: 0,
-    health_score: 65,
-    createdAt: '2024-10-15T14:00:00Z',
-    lastActivity: '2024-12-21T16:00:00Z',
-    tags: ['finance', 'startup'],
-    address: { city: 'New York', state: 'NY', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith'],
-    source: 'Conference',
-    deals: [
-      { id: 'd3', name: 'Initial Contract', value: 75000, stage: 'discovery', probability: 40, expectedClose: '2025-03-15', createdAt: '2024-11-15', owner: 'John Smith', products: ['Starter Pack'] }
-    ],
-    tier: 'silver'
-  },
-  {
-    id: 'c4',
-    name: 'Healthcare Plus',
-    company: 'Healthcare Plus',
-    industry: 'Healthcare',
-    status: 'lead',
-    contacts: [
-      { id: 'ct4', name: 'Dr. Emily Carter', email: 'emily@healthcareplus.org', title: 'Director of IT', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct4', name: 'Dr. Emily Carter', email: 'emily@healthcareplus.org', title: 'Director of IT', isPrimary: true },
-    revenue: 0,
-    lifetime_value: 0,
-    projects: 0,
-    health_score: 0,
-    createdAt: '2024-12-10T10:00:00Z',
-    lastActivity: '2024-12-18T11:00:00Z',
-    tags: ['healthcare', 'enterprise'],
-    address: { city: 'Boston', state: 'MA', country: 'USA' },
-    owner: 'Emily Davis',
-    team: ['Emily Davis'],
-    source: 'Webinar',
-    deals: [],
-    tier: 'bronze'
-  },
-  {
-    id: 'c5',
-    name: 'Retail Empire',
-    company: 'Retail Empire',
-    industry: 'Retail',
-    website: 'https://retailempire.com',
-    status: 'churned',
-    contacts: [
-      { id: 'ct5', name: 'Alex Thompson', email: 'alex@retailempire.com', title: 'Operations Manager', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct5', name: 'Alex Thompson', email: 'alex@retailempire.com', title: 'Operations Manager', isPrimary: true },
-    revenue: 125000,
-    lifetime_value: 125000,
-    projects: 3,
-    health_score: 25,
-    nps: 4,
-    createdAt: '2022-06-01T09:00:00Z',
-    lastActivity: '2024-09-15T10:00:00Z',
-    tags: ['retail', 'at-risk'],
-    address: { city: 'Los Angeles', state: 'CA', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith'],
-    source: 'Partner',
-    deals: [],
-    tier: 'silver'
-  },
-]
-
-const mockActivities: Activity[] = [
-  { id: 'a1', clientId: 'c1', type: 'meeting', title: 'Q1 Planning Meeting', description: 'Discussed expansion plans', createdAt: '2024-12-22T14:30:00Z', createdBy: 'John Smith', completed: true, outcome: 'Positive - moving forward with proposal' },
-  { id: 'a2', clientId: 'c1', type: 'email', title: 'Follow-up on proposal', description: 'Sent updated pricing', createdAt: '2024-12-21T10:00:00Z', createdBy: 'John Smith', completed: true },
-  { id: 'a3', clientId: 'c2', type: 'call', title: 'Renewal discussion', description: 'Discussed annual renewal terms', createdAt: '2024-12-20T09:00:00Z', createdBy: 'Emily Davis', completed: true },
-  { id: 'a4', clientId: 'c3', type: 'meeting', title: 'Discovery call', description: 'Initial needs assessment', createdAt: '2024-12-21T16:00:00Z', createdBy: 'John Smith', completed: true },
-  { id: 'a5', clientId: 'c1', type: 'task', title: 'Send contract amendment', description: 'Update for new pricing', createdAt: '2024-12-23T09:00:00Z', createdBy: 'John Smith', completed: false, dueDate: '2024-12-26', priority: 'high' },
-]
-
-const mockTasks: Task[] = [
-  { id: 't1', clientId: 'c1', title: 'Send updated proposal', description: 'Include new pricing tier', dueDate: '2024-12-26', priority: 'high', assignee: 'John Smith', completed: false, createdAt: '2024-12-22' },
-  { id: 't2', clientId: 'c2', title: 'Schedule renewal call', description: 'Discuss 2025 contract', dueDate: '2024-12-28', priority: 'medium', assignee: 'Emily Davis', completed: false, createdAt: '2024-12-20' },
-  { id: 't3', clientId: 'c3', title: 'Send case studies', description: 'VC-focused success stories', dueDate: '2024-12-27', priority: 'medium', assignee: 'John Smith', completed: false, createdAt: '2024-12-21' },
-  { id: 't4', clientId: 'c4', title: 'Follow up on demo request', dueDate: '2024-12-24', priority: 'urgent', assignee: 'Emily Davis', completed: false, createdAt: '2024-12-18' },
-]
-
 // Helper functions
 const getStatusColor = (status: ClientStatus): string => {
   const colors: Record<ClientStatus, string> = {
@@ -533,6 +378,93 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Deals module integration
   const { createDeal, updateDeal, deals: dbDeals, loading: dealsLoading } = useDeals()
 
+  // Activities and Tasks state - loaded from API
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [activitiesLoading, setActivitiesLoading] = useState(false)
+  const [tasksLoading, setTasksLoading] = useState(false)
+
+  // Fetch activities from API
+  const fetchActivities = async () => {
+    setActivitiesLoading(true)
+    try {
+      const response = await fetch('/api/clients?include_interactions=true')
+      if (response.ok) {
+        const data = await response.json()
+        // Transform interactions to activities format
+        const allActivities: Activity[] = []
+        if (data.clients) {
+          data.clients.forEach((client: any) => {
+            if (client.recent_interactions) {
+              client.recent_interactions.forEach((interaction: any) => {
+                allActivities.push({
+                  id: interaction.id,
+                  clientId: client.id,
+                  type: interaction.type || 'note',
+                  title: interaction.subject || 'Activity',
+                  description: interaction.description || '',
+                  createdAt: interaction.created_at,
+                  createdBy: interaction.user?.name || 'You',
+                  completed: !!interaction.completed_at,
+                  outcome: interaction.outcome,
+                  dueDate: interaction.scheduled_at,
+                  priority: interaction.priority
+                })
+              })
+            }
+          })
+        }
+        setActivities(allActivities.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to fetch activities:', error)
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }
+
+  // Fetch tasks from API (using client interactions with type 'task')
+  const fetchTasks = async () => {
+    setTasksLoading(true)
+    try {
+      const response = await fetch('/api/clients?include_interactions=true')
+      if (response.ok) {
+        const data = await response.json()
+        const allTasks: Task[] = []
+        if (data.clients) {
+          data.clients.forEach((client: any) => {
+            if (client.recent_interactions) {
+              client.recent_interactions
+                .filter((i: any) => i.type === 'task')
+                .forEach((interaction: any) => {
+                  allTasks.push({
+                    id: interaction.id,
+                    clientId: client.id,
+                    title: interaction.subject || 'Task',
+                    description: interaction.description,
+                    dueDate: interaction.scheduled_at || interaction.due_date || new Date().toISOString(),
+                    priority: interaction.priority || 'medium',
+                    assignee: interaction.user?.name || 'You',
+                    completed: !!interaction.completed_at,
+                    createdAt: interaction.created_at
+                  })
+                })
+            }
+          })
+        }
+        setTasks(allTasks.sort((a, b) =>
+          new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error)
+    } finally {
+      setTasksLoading(false)
+    }
+  }
+
   // Form state for new client
   const [newClientForm, setNewClientForm] = useState({
     company: '',
@@ -558,8 +490,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   })
 
   // Fetch clients on mount
+  // Fetch all data on mount
   useEffect(() => {
     fetchClients()
+    fetchActivities()
+    fetchTasks()
   }, [fetchClients])
 
   // Handle creating a new client
@@ -699,7 +634,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     setShowDeleteConfirm(true)
   }
 
-  // Filter clients - combine mock and database clients
+  // Filter clients - using only database clients from Supabase
   const filteredClients = useMemo(() => {
     // Transform database clients to display format
     const dbClientsTransformed = dbClients.map(c => ({
@@ -748,8 +683,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       isFromDatabase: true
     }))
 
-    // Combine database and mock clients, database clients first
-    let result = [...dbClientsTransformed, ...mockClients]
+    // Use only database clients
+    let result = [...dbClientsTransformed]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -768,22 +703,23 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     return result
   }, [searchQuery, statusFilter, dbClients])
 
-  // Calculate stats including database clients
+  // Calculate stats from database clients only
   const stats = useMemo(() => {
     const allClients = [...filteredClients]
     const customers = allClients.filter(c => c.status === 'customer')
-    const dbClientCount = dbClients.length
+    // Get deals from the deals hook
+    const openDealsList = dbDeals?.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost') || []
     return {
-      totalClients: mockClients.length + dbClientCount,
+      totalClients: dbClients.length,
       totalCustomers: customers.length,
       totalRevenue: allClients.reduce((sum, c) => sum + (c.revenue || 0), 0),
       totalLTV: allClients.reduce((sum, c) => sum + (c.lifetime_value || 0), 0),
       avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.health_score || 0), 0) / customers.length : 0,
-      pipelineValue: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').reduce((sum, d) => sum + (d.value * d.probability / 100), 0),
-      openDeals: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').length,
-      pendingTasks: mockTasks.filter(t => !t.completed).length
+      pipelineValue: openDealsList.reduce((sum, d) => sum + ((d.value || 0) * (d.probability || 0) / 100), 0),
+      openDeals: openDealsList.length,
+      pendingTasks: 0 // Tasks will be loaded from API
     }
-  }, [filteredClients, dbClients])
+  }, [filteredClients, dbClients, dbDeals])
 
   // Pipeline stages for kanban
   const pipelineStages: { stage: DealStage; label: string; color: string }[] = [
@@ -794,7 +730,28 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     { stage: 'closed_won', label: 'Won', color: 'green' },
   ]
 
-  const allDeals = mockClients.flatMap(c => c.deals.map(d => ({ ...d, clientName: c.name, clientId: c.id })))
+  // Get all deals from database, enriched with client info
+  const allDeals = useMemo(() => {
+    return (dbDeals || []).map(d => {
+      const client = dbClients.find(c => c.id === d.client_id)
+      return {
+        id: d.id,
+        name: d.title,
+        value: d.value || 0,
+        stage: d.stage === 'lead' ? 'qualification' as DealStage :
+               d.stage === 'qualified' ? 'discovery' as DealStage :
+               (d.stage as DealStage) || 'qualification' as DealStage,
+        probability: d.probability || 0,
+        expectedClose: d.expected_close_date || '',
+        createdAt: d.created_at,
+        owner: 'You',
+        products: d.tags || [],
+        notes: d.description,
+        clientName: client?.company || client?.name || 'Unknown',
+        clientId: d.client_id
+      }
+    })
+  }, [dbDeals, dbClients])
 
   // Handlers
   const handleExportClients = () => {
@@ -812,7 +769,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     downloadAsCsv(exportData, `clients-export-${new Date().toISOString().split('T')[0]}`)
   }
 
-  const handleCreateDeal = (client: typeof mockClients[0]) => {
+  const handleCreateDeal = (client: Client) => {
     // Open deal creation dialog with client pre-selected
     setSelectedClientForAction(client as Client)
     setDealForm({
@@ -881,7 +838,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  const handleSendMessage = (client: typeof mockClients[0]) => {
+  const handleSendMessage = (client: Client) => {
     // Open email compose dialog
     if (client.primaryContact.email) {
       setSelectedClientForAction(client as Client)
@@ -935,7 +892,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     setShowEmailComposeDialog(false)
   }
 
-  const handleScheduleMeeting = (client: typeof mockClients[0]) => {
+  const handleScheduleMeeting = (client: Client) => {
     // Open meeting scheduling dialog
     setSelectedClientForAction(client as Client)
     const tomorrow = new Date()
@@ -1018,12 +975,12 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   // View client history
-  const handleViewClientHistory = (client: typeof mockClients[0]) => {
+  const handleViewClientHistory = (client: Client) => {
     setSelectedClientForAction(client as Client)
     setShowClientHistoryDialog(true)
   }
 
-  const handleCallClient = (client: typeof mockClients[0]) => {
+  const handleCallClient = (client: Client) => {
     if (client.primaryContact.phone) {
       window.location.href = `tel:${client.primaryContact.phone}`
       toast.success('Initiating call'`
@@ -1309,7 +1266,24 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             )}
 
             {/* Client List - Card/Grid View */}
-            {viewMode !== 'table' && (
+            {viewMode !== 'table' && clientsLoading && (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                <span className="ml-2 text-gray-500">Loading clients...</span>
+              </div>
+            )}
+            {viewMode !== 'table' && !clientsLoading && filteredClients.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                <Users className="w-12 h-12 mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No clients found</h3>
+                <p className="text-sm text-center mb-4">Get started by adding your first client or adjust your filters.</p>
+                <Button onClick={() => setShowAddDialog(true)} className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Client
+                </Button>
+              </div>
+            )}
+            {viewMode !== 'table' && !clientsLoading && filteredClients.length > 0 && (
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
                 {filteredClients.map((client) => (
                   <Card
@@ -1444,49 +1418,61 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[400px]">
-                  <div className="space-y-4">
-                    {mockActivities.map(activity => {
-                      const client = mockClients.find(c => c.id === activity.clientId)
-                      return (
-                        <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                            activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                            activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {activity.type === 'call' && <PhoneCall className="w-5 h-5" />}
-                            {activity.type === 'email' && <Mail className="w-5 h-5" />}
-                            {activity.type === 'meeting' && <Video className="w-5 h-5" />}
-                            {activity.type === 'note' && <FileText className="w-5 h-5" />}
-                            {activity.type === 'task' && <CheckCircle2 className="w-5 h-5" />}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">{activity.title}</span>
-                              {activity.completed ? (
-                                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Clock className="w-4 h-4 text-orange-500" />
+                  {activitiesLoading ? (
+                    <div className="flex items-center justify-center h-40">
+                      <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                    </div>
+                  ) : activities.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                      <Activity className="w-8 h-8 mb-2 opacity-50" />
+                      <p>No activities yet</p>
+                      <p className="text-sm">Log your first activity to get started</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {activities.map(activity => {
+                        const client = filteredClients.find(c => c.id === activity.clientId)
+                        return (
+                          <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {activity.type === 'call' && <PhoneCall className="w-5 h-5" />}
+                              {activity.type === 'email' && <Mail className="w-5 h-5" />}
+                              {activity.type === 'meeting' && <Video className="w-5 h-5" />}
+                              {activity.type === 'note' && <FileText className="w-5 h-5" />}
+                              {activity.type === 'task' && <CheckCircle2 className="w-5 h-5" />}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{activity.title}</span>
+                                {activity.completed ? (
+                                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                ) : (
+                                  <Clock className="w-4 h-4 text-orange-500" />
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
+                              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                <span className="flex items-center gap-1">
+                                  <Building2 className="w-3 h-3" />
+                                  {client?.company || 'Unknown Client'}
+                                </span>
+                                <span>{activity.createdBy}</span>
+                                <span>{formatRelativeTime(activity.createdAt)}</span>
+                              </div>
+                              {activity.outcome && (
+                                <p className="text-sm text-green-600 mt-2 italic">{activity.outcome}</p>
                               )}
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
-                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <Building2 className="w-3 h-3" />
-                                {client?.company}
-                              </span>
-                              <span>{activity.createdBy}</span>
-                              <span>{formatRelativeTime(activity.createdAt)}</span>
-                            </div>
-                            {activity.outcome && (
-                              <p className="text-sm text-green-600 mt-2 italic">{activity.outcome}</p>
-                            )}
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -1501,50 +1487,63 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 Add Task
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockTasks.filter(t => !t.completed).map(task => {
-                const client = mockClients.find(c => c.id === task.clientId)
-                const isOverdue = new Date(task.dueDate) < new Date()
-                return (
-                  <Card key={task.id} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${
-                          task.priority === 'urgent' ? 'border-red-500' :
-                          task.priority === 'high' ? 'border-orange-500' :
-                          'border-gray-300'
-                        }`}>
-                          {task.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                          {task.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{task.description}</p>
-                          )}
-                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Building2 className="w-3 h-3" />
-                              {client?.company}
-                            </span>
-                            <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-600' : ''}`}>
-                              <CalendarClock className="w-3 h-3" />
-                              {formatDate(task.dueDate)}
-                              {isOverdue && ' (Overdue)'}
-                            </span>
-                            <Badge className={`${getPriorityColor(task.priority)} bg-opacity-10`}>
-                              {task.priority}
-                            </Badge>
+            {tasksLoading ? (
+              <div className="flex items-center justify-center h-40">
+                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              </div>
+            ) : tasks.filter(t => !t.completed).length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                <CheckCircle2 className="w-8 h-8 mb-2 opacity-50" />
+                <p>No pending tasks</p>
+                <p className="text-sm">Add a task to track your to-dos</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tasks.filter(t => !t.completed).map(task => {
+                  const client = filteredClients.find(c => c.id === task.clientId)
+                  const isOverdue = new Date(task.dueDate) < new Date()
+                  return (
+                    <Card key={task.id} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${
+                            task.priority === 'urgent' ? 'border-red-500' :
+                            task.priority === 'high' ? 'border-orange-500' :
+                            'border-gray-300'
+                          }`}>
+                            {task.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
                           </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
+                            {task.description && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{task.description}</p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Building2 className="w-3 h-3" />
+                                {client?.company || 'Unknown Client'}
+                              </span>
+                              <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-600' : ''}`}>
+                                <CalendarClock className="w-3 h-3" />
+                                {formatDate(task.dueDate)}
+                                {isOverdue && ' (Overdue)'}
+                              </span>
+                              <Badge className={`${getPriorityColor(task.priority)} bg-opacity-10`}>
+                                {task.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-xs">{task.assignee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
                         </div>
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="text-xs">{task.assignee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                      </div>
                     </CardContent>
                   </Card>
                 )
+                )
               })}
-            </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Reports Tab */}
@@ -1557,7 +1556,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {['platinum', 'gold', 'silver', 'bronze'].map(tier => {
-                      const tierClients = mockClients.filter(c => c.tier === tier as any)
+                      const tierClients = filteredClients.filter(c => c.tier === tier as any)
                       const tierRevenue = tierClients.reduce((sum, c) => sum + c.revenue, 0)
                       return (
                         <div key={tier} className="space-y-1">
@@ -1565,7 +1564,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <span className="capitalize font-medium">{tier}</span>
                             <span>{formatCurrency(tierRevenue)}</span>
                           </div>
-                          <Progress value={(tierRevenue / stats.totalRevenue) * 100} className="h-2" />
+                          <Progress value={stats.totalRevenue > 0 ? (tierRevenue / stats.totalRevenue) * 100 : 0} className="h-2" />
                         </div>
                       )
                     })}
@@ -1580,7 +1579,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {(['customer', 'opportunity', 'prospect', 'lead', 'churned'] as const).map(status => {
-                      const count = mockClients.filter(c => c.status === status).length
+                      const count = filteredClients.filter(c => c.status === status).length
                       return (
                         <div key={status} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1600,19 +1599,23 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Array.from(new Set(mockClients.map(c => c.industry))).map(industry => {
-                      const count = mockClients.filter(c => c.industry === industry).length
-                      const revenue = mockClients.filter(c => c.industry === industry).reduce((sum, c) => sum + c.revenue, 0)
-                      return (
-                        <div key={industry} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                          <div>
-                            <div className="font-medium">{industry}</div>
-                            <div className="text-xs text-gray-500">{count} clients</div>
+                    {filteredClients.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No clients to display</p>
+                    ) : (
+                      Array.from(new Set(filteredClients.map(c => c.industry))).map(industry => {
+                        const count = filteredClients.filter(c => c.industry === industry).length
+                        const revenue = filteredClients.filter(c => c.industry === industry).reduce((sum, c) => sum + c.revenue, 0)
+                        return (
+                          <div key={industry} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div>
+                              <div className="font-medium">{industry}</div>
+                              <div className="text-xs text-gray-500">{count} clients</div>
+                            </div>
+                            <span className="font-semibold">{formatCurrency(revenue)}</span>
                           </div>
-                          <span className="font-semibold">{formatCurrency(revenue)}</span>
-                        </div>
-                      )
-                    })}
+                        )
+                      })
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -2837,7 +2840,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <Select value={activityForm.clientId} onValueChange={(value) => setActivityForm(prev => ({ ...prev, clientId: value }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
-                    {mockClients.map(client => (
+                    {filteredClients.map(client => (
                       <SelectItem key={client.id} value={client.id}>{client.company}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2914,7 +2917,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <Select value={taskForm.clientId} onValueChange={(value) => setTaskForm(prev => ({ ...prev, clientId: value }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
-                    {mockClients.map(client => (
+                    {filteredClients.map(client => (
                       <SelectItem key={client.id} value={client.id}>{client.company}</SelectItem>
                     ))}
                   </SelectContent>
@@ -4018,36 +4021,43 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <TabsContent value="activities" className="mt-4">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-3">
-                      {mockActivities
-                        .filter(a => !selectedClientForAction || a.clientId === selectedClientForAction.id || selectedClientForAction.id.startsWith('c'))
-                        .map(activity => (
-                          <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
-                              {activity.type === 'call' && <PhoneCall className="w-4 h-4" />}
-                              {activity.type === 'email' && <Mail className="w-4 h-4" />}
-                              {activity.type === 'meeting' && <Video className="w-4 h-4" />}
-                              {activity.type === 'note' && <FileText className="w-4 h-4" />}
-                              {activity.type === 'task' && <CheckCircle2 className="w-4 h-4" />}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{activity.title}</span>
-                                <Badge variant="secondary" className="text-xs">{activity.type}</Badge>
+                      {activities.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No activities recorded</p>
+                        </div>
+                      ) : (
+                        activities
+                          .filter(a => !selectedClientForAction || a.clientId === selectedClientForAction.id)
+                          .map(activity => (
+                            <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                                activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                                activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                                'bg-gray-100 text-gray-600'
+                              }`}>
+                                {activity.type === 'call' && <PhoneCall className="w-4 h-4" />}
+                                {activity.type === 'email' && <Mail className="w-4 h-4" />}
+                                {activity.type === 'meeting' && <Video className="w-4 h-4" />}
+                                {activity.type === 'note' && <FileText className="w-4 h-4" />}
+                                {activity.type === 'task' && <CheckCircle2 className="w-4 h-4" />}
                               </div>
-                              <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                                <span>{activity.createdBy}</span>
-                                <span>-</span>
-                                <span>{formatRelativeTime(activity.createdAt)}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{activity.title}</span>
+                                  <Badge variant="secondary" className="text-xs">{activity.type}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+                                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                  <span>{activity.createdBy}</span>
+                                  <span>-</span>
+                                  <span>{formatRelativeTime(activity.createdAt)}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))
+                      )}
                     </div>
                   </ScrollArea>
                 </TabsContent>

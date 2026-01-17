@@ -345,22 +345,43 @@ export default function MessagesClient() {
   // Stats - now uses real Supabase data when available
   const stats = useMemo(() => {
     // Use real data from Supabase when available, fallback to mock data
-    const hasRealData = supabaseChats.length > 0
+    const hasRealData = supabaseChats.length > 0 || (supabaseMessages && supabaseMessages.length > 0)
 
-    const totalMessages = hasRealData
-      ? chatMessages.length + (supabaseMessages?.length || 0)
-      : mockMessages.length * 150
+    // Calculate real message counts
+    const realMessageCount = chatMessages.length + (supabaseMessages?.length || 0)
+    const totalMessages = hasRealData ? realMessageCount : mockMessages.length * 150
+
+    // Calculate real channel counts (direct + group + channels)
     const totalChannels = hasRealData
-      ? supabaseChats.length
+      ? directChats.length + groupChats.length + supabaseChannels.length
       : mockChannels.length
+
+    // Calculate real unread count
     const unreadMessages = hasRealData
       ? totalUnread
       : mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
-    const activeThreads = mockThreads.filter(t => t.isUnread).length
+
+    // Calculate active threads from pinned messages (as proxy for threads)
+    const activeThreads = hasRealData
+      ? pinnedMessages.length
+      : mockThreads.filter(t => t.isUnread).length
+
+    // Files count - would need a separate hook for real data
     const totalFiles = mockFiles.length * 25
+
+    // Calls count - would need a separate hook for real data
     const totalCalls = mockCalls.length * 12
-    const onlineMembers = mockUsers.filter(u => u.status === 'online').length
-    const mentions = mockMentions.filter(m => !m.isRead).length
+
+    // Online members - use typing users as proxy for online activity
+    const onlineMembers = hasRealData
+      ? typingUsers.length + (currentUserId ? 1 : 0)
+      : mockUsers.filter(u => u.status === 'online').length
+
+    // Mentions count from unread messages
+    const mentions = hasRealData
+      ? supabaseMessages?.filter(m => !m.is_read).length || 0
+      : mockMentions.filter(m => !m.isRead).length
+
     return {
       totalMessages,
       totalChannels,
@@ -372,7 +393,7 @@ export default function MessagesClient() {
       mentions,
       hasRealData
     }
-  }, [supabaseChats, chatMessages, supabaseMessages, totalUnread])
+  }, [supabaseChats, chatMessages, supabaseMessages, totalUnread, directChats, groupChats, supabaseChannels, pinnedMessages, typingUsers, currentUserId])
 
   // Filtered channels - merges real Supabase data with mock data
   const filteredChannels = useMemo(() => {
@@ -695,7 +716,7 @@ export default function MessagesClient() {
         description: newChannelDescription.trim() || `Channel for ${newChannelName} discussions`
       })
       if (result.success) {
-        toast.success('Channel created' is now available` })
+        toast.success(`Channel #${newChannelName} created`)
         setShowCreateChannelDialog(false)
         setNewChannelName('')
         setNewChannelDescription('')
@@ -718,7 +739,7 @@ export default function MessagesClient() {
         memberIds: [userId]
       })
       if (result.success && result.chat) {
-        toast.success('Chat created'` })
+        toast.success(`Chat with ${userName} created`)
         // Select the new chat
         await selectChat(result.chat.id)
       } else {
@@ -840,7 +861,7 @@ export default function MessagesClient() {
 
     const newFiles = Array.from(files)
     setUploadedFiles(prev => [...prev, ...newFiles])
-    toast.success('Files added' file(s) ready to upload` })
+    toast.success(`${newFiles.length} file(s) added and ready to upload`)
   }
 
   // Handler for advanced search
@@ -887,7 +908,7 @@ export default function MessagesClient() {
       }))
 
       setSearchResults([...convertedResults, ...mockResults])
-      toast.success('Search complete' matching messages` })
+      toast.success(`Search complete: ${convertedResults.length + mockResults.length} matching messages`)
     } catch (error) {
       toast.error('Search failed')
     } finally {
@@ -967,7 +988,7 @@ export default function MessagesClient() {
   }
 
   const handleMuteChannel = (channelName: string) => {
-    toast.success('Channel muted' notifications are now off` })
+    toast.success(`Channel #${channelName} muted - notifications are now off`)
   }
 
   const handleMarkAllAsRead = async () => {
@@ -997,7 +1018,7 @@ export default function MessagesClient() {
       }
 
       if (totalMarked > 0) {
-        toast.success('All messages marked as read' messages updated` })
+        toast.success(`All messages marked as read: ${totalMarked} messages updated`)
       } else {
         toast.info('No unread messages')
       }
@@ -1224,11 +1245,19 @@ export default function MessagesClient() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Channels & Workspaces</h2>
-                  <p className="text-purple-100">Slack-level team communication and collaboration</p>
+                  <p className="text-purple-100">
+                    Slack-level team communication and collaboration
+                    {stats.hasRealData && (
+                      <span className="ml-2 inline-flex items-center gap-1">
+                        <Radio className="w-3 h-3" />
+                        Live
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockChannels.length}</p>
+                    <p className="text-3xl font-bold">{stats.totalChannels}</p>
                     <p className="text-purple-200 text-sm">Channels</p>
                   </div>
                   <div className="text-center">
@@ -1247,12 +1276,12 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: handleCreateChannel },
-                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setChannelFilter('all'); toast.success('Browse channels' channels available` }) } },
+                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setChannelFilter('all'); toast.success(`Browse: ${filteredChannels.length} channels available`) } },
                 { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { navigator.clipboard.writeText('https://freeflow.app/invite/workspace'); toast.success('Invite link copied!') } },
                 { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Showing starred channels') } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => window.open('/dashboard/integrations', '_blank') },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => window.open('/dashboard/automations', '_blank') },
-                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success('Archived channels' channels in archive` }) } },
+                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success(`Archived: ${archived.length} channels in archive`) } },
                 { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
@@ -1416,10 +1445,29 @@ export default function MessagesClient() {
                     <CardTitle className="flex items-center gap-2">
                       <Users className="w-5 h-5" />
                       Online Now
+                      {stats.hasRealData && (
+                        <Badge variant="secondary" className="ml-2 text-xs">Live</Badge>
+                      )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {mockUsers.filter(u => u.status === 'online' && !u.isBot).map(user => (
+                    {/* Show typing users from real-time data first */}
+                    {typingUsers.map(typingUser => (
+                      <div key={typingUser.user_id} className="flex items-center gap-3">
+                        <div className="relative">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback>{typingUser.user_name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-green-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{typingUser.user_name}</p>
+                          <p className="text-xs text-green-500 italic">typing...</p>
+                        </div>
+                      </div>
+                    ))}
+                    {/* Show mock users as fallback if no real-time data */}
+                    {typingUsers.length === 0 && mockUsers.filter(u => u.status === 'online' && !u.isBot).map(user => (
                       <div key={user.id} className="flex items-center gap-3">
                         <div className="relative">
                           <Avatar className="w-8 h-8">
@@ -1433,6 +1481,9 @@ export default function MessagesClient() {
                         </div>
                       </div>
                     ))}
+                    {typingUsers.length === 0 && mockUsers.filter(u => u.status === 'online' && !u.isBot).length === 0 && (
+                      <p className="text-sm text-gray-500 text-center py-4">No one online</p>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -1546,12 +1597,12 @@ export default function MessagesClient() {
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => {
                             const pinnedMessages = channelMessages.filter(m => m.isPinned)
-                            toast.success('Pinned items' pinned messages in this channel` })
+                            toast.success(`Pinned: ${channelMessages.filter(m => m.isPinned).length} pinned messages in this channel`)
                           }}><Pin className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={async () => {
                             if (confirm(`Are you sure you want to archive #${selectedChannel.name}?`)) {
-                              toast.success('Channel archived' has been archived` })
+                              toast.success(`Channel #${selectedChannel.name} has been archived`)
                               setSelectedChannel(null)
                             }
                           }}><Archive className="w-4 h-4" /></Button>
@@ -1679,11 +1730,19 @@ export default function MessagesClient() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Threaded Conversations</h2>
-                  <p className="text-amber-100">Keep discussions organized with focused threads</p>
+                  <p className="text-amber-100">
+                    Keep discussions organized with focused threads
+                    {stats.hasRealData && (
+                      <span className="ml-2 inline-flex items-center gap-1">
+                        <Radio className="w-3 h-3" />
+                        Live
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockThreads.length}</p>
+                    <p className="text-3xl font-bold">{stats.hasRealData ? pinnedMessages.length : mockThreads.length}</p>
                     <p className="text-amber-200 text-sm">Total Threads</p>
                   </div>
                   <div className="text-center">
@@ -1691,7 +1750,7 @@ export default function MessagesClient() {
                     <p className="text-amber-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockThreads.filter(t => t.isFollowing).length}</p>
+                    <p className="text-3xl font-bold">{stats.hasRealData ? pinnedMessages.length : mockThreads.filter(t => t.isFollowing).length}</p>
                     <p className="text-amber-200 text-sm">Following</p>
                   </div>
                 </div>
@@ -1702,10 +1761,10 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowAllThreadsDialog(true) },
-                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { const following = mockThreads.filter(t => t.isFollowing); toast.success('Following' threads you are following` }) } },
-                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { const unread = mockThreads.filter(t => t.isUnread); toast.success('Unread threads' unread threads` }) } },
+                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { const following = mockThreads.filter(t => t.isFollowing); toast.success(`Following: ${following.length} threads you are following`) } },
+                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { const unread = mockThreads.filter(t => t.isUnread); toast.success(`Unread: ${unread.length} unread threads`) } },
                 { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowMyRepliesDialog(true) },
-                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success('Mentions' mentions found` }) } },
+                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success(`Mentions: ${stats.mentions} mentions found`) } },
                 { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowArchivedThreadsDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
@@ -1724,12 +1783,45 @@ export default function MessagesClient() {
 
             <Card className="border-0 shadow-sm">
               <CardHeader>
-                <CardTitle>Active Threads</CardTitle>
-                <CardDescription>Conversations you're following</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  Active Threads
+                  {stats.hasRealData && <Badge variant="secondary" className="text-xs">Live</Badge>}
+                </CardTitle>
+                <CardDescription>
+                  {stats.hasRealData ? 'Pinned conversations and threads' : 'Conversations you are following'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockThreads.map(thread => (
+                  {/* Show pinned messages from Supabase as threads when available */}
+                  {stats.hasRealData && pinnedMessages.length > 0 && pinnedMessages.map(msg => (
+                    <div key={msg.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
+                      const chat = supabaseChats.find(c => c.id === msg.chat_id)
+                      if (chat) {
+                        handleSelectConversation(chat.id)
+                      }
+                    }}>
+                      <div className="flex items-start gap-3">
+                        <Avatar>
+                          <AvatarFallback>{msg.sender?.name?.charAt(0) || '?'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{msg.sender?.name || 'Unknown'}</span>
+                            <span className="text-xs text-gray-500">pinned</span>
+                            <Pin className="w-3 h-3 text-yellow-500" />
+                          </div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{msg.text}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>{msg.reactions?.length || 0} reactions</span>
+                            <span>Pinned {formatTime(msg.pinned_at || msg.created_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Show mock threads as fallback */}
+                  {(!stats.hasRealData || pinnedMessages.length === 0) && mockThreads.map(thread => (
                     <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-start gap-3">
                         <Avatar>
@@ -1757,6 +1849,14 @@ export default function MessagesClient() {
                       </div>
                     </div>
                   ))}
+                  {/* Empty state */}
+                  {stats.hasRealData && pinnedMessages.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>No pinned threads yet</p>
+                      <p className="text-sm">Pin important messages to create threads</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1796,7 +1896,7 @@ export default function MessagesClient() {
                 { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { setActiveCall({ id: 'huddle-new', type: 'huddle', status: 'ongoing', channelId: 'huddle', channelName: 'Quick Huddle', participants: [currentUser as any], startTime: new Date().toISOString(), isRecorded: false }); toast.success('Huddle started') } },
                 { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (!activeCall) { toast.warning('Start a call first') } } },
                 { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => window.open('/dashboard/calendar', '_blank') },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success('Call recordings' recorded calls available` }) } },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success(`Call recordings: ${recorded.length} recorded calls available`) } },
                 { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowCallHistoryDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
@@ -1834,7 +1934,7 @@ export default function MessagesClient() {
                           </div>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
                             setActiveCall(call)
-                            toast.success(`Joined ${call.channelName}` participants` })
+                            toast.success(`Joined ${call.channelName} - ${call.participants.length} participants`)
                           }}>
                             Join
                           </Button>
@@ -1876,7 +1976,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
                             navigator.clipboard.writeText(`Call: ${call.channelName}\nScheduled: ${new Date(call.startTime).toLocaleString()}\nParticipants: ${call.participants.length}`)
-                            toast.success('Call details copied' - ${new Date(call.startTime).toLocaleString()}` })
+                            toast.success(`Call details copied - ${call.channelName} at ${new Date(call.startTime).toLocaleString()}`)
                           }}>View</Button>
                         </div>
                       </div>
@@ -1973,7 +2073,7 @@ export default function MessagesClient() {
                     const input = document.createElement('input')
                     input.type = 'file'
                     input.multiple = true
-                    input.onchange = () => toast.success('Files selected' files ready to upload` })
+                    input.onchange = () => toast.success(`Files selected and ready to upload`)
                     input.click()
                   }}>
                     <Upload className="w-4 h-4 mr-2" />
@@ -2097,7 +2197,7 @@ export default function MessagesClient() {
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setMessageInput(`@${mention.message.author.name} `)
-                          toast.success('Ready to reply'` })
+                          toast.success('Ready to reply')
                         }}>
                           <Reply className="w-4 h-4" />
                         </Button>
@@ -2892,7 +2992,7 @@ export default function MessagesClient() {
                 } else if (insight.actionLabel?.toLowerCase().includes('filter')) {
                   setChannelFilter('unread')
                 } else {
-                  toast.info('Insight action'` })
+                  toast.info('Insight action triggered')
                 }
               }}
             />

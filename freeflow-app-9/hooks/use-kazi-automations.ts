@@ -37,6 +37,36 @@ export interface AutomationStats {
   timeSaved: number
 }
 
+export interface ExecutionLog {
+  id: string
+  automation_id: string
+  status: 'success' | 'failed' | 'running' | 'pending'
+  triggered_by: string
+  started_at: string
+  completed_at: string | null
+  duration_ms: number | null
+  actions_completed: number
+  actions_failed: number
+  error_message: string | null
+  result: unknown
+  created_at: string
+}
+
+export interface AutomationTemplate {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  color: string
+  trigger_type: string
+  trigger_config: Record<string, unknown>
+  actions: { type: string; config: Record<string, unknown> }[]
+  tags: string[]
+  usage_count: number
+  is_verified: boolean
+}
+
 interface UseKaziAutomationsOptions {
   status?: string
   category?: string
@@ -451,6 +481,64 @@ export function useKaziAutomations(options: UseKaziAutomationsOptions = {}) {
     return createAutomation(duplicate)
   }, [automations, createAutomation])
 
+  // Fetch execution logs for an automation
+  const fetchExecutionLogs = useCallback(async (automationId: string, limit = 20, offset = 0): Promise<{ logs: ExecutionLog[]; total: number }> => {
+    try {
+      const params = new URLSearchParams({
+        limit: String(limit),
+        offset: String(offset)
+      })
+      const response = await fetch(`/api/kazi/automations/${automationId}/logs?${params}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch execution logs')
+      }
+
+      const { data, pagination } = await response.json()
+      return { logs: data || [], total: pagination?.total || 0 }
+    } catch (err) {
+      console.error('Error fetching execution logs:', err)
+      return { logs: [], total: 0 }
+    }
+  }, [])
+
+  // Fetch all recent execution logs (for activity tab)
+  const fetchRecentLogs = useCallback(async (limit = 20): Promise<ExecutionLog[]> => {
+    try {
+      const response = await fetch(`/api/kazi/automations/logs?limit=${limit}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recent logs')
+      }
+
+      const { data } = await response.json()
+      return data || []
+    } catch (err) {
+      console.error('Error fetching recent logs:', err)
+      return []
+    }
+  }, [])
+
+  // Fetch automation templates
+  const fetchTemplates = useCallback(async (category?: string): Promise<AutomationTemplate[]> => {
+    try {
+      const params = new URLSearchParams()
+      if (category) params.set('category', category)
+
+      const response = await fetch(`/api/kazi/automations/templates?${params}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch templates')
+      }
+
+      const { data } = await response.json()
+      return data || []
+    } catch (err) {
+      console.error('Error fetching templates:', err)
+      return []
+    }
+  }, [])
+
   // Load automations on mount
   useEffect(() => {
     fetchAutomations()
@@ -468,6 +556,9 @@ export function useKaziAutomations(options: UseKaziAutomationsOptions = {}) {
     deleteAutomation,
     toggleAutomation,
     runAutomation,
-    duplicateAutomation
+    duplicateAutomation,
+    fetchExecutionLogs,
+    fetchRecentLogs,
+    fetchTemplates
   }
 }

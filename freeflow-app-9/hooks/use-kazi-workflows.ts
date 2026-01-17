@@ -29,6 +29,8 @@ export interface Workflow {
   last_run_at: string | null
   next_run_at: string | null
   workflow_actions?: WorkflowAction[]
+  // Computed property for UI convenience
+  actions: { name: string; type: string; config: Record<string, unknown> }[]
   created_at: string
   updated_at: string
 }
@@ -38,6 +40,32 @@ export interface WorkflowStats {
   activeWorkflows: number
   totalRuns: number
   successRate: number
+}
+
+export interface WorkflowTemplate {
+  id: string
+  name: string
+  description: string
+  category: string
+  icon: string
+  trigger_type: string
+  actions: WorkflowAction[]
+  usage_count: number
+  tags: string[]
+}
+
+export interface WorkflowExecution {
+  id: string
+  workflow_id: string
+  workflow_name: string
+  status: 'pending' | 'running' | 'success' | 'failed' | 'cancelled'
+  started_at: string
+  completed_at?: string
+  execution_time_ms?: number
+  error_message?: string
+  trigger_type: string
+  actions_completed: number
+  actions_total: number
 }
 
 interface UseKaziWorkflowsOptions {
@@ -69,6 +97,11 @@ const mockWorkflows: Workflow[] = [
       { action_type: 'create-task', position: 1, config: { title: 'Schedule intro call' } },
       { action_type: 'notification', position: 2, config: { message: 'New client added' } }
     ],
+    actions: [
+      { name: 'Email', type: 'email', config: { template: 'welcome' } },
+      { name: 'Create Task', type: 'create-task', config: { title: 'Schedule intro call' } },
+      { name: 'Notification', type: 'notification', config: { message: 'New client added' } }
+    ],
     created_at: new Date(Date.now() - 86400000 * 60).toISOString(),
     updated_at: new Date(Date.now() - 86400000).toISOString()
   },
@@ -95,6 +128,12 @@ const mockWorkflows: Workflow[] = [
       { action_type: 'email', position: 2, config: { template: 'project-delivered' } },
       { action_type: 'update-record', position: 3, config: { status: 'delivered' } }
     ],
+    actions: [
+      { name: 'Condition', type: 'condition', config: { field: 'deliverables_ready', operator: 'equals', value: true } },
+      { name: 'Api Call', type: 'api-call', config: { action: 'generate-report' } },
+      { name: 'Email', type: 'email', config: { template: 'project-delivered' } },
+      { name: 'Update Record', type: 'update-record', config: { status: 'delivered' } }
+    ],
     created_at: new Date(Date.now() - 86400000 * 45).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 3).toISOString()
   },
@@ -120,6 +159,11 @@ const mockWorkflows: Workflow[] = [
       { action_type: 'email', position: 1, config: { template: 'invoice-batch' } },
       { action_type: 'notification', position: 2, config: { message: 'Monthly invoices sent' } }
     ],
+    actions: [
+      { name: 'Api Call', type: 'api-call', config: { action: 'generate-invoices' } },
+      { name: 'Email', type: 'email', config: { template: 'invoice-batch' } },
+      { name: 'Notification', type: 'notification', config: { message: 'Monthly invoices sent' } }
+    ],
     created_at: new Date(Date.now() - 86400000 * 180).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 5).toISOString()
   },
@@ -143,6 +187,10 @@ const mockWorkflows: Workflow[] = [
     workflow_actions: [
       { action_type: 'api-call', position: 0, config: { action: 'compile-weekly-stats' } },
       { action_type: 'email', position: 1, config: { template: 'weekly-review', to: 'team-leads' } }
+    ],
+    actions: [
+      { name: 'Api Call', type: 'api-call', config: { action: 'compile-weekly-stats' } },
+      { name: 'Email', type: 'email', config: { template: 'weekly-review', to: 'team-leads' } }
     ],
     created_at: new Date(Date.now() - 86400000 * 365).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 7).toISOString()
@@ -170,6 +218,12 @@ const mockWorkflows: Workflow[] = [
       { action_type: 'notification', position: 2, config: { message: 'Ticket escalated', to: 'support-manager' } },
       { action_type: 'update-record', position: 3, config: { escalated: true } }
     ],
+    actions: [
+      { name: 'Condition', type: 'condition', config: { field: 'response_time_hours', operator: 'greater', value: 24 } },
+      { name: 'Condition', type: 'condition', config: { field: 'priority', operator: 'equals', value: 'high' } },
+      { name: 'Notification', type: 'notification', config: { message: 'Ticket escalated', to: 'support-manager' } },
+      { name: 'Update Record', type: 'update-record', config: { escalated: true } }
+    ],
     created_at: new Date(Date.now() - 86400000 * 200).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 14).toISOString()
   }
@@ -177,6 +231,8 @@ const mockWorkflows: Workflow[] = [
 
 export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
   const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([])
+  const [executions, setExecutions] = useState<WorkflowExecution[]>([])
   const [stats, setStats] = useState<WorkflowStats>({
     totalWorkflows: 0,
     activeWorkflows: 0,
@@ -207,8 +263,17 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
       const { data } = await response.json()
 
       if (data && data.length > 0) {
-        setWorkflows(data)
-        calculateStats(data)
+        // Transform workflow_actions to actions for UI compatibility
+        const transformedWorkflows = data.map((w: Workflow & { workflow_actions?: WorkflowAction[] }) => ({
+          ...w,
+          actions: (w.workflow_actions || []).map(a => ({
+            name: a.action_type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            type: a.action_type,
+            config: a.config || {}
+          }))
+        }))
+        setWorkflows(transformedWorkflows)
+        calculateStats(transformedWorkflows)
       } else {
         setWorkflows([])
         calculateStats([])
@@ -236,8 +301,45 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
     })
   }
 
+  // Fetch templates
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const response = await fetch('/api/kazi/workflows/templates')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch templates')
+      }
+
+      const { data } = await response.json()
+      setTemplates(data || [])
+    } catch (err) {
+      console.error('Error fetching templates:', err)
+    }
+  }, [])
+
+  // Fetch executions
+  const fetchExecutions = useCallback(async (workflowId?: string) => {
+    try {
+      const params = new URLSearchParams()
+      if (workflowId) params.set('workflowId', workflowId)
+
+      const response = await fetch(`/api/kazi/workflows/executions?${params}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch executions')
+      }
+
+      const { data } = await response.json()
+      setExecutions(data || [])
+      return data || []
+    } catch (err) {
+      console.error('Error fetching executions:', err)
+      return []
+    }
+  }, [])
+
   // Create workflow
-  const createWorkflow = useCallback(async (workflow: Partial<Workflow> & { actions?: WorkflowAction[] }): Promise<Workflow | null> => {
+  const createWorkflow = useCallback(async (workflow: Partial<Omit<Workflow, 'actions'>> & { actions?: WorkflowAction[] }): Promise<Workflow | null> => {
     try {
       const response = await fetch('/api/kazi/workflows', {
         method: 'POST',
@@ -268,7 +370,7 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
   }, [toast])
 
   // Update workflow
-  const updateWorkflow = useCallback(async (id: string, updates: Partial<Workflow> & { actions?: WorkflowAction[] }): Promise<Workflow | null> => {
+  const updateWorkflow = useCallback(async (id: string, updates: Partial<Omit<Workflow, 'actions'>> & { actions?: WorkflowAction[] }): Promise<Workflow | null> => {
     try {
       const response = await fetch(`/api/kazi/workflows/${id}`, {
         method: 'PATCH',
@@ -452,18 +554,24 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
     return createWorkflow(duplicate)
   }, [workflows, createWorkflow])
 
-  // Load workflows on mount
+  // Load workflows, templates, and executions on mount
   useEffect(() => {
     fetchWorkflows()
-  }, [fetchWorkflows])
+    fetchTemplates()
+    fetchExecutions()
+  }, [fetchWorkflows, fetchTemplates, fetchExecutions])
 
   return {
     workflows,
+    templates,
+    executions,
     stats,
     isLoading,
     error,
     runningWorkflows,
     fetchWorkflows,
+    fetchTemplates,
+    fetchExecutions,
     createWorkflow,
     updateWorkflow,
     deleteWorkflow,

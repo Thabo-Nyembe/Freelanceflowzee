@@ -277,9 +277,11 @@ interface DbFolder {
   updated_at: string
 }
 
-export default function FilesHubClient() {
+interface FilesHubClientProps {
+  initialFiles?: FileItem[]
+}
 
-
+export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProps) {
   // UI State
   const [activeTab, setActiveTab] = useState('files')
   const [searchQuery, setSearchQuery] = useState('')
@@ -337,43 +339,19 @@ export default function FilesHubClient() {
   // Advanced upload dialog state (world-class drag & drop component)
   const [showAdvancedUpload, setShowAdvancedUpload] = useState(false)
 
-  // Handle advanced upload completion
-  const handleAdvancedUploadComplete = useCallback(async (uploadedFiles: UploadedFile[]) => {
-    try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      // Create file records in database for each uploaded file
-      for (const file of uploadedFiles) {
-        const extension = file.name.split('.').pop() || ''
-        const fileType = file.type.startsWith('image/') ? 'image' :
-                        file.type.startsWith('video/') ? 'video' :
-                        file.type.startsWith('audio/') ? 'audio' :
-                        file.type.includes('pdf') || file.type.includes('document') ? 'document' :
-                        file.type.includes('spreadsheet') || file.type.includes('excel') ? 'spreadsheet' :
-                        file.type.includes('presentation') || file.type.includes('powerpoint') ? 'presentation' :
-                        file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other'
-
-        await supabase.from('files').insert({
-          user_id: user.id,
-          folder_id: currentFolderId,
-          name: file.name,
-          type: fileType,
-          extension,
-          size: file.size,
-          url: file.url,
-          status: 'active'
-        })
-      }
-
-      setShowAdvancedUpload(false)
-      fetchData()
-    } catch (error) {
-      toast.error('Failed to save uploaded files')
+  // Map database activity types to UI activity types
+  const mapActivityType = (activity: string): FileActivity['action'] => {
+    const activityMap: Record<string, FileActivity['action']> = {
+      'upload': 'created',
+      'edit': 'modified',
+      'rename': 'renamed',
+      'move': 'moved',
+      'delete': 'deleted',
+      'share': 'shared',
+      'download': 'downloaded'
     }
-  }, [currentFolderId, fetchData])
+    return activityMap[activity] || 'modified'
+  }
 
   // Fetch files, folders, shared links, and activities
   const fetchData = useCallback(async () => {
@@ -490,23 +468,49 @@ export default function FilesHubClient() {
     }
   }, [])
 
-  // Map database activity types to UI activity types
-  const mapActivityType = (activity: string): FileActivity['action'] => {
-    const activityMap: Record<string, FileActivity['action']> = {
-      'upload': 'created',
-      'edit': 'modified',
-      'rename': 'renamed',
-      'move': 'moved',
-      'delete': 'deleted',
-      'share': 'shared',
-      'download': 'downloaded'
-    }
-    return activityMap[activity] || 'modified'
-  }
-
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Handle advanced upload completion
+  const handleAdvancedUploadComplete = useCallback(async (uploadedFiles: UploadedFile[]) => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create file records in database for each uploaded file
+      for (const file of uploadedFiles) {
+        const extension = file.name.split('.').pop() || ''
+        const fileType = file.type.startsWith('image/') ? 'image' :
+                        file.type.startsWith('video/') ? 'video' :
+                        file.type.startsWith('audio/') ? 'audio' :
+                        file.type.includes('pdf') || file.type.includes('document') ? 'document' :
+                        file.type.includes('spreadsheet') || file.type.includes('excel') ? 'spreadsheet' :
+                        file.type.includes('presentation') || file.type.includes('powerpoint') ? 'presentation' :
+                        file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other'
+
+        await supabase.from('files').insert({
+          user_id: user.id,
+          folder_id: currentFolderId,
+          name: file.name,
+          type: fileType,
+          extension,
+          size: file.size,
+          url: file.url,
+          status: 'active'
+        })
+      }
+
+      setShowAdvancedUpload(false)
+      toast.success(`${uploadedFiles.length} file(s) uploaded successfully`)
+      fetchData()
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to save uploaded files')
+    }
+  }, [currentFolderId, fetchData])
 
   // Stats
   const stats: StorageStats = useMemo(() => ({
@@ -580,8 +584,6 @@ export default function FilesHubClient() {
         ? folders.find(f => f.id === currentFolderId)?.path || '/'
         : '/'
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('folders').insert({
         user_id: user.id,
         parent_id: currentFolderId,
@@ -591,7 +593,7 @@ export default function FilesHubClient() {
       })
 
       if (error) throw error
-      toast.success('Folder created'" has been created` })
+      toast.success(`Folder "${newFolderName.trim()}" has been created`)
       setNewFolderName('')
       setShowCreateFolderDialog(false)
       fetchData()
@@ -608,7 +610,7 @@ export default function FilesHubClient() {
       const supabase = createClient()
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
-      toast.success('File deleted' moved to trash` })
+      toast.success(`"${fileName}" moved to trash`)
       fetchData()
     } catch (error) {
       toast.error('Failed to delete file')
@@ -635,8 +637,6 @@ export default function FilesHubClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('file_shares').insert({
         file_id: fileId,
         shared_by: user.id,
@@ -645,10 +645,8 @@ export default function FilesHubClient() {
       })
       if (error) throw error
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
-      toast.success('File shared'` })
+      toast.success(`"${fileName}" has been shared`)
       fetchData()
     } catch (error) {
       toast.error('Failed to share file')
@@ -661,7 +659,7 @@ export default function FilesHubClient() {
       const supabase = createClient()
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
-      toast.success('Folder deleted'" has been deleted` })
+      toast.success(`Folder "${folderName}" has been deleted`)
       if (currentFolderId === folderId) setCurrentFolderId(null)
       fetchData()
     } catch (error) {
@@ -677,8 +675,6 @@ export default function FilesHubClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('files').update({
         folder_id: targetFolderId,
         updated_at: new Date().toISOString()
@@ -687,8 +683,6 @@ export default function FilesHubClient() {
       if (error) throw error
 
       // Log the activity
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('file_activities').insert({
         file_id: fileId,
         user_id: user.id,
@@ -696,7 +690,7 @@ export default function FilesHubClient() {
         description: `File moved to ${targetFolderId ? folders.find(f => f.id === targetFolderId)?.name || 'folder' : 'root'}`
       })
 
-      toast.success('File moved' has been moved` })
+      toast.success(`"${fileName}" has been moved`)
       fetchData()
     } catch (error) {
       toast.error('Failed to move file')
@@ -711,8 +705,6 @@ export default function FilesHubClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('files').update({
         name: newName,
         updated_at: new Date().toISOString()
@@ -721,8 +713,6 @@ export default function FilesHubClient() {
       if (error) throw error
 
       // Log the activity
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('file_activities').insert({
         file_id: fileId,
         user_id: user.id,
@@ -730,7 +720,7 @@ export default function FilesHubClient() {
         description: `File renamed to ${newName}`
       })
 
-      toast.success('File renamed'` })
+      toast.success(`File renamed to "${newName}"`)
       fetchData()
     } catch (error) {
       toast.error('Failed to rename file')
@@ -784,7 +774,7 @@ export default function FilesHubClient() {
       }
 
       toast.dismiss()
-      toast.success('Files uploaded successfully' file(s) uploaded` })
+      toast.success('Files uploaded successfully')
       fetchData()
     } catch (error) {
       toast.dismiss()
@@ -823,17 +813,8 @@ export default function FilesHubClient() {
       toast.success('Download complete')
     } catch (error) {
       toast.dismiss()
-      // Fallback for mock files
-      const blob = new Blob([`Mock content for ${file.name}`], { type: 'application/octet-stream' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = file.name
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-      toast.success('Download complete')
+      console.error('Download error:', error)
+      toast.error(`Failed to download "${file.name}". The file may not exist or you may not have permission to access it.`)
     }
   }
 
@@ -850,7 +831,7 @@ export default function FilesHubClient() {
       const { error } = await supabase.from('file_shares').delete().eq('id', linkId)
       if (error) throw error
       toast.dismiss()
-      toast.success('Access revoked'" has been revoked` })
+      toast.success(`Access to "${fileName}" has been revoked`)
       fetchData()
     } catch (error) {
       toast.dismiss()
@@ -2373,6 +2354,29 @@ export default function FilesHubClient() {
             </DialogHeader>
             {selectedFile && (
               <div className="space-y-4">
+                {/* File Preview for Images */}
+                {selectedFile.type === 'image' && selectedFile.path && (
+                  <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <img
+                      src={selectedFile.path}
+                      alt={selectedFile.name}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
+                  </div>
+                )}
+                {/* Video Preview */}
+                {selectedFile.type === 'video' && selectedFile.path && (
+                  <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <video
+                      src={selectedFile.path}
+                      className="w-full h-full object-contain"
+                      controls
+                    />
+                  </div>
+                )}
                 <div className="flex items-start gap-4">
                   {(() => {
                     const FileIcon = getFileIcon(selectedFile.type)
@@ -2658,7 +2662,7 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUnlinkDeviceDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Device unlinked' has been removed` })
+                toast.success(`${selectedDevice?.name || 'Device'} has been removed`)
                 setShowUnlinkDeviceDialog(false)
               }} variant="destructive">
                 Unlink Device

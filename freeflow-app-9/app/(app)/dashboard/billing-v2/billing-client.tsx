@@ -49,6 +49,9 @@ import { toast } from 'sonner'
 // World-class guest payment component
 import GuestPaymentModal from '@/components/payments/guest-payment-modal'
 
+// Stripe Payment Element for payment processing
+import { StripePayment } from '@/components/payments/stripe-payment-element'
+
 interface Subscription {
   id: string
   customer_id: string
@@ -366,7 +369,6 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     settingCategory: string
   ) => {
     try {
-      const supabase = createClient()
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       await supabase.from('billing_settings').upsert({
@@ -911,6 +913,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
 
   const handleExportBilling = useCallback(async () => {
     try {
+      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: billingData, error } = await supabase
         .from('billing')
@@ -950,39 +953,110 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
     }
   }, [])
 
+  // State for Stripe payment retry modal
+  const [showRetryPaymentModal, setShowRetryPaymentModal] = useState(false)
+  const [retryPaymentClientSecret, setRetryPaymentClientSecret] = useState<string | null>(null)
+  const [retryPaymentInvoice, setRetryPaymentInvoice] = useState<Invoice | null>(null)
+  const [isRetryingPayment, setIsRetryingPayment] = useState(false)
+
   const handleRetryPayment = useCallback(async (invoice: Invoice) => {
+    setIsRetryingPayment(true)
     try {
+      // Update invoice status to processing
       await updateInvoice(invoice.id, {
         status: 'processing',
         last_retry_at: new Date().toISOString()
       })
-      toast.info('Retrying payment', {
-        description: `Attempting to charge for invoice ${invoice.number || invoice.id}`
+
+      toast.info('Initiating payment retry', {
+        description: `Processing payment for invoice ${invoice.number || invoice.id}`
       })
-      // In a real app, this would trigger a payment processor
-      // For now, we just update the status and show a toast
-      setTimeout(async () => {
-        // Simulate payment success/failure (50% chance)
-        const success = Math.random() > 0.5
+
+      // Call the retry invoice API to create a payment intent
+      const response = await fetch('/api/payments/retry-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: invoice.id,
+          amount: invoice.amount_due || invoice.total,
+          customerId: invoice.customer_id,
+          stripeInvoiceId: (invoice as any).stripe_invoice_id,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Payment retry failed')
+      }
+
+      if (result.status === 'paid' || result.success === true && result.status !== 'requires_payment') {
+        // Payment was processed directly (e.g., existing Stripe invoice)
         await updateInvoice(invoice.id, {
-          status: success ? 'paid' : 'open',
-          paid_at: success ? new Date().toISOString() : null
+          status: 'paid',
+          paid_at: new Date().toISOString()
         })
-        if (success) {
-          toast.success('Payment successful', {
-            description: `Invoice ${invoice.number || invoice.id} has been paid`
-          })
-        } else {
-          toast.error('Payment failed', {
-            description: 'The payment could not be processed. Please try again.'
-          })
-        }
-      }, 2000)
-    } catch (error) {
+        toast.success('Payment successful', {
+          description: `Invoice ${invoice.number || invoice.id} has been paid`
+        })
+        refreshAllBillingData()
+      } else if (result.clientSecret) {
+        // Payment requires additional action - show Stripe Elements modal
+        setRetryPaymentClientSecret(result.clientSecret)
+        setRetryPaymentInvoice(invoice)
+        setShowRetryPaymentModal(true)
+      } else {
+        throw new Error('Unexpected payment response')
+      }
+    } catch (error: any) {
       console.error('Failed to retry payment:', error)
-      toast.error('Failed to retry payment')
+
+      // Revert invoice status on failure
+      await updateInvoice(invoice.id, {
+        status: 'open',
+        last_retry_at: new Date().toISOString()
+      })
+
+      toast.error('Payment failed', {
+        description: error.message || 'The payment could not be processed. Please try again.'
+      })
+    } finally {
+      setIsRetryingPayment(false)
     }
-  }, [updateInvoice])
+  }, [updateInvoice, refreshAllBillingData])
+
+  // Handler for successful Stripe payment from retry modal
+  const handleRetryPaymentSuccess = useCallback(async (paymentIntent: any) => {
+    if (retryPaymentInvoice) {
+      await updateInvoice(retryPaymentInvoice.id, {
+        status: 'paid',
+        paid_at: new Date().toISOString()
+      })
+      toast.success('Payment successful', {
+        description: `Invoice ${retryPaymentInvoice.number || retryPaymentInvoice.id} has been paid`
+      })
+      setShowRetryPaymentModal(false)
+      setRetryPaymentClientSecret(null)
+      setRetryPaymentInvoice(null)
+      refreshAllBillingData()
+    }
+  }, [retryPaymentInvoice, updateInvoice, refreshAllBillingData])
+
+  // Handler for payment errors from retry modal
+  const handleRetryPaymentError = useCallback(async (error: Error) => {
+    if (retryPaymentInvoice) {
+      await updateInvoice(retryPaymentInvoice.id, {
+        status: 'open',
+        last_retry_at: new Date().toISOString()
+      })
+    }
+    toast.error('Payment failed', {
+      description: error.message || 'The payment could not be processed. Please try again.'
+    })
+    setShowRetryPaymentModal(false)
+    setRetryPaymentClientSecret(null)
+    setRetryPaymentInvoice(null)
+  }, [retryPaymentInvoice, updateInvoice])
 
   const handleCreateInvoice = useCallback(async () => {
     if (!newInvoiceForm.clientEmail || !newInvoiceForm.amount) {
@@ -1439,8 +1513,15 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                                 </Button>
                               )}
                               {inv.status === 'open' && (
-                                <Button size="sm" variant="default" onClick={() => handleRetryPayment(inv)} disabled={mutatingInvoice}>
-                                  Retry Payment
+                                <Button size="sm" variant="default" onClick={() => handleRetryPayment(inv)} disabled={mutatingInvoice || isRetryingPayment}>
+                                  {isRetryingPayment ? (
+                                    <>
+                                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                                      Processing...
+                                    </>
+                                  ) : (
+                                    'Retry Payment'
+                                  )}
                                 </Button>
                               )}
                             </div>
@@ -3185,9 +3266,16 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                       handleRetryPayment(selectedInvoice)
                       setSelectedInvoice(null)
                     }}
-                    disabled={mutatingInvoice}
+                    disabled={mutatingInvoice || isRetryingPayment}
                   >
-                    Retry Payment
+                    {isRetryingPayment ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Retry Payment'
+                    )}
                   </Button>
                 </>
               )}
@@ -3232,6 +3320,48 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
           allowApplePay={paymentSettings.appleGooglePay}
           allowGooglePay={paymentSettings.appleGooglePay}
         />
+      )}
+
+      {/* Invoice Payment Retry Modal - Stripe Elements */}
+      {showRetryPaymentModal && retryPaymentClientSecret && retryPaymentInvoice && (
+        <Dialog open={showRetryPaymentModal} onOpenChange={(open) => {
+          if (!open) {
+            setShowRetryPaymentModal(false)
+            setRetryPaymentClientSecret(null)
+            setRetryPaymentInvoice(null)
+          }
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-indigo-600" />
+                Complete Payment
+              </DialogTitle>
+              <DialogDescription>
+                Pay invoice {retryPaymentInvoice.number || retryPaymentInvoice.id}
+              </DialogDescription>
+            </DialogHeader>
+            <StripePayment
+              clientSecret={retryPaymentClientSecret}
+              amount={retryPaymentInvoice.amount_due || retryPaymentInvoice.total}
+              currency="usd"
+              onSuccess={handleRetryPaymentSuccess}
+              onError={handleRetryPaymentError}
+              onCancel={() => {
+                setShowRetryPaymentModal(false)
+                setRetryPaymentClientSecret(null)
+                setRetryPaymentInvoice(null)
+              }}
+              showOrderSummary={true}
+              orderItems={[{
+                name: `Invoice ${retryPaymentInvoice.number || retryPaymentInvoice.id}`,
+                description: retryPaymentInvoice.customer_name,
+                amount: retryPaymentInvoice.amount_due || retryPaymentInvoice.total,
+              }]}
+              className="border-0 shadow-none"
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   )
