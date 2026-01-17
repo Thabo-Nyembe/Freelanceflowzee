@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -69,11 +70,7 @@ interface Project {
   color: string
 }
 
-const INITIAL_PROJECTS: Project[] = [
-  { id: 'proj_1', name: 'TechCorp Branding', description: 'Complete logo design and brand guidelines', progress: 75, status: 'on-track', priority: 'high', velocity: 85, tasksToday: 2, dueIn: '3 days', color: 'purple' },
-  { id: 'proj_2', name: 'Portfolio Redesign', description: 'Modernize portfolio with new case studies', progress: 45, status: 'at-risk', priority: 'medium', velocity: 72, tasksToday: 1, dueIn: '1 week', color: 'blue' },
-  { id: 'proj_3', name: 'Client Dashboard', description: 'Build custom analytics dashboard', progress: 92, status: 'ahead', priority: 'low', velocity: 95, tasksToday: 1, dueIn: '5 days', color: 'green' }
-]
+const INITIAL_PROJECTS: Project[] = []
 
 const PROJECT_COLORS: Record<string, { bg: string; border: string; text: string; bar: string }> = {
   purple: { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-200 dark:border-purple-700', text: 'text-purple-700 dark:text-purple-300', bar: 'bg-purple-600' },

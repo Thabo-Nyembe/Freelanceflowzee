@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 "use client"
 
 import { useCallback, useState, useEffect } from 'react'
@@ -321,11 +322,9 @@ export default function StudioPage() {
     try {
       const usageResult = await getUsageSummary(userId)
       const usageData = usageResult.data || { total_requests: 0, total_tokens: 0, total_cost: 0 }
-      const quota = 1000 // Default quota
-      const percentRemaining = Math.round(((quota - usageData.total_requests) / quota) * 100)
 
       toast.success('Usage Status', {
-        description: `API quota: ${percentRemaining}% remaining | Requests: ${usageData.total_requests}/${quota} | Cost: $${usageData.total_cost.toFixed(2)}`
+        description: `Requests: ${usageData.total_requests} | Cost: $${usageData.total_cost.toFixed(2)}`
       })
       logger.info('Usage checked', { usage: usageData })
     } catch (error) {
@@ -355,23 +354,20 @@ export default function StudioPage() {
       const response = await fetch(`/api/users/${userId}/permissions`)
       if (response.ok) {
         const data = await response.json()
-        const permissions = data.permissions || ['Generate', 'Analyze', 'Export']
+        const permissions = data.permissions || []
         toast.success('Permissions', {
-          description: `Current: ${permissions.join(', ')} | Role: ${data.role || 'User'}`
+          description: `Current: ${permissions.length > 0 ? permissions.join(', ') : 'None'} | Role: ${data.role || 'User'}`
         })
       } else {
-        // Fallback to default permissions display
-        toast.success('Permissions', {
-          description: 'Current: Generate, Analyze, Export | Admin: Full Access'
+        // Fallback to fetching from database
+        toast.info('Permissions', {
+          description: 'Unable to fetch permissions. Please check back later.'
         })
       }
       logger.info('Permissions viewed')
     } catch (error) {
-      // Fallback if API doesn't exist
-      toast.success('Permissions', {
-        description: 'Current: Generate, Analyze, Export | Admin: Full Access'
-      })
-      logger.info('Permissions viewed (fallback)')
+      logger.error('Permissions fetch failed', { error })
+      toast.error('Failed to fetch permissions')
     } finally {
       setIsProcessing(false)
     }

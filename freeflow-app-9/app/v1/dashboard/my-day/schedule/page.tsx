@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useReducer, useEffect } from 'react'
@@ -43,7 +44,6 @@ import { createFeatureLogger } from '@/lib/logger'
 import {
   taskReducer,
   initialTaskState,
-  mockTimeBlocks,
   type TimeBlock
 } from '@/lib/my-day-utils'
 
@@ -95,8 +95,8 @@ export default function SchedulePage() {
   useEffect(() => {
     async function fetchSchedule() {
       if (!userId) {
-        // Use demo data when not logged in
-        setTimeBlocks(mockTimeBlocks)
+        // Not logged in - empty state
+        setTimeBlocks([])
         setIsLoading(false)
         return
       }
@@ -109,14 +109,14 @@ export default function SchedulePage() {
           // Convert DB blocks to UI format
           setTimeBlocks(result.data.map(dbBlockToUIBlock))
         } else {
-          // No data - show demo data
-          setTimeBlocks(mockTimeBlocks)
+          // No data from database
+          setTimeBlocks([])
         }
       } catch (error) {
         logger.error('Failed to fetch schedule', { error })
         toast.error('Failed to load schedule')
-        // Fallback to demo data
-        setTimeBlocks(mockTimeBlocks)
+        // Fallback to empty state
+        setTimeBlocks([])
       } finally {
         setIsLoading(false)
       }

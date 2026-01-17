@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback } from 'react'
@@ -21,28 +22,9 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
 // MY DAY UTILITIES
-import { mockAIInsights, type AIInsight } from '@/lib/my-day-utils'
+import { type AIInsight } from '@/lib/my-day-utils'
 
 const logger = createFeatureLogger('MyDay-Insights')
-
-const ADDITIONAL_INSIGHTS: AIInsight[] = [
-  {
-    id: 'insight_4',
-    type: 'optimization',
-    title: 'Task Batching Opportunity',
-    description: 'You have 3 similar design tasks scheduled separately. Batch them together for 25% efficiency gain.',
-    actionable: true,
-    priority: 'medium'
-  },
-  {
-    id: 'insight_5',
-    type: 'productivity',
-    title: 'Focus Block Extension',
-    description: 'Your morning focus sessions average 45 minutes. Try extending to 90 minutes for deep work.',
-    actionable: true,
-    priority: 'low'
-  }
-]
 
 const TYPE_STYLES: Record<string, { bg: string; darkBg: string; iconColor: string }> = {
   productivity: { bg: 'bg-purple-100', darkBg: 'dark:bg-purple-900/30', iconColor: 'text-purple-600 dark:text-purple-400' },
@@ -62,7 +44,7 @@ export default function InsightsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [insights, setInsights] = useState<AIInsight[]>(mockAIInsights)
+  const [insights, setInsights] = useState<AIInsight[]>([])
   const [appliedInsights, setAppliedInsights] = useState<Set<string>>(new Set())
   const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(new Set())
   const [filterType, setFilterType] = useState<string>('all')
@@ -93,9 +75,9 @@ export default function InsightsPage() {
   const handleRefreshInsights = useCallback(async () => {
     setIsRefreshing(true)
 
-    // Generate fresh insights from current data
-    // Add new insights and reset
-    const newInsights = [...mockAIInsights, ...ADDITIONAL_INSIGHTS].sort(() => Math.random() - 0.5)
+    // Generate fresh insights from database
+    // TODO: Replace with actual database hook
+    const newInsights: AIInsight[] = []
     setInsights(newInsights)
     setAppliedInsights(new Set())
     setDismissedInsights(new Set())

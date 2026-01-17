@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useCallback } from 'react'
@@ -36,24 +37,17 @@ interface HistoryItem {
   content?: string
 }
 
-const INITIAL_HISTORY: HistoryItem[] = [
-  { id: 1, type: 'Creative Asset', title: 'Cinematic LUT for Sunset Scene', model: 'Cinematika 7B (Free)', timestamp: '2 hours ago', tokens: 1245, cost: 0, content: 'Generated cinematic color grading preset with warm tones and enhanced shadows for sunset scenes.' },
-  { id: 2, type: 'Code Generation', title: 'React Authentication Component', model: 'Phi-3 Mini (Free)', timestamp: '5 hours ago', tokens: 3420, cost: 0, content: 'TypeScript React component with JWT authentication, login form, and protected routes.' },
-  { id: 3, type: 'Content Writing', title: 'Blog Post: AI in Modern Development', model: 'Mistral 7B (Free)', timestamp: '1 day ago', tokens: 2890, cost: 0, content: 'Comprehensive blog post exploring how AI is transforming software development practices.' },
-  { id: 4, type: 'Image Generation', title: 'Product Mockup - Mobile App', model: 'DALL-E 3', timestamp: '2 days ago', tokens: 0, cost: 0.08, content: 'High-quality product mockup showing mobile app interface on iPhone 15 Pro.' },
-  { id: 5, type: 'Code Analysis', title: 'TypeScript Refactoring Suggestions', model: 'Claude 3.5 Sonnet', timestamp: '3 days ago', tokens: 4520, cost: 0.09, content: 'Detailed analysis with 12 refactoring suggestions for improved type safety and performance.' }
-]
 
 export default function HistoryPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [history, setHistory] = useState<HistoryItem[]>(INITIAL_HISTORY)
+  const [history, setHistory] = useState<HistoryItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [deleteItem, setDeleteItem] = useState<HistoryItem | null>(null)
   const itemsPerPage = 5
-  const totalItems = 127
+  const totalItems = 0
 
   // Load history from database
   const loadHistory = useCallback(async () => {

@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useCallback } from 'react'
@@ -32,38 +33,11 @@ interface Template {
   isFavorite?: boolean
 }
 
-const INITIAL_TEMPLATES = [
-  {
-    name: 'Content Writing',
-    templates: [
-      { id: 1, name: 'Blog Post Outline', description: '5-section blog structure', uses: 2453, prompt: 'Create a comprehensive blog post outline with: 1) Hook introduction, 2) Problem statement, 3) Solution details, 4) Key benefits, 5) Call to action' },
-      { id: 2, name: 'Social Media Thread', description: 'Twitter/X thread template', uses: 1892, prompt: 'Write a viral Twitter thread with: Hook tweet, 5-7 value tweets, engagement prompt, and summary tweet' },
-      { id: 3, name: 'Product Description', description: 'E-commerce product copy', uses: 3201, prompt: 'Write compelling product copy: headline, key features (3-5 bullets), benefits, social proof element, CTA' }
-    ]
-  },
-  {
-    name: 'Code Generation',
-    templates: [
-      { id: 4, name: 'React Component', description: 'TypeScript React component', uses: 4523, prompt: 'Generate a TypeScript React functional component with: props interface, state management, event handlers, proper types' },
-      { id: 5, name: 'API Endpoint', description: 'REST API with validation', uses: 3456, prompt: 'Create a REST API endpoint with: input validation, error handling, type safety, proper HTTP status codes' },
-      { id: 6, name: 'Database Schema', description: 'SQL table definitions', uses: 2134, prompt: 'Design SQL schema with: tables, relationships, indexes, constraints, and migration scripts' }
-    ]
-  },
-  {
-    name: 'Creative Assets',
-    templates: [
-      { id: 7, name: 'Color Palette', description: '5-color scheme generator', uses: 5432, prompt: 'Generate a cohesive 5-color palette with: primary, secondary, accent, background, text colors with hex values' },
-      { id: 8, name: 'LUT Preset', description: 'Cinematic color grading', uses: 4321, prompt: 'Create cinematic color grading settings: contrast, saturation, highlights, shadows, color wheels' },
-      { id: 9, name: 'Synth Preset', description: 'EDM lead synth', uses: 1765, prompt: 'Design synthesizer preset: oscillators, filters, envelopes, LFOs, effects chain for EDM lead sound' }
-    ]
-  }
-]
-
 export default function TemplatesPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [categories, setCategories] = useState(INITIAL_TEMPLATES)
+  const [categories, setCategories] = useState([])
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)

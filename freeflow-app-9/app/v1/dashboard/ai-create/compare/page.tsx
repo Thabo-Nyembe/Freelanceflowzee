@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useCallback } from 'react'
@@ -60,62 +61,15 @@ export default function ComparePage() {
 
   // Generate simulated response based on model characteristics
   const generateModelResponse = useCallback((modelId: string, userPrompt: string): ComparisonResult => {
-    const model = MODELS_TO_COMPARE.find(m => m.id === modelId)!
-
-    // Simulate different response characteristics per model
-    const responses: Record<string, { output: string; speed: number; cost: number; quality: number }> = {
-      'mistral-free': {
-        output: `Here's a response from Mistral 7B:\n\n${userPrompt.includes('blog') ?
-          'AI in healthcare represents a transformative shift in how medical professionals diagnose, treat, and manage patient care. From predictive analytics to robotic surgery, the applications are vast and growing.\n\nKey areas include:\n- Diagnostic imaging analysis\n- Drug discovery acceleration\n- Personalized treatment plans\n- Administrative task automation' :
-          'Based on your prompt, here is my analysis and response. The key points to consider are the context, requirements, and desired outcomes. I recommend a structured approach that addresses each element systematically.'}`,
-        speed: 1.2,
-        cost: 0,
-        quality: 75
-      },
-      'phi-3-free': {
-        output: `Phi-3 Mini response:\n\n${userPrompt.includes('blog') ?
-          'Healthcare AI is revolutionizing medicine. Machine learning algorithms can now detect diseases earlier and more accurately than ever before. This includes applications in radiology, pathology, and genomics.\n\nBenefits:\n• Faster diagnosis\n• Reduced human error\n• 24/7 availability\n• Cost reduction over time' :
-          'I understand your request. Let me provide a comprehensive response that covers the main aspects of your query. The approach should be methodical and consider multiple perspectives.'}`,
-        speed: 0.8,
-        cost: 0,
-        quality: 70
-      },
-      'llama-8b': {
-        output: `Llama 3.1 8B analysis:\n\n${userPrompt.includes('blog') ?
-          'The intersection of artificial intelligence and healthcare is creating unprecedented opportunities for improving patient outcomes. From early disease detection to personalized medicine, AI is becoming an indispensable tool in modern healthcare.\n\n## Key Applications\n\n1. **Diagnostic Support**: AI systems can analyze medical images with remarkable accuracy\n2. **Predictive Analytics**: Identifying at-risk patients before conditions worsen\n3. **Treatment Optimization**: Personalizing therapies based on genetic profiles\n4. **Operational Efficiency**: Streamlining administrative workflows' :
-          'Thank you for your query. I will provide a detailed and well-structured response that addresses your needs. The solution involves several key components that work together effectively.'}`,
-        speed: 1.5,
-        cost: 0.002,
-        quality: 82
-      },
-      'claude-sonnet': {
-        output: `Claude 3.5 Sonnet response:\n\n${userPrompt.includes('blog') ?
-          '# The Transformative Power of AI in Healthcare\n\nArtificial intelligence is fundamentally reshaping the healthcare landscape, offering unprecedented opportunities to enhance patient care, streamline operations, and accelerate medical discoveries.\n\n## The Current State\n\nHealthcare AI has moved beyond theoretical applications into practical, life-saving implementations. Hospitals worldwide are deploying AI systems that can:\n\n- **Detect diseases earlier**: AI algorithms can identify subtle patterns in medical imaging that might escape human observation\n- **Predict patient outcomes**: Machine learning models analyze vast datasets to forecast health trajectories\n- **Personalize treatments**: AI enables precision medicine by matching patients with optimal therapies\n\n## Looking Forward\n\nThe future of healthcare AI is incredibly promising, with emerging applications in drug discovery, remote patient monitoring, and mental health support.\n\n*The key is ensuring these technologies are developed responsibly, with patient safety and privacy at the forefront.*' :
-          'I appreciate your thoughtful prompt. Let me provide a comprehensive, nuanced response that addresses the key aspects of your request while considering various perspectives and implications. My analysis will be structured, detailed, and actionable.'}`,
-        speed: 2.8,
-        cost: 0.015,
-        quality: 95
-      },
-      'gpt-4o': {
-        output: `GPT-4o response:\n\n${userPrompt.includes('blog') ?
-          '# AI in Healthcare: A Comprehensive Overview\n\n## Introduction\n\nThe integration of artificial intelligence into healthcare represents one of the most significant technological shifts in modern medicine. This transformation is not merely incremental—it is fundamentally changing how we approach diagnosis, treatment, and patient care.\n\n## Key Areas of Impact\n\n### 1. Diagnostic Excellence\nAI-powered diagnostic tools are achieving remarkable accuracy in detecting conditions ranging from diabetic retinopathy to various cancers. These systems serve as powerful aids to clinicians, not replacements.\n\n### 2. Drug Discovery Revolution\nPharmaceutical companies are leveraging AI to compress drug development timelines from decades to years, potentially saving billions in development costs.\n\n### 3. Operational Optimization\nFrom scheduling to supply chain management, AI is making healthcare systems more efficient and responsive.\n\n## Ethical Considerations\n\nAs we embrace these technologies, we must remain vigilant about data privacy, algorithmic bias, and ensuring equitable access to AI-enhanced care.\n\n## Conclusion\n\nThe future of healthcare is undeniably intertwined with AI, promising better outcomes for patients worldwide.' :
-          'Thank you for your inquiry. I will provide a thorough, well-researched response that addresses all aspects of your prompt. My approach combines analytical rigor with practical applicability, ensuring you receive actionable insights.'}`,
-        speed: 3.2,
-        cost: 0.02,
-        quality: 97
-      }
-    }
-
-    const modelResponse = responses[modelId] || responses['mistral-free']
-    const tokenCount = Math.floor(modelResponse.output.length / 4) // Approximate tokens
+    // REMOVED: Mock responses - will be replaced with actual API calls to database
 
     return {
       modelId,
-      output: modelResponse.output,
-      responseTime: modelResponse.speed + (Math.random() * 0.5),
-      tokenCount,
-      estimatedCost: modelResponse.cost * (tokenCount / 100),
-      quality: modelResponse.quality + Math.floor(Math.random() * 5) - 2
+      output: '',
+      responseTime: 0,
+      tokenCount: 0,
+      estimatedCost: 0,
+      quality: 0
     }
   }, [])
 

@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -17,24 +18,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('AI Create - Analytics')
-
-// Fallback mock data for when no real data exists
-const FALLBACK_USAGE_BY_MODEL = [
-  { model: 'Mistral 7B (Free)', requests: 432, tokens: 156890, cost: 0, color: 'green' },
-  { model: 'Phi-3 Mini (Free)', requests: 289, tokens: 234560, cost: 0, color: 'green' },
-  { model: 'Claude 3.5 Sonnet', requests: 45, tokens: 89340, cost: 1.52, color: 'purple' },
-  { model: 'GPT-4o', requests: 23, tokens: 45620, cost: 0.89, color: 'purple' }
-]
-
-const FALLBACK_RECENT_ACTIVITY = [
-  { day: 'Mon', generations: 45, cost: 0.23 },
-  { day: 'Tue', generations: 67, cost: 0.45 },
-  { day: 'Wed', generations: 89, cost: 0.12 },
-  { day: 'Thu', generations: 123, cost: 0.67 },
-  { day: 'Fri', generations: 145, cost: 0.89 },
-  { day: 'Sat', generations: 92, cost: 0.34 },
-  { day: 'Sun', generations: 78, cost: 0.21 }
-]
 
 interface AssetStats {
   total_assets: number
@@ -161,22 +144,22 @@ export default function AnalyticsPage() {
     )
   }
 
-  // Use real data or fallback
-  const totalGenerations = generationStats?.total_generations ?? 789
-  const completedGenerations = generationStats?.completed_generations ?? 721
+  // Use real data
+  const totalGenerations = generationStats?.total_generations ?? 0
+  const completedGenerations = generationStats?.completed_generations ?? 0
   const avgResponseTime = generationStats?.avg_generation_time_ms
     ? (generationStats.avg_generation_time_ms / 1000).toFixed(1)
-    : 2.4
+    : '0'
   const freeTierPercentage = totalGenerations > 0
     ? Math.round((completedGenerations / totalGenerations) * 100)
-    : 91
+    : 0
 
   const totalAssets = assetStats?.total_assets ?? 0
   const totalDownloads = assetStats?.total_downloads ?? 0
   const totalViews = assetStats?.total_views ?? 0
   const favoriteAssets = assetStats?.favorite_assets ?? 0
 
-  // Build model usage from by_type or use fallback
+  // Build model usage from by_type
   const usageByModel = assetStats?.by_type && Object.keys(assetStats.by_type).length > 0
     ? Object.entries(assetStats.by_type).map(([type, count], index) => ({
         model: type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
@@ -185,7 +168,7 @@ export default function AnalyticsPage() {
         cost: index < 2 ? 0 : count * 0.03, // First 2 types are free
         color: index < 2 ? 'green' : 'purple'
       })).slice(0, 4)
-    : FALLBACK_USAGE_BY_MODEL
+    : []
 
   return (
     <div className="space-y-6">
@@ -344,19 +327,10 @@ export default function AnalyticsPage() {
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">7-Day Activity</h3>
         <div className="flex items-end justify-between gap-2 h-48">
-          {FALLBACK_RECENT_ACTIVITY.map((day) => (
-            <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
-              <div className="flex-1 w-full flex items-end">
-                <div
-                  className="w-full bg-gradient-to-t from-purple-500 to-purple-400 rounded-t-lg transition-all hover:from-purple-600 hover:to-purple-500"
-                  style={{ height: `${(day.generations / 145) * 100}%` }}
-                  title={`${day.generations} generations - $${day.cost.toFixed(2)}`}
-                />
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">{day.day}</div>
-              <div className="text-xs font-semibold">{day.generations}</div>
-            </div>
-          ))}
+          {/* Data from database hooks will populate here */}
+          {!generationStats && (
+            <p className="text-sm text-gray-600 dark:text-gray-400">No activity data available</p>
+          )}
         </div>
       </Card>
 

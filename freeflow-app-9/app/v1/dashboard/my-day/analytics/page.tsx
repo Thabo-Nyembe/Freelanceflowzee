@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect, useReducer } from 'react'
@@ -164,13 +165,13 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-lg">
-                  {workPatternAnalytics?.insights?.peakPerformanceWindow || '9:00-11:00'}
+                  {workPatternAnalytics?.insights?.peakPerformanceWindow || '-'}
                 </h3>
                 <p className="text-sm text-gray-600">Your most productive hours</p>
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold text-purple-600">
-                  {workPatternAnalytics?.insights?.energyOptimizationScore || 95}%
+                  {workPatternAnalytics?.insights?.energyOptimizationScore || 0}%
                 </div>
                 <div className="text-xs text-gray-500">Efficiency Score</div>
               </div>
@@ -178,8 +179,7 @@ export default function AnalyticsPage() {
             <div className="bg-white/60 p-4 rounded-xl">
               <p className="text-sm text-gray-700">
                 <strong>AI Recommendation:</strong>{' '}
-                {workPatternAnalytics?.insights?.recommendations?.[0] ||
-                  'Schedule your most challenging tasks during this window. You complete tasks 35% faster and with 28% higher quality during these hours.'}
+                {workPatternAnalytics?.insights?.recommendations?.[0] || ''}
               </p>
             </div>
           </div>
@@ -197,12 +197,12 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">9-11 AM</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">-</div>
               <p className="text-sm text-gray-600 mb-3">Most Productive</p>
               <div className="text-xs text-gray-500 space-y-1">
-                <p>Tasks completed: 8.2/hr</p>
-                <p>Focus level: 92%</p>
-                <p>Quality score: 4.7/5</p>
+                <p>Tasks completed: -</p>
+                <p>Focus level: -</p>
+                <p>Quality score: -</p>
               </div>
             </div>
           </CardContent>
@@ -221,32 +221,32 @@ export default function AnalyticsPage() {
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-xs text-gray-600">Design Work</span>
-                  <span className="text-xs font-semibold text-green-600">Excellent</span>
+                  <span className="text-xs font-semibold text-gray-600">-</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-green-600 h-1.5 rounded-full" style={{ width: '88%' }}></div>
+                  <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">88% completion rate</p>
+                <p className="text-xs text-gray-500 mt-1">0% completion rate</p>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-xs text-gray-600">Coding</span>
-                  <span className="text-xs font-semibold text-blue-600">Strong</span>
+                  <span className="text-xs font-semibold text-gray-600">-</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '82%' }}></div>
+                  <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">82% completion rate</p>
+                <p className="text-xs text-gray-500 mt-1">0% completion rate</p>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-xs text-gray-600">Meetings</span>
-                  <span className="text-xs font-semibold text-yellow-600">Average</span>
+                  <span className="text-xs font-semibold text-gray-600">-</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-yellow-600 h-1.5 rounded-full" style={{ width: '65%' }}></div>
+                  <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">65% completion rate</p>
+                <p className="text-xs text-gray-500 mt-1">0% completion rate</p>
               </div>
             </div>
           </CardContent>
@@ -264,23 +264,23 @@ export default function AnalyticsPage() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-600">Deep Work</span>
-                <span className="text-xs font-medium">45%</span>
+                <span className="text-xs font-medium">0%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-600">Meetings</span>
-                <span className="text-xs font-medium">25%</span>
+                <span className="text-xs font-medium">0%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-600">Admin</span>
-                <span className="text-xs font-medium">15%</span>
+                <span className="text-xs font-medium">0%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-600">Breaks</span>
-                <span className="text-xs font-medium">15%</span>
+                <span className="text-xs font-medium">0%</span>
               </div>
               <div className="pt-2 border-t">
                 <p className="text-xs text-gray-500">
-                  Ideal balance achieved
+
                 </p>
               </div>
             </div>
@@ -309,19 +309,19 @@ export default function AnalyticsPage() {
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-xs text-gray-600">Quality Score</span>
-                  <span className="text-xs font-semibold">4.7/5</span>
+                  <span className="text-xs font-semibold">-</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-green-600 h-1.5 rounded-full" style={{ width: '94%' }}></div>
+                  <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
                 </div>
               </div>
               <div>
                 <div className="flex justify-between mb-1">
                   <span className="text-xs text-gray-600">On-Time Delivery</span>
-                  <span className="text-xs font-semibold">91%</span>
+                  <span className="text-xs font-semibold">-</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: '91%' }}></div>
+                  <div className="bg-gray-400 h-1.5 rounded-full" style={{ width: '0%' }}></div>
                 </div>
               </div>
             </div>
@@ -346,7 +346,7 @@ export default function AnalyticsPage() {
                 </div>
                 {/* Energy graph visualization */}
                 <div className="grid grid-cols-12 gap-1 h-24 items-end">
-                  {[30, 45, 65, 85, 95, 90, 75, 65, 70, 60, 45, 30].map((energy, hour) => (
+                  {[].map((energy, hour) => (
                     <div key={hour} className="flex flex-col items-center gap-1">
                       <div
                         className={cn(
@@ -365,8 +365,7 @@ export default function AnalyticsPage() {
               </div>
               <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-xl">
                 <p className="text-sm text-gray-700">
-                  <strong>Optimization Tip:</strong> Your energy peaks at 9-11 AM. Schedule complex design work here.
-                  Avoid meetings during 2-3 PM when energy dips.
+                  <strong>Optimization Tip:</strong>
                 </p>
               </div>
             </div>
@@ -420,7 +419,7 @@ export default function AnalyticsPage() {
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
                 <div className="grid grid-cols-7 gap-1">
-                  {[75, 82, 88, 79, 85, 91, completionRate].map((rate, i) => (
+                  {[].map((rate, i) => (
                     <div key={i} className="flex flex-col items-center">
                       <div className="text-xs text-gray-500 mb-1">
                         {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
@@ -459,8 +458,6 @@ export default function AnalyticsPage() {
                 <h4 className="font-semibold text-sm">Productivity Boost</h4>
               </div>
               <p className="text-xs text-gray-600">
-                You're 23% more productive on days when you start with deep work.
-                Try blocking 9-10 AM for your most important task.
               </p>
             </div>
             <div className="bg-white/60 p-4 rounded-xl">
@@ -469,8 +466,6 @@ export default function AnalyticsPage() {
                 <h4 className="font-semibold text-sm">Time Management</h4>
               </div>
               <p className="text-xs text-gray-600">
-                Batch similar tasks together. When you group meetings in the afternoon,
-                you complete 31% more tasks in the morning.
               </p>
             </div>
             <div className="bg-white/60 p-4 rounded-xl">
@@ -479,8 +474,6 @@ export default function AnalyticsPage() {
                 <h4 className="font-semibold text-sm">Break Optimization</h4>
               </div>
               <p className="text-xs text-gray-600">
-                Taking a 15-min break every 90 minutes increases your afternoon productivity by 18%.
-                Your next break is recommended at 2:30 PM.
               </p>
             </div>
           </div>

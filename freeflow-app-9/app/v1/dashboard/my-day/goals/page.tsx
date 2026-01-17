@@ -1,3 +1,4 @@
+// MIGRATED: Batch #30 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useReducer, useEffect } from 'react'
@@ -69,17 +70,6 @@ interface Goal {
   dueDate?: string
 }
 
-const INITIAL_DAILY_GOALS: Goal[] = [
-  { id: 'dg1', title: 'Complete 5 tasks', description: 'Finish your daily task quota', type: 'daily', category: 'productivity', target: 5, current: 1, unit: 'tasks', status: 'in-progress' },
-  { id: 'dg2', title: '6 hours of focus time', description: 'Deep work without distractions', type: 'daily', category: 'productivity', target: 360, current: 210, unit: 'minutes', status: 'in-progress' },
-  { id: 'dg3', title: '2 client check-ins', description: 'Touch base with key clients', type: 'daily', category: 'communication', target: 2, current: 0, unit: 'check-ins', status: 'pending' }
-]
-
-const INITIAL_WEEKLY_GOALS: Goal[] = [
-  { id: 'wg1', title: 'Finish TechCorp milestone', description: 'Complete all logo variations and documentation', type: 'weekly', category: 'productivity', target: 100, current: 75, unit: 'percent', status: 'in-progress', dueDate: '2 days' },
-  { id: 'wg2', title: 'Client presentation prep', description: 'Prepare slides and demo materials', type: 'weekly', category: 'communication', target: 100, current: 30, unit: 'percent', status: 'pending', dueDate: '4 days' },
-  { id: 'wg3', title: 'Portfolio update', description: 'Add 3 new case studies', type: 'weekly', category: 'learning', target: 3, current: 2, unit: 'case studies', status: 'on-track', dueDate: '5 days' }
-]
 
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   productivity: { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-700', text: 'text-green-600', icon: 'bg-green-600' },
@@ -122,9 +112,6 @@ export default function GoalsPage() {
   useEffect(() => {
     async function fetchGoals() {
       if (!userId) {
-        // Use demo data when not logged in
-        setDailyGoals(INITIAL_DAILY_GOALS)
-        setWeeklyGoals(INITIAL_WEEKLY_GOALS)
         setIsLoading(false)
         return
       }
@@ -143,19 +130,9 @@ export default function GoalsPage() {
         if (weeklyResult.data) {
           setWeeklyGoals(weeklyResult.data.map(dbGoalToUIGoal))
         }
-
-        // If no goals exist, show demo data
-        if ((!dailyResult.data || dailyResult.data.length === 0) &&
-            (!weeklyResult.data || weeklyResult.data.length === 0)) {
-          setDailyGoals(INITIAL_DAILY_GOALS)
-          setWeeklyGoals(INITIAL_WEEKLY_GOALS)
-        }
       } catch (error) {
         logger.error('Failed to fetch goals', { error })
         toast.error('Failed to load goals')
-        // Fallback to demo data
-        setDailyGoals(INITIAL_DAILY_GOALS)
-        setWeeklyGoals(INITIAL_WEEKLY_GOALS)
       } finally {
         setIsLoading(false)
       }
