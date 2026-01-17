@@ -536,8 +536,6 @@ export default function TeamHubClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('team_members')
         .select('*')
@@ -570,8 +568,6 @@ export default function TeamHubClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('team_members').insert({
         user_id: user.id,
         name: memberForm.name,
@@ -815,8 +811,7 @@ export default function TeamHubClient() {
   }
 
   const handleSendMessage = (channelName: string) => {
-    toast.success('Message sent'`
-    })
+    toast.success('Message sent')
   }
 
   const handleInviteMember = () => {
@@ -1003,7 +998,7 @@ export default function TeamHubClient() {
                 { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => setSettingsTab('members') },
                 { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => {
                   const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
-                  toast.info('Admin Users' admin users in workspace` })
+                  toast.info(`${adminCount} admin users in workspace`)
                 }},
                 { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => {
                   const csvContent = 'Name,Email,Role,Department,Status\n' +
@@ -1443,7 +1438,7 @@ export default function TeamHubClient() {
 
                     <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => {
                       setShowHuddleDialog(true)
-                      toast.success('Joined huddle'` })
+                      toast.success('Joined huddle')
                     }}>
                       Join Huddle
                     </Button>
@@ -1844,7 +1839,7 @@ export default function TeamHubClient() {
                               if (integration.status === 'connected') {
                                 setShowAddAppDialog(true)
                               } else {
-                                toast.success('Connected' connected successfully` })
+                                toast.success('Connected successfully')
                               }
                             }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
@@ -2250,7 +2245,7 @@ export default function TeamHubClient() {
 
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1" onClick={() => {
-                    toast.success('Opening channel'` })
+                    toast.success('Opening channel')
                     setSelectedChannel(null)
                   }}>Open Channel</Button>
                   <Button variant="outline" size="icon" onClick={() => {
@@ -2259,8 +2254,7 @@ export default function TeamHubClient() {
                       ch.id === selectedChannel.id ? { ...ch, isStarred: newStarredState } : ch
                     ))
                     setSelectedChannel({ ...selectedChannel, isStarred: newStarredState })
-                    toast.success(newStarredState ? 'Channel starred' : 'Channel unstarred' has been ${newStarredState ? 'added to' : 'removed from'} your starred channels`
-                    })
+                    toast.success(newStarredState ? 'Channel starred' : 'Channel unstarred')
                   }}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
@@ -2516,7 +2510,7 @@ export default function TeamHubClient() {
                   setChannels(prev => [...prev, newChannel])
                   setShowCreateChannelDialog(false)
                   setChannelForm({ name: '', description: '', isPrivate: false })
-                  toast.success('Channel created' is ready to use` })
+                  toast.success('Channel created')
                 }}
               >Create Channel</Button>
             </div>
@@ -2596,7 +2590,7 @@ export default function TeamHubClient() {
                 setHuddles(prev => [...prev, newHuddle])
                 setShowHuddleDialog(false)
                 setHuddleForm({ channelId: '', enableVideo: false, recordHuddle: false })
-                toast.success('Huddle started'` })
+                toast.success('Huddle started')
               }}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Start Huddle
@@ -2687,8 +2681,7 @@ export default function TeamHubClient() {
                         setApps(prev => prev.map(a =>
                           a.id === app.id ? { ...a, isInstalled: newInstalledState } : a
                         ))
-                        toast.success(newInstalledState ? 'App installed' : 'App removed' has been ${newInstalledState ? 'added to' : 'removed from'} your workspace`
-                        })
+                        toast.success(newInstalledState ? 'App installed' : 'App removed')
                       }}>
                         {app.isInstalled ? 'Installed' : 'Add'}
                       </Button>
@@ -2822,7 +2815,7 @@ export default function TeamHubClient() {
                       }
                       setShowReactionsDialog(false)
                       setSelectedMessageForReaction(null)
-                      toast.success('Reaction added'` })
+                      toast.success('Reaction added')
                     }}
                   >
                     {emoji}

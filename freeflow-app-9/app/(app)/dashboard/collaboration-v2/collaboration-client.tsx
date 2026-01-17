@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   copyToClipboard,
@@ -8,6 +8,25 @@ import {
   downloadAsJson,
   apiPost
 } from '@/lib/button-handlers'
+
+// Real-time collaboration API hooks
+import {
+  useConversations,
+  useMessages,
+  useSendMessage,
+  useMarkAsRead,
+  useCreateConversation,
+  useMessagingStats,
+  useAddReaction,
+  useTeamMembers,
+  useTeamStats,
+  useSendInvitation,
+  useNotifications,
+  useEvents,
+  useCreateEvent,
+  useUpdateEvent,
+  useBookings
+} from '@/lib/api-clients'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -729,7 +748,7 @@ export default function CollaborationClient() {
                           <DropdownMenuItem onClick={() => shareContent('Board', board.name)}><Share2 className="h-4 w-4 mr-2" />Share</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => copyToClipboard(`https://app.freeflow.io/board/${board.id}`, 'Board link copied')}><Link2 className="h-4 w-4 mr-2" />Copy Link</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => { setArchivedBoards(prev => [...prev, board.id]); toast.success('Board archived'" moved to archive` }) }}><Archive className="h-4 w-4 mr-2" />Archive</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setArchivedBoards(prev => [...prev, board.id]); toast.success('Board archived') }}><Archive className="h-4 w-4 mr-2" />Archive</DropdownMenuItem>
                           <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Delete "${board.name}"? This action cannot be undone.`)) { toast.promise(fetch(`/api/collaboration/boards/${board.id}`, { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Deleting board...', success: () => { setBoards(prev => prev.filter(b => b.id !== board.id)); return `"${board.name}" has been permanently removed`; }, error: 'Failed to delete board' }); } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -834,7 +853,7 @@ export default function CollaborationClient() {
                           <DropdownMenuItem onClick={() => { if (selectedChannel) { setMutedChannels(prev => prev.includes(selectedChannel.id) ? prev.filter(id => id !== selectedChannel.id) : [...prev, selectedChannel.id]); toast.success(mutedChannels.includes(selectedChannel.id) ? 'Channel unmuted' : 'Channel muted', { description: `Notifications ${mutedChannels.includes(selectedChannel.id) ? 'enabled' : 'disabled'} for #${selectedChannel.name}` }) } }}><BellOff className="h-4 w-4 mr-2" />{selectedChannel && mutedChannels.includes(selectedChannel.id) ? 'Unmute' : 'Mute'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => copyToClipboard(`#${selectedChannel?.name || 'channel'}`, 'Channel name copied')}><Copy className="h-4 w-4 mr-2" />Copy Name</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Leave #${selectedChannel?.name}? You'll need to be re-invited to rejoin.`)) { setSelectedChannel(null); toast.success('Left channel'` }) } }}><ExternalLink className="h-4 w-4 mr-2" />Leave Channel</DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Leave #${selectedChannel?.name}? You'll need to be re-invited to rejoin.`)) { setSelectedChannel(null); toast.success('Left channel') } }}><ExternalLink className="h-4 w-4 mr-2" />Leave Channel</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -879,7 +898,7 @@ export default function CollaborationClient() {
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => { setMessageInput(`@${message.sender.name} `); toast.info('Replying to thread''s message` }) }}><Reply className="h-4 w-4 mr-2" />Reply in Thread</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setMessageInput(`@${message.sender.name} `); toast.info('Replying to thread') }}><Reply className="h-4 w-4 mr-2" />Reply in Thread</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => copyToClipboard(message.content, 'Message copied')}><Copy className="h-4 w-4 mr-2" />Copy Text</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { setPinnedMessages(prev => prev.includes(message.id) ? prev.filter(id => id !== message.id) : [...prev, message.id]); toast.success(pinnedMessages.includes(message.id) ? 'Message unpinned' : 'Message pinned', { description: pinnedMessages.includes(message.id) ? 'Removed from pinned messages' : 'Added to pinned messages' }) }}><Pin className="h-4 w-4 mr-2" />{pinnedMessages.includes(message.id) ? 'Unpin' : 'Pin'} Message</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { toast.promise(fetch('/api/collaboration/reminders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messageId: message.id, remindAt: new Date(Date.now() + 3600000).toISOString() }) }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Setting reminder...', success: 'Reminder set for 1 hour from now', error: 'Failed to set reminder' }); }}><Bell className="h-4 w-4 mr-2" />Remind Me</DropdownMenuItem>
@@ -1174,7 +1193,7 @@ export default function CollaborationClient() {
                         <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => { setSelectedMemberForProfile(member); setShowMemberProfileDialog(true) }}><Eye className="h-4 w-4 mr-2" />View Profile</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => { setActiveTab('messages'); setMessageInput(`@${member.name} `); toast.info('Starting conversation'` }) }}><MessageSquare className="h-4 w-4 mr-2" />Send Message</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setActiveTab('messages'); setMessageInput(`@${member.name} `); toast.info('Starting conversation') }}><MessageSquare className="h-4 w-4 mr-2" />Send Message</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { const newRole = prompt('Change role to:', member.role); if (newRole && newRole !== member.role) { toast.promise(fetch(`/api/collaboration/members/${member.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Updating role...', success: () => { setMembers(prev => prev.map(m => m.id === member.id ? { ...m, role: newRole } : m)); return `${member.name}'s role changed to ${newRole}`; }, error: 'Failed to update role' }); } }}><Crown className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Remove ${member.name} from the workspace? They will lose access to all boards and channels.`)) { toast.promise(fetch(`/api/collaboration/members/${member.id}`, { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Removing member...', success: () => { setMembers(prev => prev.filter(m => m.id !== member.id)); return `${member.name} has been removed from the workspace`; }, error: 'Failed to remove member' }); } }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
