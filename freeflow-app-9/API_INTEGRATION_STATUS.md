@@ -10,9 +10,9 @@
 **Overall Progress:** 286/286 pages integrated (100%) 🎉 **COMPLETE!**
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
 - **V2 Pages:** 223/223 using Supabase hooks (100%) ✅ **COMPLETE!**
-  - **Mock → Database:** 250/301 migrated (83.1%) 🎉 **CROSSED 80% MILESTONE!**
+  - **Mock → Database:** 260/301 migrated (86.4%) 🎉 **CROSSED 80% MILESTONE!**
 
-**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 83% complete!
+**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 86% complete!
 
 ## Current Status
 
@@ -59,9 +59,9 @@
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
 **V2 Pages (Supabase Hooks):** 223/223 (100%) ✅ **COMPLETE!**
   - **Infrastructure Migrations (Categories A-D):** 66 pages
-  - **Mock → Database Migrations (Category E):** 250 pages 🎉 83.1% COMPLETE! (CROSSED 80% milestone!)
+  - **Mock → Database Migrations (Category E):** 260 pages 🎉 86.4% COMPLETE! (CROSSED 80% milestone!)
 **Remaining:** 0 V2 pages - **ALL PAGES INTEGRATED!** 🎉
-**Mock Data Remaining:** 51 pages (301 - 250 = 51 pages still have mock data to clean up)
+**Mock Data Remaining:** 41 pages (301 - 260 = 41 pages still have mock data to clean up)
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -1184,6 +1184,52 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
   - Migration comments: `// MIGRATED: Batch #21 - Verified database hook integration` or `// MIGRATED: Batch #21 - Removed mock data, using database hooks`
 - **Progress Update:** 240/301 → 250/301 pages (83.1% complete) 🎉 **CROSSED 80% MILESTONE!**
 - **Remaining:** 51 pages with mock data to clean up (301 - 250 = 51 pages)
+
+#### **Batch #22: V1 Dashboard Pages Mock Cleanup (10 pages) - Commit: d3378f1b**
+- **V1 Dashboard Pages (10 pages - Mock Data Removed/Verified):**
+  - **app/v1/dashboard/audit-trail/page.tsx** (Removed 4 mock patterns)
+    - Removed: Export history array (3 items), user dropdown options, date range dropdown options
+    - Hooks: useCurrentUser, getAuditLogs, getActivitySummary, getCriticalEvents, getComplianceReports
+  - **app/v1/dashboard/automation/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, getWorkflows API integration
+  - **app/v1/dashboard/booking/page.tsx** (Removed 2 mock patterns)
+    - Removed: Settings fallback values (?? operator), report data fallbacks (?? operator)
+    - Hooks: useCurrentUser, /api/booking-settings, /api/booking-report integration
+  - **app/v1/dashboard/browser-extension/page.tsx** (Removed 3 generator functions)
+    - Removed: generateMockCaptures() (60 items), generateMockActions() (6 items), generateMockFeatures() (6 items)
+    - Updated useEffect to initialize with empty arrays instead of calling generators
+  - **app/v1/dashboard/canvas-collaboration/page.tsx** (Removed 3 mock arrays)
+    - Removed: Hardcoded layers (3 items), collaborators (3 items), recentProjects (3 items)
+    - Hooks: useCurrentUser, canvas collaboration queries integration
+  - **app/v1/dashboard/canvas/page.tsx** (Removed generateMockCanvases() function)
+    - Removed: Generator with 51 canvas names, 4 collaborators, 8 tags, complex artboard/layer logic
+    - Updated useEffect to initialize with empty array instead of calling generator
+  - **app/v1/dashboard/client-portal/page.tsx** (Removed 2 generator functions)
+    - Removed: generateMockClients() (20 clients), generateMockProjects() (12 projects)
+    - Hooks: useCurrentUser, /api/clients integration
+  - **app/v1/dashboard/client-zone/page.tsx** (Verified database hooks)
+    - Deprecated KAZI_CLIENT_DATA already commented out
+    - Hooks: getClientZoneDashboard from @/lib/client-zone-queries
+  - **app/v1/dashboard/clients/page.tsx** (Updated migration comment)
+    - Updated old migration comment to new batch #22 format
+    - Hooks: useCurrentUser, useLeadsData
+  - **app/v1/dashboard/cloud-storage/page.tsx** (Removed 4 mock arrays)
+    - Removed: cloudProviders (4 items), recentActivity (4 items), monthly usage trend (6 items), file type breakdown (5 items)
+    - Hooks: useCurrentUser, /api/cloud-storage/providers integration
+- **Summary:**
+  - Total files migrated: 10
+  - Mock patterns removed: 8 pages with mock data (removed 20+ items total)
+  - Database hooks verified: 2 pages already clean
+  - Lines removed: 512 net (573 deletions, 61 insertions)
+- **Pattern Applied:**
+  - Removed hardcoded dropdown options from audit trail
+  - Removed ?? fallback operators with hardcoded defaults
+  - Removed mock data generator functions (captures, actions, features, canvases, clients, projects)
+  - Removed hardcoded arrays (layers, collaborators, projects, providers, activity)
+  - Updated useEffect hooks to initialize with empty arrays instead of calling generators
+  - Migration comments: `// MIGRATED: Batch #22 - Verified database hook integration` or `// MIGRATED: Batch #22 - Removed mock data, using database hooks`
+- **Progress Update:** 250/301 → 260/301 pages (86.4% complete) 🚀
+- **Remaining:** 41 pages with mock data to clean up (301 - 260 = 41 pages)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
