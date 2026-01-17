@@ -7,10 +7,10 @@
 **Actual Count:** 286 total dashboard pages (63 V1 + 223 V2)
 **Original Estimate:** 301 pages (updated with accurate file count)
 
-**Overall Progress:** 255/286 pages integrated (89.2%)
+**Overall Progress:** 265/286 pages integrated (92.7%)
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
-- **V2 Pages:** 192/223 using Supabase hooks (86.1%) 🚧
-  - **Mock → Database:** 180/301 migrated (59.8%) 🎉 APPROACHING 60% MILESTONE!
+- **V2 Pages:** 202/223 using Supabase hooks (90.6%) 🚧
+  - **Mock → Database:** 190/301 migrated (63.1%) 🎉 EXCEEDED 60% MILESTONE!
 
 **Status:** Infrastructure complete, V1 fully migrated, V2 partially integrated, Mock data migration started!
 
@@ -57,10 +57,10 @@
 #### Integration Breakdown
 
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
-**V2 Pages (Supabase Hooks):** 192/223 (86.1%) 🚧
+**V2 Pages (Supabase Hooks):** 202/223 (90.6%) 🚧
   - **Infrastructure Migrations (Categories A-D):** 66 pages
-  - **Mock → Database Migrations (Category E):** 180 pages 🎉 59.8% COMPLETE! (0.2% from 60% milestone!)
-**Remaining:** 31 V2 pages need Supabase hook integration
+  - **Mock → Database Migrations (Category E):** 190 pages 🎉 63.1% COMPLETE! (EXCEEDED 60% milestone!)
+**Remaining:** 21 V2 pages need Supabase hook integration
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -897,6 +897,38 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
   - builds-v2: Integrated 3 hooks (useBuilds, useBuildPipelines, useBuildArtifacts)
 - **Progress Update:** 170/301 → 180/301 pages (59.8% complete) - Just 0.2% from 60% milestone!
 
+#### **Batch #13: V2 Dashboard Pages Mock Cleanup (10 pages) - Commit: c49dcfa1**
+- **App/(app)/dashboard/*-v2 Pages (10 files):**
+  - **component-library-v2** (6 MOCK constants - 150+ lines removed, integrated useUIComponents + useComponentShowcases)
+  - **content-v2** (6 MOCK constants - 178 lines removed, net reduction: 73 lines)
+  - **customer-support-v2** (integrated useCustomerSupport hook with real-time sync - 3 lines added)
+  - **data-export-v2** (rewrote broken hook, removed 18-line manual fetch - net reduction: 12 lines)
+  - **deployments-v2** (12 MOCK constants - 150+ lines removed, applied field mapping)
+  - **desktop-app-v2** (10 MOCK constants - 300+ lines removed)
+  - **docs-v2** (8 MOCK constants - 245 lines removed, integrated useDocs hook)
+  - **events-v2** (3 MOCK arrays - 326 lines removed, 8.3% file reduction)
+  - **expenses-v2** (10 MOCK constants - 100+ lines removed)
+  - **investor-metrics-v2** (4 MOCK constants - 19 lines removed)
+- **Lines Removed:** 1,498 lines
+- **Lines Added:** 399 lines (migration comments + hook integration)
+- **Net Reduction:** 1,099 lines
+- **MOCK Constants Migrated:** 69 constants
+- **Database Hooks Used:** useUIComponents, useComponentShowcases, useContent, useCustomerSupport, useDataExports, useDeployments, useDesktopApps, useDocs, useEvents, useExpenses, useInvestorMetrics
+- **Hook Fixed:** use-data-exports.ts completely rewritten (was broken - now proper async/await with TypeScript)
+- **Patterns Applied:**
+  - Empty array initialization: `const MOCK_X = []`
+  - Zero value objects for stats
+  - Removed mock fallback patterns
+  - Field mapping: deployment_name, duration_seconds, event.name, event.event_type
+  - Real-time data synchronization (customer-support-v2)
+  - Migration comments: `// MIGRATED: Batch #13 - Removed mock data, using database hooks`
+- **Special Achievements:**
+  - events-v2: 8.3% file size reduction (3925 → 3599 lines)
+  - data-export-v2: Fixed completely broken hook implementation
+  - customer-support-v2: Full real-time Supabase integration
+  - 11 hooks integrated across 10 pages
+- **Progress Update:** 180/301 → 190/301 pages (63.1% complete) 🎉 **EXCEEDED 60% MILESTONE!**
+
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
 2. Replace mock useState with hook calls (const { data, isLoading, refresh } = useHookName())
@@ -912,7 +944,7 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
 - audio-studio-v2 (NOTE: Schema mismatch - skip until resolved)
 - Estimated: 10-15 pages can be migrated quickly with existing hooks
 
-**Total Remaining:** 131 V2 pages with mock/setTimeout data need real database integration
+**Total Remaining:** 111 V2 pages with mock/setTimeout data need real database integration
 
 #### Available Hooks Infrastructure
 
