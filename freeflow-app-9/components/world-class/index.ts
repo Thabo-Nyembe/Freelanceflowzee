@@ -69,3 +69,59 @@ export {
   type FileFilters,
   type StorageStats
 } from '@/lib/api-clients/files-client'
+
+// ============================================================================
+// CHARTS - Recharts Wrappers with Theme Support
+// ============================================================================
+export {
+  WorldClassAreaChart,
+  WorldClassBarChart,
+  WorldClassLineChart,
+  WorldClassPieChart,
+  type AreaChartDataPoint,
+  type AreaConfig,
+  type WorldClassAreaChartProps,
+  type BarChartDataPoint,
+  type BarConfig,
+  type WorldClassBarChartProps,
+  type LineChartDataPoint,
+  type LineConfig,
+  type ReferenceLineConfig,
+  type WorldClassLineChartProps,
+  type PieChartDataPoint,
+  type WorldClassPieChartProps,
+} from './charts'
+
+// ============================================================================
+// FORMS - Enhanced Form Components with react-hook-form & Zod
+// ============================================================================
+export {
+  // Form Input
+  FormInput,
+  StandaloneInput,
+  inputValidationSchemas,
+  type FormInputProps,
+  type StandaloneInputProps,
+  // Form Select
+  FormSelect,
+  StandaloneSelect,
+  type FormSelectProps,
+  type StandaloneSelectProps,
+  type SelectOption,
+  type SelectGroup,
+  // Form Textarea
+  FormTextarea,
+  StandaloneTextarea,
+  TextDisplay,
+  textareaValidationSchemas,
+  type FormTextareaProps,
+  type StandaloneTextareaProps,
+  type TextDisplayProps,
+  // Form Date Picker
+  FormDatePicker,
+  StandaloneDatePicker,
+  dateValidationSchemas,
+  type FormDatePickerProps,
+  type StandaloneDatePickerProps,
+  type DatePreset,
+} from './forms'

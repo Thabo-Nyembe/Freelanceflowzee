@@ -104,7 +104,11 @@
     "test:hydration:debug": "playwright test tests/integration/hydration/*.test.ts --debug",
     "test:hydration:headed": "playwright test tests/integration/hydration/*.test.ts --headed",
     "test:integration": "jest --config jest.config.js --selectProjects integration",
-    "test:unit": "jest --config jest.config.js --selectProjects unit"
+    "test:unit": "jest --config jest.config.js --selectProjects unit",
+    "seed:projects": "node scripts/seed-projects.js",
+    "seed:clear": "node scripts/clear-seed-data.js",
+    "seed:reset": "node scripts/clear-seed-data.js && node scripts/seed-projects.js",
+    "seed:clients-invoices": "npx tsx scripts/seed-clients-invoices.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.2",
