@@ -1987,7 +1987,35 @@ export default function CVPortfolioPage() {
     })
 
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not authenticated')
+
+        // Call email API to send portfolio test email
+        const response = await fetch('/api/email/send-portfolio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipient: profileData.email,
+            portfolioData: profileData
+          })
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message || 'Failed to send email')
+        }
+
+        // Log email sent
+        await supabase.from('email_logs').insert({
+          user_id: user.id,
+          email_type: 'portfolio_test',
+          recipient: profileData.email,
+          sent_at: new Date().toISOString()
+        })
+      })(),
       {
         loading: `Sending test email to ${profileData.email}...`,
         success: 'Test email sent! Check your inbox',

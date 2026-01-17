@@ -3053,11 +3053,21 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Initiating translation queue...', { id: 'translate-queue' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                await supabase.from('translation_jobs').insert({
+                  user_id: user.id,
+                  status: 'queued',
+                  created_at: new Date().toISOString()
+                })
+
                 toast.success('Translation queue initiated', { id: 'translate-queue', description: 'Articles will be translated within 24 hours' })
                 setShowTranslateDialog(false)
-              } catch {
-                toast.error('Failed to start translation', { id: 'translate-queue' })
+              } catch (error: any) {
+                toast.error('Failed to start translation', { id: 'translate-queue', description: error.message })
               }
             }}>
               <Languages className="w-4 h-4 mr-2" />
@@ -3096,11 +3106,20 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Creating subcategory...', { id: 'create-subcategory' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                await supabase.from('help_subcategories').insert({
+                  user_id: user.id,
+                  created_at: new Date().toISOString()
+                })
+
                 toast.success('Subcategory created', { id: 'create-subcategory' })
                 setShowSubcategoryDialog(false)
-              } catch {
-                toast.error('Failed to create subcategory', { id: 'create-subcategory' })
+              } catch (error: any) {
+                toast.error('Failed to create subcategory', { id: 'create-subcategory', description: error.message })
               }
             }}>
               <Plus className="w-4 h-4 mr-2" />
@@ -3144,11 +3163,27 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Saving order...', { id: 'save-order' })
               try {
-                await new Promise(r => setTimeout(r, 800))
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                // Update category order in database
+                const updates = categories.map((cat, idx) => ({
+                  id: cat.id,
+                  sort_order: idx
+                }))
+
+                for (const update of updates) {
+                  await supabase.from('help_categories')
+                    .update({ sort_order: update.sort_order })
+                    .eq('id', update.id)
+                }
+
                 toast.success('Order saved', { id: 'save-order' })
                 setShowOrganizeDialog(false)
-              } catch {
-                toast.error('Failed to save order', { id: 'save-order' })
+              } catch (error: any) {
+                toast.error('Failed to save order', { id: 'save-order', description: error.message })
               }
             }}>
               Save Order

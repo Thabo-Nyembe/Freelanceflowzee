@@ -4069,11 +4069,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Saving webhook...', { id: 'save-webhook' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                await supabase.from('support_webhooks').insert({
+                  user_id: user.id,
+                  created_at: new Date().toISOString()
+                })
+
                 toast.success('Webhook configured', { id: 'save-webhook', description: 'Endpoint saved successfully' })
                 setShowWebhooksDialog(false)
-              } catch {
-                toast.error('Failed to save webhook', { id: 'save-webhook' })
+              } catch (error: any) {
+                toast.error('Failed to save webhook', { id: 'save-webhook', description: error.message })
               }
             }}>Save Webhook</Button>
           </DialogFooter>

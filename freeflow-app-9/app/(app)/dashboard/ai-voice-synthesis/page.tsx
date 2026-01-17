@@ -210,8 +210,23 @@ export default function AIVoiceSynthesisPage() {
       try {
         const { createVoiceSynthesis, incrementVoiceUsage, trackVoiceAnalytics } = await import('@/lib/ai-voice-queries')
 
-        // Simulate synthesis processing
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Call voice synthesis API for actual processing
+        const synthResponse = await fetch('/api/ai/voice-synthesis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            voiceId: selectedVoice.id,
+            speed: speed[0],
+            pitch: pitch[0],
+            format: audioFormat,
+            quality: audioQuality
+          })
+        })
+        if (!synthResponse.ok) {
+          const err = await synthResponse.json()
+          throw new Error(err.message || 'Synthesis failed')
+        }
         const processingTime = (Date.now() - startTime) / 1000
 
         // Create synthesis record

@@ -2484,7 +2484,32 @@ export default function ReleasesClient() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => {
                         toast.promise(
-                          new Promise(r => setTimeout(r, 1000)),
+                          (async () => {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
+                            const { data: { user } } = await supabase.auth.getUser()
+                            if (!user) throw new Error('Not authenticated')
+
+                            // Create downloadable release notes
+                            const content = `# ${selectedRelease.title}\n\nVersion: ${selectedRelease.version}\nDate: ${selectedRelease.release_date}\n\n## Description\n${selectedRelease.description}\n\n## Changes\n${selectedRelease.features?.map((f: string) => `- ${f}`).join('\n') || 'No features listed'}\n\n## Bug Fixes\n${selectedRelease.bug_fixes?.map((b: string) => `- ${b}`).join('\n') || 'No bug fixes listed'}`
+
+                            const blob = new Blob([content], { type: 'text/markdown' })
+                            const url = URL.createObjectURL(blob)
+                            const link = document.createElement('a')
+                            link.href = url
+                            link.download = `release-notes-${selectedRelease.version}.md`
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+                            URL.revokeObjectURL(url)
+
+                            // Log download
+                            await supabase.from('release_downloads').insert({
+                              user_id: user.id,
+                              release_id: selectedRelease.id,
+                              downloaded_at: new Date().toISOString()
+                            })
+                          })(),
                           {
                             loading: 'Downloading release notes...',
                             success: 'Release notes downloaded',

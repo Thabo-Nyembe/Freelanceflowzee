@@ -1299,7 +1299,7 @@ export default function BuildsClient() {
             {/* Workflows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening workflow editor...', success: 'Workflow editor ready - configure in Settings tab', error: 'Failed to open editor' }) },
+                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('settings'); toast.success('Workflow editor ready', { description: 'Configure in Settings tab' }); } },
                 { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => {
                   // MIGRATED: Batch #12 - Using database pipelines with fallback
                   const workflowsToSearch = databasePipelines.length > 0 ? databasePipelines : mockWorkflows
@@ -1414,7 +1414,7 @@ export default function BuildsClient() {
             {/* Environments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating environment...', success: 'New environment form ready - configure in Settings', error: 'Failed to create' }) },
+                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setActiveTab('settings'); toast.success('Create New Environment', { description: 'Configure your new environment in the Settings tab' }); } },
                 { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleTriggerBuild('deploy') },
                 { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Environment Protection', { description: 'Configure protection rules in Settings tab' }) },
                 { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setActiveTab('settings') },
@@ -1766,7 +1766,7 @@ export default function BuildsClient() {
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-3" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening secret form...', success: 'Add secrets via your CI/CD provider settings', error: 'Failed' })}>
+                    <Button variant="outline" className="w-full mt-3" onClick={() => toast.info('Add Secret', { description: 'Configure secrets via your CI/CD provider settings or environment variables' })}>
                       <Key className="w-4 h-4 mr-2" />
                       Add Secret
                     </Button>

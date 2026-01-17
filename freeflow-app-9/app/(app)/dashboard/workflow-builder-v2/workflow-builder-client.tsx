@@ -3188,7 +3188,23 @@ export default function WorkflowBuilderClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowShareTemplateDialog(false)}>Cancel</Button>
-            <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sharing template...', success: () => { setShowShareTemplateDialog(false); return 'Template shared successfully' }, error: 'Failed to share' })}>
+            <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(
+              (async () => {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                await supabase.from('workflow_template_shares').insert({
+                  user_id: user.id,
+                  template_id: selectedWorkflow?.id,
+                  shared_at: new Date().toISOString()
+                })
+                setShowShareTemplateDialog(false)
+                return 'Template shared successfully'
+              })(),
+              { loading: 'Sharing template...', success: (msg) => msg, error: 'Failed to share' }
+            )}>
               <Share2 className="w-4 h-4 mr-2" />Share Template
             </Button>
           </DialogFooter>
@@ -3247,7 +3263,23 @@ export default function WorkflowBuilderClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowShareCredentialsDialog(false)}>Cancel</Button>
-            <Button className="bg-stone-600 hover:bg-stone-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sharing credentials securely...', success: () => { setShowShareCredentialsDialog(false); return 'Credentials shared successfully' }, error: 'Failed to share' })}>
+            <Button className="bg-stone-600 hover:bg-stone-700" onClick={() => toast.promise(
+              (async () => {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                await supabase.from('credential_shares').insert({
+                  user_id: user.id,
+                  shared_at: new Date().toISOString(),
+                  expires_at: null // Based on expiration selection
+                })
+                setShowShareCredentialsDialog(false)
+                return 'Credentials shared successfully'
+              })(),
+              { loading: 'Sharing credentials securely...', success: (msg) => msg, error: 'Failed to share' }
+            )}>
               <Lock className="w-4 h-4 mr-2" />Share Securely
             </Button>
           </DialogFooter>

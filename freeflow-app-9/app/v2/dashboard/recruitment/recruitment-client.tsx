@@ -1076,14 +1076,9 @@ export default function RecruitmentClient() {
     const stageOrder = ['Applied', 'Screening', 'Phone Interview', 'Technical', 'Onsite', 'Offer', 'Hired']
     const currentIndex = stageOrder.indexOf(currentStage)
     if (currentIndex === -1 || currentIndex >= stageOrder.length - 1) {
-      toast.promise(
-        new Promise(r => setTimeout(r, 300)),
-        {
-          loading: 'Checking stage status...',
-          success: `${candidateName} is already at the final stage`,
-          error: 'Failed to check stage'
-        }
-      )
+      toast.info(`${candidateName} is already at the final stage`, {
+        description: currentStage === 'Hired' ? 'Candidate has been hired' : 'Cannot advance further'
+      })
       return
     }
 

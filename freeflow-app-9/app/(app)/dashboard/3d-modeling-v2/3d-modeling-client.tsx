@@ -2202,11 +2202,22 @@ export default function ThreeDModelingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving path...', { id: 'temp-path' })
                 try {
-                  await new Promise(r => setTimeout(r, 800))
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) throw new Error('Not authenticated')
+
+                  await supabase.from('user_settings').upsert({
+                    user_id: user.id,
+                    setting_key: '3d_modeling_temp_path',
+                    setting_value: tempFilePath,
+                    updated_at: new Date().toISOString()
+                  }, { onConflict: 'user_id,setting_key' })
+
                   toast.success('Temp file path updated', { id: 'temp-path', description: tempFilePath })
                   setShowBrowseTempDialog(false)
-                } catch {
-                  toast.error('Failed to save path', { id: 'temp-path' })
+                } catch (error: any) {
+                  toast.error('Failed to save path', { id: 'temp-path', description: error.message })
                 }
               }}>Save</Button>
             </div>
@@ -2237,11 +2248,22 @@ export default function ThreeDModelingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving path...', { id: 'assets-path' })
                 try {
-                  await new Promise(r => setTimeout(r, 800))
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) throw new Error('Not authenticated')
+
+                  await supabase.from('user_settings').upsert({
+                    user_id: user.id,
+                    setting_key: '3d_modeling_assets_path',
+                    setting_value: assetsPath,
+                    updated_at: new Date().toISOString()
+                  }, { onConflict: 'user_id,setting_key' })
+
                   toast.success('Assets path updated', { id: 'assets-path', description: assetsPath })
                   setShowBrowseAssetsDialog(false)
-                } catch {
-                  toast.error('Failed to save path', { id: 'assets-path' })
+                } catch (error: any) {
+                  toast.error('Failed to save path', { id: 'assets-path', description: error.message })
                 }
               }}>Save</Button>
             </div>
