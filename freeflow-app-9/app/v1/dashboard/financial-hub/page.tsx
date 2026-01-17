@@ -1,5 +1,7 @@
 "use client"
 
+// MIGRATED: Batch #24 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
@@ -114,11 +116,7 @@ export default function FinancialHubPage() {
     status: string
   }>>([])
 
-  const [upcomingPayments, setUpcomingPayments] = useState([
-    { id: 1, client: 'Acme Corp', amount: 12500, dueDate: '2024-01-25', status: 'pending' },
-    { id: 2, client: 'Tech Startup', amount: 8000, dueDate: '2024-01-30', status: 'overdue' },
-    { id: 3, client: 'Local Business', amount: 5500, dueDate: '2024-02-05', status: 'scheduled' }
-  ])
+  const [upcomingPayments, setUpcomingPayments] = useState([])
 
   // Load financial hub data
   useEffect(() => {
@@ -251,65 +249,7 @@ export default function FinancialHubPage() {
         setIsLoading(false)
         announce('Error loading financial hub', 'assertive')
         logger.error('Failed to load financial hub', { error: err })
-        toast.error('Failed to load financial data', { description: 'Using demo data' })
-
-        // Fallback to mock data
-        setFinancialData({
-          overview: {
-            totalRevenue: 245231,
-            totalExpenses: 98500,
-            netProfit: 146731,
-            monthlyGrowth: 15.2,
-            yearlyGrowth: 28.4,
-            profitMargin: 59.8
-          },
-          invoices: {
-            total: 47,
-            paid: 35,
-            pending: 8,
-            overdue: 4,
-            totalAmount: 198500,
-            paidAmount: 145230,
-            pendingAmount: 42270,
-            overdueAmount: 11000
-          },
-          expenses: {
-            total: 98500,
-            categories: {
-              software: 25000,
-              marketing: 18500,
-              office: 15000,
-              travel: 12000,
-              utilities: 8000,
-              other: 20000
-            }
-          },
-          clients: {
-            total: 24,
-            active: 18,
-            new: 6,
-            topClients: [
-              { name: 'Acme Corp', revenue: 45000, projects: 8 },
-              { name: 'Tech Startup', revenue: 38000, projects: 5 },
-              { name: 'Design Agency', revenue: 32000, projects: 12 },
-              { name: 'Local Business', revenue: 25000, projects: 3 }
-            ]
-          },
-          goals: {
-            monthlyTarget: 50000,
-            yearlyTarget: 600000,
-            currentProgress: 42000,
-            yearlyProgress: 245231
-          }
-        })
-
-        setRecentTransactions([
-          { id: 1, type: 'income', description: 'Project Payment - Acme Corp', amount: 15000, date: '2024-01-15', status: 'completed' },
-          { id: 2, type: 'expense', description: 'Software Subscriptions', amount: -2999, date: '2024-01-14', status: 'completed' },
-          { id: 3, type: 'income', description: 'Design Package - Tech Startup', amount: 8500, date: '2024-01-12', status: 'completed' },
-          { id: 4, type: 'expense', description: 'Marketing Campaign', amount: -3500, date: '2024-01-10', status: 'completed' },
-          { id: 5, type: 'income', description: 'Consultation - Design Agency', amount: 2500, date: '2024-01-08', status: 'pending' }
-        ])
+        toast.error('Failed to load financial data')
       }
     }
 

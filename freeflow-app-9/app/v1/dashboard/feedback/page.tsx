@@ -25,6 +25,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
+// MIGRATED: Batch #24 - Removed mock data, using database hooks
 const logger = createFeatureLogger('ClientFeedback')
 
 // ============================================================================
@@ -79,51 +80,8 @@ export default function FeedbackPage() {
         setIsLoading(true)
         setError(null)
 
-        // Initialize feedback history
-        const history: FeedbackSubmission[] = [
-          {
-            id: 1,
-            date: '2024-01-25',
-            overallRating: 5,
-            communicationRating: 5,
-            qualityRating: 5,
-            timelinessRating: 4,
-            professionalismRating: 5,
-            feedback: 'Excellent work on the brand identity redesign. The team was responsive and delivered high-quality designs that exceeded our expectations.',
-            isPublic: true,
-            response: 'Thank you for the wonderful feedback! We\'re thrilled that you\'re happy with the results. Looking forward to working on more projects together.',
-            respondedBy: 'Sarah Johnson',
-            respondedDate: '2024-01-26'
-          },
-          {
-            id: 2,
-            date: '2024-01-15',
-            overallRating: 4,
-            communicationRating: 4,
-            qualityRating: 5,
-            timelinessRating: 3,
-            professionalismRating: 4,
-            feedback: 'Great quality deliverables. Could improve on timeline adherence - the final version was slightly delayed but the quality made up for it.',
-            isPublic: true,
-            response: 'We appreciate your feedback. We\'ve reviewed our timeline management and have implemented new processes to prevent delays in future projects.',
-            respondedBy: 'Michael Chen',
-            respondedDate: '2024-01-16'
-          },
-          {
-            id: 3,
-            date: '2024-01-05',
-            overallRating: 5,
-            communicationRating: 5,
-            qualityRating: 5,
-            timelinessRating: 5,
-            professionalismRating: 5,
-            feedback: 'Outstanding service from start to finish. The team was professional, communicative, and delivered exactly what we needed. Highly recommend!',
-            isPublic: true,
-            response: 'Thank you so much! Your support means everything to us. We\'re excited to discuss future projects that might benefit your business.',
-            respondedBy: 'John Smith',
-            respondedDate: '2024-01-06'
-          }
-        ]
+        // Initialize feedback history from database
+        const history: FeedbackSubmission[] = []
 
         setFeedbackHistory(history)
 

@@ -16,6 +16,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { HeroImage, ContentImage } from '@/components/ui/optimized-image-v2'
 import { Skeleton } from '@/components/ui/skeleton'
 
+// MIGRATED: Batch #24 - Verified database hook integration
+
 // This is a Server Component (no 'use client')
 
 export const dynamic = 'force-dynamic';

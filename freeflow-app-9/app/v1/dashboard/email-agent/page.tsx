@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #24 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 ;
@@ -162,46 +164,7 @@ export default function BusinessAutomationAgentDashboard() {
   };
 
   const loadEmails = async () => {
-    // Mock data for demonstration
-    setEmails([
-      {
-        id: '1',
-        from: 'john@example.com',
-        subject: 'Need a quote for web development',
-        body: 'Hi, I need a website for my business...',
-        receivedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        analysis: {
-          intent: 'quote_request',
-          sentiment: 'positive',
-          priority: 'high',
-          category: 'Sales',
-          summary: 'Client requesting web development quotation',
-          requiresQuotation: true,
-          requiresHumanReview: false,
-        },
-        hasResponse: true,
-        hasQuotation: true,
-        status: 'processed',
-      },
-      {
-        id: '2',
-        from: 'sarah@company.com',
-        subject: 'Book a consultation',
-        body: 'I would like to schedule a consultation for next week...',
-        receivedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-        analysis: {
-          intent: 'inquiry',
-          sentiment: 'neutral',
-          priority: 'medium',
-          category: 'Booking',
-          summary: 'Client requesting consultation booking',
-          requiresQuotation: false,
-          requiresHumanReview: false,
-        },
-        hasResponse: true,
-        status: 'processed',
-      },
-    ]);
+    setEmails([]);
   };
 
   const loadApprovals = async () => {

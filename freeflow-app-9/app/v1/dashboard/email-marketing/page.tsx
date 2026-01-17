@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #24 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react'
@@ -66,11 +68,7 @@ export default function EmailMarketingPage() {
     delay: '1' as string,
     action: 'welcome' as string
   })
-  const [automations, setAutomations] = useState([
-    { id: 1, name: 'Welcome Series', trigger: 'New Subscriber', status: 'active', emails: 3, sent: 1245, opened: 876 },
-    { id: 2, name: 'Cart Abandonment', trigger: 'Abandoned Cart', status: 'active', emails: 2, sent: 432, opened: 298 },
-    { id: 3, name: 'Re-engagement', trigger: 'Inactive 30 days', status: 'paused', emails: 4, sent: 156, opened: 78 }
-  ])
+  const [automations, setAutomations] = useState([])
 
   useEffect(() => {
     const loadEmailMarketingData = async () => {

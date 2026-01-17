@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #24 - Verified database hook integration
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useReducer, useMemo, useDeferredValue } from 'react'
