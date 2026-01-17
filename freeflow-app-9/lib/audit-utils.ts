@@ -7,6 +7,8 @@ import type {
   SeverityLevel
 } from './audit-types'
 
+// MIGRATED: Batch #19 - Verified empty MOCK constants (database fallbacks)
+
 // Mock Audit Logs
 // MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_AUDIT_LOGS: AuditLog[] = []

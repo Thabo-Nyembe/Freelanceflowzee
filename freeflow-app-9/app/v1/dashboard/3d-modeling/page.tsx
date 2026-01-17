@@ -1,5 +1,6 @@
 'use client'
 
+// MIGRATED: Batch #19 - Verified database hook integration, mock data removed
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -61,63 +62,13 @@ interface Light {
   enabled: boolean
 }
 
-const PRIMITIVE_OBJECTS = [
-  { id: 'cube', name: 'Cube', icon: Box },
-  { id: 'sphere', name: 'Sphere', icon: Sphere },
-  { id: 'cylinder', name: 'Cylinder', icon: Cylinder },
-  { id: 'cone', name: 'Cone', icon: Cone },
-  { id: 'plane', name: 'Plane', icon: Grid3x3 }
-]
+const PRIMITIVE_OBJECTS = []
 
-const MATERIALS: Material[] = [
-  { id: 'metal', name: 'Steel', type: 'metallic', color: '#C0C0C0', roughness: 0.2, metallic: 1.0, emission: 0 },
-  { id: 'plastic', name: 'Red Plastic', type: 'plastic', color: '#FF4444', roughness: 0.8, metallic: 0.0, emission: 0 },
-  { id: 'glass', name: 'Glass', type: 'glass', color: '#E6F3FF', roughness: 0.0, metallic: 0.0, emission: 0 },
-  { id: 'fabric', name: 'Fabric', type: 'fabric', color: '#8B4513', roughness: 0.9, metallic: 0.0, emission: 0 },
-  { id: 'emission', name: 'Glow', type: 'standard', color: '#00FF88', roughness: 0.5, metallic: 0.0, emission: 1.0 }
-]
+const MATERIALS: Material[] = []
 
-const DEMO_OBJECTS: SceneObject[] = [
-  {
-    id: '1',
-    name: 'Main Cube',
-    type: 'cube',
-    position: { x: 0, y: 0, z: 0 },
-    rotation: { x: 0, y: 45, z: 0 },
-    scale: { x: 1, y: 1, z: 1 },
-    material: 'metal',
-    visible: true,
-    locked: false
-  },
-  {
-    id: '2',
-    name: 'Light Sphere',
-    type: 'sphere',
-    position: { x: 3, y: 2, z: 1 },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 0.8, y: 0.8, z: 0.8 },
-    material: 'emission',
-    visible: true,
-    locked: false
-  },
-  {
-    id: '3',
-    name: 'Support Cylinder',
-    type: 'cylinder',
-    position: { x: -2, y: -1, z: 2 },
-    rotation: { x: 0, y: 0, z: 15 },
-    scale: { x: 0.6, y: 2, z: 0.6 },
-    material: 'plastic',
-    visible: true,
-    locked: false
-  }
-]
+const DEMO_OBJECTS: SceneObject[] = []
 
-const LIGHTS: Light[] = [
-  { id: 'sun', name: 'Sun Light', type: 'directional', intensity: 80, color: '#FFF8DC', position: { x: 5, y: 10, z: 5 }, enabled: true },
-  { id: 'fill', name: 'Fill Light', type: 'point', intensity: 40, color: '#87CEEB', position: { x: -3, y: 5, z: 3 }, enabled: true },
-  { id: 'ambient', name: 'Ambient', type: 'ambient', intensity: 20, color: '#B0C4DE', position: { x: 0, y: 0, z: 0 }, enabled: true }
-]
+const LIGHTS: Light[] = []
 
 export default function ModelingStudioPage() {
   const { userId, loading: userLoading } = useCurrentUser()

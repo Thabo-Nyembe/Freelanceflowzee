@@ -3,6 +3,8 @@
  * Helper functions and mock data for white label system
  */
 
+// MIGRATED: Batch #19 - Verified empty MOCK constants (database fallbacks)
+
 import {
   WhiteLabelConfig,
   BrandingPreset,

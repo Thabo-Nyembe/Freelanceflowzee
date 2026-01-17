@@ -29,6 +29,7 @@ const logger = createFeatureLogger('InvoiceUtils')
 // All mock data has been migrated to use database queries.
 // Data now comes from Supabase via invoice-queries.ts
 // Migration completed: 2026-01-17
+// MIGRATED: Batch #19 - Verified empty MOCK constants (database fallbacks)
 
 export const MOCK_INVOICES: Invoice[] = []
 export const MOCK_PAYMENTS: Payment[] = []

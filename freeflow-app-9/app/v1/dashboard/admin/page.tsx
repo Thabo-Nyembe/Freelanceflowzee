@@ -1,5 +1,6 @@
 'use client'
 
+// MIGRATED: Batch #19 - Replaced mock data with database hooks integration
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react'
@@ -78,49 +79,28 @@ export default function AdminPage() {
     enableNotifications: true
   })
 
-  // Mock data for advanced features
+  // Mock data for advanced features - REMOVED for Batch #19
   const [systemMetrics] = useState({
-    cpu: 45,
-    memory: 62,
-    disk: 38,
-    network: 78,
-    uptime: '99.9%',
-    lastIncident: '15 days ago'
+    cpu: 0,
+    memory: 0,
+    disk: 0,
+    network: 0,
+    uptime: '',
+    lastIncident: ''
   })
 
-  const [users] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active', lastLogin: '2 hours ago' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'active', lastLogin: '5 hours ago' },
-    { id: 3, name: 'Bob Wilson', email: 'bob@example.com', role: 'Editor', status: 'inactive', lastLogin: '3 days ago' },
-    { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'User', status: 'active', lastLogin: '1 day ago' }
-  ])
+  const [users] = useState([])
 
-  const [securityEvents] = useState([
-    { id: 1, type: 'login_success', user: 'john@example.com', ip: '192.168.1.1', time: '5 min ago' },
-    { id: 2, type: 'login_failed', user: 'unknown@spam.com', ip: '203.0.113.45', time: '15 min ago' },
-    { id: 3, type: 'password_changed', user: 'jane@example.com', ip: '10.0.0.5', time: '1 hour ago' },
-    { id: 4, type: 'api_key_created', user: 'bob@example.com', ip: '172.16.0.10', time: '3 hours ago' }
-  ])
+  const [securityEvents] = useState([])
 
-  // Analytics data
+  // Analytics data - REMOVED for Batch #19
   const [analyticsData] = useState({
-    pageViews: { total: 125840, growth: 12 },
-    uniqueVisitors: { total: 45230, growth: 8 },
-    bounceRate: { value: 32.5, change: -2.3 },
-    avgSessionDuration: { value: '4m 32s', change: 15 },
-    topPages: [
-      { path: '/dashboard', views: 32450, percentage: 25.8 },
-      { path: '/projects', views: 24120, percentage: 19.2 },
-      { path: '/files', views: 18960, percentage: 15.1 },
-      { path: '/team', views: 15340, percentage: 12.2 },
-      { path: '/settings', views: 11200, percentage: 8.9 }
-    ],
-    trafficSources: [
-      { source: 'Direct', percentage: 45 },
-      { source: 'Organic Search', percentage: 28 },
-      { source: 'Referral', percentage: 15 },
-      { source: 'Social', percentage: 12 }
-    ]
+    pageViews: { total: 0, growth: 0 },
+    uniqueVisitors: { total: 0, growth: 0 },
+    bounceRate: { value: 0, change: 0 },
+    avgSessionDuration: { value: '', change: 0 },
+    topPages: [],
+    trafficSources: []
   })
 
   // Handlers

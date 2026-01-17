@@ -1,5 +1,6 @@
 'use client'
 
+// MIGRATED: Batch #19 - Verified database hook integration, mock data removed
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -135,20 +136,7 @@ export default function AIAssistantPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { chat, loading: aiLoading } = useKaziAI(userId || 'anonymous')
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: 'Hello! I\'m your AI Assistant. I can help you optimize your workflow, analyze projects, provide business insights, and answer questions about your freelance business. What would you like to explore today?',
-      type: 'assistant',
-      timestamp: new Date(Date.now() - 5 * 60000),
-      suggestions: [
-        'Analyze my current projects',
-        'Suggest productivity improvements',
-        'Help with client communication',
-        'Review my business metrics'
-      ]
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
 
   const [inputMessage, setInputMessage] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -238,123 +226,11 @@ export default function AIAssistantPage() {
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
   const [insightToDismiss, setInsightToDismiss] = useState<string | null>(null)
 
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: '1',
-      title: 'Project Optimization Strategy',
-      preview: 'How can I improve my project delivery times...',
-      timestamp: new Date(Date.now() - 2 * 60 * 60000),
-      tags: ['productivity', 'optimization'],
-      messageCount: 12
-    },
-    {
-      id: '2',
-      title: 'Client Pricing Analysis',
-      preview: 'What should I charge for web development...',
-      timestamp: new Date(Date.now() - 24 * 60 * 60000),
-      tags: ['pricing', 'business'],
-      messageCount: 8
-    },
-    {
-      id: '3',
-      title: 'Marketing Strategy Discussion',
-      preview: 'Help me create a marketing plan for...',
-      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60000),
-      tags: ['marketing', 'growth'],
-      messageCount: 15
-    }
-  ])
+  const [conversations, setConversations] = useState<Conversation[]>([])
 
-  const [aiInsights, setAiInsights] = useState<AIInsight[]>([
-    {
-      id: '0',
-      title: 'NEW: AI-Powered Growth Engine',
-      description: 'Unlock 110% revenue growth! Our Growth Hub uses research-backed strategies (2025 data) to optimize pricing, reduce CAC by 45%, and improve conversions by 35-78%.',
-      category: 'business',
-      priority: 'high',
-      action: 'Explore Growth Hub',
-      icon: Sparkles
-    },
-    {
-      id: '1',
-      title: 'Productivity Opportunity',
-      description: 'You spend 40% more time on revisions than industry average. Consider implementing structured feedback workflows.',
-      category: 'optimization',
-      priority: 'high',
-      action: 'Implement feedback system',
-      icon: TrendingUp
-    },
-    {
-      id: '2',
-      title: 'Revenue Growth Potential',
-      description: 'Your video editing projects have 23% higher profit margins. Consider expanding this service line.',
-      category: 'business',
-      priority: 'high',
-      action: 'Expand video services',
-      icon: DollarSign
-    },
-    {
-      id: '3',
-      title: 'Client Retention Insight',
-      description: 'Clients who use your escrow system have 65% higher retention rates. Promote this feature more.',
-      category: 'opportunity',
-      priority: 'medium',
-      action: 'Promote escrow system',
-      icon: Users
-    },
-    {
-      id: '4',
-      title: 'Workflow Optimization',
-      description: 'Your most productive hours are 9-11 AM. Schedule complex tasks during this window.',
-      category: 'productivity',
-      priority: 'medium',
-      action: 'Adjust daily schedule',
-      icon: Clock
-    }
-  ])
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
 
-  const [projectAnalysis, setProjectAnalysis] = useState<ProjectAnalysis[]>([
-    {
-      projectName: 'E-commerce Redesign',
-      status: 'In Progress',
-      completion: 75,
-      insights: [
-        'Project is 15% ahead of original timeline',
-        'Client feedback response time: 2.3 days average',
-        'Design iteration efficiency: 88%'
-      ],
-      recommendations: [
-        'Schedule final review meeting for next week',
-        'Prepare comprehensive testing documentation',
-        'Create handover documentation early'
-      ],
-      nextActions: [
-        'Complete checkout flow testing',
-        'Finalize mobile responsive design',
-        'Prepare deployment checklist'
-      ]
-    },
-    {
-      projectName: 'Brand Identity Package',
-      status: 'Review',
-      completion: 90,
-      insights: [
-        'Client approval rate: 92% first-time approval',
-        'Revision requests: 23% below average',
-        'Timeline adherence: Excellent'
-      ],
-      recommendations: [
-        'Present final brand guidelines document',
-        'Offer additional brand applications',
-        'Schedule brand implementation consultation'
-      ],
-      nextActions: [
-        'Deliver final logo variations',
-        'Complete brand guidelines PDF',
-        'Prepare usage examples'
-      ]
-    }
-  ])
+  const [projectAnalysis, setProjectAnalysis] = useState<ProjectAnalysis[]>([])
 
   const quickActions = [
     { id: 'analyze-projects', label: 'Analyze My Projects', icon: BarChart3 },

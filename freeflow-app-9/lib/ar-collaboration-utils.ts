@@ -3,6 +3,8 @@
  * Helper functions and mock data for AR workspace
  */
 
+// MIGRATED: Batch #19 - Verified empty MOCK constants (database fallbacks)
+
 import {
   ARSession,
   ARParticipant,
