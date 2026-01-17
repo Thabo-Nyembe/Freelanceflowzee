@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useTaxSummary, useTaxInsights, useTaxDeductions, useDeductionBreakdown, useTaxProfile, useTaxFilings
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

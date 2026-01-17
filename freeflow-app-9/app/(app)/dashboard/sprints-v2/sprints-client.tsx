@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useSprints, useSprintTasks, useSprintMutations
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

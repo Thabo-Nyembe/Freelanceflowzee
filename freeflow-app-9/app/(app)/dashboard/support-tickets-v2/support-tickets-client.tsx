@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useSupportTickets, useTicketReplies
+
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useSupportTickets, useTicketReplies, SupportTicket, SupportStats, TicketReply } from '@/lib/hooks/use-support-tickets'

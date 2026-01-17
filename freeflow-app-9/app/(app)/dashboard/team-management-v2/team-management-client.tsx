@@ -1,4 +1,8 @@
 'use client'
+
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useTeamManagement
+
 import { useState, useMemo } from 'react'
 import {
   Users, UserPlus, Building2, Target, Award, MessageSquare, Calendar, BarChart3,

@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useSettings, useState, useMemo, useEffect, useCallback
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'

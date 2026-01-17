@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks used: useSurveys, useSurveyMutations
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'

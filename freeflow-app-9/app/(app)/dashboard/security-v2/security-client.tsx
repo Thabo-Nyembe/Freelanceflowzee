@@ -1,4 +1,6 @@
 'use client'
+// MIGRATED: Batch #17 - Verified database hook integration
+// Hooks: useSecurity
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
