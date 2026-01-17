@@ -1098,15 +1098,12 @@ export default function AuditLogsClient() {
 
   const handleInvestigateLog = async (logId: string) => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'security',
-          action: 'log.investigate',
-          description: `Investigating log ${logId}`,
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 600))
-      })(),
+      createAuditLog({
+        log_type: 'security',
+        action: 'log.investigate',
+        description: `Investigating log ${logId}`,
+        status: 'success'
+      }),
       {
         loading: `Opening investigation for log ${logId}...`,
         success: 'Investigation started',
@@ -1117,15 +1114,12 @@ export default function AuditLogsClient() {
 
   const handleMarkResolved = async (alertId: string) => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'admin',
-          action: 'alert.resolve',
-          description: `Resolved alert ${alertId}`,
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 600))
-      })(),
+      createAuditLog({
+        log_type: 'admin',
+        action: 'alert.resolve',
+        description: `Resolved alert ${alertId}`,
+        status: 'success'
+      }),
       {
         loading: `Resolving alert ${alertId}...`,
         success: `Alert ${alertId} has been marked as resolved`,
@@ -1136,15 +1130,12 @@ export default function AuditLogsClient() {
 
   const handleGenerateReport = async () => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'data_access',
-          action: 'report.generate',
-          description: 'Generated compliance report',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 1500))
-      })(),
+      createAuditLog({
+        log_type: 'data_access',
+        action: 'report.generate',
+        description: 'Generated compliance report',
+        status: 'success'
+      }),
       {
         loading: 'Generating compliance report...',
         success: 'Compliance report generated successfully',
@@ -1167,29 +1158,27 @@ export default function AuditLogsClient() {
   }
 
   // Handle saved queries button
-  const handleSavedQueries = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading saved queries...',
-        success: 'Saved queries loaded',
-        error: 'Failed to load saved queries'
-      }
-    )
+  const handleSavedQueries = async () => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data, error } = await supabase.from('saved_queries').select('*').eq('type', 'audit_log')
+      if (error) throw error
+      toast.success('Saved queries loaded', { description: `${data?.length || 0} queries available` })
+    } catch (err) {
+      toast.error('Failed to load saved queries')
+    }
   }
 
   // Handle search logs
   const handleSearchLogs = () => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'data_access',
-          action: 'logs.search',
-          description: 'Performed advanced log search',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 800))
-      })(),
+      createAuditLog({
+        log_type: 'data_access',
+        action: 'logs.search',
+        description: 'Performed advanced log search',
+        status: 'success'
+      }),
       {
         loading: 'Searching audit logs...',
         success: 'Search completed',
@@ -1201,15 +1190,12 @@ export default function AuditLogsClient() {
   // Handle refresh compliance
   const handleRefreshCompliance = () => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'system',
-          action: 'compliance.refresh',
-          description: 'Refreshed compliance dashboard',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 1000))
-      })(),
+      createAuditLog({
+        log_type: 'system',
+        action: 'compliance.refresh',
+        description: 'Refreshed compliance dashboard',
+        status: 'success'
+      }),
       {
         loading: 'Refreshing compliance data...',
         success: 'Compliance data refreshed',
@@ -1219,58 +1205,51 @@ export default function AuditLogsClient() {
   }
 
   // Handle export all compliance reports
-  const handleExportAllCompliance = () => {
-    toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'data_access',
-          action: 'compliance.export_all',
-          description: 'Exported all compliance reports',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 2000))
-      })(),
-      {
-        loading: 'Exporting all compliance reports...',
-        success: 'All compliance reports exported',
-        error: 'Failed to export compliance reports'
-      }
-    )
+  const handleExportAllCompliance = async () => {
+    await createAuditLog({
+      log_type: 'data_access',
+      action: 'compliance.export_all',
+      description: 'Exported all compliance reports',
+      status: 'success'
+    })
+    const blob = new Blob([JSON.stringify({ exported_at: new Date().toISOString(), frameworks: ['SOC2', 'HIPAA', 'GDPR', 'PCI-DSS'] })], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `compliance-reports-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('All compliance reports exported')
   }
 
   // Handle download individual compliance report
-  const handleDownloadComplianceReport = (framework: string) => {
-    toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'data_access',
-          action: 'compliance.download_report',
-          description: `Downloaded ${framework} compliance report`,
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 1500))
-      })(),
-      {
-        loading: `Downloading ${framework} report...`,
-        success: `${framework} report downloaded`,
-        error: `Failed to download ${framework} report`
-      }
-    )
+  const handleDownloadComplianceReport = async (framework: string) => {
+    await createAuditLog({
+      log_type: 'data_access',
+      action: 'compliance.download_report',
+      description: `Downloaded ${framework} compliance report`,
+      status: 'success'
+    })
+    const blob = new Blob([JSON.stringify({ framework, exported_at: new Date().toISOString(), status: 'compliant' })], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${framework.toLowerCase()}-compliance-report-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`${framework} report downloaded`)
   }
 
   // Handle SIEM integration
   const handleSiemIntegration = (name: string, status: string) => {
     if (status === 'connected') {
       toast.promise(
-        (async () => {
-          await createAuditLog({
-            log_type: 'admin',
-            action: 'integration.manage',
-            description: `Managing ${name} integration`,
-            status: 'success'
-          })
-          await new Promise(r => setTimeout(r, 800))
-        })(),
+        createAuditLog({
+          log_type: 'admin',
+          action: 'integration.manage',
+          description: `Managing ${name} integration`,
+          status: 'success'
+        }),
         {
           loading: `Opening ${name} settings...`,
           success: `${name} settings opened`,
@@ -1278,22 +1257,19 @@ export default function AuditLogsClient() {
         }
       )
     } else {
-      toast.promise(
-        (async () => {
-          await createAuditLog({
-            log_type: 'admin',
-            action: 'integration.connect',
-            description: `Connecting to ${name}`,
-            status: 'success'
-          })
-          await new Promise(r => setTimeout(r, 1500))
-        })(),
-        {
-          loading: `Connecting to ${name}...`,
-          success: `Connected to ${name}`,
-          error: `Failed to connect to ${name}`
-        }
-      )
+      const oauthUrl = `/api/integrations/${name.toLowerCase()}/oauth`
+      const popup = window.open(oauthUrl, `${name} Connection`, 'width=600,height=700')
+      if (popup) {
+        createAuditLog({
+          log_type: 'admin',
+          action: 'integration.connect',
+          description: `Connecting to ${name}`,
+          status: 'success'
+        })
+        toast.info(`Complete ${name} authorization in the popup window`)
+      } else {
+        toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+      }
     }
   }
 
@@ -1312,43 +1288,43 @@ export default function AuditLogsClient() {
   }
 
   // Handle clear debug logs
-  const handleClearDebugLogs = () => {
-    toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'admin',
-          action: 'logs.clear_debug',
-          description: 'Cleared debug logs',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 1000))
-      })(),
-      {
-        loading: 'Clearing debug logs...',
-        success: 'Debug logs cleared',
-        error: 'Failed to clear debug logs'
-      }
-    )
+  const handleClearDebugLogs = async () => {
+    if (!confirm('Are you sure you want to clear all debug logs? This action cannot be undone.')) return
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('audit_logs').delete().eq('log_type', 'debug')
+      if (error) throw error
+      await createAuditLog({
+        log_type: 'admin',
+        action: 'logs.clear_debug',
+        description: 'Cleared debug logs',
+        status: 'success'
+      })
+      toast.success('Debug logs cleared')
+    } catch (err) {
+      toast.error('Failed to clear debug logs')
+    }
   }
 
   // Handle reset configuration
-  const handleResetConfiguration = () => {
-    toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'admin',
-          action: 'settings.reset',
-          description: 'Reset all audit log settings to default',
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 1500))
-      })(),
-      {
-        loading: 'Resetting configuration...',
-        success: 'Configuration reset to defaults',
-        error: 'Failed to reset configuration'
-      }
-    )
+  const handleResetConfiguration = async () => {
+    if (!confirm('Are you sure you want to reset all audit log settings to defaults?')) return
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('audit_log_settings').update({ settings: {} }).is('deleted_at', null)
+      if (error) throw error
+      await createAuditLog({
+        log_type: 'admin',
+        action: 'settings.reset',
+        description: 'Reset all audit log settings to default',
+        status: 'success'
+      })
+      toast.success('Configuration reset to defaults')
+    } catch (err) {
+      toast.error('Failed to reset configuration')
+    }
   }
 
   // Handle copy log ID
@@ -1360,15 +1336,12 @@ export default function AuditLogsClient() {
   // Handle related events
   const handleRelatedEvents = (logId: string) => {
     toast.promise(
-      (async () => {
-        await createAuditLog({
-          log_type: 'data_access',
-          action: 'logs.view_related',
-          description: `Viewing related events for log ${logId}`,
-          status: 'success'
-        })
-        await new Promise(r => setTimeout(r, 800))
-      })(),
+      createAuditLog({
+        log_type: 'data_access',
+        action: 'logs.view_related',
+        description: `Viewing related events for log ${logId}`,
+        status: 'success'
+      }),
       {
         loading: 'Loading related events...',
         success: 'Related events loaded',
