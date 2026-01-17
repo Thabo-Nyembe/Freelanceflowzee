@@ -461,6 +461,82 @@ interface DbTeamMember {
 
 export default function TeamHubClient() {
 
+  // ==========================================================================
+  // REAL-TIME TEAM COLLABORATION HOOKS - Wired to Supabase APIs
+  // ==========================================================================
+
+  // Team members from API with real-time sync
+  const { data: apiTeamMembersData, isLoading: isLoadingApiTeam } = useTeamMembers()
+  const { data: apiTeamStatsData } = useTeamStats()
+  const createTeamMemberApi = useCreateTeamMember()
+  const updateTeamMemberApi = useUpdateTeamMember()
+  const deleteTeamMemberApi = useDeleteTeamMember()
+  const sendInvitationApi = useSendInvitation()
+  const { data: invitationsData } = useTeamInvitations()
+
+  // Messaging/Chat from API
+  const { data: conversationsData } = useConversations()
+  const { data: messagingStatsData } = useMessagingStats()
+  const sendMessageApi = useSendMessage()
+
+  // Calendar events for huddles/meetings
+  const { data: eventsData } = useEvents()
+  const createEventApi = useCreateEvent()
+
+  // Notifications for real-time updates
+  const { data: notificationsData } = useNotifications()
+
+  // Transform API team members to match mock member structure
+  const apiTeamMembers = useMemo(() => {
+    const members = apiTeamMembersData?.data || []
+    return members.map((member: any) => ({
+      id: member.id,
+      name: member.name || member.full_name || 'Team Member',
+      email: member.email || '',
+      avatar: member.avatar_url || '',
+      displayName: member.display_name || member.name || 'user',
+      role: member.role || 'member',
+      department: member.department || 'General',
+      status: member.status === 'active' ? 'online' : 'offline',
+      timezone: member.timezone || 'UTC',
+      localTime: new Date().toLocaleTimeString(),
+      slackConnect: false,
+      title: member.title || member.role || 'Team Member'
+    }))
+  }, [apiTeamMembersData])
+
+  // Transform API conversations to channels format
+  const apiChannels = useMemo(() => {
+    const conversations = conversationsData?.data || []
+    return conversations.map((conv: any) => ({
+      id: conv.id,
+      name: conv.title || 'general',
+      type: conv.type === 'channel' ? 'channel' : (conv.type === 'group' ? 'group' : 'dm') as ChannelType,
+      description: conv.description || '',
+      topic: conv.topic || '',
+      memberCount: conv.participants?.length || 1,
+      unreadCount: conv.unread_count || 0,
+      isPrivate: conv.is_private || false,
+      isStarred: false,
+      isMuted: false,
+      createdAt: conv.created_at || new Date().toISOString()
+    }))
+  }, [conversationsData])
+
+  // Enhanced real stats from API
+  const enhancedTeamStats = useMemo(() => ({
+    totalMembers: apiTeamStatsData?.data?.totalMembers || mockMembers.length,
+    activeMembers: apiTeamStatsData?.data?.activeMembers || mockMembers.filter(m => m.status === 'online').length,
+    onlineNow: apiTeamMembers.filter(m => m.status === 'online').length || mockMembers.filter(m => m.status === 'online').length,
+    totalChannels: apiChannels.length || mockChannels.length,
+    unreadMessages: messagingStatsData?.data?.unreadCount || 0,
+    pendingInvitations: invitationsData?.data?.length || 0,
+    totalHuddles: eventsData?.data?.filter((e: any) => e.type === 'huddle').length || mockHuddles.length
+  }), [apiTeamStatsData, apiTeamMembers, apiChannels, messagingStatsData, invitationsData, eventsData])
+
+  // Use API data with fallback to mock data
+  const effectiveMembers = apiTeamMembers.length > 0 ? apiTeamMembers : mockMembers
+  const effectiveChannels = apiChannels.length > 0 ? apiChannels : mockChannels
 
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
