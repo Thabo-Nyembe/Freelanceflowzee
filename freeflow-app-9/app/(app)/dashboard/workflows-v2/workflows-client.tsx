@@ -1,4 +1,6 @@
 'use client'
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useWorkflows
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'

@@ -1,6 +1,8 @@
 // Training V2 - Docebo Level Learning Management System
 // Comprehensive LMS with courses, learning paths, certifications, and gamification
 'use client'
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useTrainingPrograms, useTrainingMutations
 
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'

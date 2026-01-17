@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useTimeTracking
+
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

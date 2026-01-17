@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useState, useMemo, useCallback, useWebhooks
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useWebhooks, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
