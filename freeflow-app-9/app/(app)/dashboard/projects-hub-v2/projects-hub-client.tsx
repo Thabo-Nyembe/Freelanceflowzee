@@ -1,9 +1,26 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { ColumnDef } from '@tanstack/react-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useProjects } from '@/lib/hooks/use-projects'
+import { useProjects as useProjectsOld } from '@/lib/hooks/use-projects'
+import {
+  useProjects as useProjectsApi,
+  useDeleteProject as useDeleteProjectApi,
+  useUpdateProject as useUpdateProjectApi,
+  useProjectStats,
+  useTasks,
+  useUpdateTask,
+  type Project as ApiProject,
+  type ProjectFilters,
+  type Task
+} from '@/lib/api-clients'
+import {
+  DataTable,
+  DataTableColumnHeader,
+  type DataTableFilterConfig
+} from '@/components/world-class/data-table/data-table'
 import { useSprints, useSprintMutations, Sprint as SprintDB } from '@/lib/hooks/use-sprints'
 import { useMilestones, useMilestoneMutations, Milestone as MilestoneDB } from '@/lib/hooks/use-milestones'
 import { useRoadmapInitiatives, useRoadmapMutations, RoadmapInitiative } from '@/lib/hooks/use-roadmap'
@@ -368,8 +385,304 @@ export default function ProjectsHubClient() {
   const [localMilestones, setLocalMilestones] = useState<RoadmapItem[]>([])
   const [localSprints, setLocalSprints] = useState<Sprint[]>([])
 
-  // Database integration - use real projects hook
-  const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
+  // Database integration - use real projects hook (legacy)
+  const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjectsOld()
+
+  // TanStack Query integration for DataTable (new world-class pattern)
+  const [dataTablePage, setDataTablePage] = useState(1)
+  const [dataTablePageSize, setDataTablePageSize] = useState(10)
+  const [dataTableFilters, setDataTableFilters] = useState<ProjectFilters>({})
+  const [selectedProjectRows, setSelectedProjectRows] = useState<Project[]>([])
+
+  const {
+    data: apiProjectsData,
+    isLoading: apiProjectsLoading,
+    error: apiProjectsError,
+    refetch: refetchApiProjects
+  } = useProjectsApi(dataTablePage, dataTablePageSize, dataTableFilters)
+
+  const deleteProjectMutation = useDeleteProjectApi()
+  const updateProjectMutation = useUpdateProjectApi()
+  const { data: projectStatsData } = useProjectStats()
+
+  // Bulk actions for DataTable
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedProjectRows.length === 0) return
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedProjectRows.length} project(s)? This action cannot be undone.`
+    )
+    if (!confirmDelete) return
+
+    try {
+      await Promise.all(
+        selectedProjectRows.map(project => deleteProjectMutation.mutateAsync(project.id))
+      )
+      toast.success(`Successfully deleted ${selectedProjectRows.length} project(s)`)
+      setSelectedProjectRows([])
+    } catch (error) {
+      toast.error('Failed to delete some projects')
+    }
+  }, [selectedProjectRows, deleteProjectMutation])
+
+  const handleBulkArchive = useCallback(async () => {
+    if (selectedProjectRows.length === 0) return
+
+    try {
+      await Promise.all(
+        selectedProjectRows.map(project =>
+          updateProjectMutation.mutateAsync({
+            id: project.id,
+            updates: { status: 'on-hold' as const }
+          })
+        )
+      )
+      toast.success(`Successfully archived ${selectedProjectRows.length} project(s)`)
+      setSelectedProjectRows([])
+    } catch (error) {
+      toast.error('Failed to archive some projects')
+    }
+  }, [selectedProjectRows, updateProjectMutation])
+
+  const handleBulkExport = useCallback(() => {
+    if (selectedProjectRows.length === 0) {
+      toast.error('Select projects to export')
+      return
+    }
+
+    const exportData = selectedProjectRows.map(project => ({
+      id: project.id,
+      name: project.name,
+      status: project.status,
+      priority: project.priority,
+      progress: project.progress,
+      budget: project.budget,
+      spent: project.spent,
+      startDate: project.startDate,
+      endDate: project.endDate
+    }))
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `projects-export-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`Exported ${selectedProjectRows.length} project(s)`)
+  }, [selectedProjectRows])
+
+  // DataTable column definitions
+  const projectColumns: ColumnDef<Project>[] = useMemo(() => [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Project" />
+      ),
+      cell: ({ row }) => (
+        <div>
+          <p className="font-medium">{row.original.name}</p>
+          <p className="text-xs text-gray-500">{row.original.projectCode}</p>
+        </div>
+      ),
+      enableSorting: true,
+      filterFn: 'fuzzy'
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => (
+        <Badge className={getStatusColor(row.original.status)}>
+          {statusColumns.find(c => c.id === row.original.status)?.label || row.original.status}
+        </Badge>
+      ),
+      enableSorting: true,
+      filterFn: 'array'
+    },
+    {
+      accessorKey: 'priority',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Priority" />
+      ),
+      cell: ({ row }) => {
+        const config = getPriorityConfig(row.original.priority)
+        return (
+          <Badge className={`${config.color} text-white`}>
+            {config.label}
+          </Badge>
+        )
+      },
+      enableSorting: true,
+      filterFn: 'array'
+    },
+    {
+      accessorKey: 'progress',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Progress" />
+      ),
+      cell: ({ row }) => (
+        <div className="w-24">
+          <div className="flex justify-between text-xs mb-1">
+            <span>{row.original.progress}%</span>
+          </div>
+          <Progress value={row.original.progress} className="h-1.5" />
+        </div>
+      ),
+      enableSorting: true
+    },
+    {
+      accessorKey: 'budget',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Budget" />
+      ),
+      cell: ({ row }) => (
+        row.original.budget ? (
+          <div>
+            <span className="font-medium">${((row.original.spent || 0) / 1000).toFixed(0)}K</span>
+            <span className="text-gray-500"> / ${(row.original.budget / 1000).toFixed(0)}K</span>
+          </div>
+        ) : '-'
+      ),
+      enableSorting: true
+    },
+    {
+      accessorKey: 'endDate',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Due Date" />
+      ),
+      cell: ({ row }) => (
+        row.original.endDate
+          ? new Date(row.original.endDate).toLocaleDateString()
+          : '-'
+      ),
+      enableSorting: true
+    }
+  ], [])
+
+  // DataTable filter configs
+  const projectFilterConfigs: DataTableFilterConfig[] = useMemo(() => [
+    {
+      columnId: 'status',
+      title: 'Status',
+      options: statusColumns.map(col => ({
+        label: col.label,
+        value: col.id
+      }))
+    },
+    {
+      columnId: 'priority',
+      title: 'Priority',
+      options: [
+        { label: 'Critical', value: 'critical' },
+        { label: 'High', value: 'high' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Low', value: 'low' }
+      ]
+    }
+  ], [])
+
+  // Gantt Chart - Tasks integration for timeline view
+  const [ganttTimeRange, setGanttTimeRange] = useState<'week' | 'month' | 'quarter'>('month')
+  const [draggedTask, setDraggedTask] = useState<string | null>(null)
+
+  const {
+    data: tasksData,
+    isLoading: tasksLoading,
+    refetch: refetchTasks
+  } = useTasks(1, 100) // Fetch all tasks for Gantt view
+
+  const updateTaskMutation = useUpdateTask()
+
+  // Calculate Gantt chart date range
+  const ganttDateRange = useMemo(() => {
+    const now = new Date()
+    let startDate: Date
+    let endDate: Date
+    let daysInRange: number
+
+    switch (ganttTimeRange) {
+      case 'week':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
+        endDate = new Date(startDate)
+        endDate.setDate(endDate.getDate() + 7)
+        daysInRange = 7
+        break
+      case 'quarter':
+        const quarter = Math.floor(now.getMonth() / 3)
+        startDate = new Date(now.getFullYear(), quarter * 3, 1)
+        endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0)
+        daysInRange = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+        break
+      case 'month':
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        daysInRange = endDate.getDate()
+    }
+
+    return { startDate, endDate, daysInRange }
+  }, [ganttTimeRange])
+
+  // Calculate task position in Gantt chart
+  const getTaskGanttPosition = useCallback((task: { start_date?: string | null; deadline?: string | null }) => {
+    const { startDate, endDate, daysInRange } = ganttDateRange
+    const rangeMs = endDate.getTime() - startDate.getTime()
+
+    const taskStart = task.start_date ? new Date(task.start_date) : new Date()
+    const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    const startOffset = Math.max(0, (taskStart.getTime() - startDate.getTime()) / rangeMs * 100)
+    const width = Math.min(100 - startOffset, Math.max(5, (taskEnd.getTime() - taskStart.getTime()) / rangeMs * 100))
+
+    return { left: `${startOffset}%`, width: `${width}%` }
+  }, [ganttDateRange])
+
+  // Handle drag and drop for task scheduling
+  const handleTaskDragStart = useCallback((taskId: string) => {
+    setDraggedTask(taskId)
+  }, [])
+
+  const handleTaskDragEnd = useCallback(async (taskId: string, newStartDate: Date) => {
+    const task = tasksData?.data?.find((t: Task) => t.id === taskId)
+    if (!task) return
+
+    const duration = task.deadline && task.start_date
+      ? new Date(task.deadline).getTime() - new Date(task.start_date).getTime()
+      : 7 * 24 * 60 * 60 * 1000 // Default 7 days
+
+    const newEndDate = new Date(newStartDate.getTime() + duration)
+
+    try {
+      await updateTaskMutation.mutateAsync({
+        id: taskId,
+        updates: {
+          start_date: newStartDate.toISOString().split('T')[0],
+          deadline: newEndDate.toISOString().split('T')[0]
+        }
+      })
+      toast.success('Task rescheduled successfully')
+    } catch (error) {
+      toast.error('Failed to reschedule task')
+    }
+
+    setDraggedTask(null)
+  }, [tasksData, updateTaskMutation])
+
+  // Generate Gantt chart header dates
+  const ganttHeaderDates = useMemo(() => {
+    const { startDate, daysInRange } = ganttDateRange
+    const dates: Date[] = []
+
+    for (let i = 0; i < daysInRange; i++) {
+      const date = new Date(startDate)
+      date.setDate(date.getDate() + i)
+      dates.push(date)
+    }
+
+    return dates
+  }, [ganttDateRange])
 
   // Sprints integration - real Supabase data
   const { sprints: dbSprints, isLoading: sprintsLoading, refetch: refetchSprints } = useSprints()
@@ -782,80 +1095,243 @@ export default function ProjectsHubClient() {
 
             {viewType === 'list' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardContent className="p-0">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th><th className="px-4 py-3"></th></tr></thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {filteredProjects.map(project => (
-                        <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
-                          <td className="px-4 py-4"><div><p className="font-medium">{project.name}</p><p className="text-xs text-gray-500">{project.projectCode}</p></div></td>
-                          <td className="px-4 py-4"><Badge className={getStatusColor(project.status)}>{statusColumns.find(c => c.id === project.status)?.label}</Badge></td>
-                          <td className="px-4 py-4"><div className="w-24"><div className="flex justify-between text-xs mb-1"><span>{project.progress}%</span></div><Progress value={project.progress} className="h-1.5" /></div></td>
-                          <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${(project.spent / 1000).toFixed(0)}K</span><span className="text-gray-500"> / ${(project.budget / 1000).toFixed(0)}K</span></div> : '-'}</td>
-                          <td className="px-4 py-4">{project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}</td>
-                          <td className="px-4 py-4">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                                <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
-                                  <FolderOpen className="h-4 w-4 mr-2" />View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setEditProjectForm({ name: project.name, description: project.description || '', budget: project.budget || 0, priority: project.priority, status: project.status }); setShowEditProjectDialog(true) }}>
-                                  <Edit className="h-4 w-4 mr-2" />Edit Project
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowTeamMemberDialog(true) }}>
-                                  <Users className="h-4 w-4 mr-2" />Add Team Member
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                                {statusColumns.filter(col => col.id !== project.status).map(col => (
-                                  <DropdownMenuItem key={col.id} onClick={() => {
-                                    toast.promise(
-                                      handleUpdateProjectStatus(project.id, col.id as ProjectStatus),
-                                      {
-                                        loading: 'Updating status...',
-                                        success: `Status changed to ${col.label}`,
-                                        error: 'Failed to update status'
-                                      }
-                                    )
-                                  }}>
-                                    <span className={`w-2 h-2 rounded-full ${col.color} mr-2`} />{col.label}
-                                  </DropdownMenuItem>
-                                ))}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleExportProjects()}>
-                                  <Download className="h-4 w-4 mr-2" />Export
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600" onClick={() => { setSelectedProject(project); setShowDeleteProjectDialog(true) }}>
-                                  <Trash2 className="h-4 w-4 mr-2" />Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <CardContent className="p-4">
+                  {/* Bulk Actions Toolbar */}
+                  {selectedProjectRows.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4 p-3 bg-muted rounded-lg">
+                      <span className="text-sm font-medium">{selectedProjectRows.length} selected</span>
+                      <div className="flex-1" />
+                      <Button variant="outline" size="sm" onClick={handleBulkExport}>
+                        <Download className="h-4 w-4 mr-2" />Export
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleBulkArchive}>
+                        <Archive className="h-4 w-4 mr-2" />Archive
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                        <Trash2 className="h-4 w-4 mr-2" />Delete
+                      </Button>
+                    </div>
+                  )}
+
+                  <DataTable
+                    columns={projectColumns}
+                    data={filteredProjects}
+                    isLoading={projectsLoading || apiProjectsLoading}
+                    isError={!!apiProjectsError}
+                    errorMessage={apiProjectsError?.message}
+                    onRetry={() => refetchApiProjects()}
+                    enableRowSelection={true}
+                    onRowSelectionChange={setSelectedProjectRows}
+                    enableSorting={true}
+                    enableFiltering={true}
+                    enableGlobalFilter={true}
+                    searchPlaceholder="Search projects..."
+                    filterConfigs={projectFilterConfigs}
+                    enablePagination={true}
+                    defaultPageSize={10}
+                    pageSizeOptions={[10, 20, 50, 100]}
+                    enableColumnVisibility={true}
+                    showExport={true}
+                    showRefresh={true}
+                    showAdd={true}
+                    addButtonLabel="New Project"
+                    onAdd={() => setShowNewProjectDialog(true)}
+                    onRefresh={() => { fetchProjects(); refetchApiProjects() }}
+                    onRowView={(project) => { setSelectedProject(project); setShowProjectDialog(true) }}
+                    onRowEdit={(project) => {
+                      setSelectedProject(project)
+                      setEditProjectForm({
+                        name: project.name,
+                        description: project.description || '',
+                        budget: project.budget || 0,
+                        priority: project.priority,
+                        status: project.status
+                      })
+                      setShowEditProjectDialog(true)
+                    }}
+                    onRowDelete={(project) => {
+                      setSelectedProject(project)
+                      setShowDeleteProjectDialog(true)
+                    }}
+                    onRowClick={(project) => { setSelectedProject(project); setShowProjectDialog(true) }}
+                    emptyState={{
+                      title: "No projects found",
+                      description: "Get started by creating your first project.",
+                      action: {
+                        label: "Create Project",
+                        onClick: () => setShowNewProjectDialog(true)
+                      }
+                    }}
+                  />
                 </CardContent>
               </Card>
             )}
 
             {viewType === 'timeline' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><GanttChartSquare className="h-5 w-5" />Project Timeline</CardTitle></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <GanttChartSquare className="h-5 w-5" />Gantt Chart - Project Timeline
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Select value={ganttTimeRange} onValueChange={(v) => setGanttTimeRange(v as 'week' | 'month' | 'quarter')}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="week">This Week</SelectItem>
+                        <SelectItem value="month">This Month</SelectItem>
+                        <SelectItem value="quarter">This Quarter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" size="sm" onClick={() => refetchTasks()}>
+                      <RefreshCw className="h-4 w-4 mr-2" />Refresh
+                    </Button>
+                  </div>
+                </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {filteredProjects.map(project => (
-                      <div key={project.id} className="flex items-center gap-4">
-                        <div className="w-48 truncate text-sm font-medium">{project.name}</div>
-                        <div className="flex-1 relative h-8 bg-muted rounded"><div className={`absolute h-full rounded ${getStatusColor(project.status)} opacity-80`} style={{ left: '10%', width: `${Math.max(project.progress, 10)}%` }}><div className="px-2 text-xs text-white truncate leading-8">{project.progress}%</div></div></div>
-                        <div className="w-20 text-right text-sm text-gray-500">{project.endDate ? new Date(project.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-'}</div>
+                  {/* Gantt Chart Header - Date Range */}
+                  <div className="mb-4 overflow-x-auto">
+                    <div className="min-w-[800px]">
+                      {/* Date headers */}
+                      <div className="flex border-b pb-2 mb-2">
+                        <div className="w-48 flex-shrink-0 font-medium text-sm">Project / Task</div>
+                        <div className="flex-1 flex">
+                          {ganttTimeRange === 'week' && ganttHeaderDates.map((date, i) => (
+                            <div key={i} className="flex-1 text-center text-xs text-gray-500">
+                              {date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}
+                            </div>
+                          ))}
+                          {ganttTimeRange === 'month' && (
+                            <>
+                              <div className="w-1/4 text-center text-xs text-gray-500">Week 1</div>
+                              <div className="w-1/4 text-center text-xs text-gray-500">Week 2</div>
+                              <div className="w-1/4 text-center text-xs text-gray-500">Week 3</div>
+                              <div className="w-1/4 text-center text-xs text-gray-500">Week 4</div>
+                            </>
+                          )}
+                          {ganttTimeRange === 'quarter' && (
+                            <>
+                              <div className="w-1/3 text-center text-xs text-gray-500">Month 1</div>
+                              <div className="w-1/3 text-center text-xs text-gray-500">Month 2</div>
+                              <div className="w-1/3 text-center text-xs text-gray-500">Month 3</div>
+                            </>
+                          )}
+                        </div>
+                        <div className="w-24 text-right text-xs text-gray-500">Due Date</div>
                       </div>
-                    ))}
+
+                      {/* Projects and their tasks */}
+                      <div className="space-y-1">
+                        {filteredProjects.map(project => {
+                          const projectTasks = tasksData?.data?.filter((t: Task) => t.project_id === project.id) || []
+                          const projectPosition = getTaskGanttPosition({
+                            start_date: project.startDate,
+                            deadline: project.endDate
+                          })
+
+                          return (
+                            <div key={project.id} className="group">
+                              {/* Project row */}
+                              <div
+                                className="flex items-center gap-4 py-2 hover:bg-muted/50 rounded cursor-pointer"
+                                onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}
+                              >
+                                <div className="w-48 flex-shrink-0 flex items-center gap-2">
+                                  <div className={`w-2 h-2 rounded-full ${getStatusColor(project.status)}`} />
+                                  <span className="text-sm font-medium truncate">{project.name}</span>
+                                </div>
+                                <div className="flex-1 relative h-6 bg-muted/30 rounded">
+                                  <div
+                                    className={`absolute h-full rounded ${getStatusColor(project.status)} opacity-70 transition-all`}
+                                    style={projectPosition}
+                                  >
+                                    <div className="px-2 text-xs text-white truncate leading-6">
+                                      {project.progress}%
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="w-24 text-right text-xs text-gray-500">
+                                  {project.endDate ? new Date(project.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-'}
+                                </div>
+                              </div>
+
+                              {/* Task rows for this project (draggable) */}
+                              {projectTasks.slice(0, 5).map((task: Task) => {
+                                const taskPosition = getTaskGanttPosition(task)
+                                return (
+                                  <div
+                                    key={task.id}
+                                    className="flex items-center gap-4 py-1 pl-4 hover:bg-muted/30 rounded cursor-move"
+                                    draggable
+                                    onDragStart={() => handleTaskDragStart(task.id)}
+                                    onDragEnd={(e) => {
+                                      const container = e.currentTarget.parentElement?.querySelector('.relative.h-5') as HTMLElement
+                                      if (container) {
+                                        const rect = container.getBoundingClientRect()
+                                        const relativeX = e.clientX - rect.left
+                                        const percentage = relativeX / rect.width
+                                        const { startDate, daysInRange } = ganttDateRange
+                                        const newDate = new Date(startDate.getTime() + percentage * daysInRange * 24 * 60 * 60 * 1000)
+                                        handleTaskDragEnd(task.id, newDate)
+                                      }
+                                    }}
+                                  >
+                                    <div className="w-44 flex-shrink-0 flex items-center gap-2 text-xs text-gray-600">
+                                      <CheckSquare className="h-3 w-3" />
+                                      <span className="truncate">{task.title}</span>
+                                    </div>
+                                    <div className="flex-1 relative h-5 bg-muted/20 rounded">
+                                      <div
+                                        className={`absolute h-full rounded transition-all ${
+                                          draggedTask === task.id
+                                            ? 'bg-blue-500 opacity-100 ring-2 ring-blue-300'
+                                            : task.status === 'completed'
+                                              ? 'bg-green-400 opacity-60'
+                                              : task.status === 'in_progress'
+                                                ? 'bg-blue-400 opacity-60'
+                                                : 'bg-gray-400 opacity-60'
+                                        }`}
+                                        style={taskPosition}
+                                      >
+                                        <div className="px-1 text-[10px] text-white truncate leading-5">
+                                          {task.title}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="w-24 text-right text-[10px] text-gray-400">
+                                      {task.deadline ? new Date(task.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-'}
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                              {projectTasks.length > 5 && (
+                                <div className="pl-4 text-xs text-gray-400">
+                                  +{projectTasks.length - 5} more tasks
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Loading state */}
+                      {(projectsLoading || tasksLoading) && (
+                        <div className="flex items-center justify-center py-8">
+                          <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+                          <span className="text-gray-500">Loading timeline...</span>
+                        </div>
+                      )}
+
+                      {/* Empty state */}
+                      {!projectsLoading && !tasksLoading && filteredProjects.length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                          <GanttChartSquare className="h-12 w-12 mb-4 text-gray-300" />
+                          <p className="text-lg font-medium mb-2">No projects to display</p>
+                          <p className="text-sm">Create a project to see it in the timeline</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
