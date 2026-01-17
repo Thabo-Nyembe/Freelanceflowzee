@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -57,67 +58,6 @@ interface GalleryFilter {
   sortBy: 'recent' | 'oldest' | 'name' | 'project'
 }
 
-// Mock Gallery Data
-const GALLERY_ITEMS: GalleryItem[] = [
-  {
-    id: 1,
-    name: 'Logo Concepts v3',
-    project: 'Brand Identity Redesign',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-25',
-    fileSize: '2.4 MB',
-    imageUrl: '/gallery/logo-concepts.jpg',
-    type: 'image',
-    description: 'Final logo concept variations with brand colors',
-    status: 'approved'
-  },
-  {
-    id: 2,
-    name: 'Brand Guidelines Draft',
-    project: 'Brand Identity Redesign',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-20',
-    fileSize: '5.1 MB',
-    type: 'document',
-    description: 'Complete brand guidelines document with usage rules',
-    status: 'approved'
-  },
-  {
-    id: 3,
-    name: 'Website Homepage Mockup',
-    project: 'Website Development',
-    uploadedBy: 'Alex Thompson',
-    uploadDate: '2024-01-18',
-    fileSize: '8.7 MB',
-    imageUrl: '/gallery/website-mockup.jpg',
-    type: 'image',
-    description: 'Responsive homepage mockup for desktop and mobile',
-    status: 'pending-review'
-  },
-  {
-    id: 4,
-    name: 'Product Demo Video',
-    project: 'Website Development',
-    uploadedBy: 'Michael Chen',
-    uploadDate: '2024-01-15',
-    fileSize: '156 MB',
-    type: 'video',
-    description: 'Walking through complete website functionality',
-    status: 'approved'
-  },
-  {
-    id: 5,
-    name: 'Color Palette Variations',
-    project: 'Brand Identity Redesign',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-10',
-    fileSize: '1.2 MB',
-    imageUrl: '/gallery/color-palette.jpg',
-    type: 'image',
-    description: 'Multiple color palette options for brand identity',
-    status: 'revision-needed'
-  }
-]
 
 export default function GalleryPage() {
   const router = useRouter()
@@ -151,11 +91,12 @@ export default function GalleryPage() {
         const response = await fetch('/api/client-zone/gallery')
         if (!response.ok) throw new Error('Failed to load gallery')
 
-        setGalleryItems(GALLERY_ITEMS)
+        const data = await response.json()
+        setGalleryItems(data)
         setIsLoading(false)
         announce('Gallery loaded successfully', 'polite')
         logger.info('Gallery data loaded', {
-          itemCount: GALLERY_ITEMS.length
+          itemCount: data.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load gallery'

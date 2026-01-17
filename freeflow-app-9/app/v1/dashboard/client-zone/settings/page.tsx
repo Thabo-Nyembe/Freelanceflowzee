@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -87,109 +88,6 @@ export default function SettingsPage() {
       try {
         setIsLoading(true)
         setError(null)
-
-        // Initialize notification settings
-        const notifications: NotificationSetting[] = [
-          {
-            id: 'project-updates',
-            label: 'Project Updates',
-            description: 'Get notified about project progress and milestones',
-            enabled: true,
-            icon: FileText,
-            category: 'project'
-          },
-          {
-            id: 'deliverable-status',
-            label: 'Deliverable Status Changes',
-            description: 'Receive alerts when deliverables change status',
-            enabled: true,
-            icon: Check,
-            category: 'project'
-          },
-          {
-            id: 'team-messages',
-            label: 'Team Messages',
-            description: 'Get notified about new messages from your team',
-            enabled: true,
-            icon: MessageSquare,
-            category: 'communication'
-          },
-          {
-            id: 'meeting-reminders',
-            label: 'Meeting Reminders',
-            description: 'Reminders for scheduled meetings and calls',
-            enabled: true,
-            icon: Clock,
-            category: 'communication'
-          },
-          {
-            id: 'invoice-notifications',
-            label: 'Invoice Notifications',
-            description: 'New invoices and payment due dates',
-            enabled: true,
-            icon: FileText,
-            category: 'payment'
-          },
-          {
-            id: 'payment-confirmed',
-            label: 'Payment Confirmations',
-            description: 'Confirmation when payments are received',
-            enabled: true,
-            icon: Check,
-            category: 'payment'
-          },
-          {
-            id: 'system-updates',
-            label: 'System Updates',
-            description: 'Platform updates and maintenance notices',
-            enabled: false,
-            icon: Zap,
-            category: 'system'
-          },
-          {
-            id: 'feature-announcements',
-            label: 'Feature Announcements',
-            description: 'New features and improvements',
-            enabled: true,
-            icon: Bell,
-            category: 'system'
-          }
-        ]
-
-        // Initialize privacy settings
-        const privacy: PrivacySetting[] = [
-          {
-            id: 'profile-visibility',
-            label: 'Profile Visibility',
-            description: 'Allow your profile to be visible to other users',
-            enabled: true,
-            icon: Eye
-          },
-          {
-            id: 'testimonials-public',
-            label: 'Public Testimonials',
-            description: 'Allow your feedback to appear in public testimonials',
-            enabled: true,
-            icon: MessageSquare
-          },
-          {
-            id: 'analytics-sharing',
-            label: 'Analytics Sharing',
-            description: 'Share project analytics with team members',
-            enabled: true,
-            icon: Database
-          },
-          {
-            id: 'activity-visibility',
-            label: 'Activity History',
-            description: 'Show your activity history to project team',
-            enabled: false,
-            icon: Clock
-          }
-        ]
-
-        setNotificationSettings(notifications)
-        setPrivacySettings(privacy)
         setEmail(KAZI_CLIENT_DATA.clientInfo.email)
         setPhone(KAZI_CLIENT_DATA.clientInfo.phone)
 

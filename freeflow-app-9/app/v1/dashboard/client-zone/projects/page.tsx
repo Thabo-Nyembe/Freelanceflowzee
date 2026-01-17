@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Verified database hook integration
 'use client'
 
 import { useState, useEffect } from 'react'

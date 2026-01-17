@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -43,50 +44,6 @@ interface ExtendedMessage extends Message {
   attachments?: { name: string; size: string }[]
 }
 
-const EXTENDED_MESSAGES: ExtendedMessage[] = [
-  {
-    id: 1,
-    sender: 'Sarah Johnson',
-    role: 'Designer',
-    message: 'Hi John! I\'ve uploaded the latest logo concepts for your review. Please let me know your thoughts on the color variations.',
-    timestamp: '2 hours ago',
-    avatar: '/avatars/sarah.jpg',
-    unread: true,
-    isRead: false,
-    likes: 1,
-    replies: 2,
-    attachments: [
-      { name: 'Logo-Concepts.zip', size: '15.7 MB' }
-    ]
-  },
-  {
-    id: 2,
-    sender: 'Michael Chen',
-    role: 'Developer',
-    message: 'The website staging environment is ready for your review. You can access it using the credentials I sent earlier.',
-    timestamp: '45 minutes ago',
-    avatar: '/avatars/michael.jpg',
-    unread: true,
-    isRead: false,
-    likes: 0,
-    replies: 1,
-    attachments: []
-  },
-  {
-    id: 3,
-    sender: 'Alex Thompson',
-    role: 'Project Manager',
-    message: 'Just confirming our meeting tomorrow at 2 PM. Looking forward to discussing the final design phase.',
-    timestamp: '1 day ago',
-    avatar: '/avatars/alex.jpg',
-    unread: false,
-    isRead: true,
-    likes: 0,
-    replies: 0,
-    attachments: []
-  }
-]
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -103,12 +60,12 @@ export default function MessagesPage() {
   const router = useRouter()
 
   // MESSAGE STATE
-  const [messages, setMessages] = useState<ExtendedMessage[]>(EXTENDED_MESSAGES)
+  const [messages, setMessages] = useState<ExtendedMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMessage, setSelectedMessage] = useState<ExtendedMessage | null>(null)
-  const [filteredMessages, setFilteredMessages] = useState<ExtendedMessage[]>(EXTENDED_MESSAGES)
-  const [unreadCount, setUnreadCount] = useState(EXTENDED_MESSAGES.filter(m => m.unread).length)
+  const [filteredMessages, setFilteredMessages] = useState<ExtendedMessage[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
   // A+++ LOAD MESSAGE DATA
   useEffect(() => {

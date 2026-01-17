@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -57,166 +58,6 @@ interface Invoice {
   paymentMethod?: string
 }
 
-// Mock Invoice Data
-const INVOICES: Invoice[] = [
-  {
-    id: 1,
-    number: 'INV-001',
-    project: 'Brand Identity Package',
-    amount: 3500,
-    items: [
-      { description: 'Logo Design', quantity: 1, unitPrice: 1500, total: 1500 },
-      {
-        description: 'Brand Guidelines',
-        quantity: 1,
-        unitPrice: 1200,
-        total: 1200
-      },
-      {
-        description: 'Business Card Design',
-        quantity: 1,
-        unitPrice: 800,
-        total: 800
-      }
-    ],
-    dueDate: '2024-01-30',
-    issueDate: '2024-01-15',
-    status: 'pending',
-    description: 'Brand Identity Redesign - Phase 1',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    notes: 'Please remit payment within 15 days of invoice date'
-  },
-  {
-    id: 2,
-    number: 'INV-002',
-    project: 'Website Development',
-    amount: 12000,
-    items: [
-      {
-        description: 'Website Design & UX',
-        quantity: 1,
-        unitPrice: 5000,
-        total: 5000
-      },
-      { description: 'CMS Integration', quantity: 1, unitPrice: 4000, total: 4000 },
-      { description: 'Testing & QA', quantity: 1, unitPrice: 3000, total: 3000 }
-    ],
-    dueDate: '2024-01-15',
-    issueDate: '2024-01-01',
-    paidDate: '2024-01-15',
-    status: 'paid',
-    description: 'Website Development - Complete Project',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    paymentMethod: 'Credit Card',
-    notes: 'Thank you for prompt payment'
-  },
-  {
-    id: 3,
-    number: 'INV-003',
-    project: 'Brand Identity Redesign',
-    amount: 5000,
-    items: [
-      {
-        description: 'Color Palette Development',
-        quantity: 1,
-        unitPrice: 2000,
-        total: 2000
-      },
-      {
-        description: 'Typography Selection',
-        quantity: 1,
-        unitPrice: 1500,
-        total: 1500
-      },
-      {
-        description: 'Brand Asset Creation',
-        quantity: 1,
-        unitPrice: 1500,
-        total: 1500
-      }
-    ],
-    dueDate: '2024-02-10',
-    issueDate: '2024-01-25',
-    status: 'overdue',
-    description: 'Brand Identity Redesign - Phase 2',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    notes: 'This invoice is now overdue. Please remit payment immediately.'
-  },
-  {
-    id: 4,
-    number: 'INV-004',
-    project: 'Marketing Collateral',
-    amount: 2500,
-    items: [
-      {
-        description: 'Brochure Design (Tri-fold)',
-        quantity: 2,
-        unitPrice: 750,
-        total: 1500
-      },
-      {
-        description: 'Social Media Templates',
-        quantity: 1,
-        unitPrice: 1000,
-        total: 1000
-      }
-    ],
-    dueDate: '2024-02-20',
-    issueDate: '2024-02-05',
-    status: 'pending',
-    description: 'Marketing Collateral Design',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    notes: 'Editable template files included'
-  },
-  {
-    id: 5,
-    number: 'INV-005',
-    project: 'Website Development',
-    amount: 3000,
-    items: [
-      {
-        description: 'Maintenance & Support (Monthly)',
-        quantity: 3,
-        unitPrice: 1000,
-        total: 3000
-      }
-    ],
-    dueDate: '2024-01-20',
-    issueDate: '2024-01-05',
-    paidDate: '2024-01-20',
-    status: 'paid',
-    description: 'Website Maintenance & Support - Q1 2024',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    paymentMethod: 'Bank Transfer',
-    notes: 'Recurring monthly service'
-  },
-  {
-    id: 6,
-    number: 'INV-006',
-    project: 'Brand Identity Redesign',
-    amount: 1500,
-    items: [
-      {
-        description: 'Additional Logo Revisions',
-        quantity: 3,
-        unitPrice: 500,
-        total: 1500
-      }
-    ],
-    dueDate: '2024-02-05',
-    issueDate: '2024-01-20',
-    status: 'disputed',
-    description: 'Additional Services - Logo Revisions',
-    clientName: 'Acme Corporation',
-    clientEmail: 'john@acme.com',
-    notes: 'Client disputed charges for revisions'
-  }
-]
 
 export default function InvoicesPage() {
   const router = useRouter()
@@ -247,11 +88,12 @@ export default function InvoicesPage() {
         const response = await fetch('/api/client-zone/invoices')
         if (!response.ok) throw new Error('Failed to load invoices')
 
-        setInvoices(INVOICES)
+        const data = await response.json()
+        setInvoices(data)
         setIsLoading(false)
         announce('Invoices loaded successfully', 'polite')
         logger.info('Invoices data loaded', {
-          invoiceCount: INVOICES.length
+          invoiceCount: data.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load invoices'

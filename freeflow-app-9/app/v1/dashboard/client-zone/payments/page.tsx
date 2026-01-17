@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -57,121 +58,6 @@ interface PaymentHistory {
   transactionId: string
 }
 
-// Mock Payment Data
-const MILESTONES: Milestone[] = [
-  {
-    id: 1,
-    name: 'Logo Concepts',
-    description: 'Initial logo concept presentation and client approval',
-    project: 'Brand Identity Redesign',
-    amount: 2000,
-    releaseCondition: 'Client approval of initial concepts',
-    status: 'released',
-    completionDate: '2024-01-20',
-    releaseDate: '2024-01-21',
-    dueDate: '2024-01-25',
-    approvalNotes: 'All concepts approved. Moving forward with refinement.'
-  },
-  {
-    id: 2,
-    name: 'Color Palette & Typography',
-    description: 'Finalized brand color palette and typography selection',
-    project: 'Brand Identity Redesign',
-    amount: 1500,
-    releaseCondition: 'Completion and approval of brand color system',
-    status: 'in-escrow',
-    completionDate: '2024-01-25',
-    dueDate: '2024-02-01',
-    approvalNotes: 'Awaiting final client approval'
-  },
-  {
-    id: 3,
-    name: 'Brand Guidelines Document',
-    description: 'Comprehensive brand guidelines and asset package',
-    project: 'Brand Identity Redesign',
-    amount: 2000,
-    releaseCondition: 'Delivery and approval of complete guidelines document',
-    status: 'completed',
-    completionDate: '2024-02-05',
-    dueDate: '2024-02-10',
-    approvalNotes: 'Ready for client approval'
-  },
-  {
-    id: 4,
-    name: 'Website Design Mockups',
-    description: 'Desktop and mobile design mockups for website',
-    project: 'Website Development',
-    amount: 5000,
-    releaseCondition: 'Completion of all page designs and client feedback integration',
-    status: 'completed',
-    completionDate: '2024-01-22',
-    dueDate: '2024-01-30',
-    approvalNotes: 'Designs completed. Awaiting your approval to proceed.'
-  },
-  {
-    id: 5,
-    name: 'CMS Integration & Testing',
-    description: 'Complete CMS setup and quality assurance testing',
-    project: 'Website Development',
-    amount: 4000,
-    releaseCondition: 'Successful completion of QA and staging deployment',
-    status: 'released',
-    completionDate: '2024-01-20',
-    releaseDate: '2024-01-22',
-    dueDate: '2024-02-05'
-  },
-  {
-    id: 6,
-    name: 'Website Launch & Training',
-    description: 'Live deployment and client training session',
-    project: 'Website Development',
-    amount: 3000,
-    releaseCondition: 'Production deployment and completion of client training',
-    status: 'in-escrow',
-    completionDate: '2024-01-25',
-    dueDate: '2024-02-10',
-    approvalNotes: 'Awaiting final launch approval and sign-off'
-  }
-]
-
-const PAYMENT_HISTORY: PaymentHistory[] = [
-  {
-    id: 1,
-    date: '2024-01-21',
-    milestone: 'Logo Concepts',
-    amount: 2000,
-    type: 'release',
-    status: 'completed',
-    transactionId: 'TXN-2024-001'
-  },
-  {
-    id: 2,
-    date: '2024-01-22',
-    milestone: 'CMS Integration & Testing',
-    amount: 4000,
-    type: 'release',
-    status: 'completed',
-    transactionId: 'TXN-2024-002'
-  },
-  {
-    id: 3,
-    date: '2024-01-25',
-    milestone: 'Color Palette & Typography',
-    amount: 1500,
-    type: 'hold',
-    status: 'pending',
-    transactionId: 'TXN-2024-003'
-  },
-  {
-    id: 4,
-    date: '2024-01-22',
-    milestone: 'Website Design Mockups',
-    amount: 5000,
-    type: 'hold',
-    status: 'pending',
-    transactionId: 'TXN-2024-004'
-  }
-]
 
 export default function PaymentsPage() {
   const router = useRouter()
@@ -207,13 +93,14 @@ export default function PaymentsPage() {
         const response = await fetch('/api/client-zone/payments')
         if (!response.ok) throw new Error('Failed to load payments')
 
-        setMilestones(MILESTONES)
-        setPaymentHistory(PAYMENT_HISTORY)
+        const data = await response.json()
+        setMilestones(data.milestones || [])
+        setPaymentHistory(data.paymentHistory || [])
         setIsLoading(false)
         announce('Payments loaded successfully', 'polite')
         logger.info('Payments data loaded', {
-          milestoneCount: MILESTONES.length,
-          historyCount: PAYMENT_HISTORY.length
+          milestoneCount: data.milestones?.length || 0,
+          historyCount: data.paymentHistory?.length || 0
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load payments'

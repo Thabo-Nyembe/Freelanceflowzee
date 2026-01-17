@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -56,77 +57,6 @@ interface Meeting {
   notes?: string
 }
 
-// Mock Meeting Data
-const MEETINGS: Meeting[] = [
-  {
-    id: 1,
-    title: 'Project Review Meeting',
-    description: 'Quarterly review of Brand Identity project progress and deliverables',
-    date: '2024-02-01',
-    time: '14:00',
-    duration: 60,
-    meetingType: 'video-call',
-    attendees: ['Sarah Johnson', 'Michael Chen', 'John Smith'],
-    meetingUrl: 'https://meet.google.com/abc-defg-hij',
-    status: 'scheduled',
-    project: 'Brand Identity Redesign',
-    notes: 'Bring logo concepts for final approval'
-  },
-  {
-    id: 2,
-    title: 'Final Presentation',
-    description: 'Final presentation and delivery of all project assets',
-    date: '2024-02-05',
-    time: '10:00',
-    duration: 90,
-    meetingType: 'in-person',
-    attendees: ['Alex Thompson', 'Lisa Wang', 'John Smith', 'Sarah Johnson'],
-    location: '123 Design Studio, Tech Street, City, ST 12345',
-    status: 'scheduled',
-    project: 'Brand Identity Redesign',
-    notes: 'Bring printed samples and presentation deck'
-  },
-  {
-    id: 3,
-    title: 'Website Walkthrough',
-    description: 'Complete walkthrough of the new website functionality',
-    date: '2024-01-30',
-    time: '15:00',
-    duration: 45,
-    meetingType: 'video-call',
-    attendees: ['Alex Thompson', 'Lisa Wang'],
-    meetingUrl: 'https://meet.google.com/xyz-uvwx-yz',
-    status: 'scheduled',
-    project: 'Website Development'
-  },
-  {
-    id: 4,
-    title: 'Weekly Sync',
-    description: 'Weekly project update and discussion',
-    date: '2024-01-25',
-    time: '11:00',
-    duration: 30,
-    meetingType: 'phone-call',
-    attendees: ['Sarah Johnson'],
-    status: 'completed',
-    project: 'Brand Identity Redesign',
-    notes: 'Discussed color palette feedback'
-  },
-  {
-    id: 5,
-    title: 'Project Kickoff',
-    description: 'Initial project kickoff and requirements discussion',
-    date: '2024-01-15',
-    time: '09:00',
-    duration: 120,
-    meetingType: 'video-call',
-    attendees: ['Sarah Johnson', 'Michael Chen', 'Alex Thompson'],
-    meetingUrl: 'https://meet.google.com/old-meeting-link',
-    status: 'completed',
-    project: 'Website Development',
-    notes: 'Defined scope and timeline'
-  }
-]
 
 export default function CalendarPage() {
   const router = useRouter()
@@ -154,11 +84,12 @@ export default function CalendarPage() {
         const response = await fetch('/api/client-zone/calendar')
         if (!response.ok) throw new Error('Failed to load calendar')
 
-        setMeetings(MEETINGS)
+        const data = await response.json()
+        setMeetings(data.meetings || [])
         setIsLoading(false)
         announce('Calendar loaded successfully', 'polite')
         logger.info('Calendar data loaded', {
-          meetingCount: MEETINGS.length
+          meetingCount: data.meetings?.length || 0
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load calendar'

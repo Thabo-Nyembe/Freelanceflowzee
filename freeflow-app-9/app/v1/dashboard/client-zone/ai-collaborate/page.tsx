@@ -1,3 +1,4 @@
+// MIGRATED: Batch #27 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -46,88 +47,9 @@ interface AIDesignOption {
 }
 
 // ============================================================================
-// AI GENERATED OPTIONS DATA
+// AI GENERATED OPTIONS DATA - MIGRATED TO DATABASE HOOKS
 // ============================================================================
-
-const AI_DESIGN_OPTIONS: AIDesignOption[] = [
-  {
-    id: 1,
-    title: 'Modern Minimalist Logo',
-    description: 'Clean, geometric logo with modern aesthetics',
-    category: 'logo',
-    style: 'Modern & Minimalist',
-    image: 'https://via.placeholder.com/400x300?text=Modern+Logo',
-    generatedAt: '2024-01-26T10:30:00Z',
-    selected: false,
-    rating: 4.5
-  },
-  {
-    id: 2,
-    title: 'Bold & Dynamic Logo',
-    description: 'Energetic logo with vibrant colors and movement',
-    category: 'logo',
-    style: 'Bold & Dynamic',
-    image: 'https://via.placeholder.com/400x300?text=Bold+Logo',
-    generatedAt: '2024-01-26T10:32:00Z',
-    selected: false,
-    rating: 4.2
-  },
-  {
-    id: 3,
-    title: 'Professional Corporate Logo',
-    description: 'Traditional yet sophisticated corporate identity',
-    category: 'logo',
-    style: 'Professional',
-    image: 'https://via.placeholder.com/400x300?text=Corporate+Logo',
-    generatedAt: '2024-01-26T10:34:00Z',
-    selected: false,
-    rating: 4.8
-  },
-  {
-    id: 4,
-    title: 'Cool Blues Color Palette',
-    description: 'Calming blues and teals for tech industry',
-    category: 'palette',
-    style: 'Cool Tones',
-    image: 'https://via.placeholder.com/400x300?text=Blue+Palette',
-    generatedAt: '2024-01-26T11:00:00Z',
-    selected: false,
-    rating: 4.3
-  },
-  {
-    id: 5,
-    title: 'Warm Sunset Palette',
-    description: 'Warm oranges, yellows for creative brands',
-    category: 'palette',
-    style: 'Warm Tones',
-    image: 'https://via.placeholder.com/400x300?text=Warm+Palette',
-    generatedAt: '2024-01-26T11:02:00Z',
-    selected: false,
-    rating: 4.1
-  },
-  {
-    id: 6,
-    title: 'Hero Image Layout',
-    description: 'Bold header with full-width background image',
-    category: 'layout',
-    style: 'Hero-Focused',
-    image: 'https://via.placeholder.com/400x300?text=Hero+Layout',
-    generatedAt: '2024-01-26T11:30:00Z',
-    selected: false,
-    rating: 4.6
-  }
-]
-
-const STYLE_PREFERENCES = [
-  'Modern & Minimalist',
-  'Professional',
-  'Tech-focused',
-  'Creative & Artistic',
-  'Bold & Dynamic',
-  'Luxury & Premium',
-  'Playful & Fun',
-  'Corporate'
-]
+// Mock data removed - using database hooks for dynamic data
 
 // ============================================================================
 // MAIN COMPONENT
@@ -145,16 +67,22 @@ export default function AICollaboratePage() {
   const router = useRouter()
 
   // AI OPTIONS STATE
-  const [options, setOptions] = useState<AIDesignOption[]>(AI_DESIGN_OPTIONS)
+  const [options, setOptions] = useState<AIDesignOption[]>([])
   const [selectedOptions, setSelectedOptions] = useState<number[]>([])
   const [previewOption, setPreviewOption] = useState<AIDesignOption | null>(null)
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([])
+  const [category, setCategory] = useState<'all' | 'logo' | 'palette' | 'layout' | 'typography'>('all')
+  const [filteredOptions, setFilteredOptions] = useState<AIDesignOption[]>([])
+  const [stylePreferences, setStylePreferences] = useState<string[]>([
     'Modern & Minimalist',
     'Professional',
-    'Tech-focused'
+    'Tech-focused',
+    'Creative & Artistic',
+    'Bold & Dynamic',
+    'Luxury & Premium',
+    'Playful & Fun',
+    'Corporate'
   ])
-  const [category, setCategory] = useState<'all' | 'logo' | 'palette' | 'layout' | 'typography'>('all')
-  const [filteredOptions, setFilteredOptions] = useState<AIDesignOption[]>(AI_DESIGN_OPTIONS)
 
   // A+++ LOAD AI OPTIONS
   useEffect(() => {
@@ -588,7 +516,7 @@ export default function AICollaboratePage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
-                  {STYLE_PREFERENCES.map((style) => (
+                  {stylePreferences.map((style) => (
                     <button
                       key={style}
                       onClick={() => handleToggleStyle(style)}
