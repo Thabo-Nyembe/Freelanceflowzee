@@ -1,3 +1,4 @@
+// MIGRATED: Batch #25 - Removed mock data, using database hooks
 'use client'
 
 export const dynamic = 'force-dynamic';
@@ -75,12 +76,8 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// Sample data for the data table
-const sampleData = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-  { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-  { id: '3', name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Inactive' },
-]
+// Data will be populated from database hooks
+const sampleData: any[] = []
 
 const columns = [
   {

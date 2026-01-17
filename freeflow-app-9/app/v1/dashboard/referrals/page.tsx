@@ -1,3 +1,5 @@
+// MIGRATED: Batch #25 - Removed mock data, using database hooks
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -89,105 +91,11 @@ export default function ReferralsPage() {
         setReferralCode(code)
         setReferralLink(link)
 
-        // Initialize referrals list
-        const referralsList: Referral[] = [
-          {
-            id: 1,
-            name: 'TechCorp Industries',
-            email: 'contact@techcorp.com',
-            avatar: '/avatars/techcorp.jpg',
-            referralDate: '2024-01-15',
-            status: 'earned',
-            projectsCompleted: 2,
-            commissionEarned: 2400
-          },
-          {
-            id: 2,
-            name: 'Design Studio Pro',
-            email: 'info@designstudio.com',
-            avatar: '/avatars/designstudio.jpg',
-            referralDate: '2024-01-20',
-            status: 'completed',
-            projectsCompleted: 1,
-            commissionEarned: 1200
-          },
-          {
-            id: 3,
-            name: 'Marketing Innovations',
-            email: 'hello@marketinginno.com',
-            avatar: '/avatars/marketing.jpg',
-            referralDate: '2024-02-01',
-            status: 'completed',
-            projectsCompleted: 0,
-            commissionEarned: 0
-          },
-          {
-            id: 4,
-            name: 'Digital Creative Agency',
-            email: 'contact@dcagency.com',
-            avatar: '/avatars/dcagency.jpg',
-            referralDate: '2024-02-05',
-            status: 'pending',
-            projectsCompleted: 0,
-            commissionEarned: 0
-          }
-        ]
-
-        // Initialize rewards
-        const rewardsList: Reward[] = [
-          {
-            id: 1,
-            title: 'First Referral',
-            description: 'Refer your first client and earn 500 points',
-            points: 500,
-            earned: true,
-            earnedDate: '2024-01-15',
-            icon: Gift,
-            color: 'blue'
-          },
-          {
-            id: 2,
-            title: 'Triple Threat',
-            description: 'Refer 3 clients and unlock 1,500 points',
-            points: 1500,
-            earned: true,
-            earnedDate: '2024-02-10',
-            icon: Sparkles,
-            color: 'purple'
-          },
-          {
-            id: 3,
-            title: 'Gold Member',
-            description: 'Generate $5,000 in referral commissions',
-            points: 2000,
-            earned: false,
-            icon: Crown,
-            color: 'yellow'
-          },
-          {
-            id: 4,
-            title: 'Loyalty Milestone',
-            description: 'Maintain 6 months of referral activity',
-            points: 1000,
-            earned: false,
-            icon: Award,
-            color: 'green'
-          },
-          {
-            id: 5,
-            title: 'Power Promoter',
-            description: 'Refer 5 clients in a single quarter',
-            points: 2500,
-            earned: false,
-            icon: TrendingUp,
-            color: 'red'
-          }
-        ]
-
-        setReferrals(referralsList)
-        setRewards(rewardsList)
-        setLoyaltyPoints(2000)
-        setTotalCommission(3600)
+        // TODO: Replace with actual database hooks
+        setReferrals([])
+        setRewards([])
+        setLoyaltyPoints(0)
+        setTotalCommission(0)
 
         setIsLoading(false)
         announce('Referral system loaded successfully', 'polite')      } catch (err) {

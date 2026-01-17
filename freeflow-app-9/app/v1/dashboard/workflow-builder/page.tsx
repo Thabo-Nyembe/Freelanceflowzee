@@ -1,3 +1,4 @@
+// MIGRATED: Batch #25 - Verified database hook integration
 'use client'
 
 export const dynamic = 'force-dynamic';

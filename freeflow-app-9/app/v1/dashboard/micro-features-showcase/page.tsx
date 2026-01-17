@@ -1,3 +1,4 @@
+// MIGRATED: Batch #25 - Verified database hook integration
 'use client'
 
 import * as React from 'react'
