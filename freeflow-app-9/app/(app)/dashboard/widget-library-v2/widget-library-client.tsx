@@ -1,5 +1,8 @@
 'use client'
 
+// MIGRATED: Batch #18 - Removed mock data, using database hooks
+// Hooks: useWidgetLibrary
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -134,38 +137,16 @@ interface Contributor {
 }
 
 // Mock data for contributors (to be replaced with real data)
-const mockContributors: Contributor[] = [
-  { id: '1', name: 'FreeFlow Team', avatar: '', widgets_count: 28, total_installs: 245000, verified: true },
-  { id: '2', name: 'ChartWorks', avatar: '', widgets_count: 12, total_installs: 156000, verified: true },
-  { id: '3', name: 'FormCraft', avatar: '', widgets_count: 8, total_installs: 89000, verified: true },
-  { id: '4', name: 'EditorLabs', avatar: '', widgets_count: 5, total_installs: 67800, verified: false },
-  { id: '5', name: 'NotifyPro', avatar: '', widgets_count: 4, total_installs: 54300, verified: true }
-]
+const mockContributors: Contributor[] = []
 
 // Enhanced Widget Library Mock Data for AI components
-const mockWidgetLibAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Popular Widget', description: 'Charts Pro has 50K+ installs. Consider featuring it prominently.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
-  { id: '2', type: 'info' as const, title: 'New Submissions', description: '8 new widgets pending review. Average review time 2 days.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Queue' },
-  { id: '3', type: 'warning' as const, title: 'Compatibility', description: '3 widgets have compatibility issues with v2.0. Update needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
-]
+const mockWidgetLibAIInsights = []
 
-const mockWidgetLibCollaborators = [
-  { id: '1', name: 'Widget Curator', avatar: '/avatars/curator.jpg', status: 'online' as const, role: 'Curation', lastActive: 'Now' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Development', lastActive: '10m ago' },
-  { id: '3', name: 'QA Tester', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'Testing', lastActive: '45m ago' },
-]
+const mockWidgetLibCollaborators = []
 
-const mockWidgetLibPredictions = [
-  { id: '1', label: 'Total Widgets', current: 156, target: 200, predicted: 180, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Installs/Day', current: 2450, target: 3000, predicted: 2800, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Avg Rating', current: 4.5, target: 4.8, predicted: 4.6, confidence: 85, trend: 'up' as const },
-]
+const mockWidgetLibPredictions = []
 
-const mockWidgetLibActivities = [
-  { id: '1', user: 'Widget Curator', action: 'approved', target: 'DataGrid Pro widget', timestamp: '20m ago', type: 'success' as const },
-  { id: '2', user: 'Developer', action: 'submitted', target: 'Calendar Plus v2', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'QA Tester', action: 'tested', target: '5 widgets for v2.0', timestamp: '2h ago', type: 'info' as const },
-]
+const mockWidgetLibActivities = []
 
 // Transform LibraryWidget to local Widget type
 const transformWidget = (w: LibraryWidget, isBookmarked: boolean): Widget => ({
