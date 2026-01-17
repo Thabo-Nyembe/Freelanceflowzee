@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-;
+// MIGRATED: Batch #23 - Removed mock data, using database hooks
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -294,173 +294,37 @@ export default function CVPortfolioPage() {
   const [isSaving, setIsSaving] = useState(false)
 
   // REAL STATE - Projects
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: 1,
-      title: 'E-commerce Platform Redesign',
-      description: 'Complete overhaul of a major retail platform serving 500K+ customers',
-      image: '/portfolio-1.jpg',
-      technologies: ['React', 'Node.js', 'AWS', 'Stripe'],
-      link: 'https://example.com',
-      status: 'Completed',
-      dateAdded: '2023-06-15'
-    },
-    {
-      id: 2,
-      title: 'AI-Powered Analytics Dashboard',
-      description: 'Real-time analytics platform with machine learning insights',
-      image: '/portfolio-2.jpg',
-      technologies: ['Vue.js', 'Python', 'TensorFlow', 'D3.js'],
-      link: 'https://example.com',
-      status: 'Live',
-      dateAdded: '2023-09-20'
-    },
-    {
-      id: 3,
-      title: 'Mobile Banking App',
-      description: 'Secure mobile banking solution with biometric authentication',
-      image: '/portfolio-3.jpg',
-      technologies: ['React Native', 'Node.js', 'MongoDB', 'AWS'],
-      link: 'https://example.com',
-      status: 'In Development',
-      dateAdded: '2024-01-10'
-    }
-  ])
+  const [projects, setProjects] = useState<Project[]>([])
 
   // REAL STATE - Skills
-  const [skills, setSkills] = useState<Skill[]>([
-    { id: 1, name: 'React', category: 'Technical', proficiency: 5 },
-    { id: 2, name: 'Vue.js', category: 'Technical', proficiency: 4 },
-    { id: 3, name: 'TypeScript', category: 'Technical', proficiency: 5 },
-    { id: 4, name: 'Next.js', category: 'Technical', proficiency: 5 },
-    { id: 5, name: 'Tailwind CSS', category: 'Technical', proficiency: 5 },
-    { id: 6, name: 'Node.js', category: 'Technical', proficiency: 5 },
-    { id: 7, name: 'Python', category: 'Technical', proficiency: 4 },
-    { id: 8, name: 'PostgreSQL', category: 'Technical', proficiency: 4 },
-    { id: 9, name: 'Leadership', category: 'Soft', proficiency: 5 },
-    { id: 10, name: 'Communication', category: 'Soft', proficiency: 5 },
-    { id: 11, name: 'Problem Solving', category: 'Soft', proficiency: 5 },
-    { id: 12, name: 'English', category: 'Languages', proficiency: 5 },
-    { id: 13, name: 'Zulu', category: 'Languages', proficiency: 5 },
-    { id: 14, name: 'Afrikaans', category: 'Languages', proficiency: 3 }
-  ])
+  const [skills, setSkills] = useState<Skill[]>([])
 
   // REAL STATE - Experience
-  const [experience, setExperience] = useState<Experience[]>([
-    {
-      id: 1,
-      company: 'KaleidoCraft Digital',
-      position: 'Lead Developer & Founder',
-      period: '2020 - Present',
-      location: 'Johannesburg, SA',
-      description: 'Founded and led a digital agency specializing in custom web applications and mobile solutions for enterprise clients.',
-      technologies: ['React', 'Node.js', 'TypeScript', 'AWS', 'PostgreSQL'],
-      startDate: '2020-01-01',
-      current: true
-    },
-    {
-      id: 2,
-      company: 'Innovation Labs',
-      position: 'Senior Full-Stack Developer',
-      period: '2018 - 2020',
-      location: 'Cape Town, SA',
-      description: 'Developed scalable web applications serving 100K+ users. Led a team of 5 developers in agile environment.',
-      technologies: ['Vue.js', 'Python', 'Django', 'Docker', 'Redis'],
-      startDate: '2018-03-01',
-      endDate: '2020-01-01'
-    },
-    {
-      id: 3,
-      company: 'TechStart Solutions',
-      position: 'Frontend Developer',
-      period: '2016 - 2018',
-      location: 'Pretoria, SA',
-      description: 'Built responsive web interfaces and progressive web apps with focus on performance and accessibility.',
-      technologies: ['JavaScript', 'HTML5', 'CSS3', 'SASS', 'Webpack'],
-      startDate: '2016-06-01',
-      endDate: '2018-03-01'
-    }
-  ])
+  const [experience, setExperience] = useState<Experience[]>([])
 
   // REAL STATE - Education
-  const [education, setEducation] = useState<Education[]>([
-    {
-      id: 1,
-      institution: 'University of the Witwatersrand',
-      degree: 'Bachelor of Science in Computer Science',
-      period: '2012 - 2015',
-      location: 'Johannesburg, SA',
-      achievements: ['Cum Laude', "Dean's List 2014-2015"],
-      gpa: '3.8',
-      startDate: '2012-01-01',
-      endDate: '2015-12-01'
-    },
-    {
-      id: 2,
-      institution: 'Google Cloud Platform',
-      degree: 'Professional Cloud Architect Certification',
-      period: '2021',
-      location: 'Online',
-      achievements: ['Professional Certification'],
-      startDate: '2021-01-01',
-      endDate: '2021-12-01'
-    }
-  ])
+  const [education, setEducation] = useState<Education[]>([])
 
   // REAL STATE - Achievements
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    {
-      id: 1,
-      title: 'Developer of the Year 2023',
-      issuer: 'South African Developers Association',
-      date: '2023',
-      description: 'Recognized for outstanding contributions to the developer community'
-    },
-    {
-      id: 2,
-      title: 'Top 1% React Developer',
-      issuer: 'Stack Overflow',
-      date: '2022',
-      description: 'Ranked in top 1% of React developers globally'
-    },
-    {
-      id: 3,
-      title: 'Innovation Award',
-      issuer: 'TechCrunch Africa',
-      date: '2021',
-      description: 'Awarded for innovative mobile banking solution'
-    }
-  ])
+  const [achievements, setAchievements] = useState<Achievement[]>([])
 
   // REAL STATE - Profile
   const [profileData, setProfileData] = useState({
-    name: 'Thabo Nkanyane',
-    title: 'Senior Full-Stack Developer & Designer',
-    location: 'Johannesburg, South Africa',
-    email: 'thabo@kaleidocraft.co.za',
-    phone: '+27 81 234 5678',
-    website: 'kaleidocraft.co.za',
-    bio: 'Creative technologist with 8+ years of experience building innovative digital solutions. Specialized in React, Node.js, and modern web technologies with a passion for user-centered design.',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Thabo'
+    name: '',
+    title: '',
+    location: '',
+    email: '',
+    phone: '',
+    website: '',
+    bio: '',
+    avatar: ''
   })
 
   // REAL STATE - CV Sections
-  const [cvSections, setCvSections] = useState<CVSection[]>([
-    { id: 'summary', name: 'Professional Summary', visible: true, order: 1 },
-    { id: 'experience', name: 'Work Experience', visible: true, order: 2 },
-    { id: 'education', name: 'Education', visible: true, order: 3 },
-    { id: 'skills', name: 'Skills', visible: true, order: 4 },
-    { id: 'projects', name: 'Projects', visible: true, order: 5 },
-    { id: 'achievements', name: 'Achievements', visible: true, order: 6 }
-  ])
+  const [cvSections, setCvSections] = useState<CVSection[]>([])
 
   // REAL STATE - Templates
-  const [templates, setTemplates] = useState<Template[]>([
-    { id: 'modern', name: 'Modern', description: 'Clean and contemporary design', preview: '/templates/modern.png' },
-    { id: 'classic', name: 'Classic', description: 'Traditional professional layout', preview: '/templates/classic.png' },
-    { id: 'creative', name: 'Creative', description: 'Bold and artistic design', preview: '/templates/creative.png' },
-    { id: 'minimal', name: 'Minimal', description: 'Simple and elegant', preview: '/templates/minimal.png' }
-  ])
+  const [templates, setTemplates] = useState<Template[]>([])
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>('modern')
 

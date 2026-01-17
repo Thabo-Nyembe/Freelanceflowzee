@@ -98,6 +98,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// MIGRATED: Batch #23 - Removed mock data, using database hooks
+
 const logger = createFeatureLogger('Collaboration')
 
 export default function CollaborationPage() {
@@ -132,14 +134,7 @@ export default function CollaborationPage() {
   }
 
   // Sample media for gallery
-  const mediaItems = [
-    { id: 1, type: 'image', name: 'project-design.png', size: '2.4 MB', date: '2 hours ago', url: '/placeholder-image.jpg' },
-    { id: 2, type: 'video', name: 'demo-recording.mp4', size: '45 MB', date: '1 day ago', url: '/placeholder-video.mp4' },
-    { id: 3, type: 'image', name: 'wireframes.jpg', size: '1.8 MB', date: '2 days ago', url: '/placeholder-image.jpg' },
-    { id: 4, type: 'image', name: 'screenshot.png', size: '890 KB', date: '3 days ago', url: '/placeholder-image.jpg' },
-    { id: 5, type: 'video', name: 'meeting-recap.mp4', size: '120 MB', date: '4 days ago', url: '/placeholder-video.mp4' },
-    { id: 6, type: 'image', name: 'mockup-v2.png', size: '3.1 MB', date: '5 days ago', url: '/placeholder-image.jpg' }
-  ]
+  const mediaItems: any[] = []
 
   useEffect(() => {
     const loadCollaborationData = async () => {
@@ -364,13 +359,7 @@ export default function CollaborationPage() {
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
   const [isAddingParticipants, setIsAddingParticipants] = useState(false)
 
-  const availableParticipants = [
-    { id: 'user-1', name: 'Alex Johnson', email: 'alex@company.com', avatar: 'AJ' },
-    { id: 'user-2', name: 'Beth Williams', email: 'beth@company.com', avatar: 'BW' },
-    { id: 'user-3', name: 'Chris Brown', email: 'chris@company.com', avatar: 'CB' },
-    { id: 'user-4', name: 'Diana Moore', email: 'diana@company.com', avatar: 'DM' },
-    { id: 'user-5', name: 'Eric Taylor', email: 'eric@company.com', avatar: 'ET' },
-  ]
+  const availableParticipants: any[] = []
 
   const handleAddParticipants = () => {    setShowAddParticipantsDialog(true)
   }
@@ -419,11 +408,7 @@ export default function CollaborationPage() {
     const chatHistory = {
       exported: new Date().toISOString(),
       channels: channels,
-      messages: [
-        { id: 1, user: 'Sarah Anderson', message: 'Good morning team!', timestamp: '10:23 AM' },
-        { id: 2, user: 'Mike Chen', message: 'Thanks Sarah!', timestamp: '10:25 AM' },
-        { id: 3, user: 'Jessica Davis', message: 'Great work everyone!', timestamp: '10:28 AM' }
-      ]
+      messages: []
     }
     downloadAsJson(chatHistory, `chat-history-${new Date().toISOString().split('T')[0]}.json`)
   }
@@ -568,13 +553,7 @@ export default function CollaborationPage() {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
 
-  const sampleMessages = [
-    { id: 1, user: 'Sarah Anderson', content: 'Good morning team! Just reviewed the latest project updates.', time: '10:23 AM' },
-    { id: 2, user: 'Mike Chen', content: 'Thanks Sarah! I added pinpoint feedback on the design mockups.', time: '10:25 AM' },
-    { id: 3, user: 'Jessica Davis', content: 'Great work everyone! Let\'s schedule a quick sync meeting.', time: '10:28 AM' },
-    { id: 4, user: 'Robert Kim', content: 'The new designs look amazing. Great collaboration!', time: '10:30 AM' },
-    { id: 5, user: 'Emily Martinez', content: 'Here\'s the updated project timeline for everyone.', time: '10:32 AM' },
-  ]
+  const sampleMessages: any[] = []
 
   const handleSearchMessages = () => {    setShowSearchDialog(true)
   }

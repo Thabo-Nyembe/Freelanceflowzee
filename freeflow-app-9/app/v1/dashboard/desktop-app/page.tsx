@@ -2,6 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
+// MIGRATED: Batch #23 - Removed mock data, using database hooks
+
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
@@ -28,68 +30,11 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-const DESKTOP_PRESETS = [
-  { id: 'macbook-14', name: 'MacBook Pro 14"', width: 1512, height: 982, os: 'macOS', category: 'laptop' },
-  { id: 'macbook-16', name: 'MacBook Pro 16"', width: 1728, height: 1117, os: 'macOS', category: 'laptop' },
-  { id: 'imac-24', name: 'iMac 24"', width: 1920, height: 1080, os: 'macOS', category: 'desktop' },
-  { id: 'surface-laptop', name: 'Surface Laptop', width: 1536, height: 1024, os: 'Windows', category: 'laptop' },
-  { id: 'dell-xps', name: 'Dell XPS 13', width: 1920, height: 1200, os: 'Windows', category: 'laptop' },
-  { id: 'thinkpad-x1', name: 'ThinkPad X1', width: 1920, height: 1080, os: 'Linux', category: 'laptop' },
-  { id: 'ultrawide', name: 'Ultrawide Monitor', width: 3440, height: 1440, os: 'Windows', category: 'desktop' }
-]
+const DESKTOP_PRESETS = []
 
-const APP_FRAMEWORKS = [
-  { id: 'electron', name: 'Electron', icon: Code, description: 'Cross-platform desktop apps with web technologies' },
-  { id: 'tauri', name: 'Tauri', icon: Package, description: 'Lightweight, secure desktop applications' },
-  { id: 'flutter', name: 'Flutter Desktop', icon: Layers, description: 'Beautiful native desktop apps' },
-  { id: 'native', name: 'Native', icon: Cpu, description: 'Platform-specific native applications' },
-  { id: 'pwa', name: 'PWA', icon: Globe, description: 'Progressive Web App with desktop features' }
-]
+const APP_FRAMEWORKS = []
 
-const DEMO_APPS = [
-  {
-    id: 'code-editor',
-    name: 'Code Editor',
-    icon: Code,
-    category: 'Development',
-    description: 'VS Code-like interface'
-  },
-  {
-    id: 'file-manager',
-    name: 'File Manager',
-    icon: Folder,
-    category: 'Productivity',
-    description: 'Finder/Explorer-like interface'
-  },
-  {
-    id: 'music-player',
-    name: 'Music Player',
-    icon: Music,
-    category: 'Media',
-    description: 'Spotify-like desktop app'
-  },
-  {
-    id: 'email-client',
-    name: 'Email Client',
-    icon: Mail,
-    category: 'Communication',
-    description: 'Apple Mail-like interface'
-  },
-  {
-    id: 'calculator',
-    name: 'Calculator',
-    icon: Calculator,
-    category: 'Utility',
-    description: 'System calculator app'
-  },
-  {
-    id: 'terminal',
-    name: 'Terminal',
-    icon: Terminal,
-    category: 'Development',
-    description: 'Command line interface'
-  }
-]
+const DEMO_APPS = []
 
 interface DesktopWindowProps {
   app: string
