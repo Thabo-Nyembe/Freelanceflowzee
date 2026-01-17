@@ -253,11 +253,32 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
   const handleBalanceWorkload = async () => {
     toast.loading('Balancing workload...')
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    toast.dismiss()
-    toast.success('Workload balanced', {
-      description: 'Team capacity has been optimized across projects'
-    })
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      // Get all allocations and rebalance based on capacity
+      const { data: allocations } = await supabase.from('allocations').select('*')
+      const { data: members } = await supabase.from('team_members').select('id, max_hours_per_day')
+      if (allocations && members) {
+        // Auto-balance: distribute hours evenly
+        for (const member of members) {
+          const memberAllocations = allocations.filter(a => a.member_id === member.id)
+          const totalHours = memberAllocations.reduce((sum, a) => sum + (a.hours_per_day || 0), 0)
+          const maxHours = member.max_hours_per_day || 8
+          if (totalHours > maxHours && memberAllocations.length > 1) {
+            const balancedHours = maxHours / memberAllocations.length
+            for (const alloc of memberAllocations) {
+              await supabase.from('allocations').update({ hours_per_day: balancedHours }).eq('id', alloc.id)
+            }
+          }
+        }
+      }
+      toast.dismiss()
+      toast.success('Workload balanced', { description: 'Team capacity has been optimized across projects' })
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to balance workload')
+    }
   }
 
   const handleExportCapacity = () => {
@@ -270,20 +291,26 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Creating allocation...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.dismiss()
-    toast.success('Allocation created', {
-      description: `Resource allocated successfully`
-    })
-    setAddAllocationDialogOpen(false)
-    setNewAllocation({
-      memberId: '',
-      projectId: '',
-      hoursPerDay: 4,
-      startDate: '',
-      endDate: '',
-      status: 'tentative'
-    })
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('allocations').insert({
+        member_id: newAllocation.memberId,
+        project_id: newAllocation.projectId,
+        hours_per_day: newAllocation.hoursPerDay,
+        start_date: newAllocation.startDate || new Date().toISOString(),
+        end_date: newAllocation.endDate || null,
+        status: newAllocation.status
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Allocation created', { description: 'Resource allocated successfully' })
+      setAddAllocationDialogOpen(false)
+      setNewAllocation({ memberId: '', projectId: '', hoursPerDay: 4, startDate: '', endDate: '', status: 'tentative' })
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to create allocation')
+    }
   }
 
   const handleCreateTeamMember = async () => {
@@ -292,20 +319,26 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Adding team member...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.dismiss()
-    toast.success('Team member added', {
-      description: `${newTeamMember.name} has been added to the team`
-    })
-    setAddTeamMemberDialogOpen(false)
-    setNewTeamMember({
-      name: '',
-      email: '',
-      role: '',
-      department: '',
-      hourlyRate: 100,
-      skills: ''
-    })
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('team_members').insert({
+        name: newTeamMember.name,
+        email: newTeamMember.email,
+        role: newTeamMember.role || 'Member',
+        department: newTeamMember.department || 'General',
+        hourly_rate: newTeamMember.hourlyRate,
+        skills: newTeamMember.skills?.split(',').map(s => s.trim()) || []
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Team member added', { description: `${newTeamMember.name} has been added to the team` })
+      setAddTeamMemberDialogOpen(false)
+      setNewTeamMember({ name: '', email: '', role: '', department: '', hourlyRate: 100, skills: '' })
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to add team member')
+    }
   }
 
   const handleCreateProject = async () => {
@@ -314,21 +347,28 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Creating project...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.dismiss()
-    toast.success('Project created', {
-      description: `${newProject.name} has been created`
-    })
-    setAddProjectDialogOpen(false)
-    setNewProject({
-      name: '',
-      client: '',
-      color: '#3B82F6',
-      startDate: '',
-      endDate: '',
-      budget: 0,
-      totalHours: 0
-    })
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('projects').insert({
+        title: newProject.name,
+        client_name: newProject.client,
+        color: newProject.color,
+        start_date: newProject.startDate || new Date().toISOString(),
+        end_date: newProject.endDate || null,
+        budget: newProject.budget,
+        estimated_hours: newProject.totalHours,
+        status: 'active'
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Project created', { description: `${newProject.name} has been created` })
+      setAddProjectDialogOpen(false)
+      setNewProject({ name: '', client: '', color: '#3B82F6', startDate: '', endDate: '', budget: 0, totalHours: 0 })
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to create project')
+    }
   }
 
   const handleExport = () => {
@@ -355,43 +395,83 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Adding department...')
-    await new Promise(resolve => setTimeout(resolve, 800))
-    toast.dismiss()
-    toast.success('Department added', {
-      description: `${newDepartment} has been added`
-    })
-    setAddDepartmentDialogOpen(false)
-    setNewDepartment('')
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('departments').insert({
+        name: newDepartment,
+        created_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Department added', { description: `${newDepartment} has been added` })
+      setAddDepartmentDialogOpen(false)
+      setNewDepartment('')
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to add department')
+    }
   }
 
   const handleRegenerateApiKey = async () => {
     toast.loading('Regenerating API key...')
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    toast.dismiss()
-    toast.success('API key regenerated', {
-      description: 'Your new API key is ready to use'
-    })
-    setApiKeyDialogOpen(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const newApiKey = `cap_${crypto.randomUUID().replace(/-/g, '')}`
+      const { error } = await supabase.from('api_keys').upsert({
+        id: 'capacity-api',
+        key: newApiKey,
+        service: 'capacity',
+        regenerated_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('API key regenerated', { description: 'Your new API key is ready to use' })
+      setApiKeyDialogOpen(false)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to regenerate API key')
+    }
   }
 
   const handleClearAllocations = async () => {
+    if (!confirm('Are you sure you want to clear all allocations? This cannot be undone.')) return
     toast.loading('Clearing allocations...')
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    toast.dismiss()
-    toast.success('Allocations cleared', {
-      description: 'All allocations have been removed'
-    })
-    setClearAllocationsDialogOpen(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('allocations').delete().neq('id', '')
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Allocations cleared', { description: 'All allocations have been removed' })
+      setClearAllocationsDialogOpen(false)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to clear allocations')
+    }
   }
 
   const handleResetData = async () => {
+    const confirmation = prompt('Type "RESET" to confirm data reset:')
+    if (confirmation !== 'RESET') {
+      toast.error('Reset cancelled')
+      return
+    }
     toast.loading('Resetting data...')
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    toast.dismiss()
-    toast.success('Data reset complete', {
-      description: 'All capacity data has been reset to defaults'
-    })
-    setResetDataDialogOpen(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      // Clear all capacity-related data
+      await supabase.from('allocations').delete().neq('id', '')
+      await supabase.from('capacity_settings').delete().neq('id', '')
+      toast.dismiss()
+      toast.success('Data reset complete', { description: 'All capacity data has been reset to defaults' })
+      setResetDataDialogOpen(false)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to reset data')
+    }
   }
 
   const handleQuickAction = (actionLabel: string) => {
@@ -461,11 +541,14 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   }
 
   const handleConnectIntegration = (integrationName: string) => {
-    toast.loading(`Connecting to ${integrationName}...`)
-    setTimeout(() => {
-      toast.dismiss()
-      toast.success(`${integrationName} connected`, { description: 'Integration setup complete' })
-    }, 1500)
+    const slug = integrationName.toLowerCase().replace(/\s+/g, '-')
+    const oauthUrl = `/api/integrations/${slug}/oauth`
+    const popup = window.open(oauthUrl, `${integrationName} Connection`, 'width=600,height=700')
+    if (popup) {
+      toast.info(`Complete ${integrationName} authorization in the popup window`)
+    } else {
+      toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+    }
   }
 
   const handleSaveSettings = () => {
@@ -494,12 +577,24 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Saving department settings...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.dismiss()
-    toast.success('Department updated', {
-      description: `${departmentSettings.name} settings have been saved`
-    })
-    setEditDepartmentDialogOpen(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('departments').update({
+        name: departmentSettings.name,
+        is_active: departmentSettings.isActive,
+        default_hours_per_week: departmentSettings.defaultHoursPerWeek,
+        manager: departmentSettings.manager || null,
+        updated_at: new Date().toISOString()
+      }).eq('name', selectedDepartment)
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Department updated', { description: `${departmentSettings.name} settings have been saved` })
+      setEditDepartmentDialogOpen(false)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to save department settings')
+    }
   }
 
   const handleEditStatus = (status: { name: string; color: string }) => {
@@ -518,12 +613,23 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Saving status configuration...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.dismiss()
-    toast.success('Status updated', {
-      description: `${statusSettings.name} status has been configured`
-    })
-    setEditStatusDialogOpen(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { error } = await supabase.from('allocation_statuses').upsert({
+        name: statusSettings.name,
+        color: statusSettings.color,
+        description: statusSettings.description || null,
+        updated_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Status updated', { description: `${statusSettings.name} status has been configured` })
+      setEditStatusDialogOpen(false)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to save status configuration')
+    }
   }
 
   const handleImportData = async () => {
@@ -532,13 +638,35 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
       return
     }
     toast.loading('Importing data...')
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    toast.dismiss()
-    toast.success('Data imported successfully', {
-      description: `Imported ${importFile.name}`
-    })
-    setImportDataDialogOpen(false)
-    setImportFile(null)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const fileContent = await importFile.text()
+      let data: any
+      if (importFile.name.endsWith('.json')) {
+        data = JSON.parse(fileContent)
+      } else if (importFile.name.endsWith('.csv')) {
+        const lines = fileContent.split('\n')
+        const headers = lines[0].split(',')
+        data = lines.slice(1).filter(l => l.trim()).map(line => {
+          const values = line.split(',')
+          return headers.reduce((obj: any, h, i) => ({ ...obj, [h.trim()]: values[i]?.trim() }), {})
+        })
+      }
+      if (data?.allocations) {
+        await supabase.from('allocations').insert(data.allocations)
+      }
+      if (data?.teamMembers) {
+        await supabase.from('team_members').insert(data.teamMembers)
+      }
+      toast.dismiss()
+      toast.success('Data imported successfully', { description: `Imported ${importFile.name}` })
+      setImportDataDialogOpen(false)
+      setImportFile(null)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to import data', { description: 'Please check the file format' })
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
