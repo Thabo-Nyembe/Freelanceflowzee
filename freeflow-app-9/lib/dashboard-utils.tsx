@@ -209,96 +209,20 @@ export interface GoalMilestone {
 // Mock data arrays are deprecated - use real database queries instead
 // Kept as empty arrays for backward compatibility
 
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
 export const mockDashboardActivities: DashboardActivity[] = []
 
-// Mock projects deprecated - use real database queries
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
 export const mockDashboardProjects: DashboardProject[] = []
 
-// Mock insights deprecated - use real database queries
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
 export const mockDashboardInsights: DashboardInsight[] = []
 
-// Mock metrics deprecated - use real database queries
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
 export const mockDashboardMetrics: DashboardMetric[] = []
 
-// Quick actions - these are static UI elements, not mock data
-// They define available actions in the dashboard
-export const mockQuickActions: QuickAction[] = [
-  {
-    id: 'QA-0001',
-    title: 'Create New Project',
-    description: 'Start a new project with AI assistance',
-    icon: 'Plus',
-    color: 'blue',
-    category: 'project',
-    url: '/dashboard/projects-hub/create',
-    shortcut: 'Cmd+N',
-    isPremium: false,
-    isNew: false,
-    usageCount: 0,
-    estimatedTime: '5 min',
-    complexity: 'simple'
-  },
-  {
-    id: 'QA-0002',
-    title: 'Add New Client',
-    description: 'Onboard a new client to your workspace',
-    icon: 'UserPlus',
-    color: 'green',
-    category: 'client',
-    url: '/dashboard/client-zone/add',
-    shortcut: 'Cmd+Shift+C',
-    isPremium: false,
-    isNew: false,
-    usageCount: 0,
-    estimatedTime: '3 min',
-    complexity: 'simple'
-  },
-  {
-    id: 'QA-0003',
-    title: 'Generate Invoice',
-    description: 'Create and send professional invoices',
-    icon: 'FileText',
-    color: 'purple',
-    category: 'financial',
-    url: '/dashboard/invoices/create',
-    shortcut: 'Cmd+I',
-    isPremium: false,
-    isNew: false,
-    usageCount: 0,
-    estimatedTime: '2 min',
-    complexity: 'simple'
-  },
-  {
-    id: 'QA-0004',
-    title: 'AI Content Generator',
-    description: 'Generate content with AI assistance',
-    icon: 'Sparkles',
-    color: 'pink',
-    category: 'ai',
-    url: '/dashboard/ai-create',
-    shortcut: 'Cmd+Shift+A',
-    isPremium: true,
-    isNew: true,
-    usageCount: 0,
-    estimatedTime: '1 min',
-    complexity: 'simple'
-  },
-  {
-    id: 'QA-0005',
-    title: 'Schedule Meeting',
-    description: 'Book meetings with clients',
-    icon: 'Calendar',
-    color: 'red',
-    category: 'communication',
-    url: '/dashboard/calendar/new',
-    shortcut: 'Cmd+M',
-    isPremium: false,
-    isNew: false,
-    usageCount: 0,
-    estimatedTime: '2 min',
-    complexity: 'simple'
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const mockQuickActions: QuickAction[] = []
 
 // ============================================================================
 // UTILITY FUNCTIONS

@@ -111,230 +111,49 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
   }
 ]
 
-export const MOCK_USERS: User[] = [
-  {
-    id: 'user-1',
-    email: 'sarah.johnson@company.com',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    displayName: 'Sarah Johnson',
-    avatar: '/avatars/sarah.jpg',
-    role: 'owner',
-    status: 'active',
-    department: 'Leadership',
-    jobTitle: 'CEO & Founder',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    timezone: 'America/Los_Angeles',
-    language: 'en',
-    joinedAt: new Date(Date.now() - 86400000 * 365),
-    lastActive: new Date(Date.now() - 3600000),
-    permissions: DEFAULT_PERMISSIONS.owner,
-    settings: {
-      notifications: { email: true, push: true, slack: true, desktop: true },
-      privacy: { profileVisible: true, activityVisible: true, emailVisible: true },
-      preferences: { theme: 'dark', language: 'en', dateFormat: 'MM/DD/YYYY', timeFormat: '12h' }
-    },
-    metadata: {
-      totalProjects: 45,
-      totalTasks: 287,
-      completionRate: 94,
-      averageResponseTime: 2.5,
-      lastLogin: new Date(),
-      loginCount: 1543,
-      storageUsed: 15728640000
-    }
-  },
-  {
-    id: 'user-2',
-    email: 'michael.chen@company.com',
-    firstName: 'Michael',
-    lastName: 'Chen',
-    displayName: 'Michael Chen',
-    avatar: '/avatars/michael.jpg',
-    role: 'admin',
-    status: 'active',
-    department: 'Operations',
-    jobTitle: 'Operations Director',
-    phone: '+1 (555) 234-5678',
-    location: 'New York, NY',
-    timezone: 'America/New_York',
-    language: 'en',
-    joinedAt: new Date(Date.now() - 86400000 * 300),
-    lastActive: new Date(Date.now() - 7200000),
-    permissions: DEFAULT_PERMISSIONS.admin,
-    settings: {
-      notifications: { email: true, push: true, slack: false, desktop: true },
-      privacy: { profileVisible: true, activityVisible: true, emailVisible: false },
-      preferences: { theme: 'light', language: 'en', dateFormat: 'DD/MM/YYYY', timeFormat: '24h' }
-    },
-    metadata: {
-      totalProjects: 32,
-      totalTasks: 198,
-      completionRate: 89,
-      averageResponseTime: 3.2,
-      lastLogin: new Date(Date.now() - 7200000),
-      loginCount: 876,
-      storageUsed: 8589934592
-    }
-  },
-  {
-    id: 'user-3',
-    email: 'emma.williams@company.com',
-    firstName: 'Emma',
-    lastName: 'Williams',
-    displayName: 'Emma Williams',
-    avatar: '/avatars/emma.jpg',
-    role: 'manager',
-    status: 'active',
-    department: 'Design',
-    jobTitle: 'Design Lead',
-    location: 'Austin, TX',
-    timezone: 'America/Chicago',
-    language: 'en',
-    joinedAt: new Date(Date.now() - 86400000 * 200),
-    lastActive: new Date(Date.now() - 1800000),
-    permissions: DEFAULT_PERMISSIONS.manager,
-    settings: {
-      notifications: { email: true, push: true, slack: true, desktop: false },
-      privacy: { profileVisible: true, activityVisible: true, emailVisible: true },
-      preferences: { theme: 'auto', language: 'en', dateFormat: 'MM/DD/YYYY', timeFormat: '12h' }
-    },
-    metadata: {
-      totalProjects: 28,
-      totalTasks: 156,
-      completionRate: 92,
-      averageResponseTime: 2.8,
-      lastLogin: new Date(Date.now() - 1800000),
-      loginCount: 654,
-      storageUsed: 5368709120
-    }
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const MOCK_USERS: User[] = []
 
-export const MOCK_TEAMS: Team[] = [
-  {
-    id: 'team-1',
-    name: 'Product Team',
-    description: 'Building amazing products',
-    slug: 'product',
-    members: [],
-    owner: 'user-1',
-    createdAt: new Date(Date.now() - 86400000 * 180),
-    updatedAt: new Date(),
-    settings: {
-      visibility: 'private',
-      allowMemberInvites: true,
-      requireApproval: false,
-      maxMembers: 50,
-      features: {
-        projects: true,
-        files: true,
-        chat: true,
-        video: true,
-        calendar: true
-      }
-    },
-    stats: {
-      totalMembers: 12,
-      activeMembers: 10,
-      totalProjects: 24,
-      activeProjects: 8,
-      storageUsed: 25769803776,
-      storageLimit: 107374182400
-    }
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const MOCK_TEAMS: Team[] = []
 
-export const MOCK_DEPARTMENTS: Department[] = [
-  {
-    id: 'dept-1',
-    name: 'Leadership',
-    description: 'Executive team',
-    headId: 'user-1',
-    memberIds: ['user-1'],
-    createdAt: new Date(Date.now() - 86400000 * 365)
-  },
-  {
-    id: 'dept-2',
-    name: 'Operations',
-    description: 'Operations and management',
-    headId: 'user-2',
-    memberIds: ['user-2'],
-    createdAt: new Date(Date.now() - 86400000 * 300)
-  },
-  {
-    id: 'dept-3',
-    name: 'Design',
-    description: 'Design and creative',
-    headId: 'user-3',
-    memberIds: ['user-3'],
-    createdAt: new Date(Date.now() - 86400000 * 200)
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const MOCK_DEPARTMENTS: Department[] = []
 
-export const MOCK_INVITATIONS: Invitation[] = [
-  {
-    id: 'inv-1',
-    email: 'john.doe@example.com',
-    role: 'member',
-    invitedBy: 'user-1',
-    invitedAt: new Date(Date.now() - 86400000 * 2),
-    expiresAt: new Date(Date.now() + 86400000 * 5),
-    status: 'pending'
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const MOCK_INVITATIONS: Invitation[] = []
 
-export const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: 'act-1',
-    userId: 'user-1',
-    userName: 'Sarah Johnson',
-    action: 'created',
-    target: 'user',
-    targetId: 'user-3',
-    description: 'Added Emma Williams to the team',
-    timestamp: new Date(Date.now() - 3600000)
-  },
-  {
-    id: 'act-2',
-    userId: 'user-2',
-    userName: 'Michael Chen',
-    action: 'updated',
-    target: 'permissions',
-    targetId: 'user-3',
-    description: 'Updated permissions for Emma Williams',
-    timestamp: new Date(Date.now() - 7200000)
-  }
-]
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
+export const MOCK_ACTIVITIES: Activity[] = []
 
+// MIGRATED: Batch #14 - Removed mock data, using database hooks
 export const MOCK_USER_STATS: UserStats = {
-  totalUsers: 48,
-  activeUsers: 42,
-  newUsersToday: 3,
-  newUsersThisWeek: 12,
-  newUsersThisMonth: 28,
+  totalUsers: 0,
+  activeUsers: 0,
+  newUsersToday: 0,
+  newUsersThisWeek: 0,
+  newUsersThisMonth: 0,
   byRole: {
-    owner: 1,
-    admin: 4,
-    manager: 8,
-    member: 32,
-    guest: 3
+    owner: 0,
+    admin: 0,
+    manager: 0,
+    member: 0,
+    guest: 0
   },
   byStatus: {
-    active: 42,
-    inactive: 3,
-    pending: 2,
-    suspended: 1,
+    active: 0,
+    inactive: 0,
+    pending: 0,
+    suspended: 0,
     deleted: 0
   },
   byDepartment: {
-    Leadership: 1,
-    Operations: 5,
-    Design: 12,
-    Development: 15,
-    Marketing: 10,
-    Sales: 5
+    Leadership: 0,
+    Operations: 0,
+    Design: 0,
+    Development: 0,
+    Marketing: 0,
+    Sales: 0
   }
 }
 
