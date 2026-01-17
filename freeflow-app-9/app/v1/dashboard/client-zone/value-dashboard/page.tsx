@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -77,62 +78,13 @@ export default function ValueDashboardPage() {
         setIsLoading(true)
         setError(null)
 
-        // Initialize ROI metrics
-        const metrics: ROIMetric[] = [
-          {
-            label: 'Total Invested',
-            value: KAZI_CLIENT_DATA.clientInfo.totalInvestment,
-            format: 'currency',
-            trend: 'up',
-            trendValue: 12.5,
-            icon: DollarSign,
-            color: 'purple'
-          },
-          {
-            label: 'Completed Projects',
-            value: KAZI_CLIENT_DATA.clientInfo.completedProjects,
-            format: 'number',
-            trend: 'up',
-            trendValue: 22.3,
-            icon: CheckCircle,
-            color: 'green'
-          },
-          {
-            label: 'ROI Generated',
-            value: 156,
-            format: 'percentage',
-            trend: 'up',
-            trendValue: 18.7,
-            icon: TrendingUp,
-            color: 'blue'
-          },
-          {
-            label: 'Avg Project Value',
-            value: 3750,
-            format: 'currency',
-            trend: 'up',
-            trendValue: 8.2,
-            icon: Target,
-            color: 'orange'
-          }
-        ]
-
-        // Initialize value tracking over time
-        const tracking: ValueTrackingData[] = [
-          { month: 'Jan', value: 8000, roi: 45, projects: 1 },
-          { month: 'Feb', value: 15000, roi: 68, projects: 2 },
-          { month: 'Mar', value: 22000, roi: 95, projects: 3 },
-          { month: 'Apr', value: 28000, roi: 118, projects: 4 },
-          { month: 'May', value: 35000, roi: 142, projects: 5 },
-          { month: 'Jun', value: 45000, roi: 156, projects: 7 }
-        ]
-
-        setRoiMetrics(metrics)
-        setValueTracking(tracking)
-
         // Load value dashboard from API
         const response = await fetch('/api/client-zone/value-dashboard')
         if (!response.ok) throw new Error('Failed to load value dashboard')
+
+        const data = await response.json()
+        setRoiMetrics(data.metrics || [])
+        setValueTracking(data.tracking || [])
 
         setIsLoading(false)
         announce('Value dashboard loaded successfully', 'polite')
@@ -572,22 +524,16 @@ export default function ValueDashboardPage() {
             {/* Project Details */}
             <div className="space-y-2">
               <h4 className="font-semibold text-gray-900">Completed Projects</h4>
-              {[
-                { name: 'Brand Identity Redesign', budget: 8500, spent: 6375, value: 12000 },
-                { name: 'Website Development', budget: 12000, spent: 10800, value: 18500 },
-                { name: 'Marketing Assets', budget: 5000, spent: 4200, value: 8500 },
-                { name: 'UI/UX Design', budget: 4500, spent: 3950, value: 6700 },
-                { name: 'Content Strategy', budget: 3500, spent: 3100, value: 5500 },
-                { name: 'Brand Guidelines', budget: 2500, spent: 2000, value: 3500 }
-              ].map((project, idx) => (
+              {/* TODO: Map from API response data (valueTracking or additional projects endpoint) */}
+              {valueTracking.length > 0 && valueTracking.map((project, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{project.name}</p>
-                    <p className="text-xs text-gray-600">Budget: {formatCurrency(project.budget)} | Spent: {formatCurrency(project.spent)}</p>
+                    <p className="text-sm font-medium text-gray-900">{project.month}</p>
+                    <p className="text-xs text-gray-600">Projects: {project.projects}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-green-600">{formatCurrency(project.value)}</p>
-                    <p className="text-xs text-gray-500">{Math.round(((project.value - project.budget) / project.budget) * 100)}% margin</p>
+                    <p className="text-xs text-gray-500">ROI: {project.roi}%</p>
                   </div>
                 </div>
               ))}

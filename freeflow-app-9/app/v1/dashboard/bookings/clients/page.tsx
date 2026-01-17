@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,7 +9,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, RefreshCw, FileUp, FileDown, UserCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { mockBookings, getClientBookingCount } from '@/lib/bookings-utils'
+import { getClientBookingCount } from '@/lib/bookings-utils'
 
 // A+++ UTILITIES
 import { ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -20,7 +21,7 @@ export default function ClientsPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [clients, setClients] = useState<typeof mockBookings>([])
+  const [clients, setClients] = useState([])
 
   // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
@@ -36,7 +37,7 @@ export default function ClientsPage() {
         // Fetch clients from API
         const res = await fetch('/api/bookings?type=clients').catch(() => null)
         const data = res?.ok ? await res.json() : null
-        setClients(data?.clients || mockBookings)
+        setClients(data?.clients || [])
 
         announce('Client directory loaded', 'polite')
       } catch (err) {
@@ -71,7 +72,7 @@ export default function ClientsPage() {
   }
 
   const handleViewClientHistory = (clientName: string) => {
-    const bookingCount = getClientBookingCount(mockBookings, clientName)
+    const bookingCount = getClientBookingCount(clients, clientName)
     logger.info('Viewing client history', {
       clientName,
       bookingCount

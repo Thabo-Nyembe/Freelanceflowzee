@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,7 +9,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { Clock, Download, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getPastBookings, formatDate, mockBookings } from '@/lib/bookings-utils'
+import { getPastBookings, formatDate } from '@/lib/bookings-utils'
 import {
   Select,
   SelectContent,
@@ -41,9 +42,10 @@ export default function HistoryPage() {
         setError(null)
 
         // Fetch booking history from API
-        const res = await fetch('/api/bookings?type=history').catch(() => null)
-        const data = res?.ok ? await res.json() : null
-        setPastBookings(data?.history || getPastBookings(mockBookings))
+        const res = await fetch('/api/bookings?type=history')
+        if (!res.ok) throw new Error('Failed to fetch booking history')
+        const data = await res.json()
+        setPastBookings(data?.history || [])
 
         announce('Booking history loaded', 'polite')
       } catch (err) {

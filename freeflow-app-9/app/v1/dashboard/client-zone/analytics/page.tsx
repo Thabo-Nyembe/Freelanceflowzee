@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -73,39 +74,6 @@ interface AnalyticsData {
   }[]
 }
 
-// Fallback data for when no real data exists
-const FALLBACK_ANALYTICS: AnalyticsData = {
-  projectStats: {
-    total: 12,
-    active: 5,
-    completed: 6,
-    inReview: 1,
-    totalBudget: 45000,
-    totalSpent: 32000
-  },
-  averageRating: 4.9,
-  openRevisions: 2,
-  unreadNotifications: 3,
-  onTimeDelivery: 94,
-  firstTimeApproval: 98,
-  avgResponseTime: 2.1,
-  messagesExchanged: 127,
-  meetingsHeld: 8,
-  filesShared: 23,
-  clientSatisfaction: 4.9,
-  communicationStats: {
-    emails: 45,
-    calls: 12,
-    messages: 70,
-    meetings: 8
-  },
-  timeline: [
-    { date: 'Week 1', completed: 2, inProgress: 1, pending: 1 },
-    { date: 'Week 2', completed: 4, inProgress: 2, pending: 1 },
-    { date: 'Week 3', completed: 5, inProgress: 3, pending: 0 },
-    { date: 'Week 4', completed: 7, inProgress: 2, pending: 1 }
-  ]
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -123,7 +91,21 @@ export default function AnalyticsPage() {
   const { announce } = useAnnouncer()
 
   // ANALYTICS STATE
-  const [analytics, setAnalytics] = useState<AnalyticsData>(FALLBACK_ANALYTICS)
+  const [analytics, setAnalytics] = useState<AnalyticsData>({
+    projectStats: { total: 0, active: 0, completed: 0, inReview: 0, totalBudget: 0, totalSpent: 0 },
+    averageRating: 0,
+    openRevisions: 0,
+    unreadNotifications: 0,
+    onTimeDelivery: 0,
+    firstTimeApproval: 0,
+    avgResponseTime: 0,
+    messagesExchanged: 0,
+    meetingsHeld: 0,
+    filesShared: 0,
+    clientSatisfaction: 0,
+    communicationStats: { emails: 0, calls: 0, messages: 0, meetings: 0 },
+    timeline: []
+  })
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter' | 'year'>('month')
 
   // A+++ LOAD ANALYTICS DATA
@@ -176,7 +158,7 @@ export default function AnalyticsPage() {
             messages: messageCount || 70,
             meetings: 8
           },
-          timeline: FALLBACK_ANALYTICS.timeline
+          timeline: dashboardData.timeline || []
         })
 
         setIsLoading(false)

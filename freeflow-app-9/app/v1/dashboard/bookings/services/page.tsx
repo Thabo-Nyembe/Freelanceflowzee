@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { mockServices } from '@/lib/bookings-utils'
+import type { Service } from '@/lib/bookings-utils'
 
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -27,7 +28,7 @@ export default function ServicesPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [services, setServices] = useState<typeof mockServices>([])
+  const [services, setServices] = useState<Service[]>([])
 
   // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
@@ -43,7 +44,7 @@ export default function ServicesPage() {
         // Fetch services from API
         const res = await fetch('/api/bookings?type=services').catch(() => null)
         const data = res?.ok ? await res.json() : null
-        setServices(data?.services || mockServices)
+        setServices(data?.services || [])
 
         announce('Services loaded', 'polite')
       } catch (err) {

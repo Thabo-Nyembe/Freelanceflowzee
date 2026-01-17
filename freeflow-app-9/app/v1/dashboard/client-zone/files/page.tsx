@@ -1,3 +1,4 @@
+// MIGRATED: Batch #28 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -53,74 +54,6 @@ interface ExtendedFile extends File {
   sharedWith?: string[]
 }
 
-const EXTENDED_FILES: ExtendedFile[] = [
-  {
-    id: 1,
-    name: 'Brand Guidelines Draft v3.pdf',
-    size: '2.4 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-25',
-    project: 'Brand Identity Redesign',
-    type: 'document',
-    downloads: 3,
-    views: 12,
-    shared: true,
-    sharedWith: ['John Smith', 'Michael Chen']
-  },
-  {
-    id: 2,
-    name: 'Logo Concepts Final.zip',
-    size: '15.7 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-20',
-    project: 'Brand Identity Redesign',
-    type: 'archive',
-    downloads: 2,
-    views: 8,
-    shared: false,
-    sharedWith: []
-  },
-  {
-    id: 3,
-    name: 'Website-Mockups.psd',
-    size: '45.3 MB',
-    uploadedBy: 'Alex Thompson',
-    uploadDate: '2024-01-15',
-    project: 'Website Development',
-    type: 'document',
-    downloads: 5,
-    views: 15,
-    shared: true,
-    sharedWith: ['John Smith', 'Lisa Wang']
-  },
-  {
-    id: 4,
-    name: 'Brand-Color-Palette.ai',
-    size: '8.2 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-10',
-    project: 'Brand Identity Redesign',
-    type: 'document',
-    downloads: 1,
-    views: 5,
-    shared: false,
-    sharedWith: []
-  },
-  {
-    id: 5,
-    name: 'Final-Deliverables.zip',
-    size: '124.8 MB',
-    uploadedBy: 'Michael Chen',
-    uploadDate: '2024-01-05',
-    project: 'Website Development',
-    type: 'archive',
-    downloads: 0,
-    views: 3,
-    shared: false,
-    sharedWith: []
-  }
-]
-
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
@@ -171,11 +104,11 @@ export default function FilesPage() {
   const router = useRouter()
 
   // FILE STATE
-  const [files, setFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
+  const [files, setFiles] = useState<ExtendedFile[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'documents' | 'archives' | 'images' | 'videos'>('all')
   const [selectedFile, setSelectedFile] = useState<ExtendedFile | null>(null)
-  const [filteredFiles, setFilteredFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
+  const [filteredFiles, setFilteredFiles] = useState<ExtendedFile[]>([])
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date')
 
   // SECURE FILE DELIVERY STATE
