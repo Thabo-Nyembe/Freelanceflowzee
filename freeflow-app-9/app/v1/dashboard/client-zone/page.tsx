@@ -79,6 +79,7 @@ import { ClientOnboardingTour } from '@/components/onboarding/client-onboarding-
 import { ClientValueDashboard } from '@/components/client-value-dashboard'
 import { ReferralLoyaltySystem } from '@/components/referral-loyalty-system'
 
+// MIGRATED: Batch #22 - Verified database hook integration
 const logger = createFeatureLogger('ClientZone')
 
 // ============================================================================

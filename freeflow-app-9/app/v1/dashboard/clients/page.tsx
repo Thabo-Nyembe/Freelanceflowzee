@@ -165,10 +165,7 @@ type ClientsAction =
   | { type: 'CLEAR_SELECTED_CLIENTS' }
   | { type: 'SET_VIEW_MODE'; viewMode: ClientsState['viewMode'] }
 
-// ============================================================================
-// MOCK DATA - REMOVED (Migration #83)
-// All mock data replaced with database queries
-// ============================================================================
+// MIGRATED: Batch #22 - Verified database hook integration
 
 const mockClients: Client[] = []
 

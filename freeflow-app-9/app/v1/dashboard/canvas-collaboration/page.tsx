@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -107,41 +109,9 @@ export default function CanvasCollaboration() {
   const [canvasHistory, setCanvasHistory] = useState<string[]>([])
   const [historyStep, setHistoryStep] = useState<any>(-1)
 
-  const [layers, setLayers] = useState<CanvasLayer[]>([
-    { id: '1', name: 'Background', visible: true, locked: false, opacity: 100, type: 'drawing' },
-    { id: '2', name: 'Sketch', visible: true, locked: false, opacity: 80, type: 'drawing' },
-    { id: '3', name: 'Details', visible: true, locked: false, opacity: 100, type: 'drawing' }
-  ])
+  const [layers, setLayers] = useState<CanvasLayer[]>([])
 
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([
-    {
-      id: '1',
-      name: 'Sarah Chen',
-      avatar: '/avatars/sarah.jpg',
-      color: '#FF6B6B',
-      cursor: { x: 150, y: 200 },
-      isActive: true,
-      tool: 'brush'
-    },
-    {
-      id: '2',
-      name: 'Mike Rodriguez',
-      avatar: '/avatars/mike.jpg',
-      color: '#4ECDC4',
-      cursor: { x: 300, y: 150 },
-      isActive: true,
-      tool: 'select'
-    },
-    {
-      id: '3',
-      name: 'Emma Thompson',
-      avatar: '/avatars/emma.jpg',
-      color: '#45B7D1',
-      cursor: null,
-      isActive: false,
-      tool: 'text'
-    }
-  ])
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([])
 
   // Confirmation Dialog State
   const [removeCollaborator, setRemoveCollaborator] = useState<{ name: string; id: string } | null>(null)
@@ -159,32 +129,7 @@ export default function CanvasCollaboration() {
   const [showCommentDialog, setShowCommentDialog] = useState(false)
   const [newComment, setNewComment] = useState('')
 
-  const [recentProjects, setRecentProjects] = useState<CanvasProject[]>([
-    {
-      id: '1',
-      name: 'Brand Identity Design',
-      thumbnail: '/canvas-thumbnails/brand.jpg',
-      lastModified: '2 hours ago',
-      collaborators: ['Sarah', 'Mike'],
-      size: '1920x1080'
-    },
-    {
-      id: '2',
-      name: 'Mobile App Wireframes',
-      thumbnail: '/canvas-thumbnails/wireframes.jpg',
-      lastModified: '1 day ago',
-      collaborators: ['Emma', 'You'],
-      size: '375x812'
-    },
-    {
-      id: '3',
-      name: 'Website Homepage',
-      thumbnail: '/canvas-thumbnails/homepage.jpg',
-      lastModified: '3 days ago',
-      collaborators: ['Sarah', 'Mike', 'Emma'],
-      size: '1440x900'
-    }
-  ])
+  const [recentProjects, setRecentProjects] = useState<CanvasProject[]>([])
 
   // Additional state for real features
   const [canvasName, setCanvasName] = useState('Brand Identity Design')

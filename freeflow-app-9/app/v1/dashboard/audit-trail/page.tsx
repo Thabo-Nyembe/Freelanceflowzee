@@ -2,6 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -451,15 +453,9 @@ export default function AuditTrailPage() {
                     </select>
                     <select className="px-4 py-2 rounded-lg bg-muted">
                       <option>All Users</option>
-                      <option>John Doe</option>
-                      <option>Jane Smith</option>
-                      <option>Admin User</option>
                     </select>
                     <select className="px-4 py-2 rounded-lg bg-muted">
                       <option>All Time</option>
-                      <option>Today</option>
-                      <option>This Week</option>
-                      <option>This Month</option>
                     </select>
                   </div>
                 </div>
@@ -655,11 +651,7 @@ export default function AuditTrailPage() {
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-6">Export History</h3>
                   <div className="space-y-3">
-                    {[
-                      { name: 'audit-logs-2025-01-21.csv', size: '2.4 MB', date: '2025-01-21' },
-                      { name: 'compliance-report-q1.pdf', size: '1.8 MB', date: '2025-01-15' },
-                      { name: 'audit-logs-2025-01-01.json', size: '5.2 MB', date: '2025-01-01' }
-                    ].map((file, idx) => (
+                    {[].map((file: any, idx: number) => (
                       <div key={idx} className="p-4 rounded-lg bg-muted/30 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">📄</span>

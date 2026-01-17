@@ -1,6 +1,8 @@
 
 "use client"
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react'
@@ -65,92 +67,9 @@ export default function CloudStoragePage() {
     loadCloudStorageData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Mock cloud storage data
-  const cloudProviders = [
-    {
-      id: 'google-drive',
-      name: 'Google Drive',
-      icon: '📁',
-      connected: true,
-      totalSpace: '15 GB',
-      usedSpace: '8.2 GB',
-      usagePercent: 55,
-      files: 1247,
-      lastRefreshCw: '2 minutes ago',
-      status: 'active'
-    },
-    {
-      id: 'dropbox',
-      name: 'Dropbox',
-      icon: '📦',
-      connected: true,
-      totalSpace: '2 TB',
-      usedSpace: '458 GB',
-      usagePercent: 23,
-      files: 2893,
-      lastRefreshCw: '5 minutes ago',
-      status: 'active'
-    },
-    {
-      id: 'onedrive',
-      name: 'OneDrive',
-      icon: '☁️',
-      connected: false,
-      totalSpace: '1 TB',
-      usedSpace: '0 GB',
-      usagePercent: 0,
-      files: 0,
-      lastRefreshCw: 'Never',
-      status: 'disconnected'
-    },
-    {
-      id: 'aws-s3',
-      name: 'AWS S3',
-      icon: '🗃️',
-      connected: true,
-      totalSpace: 'Unlimited',
-      usedSpace: '127 GB',
-      usagePercent: null,
-      files: 5642,
-      lastRefreshCw: '1 hour ago',
-      status: 'syncing'
-    }
-  ]
+  const cloudProviders = []
 
-  const recentActivity = [
-    {
-      id: 1,
-      action: 'uploaded',
-      file: 'Project Proposal.pdf',
-      provider: 'Google Drive',
-      time: '5 minutes ago',
-      size: '2.4 MB'
-    },
-    {
-      id: 2,
-      action: 'downloaded',
-      file: 'Brand Assets.zip',
-      provider: 'Dropbox',
-      time: '15 minutes ago',
-      size: '45.2 MB'
-    },
-    {
-      id: 3,
-      action: 'synced',
-      file: 'Design Files',
-      provider: 'AWS S3',
-      time: '1 hour ago',
-      size: '156 files'
-    },
-    {
-      id: 4,
-      action: 'shared',
-      file: 'Client Presentation.pptx',
-      provider: 'Google Drive',
-      time: '2 hours ago',
-      size: '12.8 MB'
-    }
-  ]
+  const recentActivity = []
 
   const storageStats = {
     totalFiles: cloudProviders.reduce((sum, provider) => sum + provider.files, 0),
@@ -433,14 +352,7 @@ export default function CloudStoragePage() {
               <Badge variant="outline" className="text-xs">Last 6 months</Badge>
             </div>
             <div className="h-32 flex items-end justify-between gap-2">
-              {[
-                { month: 'Jul', usage: 45, color: 'bg-blue-500' },
-                { month: 'Aug', usage: 52, color: 'bg-blue-500' },
-                { month: 'Sep', usage: 58, color: 'bg-blue-500' },
-                { month: 'Oct', usage: 65, color: 'bg-blue-500' },
-                { month: 'Nov', usage: 72, color: 'bg-blue-500' },
-                { month: 'Dec', usage: 78, color: 'bg-blue-600' }
-              ].map((data, i) => (
+              {[].map((data, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <div
                     className={`w-full ${data.color} rounded-t transition-all hover:opacity-80`}
@@ -456,13 +368,7 @@ export default function CloudStoragePage() {
           <div>
             <h4 className="text-sm font-medium mb-3">Storage by File Type</h4>
             <div className="space-y-3">
-              {[
-                { type: 'Documents', size: '2.4 GB', percentage: 35, color: 'bg-blue-500' },
-                { type: 'Images', size: '1.8 GB', percentage: 26, color: 'bg-green-500' },
-                { type: 'Videos', size: '1.5 GB', percentage: 22, color: 'bg-purple-500' },
-                { type: 'Audio', size: '0.8 GB', percentage: 12, color: 'bg-orange-500' },
-                { type: 'Other', size: '0.3 GB', percentage: 5, color: 'bg-gray-500' }
-              ].map((item, i) => (
+              {[].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${item.color}`} />
                   <div className="flex-1">

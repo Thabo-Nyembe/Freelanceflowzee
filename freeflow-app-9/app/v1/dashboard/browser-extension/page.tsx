@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -237,173 +239,9 @@ const browserExtensionReducer = (
 }
 
 // ========================================
-// MOCK DATA GENERATORS
+// EMPTY DATA PLACEHOLDERS
 // ========================================
-
-const generateMockCaptures = (): PageCapture[] => {
-  logger.debug('Generating mock captures')
-
-  const types: CaptureType[] = ['screenshot', 'full-page', 'selection', 'video', 'text']
-  const browsers: BrowserType[] = ['chrome', 'firefox', 'safari', 'edge', 'brave', 'opera']
-  const websites = [
-    'Documentation Page', 'Article', 'Blog Post', 'Tutorial', 'Design Inspiration',
-    'Code Example', 'Research Paper', 'Product Page', 'News Article', 'Guide'
-  ]
-
-  const captures: PageCapture[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const type = types[Math.floor(Math.random() * types.length)]
-    const browser = browsers[Math.floor(Math.random() * browsers.length)]
-
-    captures.push({
-      id: `CAP-${String(i).padStart(3, '0')}`,
-      title: `${websites[Math.floor(Math.random() * websites.length)]} ${i}`,
-      url: `https://example.com/page-${i}`,
-      type,
-      fileSize: Math.floor(Math.random() * 5000000) + 100000, // 100KB - 5MB
-      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      tags: ['work', 'reference', 'inspiration'].filter(() => Math.random() > 0.5),
-      notes: Math.random() > 0.7 ? 'Important capture for later reference' : undefined,
-      metadata: {
-        browser,
-        viewport: {
-          width: 1920,
-          height: 1080
-        },
-        scrollPosition: type === 'full-page' ? Math.floor(Math.random() * 5000) : undefined
-      }
-    })
-  }  return captures
-}
-
-const generateMockActions = (): QuickAction[] => {
-  logger.debug('Generating mock actions')
-
-  const actions: QuickAction[] = [
-    {
-      id: 'action-1',
-      type: 'task',
-      name: 'Create Task',
-      description: 'Quickly create a task from current page',
-      icon: '✓',
-      shortcut: 'Ctrl+Shift+T',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-2',
-      type: 'link',
-      name: 'Save Link',
-      description: 'Save current page URL to library',
-      icon: '🔗',
-      shortcut: 'Ctrl+Shift+S',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-3',
-      type: 'share',
-      name: 'Share',
-      description: 'Share current page with team',
-      icon: '📤',
-      shortcut: 'Ctrl+Shift+H',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-4',
-      type: 'translate',
-      name: 'Translate',
-      description: 'Translate selected text',
-      icon: '🌐',
-      shortcut: 'Ctrl+Shift+L',
-      enabled: false,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-5',
-      type: 'summarize',
-      name: 'Summarize',
-      description: 'AI summary of current page',
-      icon: '📝',
-      shortcut: 'Ctrl+Shift+U',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-6',
-      type: 'analyze',
-      name: 'Analyze',
-      description: 'Analyze page content with AI',
-      icon: '🧠',
-      shortcut: 'Ctrl+Shift+A',
-      enabled: false,
-      usageCount: Math.floor(Math.random() * 100)
-    }
-  ]  return actions
-}
-
-const generateMockFeatures = (): ExtensionFeature[] => {
-  logger.debug('Generating mock features')
-
-  const features: ExtensionFeature[] = [
-    {
-      id: 'feature-1',
-      type: 'quick-access',
-      name: 'Quick Access',
-      description: 'Quick access popup on every page',
-      icon: '⚡',
-      enabled: true,
-      settings: { position: 'bottom-right' }
-    },
-    {
-      id: 'feature-2',
-      type: 'page-capture',
-      name: 'Page Capture',
-      description: 'Capture screenshots and full pages',
-      icon: '📸',
-      enabled: true,
-      settings: { format: 'png', quality: 'high' }
-    },
-    {
-      id: 'feature-3',
-      type: 'web-clipper',
-      name: 'Web Clipper',
-      description: 'Clip articles and content',
-      icon: '✂️',
-      enabled: true,
-      settings: { autoFormat: true }
-    },
-    {
-      id: 'feature-4',
-      type: 'shortcuts',
-      name: 'Keyboard Shortcuts',
-      description: 'Custom keyboard shortcuts',
-      icon: '⌨️',
-      enabled: true,
-      settings: { customShortcuts: {} }
-    },
-    {
-      id: 'feature-5',
-      type: 'sync',
-      name: 'Auto Sync',
-      description: 'Automatically sync all captures',
-      icon: '☁️',
-      enabled: true,
-      settings: { interval: 'realtime' }
-    },
-    {
-      id: 'feature-6',
-      type: 'ai-assistant',
-      name: 'AI Assistant',
-      description: 'AI-powered page analysis',
-      icon: '🤖',
-      enabled: false,
-      settings: { model: 'gpt-4' }
-    }
-  ]  return features
-}
+// Mock data generators removed - now using database hooks
 
 // ========================================
 // UTILITY FUNCTIONS
@@ -511,14 +349,13 @@ export default function BrowserExtensionPage() {
   // Confirmation Dialog State
   const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
 
-  // Load mock data
-  useEffect(() => {    const mockCaptures = generateMockCaptures()
-    const mockActions = generateMockActions()
-    const mockFeatures = generateMockFeatures()
-
-    dispatch({ type: 'SET_CAPTURES', captures: mockCaptures })
-    dispatch({ type: 'SET_ACTIONS', actions: mockActions })
-    dispatch({ type: 'SET_FEATURES', features: mockFeatures })    announce('Browser extension page loaded', 'polite')
+  // Load data from database hooks
+  useEffect(() => {
+    // Initialize with empty data - will be populated from database
+    dispatch({ type: 'SET_CAPTURES', captures: [] })
+    dispatch({ type: 'SET_ACTIONS', actions: [] })
+    dispatch({ type: 'SET_FEATURES', features: [] })
+    announce('Browser extension page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats

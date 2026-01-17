@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Verified database hook integration
+
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'

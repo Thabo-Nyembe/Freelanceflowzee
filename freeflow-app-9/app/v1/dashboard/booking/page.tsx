@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
@@ -99,17 +101,17 @@ export default function BookingPage() {
       const data = await response.json()
 
       const preferences = {
-        autoConfirm: data.auto_confirm ?? true,
-        bufferTime: data.buffer_time ?? 15,
-        maxBookingsPerDay: data.max_bookings_per_day ?? 12,
-        reminderTime: data.reminder_time ?? 24,
-        workingHours: data.working_hours ?? '9:00-17:00',
-        categories: data.categories ?? ['Consultation', 'Follow-up', 'Workshop', 'Meeting']
+        autoConfirm: data.auto_confirm,
+        bufferTime: data.buffer_time,
+        maxBookingsPerDay: data.max_bookings_per_day,
+        reminderTime: data.reminder_time,
+        workingHours: data.working_hours,
+        categories: data.categories
       }
 
       logger.info('Settings loaded successfully', {
         ...preferences,
-        categoriesCount: preferences.categories.length
+        categoriesCount: preferences.categories?.length
       })
 
       announce('Booking settings panel opened', 'polite')
@@ -135,13 +137,13 @@ export default function BookingPage() {
       const reportData = await response.json()
 
       const data = {
-        totalBookings: reportData.total_bookings ?? 143,
-        thisMonth: reportData.this_month ?? 38,
-        pendingBookings: reportData.pending ?? 12,
-        completedBookings: reportData.completed ?? 115,
-        cancelledBookings: reportData.cancelled ?? 16,
-        revenue: reportData.revenue ?? 14750,
-        topService: reportData.top_service ?? 'Consultation'
+        totalBookings: reportData.total_bookings,
+        thisMonth: reportData.this_month,
+        pendingBookings: reportData.pending,
+        completedBookings: reportData.completed,
+        cancelledBookings: reportData.cancelled,
+        revenue: reportData.revenue,
+        topService: reportData.top_service
       }
 
       const reportContent = `# Booking Report - ${new Date().toLocaleDateString()}

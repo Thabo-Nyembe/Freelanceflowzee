@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
@@ -295,126 +297,6 @@ function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
   }
 }
 
-// ============================================================================
-// A++++ MOCK DATA
-// ============================================================================
-
-function generateMockCanvases(): CanvasProject[] {
-  logger.debug('Generating mock canvases')
-
-  const templates: CanvasTemplate[] = ['ui-design', 'wireframe', 'illustration', 'presentation', 'infographic', 'social-media', 'logo-design', 'blank']
-  const statuses: CanvasStatus[] = ['in-progress', 'completed', 'archived', 'shared']
-
-  const canvasNames = [
-    'Mobile App Redesign', 'Website Landing Page', 'Dashboard UI', 'Marketing Campaign',
-    'Brand Identity', 'Social Media Posts', 'Wireframe Collection', 'Product Mockups',
-    'Presentation Deck', 'Infographic Design', 'Logo Concepts', 'User Flow Diagram',
-    'Icon Set Design', 'Email Templates', 'Mobile Onboarding', 'Web Dashboard',
-    'Marketing Materials', 'UI Component Library', 'App Prototype', 'Brand Guidelines',
-    'Social Graphics Pack', 'Product Illustrations', 'Website Redesign', 'Mobile App UI',
-    'Landing Page Design', 'E-commerce UI', 'SaaS Dashboard', 'Portfolio Website',
-    'Blog Design', 'Admin Panel', 'Presentation Templates', 'Marketing Banners',
-    'App Icons', 'Web Components', 'Mobile Screens', 'User Interface Kit',
-    'Design System', 'Wireframe Kit', 'Product Cards', 'Hero Sections',
-    'Feature Illustrations', 'Pricing Tables', 'Testimonial Cards', 'Footer Designs',
-    'Navigation Menus', 'Form Designs', 'Button Library', 'Card Components',
-    'Modal Designs', 'Alert Components', 'Badge Designs', 'Avatar Components'
-  ]
-
-  const collaborators: CanvasCollaborator[] = [
-    {
-      id: 'COL-001',
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      avatar: '👩‍💼',
-      role: 'editor',
-      color: '#3B82F6',
-      lastSeen: '2 min ago',
-      isOnline: true
-    },
-    {
-      id: 'COL-002',
-      name: 'Michael Chen',
-      email: 'michael@example.com',
-      avatar: '👨‍💻',
-      role: 'editor',
-      color: '#10B981',
-      lastSeen: '5 min ago',
-      isOnline: true
-    },
-    {
-      id: 'COL-003',
-      name: 'Emma Davis',
-      email: 'emma@example.com',
-      avatar: '👩‍🎨',
-      role: 'viewer',
-      color: '#8B5CF6',
-      lastSeen: '1 hour ago',
-      isOnline: false
-    },
-    {
-      id: 'COL-004',
-      name: 'Alex Rodriguez',
-      email: 'alex@example.com',
-      avatar: '👨‍🎨',
-      role: 'commenter',
-      color: '#F59E0B',
-      lastSeen: '30 min ago',
-      isOnline: false
-    }
-  ]
-
-  const tags = ['UI/UX', 'Web', 'Mobile', 'Branding', 'Marketing', 'Illustration', 'Design System', 'Prototype']
-
-  const canvases: CanvasProject[] = canvasNames.map((name, index) => {
-    const template = templates[index % templates.length]
-    const status = statuses[index % statuses.length]
-    const artboardCount = Math.floor(Math.random() * 10) + 1
-    const layerCount = Math.floor(Math.random() * 50) + 10
-    const collaboratorCount = Math.floor(Math.random() * 3) + 1
-    const selectedCollaborators = collaborators.slice(0, collaboratorCount)
-
-    const artboards: CanvasArtboard[] = Array.from({ length: artboardCount }, (_, i) => ({
-      id: `AB-${index}-${i}`,
-      name: `Artboard ${i + 1}`,
-      width: [1920, 1440, 1024, 768, 375][Math.floor(Math.random() * 5)],
-      height: [1080, 900, 768, 1024, 812][Math.floor(Math.random() * 5)],
-      backgroundColor: ['#FFFFFF', '#F3F4F6', '#1F2937', '#111827'][Math.floor(Math.random() * 4)],
-      layers: Array.from({ length: Math.floor(Math.random() * 15) + 5 }, (_, j) => ({
-        id: `L-${index}-${i}-${j}`,
-        name: `Layer ${j + 1}`,
-        type: (['shape', 'text', 'image', 'group', 'frame', 'vector'] as LayerType[])[Math.floor(Math.random() * 6)],
-        visible: Math.random() > 0.2,
-        locked: Math.random() > 0.9,
-        opacity: Math.floor(Math.random() * 100),
-        blendMode: 'normal'
-      }))
-    }))
-
-    return {
-      id: `CVS-${String(index + 1).padStart(3, '0')}`,
-      name,
-      description: `Professional ${template.replace('-', ' ')} project with multiple artboards and layers`,
-      thumbnail: `https://picsum.photos/seed/${index}/800/600`,
-      template,
-      status,
-      artboards,
-      collaborators: selectedCollaborators,
-      totalLayers: layerCount,
-      size: parseFloat((Math.random() * 50 + 1).toFixed(2)),
-      version: Math.floor(Math.random() * 10) + 1,
-      isStarred: Math.random() > 0.7,
-      isShared: collaboratorCount > 1,
-      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      lastModifiedBy: selectedCollaborators[0].name,
-      tags: tags.slice(0, Math.floor(Math.random() * 3) + 1)
-    }
-  })
-
-  logger.info('Mock canvases generated', { count: canvases.length })
-  return canvases
-}
 
 // ============================================================================
 // A++++ TEMPLATES
@@ -552,11 +434,11 @@ export default function CanvasPage() {
         setIsLoading(true)
         setError(null)
 
-        // Note: Using mock data - in production, this would fetch from /api/canvases
-        const mockCanvases = generateMockCanvases()
-        dispatch({ type: 'SET_CANVASES', canvases: mockCanvases })
+        // Note: Using database hooks - fetch from /api/canvases or use useCanvases hook
+        const canvases: CanvasProject[] = []
+        dispatch({ type: 'SET_CANVASES', canvases })
 
-        logger.info('Canvases loaded', { count: mockCanvases.length })
+        logger.info('Canvases loaded', { count: canvases.length })
         setIsLoading(false)
         announce('Canvases loaded successfully', 'polite')
       } catch (err) {

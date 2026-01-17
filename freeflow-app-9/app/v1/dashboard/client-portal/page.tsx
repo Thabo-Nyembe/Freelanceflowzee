@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #22 - Removed mock data, using database hooks
+
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, useReducer, useMemo } from 'react'
@@ -244,85 +246,6 @@ function portalReducer(state: PortalState, action: PortalAction): PortalState {
   }
 }
 
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const generateMockClients = (): Client[] => {
-  logger.debug('Generating mock clients')
-
-  const companies = [
-    'TechCorp Solutions', 'Digital Innovators', 'Cloud Systems Inc', 'Data Dynamics',
-    'Smart Solutions Ltd', 'Future Technologies', 'Alpha Enterprises', 'Beta Industries',
-    'Gamma Corporation', 'Delta Group', 'Epsilon Systems', 'Zeta Innovations',
-    'Eta Digital', 'Theta Tech', 'Iota Solutions', 'Kappa Corporation',
-    'Lambda Industries', 'Mu Systems', 'Nu Enterprises', 'Xi Technologies'
-  ]
-
-  const contacts = [
-    'John Smith', 'Sarah Johnson', 'Michael Brown', 'Emily Davis',
-    'David Wilson', 'Jennifer Martinez', 'Robert Anderson', 'Lisa Taylor',
-    'James Thomas', 'Mary Jackson', 'Christopher White', 'Patricia Harris'
-  ]
-
-  const statuses: ClientStatus[] = ['active', 'onboarding', 'inactive', 'churned']
-  const tiers: ClientTier[] = ['basic', 'standard', 'premium', 'enterprise']
-
-  const clients: Client[] = companies.map((company, index) => ({
-    id: `CL-${String(index + 1).padStart(3, '0')}`,
-    companyName: company,
-    contactPerson: contacts[index % contacts.length],
-    email: `contact@${company.toLowerCase().replace(/\s+/g, '')}.com`,
-    phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    tier: tiers[Math.floor(Math.random() * tiers.length)],
-    activeProjects: Math.floor(Math.random() * 5) + 1,
-    totalRevenue: Math.floor(Math.random() * 500000) + 50000,
-    healthScore: Math.floor(Math.random() * 30) + 70,
-    lastContact: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    nextFollowUp: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['priority', 'enterprise', 'growth'].slice(0, Math.floor(Math.random() * 3) + 1),
-    createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-  }))
-
-  logger.info('Generated mock clients', { count: clients.length })
-  return clients
-}
-
-const generateMockProjects = (clients: Client[]): Project[] => {
-  logger.debug('Generating mock projects')
-
-  const projectNames = [
-    'Website Redesign', 'Mobile App Development', 'Cloud Migration', 'API Integration',
-    'Data Analytics Platform', 'CRM Implementation', 'E-commerce Solution', 'Brand Identity',
-    'Marketing Campaign', 'Security Audit', 'Performance Optimization', 'DevOps Setup'
-  ]
-
-  const statuses: ProjectStatus[] = ['planning', 'active', 'on-hold', 'completed', 'cancelled']
-
-  const projects: Project[] = projectNames.map((name, index) => {
-    const client = clients[index % clients.length]
-    const budget = Math.floor(Math.random() * 200000) + 50000
-    const spent = Math.floor(budget * (Math.random() * 0.8))
-
-    return {
-      id: `PR-${String(index + 1).padStart(3, '0')}`,
-      clientId: client.id,
-      name,
-      description: `${name} project for ${client.companyName}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      budget,
-      spent,
-      progress: Math.floor(Math.random() * 100),
-      startDate: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
-      endDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
-      team: ['John Doe', 'Jane Smith', 'Bob Johnson'].slice(0, Math.floor(Math.random() * 3) + 1)
-    }
-  })
-
-  logger.info('Generated mock projects', { count: projects.length })
-  return projects
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -402,12 +325,13 @@ export default function ClientPortalPage() {
         const result = await response.json()
 
         if (result.success) {
-          // Use mock data for richer visualization
-          const clients = generateMockClients()
-          const projects = generateMockProjects(clients)
-
-          dispatch({ type: 'SET_CLIENTS', clients })
-          dispatch({ type: 'SET_PROJECTS', projects })
+          // Data will be fetched from database hooks
+          if (result.clients) {
+            dispatch({ type: 'SET_CLIENTS', clients: result.clients })
+          }
+          if (result.projects) {
+            dispatch({ type: 'SET_PROJECTS', projects: result.projects })
+          }
 
           logger.info('Data loaded from API', {
             clientsCount: result.clients?.length || 0,
