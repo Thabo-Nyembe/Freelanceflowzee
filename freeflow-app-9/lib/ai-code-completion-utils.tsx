@@ -3,6 +3,8 @@
  *
  * Comprehensive utilities for AI-powered code completion, analysis,
  * optimization, and intelligent code generation across multiple languages.
+ *
+ * MIGRATED: Batch #15 - Removed mock data, using database hooks
  */
 
 import { createFeatureLogger } from '@/lib/logger'

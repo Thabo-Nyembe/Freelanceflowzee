@@ -8,240 +8,70 @@ import type {
 } from './audit-types'
 
 // Mock Audit Logs
-export const MOCK_AUDIT_LOGS: AuditLog[] = [
-  {
-    id: 'log-1',
-    timestamp: new Date('2025-01-21T14:30:00'),
-    userId: 'user-1',
-    userName: 'John Doe',
-    userEmail: 'john@company.com',
-    activityType: 'create',
-    entityType: 'invoice',
-    entityId: 'inv-001',
-    entityName: 'Invoice #INV-2024-001',
-    action: 'Created new invoice',
-    description: 'Created invoice for client Acme Corp worth $5,000',
-    severity: 'low',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA',
-    changes: [
-      { field: 'total', oldValue: null, newValue: 5000, dataType: 'number' },
-      { field: 'status', oldValue: null, newValue: 'draft', dataType: 'string' }
-    ]
-  },
-  {
-    id: 'log-2',
-    timestamp: new Date('2025-01-21T14:15:00'),
-    userId: 'user-2',
-    userName: 'Jane Smith',
-    userEmail: 'jane@company.com',
-    activityType: 'update',
-    entityType: 'client',
-    entityId: 'client-001',
-    entityName: 'Acme Corp',
-    action: 'Updated client information',
-    description: 'Changed client email address',
-    severity: 'medium',
-    ipAddress: '192.168.1.101',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    location: 'New York, NY',
-    changes: [
-      { field: 'email', oldValue: 'old@acme.com', newValue: 'new@acme.com', dataType: 'string' }
-    ]
-  },
-  {
-    id: 'log-3',
-    timestamp: new Date('2025-01-21T13:45:00'),
-    userId: 'user-1',
-    userName: 'John Doe',
-    userEmail: 'john@company.com',
-    activityType: 'delete',
-    entityType: 'file',
-    entityId: 'file-001',
-    entityName: 'old-report.pdf',
-    action: 'Deleted file',
-    description: 'Permanently deleted file from storage',
-    severity: 'high',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA'
-  },
-  {
-    id: 'log-4',
-    timestamp: new Date('2025-01-21T13:30:00'),
-    userId: 'user-3',
-    userName: 'Admin User',
-    userEmail: 'admin@company.com',
-    activityType: 'permission-change',
-    entityType: 'user',
-    entityId: 'user-2',
-    entityName: 'Jane Smith',
-    action: 'Changed user permissions',
-    description: 'Granted admin access to user',
-    severity: 'critical',
-    ipAddress: '192.168.1.102',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA',
-    changes: [
-      { field: 'role', oldValue: 'user', newValue: 'admin', dataType: 'string' }
-    ]
-  },
-  {
-    id: 'log-5',
-    timestamp: new Date('2025-01-21T12:00:00'),
-    userId: 'user-1',
-    userName: 'John Doe',
-    userEmail: 'john@company.com',
-    activityType: 'login',
-    entityType: 'user',
-    entityId: 'user-1',
-    entityName: 'John Doe',
-    action: 'User logged in',
-    description: 'Successful login from new device',
-    severity: 'low',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA'
-  },
-  {
-    id: 'log-6',
-    timestamp: new Date('2025-01-21T11:30:00'),
-    userId: 'user-2',
-    userName: 'Jane Smith',
-    userEmail: 'jane@company.com',
-    activityType: 'export',
-    entityType: 'report',
-    entityId: 'report-001',
-    entityName: 'Q1 Financial Report',
-    action: 'Exported report',
-    description: 'Exported financial report as PDF',
-    severity: 'medium',
-    ipAddress: '192.168.1.101',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    location: 'New York, NY'
-  },
-  {
-    id: 'log-7',
-    timestamp: new Date('2025-01-21T10:15:00'),
-    userId: 'user-1',
-    userName: 'John Doe',
-    userEmail: 'john@company.com',
-    activityType: 'create',
-    entityType: 'project',
-    entityId: 'project-001',
-    entityName: 'Website Redesign',
-    action: 'Created new project',
-    description: 'Created project for client website redesign',
-    severity: 'low',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA'
-  },
-  {
-    id: 'log-8',
-    timestamp: new Date('2025-01-21T09:00:00'),
-    userId: 'user-3',
-    userName: 'Admin User',
-    userEmail: 'admin@company.com',
-    activityType: 'settings-change',
-    entityType: 'integration',
-    entityId: 'int-stripe',
-    entityName: 'Stripe Integration',
-    action: 'Updated integration settings',
-    description: 'Changed Stripe webhook configuration',
-    severity: 'high',
-    ipAddress: '192.168.1.102',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    location: 'San Francisco, CA',
-    changes: [
-      { field: 'webhook_url', oldValue: 'https://old.webhook.com', newValue: 'https://new.webhook.com', dataType: 'string' }
-    ]
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_AUDIT_LOGS: AuditLog[] = []
 
 // Activity Summary
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const ACTIVITY_SUMMARY: ActivitySummary = {
-  totalActivities: 1247,
-  todayActivities: 38,
-  weekActivities: 245,
-  monthActivities: 1247,
+  totalActivities: 0,
+  todayActivities: 0,
+  weekActivities: 0,
+  monthActivities: 0,
   byType: {
-    create: 324,
-    update: 456,
-    delete: 89,
-    login: 234,
-    logout: 198,
-    export: 67,
-    import: 23,
-    share: 45,
-    'permission-change': 12,
-    'settings-change': 19
+    create: 0,
+    update: 0,
+    delete: 0,
+    login: 0,
+    logout: 0,
+    export: 0,
+    import: 0,
+    share: 0,
+    'permission-change': 0,
+    'settings-change': 0
   },
   byEntity: {
-    user: 432,
-    client: 234,
-    project: 156,
-    invoice: 189,
-    payment: 98,
-    file: 67,
-    report: 45,
-    workflow: 23,
-    integration: 12,
-    widget: 11
+    user: 0,
+    client: 0,
+    project: 0,
+    invoice: 0,
+    payment: 0,
+    file: 0,
+    report: 0,
+    workflow: 0,
+    integration: 0,
+    widget: 0
   },
   bySeverity: {
-    low: 856,
-    medium: 298,
-    high: 78,
-    critical: 15
+    low: 0,
+    medium: 0,
+    high: 0,
+    critical: 0
   },
-  topUsers: [
-    { userId: 'user-1', userName: 'John Doe', activityCount: 456, lastActive: new Date('2025-01-21T14:30:00') },
-    { userId: 'user-2', userName: 'Jane Smith', activityCount: 389, lastActive: new Date('2025-01-21T14:15:00') },
-    { userId: 'user-3', userName: 'Admin User', activityCount: 234, lastActive: new Date('2025-01-21T13:30:00') }
-  ],
-  recentCritical: MOCK_AUDIT_LOGS.filter(log => log.severity === 'critical')
+  topUsers: [],
+  recentCritical: []
 }
 
 // Compliance Report
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const COMPLIANCE_REPORT: ComplianceReport = {
-  id: 'report-001',
-  name: 'Q1 2025 Compliance Report',
-  generatedAt: new Date('2025-01-21'),
+  id: '',
+  name: '',
+  generatedAt: new Date(),
   period: {
-    start: new Date('2025-01-01'),
-    end: new Date('2025-03-31')
+    start: new Date(),
+    end: new Date()
   },
-  totalLogs: 1247,
-  criticalEvents: 15,
-  securityIncidents: 3,
-  dataChanges: 545,
-  userLogins: 234,
-  failedLogins: 12,
-  exportActivities: 67,
-  permissionChanges: 12,
-  complianceScore: 94.5,
-  findings: [
-    {
-      id: 'finding-1',
-      category: 'security',
-      severity: 'high',
-      title: 'Multiple Failed Login Attempts',
-      description: '12 failed login attempts detected from unusual locations',
-      affectedLogs: ['log-9', 'log-10', 'log-11'],
-      recommendation: 'Implement rate limiting and IP blocking for failed login attempts'
-    },
-    {
-      id: 'finding-2',
-      category: 'access',
-      severity: 'medium',
-      title: 'Permission Changes Not Documented',
-      description: 'Some permission changes lack proper documentation',
-      affectedLogs: ['log-4'],
-      recommendation: 'Require approval and documentation for all permission changes'
-    }
-  ]
+  totalLogs: 0,
+  criticalEvents: 0,
+  securityIncidents: 0,
+  dataChanges: 0,
+  userLogins: 0,
+  failedLogins: 0,
+  exportActivities: 0,
+  permissionChanges: 0,
+  complianceScore: 0,
+  findings: []
 }
 
 // Helper Functions

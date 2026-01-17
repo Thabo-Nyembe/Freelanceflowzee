@@ -247,28 +247,24 @@ export const WHITE_LABEL_TEMPLATES: WhiteLabelTemplate[] = [
   }
 ]
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_WHITE_LABEL_CONFIG: WhiteLabelConfig = {
-  id: 'wl-1',
-  organizationId: 'org-1',
-  isActive: true,
-  brandName: 'Acme Corporation',
-  displayName: 'Acme Studio',
-  tagline: 'Create. Collaborate. Deliver.',
-  description: 'Professional creative collaboration platform',
+  id: '',
+  organizationId: '',
+  isActive: false,
+  brandName: '',
+  displayName: '',
+  tagline: '',
+  description: '',
   assets: {
     logo: {
-      light: '/branding/acme-light.svg',
-      dark: '/branding/acme-dark.svg',
-      favicon: '/branding/acme-favicon.ico',
-      iconOnly: '/branding/acme-icon.svg'
+      light: '',
+      dark: '',
+      favicon: '',
+      iconOnly: ''
     },
-    images: {
-      loginBackground: '/branding/acme-login-bg.jpg',
-      dashboardBackground: '/branding/acme-dashboard-bg.jpg'
-    },
-    socialMedia: {
-      ogImage: '/branding/acme-og.jpg'
-    }
+    images: {},
+    socialMedia: {}
   },
   colors: {
     light: DEFAULT_LIGHT_COLORS,
@@ -276,58 +272,43 @@ export const MOCK_WHITE_LABEL_CONFIG: WhiteLabelConfig = {
   },
   typography: {
     fontFamily: 'inter',
-    baseFontSize: 16,
+    baseFontSize: 0,
     headingFontFamily: 'inter'
   },
   customDomain: {
-    domain: 'studio.acme.com',
-    isVerified: true,
-    sslEnabled: true
+    domain: '',
+    isVerified: false,
+    sslEnabled: false
   },
   emailBranding: {
-    fromName: 'Acme Studio',
-    fromEmail: 'hello@acme.com',
-    replyToEmail: 'support@acme.com',
-    footerText: '© 2025 Acme Corporation. All rights reserved.',
-    socialLinks: {
-      twitter: 'https://twitter.com/acmecorp',
-      linkedin: 'https://linkedin.com/company/acmecorp'
-    }
+    fromName: '',
+    fromEmail: '',
+    replyToEmail: '',
+    footerText: '',
+    socialLinks: {}
   },
   seo: {
-    metaTitle: 'Acme Studio - Creative Collaboration Platform',
-    metaDescription: 'Professional tools for creative teams to collaborate and deliver exceptional work.',
-    keywords: ['creative', 'collaboration', 'design', 'studio'],
-    analyticsId: 'G-XXXXXXXXXX'
+    metaTitle: '',
+    metaDescription: '',
+    keywords: [],
+    analyticsId: ''
   },
   features: {
-    hideKaziBranding: true,
+    hideKaziBranding: false,
     showPoweredBy: false,
-    customFooter: 'Made with ❤️ by Acme Corporation'
+    customFooter: ''
   },
-  createdAt: new Date('2024-01-15'),
-  updatedAt: new Date('2025-01-18')
+  createdAt: new Date(0),
+  updatedAt: new Date(0)
 }
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_DOMAIN_VERIFICATION: DomainVerification = {
-  domain: 'studio.acme.com',
-  status: 'verified',
-  records: [
-    {
-      type: 'CNAME',
-      name: 'studio',
-      value: 'kazi.custom-domain.com',
-      status: 'verified'
-    },
-    {
-      type: 'TXT',
-      name: '_kazi-verify',
-      value: 'kazi-site-verification=abc123xyz789',
-      status: 'verified'
-    }
-  ],
-  verifiedAt: new Date('2025-01-10'),
-  lastChecked: new Date()
+  domain: '',
+  status: 'pending',
+  records: [],
+  verifiedAt: new Date(0),
+  lastChecked: new Date(0)
 }
 
 export const FONT_OPTIONS: Array<{ id: FontFamily; name: string; preview: string; category: string }> = [

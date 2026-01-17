@@ -109,138 +109,27 @@ export const AR_TEMPLATES: ARTemplate[] = [
   }
 ]
 
-export const MOCK_AR_SESSIONS: Partial<ARSession>[] = [
-  {
-    id: 'session-1',
-    name: 'Product Design Review',
-    description: 'Q2 product design review meeting',
-    hostId: 'user-1',
-    status: 'active',
-    startedAt: new Date(Date.now() - 1800000),
-    duration: 1800,
-    maxParticipants: 10,
-    isRecording: true
-  },
-  {
-    id: 'session-2',
-    name: 'Weekly Team Standup',
-    description: 'Monday morning standup',
-    hostId: 'user-2',
-    status: 'active',
-    startedAt: new Date(Date.now() - 600000),
-    duration: 600,
-    maxParticipants: 8,
-    isRecording: false
-  },
-  {
-    id: 'session-3',
-    name: 'Architecture Planning',
-    description: 'System architecture discussion',
-    hostId: 'user-3',
-    status: 'paused',
-    startedAt: new Date(Date.now() - 3600000),
-    duration: 2400,
-    maxParticipants: 6,
-    isRecording: true
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_AR_SESSIONS: Partial<ARSession>[] = []
 
-export const MOCK_AR_PARTICIPANTS: Partial<ARParticipant>[] = [
-  {
-    id: 'participant-1',
-    userId: 'user-1',
-    name: 'Alex Johnson',
-    device: {
-      type: 'quest',
-      model: 'Meta Quest 3',
-      capabilities: [],
-      resolution: { width: 2064, height: 2208 },
-      refreshRate: 120,
-      fov: 110
-    },
-    isHost: true,
-    isSpeaking: false,
-    isMuted: false,
-    handRaised: false,
-    joinedAt: new Date(Date.now() - 1800000),
-    latency: 45
-  },
-  {
-    id: 'participant-2',
-    userId: 'user-2',
-    name: 'Sarah Chen',
-    device: {
-      type: 'hololens',
-      model: 'HoloLens 2',
-      capabilities: [],
-      resolution: { width: 2048, height: 1080 },
-      refreshRate: 60,
-      fov: 52
-    },
-    isHost: false,
-    isSpeaking: true,
-    isMuted: false,
-    handRaised: false,
-    joinedAt: new Date(Date.now() - 1500000),
-    latency: 32
-  },
-  {
-    id: 'participant-3',
-    userId: 'user-3',
-    name: 'Marcus Brown',
-    device: {
-      type: 'webxr',
-      model: 'Browser WebXR',
-      capabilities: [],
-      resolution: { width: 1920, height: 1080 },
-      refreshRate: 60,
-      fov: 90
-    },
-    isHost: false,
-    isSpeaking: false,
-    isMuted: true,
-    handRaised: true,
-    joinedAt: new Date(Date.now() - 900000),
-    latency: 78
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_AR_PARTICIPANTS: Partial<ARParticipant>[] = []
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_AR_STATS: ARCollaborationStats = {
-  totalSessions: 156,
-  totalParticipants: 487,
-  averageSessionDuration: 1845,
-  totalSessionTime: 287820,
-  popularEnvironments: ['env-1', 'env-3', 'env-2'],
+  totalSessions: 0,
+  totalParticipants: 0,
+  averageSessionDuration: 0,
+  totalSessionTime: 0,
+  popularEnvironments: [],
   activeDevices: {
-    hololens: 45,
-    quest: 128,
-    arkit: 67,
-    arcore: 89,
-    webxr: 158
+    hololens: 0,
+    quest: 0,
+    arkit: 0,
+    arcore: 0,
+    webxr: 0
   },
-  recentSessions: [
-    {
-      id: 'session-1',
-      name: 'Product Design Review',
-      participants: 8,
-      duration: 3600,
-      date: new Date(Date.now() - 86400000)
-    },
-    {
-      id: 'session-2',
-      name: 'Architecture Planning',
-      participants: 5,
-      duration: 2700,
-      date: new Date(Date.now() - 172800000)
-    },
-    {
-      id: 'session-3',
-      name: 'Creative Brainstorm',
-      participants: 12,
-      duration: 5400,
-      date: new Date(Date.now() - 259200000)
-    }
-  ]
+  recentSessions: []
 }
 
 // Helper Functions

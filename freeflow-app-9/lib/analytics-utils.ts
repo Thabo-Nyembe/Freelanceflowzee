@@ -58,97 +58,46 @@ export interface TopClient {
 // ============================================================================
 // KAZI ANALYTICS DATA
 // ============================================================================
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 
 export const KAZI_ANALYTICS_DATA = {
   overview: {
-    totalRevenue: 287450,
-    monthlyRevenue: 45231,
-    activeProjects: 12,
-    totalProjects: 68,
-    totalClients: 156,
-    newClients: 23,
-    efficiency: 87,
-    billableHours: 1089,
-    revenueGrowth: 16.2,
-    projectGrowth: 8.5,
-    clientGrowth: 17.3,
-    efficiencyGrowth: 3.2
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    activeProjects: 0,
+    totalProjects: 0,
+    totalClients: 0,
+    newClients: 0,
+    efficiency: 0,
+    billableHours: 0,
+    revenueGrowth: 0,
+    projectGrowth: 0,
+    clientGrowth: 0,
+    efficiencyGrowth: 0
   },
 
   revenue: {
-    monthly: [
-      { month: 'Jan', revenue: 32000, projects: 8, clients: 45 },
-      { month: 'Feb', revenue: 35000, projects: 10, clients: 52 },
-      { month: 'Mar', revenue: 28000, projects: 7, clients: 48 },
-      { month: 'Apr', revenue: 42000, projects: 12, clients: 58 },
-      { month: 'May', revenue: 38000, projects: 9, clients: 55 },
-      { month: 'Jun', revenue: 45231, projects: 11, clients: 62 }
-    ] as MonthlyRevenue[],
-    forecast: [
-      { month: 'Jul', revenue: 48500, confidence: 85 },
-      { month: 'Aug', revenue: 52000, confidence: 78 },
-      { month: 'Sep', revenue: 55600, confidence: 72 }
-    ] as RevenueForecast[]
+    monthly: [] as MonthlyRevenue[],
+    forecast: [] as RevenueForecast[]
   },
 
-  projectCategories: [
-    { category: 'Web Development', count: 28, revenue: 18500, color: 'bg-blue-500', growth: 12.5 },
-    { category: 'Mobile Apps', count: 15, revenue: 12800, color: 'bg-green-500', growth: 8.3 },
-    { category: 'Branding', count: 12, revenue: 8200, color: 'bg-purple-500', growth: -2.1 },
-    { category: 'UI/UX Design', count: 8, revenue: 4200, color: 'bg-orange-500', growth: 15.7 },
-    { category: 'Marketing', count: 5, revenue: 1530, color: 'bg-pink-500', growth: 22.4 }
-  ] as ProjectCategory[],
+  projectCategories: [] as ProjectCategory[],
 
-  insights: [
-    {
-      id: 'insight-1',
-      type: 'revenue',
-      title: 'Revenue Acceleration Detected',
-      description: 'Monthly revenue growth trending 23% above forecast. Web development projects driving surge.',
-      impact: 'high',
-      confidence: 92,
-      recommendation: 'Increase web dev capacity by 2 FTEs',
-      potentialValue: 15000
-    },
-    {
-      id: 'insight-2',
-      type: 'efficiency',
-      title: 'Efficiency Optimization Opportunity',
-      description: 'Branding projects showing 2.1% decline. Consider streamlining workflow or adjusting pricing.',
-      impact: 'medium',
-      confidence: 78,
-      recommendation: 'Review branding project templates',
-      potentialValue: 4200
-    },
-    {
-      id: 'insight-3',
-      type: 'growth',
-      title: 'Marketing Segment High-Growth',
-      description: 'Marketing projects up 22.4% despite small volume. Strong demand signal for expansion.',
-      impact: 'high',
-      confidence: 88,
-      recommendation: 'Launch marketing package tier',
-      potentialValue: 8500
-    }
-  ] as KaziInsight[],
+  insights: [] as KaziInsight[],
 
   clients: {
-    topPerformers: [
-      { name: 'TechCorp Inc', revenue: 45000, projects: 8, satisfaction: 98 },
-      { name: 'DesignStudio', revenue: 38000, projects: 6, satisfaction: 95 },
-      { name: 'StartupXYZ', revenue: 32000, projects: 12, satisfaction: 92 }
-    ] as TopClient[],
-    retention: 94.2,
-    averageLifetimeValue: 28500,
-    churnRate: 5.8
+    topPerformers: [] as TopClient[],
+    retention: 0,
+    averageLifetimeValue: 0,
+    churnRate: 0
   },
 
   performance: {
-    projectCompletionRate: 96.5,
-    onTimeDelivery: 89.2,
-    clientSatisfaction: 94.8,
-    revenuePerProject: 4230,
-    profitMargin: 68.5
+    projectCompletionRate: 0,
+    onTimeDelivery: 0,
+    clientSatisfaction: 0,
+    revenuePerProject: 0,
+    profitMargin: 0
   }
 }
 
@@ -156,99 +105,15 @@ export const KAZI_ANALYTICS_DATA = {
 // LEGACY MOCK DATA (PRESERVED FOR COMPATIBILITY)
 // ============================================================================
 
-export const MOCK_METRICS: Metric[] = [
-  {
-    id: 'revenue',
-    name: 'Total Revenue',
-    type: 'revenue',
-    value: 284500,
-    previousValue: 245000,
-    change: 39500,
-    changePercent: 16.1,
-    trend: 'up',
-    unit: 'currency',
-    icon: '💰',
-    color: '#10b981'
-  },
-  {
-    id: 'users',
-    name: 'Active Users',
-    type: 'users',
-    value: 12548,
-    previousValue: 11230,
-    change: 1318,
-    changePercent: 11.7,
-    trend: 'up',
-    unit: 'number',
-    icon: '👥',
-    color: '#3b82f6'
-  },
-  {
-    id: 'conversion',
-    name: 'Conversion Rate',
-    type: 'conversion',
-    value: 3.8,
-    previousValue: 3.2,
-    change: 0.6,
-    changePercent: 18.75,
-    trend: 'up',
-    unit: 'percentage',
-    icon: '📈',
-    color: '#8b5cf6'
-  },
-  {
-    id: 'retention',
-    name: 'Retention Rate',
-    type: 'retention',
-    value: 87.5,
-    previousValue: 85.2,
-    change: 2.3,
-    changePercent: 2.7,
-    trend: 'up',
-    unit: 'percentage',
-    icon: '🎯',
-    color: '#f59e0b'
-  },
-  {
-    id: 'aov',
-    name: 'Avg Order Value',
-    type: 'revenue',
-    value: 156,
-    previousValue: 142,
-    change: 14,
-    changePercent: 9.9,
-    trend: 'up',
-    unit: 'currency',
-    icon: '💳',
-    color: '#06b6d4'
-  },
-  {
-    id: 'clv',
-    name: 'Customer LTV',
-    type: 'revenue',
-    value: 2450,
-    previousValue: 2280,
-    change: 170,
-    changePercent: 7.5,
-    trend: 'up',
-    unit: 'currency',
-    icon: '⭐',
-    color: '#ec4899'
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_METRICS: Metric[] = []
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_REVENUE_CHART: ChartData = {
   id: 'revenue-chart',
   name: 'Revenue Over Time',
   type: 'area',
-  data: [
-    { label: 'Jan', value: 185000, date: new Date('2024-01-01') },
-    { label: 'Feb', value: 195000, date: new Date('2024-02-01') },
-    { label: 'Mar', value: 215000, date: new Date('2024-03-01') },
-    { label: 'Apr', value: 225000, date: new Date('2024-04-01') },
-    { label: 'May', value: 245000, date: new Date('2024-05-01') },
-    { label: 'Jun', value: 284500, date: new Date('2024-06-01') }
-  ],
+  data: [],
   config: {
     showLegend: true,
     showGrid: true,
@@ -259,18 +124,12 @@ export const MOCK_REVENUE_CHART: ChartData = {
   }
 }
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_USERS_CHART: ChartData = {
   id: 'users-chart',
   name: 'User Growth',
   type: 'line',
-  data: [
-    { label: 'Jan', value: 8500 },
-    { label: 'Feb', value: 9200 },
-    { label: 'Mar', value: 9800 },
-    { label: 'Apr', value: 10500 },
-    { label: 'May', value: 11230 },
-    { label: 'Jun', value: 12548 }
-  ],
+  data: [],
   config: {
     showLegend: true,
     showGrid: true,
@@ -281,17 +140,12 @@ export const MOCK_USERS_CHART: ChartData = {
   }
 }
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_TRAFFIC_SOURCES: ChartData = {
   id: 'traffic-sources',
   name: 'Traffic Sources',
   type: 'donut',
-  data: [
-    { label: 'Organic Search', value: 42, category: 'organic' },
-    { label: 'Direct', value: 28, category: 'direct' },
-    { label: 'Social Media', value: 18, category: 'social' },
-    { label: 'Referral', value: 8, category: 'referral' },
-    { label: 'Email', value: 4, category: 'email' }
-  ],
+  data: [],
   config: {
     showLegend: true,
     showGrid: false,
@@ -301,154 +155,32 @@ export const MOCK_TRAFFIC_SOURCES: ChartData = {
   }
 }
 
-export const MOCK_CONVERSION_FUNNEL: FunnelStage[] = [
-  {
-    id: 'stage-1',
-    name: 'Visitors',
-    count: 45800,
-    percentage: 100,
-    conversionRate: 100
-  },
-  {
-    id: 'stage-2',
-    name: 'Sign Ups',
-    count: 12548,
-    percentage: 27.4,
-    conversionRate: 27.4,
-    dropoffRate: 72.6
-  },
-  {
-    id: 'stage-3',
-    name: 'Active Users',
-    count: 8945,
-    percentage: 19.5,
-    conversionRate: 71.3,
-    dropoffRate: 28.7
-  },
-  {
-    id: 'stage-4',
-    name: 'Trial Users',
-    count: 4523,
-    percentage: 9.9,
-    conversionRate: 50.6,
-    dropoffRate: 49.4
-  },
-  {
-    id: 'stage-5',
-    name: 'Paid Customers',
-    count: 1745,
-    percentage: 3.8,
-    conversionRate: 38.6,
-    dropoffRate: 61.4
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_CONVERSION_FUNNEL: FunnelStage[] = []
 
-export const MOCK_INSIGHTS: Insight[] = [
-  {
-    id: 'insight-1',
-    type: 'achievement',
-    title: 'Revenue Milestone Reached',
-    description: 'Total revenue exceeded $280K for the first time this month',
-    impact: 'high',
-    metric: 'revenue',
-    value: 284500,
-    createdAt: new Date(Date.now() - 86400000 * 2),
-    isRead: false
-  },
-  {
-    id: 'insight-2',
-    type: 'trend',
-    title: 'User Growth Accelerating',
-    description: 'User growth rate increased by 11.7% compared to last month',
-    impact: 'medium',
-    metric: 'users',
-    value: 11.7,
-    recommendation: 'Consider scaling infrastructure to support continued growth',
-    createdAt: new Date(Date.now() - 86400000 * 3),
-    isRead: false
-  },
-  {
-    id: 'insight-3',
-    type: 'opportunity',
-    title: 'Conversion Rate Optimization',
-    description: 'Organic search traffic has high intent but low conversion',
-    impact: 'high',
-    recommendation: 'Optimize landing pages for organic search traffic',
-    createdAt: new Date(Date.now() - 86400000 * 5),
-    isRead: false
-  },
-  {
-    id: 'insight-4',
-    type: 'warning',
-    title: 'Trial to Paid Conversion Below Target',
-    description: 'Trial to paid conversion is at 38.6%, below the 45% target',
-    impact: 'medium',
-    metric: 'conversion',
-    value: 38.6,
-    recommendation: 'Review trial experience and add more onboarding touchpoints',
-    createdAt: new Date(Date.now() - 86400000 * 7),
-    isRead: true
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_INSIGHTS: Insight[] = []
 
-export const MOCK_GOALS: Goal[] = [
-  {
-    id: 'goal-1',
-    name: 'Q2 Revenue Target',
-    description: 'Reach $300K in monthly revenue',
-    metric: 'revenue',
-    target: 300000,
-    current: 284500,
-    progress: 94.8,
-    startDate: new Date('2024-04-01'),
-    endDate: new Date('2024-06-30'),
-    status: 'on-track',
-    assignedTo: 'user-1'
-  },
-  {
-    id: 'goal-2',
-    name: 'User Growth',
-    description: 'Reach 15,000 active users',
-    metric: 'users',
-    target: 15000,
-    current: 12548,
-    progress: 83.7,
-    startDate: new Date('2024-01-01'),
-    endDate: new Date('2024-12-31'),
-    status: 'on-track',
-    assignedTo: 'user-2'
-  },
-  {
-    id: 'goal-3',
-    name: 'Conversion Rate',
-    description: 'Achieve 5% conversion rate',
-    metric: 'conversion',
-    target: 5.0,
-    current: 3.8,
-    progress: 76,
-    startDate: new Date('2024-01-01'),
-    endDate: new Date('2024-06-30'),
-    status: 'at-risk',
-    assignedTo: 'user-3'
-  }
-]
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
+export const MOCK_GOALS: Goal[] = []
 
+// MIGRATED: Batch #15 - Removed mock data, using database hooks
 export const MOCK_ANALYTICS_STATS: AnalyticsStats = {
-  totalRevenue: 1580000,
-  totalUsers: 45800,
-  activeUsers: 12548,
-  conversionRate: 3.8,
-  averageOrderValue: 156,
-  customerLifetimeValue: 2450,
-  churnRate: 2.8,
-  retentionRate: 87.5,
-  monthlyRecurringRevenue: 284500,
-  annualRecurringRevenue: 3414000,
-  revenueGrowth: 16.1,
-  userGrowth: 11.7,
-  topMetrics: MOCK_METRICS,
-  insights: MOCK_INSIGHTS,
-  goals: MOCK_GOALS
+  totalRevenue: 0,
+  totalUsers: 0,
+  activeUsers: 0,
+  conversionRate: 0,
+  averageOrderValue: 0,
+  customerLifetimeValue: 0,
+  churnRate: 0,
+  retentionRate: 0,
+  monthlyRecurringRevenue: 0,
+  annualRecurringRevenue: 0,
+  revenueGrowth: 0,
+  userGrowth: 0,
+  topMetrics: [],
+  insights: [],
+  goals: []
 }
 
 // Helper Functions
