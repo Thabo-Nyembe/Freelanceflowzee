@@ -5,7 +5,6 @@ import { Table } from "@tanstack/react-table"
 import {
   X,
   Search,
-  SlidersHorizontal,
   Download,
   RefreshCw,
   Plus,

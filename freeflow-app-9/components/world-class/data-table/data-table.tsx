@@ -13,9 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
   RowSelectionState,
-  GlobalFilterFn,
   FilterFn,
-  Row,
 } from "@tanstack/react-table"
 
 import { cn } from "@/lib/utils"
@@ -30,7 +28,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { FileX, Database, RefreshCw, AlertCircle } from "lucide-react"
+import { FileX, RefreshCw, AlertCircle } from "lucide-react"
 
 import {
   DataTablePagination,
@@ -39,7 +37,6 @@ import {
   DataTableToolbar,
   DataTableFilterConfig,
 } from "./data-table-toolbar"
-import { DataTableColumnHeader } from "./data-table-column-header"
 import {
   DataTableRowActions,
   DataTableRowAction,
@@ -47,7 +44,7 @@ import {
 } from "./data-table-row-actions"
 
 // Fuzzy filter function for column search
-const fuzzyFilter: FilterFn<any> = (row, columnId, value) => {
+const fuzzyFilter: FilterFn<unknown> = (row, columnId, value) => {
   const cellValue = row.getValue(columnId)
   if (cellValue === null || cellValue === undefined) return false
   const search = String(value).toLowerCase()
@@ -55,7 +52,7 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value) => {
 }
 
 // Global fuzzy filter function
-const globalFuzzyFilter: GlobalFilterFn<any> = (row, columnId, filterValue) => {
+const globalFuzzyFilter: FilterFn<unknown> = (row, _columnId, filterValue) => {
   const search = filterValue.toLowerCase()
 
   // Search across all columns
@@ -69,7 +66,7 @@ const globalFuzzyFilter: GlobalFilterFn<any> = (row, columnId, filterValue) => {
 }
 
 // Array filter for multi-select column filters
-const arrayFilter: FilterFn<any> = (row, columnId, filterValues: string[]) => {
+const arrayFilter: FilterFn<unknown> = (row, columnId, filterValues: string[]) => {
   if (!filterValues || filterValues.length === 0) return true
   const value = row.getValue(columnId)
   return filterValues.includes(String(value))
@@ -242,7 +239,7 @@ export function DataTable<TData, TValue>({
   defaultSorting = [],
   onSortingChange,
   enableFiltering = true,
-  enableGlobalFilter = true,
+  enableGlobalFilter: _enableGlobalFilter = true,
   searchPlaceholder = "Search...",
   searchColumn,
   filterConfigs = [],
@@ -277,34 +274,7 @@ export function DataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
 
-  // Build selection column if row selection is enabled
-  const selectionColumn: ColumnDef<TData, any> = {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-        onClick={(e) => e.stopPropagation()}
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }
-
-  // Build actions column if row actions are provided
+  // Check if row actions are provided
   const hasRowActions =
     rowActions?.length ||
     rowActionGroups?.length ||
@@ -313,40 +283,75 @@ export function DataTable<TData, TValue>({
     onRowDelete ||
     onRowCopy
 
-  const actionsColumn: ColumnDef<TData, any> = {
-    id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => (
-      <DataTableRowActions
-        row={row}
-        actions={rowActions}
-        actionGroups={rowActionGroups}
-        onView={onRowView}
-        onEdit={onRowEdit}
-        onDelete={onRowDelete}
-        onCopy={onRowCopy}
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  }
-
-  // Build final columns array
+  // Build final columns array with selection and actions columns
   const finalColumns = React.useMemo(() => {
-    const cols: ColumnDef<TData, any>[] = []
+    const cols: ColumnDef<TData, unknown>[] = []
 
+    // Selection column
     if (enableRowSelection) {
-      cols.push(selectionColumn)
+      cols.push({
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+            className="translate-y-[2px]"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            className="translate-y-[2px]"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      })
     }
 
-    cols.push(...columns)
+    // Data columns
+    cols.push(...(columns as ColumnDef<TData, unknown>[]))
 
+    // Actions column
     if (hasRowActions) {
-      cols.push(actionsColumn)
+      cols.push({
+        id: "actions",
+        header: () => <span className="sr-only">Actions</span>,
+        cell: ({ row }) => (
+          <DataTableRowActions
+            row={row}
+            actions={rowActions}
+            actionGroups={rowActionGroups}
+            onView={onRowView}
+            onEdit={onRowEdit}
+            onDelete={onRowDelete}
+            onCopy={onRowCopy}
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      })
     }
 
     return cols
-  }, [columns, enableRowSelection, hasRowActions])
+  }, [
+    columns,
+    enableRowSelection,
+    hasRowActions,
+    rowActions,
+    rowActionGroups,
+    onRowView,
+    onRowEdit,
+    onRowDelete,
+    onRowCopy,
+  ])
 
   // Create table instance
   const table = useReactTable({

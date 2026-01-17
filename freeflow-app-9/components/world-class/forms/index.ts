@@ -1,35 +1,64 @@
 /**
- * World-Class Forms Components
+ * World-Class Form Components
  *
- * A comprehensive collection of enhanced form components with:
- * - React Hook Form integration
- * - Zod validation schemas
- * - Full TypeScript support
- * - Accessible and responsive design
- * - Standalone versions for use outside forms
+ * A comprehensive collection of reusable form components built on top of
+ * React Hook Form and Zod validation patterns. All components integrate
+ * seamlessly with shadcn/ui primitives and provide consistent styling,
+ * accessibility, and validation support.
  *
- * Usage with react-hook-form:
+ * @example
  * ```tsx
- * import { FormInput, FormSelect, FormTextarea, FormDatePicker } from '@/components/world-class/forms'
+ * import { useForm } from 'react-hook-form'
+ * import { zodResolver } from '@hookform/resolvers/zod'
+ * import { z } from 'zod'
+ * import { Form } from '@/components/ui/form'
+ * import {
+ *   FormInput,
+ *   FormSelect,
+ *   FormTextarea,
+ *   FormCheckbox,
+ *   FormSwitch,
+ *   FormDatePicker,
+ *   FormFileUpload,
+ *   inputValidationSchemas,
+ * } from '@/components/world-class/forms'
  *
  * const schema = z.object({
+ *   email: inputValidationSchemas.email,
  *   name: z.string().min(2),
- *   category: z.string(),
- *   description: z.string().max(500),
- *   date: z.date(),
+ *   bio: z.string().max(500).optional(),
+ *   newsletter: z.boolean(),
+ *   notifications: z.boolean(),
+ *   birthDate: z.date(),
+ *   avatar: z.array(z.any()).optional(),
  * })
  *
  * function MyForm() {
- *   const form = useForm<z.infer<typeof schema>>({
+ *   const form = useForm({
  *     resolver: zodResolver(schema),
+ *     defaultValues: {
+ *       email: '',
+ *       name: '',
+ *       bio: '',
+ *       newsletter: false,
+ *       notifications: true,
+ *       birthDate: undefined,
+ *       avatar: [],
+ *     },
  *   })
  *
  *   return (
  *     <Form {...form}>
- *       <FormInput name="name" label="Name" required />
- *       <FormSelect name="category" label="Category" options={categories} searchable />
- *       <FormTextarea name="description" label="Description" showCharacterCount maxLength={500} />
- *       <FormDatePicker name="date" label="Date" showPresets />
+ *       <form onSubmit={form.handleSubmit(onSubmit)}>
+ *         <FormInput name="email" label="Email" type="email" required />
+ *         <FormInput name="name" label="Name" required />
+ *         <FormTextarea name="bio" label="Bio" showCharacterCount maxLength={500} />
+ *         <FormCheckbox name="newsletter" label="Subscribe to newsletter" />
+ *         <FormSwitch name="notifications" label="Enable notifications" />
+ *         <FormDatePicker name="birthDate" label="Birth Date" />
+ *         <FormFileUpload name="avatar" label="Avatar" accept={{ 'image/*': [] }} />
+ *         <button type="submit">Submit</button>
+ *       </form>
  *     </Form>
  *   )
  * }
@@ -37,7 +66,7 @@
  *
  * Standalone usage (without react-hook-form):
  * ```tsx
- * import { StandaloneInput, StandaloneSelect } from '@/components/world-class/forms'
+ * import { StandaloneInput, StandaloneSelect, StandaloneCheckbox } from '@/components/world-class/forms'
  *
  * function MyComponent() {
  *   const [value, setValue] = useState('')
@@ -45,6 +74,26 @@
  * }
  * ```
  */
+
+// ============================================================================
+// FORM FIELD WRAPPER
+// ============================================================================
+export {
+  FormFieldWrapper,
+  FieldWrapper,
+  RequiredIndicator,
+  HelpText,
+  FieldError,
+  FieldSuccess,
+  FormSection,
+  FormRow,
+  FormGrid,
+  type FormFieldWrapperProps,
+  type FieldWrapperProps,
+  type FormSectionProps,
+  type FormRowProps,
+  type FormGridProps,
+} from './form-field'
 
 // ============================================================================
 // FORM INPUT
@@ -83,6 +132,38 @@ export {
 } from './form-textarea'
 
 // ============================================================================
+// FORM CHECKBOX
+// ============================================================================
+export {
+  FormCheckbox,
+  FormCheckboxGroup,
+  StandaloneCheckbox,
+  TermsCheckbox,
+  checkboxValidationSchemas,
+  type FormCheckboxProps,
+  type FormCheckboxGroupProps,
+  type StandaloneCheckboxProps,
+  type TermsCheckboxProps,
+  type CheckboxGroupOption,
+} from './form-checkbox'
+
+// ============================================================================
+// FORM SWITCH
+// ============================================================================
+export {
+  FormSwitch,
+  FormSwitchGroup,
+  StandaloneSwitch,
+  SettingSwitch,
+  switchValidationSchemas,
+  type FormSwitchProps,
+  type FormSwitchGroupProps,
+  type StandaloneSwitchProps,
+  type SettingSwitchProps,
+  type SwitchGroupOption,
+} from './form-switch'
+
+// ============================================================================
 // FORM DATE PICKER
 // ============================================================================
 export {
@@ -93,3 +174,17 @@ export {
   type StandaloneDatePickerProps,
   type DatePreset,
 } from './form-date-picker'
+
+// ============================================================================
+// FORM FILE UPLOAD
+// ============================================================================
+export {
+  FormFileUpload,
+  StandaloneFileUpload,
+  AvatarUpload,
+  fileUploadValidationSchemas,
+  type FormFileUploadProps,
+  type StandaloneFileUploadProps,
+  type AvatarUploadProps,
+  type UploadedFileInfo,
+} from './form-file-upload'

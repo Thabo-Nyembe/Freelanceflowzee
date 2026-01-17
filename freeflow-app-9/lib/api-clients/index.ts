@@ -280,3 +280,86 @@ export {
   useUpdatePreferences,
   useNotificationStats
 } from './use-notifications'
+
+// Team
+export { teamClient } from './team-client'
+export type {
+  TeamMember,
+  TeamRole,
+  TeamPermission,
+  WorkHours,
+  TeamInvitation,
+  TeamDepartment,
+  CreateTeamMemberData,
+  UpdateTeamMemberData,
+  CreateInvitationData,
+  TeamFilters,
+  TeamStats
+} from './team-client'
+
+export {
+  teamQueryKeys,
+  useTeamMembers,
+  useInfiniteTeamMembers,
+  useTeamMember,
+  useCreateTeamMember,
+  useUpdateTeamMember,
+  useDeleteTeamMember,
+  useUpdateTeamMemberStatus,
+  useUpdateTeamMemberRole,
+  useUpdatePerformance,
+  useToggleTeamLead,
+  useTeamInvitations,
+  useSendInvitation,
+  useCancelInvitation,
+  useResendInvitation,
+  useTeamDepartments,
+  useTeamStats,
+  useBulkUpdateStatus,
+  useBulkDeleteTeamMembers
+} from './use-team-api'
+
+// Settings
+export { settingsClient } from './settings-client'
+export type {
+  UserSettings,
+  SecurityQuestion,
+  TrustedDevice,
+  IntegrationSettings,
+  ConnectedAccount,
+  BillingAddress,
+  UpdateProfileData,
+  UpdateNotificationSettings,
+  UpdateAppearanceSettings,
+  UpdateRegionalSettings,
+  UpdatePrivacySettings,
+  UpdateSecuritySettings,
+  UpdateBillingSettings,
+  SettingsStats
+} from './settings-client'
+
+export {
+  settingsQueryKeys,
+  useUserSettings,
+  useUpdateSettings,
+  useUpdateProfile,
+  useUpdateNotificationSettings,
+  useUpdateAppearanceSettings,
+  useUpdateRegionalSettings,
+  useUpdatePrivacySettings,
+  useUpdateSecuritySettings,
+  useEnable2FA,
+  useDisable2FA,
+  useGenerateApiKey,
+  useRevokeApiKey,
+  useUpdateWebhook,
+  useTrustedDevices,
+  useRemoveTrustedDevice,
+  useConnectedAccounts,
+  useDisconnectAccount,
+  useUpdateIntegrations,
+  useUpdateBillingSettings,
+  useSettingsStats,
+  useExportUserData,
+  useDeleteAccount
+} from './use-settings-api'
