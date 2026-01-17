@@ -136,186 +136,14 @@ interface HistoricalData {
 }
 
 // Mock Data
-const mockPageTests: PageTest[] = [
-  {
-    id: '1',
-    url: 'https://example.com',
-    device: 'mobile',
-    scores: { performance: 78, accessibility: 92, bestPractices: 88, seo: 95, pwa: 60 },
-    vitals: [
-      { name: 'Largest Contentful Paint', value: 2.4, unit: 's', rating: 'needs-improvement', target: { good: 2.5, needsImprovement: 4 } },
-      { name: 'First Input Delay', value: 85, unit: 'ms', rating: 'good', target: { good: 100, needsImprovement: 300 } },
-      { name: 'Cumulative Layout Shift', value: 0.08, unit: '', rating: 'good', target: { good: 0.1, needsImprovement: 0.25 } },
-      { name: 'Time to First Byte', value: 0.6, unit: 's', rating: 'good', target: { good: 0.8, needsImprovement: 1.8 } },
-      { name: 'Interaction to Next Paint', value: 180, unit: 'ms', rating: 'good', target: { good: 200, needsImprovement: 500 } }
-    ],
-    audits: [],
-    timestamp: new Date('2024-12-23T10:30:00'),
-    duration: 25.4
-  },
-  {
-    id: '2',
-    url: 'https://example.com',
-    device: 'desktop',
-    scores: { performance: 92, accessibility: 94, bestPractices: 92, seo: 98, pwa: 70 },
-    vitals: [
-      { name: 'Largest Contentful Paint', value: 1.2, unit: 's', rating: 'good', target: { good: 2.5, needsImprovement: 4 } },
-      { name: 'First Input Delay', value: 12, unit: 'ms', rating: 'good', target: { good: 100, needsImprovement: 300 } },
-      { name: 'Cumulative Layout Shift', value: 0.02, unit: '', rating: 'good', target: { good: 0.1, needsImprovement: 0.25 } },
-      { name: 'Time to First Byte', value: 0.3, unit: 's', rating: 'good', target: { good: 0.8, needsImprovement: 1.8 } },
-      { name: 'Interaction to Next Paint', value: 95, unit: 'ms', rating: 'good', target: { good: 200, needsImprovement: 500 } }
-    ],
-    audits: [],
-    timestamp: new Date('2024-12-23T10:32:00'),
-    duration: 18.2
-  },
-  {
-    id: '3',
-    url: 'https://example.com/products',
-    device: 'mobile',
-    scores: { performance: 65, accessibility: 88, bestPractices: 85, seo: 90, pwa: 55 },
-    vitals: [
-      { name: 'Largest Contentful Paint', value: 3.8, unit: 's', rating: 'needs-improvement', target: { good: 2.5, needsImprovement: 4 } },
-      { name: 'First Input Delay', value: 250, unit: 'ms', rating: 'needs-improvement', target: { good: 100, needsImprovement: 300 } },
-      { name: 'Cumulative Layout Shift', value: 0.18, unit: '', rating: 'needs-improvement', target: { good: 0.1, needsImprovement: 0.25 } },
-      { name: 'Time to First Byte', value: 1.2, unit: 's', rating: 'needs-improvement', target: { good: 0.8, needsImprovement: 1.8 } },
-      { name: 'Interaction to Next Paint', value: 320, unit: 'ms', rating: 'needs-improvement', target: { good: 200, needsImprovement: 500 } }
-    ],
-    audits: [],
-    timestamp: new Date('2024-12-22T15:20:00'),
-    duration: 32.8
-  }
-]
+// MIGRATED: Batch #16 - Removed mock data, using database hooks
+const mockPageTests: PageTest[] = []
 
-const mockAudits: Audit[] = [
-  {
-    id: '1',
-    title: 'Serve images in next-gen formats',
-    description: 'Image formats like WebP and AVIF often provide better compression than PNG or JPEG.',
-    category: 'performance',
-    severity: 'warning',
-    score: 0.4,
-    displayValue: 'Potential savings of 245 KiB',
-    savings: { bytes: 250880 }
-  },
-  {
-    id: '2',
-    title: 'Eliminate render-blocking resources',
-    description: 'Resources are blocking the first paint of your page.',
-    category: 'performance',
-    severity: 'fail',
-    score: 0,
-    displayValue: 'Potential savings of 1,250 ms',
-    savings: { time: 1250 }
-  },
-  {
-    id: '3',
-    title: 'Properly size images',
-    description: 'Serve images that are appropriately-sized to save cellular data and improve load time.',
-    category: 'performance',
-    severity: 'warning',
-    score: 0.6,
-    displayValue: 'Potential savings of 156 KiB',
-    savings: { bytes: 159744 }
-  },
-  {
-    id: '4',
-    title: 'Enable text compression',
-    description: 'Text-based resources should be served with compression (gzip, deflate or brotli).',
-    category: 'performance',
-    severity: 'pass',
-    score: 1
-  },
-  {
-    id: '5',
-    title: 'Image elements have [alt] attributes',
-    description: 'Informative elements should aim for short, descriptive alternate text.',
-    category: 'accessibility',
-    severity: 'warning',
-    score: 0.7,
-    displayValue: '3 images missing alt attributes'
-  },
-  {
-    id: '6',
-    title: 'Background and foreground colors have sufficient contrast ratio',
-    description: 'Low-contrast text is difficult or impossible for many users to read.',
-    category: 'accessibility',
-    severity: 'fail',
-    score: 0,
-    displayValue: '5 elements with low contrast'
-  },
-  {
-    id: '7',
-    title: 'Links have descriptive text',
-    description: 'Descriptive link text helps search engines understand your content.',
-    category: 'seo',
-    severity: 'pass',
-    score: 1
-  },
-  {
-    id: '8',
-    title: 'Document has a meta description',
-    description: 'Meta descriptions may be included in search results.',
-    category: 'seo',
-    severity: 'pass',
-    score: 1
-  },
-  {
-    id: '9',
-    title: 'Uses HTTPS',
-    description: 'All sites should be protected with HTTPS.',
-    category: 'best-practices',
-    severity: 'pass',
-    score: 1
-  },
-  {
-    id: '10',
-    title: 'No browser errors logged to the console',
-    description: 'Errors logged to the console indicate unresolved problems.',
-    category: 'best-practices',
-    severity: 'warning',
-    score: 0.5,
-    displayValue: '2 errors logged'
-  },
-  {
-    id: '11',
-    title: 'Registers a service worker',
-    description: 'The service worker is the technology that enables PWA features.',
-    category: 'pwa',
-    severity: 'fail',
-    score: 0
-  },
-  {
-    id: '12',
-    title: 'Web app manifest meets installability requirements',
-    description: 'Browsers can proactively prompt users to add your app to their homescreen.',
-    category: 'pwa',
-    severity: 'warning',
-    score: 0.5,
-    displayValue: 'Missing icons'
-  }
-]
+const mockAudits: Audit[] = []
 
-const mockBudgets: PerformanceBudget[] = [
-  { id: '1', name: 'JavaScript Bundle Size', metric: 'script', target: 300, current: 285, unit: 'KB', status: 'pass' },
-  { id: '2', name: 'CSS Bundle Size', metric: 'stylesheet', target: 50, current: 42, unit: 'KB', status: 'pass' },
-  { id: '3', name: 'Image Total Size', metric: 'image', target: 500, current: 620, unit: 'KB', status: 'fail' },
-  { id: '4', name: 'Total Page Weight', metric: 'total', target: 1500, current: 1380, unit: 'KB', status: 'pass' },
-  { id: '5', name: 'First Contentful Paint', metric: 'fcp', target: 1.8, current: 2.1, unit: 's', status: 'warning' },
-  { id: '6', name: 'Time to Interactive', metric: 'tti', target: 3.8, current: 3.2, unit: 's', status: 'pass' },
-  { id: '7', name: 'Third-party Requests', metric: '3p-requests', target: 10, current: 14, unit: '', status: 'fail' },
-  { id: '8', name: 'Font File Size', metric: 'font', target: 100, current: 85, unit: 'KB', status: 'pass' }
-]
+const mockBudgets: PerformanceBudget[] = []
 
-const mockHistoricalData: HistoricalData[] = [
-  { date: '2024-12-17', performance: 72, accessibility: 88, lcp: 2.8, fid: 120, cls: 0.12 },
-  { date: '2024-12-18', performance: 74, accessibility: 89, lcp: 2.6, fid: 110, cls: 0.10 },
-  { date: '2024-12-19', performance: 73, accessibility: 90, lcp: 2.7, fid: 105, cls: 0.09 },
-  { date: '2024-12-20', performance: 76, accessibility: 91, lcp: 2.5, fid: 95, cls: 0.08 },
-  { date: '2024-12-21', performance: 75, accessibility: 91, lcp: 2.6, fid: 90, cls: 0.09 },
-  { date: '2024-12-22', performance: 78, accessibility: 92, lcp: 2.4, fid: 85, cls: 0.08 },
-  { date: '2024-12-23', performance: 78, accessibility: 92, lcp: 2.4, fid: 85, cls: 0.08 }
-]
+const mockHistoricalData: HistoricalData[] = []
 
 // Helper Functions
 const getScoreColor = (score: number): string => {
@@ -412,30 +240,11 @@ const ScoreCircle = ({ score, size = 'lg', label }: { score: number; size?: 'sm'
   )
 }
 
-// Competitive Upgrade Mock Data
-const mockPerfAIInsights = [
-  { id: '1', query: "What's causing slow load times?", insight: "Largest Contentful Paint is 3.2s due to unoptimized hero image (2.4MB). Compress to WebP format for 70% size reduction.", confidence: 0.94, category: 'engagement' as const, timestamp: new Date().toISOString() },
-  { id: '2', query: "Which pages need optimization?", insight: "/products page has 4.8s TTI due to 23 render-blocking scripts. Code splitting could improve by 60%.", confidence: 0.89, category: 'conversion' as const, timestamp: new Date().toISOString() },
-  { id: '3', query: "Mobile vs desktop performance?", insight: "Mobile scores 12 points lower. Focus on reducing JavaScript bundle size and implementing lazy loading.", confidence: 0.86, category: 'revenue' as const, timestamp: new Date().toISOString() },
-]
-
-const mockPerfCollaborators = [
-  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'active' as const, lastActive: 'Just now', role: 'Performance' },
-  { id: '2', name: 'Frontend Lead', avatar: '/avatars/frontend.jpg', status: 'active' as const, lastActive: '5m ago', role: 'Engineering' },
-  { id: '3', name: 'SEO Analyst', avatar: '/avatars/seo.jpg', status: 'idle' as const, lastActive: '20m ago', role: 'Marketing' },
-]
-
-const mockPerfPredictions = [
-  { id: '1', metric: 'Performance Score', currentValue: 72, predictedValue: 85, confidence: 0.82, trend: 'up' as const, timeframe: 'After optimizations', factors: ['Image compression', 'Code splitting', 'CDN'] },
-  { id: '2', metric: 'LCP (seconds)', currentValue: 3.2, predictedValue: 1.8, confidence: 0.78, trend: 'down' as const, timeframe: 'Next release', factors: ['Lazy loading', 'Preloading critical assets'] },
-  { id: '3', metric: 'SEO Score', currentValue: 89, predictedValue: 95, confidence: 0.85, trend: 'up' as const, timeframe: 'Next 30 days', factors: ['Core Web Vitals improvements'] },
-]
-
-const mockPerfActivities = [
-  { id: '1', type: 'update' as const, title: 'Performance test completed', description: 'Mobile audit score improved to 72', user: { name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
-  { id: '2', type: 'create' as const, title: 'New optimization deployed', description: 'Image lazy loading enabled on /products', user: { name: 'Frontend Lead', avatar: '/avatars/frontend.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
-  { id: '3', type: 'milestone' as const, title: 'Core Web Vitals passed', description: 'Homepage now passes all CWV metrics', user: { name: 'DevOps Team', avatar: '/avatars/devops.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
-]
+// Competitive Upgrade Mock Data - MIGRATED: Batch #16
+const mockPerfAIInsights = []
+const mockPerfCollaborators = []
+const mockPerfPredictions = []
+const mockPerfActivities = []
 
 // Quick Actions - defined inside component to access state setters
 const getQuickActions = (

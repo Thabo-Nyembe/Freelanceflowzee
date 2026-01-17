@@ -282,138 +282,7 @@ interface ChartData {
   labels: string[]
 }
 
-// Mock data
-const mockReports: Report[] = [
-  {
-    id: '1',
-    name: 'Sales Performance Dashboard',
-    description: 'Comprehensive overview of sales metrics, revenue trends, and team performance',
-    type: 'dashboard',
-    status: 'published',
-    charts: 8,
-    views: 15420,
-    shares: 234,
-    lastModified: '2024-01-15',
-    createdAt: '2023-06-10',
-    author: { name: 'Sarah Chen', avatar: '/avatars/1.png' },
-    dataSource: 'Salesforce CRM',
-    refreshSchedule: 'Hourly',
-    isFavorite: true,
-    isPublic: true,
-    folder: 'Sales',
-    tags: ['sales', 'revenue', 'kpi']
-  },
-  {
-    id: '2',
-    name: 'Marketing Campaign Analytics',
-    description: 'Track campaign performance, ROI, and customer acquisition metrics',
-    type: 'dashboard',
-    status: 'published',
-    charts: 12,
-    views: 8920,
-    shares: 156,
-    lastModified: '2024-01-14',
-    createdAt: '2023-08-15',
-    author: { name: 'Mike Johnson', avatar: '/avatars/2.png' },
-    dataSource: 'Google Analytics',
-    refreshSchedule: 'Daily',
-    isFavorite: true,
-    isPublic: false,
-    folder: 'Marketing',
-    tags: ['marketing', 'campaigns', 'analytics']
-  },
-  {
-    id: '3',
-    name: 'Financial Quarterly Report',
-    description: 'Q4 2024 financial summary with P&L, balance sheet, and cash flow',
-    type: 'table',
-    status: 'draft',
-    charts: 6,
-    views: 3450,
-    shares: 89,
-    lastModified: '2024-01-13',
-    createdAt: '2024-01-01',
-    author: { name: 'Emily Davis', avatar: '/avatars/3.png' },
-    dataSource: 'QuickBooks',
-    isFavorite: false,
-    isPublic: false,
-    folder: 'Finance',
-    tags: ['finance', 'quarterly', 'p&l']
-  },
-  {
-    id: '4',
-    name: 'Customer Satisfaction Trends',
-    description: 'NPS scores, feedback analysis, and customer journey insights',
-    type: 'chart',
-    status: 'published',
-    charts: 5,
-    views: 5670,
-    shares: 112,
-    lastModified: '2024-01-12',
-    createdAt: '2023-11-20',
-    author: { name: 'Alex Wong', avatar: '/avatars/4.png' },
-    dataSource: 'Zendesk',
-    refreshSchedule: 'Weekly',
-    isFavorite: false,
-    isPublic: true,
-    folder: 'Customer Success',
-    tags: ['nps', 'customer', 'satisfaction']
-  },
-  {
-    id: '5',
-    name: 'Product Usage Analytics',
-    description: 'Feature adoption, user engagement, and retention metrics',
-    type: 'dashboard',
-    status: 'generating',
-    charts: 10,
-    views: 7890,
-    shares: 178,
-    lastModified: '2024-01-11',
-    createdAt: '2023-09-05',
-    author: { name: 'Jessica Lee', avatar: '/avatars/5.png' },
-    dataSource: 'Mixpanel',
-    refreshSchedule: 'Real-time',
-    isFavorite: true,
-    isPublic: false,
-    folder: 'Product',
-    tags: ['product', 'usage', 'engagement']
-  },
-  {
-    id: '6',
-    name: 'HR Workforce Analytics',
-    description: 'Headcount trends, attrition rates, and hiring pipeline',
-    type: 'story',
-    status: 'scheduled',
-    charts: 7,
-    views: 2340,
-    shares: 45,
-    lastModified: '2024-01-10',
-    createdAt: '2023-12-01',
-    author: { name: 'David Brown', avatar: '/avatars/6.png' },
-    dataSource: 'BambooHR',
-    refreshSchedule: 'Monthly',
-    isFavorite: false,
-    isPublic: false,
-    folder: 'HR',
-    tags: ['hr', 'workforce', 'hiring']
-  }
-]
-
-const mockDataSources: DataSource[] = [
-  { id: '1', name: 'Salesforce CRM', type: 'cloud', connection: 'salesforce.com', lastSync: '5 min ago', status: 'connected', tables: 45, rows: 2450000, size: '1.2 GB' },
-  { id: '2', name: 'Google Analytics', type: 'api', connection: 'analytics.google.com', lastSync: '1 hour ago', status: 'connected', tables: 12, rows: 8900000, size: '3.4 GB' },
-  { id: '3', name: 'PostgreSQL Production', type: 'database', connection: 'db.company.com:5432', lastSync: '10 min ago', status: 'connected', tables: 78, rows: 15600000, size: '8.7 GB' },
-  { id: '4', name: 'Excel Monthly Reports', type: 'spreadsheet', connection: 'SharePoint', lastSync: '2 days ago', status: 'syncing', tables: 8, rows: 45000, size: '125 MB' },
-  { id: '5', name: 'Stripe Payments', type: 'api', connection: 'api.stripe.com', lastSync: '30 min ago', status: 'error', tables: 6, rows: 890000, size: '450 MB' }
-]
-
-const mockScheduledReports: ScheduledReport[] = [
-  { id: '1', reportId: '1', reportName: 'Sales Performance Dashboard', schedule: 'Daily at 8:00 AM', nextRun: '2024-01-16 08:00', lastRun: '2024-01-15 08:00', recipients: ['team@company.com'], format: 'pdf', status: 'active' },
-  { id: '2', reportId: '2', reportName: 'Marketing Campaign Analytics', schedule: 'Weekly on Monday', nextRun: '2024-01-22 09:00', lastRun: '2024-01-15 09:00', recipients: ['marketing@company.com', 'cmo@company.com'], format: 'pdf', status: 'active' },
-  { id: '3', reportId: '3', reportName: 'Financial Quarterly Report', schedule: 'Monthly on 1st', nextRun: '2024-02-01 06:00', lastRun: '2024-01-01 06:00', recipients: ['finance@company.com', 'cfo@company.com'], format: 'excel', status: 'active' },
-  { id: '4', reportId: '4', reportName: 'Customer Satisfaction Trends', schedule: 'Daily at 6:00 PM', nextRun: '2024-01-16 18:00', lastRun: '2024-01-15 18:00', recipients: ['cs@company.com'], format: 'pdf', status: 'paused' }
-]
-
+// MIGRATED: Batch #16 - Removed mock data, using database hooks
 const chartTypes: { type: ChartType; icon: any; label: string }[] = [
   { type: 'bar', icon: BarChart3, label: 'Bar Chart' },
   { type: 'line', icon: LineChart, label: 'Line Chart' },
@@ -434,33 +303,6 @@ const folders = [
   { name: 'Product', count: 10, icon: Layers },
   { name: 'Customer Success', count: 7, icon: Users },
   { name: 'HR', count: 5, icon: Users }
-]
-
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Looker/Tableau Level
-// ============================================================================
-
-const mockReportsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Report Accuracy', description: 'All scheduled reports delivered on time with 99.9% data accuracy.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '2', type: 'warning' as const, title: 'Data Freshness', description: 'Sales data source is 6 hours stale. Refresh recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Data' },
-  { id: '3', type: 'info' as const, title: 'Usage Trend', description: 'Executive Dashboard views up 40% this month. Consider expanding.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockReportsCollaborators = [
-  { id: '1', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'online' as const, role: 'Analyst' },
-  { id: '2', name: 'BI Manager', avatar: '/avatars/bi.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'away' as const, role: 'Finance' },
-]
-
-const mockReportsPredictions = [
-  { id: '1', title: 'Report Usage', prediction: 'Monthly report views expected to reach 10K by end of quarter', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Savings', prediction: 'Automated reports saving 20 hours/week in manual work', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockReportsActivities = [
-  { id: '1', user: 'Data Analyst', action: 'Created', target: 'New Q4 Revenue Dashboard', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'BI Manager', action: 'Scheduled', target: 'Weekly KPI report for leadership', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'Monthly data refresh for all sources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
 // Quick actions will be defined inside the component to use state setters
@@ -661,12 +503,8 @@ export default function ReportsClient() {
   const [showApiKey, setShowApiKey] = useState(false)
   const [showEmbedSecret, setShowEmbedSecret] = useState(false)
 
-  // Quick Actions with real dialogs
-  const mockReportsQuickActions = [
-    { id: '1', label: 'New Report', icon: 'plus', action: () => setShowNewReportDialog(true), variant: 'default' as const },
-    { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => setShowScheduleExportDialog(true), variant: 'default' as const },
-    { id: '3', label: 'Data Sources', icon: 'database', action: () => setShowDataSourcesDialog(true), variant: 'outline' as const },
-  ]
+  // MIGRATED: Batch #16 - Removed mock quick actions
+  const mockReportsQuickActions = []
 
   // Handler functions
   const handleCreateNewReport = async () => {
@@ -2435,22 +2273,22 @@ export default function ReportsClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        {/* MIGRATED: Batch #16 - Enhanced Competitive Upgrade Components with empty data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockReportsAIInsights}
+              insights={[]}
               title="Reports Intelligence"
               onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockReportsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockReportsPredictions}
+              predictions={[]}
               title="Analytics Forecasts"
             />
           </div>
@@ -2458,7 +2296,7 @@ export default function ReportsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockReportsActivities}
+            activities={[]}
             title="Reports Activity"
             maxItems={5}
           />

@@ -147,99 +147,7 @@ interface Invoice {
   downloadUrl: string
 }
 
-// Mock Data
-const mockProfile: UserProfile = {
-  id: '1',
-  email: 'john.doe@example.com',
-  firstName: 'John',
-  lastName: 'Doe',
-  displayName: 'John Doe',
-  avatar: '/avatars/user.jpg',
-  bio: 'Product designer and developer passionate about creating beautiful user experiences.',
-  phone: '+1 (555) 123-4567',
-  location: 'San Francisco, CA',
-  website: 'https://johndoe.com',
-  timezone: 'America/Los_Angeles',
-  language: 'en-US',
-  createdAt: '2023-01-15T09:00:00Z'
-}
-
-const mockSecurity: SecuritySettings = {
-  twoFactorEnabled: true,
-  twoFactorMethod: 'app',
-  passwordLastChanged: '2024-01-01T10:00:00Z',
-  securityScore: 85,
-  loginNotifications: true,
-  trustedDevices: 3
-}
-
-const mockSessions: Session[] = [
-  { id: '1', device: 'MacBook Pro', browser: 'Chrome 120', location: 'San Francisco, CA', ipAddress: '192.168.1.1', lastActive: '2024-01-15T12:30:00Z', status: 'active', isCurrent: true },
-  { id: '2', device: 'iPhone 15 Pro', browser: 'Safari Mobile', location: 'San Francisco, CA', ipAddress: '192.168.1.2', lastActive: '2024-01-15T10:00:00Z', status: 'active', isCurrent: false },
-  { id: '3', device: 'Windows PC', browser: 'Edge 120', location: 'New York, NY', ipAddress: '10.0.0.5', lastActive: '2024-01-10T14:00:00Z', status: 'expired', isCurrent: false }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'Google', icon: 'google', status: 'connected', connectedAt: '2023-06-15T09:00:00Z', scopes: ['email', 'calendar', 'drive'], lastSync: '2024-01-15T12:00:00Z' },
-  { id: '2', name: 'GitHub', icon: 'github', status: 'connected', connectedAt: '2023-08-20T10:00:00Z', scopes: ['repo', 'user'], lastSync: '2024-01-15T11:00:00Z' },
-  { id: '3', name: 'Slack', icon: 'slack', status: 'connected', connectedAt: '2023-09-10T11:00:00Z', scopes: ['chat', 'channels'], lastSync: '2024-01-15T10:30:00Z' },
-  { id: '4', name: 'Notion', icon: 'notion', status: 'disconnected', connectedAt: null, scopes: [], lastSync: null },
-  { id: '5', name: 'Figma', icon: 'figma', status: 'error', connectedAt: '2023-10-01T08:00:00Z', scopes: ['read'], lastSync: '2024-01-10T09:00:00Z' }
-]
-
-const mockNotifications: NotificationPreference[] = [
-  { id: '1', category: 'Security Alerts', email: true, push: true, inApp: true, sms: true },
-  { id: '2', category: 'Account Updates', email: true, push: true, inApp: true, sms: false },
-  { id: '3', category: 'Marketing', email: false, push: false, inApp: true, sms: false },
-  { id: '4', category: 'Product Updates', email: true, push: false, inApp: true, sms: false },
-  { id: '5', category: 'Comments & Mentions', email: true, push: true, inApp: true, sms: false },
-  { id: '6', category: 'Team Activity', email: false, push: true, inApp: true, sms: false },
-  { id: '7', category: 'Weekly Digest', email: true, push: false, inApp: false, sms: false }
-]
-
-const mockBilling: BillingInfo = {
-  plan: 'pro',
-  billingCycle: 'yearly',
-  nextBillingDate: '2025-01-15',
-  amount: 199,
-  paymentMethod: 'Visa',
-  cardLast4: '4242'
-}
-
-const mockInvoices: Invoice[] = [
-  { id: 'INV-001', date: '2024-01-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-001.pdf' },
-  { id: 'INV-002', date: '2023-12-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-002.pdf' },
-  { id: 'INV-003', date: '2023-11-15', amount: 199, status: 'paid', downloadUrl: '/invoices/inv-003.pdf' }
-]
-
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Settings Level
-// ============================================================================
-
-const mockSettingsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Security Score', description: 'Your account security score is 95/100. All recommended protections enabled.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '2', type: 'warning' as const, title: 'Session Alert', description: 'Active session detected from new device in London. Verify if this is you.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'Plan Upgrade', description: 'You have used 85% of your storage. Consider upgrading for more space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-]
-
-const mockSettingsCollaborators = [
-  { id: '1', name: 'Account Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'IT Support', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Support' },
-  { id: '3', name: 'Billing Team', avatar: '/avatars/billing.jpg', status: 'away' as const, role: 'Billing' },
-]
-
-const mockSettingsPredictions = [
-  { id: '1', title: 'Storage Forecast', prediction: 'At current usage rate, storage will be full in 45 days', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Renewal Savings', prediction: 'Annual billing could save you $50/year on current plan', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockSettingsActivities = [
-  { id: '1', user: 'You', action: 'Changed', target: 'notification preferences', timestamp: new Date().toISOString(), type: 'info' as const },
-  { id: '2', user: 'You', action: 'Enabled', target: 'two-factor authentication', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'success' as const },
-  { id: '3', user: 'System', action: 'Revoked', target: 'inactive API key', timestamp: new Date(Date.now() - 172800000).toISOString(), type: 'warning' as const },
-]
-
-// Quick actions will be defined inside the component to use component functions
+// MIGRATED: Batch #16 - Removed mock data, using database hooks
 
 export default function SettingsClient() {
 
@@ -247,13 +155,41 @@ export default function SettingsClient() {
   const [isLoading, setIsLoading] = useState(true)
 
   // Form state with Supabase data
-  const [profile, setProfile] = useState<UserProfile>(mockProfile)
-  const [security, setSecurity] = useState<SecuritySettings>(mockSecurity)
-  const [sessions, setSessions] = useState<Session[]>(mockSessions)
-  const [integrations, setIntegrations] = useState<Integration[]>(mockIntegrations)
-  const [notifications, setNotifications] = useState<NotificationPreference[]>(mockNotifications)
-  const [billing, setBilling] = useState<BillingInfo>(mockBilling)
-  const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
+  const [profile, setProfile] = useState<UserProfile>({
+    id: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    displayName: '',
+    avatar: '',
+    bio: '',
+    phone: '',
+    location: '',
+    website: '',
+    timezone: 'America/Los_Angeles',
+    language: 'en-US',
+    createdAt: new Date().toISOString()
+  })
+  const [security, setSecurity] = useState<SecuritySettings>({
+    twoFactorEnabled: false,
+    twoFactorMethod: 'app',
+    passwordLastChanged: new Date().toISOString(),
+    securityScore: 0,
+    loginNotifications: true,
+    trustedDevices: 0
+  })
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [integrations, setIntegrations] = useState<Integration[]>([])
+  const [notifications, setNotifications] = useState<NotificationPreference[]>([])
+  const [billing, setBilling] = useState<BillingInfo>({
+    plan: 'free',
+    billingCycle: 'monthly',
+    nextBillingDate: '',
+    amount: 0,
+    paymentMethod: '',
+    cardLast4: ''
+  })
+  const [invoices, setInvoices] = useState<Invoice[]>([])
 
   const [theme, setTheme] = useState<ThemeMode>('system')
   const [showPassword, setShowPassword] = useState(false)
@@ -471,7 +407,6 @@ export default function SettingsClient() {
       toast.error('Error')
     } finally {
       setIsSaving(false)
-      setTimeout(() => setSaveMessage(''), 3000)
     }
   }
 
@@ -906,7 +841,7 @@ export default function SettingsClient() {
 
         <div className="flex items-center gap-3">
           <CollaborationIndicator
-            collaborators={mockSettingsCollaborators}
+            collaborators={[]}
             maxDisplay={3}
             showStatus={true}
           />
@@ -983,7 +918,7 @@ export default function SettingsClient() {
 
       {/* AI Insights Panel */}
       <AIInsightsPanel
-        insights={mockSettingsAIInsights}
+        insights={[]}
         title="Account Insights"
         onActionClick={handleInsightAction}
       />
@@ -1760,7 +1695,7 @@ export default function SettingsClient() {
 
           {/* Predictive Analytics */}
           <PredictiveAnalytics
-            predictions={mockSettingsPredictions}
+            predictions={[]}
             title="Billing Predictions"
           />
         </TabsContent>
@@ -1768,7 +1703,7 @@ export default function SettingsClient() {
 
       {/* Activity Feed */}
       <ActivityFeed
-        activities={mockSettingsActivities}
+        activities={[]}
         title="Recent Settings Activity"
         maxItems={5}
       />

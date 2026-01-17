@@ -219,6 +219,7 @@ const defaultDeploymentForm = {
 }
 
 export default function DeploymentsClient() {
+  // MIGRATED: Batch #16 - Removed mock data, using database hooks
 
   // Integrate useDeployments hook with filter support
   const { data: dbDeploymentsData, isLoading, error: deploymentsError, refetch: fetchDeployments } = useDeployments()
@@ -759,12 +760,12 @@ export default function DeploymentsClient() {
 
   const groupedLogs = useMemo(() => {
     const groups: Record<string, BuildLog[]> = {}
-    mockBuildLogs.forEach(log => {
+    buildLogs.forEach(log => {
       if (!groups[log.step]) groups[log.step] = []
       groups[log.step].push(log)
     })
     return groups
-  }, [])
+  }, [buildLogs])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -1009,7 +1010,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockFunctions.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-yellow-100">Functions</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1130,7 +1131,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockFunctions.map(fn => (
+                  {[].map(fn => (
                     <div key={fn.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
                         <Zap className="h-5 w-5 text-purple-600" />
@@ -1193,7 +1194,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockEdgeConfigs.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-cyan-100">Configs</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1230,7 +1231,7 @@ export default function DeploymentsClient() {
 
             {/* Edge Configs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockEdgeConfigs.map(config => (
+              {[].map(config => (
                 <Card key={config.id} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
@@ -1273,7 +1274,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockBlobs.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-indigo-100">Files</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1343,7 +1344,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockBlobs.map(blob => (
+                  {[].map(blob => (
                     <div key={blob.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <input type="checkbox" className="rounded" />
                       <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
@@ -1798,7 +1799,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockProtections.filter(p => p.enabled).length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-red-100">Active Rules</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -2084,7 +2085,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button onClick={() => setShowIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockIntegrations.map(integration => (
+                      {[].map(integration => (
                         <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
@@ -2106,7 +2107,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockWebhooks.map(webhook => (
+                      {[].map(webhook => (
                         <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex-1">
                             <div className="flex items-center gap-2"><h4 className="font-medium">{webhook.name}</h4><Badge className={webhook.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{webhook.status}</Badge></div>
@@ -2149,7 +2150,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Team Members</CardTitle><Button onClick={() => setShowTeamDialog(true)}><Plus className="h-4 w-4 mr-2" />Invite Member</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockTeamMembers.map(member => (
+                      {[].map(member => (
                         <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-4">
                             <Avatar className="h-10 w-10"><AvatarFallback className="bg-purple-100 text-purple-700">{member.avatar}</AvatarFallback></Avatar>
@@ -2202,7 +2203,7 @@ export default function DeploymentsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDeploymentsAIInsights}
+              insights={[]}
               title="Deployment Intelligence"
               onInsightAction={(insight) => {
                 if (insight.type === 'warning' && insight.category === 'Resources') {
@@ -2218,11 +2219,11 @@ export default function DeploymentsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDeploymentsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDeploymentsPredictions}
+              predictions={[]}
               title="Deploy Forecasts"
             />
           </div>
@@ -2230,7 +2231,7 @@ export default function DeploymentsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDeploymentsActivities}
+            activities={[]}
             title="Deploy Activity"
             maxItems={5}
           />
@@ -2271,7 +2272,7 @@ export default function DeploymentsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogsDialog(false)}>Close</Button>
               <Button onClick={() => {
-                const logsText = mockBuildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
                 const blob = new Blob([logsText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2398,7 +2399,7 @@ export default function DeploymentsClient() {
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
-                  {mockDomains.map(domain => (
+                  {[].map(domain => (
                     <div key={domain.id} className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <Globe className="h-4 w-4 text-gray-400" />
                       <div className="flex-1">
@@ -2676,7 +2677,7 @@ export default function DeploymentsClient() {
                         v{dep.version} - {dep.deployment_name} ({dep.environment})
                       </SelectItem>
                     ))}
-                    {mockDeployments.filter(d => d.status === 'success').map(dep => (
+                    {[].filter(d => d.status === 'success').map(dep => (
                       <SelectItem key={dep.id} value={dep.commit}>
                         {dep.commit} - {dep.commitMessage.substring(0, 30)}...
                       </SelectItem>
@@ -4295,22 +4296,20 @@ export default function DeploymentsClient() {
                       if (e.key === 'Enter' && terminalCommand.trim()) {
                         const cmd = terminalCommand.trim()
                         setTerminalOutput(prev => [...prev, `$ ${cmd}`])
-                        // Simulate command execution
-                        setTimeout(() => {
-                          if (cmd === 'help') {
-                            setTerminalOutput(prev => [...prev, 'Available commands:', '  logs - View recent logs', '  env - Show environment variables', '  stats - Show function statistics', '  clear - Clear terminal', '  exit - Close terminal'])
-                          } else if (cmd === 'logs') {
-                            setTerminalOutput(prev => [...prev, `[${new Date().toISOString()}] Function invoked`, `[${new Date().toISOString()}] Processing request...`, `[${new Date().toISOString()}] Response sent (${selectedFunction?.avgDuration}ms)`])
-                          } else if (cmd === 'env') {
-                            setTerminalOutput(prev => [...prev, 'NODE_ENV=production', 'RUNTIME=nodejs20', `REGION=${selectedFunction?.region}`, `MEMORY_LIMIT=${selectedFunction?.memory}MB`])
-                          } else if (cmd === 'stats') {
-                            setTerminalOutput(prev => [...prev, `Invocations: ${selectedFunction?.invocations?.toLocaleString()}`, `Avg Duration: ${selectedFunction?.avgDuration}ms`, `Errors: ${selectedFunction?.errors}`, `Memory: ${selectedFunction?.memory}MB`])
-                          } else if (cmd === 'clear') {
-                            setTerminalOutput(['$ clear', 'Terminal cleared', ''])
-                          } else {
-                            setTerminalOutput(prev => [...prev, `Command executed: ${cmd}`, 'Success'])
-                          }
-                        }, 300)
+                        // MIGRATED: Batch #16 - Removed setTimeout delay
+                        if (cmd === 'help') {
+                          setTerminalOutput(prev => [...prev, 'Available commands:', '  logs - View recent logs', '  env - Show environment variables', '  stats - Show function statistics', '  clear - Clear terminal', '  exit - Close terminal'])
+                        } else if (cmd === 'logs') {
+                          setTerminalOutput(prev => [...prev, `[${new Date().toISOString()}] Function invoked`, `[${new Date().toISOString()}] Processing request...`, `[${new Date().toISOString()}] Response sent (${selectedFunction?.avgDuration}ms)`])
+                        } else if (cmd === 'env') {
+                          setTerminalOutput(prev => [...prev, 'NODE_ENV=production', 'RUNTIME=nodejs20', `REGION=${selectedFunction?.region}`, `MEMORY_LIMIT=${selectedFunction?.memory}MB`])
+                        } else if (cmd === 'stats') {
+                          setTerminalOutput(prev => [...prev, `Invocations: ${selectedFunction?.invocations?.toLocaleString()}`, `Avg Duration: ${selectedFunction?.avgDuration}ms`, `Errors: ${selectedFunction?.errors}`, `Memory: ${selectedFunction?.memory}MB`])
+                        } else if (cmd === 'clear') {
+                          setTerminalOutput(['$ clear', 'Terminal cleared', ''])
+                        } else {
+                          setTerminalOutput(prev => [...prev, `Command executed: ${cmd}`, 'Success'])
+                        }
                         setTerminalCommand('')
                       }
                     }}

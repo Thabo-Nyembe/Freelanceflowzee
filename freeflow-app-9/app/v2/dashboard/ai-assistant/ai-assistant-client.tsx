@@ -150,185 +150,7 @@ interface PromptFormState {
 }
 
 // Mock Data for assistants (will be replaced with Supabase integration)
-const mockAssistants: Assistant[] = [
-  {
-    id: '1',
-    name: 'Code Copilot',
-    description: 'Expert programming assistant for all languages',
-    type: 'code',
-    model: 'gpt-4o',
-    systemPrompt: 'You are an expert programmer...',
-    temperature: 0.3,
-    tools: ['code_interpreter', 'file_search'],
-    files: ['api-docs.pdf', 'codebase.zip'],
-    icon: '💻',
-    color: 'blue',
-    usageCount: 1245,
-    createdAt: new Date('2024-11-01')
-  },
-  {
-    id: '2',
-    name: 'Content Writer',
-    description: 'Creative writing and content generation',
-    type: 'writer',
-    model: 'gpt-4-turbo',
-    systemPrompt: 'You are a professional content writer...',
-    temperature: 0.8,
-    tools: ['web_search'],
-    files: ['brand-guide.pdf'],
-    icon: '✍️',
-    color: 'purple',
-    usageCount: 892,
-    createdAt: new Date('2024-11-05')
-  },
-  {
-    id: '3',
-    name: 'Data Analyst',
-    description: 'Analyze data and generate insights',
-    type: 'analyst',
-    model: 'claude-3-opus',
-    systemPrompt: 'You are a senior data analyst...',
-    temperature: 0.2,
-    tools: ['code_interpreter', 'file_search'],
-    files: ['sales-data.csv', 'metrics.xlsx'],
-    icon: '📊',
-    color: 'green',
-    usageCount: 567,
-    createdAt: new Date('2024-11-10')
-  },
-  {
-    id: '4',
-    name: 'Research Assistant',
-    description: 'Deep research and literature review',
-    type: 'researcher',
-    model: 'claude-3-sonnet',
-    systemPrompt: 'You are a research assistant...',
-    temperature: 0.4,
-    tools: ['web_search', 'file_search'],
-    files: ['papers.zip'],
-    icon: '🔬',
-    color: 'orange',
-    usageCount: 423,
-    createdAt: new Date('2024-11-15')
-  }
-]
-
-const mockPrompts: PromptTemplate[] = [
-  {
-    id: '1',
-    name: 'Code Review',
-    description: 'Comprehensive code review with suggestions',
-    prompt: 'Review the following code for:\n1. Code quality and best practices\n2. Potential bugs\n3. Performance issues\n4. Security vulnerabilities\n\nCode:\n{{code}}',
-    category: 'Development',
-    variables: ['code'],
-    usageCount: 234,
-    starred: true
-  },
-  {
-    id: '2',
-    name: 'Blog Post Outline',
-    description: 'Generate a structured blog post outline',
-    prompt: 'Create a detailed blog post outline for the topic: {{topic}}\n\nTarget audience: {{audience}}\nTone: {{tone}}\n\nInclude:\n- Hook/introduction\n- Main sections with key points\n- Conclusion with CTA',
-    category: 'Content',
-    variables: ['topic', 'audience', 'tone'],
-    usageCount: 189,
-    starred: true
-  },
-  {
-    id: '3',
-    name: 'SQL Query Generator',
-    description: 'Generate optimized SQL queries',
-    prompt: 'Generate an optimized SQL query for:\n\nDatabase schema:\n{{schema}}\n\nRequirement:\n{{requirement}}\n\nDatabase: {{database_type}}',
-    category: 'Development',
-    variables: ['schema', 'requirement', 'database_type'],
-    usageCount: 156,
-    starred: false
-  },
-  {
-    id: '4',
-    name: 'Meeting Summary',
-    description: 'Summarize meeting notes into action items',
-    prompt: 'Summarize the following meeting notes:\n\n{{notes}}\n\nExtract:\n1. Key decisions made\n2. Action items with owners\n3. Follow-up topics\n4. Timeline/deadlines',
-    category: 'Productivity',
-    variables: ['notes'],
-    usageCount: 298,
-    starred: true
-  },
-  {
-    id: '5',
-    name: 'Product Description',
-    description: 'Write compelling product descriptions',
-    prompt: 'Write a compelling product description for:\n\nProduct: {{product}}\nFeatures: {{features}}\nTarget customer: {{customer}}\n\nInclude benefits, use cases, and emotional appeal.',
-    category: 'Marketing',
-    variables: ['product', 'features', 'customer'],
-    usageCount: 167,
-    starred: false
-  }
-]
-
-const mockFiles: KnowledgeFile[] = [
-  {
-    id: '1',
-    name: 'API Documentation.pdf',
-    type: 'document',
-    size: 2450000,
-    chunks: 124,
-    status: 'ready',
-    uploadedAt: new Date('2024-12-20'),
-    assistant: 'Code Copilot'
-  },
-  {
-    id: '2',
-    name: 'sales-data-2024.csv',
-    type: 'data',
-    size: 5600000,
-    chunks: 89,
-    status: 'ready',
-    uploadedAt: new Date('2024-12-19'),
-    assistant: 'Data Analyst'
-  },
-  {
-    id: '3',
-    name: 'brand-guidelines.pdf',
-    type: 'document',
-    size: 8900000,
-    chunks: 256,
-    status: 'ready',
-    uploadedAt: new Date('2024-12-18'),
-    assistant: 'Content Writer'
-  },
-  {
-    id: '4',
-    name: 'codebase-v2.zip',
-    type: 'code',
-    size: 15400000,
-    chunks: 512,
-    status: 'processing',
-    uploadedAt: new Date('2024-12-23')
-  }
-]
-
-const mockUsageStats: UsageStats = {
-  totalTokens: 2450000,
-  inputTokens: 980000,
-  outputTokens: 1470000,
-  totalCost: 187.45,
-  conversations: 156,
-  messages: 2890,
-  avgResponseTime: 1.8,
-  quotaUsed: 2450000,
-  quotaLimit: 5000000
-}
-
-const mockDailyUsage: DailyUsage[] = [
-  { date: '2024-12-17', tokens: 125000, cost: 9.50, messages: 145 },
-  { date: '2024-12-18', tokens: 198000, cost: 15.20, messages: 234 },
-  { date: '2024-12-19', tokens: 167000, cost: 12.80, messages: 189 },
-  { date: '2024-12-20', tokens: 245000, cost: 18.90, messages: 287 },
-  { date: '2024-12-21', tokens: 312000, cost: 24.10, messages: 356 },
-  { date: '2024-12-22', tokens: 278000, cost: 21.40, messages: 312 },
-  { date: '2024-12-23', tokens: 156000, cost: 12.00, messages: 178 }
-]
+// MIGRATED: Batch #16 - Removed mock data, using database hooks
 
 const models: { id: ModelType; name: string; provider: string; context: string; speed: string }[] = [
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128k', speed: 'Fast' },
@@ -469,11 +291,21 @@ export default function AIAssistantClient() {
   } = useAIAssistant()
 
   const [activeTab, setActiveTab] = useState('chat')
-  const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants)
-  const [prompts, setPrompts] = useState<PromptTemplate[]>(mockPrompts)
-  const [files, setFiles] = useState<KnowledgeFile[]>(mockFiles)
-  const [usageStats] = useState<UsageStats>(mockUsageStats)
-  const [dailyUsage] = useState<DailyUsage[]>(mockDailyUsage)
+  const [assistants, setAssistants] = useState<Assistant[]>([])
+  const [prompts, setPrompts] = useState<PromptTemplate[]>([])
+  const [files, setFiles] = useState<KnowledgeFile[]>([])
+  const [usageStats] = useState<UsageStats>({
+    totalTokens: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    totalCost: 0,
+    conversations: 0,
+    messages: 0,
+    avgResponseTime: 0,
+    quotaUsed: 0,
+    quotaLimit: 0
+  })
+  const [dailyUsage] = useState<DailyUsage[]>([])
 
   const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-4o')
   const [selectedMode, setSelectedMode] = useState<ConversationMode>('chat')

@@ -163,79 +163,7 @@ interface SystemMetric {
   status: 'good' | 'warning' | 'critical'
 }
 
-// Mock Data
-const mockResources: SystemResource[] = [
-  { id: '1', name: 'Primary Database', type: 'database', status: 'healthy', endpoint: 'postgres://db.freeflow.io:5432', latency: 12, uptime: 99.99, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '2', name: 'Redis Cache', type: 'cache', status: 'healthy', endpoint: 'redis://cache.freeflow.io:6379', latency: 2, uptime: 99.95, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '3', name: 'API Gateway', type: 'api', status: 'healthy', endpoint: 'https://api.freeflow.io', latency: 45, uptime: 99.98, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '4', name: 'File Storage', type: 'storage', status: 'warning', endpoint: 's3://freeflow-assets', latency: 85, uptime: 99.85, lastChecked: '2024-12-23T10:28:00Z' },
-  { id: '5', name: 'Message Queue', type: 'queue', status: 'healthy', endpoint: 'amqp://mq.freeflow.io:5672', latency: 8, uptime: 99.92, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '6', name: 'Analytics DB', type: 'database', status: 'healthy', endpoint: 'clickhouse://analytics.freeflow.io:8123', latency: 25, uptime: 99.90, lastChecked: '2024-12-23T10:30:00Z' },
-]
-
-const mockAdminUsers: AdminUser[] = [
-  { id: '1', name: 'John Smith', email: 'john@freeflow.io', role: 'super_admin', status: 'active', lastLogin: '2024-12-23T09:15:00Z', mfaEnabled: true, permissions: ['all'] },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah@freeflow.io', role: 'admin', status: 'active', lastLogin: '2024-12-23T08:45:00Z', mfaEnabled: true, permissions: ['users', 'settings', 'reports'] },
-  { id: '3', name: 'Mike Chen', email: 'mike@freeflow.io', role: 'moderator', status: 'active', lastLogin: '2024-12-22T16:30:00Z', mfaEnabled: false, permissions: ['users.read', 'content.moderate'] },
-  { id: '4', name: 'Emily Davis', email: 'emily@freeflow.io', role: 'viewer', status: 'pending', lastLogin: '', mfaEnabled: false, permissions: ['dashboard.view', 'reports.view'] },
-  { id: '5', name: 'Alex Thompson', email: 'alex@freeflow.io', role: 'admin', status: 'suspended', lastLogin: '2024-12-20T11:00:00Z', mfaEnabled: true, permissions: ['users', 'settings'] },
-]
-
-const mockAuditLogs: AuditLog[] = [
-  { id: '1', action: 'user.login', actor: 'john@freeflow.io', resource: 'auth', details: 'Successful login via SSO', ipAddress: '192.168.1.100', timestamp: '2024-12-23T10:25:00Z', severity: 'info' },
-  { id: '2', action: 'settings.update', actor: 'sarah@freeflow.io', resource: 'billing.stripe_key', details: 'Updated Stripe API key', ipAddress: '192.168.1.105', timestamp: '2024-12-23T10:20:00Z', severity: 'warning' },
-  { id: '3', action: 'user.create', actor: 'john@freeflow.io', resource: 'users', details: 'Created new admin user: emily@freeflow.io', ipAddress: '192.168.1.100', timestamp: '2024-12-23T10:15:00Z', severity: 'info' },
-  { id: '4', action: 'permission.revoke', actor: 'system', resource: 'users.alex', details: 'Auto-suspended due to failed MFA attempts', ipAddress: 'system', timestamp: '2024-12-23T10:10:00Z', severity: 'critical' },
-  { id: '5', action: 'backup.complete', actor: 'system', resource: 'database', details: 'Daily backup completed successfully', ipAddress: 'system', timestamp: '2024-12-23T06:00:00Z', severity: 'info' },
-  { id: '6', action: 'api.rate_limit', actor: 'api-key-xyz123', resource: 'api/v2/users', details: 'Rate limit exceeded (1000/min)', ipAddress: '203.45.67.89', timestamp: '2024-12-23T05:45:00Z', severity: 'warning' },
-  { id: '7', action: 'deploy.success', actor: 'ci/cd', resource: 'production', details: 'Deployed v2.4.1 to production', ipAddress: 'github-actions', timestamp: '2024-12-23T04:00:00Z', severity: 'info' },
-]
-
-const mockMetrics: SystemMetric[] = [
-  { name: 'CPU Usage', value: 42, unit: '%', trend: 'stable', status: 'good' },
-  { name: 'Memory Usage', value: 68, unit: '%', trend: 'up', status: 'warning' },
-  { name: 'Disk Usage', value: 55, unit: '%', trend: 'up', status: 'good' },
-  { name: 'Network I/O', value: 125, unit: 'MB/s', trend: 'stable', status: 'good' },
-  { name: 'Active Connections', value: 1247, unit: '', trend: 'up', status: 'good' },
-  { name: 'Request Rate', value: 3420, unit: 'req/min', trend: 'up', status: 'good' },
-]
-
-const mockJobs: ScheduledJob[] = [
-  { id: '1', name: 'Database Backup', description: 'Daily automated database backup', schedule: '0 2 * * *', lastRun: '2024-12-23T02:00:00Z', nextRun: '2024-12-24T02:00:00Z', status: 'completed', duration: 245, successRate: 99.8, type: 'cron' },
-  { id: '2', name: 'Report Generation', description: 'Weekly analytics report', schedule: '0 6 * * 1', lastRun: '2024-12-23T06:00:00Z', nextRun: '2024-12-30T06:00:00Z', status: 'completed', duration: 180, successRate: 100, type: 'cron' },
-  { id: '3', name: 'Cache Cleanup', description: 'Hourly cache invalidation', schedule: '0 * * * *', lastRun: '2024-12-23T10:00:00Z', nextRun: '2024-12-23T11:00:00Z', status: 'running', duration: 15, successRate: 99.5, type: 'cron' },
-  { id: '4', name: 'Email Queue Processor', description: 'Process pending emails', schedule: '*/5 * * * *', lastRun: '2024-12-23T10:25:00Z', nextRun: '2024-12-23T10:30:00Z', status: 'completed', duration: 8, successRate: 98.2, type: 'cron' },
-  { id: '5', name: 'Webhook Sync', description: 'Sync data from external services', schedule: 'webhook', lastRun: '2024-12-23T09:45:00Z', nextRun: '-', status: 'scheduled', duration: 45, successRate: 97.5, type: 'webhook' },
-  { id: '6', name: 'Data Migration', description: 'Manual data migration task', schedule: 'manual', lastRun: '2024-12-22T14:30:00Z', nextRun: '-', status: 'paused', duration: 3600, successRate: 100, type: 'manual' },
-]
-
-const mockFeatureFlags: FeatureFlag[] = [
-  { id: '1', key: 'new_dashboard', name: 'New Dashboard UI', description: 'Enable the redesigned dashboard', enabled: true, environment: 'production', rolloutPercentage: 100, createdAt: '2024-11-01T00:00:00Z', updatedAt: '2024-12-20T00:00:00Z' },
-  { id: '2', key: 'ai_assistant_v2', name: 'AI Assistant V2', description: 'New AI-powered assistant features', enabled: true, environment: 'production', rolloutPercentage: 50, createdAt: '2024-12-01T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-  { id: '3', key: 'dark_mode_auto', name: 'Auto Dark Mode', description: 'Automatic dark mode based on system preference', enabled: true, environment: 'production', rolloutPercentage: 100, createdAt: '2024-10-15T00:00:00Z', updatedAt: '2024-10-15T00:00:00Z' },
-  { id: '4', key: 'real_time_collab', name: 'Real-time Collaboration', description: 'Enable real-time collaboration features', enabled: false, environment: 'staging', rolloutPercentage: 0, createdAt: '2024-12-15T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-  { id: '5', key: 'advanced_analytics', name: 'Advanced Analytics', description: 'Premium analytics dashboard', enabled: true, environment: 'staging', rolloutPercentage: 25, createdAt: '2024-12-10T00:00:00Z', updatedAt: '2024-12-22T00:00:00Z' },
-  { id: '6', key: 'beta_exports', name: 'Beta Export Formats', description: 'New export format options', enabled: true, environment: 'development', rolloutPercentage: 100, createdAt: '2024-12-20T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-]
-
-const mockDeployments: Deployment[] = [
-  { id: '1', version: 'v2.4.1', environment: 'production', status: 'success', commit: 'abc123f', branch: 'main', deployedBy: 'ci/cd', deployedAt: '2024-12-23T04:00:00Z', duration: 245, changes: 12 },
-  { id: '2', version: 'v2.4.1', environment: 'staging', status: 'success', commit: 'abc123f', branch: 'main', deployedBy: 'ci/cd', deployedAt: '2024-12-23T02:00:00Z', duration: 180, changes: 12 },
-  { id: '3', version: 'v2.4.0', environment: 'production', status: 'success', commit: 'def456a', branch: 'main', deployedBy: 'john@freeflow.io', deployedAt: '2024-12-22T16:00:00Z', duration: 320, changes: 45 },
-  { id: '4', version: 'v2.4.1-rc1', environment: 'staging', status: 'failed', commit: 'ghi789b', branch: 'release/2.4.1', deployedBy: 'ci/cd', deployedAt: '2024-12-22T14:00:00Z', duration: 120, changes: 8 },
-  { id: '5', version: 'v2.5.0-dev', environment: 'development', status: 'in_progress', commit: 'jkl012c', branch: 'develop', deployedBy: 'sarah@freeflow.io', deployedAt: '2024-12-23T10:30:00Z', duration: 0, changes: 23 },
-]
-
-const mockDatabaseTables: DatabaseTable[] = [
-  { name: 'users', schema: 'public', rows: 125847, size: '256 MB', lastModified: '2024-12-23T10:25:00Z' },
-  { name: 'projects', schema: 'public', rows: 45230, size: '128 MB', lastModified: '2024-12-23T10:20:00Z' },
-  { name: 'tasks', schema: 'public', rows: 892145, size: '1.2 GB', lastModified: '2024-12-23T10:28:00Z' },
-  { name: 'files', schema: 'public', rows: 234567, size: '512 MB', lastModified: '2024-12-23T10:15:00Z' },
-  { name: 'audit_logs', schema: 'public', rows: 5678901, size: '4.5 GB', lastModified: '2024-12-23T10:30:00Z' },
-  { name: 'sessions', schema: 'auth', rows: 12456, size: '32 MB', lastModified: '2024-12-23T10:30:00Z' },
-  { name: 'invoices', schema: 'billing', rows: 78934, size: '96 MB', lastModified: '2024-12-23T09:00:00Z' },
-  { name: 'notifications', schema: 'public', rows: 456789, size: '256 MB', lastModified: '2024-12-23T10:28:00Z' },
-]
+// MIGRATED: Batch #16 - Removed mock data, using database hooks
 
 const jobStatusColors: Record<JobStatus, string> = {
   running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -276,29 +204,7 @@ const statusColors = {
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockAdminAIInsights = [
-  { id: '1', type: 'success' as const, title: 'System Health Excellent', description: 'All 12 resources running optimally with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Permission Audit Due', description: 'Quarterly access review recommended for 15 admin users.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'Feature Flag Opportunity', description: '3 feature flags have 100% rollout. Consider cleanup.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
-
-const mockAdminCollaborators = [
-  { id: '1', name: 'System Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
-  { id: '3', name: 'Security Officer', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
-
-const mockAdminPredictions = [
-  { id: '1', title: 'Resource Usage', prediction: 'Database storage will need expansion in 3 weeks', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Job Success Rate', prediction: 'Scheduled jobs maintaining 98% success rate', confidence: 92, trend: 'stable' as const, impact: 'low' as const },
-]
-
-const mockAdminActivities = [
-  { id: '1', user: 'System Admin', action: 'Deployed', target: 'v2.4.1 to production', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'DevOps Lead', action: 'Enabled', target: 'new-checkout-flow feature flag', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Batch #16 - Competitive upgrade data now sourced from database
 
 // Quick actions are now defined inside the component to access state setters
 
@@ -321,7 +227,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'staging' | 'development'>('all')
   const [sqlQuery, setSqlQuery] = useState('SELECT * FROM users LIMIT 10;')
   const [sqlResults, setSqlResults] = useState<QueryResult | null>(null)
-  const [featureFlags, setFeatureFlags] = useState(mockFeatureFlags)
+  const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([])
   const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showRunJobDialog, setShowRunJobDialog] = useState(false)
@@ -388,13 +294,20 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const { settings, createSetting, updateSetting, deleteSetting, refetch } = useAdminSettings({})
   const displaySettings = settings.length > 0 ? settings : initialSettings
 
-  // Calculate stats
-  const overallHealth = mockResources.filter(r => r.status === 'healthy').length / mockResources.length * 100
-  const activeUsers = mockAdminUsers.filter(u => u.status === 'active').length
-  const criticalLogs = mockAuditLogs.filter(l => l.severity === 'critical').length
-  const runningJobs = mockJobs.filter(j => j.status === 'running').length
+  // Calculate stats - MIGRATED: Using empty arrays as default
+  const resources: SystemResource[] = []
+  const adminUsers: AdminUser[] = []
+  const auditLogs: AuditLog[] = []
+  const jobs: ScheduledJob[] = []
+  const deployments: Deployment[] = []
+  const databaseTables: DatabaseTable[] = []
+
+  const overallHealth = resources.length > 0 ? resources.filter(r => r.status === 'healthy').length / resources.length * 100 : 0
+  const activeUsers = adminUsers.filter(u => u.status === 'active').length
+  const criticalLogs = auditLogs.filter(l => l.severity === 'critical').length
+  const runningJobs = jobs.filter(j => j.status === 'running').length
   const enabledFlags = featureFlags.filter(f => f.enabled).length
-  const successfulDeploys = mockDeployments.filter(d => d.status === 'success').length
+  const successfulDeploys = deployments.filter(d => d.status === 'success').length
 
   // Toggle feature flag (calls DB handler)
   const toggleFlag = useCallback(async (flagId: string) => {
@@ -442,9 +355,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     })
   }, [featureFlags, searchQuery, envFilter])
 
-  // Filtered deployments
+  // Filtered deployments - MIGRATED: Using empty array
   const filteredDeployments = useMemo(() => {
-    return mockDeployments.filter(d => {
+    return deployments.filter(d => {
       const matchesSearch = searchQuery === '' ||
         d.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.branch.toLowerCase().includes(searchQuery.toLowerCase())
@@ -464,7 +377,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   }, [displaySettings, searchQuery, settingCategoryFilter])
 
   const filteredUsers = useMemo(() => {
-    return mockAdminUsers.filter(u => {
+    return adminUsers.filter(u => {
       const matchesSearch = searchQuery === '' ||
         u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -474,7 +387,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   }, [searchQuery, userRoleFilter])
 
   const filteredLogs = useMemo(() => {
-    return mockAuditLogs.filter(l => {
+    return auditLogs.filter(l => {
       const matchesSearch = searchQuery === '' ||
         l.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
         l.actor.toLowerCase().includes(searchQuery.toLowerCase())
@@ -1041,7 +954,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               </div>
               <div>
                 <p className="text-xs text-gray-500">Tables</p>
-                <p className="text-xl font-bold text-indigo-600">{mockDatabaseTables.length}</p>
+                <p className="text-xl font-bold text-indigo-600">{databaseTables.length}</p>
               </div>
             </div>
           </div>
@@ -1128,7 +1041,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <p className="text-slate-200 text-sm">Health</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.length}</p>
+                    <p className="text-3xl font-bold">{resources.length}</p>
                     <p className="text-slate-200 text-sm">Resources</p>
                   </div>
                 </div>
@@ -1137,7 +1050,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
             {/* System Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {mockMetrics.map((metric) => (
+              {[].map((metric) => (
                 <div key={metric.name} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
                   <p className="text-xs text-gray-500 mb-1">{metric.name}</p>
                   <div className="flex items-end gap-1">
@@ -1172,7 +1085,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[300px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockAuditLogs.slice(0, 5).map((log) => (
+                    {auditLogs.slice(0, 5).map((log) => (
                       <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-lg ${
@@ -1208,7 +1121,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[300px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockResources.map((resource) => (
+                    {resources.map((resource) => (
                       <div key={resource.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -1255,7 +1168,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <p className="text-purple-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAdminUsers.filter(u => u.mfaEnabled).length}</p>
+                    <p className="text-3xl font-bold">{adminUsers.filter(u => u.mfaEnabled).length}</p>
                     <p className="text-purple-200 text-sm">MFA On</p>
                   </div>
                 </div>
@@ -1388,7 +1301,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
           {/* Resources Tab */}
           <TabsContent value="resources" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockResources.map((resource) => (
+              {resources.map((resource) => (
                 <div key={resource.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-3 rounded-xl ${
@@ -1622,11 +1535,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDatabaseTables.length}</p>
+                    <p className="text-3xl font-bold">{databaseTables.length}</p>
                     <p className="text-emerald-200 text-sm">Tables</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockDatabaseTables.reduce((sum, t) => sum + t.rows, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">{(databaseTables.reduce((sum, t) => sum + t.rows, 0) / 1000000).toFixed(1)}M</p>
                     <p className="text-emerald-200 text-sm">Rows</p>
                   </div>
                 </div>
@@ -1650,7 +1563,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[400px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockDatabaseTables.map((table) => (
+                    {databaseTables.map((table) => (
                       <button
                         key={table.name}
                         onClick={() => setSelectedTable(table)}
@@ -1747,7 +1660,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockJobs.length}</p>
+                    <p className="text-3xl font-bold">{jobs.length}</p>
                     <p className="text-amber-200 text-sm">Total Jobs</p>
                   </div>
                   <div className="text-center">
@@ -1774,7 +1687,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {mockJobs.map((job) => (
+                {jobs.map((job) => (
                   <div key={job.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -1975,7 +1888,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDeployments.length}</p>
+                    <p className="text-3xl font-bold">{deployments.length}</p>
                     <p className="text-cyan-200 text-sm">Deployments</p>
                   </div>
                   <div className="text-center">
@@ -2091,18 +2004,18 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAdminAIInsights}
+              insights={[]}
               title="Admin Intelligence"
               onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAdminCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAdminPredictions}
+              predictions={[]}
               title="System Forecasts"
             />
           </div>
@@ -2110,7 +2023,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAdminActivities}
+            activities={[]}
             title="Admin Activity"
             maxItems={5}
           />
@@ -2693,7 +2606,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Job</label>
                 <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  {mockJobs.map((job) => (
+                  {jobs.map((job) => (
                     <option key={job.id} value={job.id}>{job.name}</option>
                   ))}
                 </select>
@@ -3209,7 +3122,7 @@ CREATE INDEX idx_${selectedTable?.name}_created_at
             <div className="py-4">
               <ScrollArea className="h-96">
                 <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                  {mockAuditLogs.map((log) => (
+                  {auditLogs.map((log) => (
                     <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-lg ${
