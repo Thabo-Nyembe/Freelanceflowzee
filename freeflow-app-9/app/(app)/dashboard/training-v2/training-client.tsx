@@ -757,31 +757,57 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     }
   }, [courseToEnroll, enrollmentForm, supabase, refetch])
 
-  const handleStartLesson = useCallback((lessonName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Loading "${lessonName}"...`,
-        success: `Lesson "${lessonName}" ready`,
-        error: 'Failed to load lesson'
+  const handleStartLesson = useCallback(async (lessonName: string, courseId?: string) => {
+    try {
+      toast.loading(`Loading "${lessonName}"...`)
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user && courseId) {
+        // Track lesson start in progress
+        await supabase.from('training_progress').upsert({
+          user_id: user.id,
+          course_id: courseId,
+          last_lesson: lessonName,
+          last_accessed: new Date().toISOString()
+        }, { onConflict: 'user_id,course_id' })
       }
-    )
-    // In a real app, this would navigate to the lesson player
+
+      toast.dismiss()
+      toast.success(`Lesson "${lessonName}" ready`)
+      // Navigate to lesson player
+      window.location.href = `/dashboard/training-v2/lesson?name=${encodeURIComponent(lessonName)}${courseId ? `&course=${courseId}` : ''}`
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Failed to load lesson')
+    }
   }, [])
 
   const handleDownloadCertificate = useCallback(async (courseName: string, certificateUrl?: string) => {
     if (certificateUrl) {
-      toast.promise(
-        new Promise(resolve => {
-          window.open(certificateUrl, '_blank')
-          setTimeout(resolve, 600)
-        }),
-        {
-          loading: `Preparing certificate for "${courseName}"...`,
-          success: `Certificate for "${courseName}" is downloading`,
-          error: 'Failed to download certificate'
-        }
-      )
+      try {
+        toast.loading(`Preparing certificate for "${courseName}"...`)
+        const response = await fetch(certificateUrl)
+        if (!response.ok) throw new Error('Download failed')
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${courseName.replace(/\s+/g, '-')}-certificate.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        toast.dismiss()
+        toast.success(`Certificate for "${courseName}" downloaded`)
+      } catch (error) {
+        toast.dismiss()
+        toast.error('Failed to download certificate')
+      }
     } else {
       toast.error('Certificate Not Available')
     }
@@ -953,16 +979,47 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowExportDataDialog(true)
   }, [])
 
-  const handleConfirmExport = useCallback(() => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Preparing your learning data export...',
-        success: 'Learning data exported successfully',
-        error: 'Failed to export data'
+  const handleConfirmExport = useCallback(async () => {
+    try {
+      toast.loading('Preparing your learning data export...')
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Fetch user's training data
+      const [enrollments, progress, certificates] = await Promise.all([
+        supabase.from('training_enrollments').select('*').eq('user_id', user.id),
+        supabase.from('training_progress').select('*').eq('user_id', user.id),
+        supabase.from('training_certificates').select('*').eq('user_id', user.id)
+      ])
+
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        user: { id: user.id, email: user.email },
+        enrollments: enrollments.data || [],
+        progress: progress.data || [],
+        certificates: certificates.data || []
       }
-    )
-    setShowExportDataDialog(false)
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `learning-data-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss()
+      toast.success('Learning data exported successfully')
+      setShowExportDataDialog(false)
+    } catch (error: any) {
+      toast.dismiss()
+      toast.error('Failed to export data', { description: error.message })
+    }
   }, [])
 
   // Handler for Import Transcript
@@ -970,17 +1027,52 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     setShowImportTranscriptDialog(true)
   }, [])
 
-  const handleConfirmImport = useCallback(() => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Importing transcript...',
-        success: 'Transcript imported successfully',
-        error: 'Failed to import transcript'
+  const handleConfirmImport = useCallback(async (file?: File) => {
+    if (!file) {
+      // Open file picker
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.json,.csv'
+      input.onchange = (e) => {
+        const selectedFile = (e.target as HTMLInputElement).files?.[0]
+        if (selectedFile) handleConfirmImport(selectedFile)
       }
-    )
-    setShowImportTranscriptDialog(false)
-  }, [])
+      input.click()
+      return
+    }
+
+    try {
+      toast.loading('Importing transcript...')
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const text = await file.text()
+      const importData = JSON.parse(text)
+
+      // Import progress data
+      if (importData.progress && Array.isArray(importData.progress)) {
+        for (const item of importData.progress) {
+          await supabase.from('training_progress').upsert({
+            user_id: user.id,
+            course_id: item.course_id,
+            completion_percentage: item.completion_percentage,
+            last_accessed: item.last_accessed
+          }, { onConflict: 'user_id,course_id' })
+        }
+      }
+
+      toast.dismiss()
+      toast.success('Transcript imported successfully')
+      setShowImportTranscriptDialog(false)
+      refetch()
+    } catch (error: any) {
+      toast.dismiss()
+      toast.error('Failed to import transcript', { description: error.message })
+    }
+  }, [refetch])
 
   // Handler for Clear Downloads
   const handleClearDownloads = useCallback(() => {

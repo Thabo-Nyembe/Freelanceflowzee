@@ -921,15 +921,46 @@ export default function AllocationClient() {
     setShowEditDialog(true)
   }
 
-  const handleExportAllocations = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Exporting allocations...',
-        success: 'Allocation report downloaded',
-        error: 'Failed to export allocations'
+  const handleExportAllocations = async () => {
+    try {
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        allocations: allocations.map(a => ({
+          member: a.member_name,
+          project: a.project_name,
+          type: a.allocation_type,
+          status: a.status,
+          hoursPerWeek: a.hours_per_week,
+          allocatedHours: a.allocated_hours,
+          startDate: a.start_date,
+          endDate: a.end_date,
+          billableRate: a.billable_rate,
+          notes: a.notes
+        })),
+        summary: {
+          totalAllocations: allocations.length,
+          totalHours: allocations.reduce((sum, a) => sum + (a.allocated_hours || 0), 0),
+          byStatus: allocations.reduce((acc, a) => {
+            acc[a.status] = (acc[a.status] || 0) + 1
+            return acc
+          }, {} as Record<string, number>)
+        }
       }
-    )
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `allocations-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Allocation report downloaded')
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message })
+    }
   }
 
   const handleRefresh = async () => {

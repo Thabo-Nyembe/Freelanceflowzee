@@ -1852,9 +1852,25 @@ export default function AICreateClient() {
                                 })
                               } else {
                                 toast.loading(`Connecting to ${service.name}...`, { id: 'service-connect' })
-                                setTimeout(() => {
-                                  toast.success(`${service.name} connected`, { id: 'service-connect', description: 'Integration is now active' })
-                                }, 2000)
+                                ;(async () => {
+                                  try {
+                                    const { createClient } = await import('@/lib/supabase/client')
+                                    const supabase = createClient()
+                                    const { data: { user } } = await supabase.auth.getUser()
+                                    if (!user) throw new Error('Not authenticated')
+
+                                    await supabase.from('ai_service_connections').upsert({
+                                      user_id: user.id,
+                                      service_name: service.name,
+                                      connected: true,
+                                      connected_at: new Date().toISOString()
+                                    }, { onConflict: 'user_id,service_name' })
+
+                                    toast.success(`${service.name} connected`, { id: 'service-connect', description: 'Integration is now active' })
+                                  } catch (error: any) {
+                                    toast.error(`Failed to connect ${service.name}`, { id: 'service-connect', description: error.message })
+                                  }
+                                })()
                               }
                             }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
@@ -2266,7 +2282,38 @@ export default function AICreateClient() {
                   onClick={() => {
                     if (importedFile) {
                       toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 2000)),
+                        (async () => {
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
+                          const { data: { user } } = await supabase.auth.getUser()
+                          if (!user) throw new Error('Not authenticated')
+
+                          // Upload to Supabase Storage
+                          const fileName = `${user.id}/${Date.now()}-${importedFile.name}`
+                          const { data: uploadData, error: uploadError } = await supabase.storage
+                            .from('ai-imports')
+                            .upload(fileName, importedFile, {
+                              cacheControl: '3600',
+                              upsert: false
+                            })
+
+                          if (uploadError) throw uploadError
+
+                          // Get public URL
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('ai-imports')
+                            .getPublicUrl(fileName)
+
+                          // Log import
+                          await supabase.from('ai_imported_images').insert({
+                            user_id: user.id,
+                            file_name: importedFile.name,
+                            file_path: uploadData.path,
+                            file_url: publicUrl,
+                            file_size: importedFile.size,
+                            mime_type: importedFile.type
+                          })
+                        })(),
                         {
                           loading: 'Uploading image...',
                           success: 'Image imported successfully!',

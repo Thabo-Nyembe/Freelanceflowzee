@@ -3636,18 +3636,34 @@ export default function MessagesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => { setShowFileUploadDialog(false); setUploadedFiles([]) }}>Cancel</Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (uploadedFiles.length > 0) {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Uploading files...',
-                      success: `${uploadedFiles.length} file(s) uploaded successfully`,
-                      error: 'Failed to upload files'
+                  try {
+                    toast.loading('Uploading files...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    for (const file of uploadedFiles) {
+                      const fileExt = file.name.split('.').pop()
+                      const fileName = `${user.id}/messages/${Date.now()}-${file.name}`
+
+                      const { error: uploadError } = await supabase.storage
+                        .from('attachments')
+                        .upload(fileName, file)
+
+                      if (uploadError) throw uploadError
                     }
-                  )
-                  setShowFileUploadDialog(false)
-                  setUploadedFiles([])
+
+                    toast.dismiss()
+                    toast.success(`${uploadedFiles.length} file(s) uploaded successfully`)
+                    setShowFileUploadDialog(false)
+                    setUploadedFiles([])
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to upload files', { description: error.message })
+                  }
                 } else {
                   toast.error('No files selected')
                 }

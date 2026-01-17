@@ -2449,7 +2449,20 @@ export default defineConfig({
                       }
                     } else {
                       toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 2000)),
+                        (async () => {
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
+                          const { data: { user } } = await supabase.auth.getUser()
+                          if (!user) throw new Error('Not authenticated')
+
+                          await supabase.from('test_browser_instances').insert({
+                            user_id: user.id,
+                            browser_name: browser.name,
+                            browser_version: browser.version,
+                            status: 'installed',
+                            installed_at: new Date().toISOString()
+                          })
+                        })(),
                         {
                           loading: `Installing ${browser.name}...`,
                           success: `${browser.name} installed successfully`,

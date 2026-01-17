@@ -2742,7 +2742,35 @@ export default function TemplatesClient() {
                 const originalTemplate = allTemplates.find(t => t.id === selectedTemplateToDuplicate)
                 const newName = duplicateTemplateName.trim() || `${originalTemplate?.name} (Copy)`
                 toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  (async () => {
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    // Get original template data
+                    const { data: original, error: fetchError } = await supabase
+                      .from('templates')
+                      .select('*')
+                      .eq('id', selectedTemplateToDuplicate)
+                      .single()
+
+                    if (fetchError) throw fetchError
+
+                    // Create duplicate with new name
+                    const { error: insertError } = await supabase.from('templates').insert({
+                      user_id: user.id,
+                      name: newName,
+                      description: original.description,
+                      category: original.category,
+                      content: original.content,
+                      settings: original.settings,
+                      is_public: false,
+                      source_template_id: selectedTemplateToDuplicate
+                    })
+
+                    if (insertError) throw insertError
+                  })(),
                   {
                     loading: 'Duplicating template...',
                     success: `Template "${newName}" created successfully!`,

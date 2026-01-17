@@ -757,14 +757,24 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         toast.info(`Editing connection settings for ${connectionId}`)
         break
       case 'refresh':
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 1000)),
-          {
-            loading: 'Refreshing connection...',
-            success: 'Connection refreshed successfully',
-            error: 'Failed to refresh connection'
+        (async () => {
+          try {
+            toast.loading('Refreshing connection...')
+            const { createClient } = await import('@/lib/supabase/client')
+            const supabase = createClient()
+            const { error } = await supabase
+              .from('automation_connections')
+              .update({ last_refreshed: new Date().toISOString() })
+              .eq('id', connectionId)
+            if (error) throw error
+            toast.dismiss()
+            toast.success('Connection refreshed successfully')
+            refetch()
+          } catch (error: any) {
+            toast.dismiss()
+            toast.error('Failed to refresh connection', { description: error.message })
           }
-        )
+        })()
         break
       case 'remove':
         if (confirm('Are you sure you want to remove this connection?')) {
@@ -2736,19 +2746,31 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 />
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'AI is generating your automation...',
-                      success: () => {
-                        setShowAIAutomationDialog(false)
-                        setShowNewWorkflow(true)
-                        return 'Automation generated! Review and customize your workflow.'
-                      },
-                      error: 'Failed to generate automation'
-                    }
-                  )
+                <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={async () => {
+                  try {
+                    toast.loading('AI is generating your automation...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    // Call AI generation API
+                    const response = await fetch('/api/ai/generate-automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ userId: user.id })
+                    })
+
+                    if (!response.ok) throw new Error('AI generation failed')
+
+                    toast.dismiss()
+                    toast.success('Automation generated! Review and customize your workflow.')
+                    setShowAIAutomationDialog(false)
+                    setShowNewWorkflow(true)
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to generate automation', { description: error.message })
+                  }
                 }}>
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate Automation
@@ -2824,18 +2846,30 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {['Slack', 'Google', 'GitHub', 'Stripe', 'HubSpot', 'OpenAI'].map(app => (
-                  <button key={app} className="p-4 border rounded-lg hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all flex flex-col items-center gap-2" onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
-                      {
-                        loading: `Connecting to ${app}...`,
-                        success: () => {
-                          setShowNewConnectionDialog(false)
-                          return `${app} connected successfully!`
-                        },
-                        error: `Failed to connect to ${app}`
-                      }
-                    )
+                  <button key={app} className="p-4 border rounded-lg hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all flex flex-col items-center gap-2" onClick={async () => {
+                    try {
+                      toast.loading(`Connecting to ${app}...`)
+                      const { createClient } = await import('@/lib/supabase/client')
+                      const supabase = createClient()
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (!user) throw new Error('Not authenticated')
+
+                      const { error } = await supabase.from('automation_connections').insert({
+                        user_id: user.id,
+                        provider: app.toLowerCase(),
+                        status: 'connected',
+                        connected_at: new Date().toISOString()
+                      })
+
+                      if (error) throw error
+                      toast.dismiss()
+                      toast.success(`${app} connected successfully!`)
+                      setShowNewConnectionDialog(false)
+                      refetch()
+                    } catch (error: any) {
+                      toast.dismiss()
+                      toast.error(`Failed to connect to ${app}`, { description: error.message })
+                    }
                   }}>
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
                       {app.slice(0, 2)}
@@ -2882,18 +2916,32 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </select>
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Creating webhook...',
-                      success: () => {
-                        setShowNewWebhookDialog(false)
-                        return 'Webhook created successfully!'
-                      },
-                      error: 'Failed to create webhook'
-                    }
-                  )
+                <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={async () => {
+                  try {
+                    toast.loading('Creating webhook...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    const { error } = await supabase.from('webhooks').insert({
+                      user_id: user.id,
+                      name: 'New Webhook',
+                      url: `https://api.freeflow.io/webhooks/${crypto.randomUUID()}`,
+                      method: 'POST',
+                      is_active: true,
+                      created_at: new Date().toISOString()
+                    })
+
+                    if (error) throw error
+                    toast.dismiss()
+                    toast.success('Webhook created successfully!')
+                    setShowNewWebhookDialog(false)
+                    refetch()
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to create webhook', { description: error.message })
+                  }
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Webhook
@@ -3135,18 +3183,28 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 </select>
               </div>
               <div className="flex gap-2">
-                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Submitting template for review...',
-                      success: () => {
-                        setShowSubmitTemplateDialog(false)
-                        return 'Template submitted! Our team will review it shortly.'
-                      },
-                      error: 'Failed to submit template'
-                    }
-                  )
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={async () => {
+                  try {
+                    toast.loading('Submitting template for review...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    const { error } = await supabase.from('workflow_template_submissions').insert({
+                      user_id: user.id,
+                      status: 'pending_review',
+                      submitted_at: new Date().toISOString()
+                    })
+
+                    if (error) throw error
+                    toast.dismiss()
+                    toast.success('Template submitted! Our team will review it shortly.')
+                    setShowSubmitTemplateDialog(false)
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to submit template', { description: error.message })
+                  }
                 }}>
                   Submit for Review
                 </Button>

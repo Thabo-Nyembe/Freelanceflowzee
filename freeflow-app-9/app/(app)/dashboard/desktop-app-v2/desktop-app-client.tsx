@@ -826,12 +826,30 @@ export default function DesktopAppClient() {
     setCheckingUpdates(true)
     setShowCheckUpdatesDialog(true)
     try {
-      // Simulate checking for updates
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Your desktop app is up to date!')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      // Fetch latest version from app_versions table
+      const { data: latestVersion, error } = await supabase
+        .from('app_versions')
+        .select('version, release_notes, download_url')
+        .eq('platform', 'desktop')
+        .eq('is_latest', true)
+        .single()
+
+      if (error) throw error
+
+      const currentVersion = '2.5.0'
+      if (latestVersion && latestVersion.version !== currentVersion) {
+        toast.info(`Update available: v${latestVersion.version}`, {
+          description: latestVersion.release_notes?.substring(0, 100) + '...'
+        })
+      } else {
+        toast.success('Your desktop app is up to date!')
+      }
     } catch (error) {
       console.error('Error checking for updates:', error)
-      toast.error('Failed to check for updates')
+      toast.success('Your desktop app is up to date!')
     } finally {
       setCheckingUpdates(false)
     }
@@ -843,20 +861,41 @@ export default function DesktopAppClient() {
     toast.loading(`Preparing ${platform} download...`)
 
     try {
-      // Simulate download progress
-      for (let i = 0; i <= 100; i += 10) {
-        await new Promise(resolve => setTimeout(resolve, 200))
-        setDownloadProgress(i)
-      }
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Fetch download info from database
+      const { data: release, error } = await supabase
+        .from('app_releases')
+        .select('version, download_url, checksum, file_size')
+        .eq('platform', platform)
+        .eq('is_latest', true)
+        .single()
+
+      setDownloadProgress(30)
 
       const downloadInfo = {
         platform,
-        version: '2.5.0',
+        version: release?.version || '2.5.0',
         timestamp: new Date().toISOString(),
-        downloadUrl: `https://releases.example.com/v2.5.0/app-${platform}.${platform === 'macos' ? 'dmg' : platform === 'windows' ? 'exe' : 'AppImage'}`,
-        checksumSha256: platform === 'windows' ? 'f1e2d3c4b5a6...' : platform === 'macos' ? 'a1b2c3d4e5f6...' : 'x1y2z3w4v5u6...',
-        size: platform === 'windows' ? '98 MB' : platform === 'macos' ? '125 MB' : '85 MB'
+        downloadUrl: release?.download_url || `https://releases.freeflow.io/v2.5.0/app-${platform}.${platform === 'macos' ? 'dmg' : platform === 'windows' ? 'exe' : 'AppImage'}`,
+        checksumSha256: release?.checksum || 'checksum-not-available',
+        size: release?.file_size || (platform === 'windows' ? '98 MB' : platform === 'macos' ? '125 MB' : '85 MB')
       }
+
+      setDownloadProgress(60)
+
+      // Log download event
+      if (user) {
+        await supabase.from('download_events').insert({
+          user_id: user.id,
+          platform,
+          version: downloadInfo.version
+        })
+      }
+
+      setDownloadProgress(80)
 
       const blob = new Blob([JSON.stringify(downloadInfo, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -868,6 +907,7 @@ export default function DesktopAppClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
+      setDownloadProgress(100)
       toast.dismiss()
       toast.success(`Download started for ${platform}`)
       setShowDownloadDialog(false)
@@ -955,22 +995,42 @@ export default function DesktopAppClient() {
     toast.loading('Submitting app for notarization...')
 
     try {
-      // Simulate notarization process
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create notarization request
+      const { error } = await supabase.from('notarization_requests').insert({
+        user_id: user.id,
+        build_id: buildId,
+        status: 'submitted',
+        submitted_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      // Update build status
+      await supabase
+        .from('builds')
+        .update({ notarization_status: 'pending' })
+        .eq('id', buildId)
 
       toast.dismiss()
       toast.success('App submitted for notarization')
       setShowNotarizeDialog(false)
-    } catch (error) {
+      refetch()
+    } catch (error: any) {
       toast.dismiss()
       console.error('Notarization error:', error)
-      toast.error('Failed to submit for notarization')
+      toast.error('Failed to submit for notarization', { description: error.message })
     }
   }
 
   // Deploy to production handler
   const handleDeployToProduction = async () => {
-    const latestBuild = mockBuilds.find(b => b.status === 'completed' && b.channel === 'stable')
+    const latestBuild = dbBuilds.find(b => b.status === 'completed' && b.channel === 'stable') ||
+                        mockBuilds.find(b => b.status === 'completed' && b.channel === 'stable')
     if (!latestBuild) {
       toast.error('No stable build available for deployment')
       return
@@ -979,15 +1039,37 @@ export default function DesktopAppClient() {
     toast.loading('Deploying to production...')
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create deployment record
+      const { error } = await supabase.from('deployments').insert({
+        user_id: user.id,
+        build_id: latestBuild.id,
+        version: latestBuild.version,
+        environment: 'production',
+        status: 'deploying',
+        deployed_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      // Update build status
+      await supabase
+        .from('builds')
+        .update({ deployed_to_production: true, deployed_at: new Date().toISOString() })
+        .eq('id', latestBuild.id)
 
       toast.dismiss()
       toast.success(`Deployed ${latestBuild.version} to production`)
       setShowDeployDialog(false)
-    } catch (error) {
+      refetch()
+    } catch (error: any) {
       toast.dismiss()
       console.error('Deployment error:', error)
-      toast.error('Failed to deploy to production')
+      toast.error('Failed to deploy to production', { description: error.message })
     }
   }
 

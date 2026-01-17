@@ -697,16 +697,55 @@ export default function ContentClient() {
   }
 
   // Asset handlers
-  const handleUploadAsset = async () => {
-    // In a real implementation, this would handle file upload
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Preparing upload...',
-        success: 'Upload ready - connect to your storage solution',
-        error: 'Upload preparation failed'
+  const handleUploadAsset = async (file?: File) => {
+    if (!file) {
+      // Open file picker
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*,video/*,audio/*,application/pdf'
+      input.onchange = async (e) => {
+        const selectedFile = (e.target as HTMLInputElement).files?.[0]
+        if (selectedFile) await handleUploadAsset(selectedFile)
       }
-    )
+      input.click()
+      return
+    }
+
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('assets')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(fileName)
+
+      const { error: insertError } = await supabase.from('assets').insert({
+        user_id: user.id,
+        filename: file.name,
+        url: publicUrl,
+        file_type: file.type,
+        file_size: file.size,
+        storage_path: fileName
+      })
+
+      if (insertError) throw insertError
+
+      toast.success('Asset uploaded successfully')
+      // Refresh assets list
+      const { data: newAssets } = await supabase.from('assets').select('*').eq('user_id', user.id).is('deleted_at', null)
+      if (newAssets) setAssets(newAssets)
+    } catch (error: any) {
+      toast.error('Upload failed', { description: error.message })
+    }
   }
 
   const handleCopyAssetUrl = (asset: Asset) => {
@@ -720,18 +759,25 @@ export default function ContentClient() {
     )
   }
 
-  const handleDownloadAsset = (asset: Asset) => {
-    toast.promise(
-      new Promise(resolve => {
-        window.open(asset.url, '_blank')
-        setTimeout(resolve, 600)
-      }),
-      {
-        loading: 'Starting download...',
-        success: `Download started: ${asset.filename}`,
-        error: 'Failed to start download'
-      }
-    )
+  const handleDownloadAsset = async (asset: Asset) => {
+    try {
+      const response = await fetch(asset.url)
+      if (!response.ok) throw new Error('Download failed')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = asset.filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success(`Downloaded: ${asset.filename}`)
+    } catch (error: any) {
+      toast.error('Download failed', { description: error.message })
+    }
   }
 
   const handleDeleteAsset = async (asset: Asset) => {

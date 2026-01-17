@@ -458,14 +458,25 @@ export default function PerformanceAnalyticsClient() {
 
   const handleConfirmRefresh = async () => {
     setIsRefreshing(true)
-    // Simulate refresh delay
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsRefreshing(false)
-    setLastRefresh(new Date())
-    setShowRefreshDialog(false)
-    toast.success('Metrics refreshed', {
-      description: 'All performance data has been updated'
-    })
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Trigger metrics refresh
+      await supabase.rpc('refresh_performance_metrics', { p_user_id: user.id })
+
+      setLastRefresh(new Date())
+      setShowRefreshDialog(false)
+      toast.success('Metrics refreshed', {
+        description: 'All performance data has been updated'
+      })
+    } catch (error: any) {
+      toast.error('Failed to refresh metrics', { description: error.message })
+    } finally {
+      setIsRefreshing(false)
+    }
   }
 
   const handleExportReport = () => {
@@ -474,19 +485,78 @@ export default function PerformanceAnalyticsClient() {
 
   const handleConfirmExport = async () => {
     setIsExporting(true)
-    // Simulate export delay
-    await new Promise(resolve => setTimeout(resolve, 2500))
-    setIsExporting(false)
-    setShowExportDialog(false)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
 
-    const dataTypes = []
-    if (exportMetrics) dataTypes.push('metrics')
-    if (exportTraces) dataTypes.push('traces')
-    if (exportLogs) dataTypes.push('logs')
+      const dataTypes: string[] = []
+      const exportData: Record<string, any> = {
+        exportedAt: new Date().toISOString(),
+        timeRange: exportTimeRange,
+        format: exportFormat
+      }
 
-    toast.success('Export completed', {
-      description: `${dataTypes.join(', ')} exported as ${exportFormat.toUpperCase()} for ${exportTimeRange}`
-    })
+      // Fetch requested data types
+      if (exportMetrics) {
+        dataTypes.push('metrics')
+        const { data } = await supabase
+          .from('performance_metrics')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('recorded_at', { ascending: false })
+          .limit(1000)
+        exportData.metrics = data || []
+      }
+      if (exportTraces) {
+        dataTypes.push('traces')
+        const { data } = await supabase
+          .from('performance_traces')
+          .select('*')
+          .eq('user_id', user.id)
+          .limit(500)
+        exportData.traces = data || []
+      }
+      if (exportLogs) {
+        dataTypes.push('logs')
+        const { data } = await supabase
+          .from('system_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .limit(1000)
+        exportData.logs = data || []
+      }
+
+      // Create download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `performance-export-${exportTimeRange}-${Date.now()}.${exportFormat}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Log export event
+      await supabase.from('export_logs').insert({
+        user_id: user.id,
+        export_type: 'performance_analytics',
+        data_types: dataTypes,
+        format: exportFormat,
+        time_range: exportTimeRange
+      })
+
+      setShowExportDialog(false)
+      toast.success('Export completed', {
+        description: `${dataTypes.join(', ')} exported as ${exportFormat.toUpperCase()} for ${exportTimeRange}`
+      })
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const handleCreateAlert = () => {

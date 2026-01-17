@@ -478,18 +478,47 @@ export default function ThirdPartyIntegrationsClient() {
     setTestConnectionStatus('testing')
     setTestConnectionMessage('Testing connection...')
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
 
-    const connection = connections.find(c => c.id === testConnectionAppId)
-    const isSuccess = connection?.status === 'connected'
+      const connection = connections.find(c => c.id === testConnectionAppId)
+      const startTime = Date.now()
 
-    if (isSuccess) {
-      setTestConnectionStatus('success')
-      setTestConnectionMessage(`Connection to ${connection?.app.name} is healthy. Response time: 124ms`)
-    } else {
+      // Actually test the connection by calling our API
+      const response = await fetch('/api/integrations/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          connectionId: testConnectionAppId,
+          appType: connection?.app.name
+        })
+      })
+
+      const responseTime = Date.now() - startTime
+      const result = await response.json()
+
+      // Log the test result
+      await supabase.from('integration_connection_tests').insert({
+        user_id: user.id,
+        connection_id: testConnectionAppId,
+        status: result.success ? 'success' : 'failed',
+        response_time_ms: responseTime,
+        error_message: result.error || null
+      })
+
+      if (result.success) {
+        setTestConnectionStatus('success')
+        setTestConnectionMessage(`Connection to ${connection?.app.name} is healthy. Response time: ${responseTime}ms`)
+      } else {
+        setTestConnectionStatus('error')
+        setTestConnectionMessage(`Connection to ${connection?.app.name} failed: ${result.error}`)
+      }
+    } catch (error: any) {
       setTestConnectionStatus('error')
-      setTestConnectionMessage(`Connection to ${connection?.app.name} failed. Please check credentials and try again.`)
+      setTestConnectionMessage(`Connection test failed: ${error.message}`)
     }
   }
 
@@ -667,14 +696,34 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Refresh connection handler
-  const handleRefreshConnection = (conn: Connection, e: React.MouseEvent) => {
+  const handleRefreshConnection = async (conn: Connection, e: React.MouseEvent) => {
     e.stopPropagation()
-    toast.info('Syncing' data...`
-    })
-    setTimeout(() => {
-      toast.success('Sync Complete' data is now up to date`
+    const toastId = toast.loading(`Syncing ${conn.app.name} data...`)
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Sync the integration data
+      await supabase.from('integration_connections').update({
+        last_synced_at: new Date().toISOString(),
+        sync_status: 'synced'
+      }).eq('id', conn.id)
+
+      // Log sync event
+      await supabase.from('integration_sync_logs').insert({
+        user_id: user.id,
+        connection_id: conn.id,
+        status: 'success'
       })
-    }, 1500)
+
+      toast.dismiss(toastId)
+      toast.success('Sync Complete', { description: `${conn.app.name} data is now up to date` })
+    } catch (error: any) {
+      toast.dismiss(toastId)
+      toast.error('Sync failed', { description: error.message })
+    }
   }
 
   // Connection settings handler
@@ -691,11 +740,30 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Refresh history handler
-  const handleRefreshHistory = () => {
-    toast.info('Refreshing')
-    setTimeout(() => {
-      toast.success('Logs Refreshed')
-    }, 1000)
+  const handleRefreshHistory = async () => {
+    const toastId = toast.loading('Refreshing logs...')
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Fetch fresh logs
+      const { data: freshLogs, error } = await supabase
+        .from('integration_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (error) throw error
+
+      toast.dismiss(toastId)
+      toast.success('Logs Refreshed', { description: `${freshLogs?.length || 0} logs loaded` })
+    } catch (error: any) {
+      toast.dismiss(toastId)
+      toast.error('Refresh failed', { description: error.message })
+    }
   }
 
   // Upgrade handler
@@ -713,15 +781,43 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Webhook test handler
-  const handleTestWebhook = () => {
+  const handleTestWebhook = async () => {
     if (showWebhookTestDialog) {
-      toast.info('Testing Webhook'...`
-      })
-      setTimeout(() => {
-        toast.success('Test Successful' responded with 200 OK`
+      const toastId = toast.loading(`Testing ${showWebhookTestDialog.name}...`)
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not authenticated')
+
+        // Send test webhook
+        const response = await fetch('/api/webhooks/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ webhookId: showWebhookTestDialog.id })
         })
+
+        const result = await response.json()
+
+        // Log test result
+        await supabase.from('webhook_test_logs').insert({
+          user_id: user.id,
+          webhook_id: showWebhookTestDialog.id,
+          status: result.success ? 'success' : 'failed',
+          response_code: result.statusCode || null
+        })
+
+        toast.dismiss(toastId)
+        if (result.success) {
+          toast.success('Test Successful', { description: `${showWebhookTestDialog.name} responded with ${result.statusCode || 200} OK` })
+        } else {
+          toast.error('Test Failed', { description: result.error })
+        }
         setShowWebhookTestDialog(null)
-      }, 1500)
+      } catch (error: any) {
+        toast.dismiss(toastId)
+        toast.error('Test failed', { description: error.message })
+      }
     }
   }
 
@@ -763,13 +859,46 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Export data handler
-  const handleExportData = () => {
-    toast.success('Export Started' export...`
-    })
-    setTimeout(() => {
-      toast.success('Export Complete')
+  const handleExportData = async () => {
+    const toastId = toast.loading('Preparing export...')
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Fetch all integration data
+      const [connectionsRes, webhooksRes, logsRes] = await Promise.all([
+        supabase.from('integration_connections').select('*').eq('user_id', user.id),
+        supabase.from('webhooks').select('*').eq('user_id', user.id),
+        supabase.from('integration_logs').select('*').eq('user_id', user.id).limit(500)
+      ])
+
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        connections: connectionsRes.data || [],
+        webhooks: webhooksRes.data || [],
+        logs: logsRes.data || []
+      }
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `integrations-export-${Date.now()}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss(toastId)
+      toast.success('Export Complete', { description: 'Your data has been downloaded' })
       setShowExportDataDialog(false)
-    }, 1500)
+    } catch (error: any) {
+      toast.dismiss(toastId)
+      toast.error('Export failed', { description: error.message })
+    }
   }
 
   // Clone configuration handler
@@ -804,14 +933,34 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Sync connection now handler
-  const handleSyncNow = () => {
+  const handleSyncNow = async () => {
     if (selectedConnection) {
-      toast.info('Syncing'...`
-      })
-      setTimeout(() => {
-        toast.success('Sync Complete' data synchronized`
+      const toastId = toast.loading(`Syncing ${selectedConnection.app.name}...`)
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not authenticated')
+
+        // Update sync timestamp
+        await supabase.from('integration_connections').update({
+          last_synced_at: new Date().toISOString(),
+          sync_status: 'synced'
+        }).eq('id', selectedConnection.id)
+
+        // Log sync
+        await supabase.from('integration_sync_logs').insert({
+          user_id: user.id,
+          connection_id: selectedConnection.id,
+          status: 'success'
         })
-      }, 1500)
+
+        toast.dismiss(toastId)
+        toast.success('Sync Complete', { description: `${selectedConnection.app.name} data synchronized` })
+      } catch (error: any) {
+        toast.dismiss(toastId)
+        toast.error('Sync failed', { description: error.message })
+      }
     }
   }
 

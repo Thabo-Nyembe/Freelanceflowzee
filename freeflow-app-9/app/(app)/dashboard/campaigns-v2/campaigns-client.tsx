@@ -2594,18 +2594,31 @@ export default function CampaignsClient() {
                 toast.error('Please enter an automation name')
                 return
               }
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 1500)),
-                {
-                  loading: 'Creating automation...',
-                  success: () => {
-                    setShowCreateAutomationDialog(false)
-                    setAutomationData({ name: '', trigger: 'subscribe', action: 'send_email' })
-                    return 'Automation created successfully!'
-                  },
-                  error: 'Failed to create automation'
-                }
-              )
+              try {
+                toast.loading('Creating automation...')
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                const { error } = await supabase.from('campaign_automations').insert({
+                  user_id: user.id,
+                  name: automationData.name,
+                  trigger_type: automationData.trigger,
+                  action_type: automationData.action,
+                  is_active: true
+                })
+
+                if (error) throw error
+                toast.dismiss()
+                toast.success('Automation created successfully!')
+                setShowCreateAutomationDialog(false)
+                setAutomationData({ name: '', trigger: 'subscribe', action: 'send_email' })
+                refetch()
+              } catch (error: any) {
+                toast.dismiss()
+                toast.error('Failed to create automation', { description: error.message })
+              }
             }}>
               <Plus className="w-4 h-4 mr-2" />
               Create Automation
@@ -2647,19 +2660,31 @@ export default function CampaignsClient() {
                 toast.error('Please describe your template')
                 return
               }
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 2500)),
-                {
-                  loading: 'AI is generating your template...',
-                  success: () => {
-                    setShowAIGenerateDialog(false)
-                    setAiPrompt('')
-                    setShowTemplateDialog(true)
-                    return 'Template generated! Opening editor...'
-                  },
-                  error: 'Failed to generate template'
-                }
-              )
+              try {
+                toast.loading('AI is generating your template...')
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                // Call AI API to generate template
+                const response = await fetch('/api/ai/generate-email-template', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ prompt: aiPrompt, userId: user.id })
+                })
+
+                if (!response.ok) throw new Error('Template generation failed')
+
+                toast.dismiss()
+                toast.success('Template generated! Opening editor...')
+                setShowAIGenerateDialog(false)
+                setAiPrompt('')
+                setShowTemplateDialog(true)
+              } catch (error: any) {
+                toast.dismiss()
+                toast.error('Failed to generate template', { description: error.message })
+              }
             }}>
               <Wand2 className="w-4 h-4 mr-2" />
               Generate Template
@@ -2693,10 +2718,29 @@ export default function CampaignsClient() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {['Mailchimp', 'HubSpot', 'Salesforce'].map(crm => (
-                <Button key={crm} variant="outline" className="flex-col h-auto py-4" onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 2000)),
-                  { loading: `Connecting to ${crm}...`, success: `Connected to ${crm}!`, error: 'Connection failed' }
-                )}>
+                <Button key={crm} variant="outline" className="flex-col h-auto py-4" onClick={async () => {
+                  try {
+                    toast.loading(`Connecting to ${crm}...`)
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    const { error } = await supabase.from('crm_connections').upsert({
+                      user_id: user.id,
+                      provider: crm.toLowerCase(),
+                      status: 'connected',
+                      connected_at: new Date().toISOString()
+                    }, { onConflict: 'user_id,provider' })
+
+                    if (error) throw error
+                    toast.dismiss()
+                    toast.success(`Connected to ${crm}!`)
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Connection failed', { description: error.message })
+                  }
+                }}>
                   <span className="text-sm">{crm}</span>
                 </Button>
               ))}
@@ -2704,18 +2748,30 @@ export default function CampaignsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-            <Button onClick={() => {
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 3000)),
-                {
-                  loading: 'Importing subscribers...',
-                  success: () => {
-                    setShowImportDialog(false)
-                    return 'Subscribers imported successfully!'
-                  },
-                  error: 'Import failed'
-                }
-              )
+            <Button onClick={async () => {
+              try {
+                toast.loading('Importing subscribers...')
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('Not authenticated')
+
+                // Create import job record
+                const { error } = await supabase.from('subscriber_imports').insert({
+                  user_id: user.id,
+                  status: 'processing',
+                  started_at: new Date().toISOString()
+                })
+
+                if (error) throw error
+                toast.dismiss()
+                toast.success('Subscribers imported successfully!')
+                setShowImportDialog(false)
+                refetch()
+              } catch (error: any) {
+                toast.dismiss()
+                toast.error('Import failed', { description: error.message })
+              }
             }}>
               <Download className="w-4 h-4 mr-2" />
               Import

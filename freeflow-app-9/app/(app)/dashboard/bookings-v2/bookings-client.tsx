@@ -2493,25 +2493,42 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     toast.error('Select days', { description: 'Please select at least one day for recurring block' })
                     return
                   }
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Blocking time slot...',
-                      success: () => {
-                        setShowBlockTimeDialog(false)
-                        setBlockTimeForm({
-                          date: '',
-                          startTime: '09:00',
-                          endTime: '17:00',
-                          reason: '',
-                          recurring: false,
-                          recurringDays: []
-                        })
-                        return `Time blocked: ${blockTimeForm.date} from ${blockTimeForm.startTime} to ${blockTimeForm.endTime}${blockTimeForm.reason ? ` (${blockTimeForm.reason})` : ''}`
-                      },
-                      error: 'Failed to block time slot'
+                  (async () => {
+                    try {
+                      toast.loading('Blocking time slot...')
+                      const { createClient } = await import('@/lib/supabase/client')
+                      const supabase = createClient()
+                      const { data: { user } } = await supabase.auth.getUser()
+                      if (!user) throw new Error('Not authenticated')
+
+                      const { error } = await supabase.from('blocked_time_slots').insert({
+                        user_id: user.id,
+                        date: blockTimeForm.date,
+                        start_time: blockTimeForm.startTime,
+                        end_time: blockTimeForm.endTime,
+                        reason: blockTimeForm.reason,
+                        is_recurring: blockTimeForm.recurring,
+                        recurring_days: blockTimeForm.recurringDays
+                      })
+
+                      if (error) throw error
+                      toast.dismiss()
+                      toast.success(`Time blocked: ${blockTimeForm.date} from ${blockTimeForm.startTime} to ${blockTimeForm.endTime}${blockTimeForm.reason ? ` (${blockTimeForm.reason})` : ''}`)
+                      setShowBlockTimeDialog(false)
+                      setBlockTimeForm({
+                        date: '',
+                        startTime: '09:00',
+                        endTime: '17:00',
+                        reason: '',
+                        recurring: false,
+                        recurringDays: []
+                      })
+                      refetch()
+                    } catch (error: any) {
+                      toast.dismiss()
+                      toast.error('Failed to block time slot', { description: error.message })
                     }
-                  )
+                  })()
                 }}
               >
                 <Timer className="h-4 w-4 mr-2" />

@@ -836,41 +836,65 @@ export default function SocialMediaClient() {
     setIsInviteDialogOpen(true)
   }
 
-  const handleSendInvite = () => {
+  const handleSendInvite = async () => {
     if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
       toast.error('Please enter a valid email address')
       return
     }
-    const sendOperation = async () => {
-      // Simulate sending invitation
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      return `Invitation sent to ${inviteEmail} as ${inviteRole}!`
+    try {
+      toast.loading('Sending invitation...')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('team_invitations').insert({
+        invited_by: user.id,
+        email: inviteEmail,
+        role: inviteRole,
+        status: 'pending',
+        feature: 'social_media'
+      })
+
+      if (error) throw error
+
+      toast.dismiss()
+      toast.success(`Invitation sent to ${inviteEmail} as ${inviteRole}!`)
+      setIsInviteDialogOpen(false)
+      setInviteEmail('')
+    } catch (error: any) {
+      toast.dismiss()
+      toast.error('Failed to send invitation', { description: error.message })
     }
-    toast.promise(sendOperation(), {
-      loading: 'Sending invitation...',
-      success: (msg) => {
-        setIsInviteDialogOpen(false)
-        setInviteEmail('')
-        return msg
-      },
-      error: 'Failed to send invitation'
-    })
   }
 
   const handleBrowseIntegrations = () => {
     setIsIntegrationsDialogOpen(true)
   }
 
-  const handleConnectIntegration = (integrationName: string) => {
-    const connectOperation = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      return `${integrationName} connected successfully!`
+  const handleConnectIntegration = async (integrationName: string) => {
+    try {
+      toast.loading(`Connecting ${integrationName}...`)
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('social_integrations').upsert({
+        user_id: user.id,
+        platform: integrationName.toLowerCase(),
+        is_connected: true,
+        connected_at: new Date().toISOString()
+      }, { onConflict: 'user_id,platform' })
+
+      if (error) throw error
+
+      toast.dismiss()
+      toast.success(`${integrationName} connected successfully!`)
+    } catch (error: any) {
+      toast.dismiss()
+      toast.error(`Failed to connect ${integrationName}`, { description: error.message })
     }
-    toast.promise(connectOperation(), {
-      loading: `Connecting ${integrationName}...`,
-      success: (msg) => msg,
-      error: `Failed to connect ${integrationName}`
-    })
   }
 
   const handleRegenerateKey = () => {

@@ -2153,16 +2153,35 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               </Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
-                onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 600)),
-                    {
-                      loading: 'Applying template...',
-                      success: `Template Applied! "${selectedTemplate?.name}" has been created`,
-                      error: 'Failed to apply template'
-                    }
-                  )
-                  setShowTemplateDialog(false)
+                onClick={async () => {
+                  if (!selectedTemplate) return
+                  try {
+                    toast.loading('Applying template...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    const { error } = await supabase.from('automations').insert({
+                      user_id: user.id,
+                      name: selectedTemplate.name,
+                      description: selectedTemplate.description,
+                      trigger_type: selectedTemplate.trigger || 'manual',
+                      action_type: selectedTemplate.category,
+                      is_active: true,
+                      config: { template_id: selectedTemplate.id },
+                      created_from_template: true
+                    })
+
+                    if (error) throw error
+                    toast.dismiss()
+                    toast.success(`Template Applied! "${selectedTemplate.name}" has been created`)
+                    setShowTemplateDialog(false)
+                    refetch()
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to apply template', { description: error.message })
+                  }
                 }}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
@@ -2215,16 +2234,34 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               </Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
-                onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 600)),
-                    {
-                      loading: 'Connecting integration...',
-                      success: `Integration Connected! ${selectedIntegration?.name} is now ready to use`,
-                      error: 'Failed to connect integration'
-                    }
-                  )
-                  setShowIntegrationDialog(false)
+                onClick={async () => {
+                  if (!selectedIntegration) return
+                  try {
+                    toast.loading('Connecting integration...')
+                    const { createClient } = await import('@/lib/supabase/client')
+                    const supabase = createClient()
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (!user) throw new Error('Not authenticated')
+
+                    const { error } = await supabase.from('integrations').upsert({
+                      user_id: user.id,
+                      name: selectedIntegration.name,
+                      type: selectedIntegration.authType,
+                      is_connected: true,
+                      triggers: selectedIntegration.triggers,
+                      actions: selectedIntegration.actions,
+                      connected_at: new Date().toISOString()
+                    }, { onConflict: 'user_id,name' })
+
+                    if (error) throw error
+                    toast.dismiss()
+                    toast.success(`Integration Connected! ${selectedIntegration.name} is now ready to use`)
+                    setShowIntegrationDialog(false)
+                    refetch()
+                  } catch (error: any) {
+                    toast.dismiss()
+                    toast.error('Failed to connect integration', { description: error.message })
+                  }
                 }}
               >
                 <Puzzle className="h-4 w-4 mr-2" />

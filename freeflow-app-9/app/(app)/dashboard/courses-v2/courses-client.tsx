@@ -1493,7 +1493,22 @@ export default function CoursesClient() {
                               handlePublishCourse(course)
                             } else {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 600)),
+                                (async () => {
+                                  const { createClient } = await import('@/lib/supabase/client')
+                                  const supabase = createClient()
+                                  const { data: { user } } = await supabase.auth.getUser()
+                                  if (!user) throw new Error('Not authenticated')
+
+                                  // Log preview activity
+                                  await supabase.from('course_previews').insert({
+                                    user_id: user.id,
+                                    course_id: course.id,
+                                    previewed_at: new Date().toISOString()
+                                  })
+
+                                  // Open course preview URL
+                                  window.open(`/courses/${course.id}/preview`, '_blank')
+                                })(),
                                 {
                                   loading: 'Opening preview...',
                                   success: `Previewing "${course.title}"`,
