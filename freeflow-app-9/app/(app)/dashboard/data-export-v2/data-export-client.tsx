@@ -31,8 +31,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+import { useDataExports } from '@/lib/hooks/use-data-exports'
 
 // AWS DataPipeline/Fivetran level interfaces
 interface DataSource {
@@ -194,9 +194,10 @@ export default function DataExportClient() {
   const [showArchiveManager, setShowArchiveManager] = useState(false)
   const [pipelineFilter, setPipelineFilter] = useState<string>('all')
 
-  // Supabase state
-  const [dataExports, setDataExports] = useState<DataExport[]>([])
-  const [loading, setLoading] = useState(false)
+  // MIGRATED: Batch #13 - Removed mock data, using database hooks
+  // Fetch data exports from database via hook
+  const { data: dataExports = [], isLoading: loading, error: exportsError, refetch: fetchDataExports } = useDataExports()
+
   const [formData, setFormData] = useState({
     export_name: '',
     description: '',
@@ -205,30 +206,11 @@ export default function DataExportClient() {
     data_source: 'users' as const,
   })
 
-  // Fetch data exports from Supabase
-  const fetchDataExports = useCallback(async () => {
-    setLoading(true)
-    try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('data_exports')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDataExports(data || [])
-    } catch (error: any) {
-      toast.error('Failed to load exports')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    fetchDataExports()
-  }, [fetchDataExports])
+    if (exportsError) {
+      toast.error('Failed to load exports')
+    }
+  }, [exportsError])
 
   const getSourceStatusColor = (status: DataSource['status']) => {
     switch (status) {

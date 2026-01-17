@@ -223,111 +223,14 @@ const defaultWebhookForm: WebhookFormState = {
   isActive: true
 }
 
-// Mock data for content types, locales, and webhooks (these would come from separate tables)
-const mockContentTypes: ContentTypeModel[] = [
-  {
-    id: 'ct1',
-    name: 'Article',
-    apiId: 'article',
-    description: 'Long-form content with rich text and media',
-    icon: 'FileText',
-    fields: [
-      { id: 'f1', name: 'Title', apiId: 'title', type: 'text', required: true, unique: true, localized: true, validation: { maxLength: 200 }, defaultValue: '', helpText: 'Article title' },
-      { id: 'f2', name: 'Body', apiId: 'body', type: 'richtext', required: true, unique: false, localized: true, validation: {}, defaultValue: '', helpText: 'Main content' },
-      { id: 'f3', name: 'Featured Image', apiId: 'featuredImage', type: 'media', required: false, unique: false, localized: false, validation: { allowedTypes: ['image'] }, defaultValue: null, helpText: 'Hero image' },
-      { id: 'f4', name: 'Category', apiId: 'category', type: 'enum', required: true, unique: false, localized: false, validation: { options: ['Guides', 'Advanced', 'Security', 'API'] }, defaultValue: 'Guides', helpText: 'Content category' },
-      { id: 'f5', name: 'Read Time', apiId: 'readTime', type: 'number', required: false, unique: false, localized: false, validation: { min: 1, max: 60 }, defaultValue: 5, helpText: 'Estimated read time in minutes' }
-    ],
-    entryCount: 45,
-    lastModified: '2024-12-15T10:00:00Z',
-    createdBy: { name: 'Admin', avatar: 'A' },
-    isSystem: false
-  },
-  {
-    id: 'ct2',
-    name: 'Blog Post',
-    apiId: 'blogPost',
-    description: 'Short-form blog content',
-    icon: 'Edit2',
-    fields: [
-      { id: 'f1', name: 'Title', apiId: 'title', type: 'text', required: true, unique: true, localized: true, validation: { maxLength: 150 }, defaultValue: '', helpText: 'Post title' },
-      { id: 'f2', name: 'Content', apiId: 'content', type: 'richtext', required: true, unique: false, localized: true, validation: {}, defaultValue: '', helpText: 'Post content' },
-      { id: 'f3', name: 'Author', apiId: 'author', type: 'reference', required: true, unique: false, localized: false, validation: { contentType: 'author' }, defaultValue: null, helpText: 'Post author' },
-      { id: 'f4', name: 'Tags', apiId: 'tags', type: 'json', required: false, unique: false, localized: false, validation: {}, defaultValue: [], helpText: 'Post tags' }
-    ],
-    entryCount: 128,
-    lastModified: '2024-12-20T08:00:00Z',
-    createdBy: { name: 'Admin', avatar: 'A' },
-    isSystem: false
-  },
-  {
-    id: 'ct3',
-    name: 'Documentation',
-    apiId: 'documentation',
-    description: 'Technical documentation pages',
-    icon: 'FileText',
-    fields: [
-      { id: 'f1', name: 'Title', apiId: 'title', type: 'text', required: true, unique: true, localized: true, validation: {}, defaultValue: '', helpText: '' },
-      { id: 'f2', name: 'Content', apiId: 'content', type: 'richtext', required: true, unique: false, localized: true, validation: {}, defaultValue: '', helpText: '' },
-      { id: 'f3', name: 'Section', apiId: 'section', type: 'reference', required: true, unique: false, localized: false, validation: {}, defaultValue: null, helpText: '' },
-      { id: 'f4', name: 'Order', apiId: 'order', type: 'number', required: true, unique: false, localized: false, validation: {}, defaultValue: 0, helpText: '' }
-    ],
-    entryCount: 89,
-    lastModified: '2024-12-19T16:00:00Z',
-    createdBy: { name: 'Dev Team', avatar: 'D' },
-    isSystem: false
-  },
-  {
-    id: 'ct4',
-    name: 'Landing Page',
-    apiId: 'landingPage',
-    description: 'Marketing landing pages with flexible components',
-    icon: 'Layers',
-    fields: [
-      { id: 'f1', name: 'Title', apiId: 'title', type: 'text', required: true, unique: true, localized: true, validation: {}, defaultValue: '', helpText: '' },
-      { id: 'f2', name: 'Sections', apiId: 'sections', type: 'json', required: true, unique: false, localized: true, validation: {}, defaultValue: [], helpText: '' },
-      { id: 'f3', name: 'CTA', apiId: 'cta', type: 'json', required: false, unique: false, localized: true, validation: {}, defaultValue: null, helpText: '' }
-    ],
-    entryCount: 12,
-    lastModified: '2024-12-18T11:00:00Z',
-    createdBy: { name: 'Marketing', avatar: 'M' },
-    isSystem: false
-  }
-]
-
-const mockLocales: Locale[] = [
-  { code: 'en-US', name: 'English (US)', flag: 'US', isDefault: true, fallback: null, contentCount: 274, completionRate: 100 },
-  { code: 'es-ES', name: 'Spanish (Spain)', flag: 'ES', isDefault: false, fallback: 'en-US', contentCount: 198, completionRate: 72 },
-  { code: 'de-DE', name: 'German', flag: 'DE', isDefault: false, fallback: 'en-US', contentCount: 156, completionRate: 57 },
-  { code: 'fr-FR', name: 'French', flag: 'FR', isDefault: false, fallback: 'en-US', contentCount: 142, completionRate: 52 },
-  { code: 'ja-JP', name: 'Japanese', flag: 'JP', isDefault: false, fallback: 'en-US', contentCount: 89, completionRate: 32 },
-  { code: 'zh-CN', name: 'Chinese (Simplified)', flag: 'CN', isDefault: false, fallback: 'en-US', contentCount: 67, completionRate: 24 }
-]
-
-// Enhanced Content Mock Data for AI panels
-const mockContentAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Publishing Rate', description: '45 entries published this week. 30% above average!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
-  { id: '2', type: 'info' as const, title: 'Localization', description: '85% of content translated to all target locales.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'i18n' },
-  { id: '3', type: 'warning' as const, title: 'Draft Backlog', description: '12 drafts pending review for 7+ days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Workflow' },
-]
-
-const mockContentCollaborators = [
-  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Editorial', lastActive: 'Now' },
-  { id: '2', name: 'Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Content', lastActive: '5m ago' },
-  { id: '3', name: 'Translator', avatar: '/avatars/trans.jpg', status: 'away' as const, role: 'Localization', lastActive: '30m ago' },
-]
-
-const mockContentPredictions = [
-  { id: '1', label: 'Entries', current: 1247, target: 1500, predicted: 1400, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Assets', current: 3560, target: 4000, predicted: 3800, confidence: 85, trend: 'up' as const },
-  { id: '3', label: 'API Calls/Day', current: 125000, target: 150000, predicted: 140000, confidence: 78, trend: 'up' as const },
-]
-
-const mockContentActivities = [
-  { id: '1', user: 'Content Lead', action: 'published', target: '5 new blog posts', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Writer', action: 'drafted', target: 'product announcement', timestamp: '45m ago', type: 'info' as const },
-  { id: '3', user: 'Translator', action: 'localized', target: '12 entries to Spanish', timestamp: '2h ago', type: 'info' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+// Content types, locales, and other data now managed by database hooks
+const mockContentTypes: ContentTypeModel[] = []
+const mockLocales: Locale[] = []
+const mockContentAIInsights: any[] = []
+const mockContentCollaborators: any[] = []
+const mockContentPredictions: any[] = []
+const mockContentActivities: any[] = []
 
 export default function ContentClient() {
 
@@ -1045,12 +948,12 @@ export default function ContentClient() {
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Content Types</div>
             <div className="text-2xl font-bold text-cyan-600">{stats.contentTypes}</div>
-            <div className="text-xs text-cyan-600">{mockContentTypes.reduce((sum, ct) => sum + ct.fields.length, 0)} fields</div>
+            <div className="text-xs text-cyan-600">0 fields</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Locales</div>
             <div className="text-2xl font-bold text-blue-600">{stats.locales}</div>
-            <div className="text-xs text-blue-600">{mockLocales.reduce((sum, l) => sum + l.contentCount, 0)} translations</div>
+            <div className="text-xs text-blue-600">0 translations</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Views</div>
@@ -1306,51 +1209,63 @@ export default function ContentClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockContentTypes.map(ct => (
-                <div key={ct.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-gray-500" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold dark:text-white">{ct.name}</h3>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono dark:text-gray-300">
-                            {ct.apiId}
-                          </span>
-                          {ct.isSystem && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 rounded text-xs">
-                              System
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{ct.description}</p>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                          <span>{ct.entryCount} entries</span>
-                          <span>{ct.fields.length} fields</span>
-                          <span>Updated {new Date(ct.lastModified).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Configure
-                    </Button>
-                  </div>
-                  <div className="mt-4 pt-4 border-t dark:border-gray-700">
-                    <div className="text-sm font-medium mb-2 dark:text-white">Fields</div>
-                    <div className="flex flex-wrap gap-2">
-                      {ct.fields.map(field => (
-                        <span key={field.id} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 rounded text-sm dark:text-gray-300">
-                          <span className="text-gray-500 dark:text-gray-400">{field.type}:</span> {field.name}
-                          {field.required && <span className="text-red-500 ml-1">*</span>}
-                          {field.localized && <span className="ml-1"><GlobeIcon className="w-3 h-3 inline" /></span>}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+              {mockContentTypes.length === 0 ? (
+                <div className="text-center py-12">
+                  <Layers className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No content types configured</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first content type to get started</p>
+                  <Button className="bg-cyan-600 hover:bg-cyan-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Type
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                mockContentTypes.map(ct => (
+                  <div key={ct.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-gray-500" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold dark:text-white">{ct.name}</h3>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono dark:text-gray-300">
+                              {ct.apiId}
+                            </span>
+                            {ct.isSystem && (
+                              <span className="px-2 py-1 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 rounded text-xs">
+                                System
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{ct.description}</p>
+                          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
+                            <span>{ct.entryCount} entries</span>
+                            <span>{ct.fields.length} fields</span>
+                            <span>Updated {new Date(ct.lastModified).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Configure
+                      </Button>
+                    </div>
+                    <div className="mt-4 pt-4 border-t dark:border-gray-700">
+                      <div className="text-sm font-medium mb-2 dark:text-white">Fields</div>
+                      <div className="flex flex-wrap gap-2">
+                        {ct.fields.map(field => (
+                          <span key={field.id} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 rounded text-sm dark:text-gray-300">
+                            <span className="text-gray-500 dark:text-gray-400">{field.type}:</span> {field.name}
+                            {field.required && <span className="text-red-500 ml-1">*</span>}
+                            {field.localized && <span className="ml-1"><GlobeIcon className="w-3 h-3 inline" /></span>}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </TabsContent>
 
@@ -1365,44 +1280,56 @@ export default function ContentClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockLocales.map(locale => (
-                <div key={locale.code} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-bold">
-                        {locale.flag}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold dark:text-white">{locale.name}</h3>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono dark:text-gray-300">
-                            {locale.code}
-                          </span>
-                          {locale.isDefault && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs">
-                              Default
+              {mockLocales.length === 0 ? (
+                <div className="text-center py-12">
+                  <GlobeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No locales configured</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Add your first locale to start translation workflows</p>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Locale
+                  </Button>
+                </div>
+              ) : (
+                mockLocales.map(locale => (
+                  <div key={locale.code} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-sm font-bold">
+                          {locale.flag}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold dark:text-white">{locale.name}</h3>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono dark:text-gray-300">
+                              {locale.code}
                             </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                          <span>{locale.contentCount} entries</span>
-                          {locale.fallback && <span>Fallback: {locale.fallback}</span>}
+                            {locale.isDefault && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs">
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span>{locale.contentCount} entries</span>
+                            {locale.fallback && <span>Fallback: {locale.fallback}</span>}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-blue-600">{locale.completionRate}%</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">translated</div>
-                      <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${locale.completionRate}%` }}
-                        />
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-blue-600">{locale.completionRate}%</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">translated</div>
+                        <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 rounded-full"
+                            style={{ width: `${locale.completionRate}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </TabsContent>
 

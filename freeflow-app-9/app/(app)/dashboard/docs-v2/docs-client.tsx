@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useDocs } from '@/lib/hooks/use-docs-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -169,288 +170,43 @@ interface DocSpace {
 }
 
 // Mock Data
-const mockAuthors: Author[] = [
-  { id: '1', name: 'Alex Chen', avatar: '/avatars/alex.jpg', role: 'Technical Writer' },
-  { id: '2', name: 'Sarah Kim', avatar: '/avatars/sarah.jpg', role: 'Developer Advocate' },
-  { id: '3', name: 'Mike Ross', avatar: '/avatars/mike.jpg', role: 'API Engineer' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockAuthors: Author[] = []
 
-const mockSpaces: DocSpace[] = [
-  { id: '1', name: 'Getting Started', description: 'Quick start guides and tutorials', icon: 'Zap', docsCount: 12, lastUpdated: '2024-03-20' },
-  { id: '2', name: 'API Reference', description: 'Complete API documentation', icon: 'Code', docsCount: 45, lastUpdated: '2024-03-19' },
-  { id: '3', name: 'SDKs & Libraries', description: 'Official SDKs and client libraries', icon: 'Package', docsCount: 18, lastUpdated: '2024-03-18' },
-  { id: '4', name: 'Tutorials', description: 'Step-by-step tutorials', icon: 'Book', docsCount: 24, lastUpdated: '2024-03-17' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockSpaces: DocSpace[] = []
 
-const mockDocs: Doc[] = [
-  {
-    id: '1',
-    title: 'Quick Start Guide',
-    slug: 'quick-start',
-    description: 'Get up and running with our platform in under 5 minutes',
-    category: 'guides',
-    status: 'published',
-    content: '# Quick Start\n\nWelcome to our platform...',
-    sections: [
-      { id: '1', title: 'Installation', slug: 'installation', order: 1 },
-      { id: '2', title: 'Configuration', slug: 'configuration', order: 2 },
-      { id: '3', title: 'First API Call', slug: 'first-api-call', order: 3 }
-    ],
-    author: mockAuthors[0],
-    contributors: [mockAuthors[1]],
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-20',
-    publishedAt: '2024-01-20',
-    version: '2.1.0',
-    versions: [
-      { version: '2.1.0', date: '2024-03-20', isLatest: true, isCurrent: true },
-      { version: '2.0.0', date: '2024-02-15', isLatest: false, isCurrent: false },
-      { version: '1.0.0', date: '2024-01-20', isLatest: false, isCurrent: false }
-    ],
-    codeExamples: [
-      { language: 'bash', code: 'npm install @company/sdk', title: 'Installation' },
-      { language: 'javascript', code: 'import { Client } from "@company/sdk";\n\nconst client = new Client({ apiKey: "YOUR_KEY" });', title: 'Initialize' }
-    ],
-    readTime: 5,
-    views: 45230,
-    feedback: { helpful: 892, notHelpful: 23, comments: [] },
-    tags: ['getting-started', 'quickstart', 'installation'],
-    relatedDocs: ['2', '3'],
-    isBookmarked: false,
-    isFeatured: true
-  },
-  {
-    id: '2',
-    title: 'Authentication',
-    slug: 'authentication',
-    description: 'Learn how to authenticate API requests using API keys and OAuth',
-    category: 'api',
-    status: 'published',
-    content: '# Authentication\n\nSecure your API calls...',
-    sections: [
-      { id: '1', title: 'API Keys', slug: 'api-keys', order: 1 },
-      { id: '2', title: 'OAuth 2.0', slug: 'oauth', order: 2 },
-      { id: '3', title: 'JWT Tokens', slug: 'jwt', order: 3 }
-    ],
-    author: mockAuthors[2],
-    contributors: [mockAuthors[0], mockAuthors[1]],
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-18',
-    publishedAt: '2024-02-05',
-    version: '1.5.0',
-    versions: [
-      { version: '1.5.0', date: '2024-03-18', isLatest: true, isCurrent: true }
-    ],
-    codeExamples: [
-      { language: 'javascript', code: 'const headers = {\n  "Authorization": "Bearer YOUR_TOKEN"\n};', title: 'Bearer Token' }
-    ],
-    apiEndpoint: {
-      method: 'POST',
-      path: '/auth/token',
-      description: 'Generate an access token',
-      parameters: [
-        { name: 'grant_type', type: 'string', required: true, description: 'OAuth grant type' },
-        { name: 'client_id', type: 'string', required: true, description: 'Your client ID' }
-      ],
-      responseExample: '{\n  "access_token": "eyJ...",\n  "expires_in": 3600\n}'
-    },
-    readTime: 8,
-    views: 38450,
-    feedback: { helpful: 756, notHelpful: 12, comments: [] },
-    tags: ['auth', 'security', 'api-keys', 'oauth'],
-    relatedDocs: ['1', '3'],
-    isBookmarked: true,
-    isFeatured: true
-  },
-  {
-    id: '3',
-    title: 'JavaScript SDK',
-    slug: 'javascript-sdk',
-    description: 'Complete reference for the official JavaScript/TypeScript SDK',
-    category: 'sdk',
-    status: 'published',
-    content: '# JavaScript SDK\n\nThe official SDK...',
-    sections: [
-      { id: '1', title: 'Installation', slug: 'installation', order: 1 },
-      { id: '2', title: 'Client Setup', slug: 'client-setup', order: 2 },
-      { id: '3', title: 'Methods', slug: 'methods', order: 3 },
-      { id: '4', title: 'Error Handling', slug: 'errors', order: 4 }
-    ],
-    author: mockAuthors[1],
-    contributors: [mockAuthors[2]],
-    createdAt: '2024-01-20',
-    updatedAt: '2024-03-15',
-    publishedAt: '2024-01-25',
-    version: '3.2.1',
-    versions: [
-      { version: '3.2.1', date: '2024-03-15', isLatest: true, isCurrent: true },
-      { version: '3.2.0', date: '2024-03-01', isLatest: false, isCurrent: false }
-    ],
-    codeExamples: [
-      { language: 'typescript', code: 'import { Client, User } from "@company/sdk";\n\nasync function getUser(id: string): Promise<User> {\n  const client = new Client();\n  return await client.users.get(id);\n}', title: 'Get User' }
-    ],
-    readTime: 15,
-    views: 28900,
-    feedback: { helpful: 542, notHelpful: 18, comments: [] },
-    tags: ['javascript', 'typescript', 'sdk', 'npm'],
-    relatedDocs: ['1', '4'],
-    isBookmarked: false,
-    isFeatured: false
-  },
-  {
-    id: '4',
-    title: 'Webhooks Guide',
-    slug: 'webhooks',
-    description: 'Configure and handle webhook events for real-time updates',
-    category: 'guides',
-    status: 'published',
-    content: '# Webhooks\n\nReceive real-time notifications...',
-    sections: [
-      { id: '1', title: 'Setup', slug: 'setup', order: 1 },
-      { id: '2', title: 'Event Types', slug: 'events', order: 2 },
-      { id: '3', title: 'Verification', slug: 'verification', order: 3 }
-    ],
-    author: mockAuthors[2],
-    contributors: [],
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-10',
-    publishedAt: '2024-02-20',
-    version: '1.2.0',
-    versions: [
-      { version: '1.2.0', date: '2024-03-10', isLatest: true, isCurrent: true }
-    ],
-    codeExamples: [
-      { language: 'javascript', code: 'app.post("/webhook", (req, res) => {\n  const event = req.body;\n  // Handle event\n  res.sendStatus(200);\n});', title: 'Express Handler' }
-    ],
-    readTime: 10,
-    views: 15670,
-    feedback: { helpful: 328, notHelpful: 8, comments: [] },
-    tags: ['webhooks', 'events', 'real-time'],
-    relatedDocs: ['2'],
-    isBookmarked: false,
-    isFeatured: false
-  },
-  {
-    id: '5',
-    title: 'REST API Reference',
-    slug: 'api-reference',
-    description: 'Complete REST API documentation with all endpoints',
-    category: 'reference',
-    status: 'published',
-    content: '# API Reference\n\nFull API documentation...',
-    sections: [
-      { id: '1', title: 'Users', slug: 'users', order: 1, children: [
-        { id: '1a', title: 'List Users', slug: 'list-users', order: 1 },
-        { id: '1b', title: 'Get User', slug: 'get-user', order: 2 },
-        { id: '1c', title: 'Create User', slug: 'create-user', order: 3 }
-      ]},
-      { id: '2', title: 'Projects', slug: 'projects', order: 2 },
-      { id: '3', title: 'Teams', slug: 'teams', order: 3 }
-    ],
-    author: mockAuthors[2],
-    contributors: [mockAuthors[0], mockAuthors[1]],
-    createdAt: '2024-01-01',
-    updatedAt: '2024-03-20',
-    publishedAt: '2024-01-05',
-    version: '4.0.0',
-    versions: [
-      { version: '4.0.0', date: '2024-03-20', isLatest: true, isCurrent: true }
-    ],
-    codeExamples: [],
-    apiEndpoint: {
-      method: 'GET',
-      path: '/users',
-      description: 'List all users',
-      parameters: [
-        { name: 'page', type: 'integer', required: false, description: 'Page number' },
-        { name: 'limit', type: 'integer', required: false, description: 'Items per page' }
-      ]
-    },
-    readTime: 30,
-    views: 52340,
-    feedback: { helpful: 1024, notHelpful: 45, comments: [] },
-    tags: ['api', 'rest', 'reference', 'endpoints'],
-    relatedDocs: ['2', '3'],
-    isBookmarked: true,
-    isFeatured: true
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocs: Doc[] = []
 
 const languages = ['All', 'JavaScript', 'Python', 'Ruby', 'Go', 'cURL']
 
-// Mock data for AI-powered competitive upgrade components
-const mockDocsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Popular Content', description: 'Quick Start guide has 10K views this month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'warning' as const, title: 'Broken Links', description: '5 external links returning 404 errors.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '3', type: 'info' as const, title: 'Search Insights', description: '"webhooks" is trending - consider expanding coverage.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Search' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocsAIInsights = []
 
-const mockDocsCollaborators = [
-  { id: '1', name: 'Docs Lead', avatar: '/avatars/docs.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'API Writer', avatar: '/avatars/api-writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '3', name: 'Developer Advocate', avatar: '/avatars/devrel.jpg', status: 'away' as const, role: 'DevRel' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocsCollaborators = []
 
-const mockDocsPredictions = [
-  { id: '1', title: 'Traffic Growth', prediction: 'Docs traffic will double after v3 API launch', confidence: 86, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Content Needs', prediction: 'SDK pages need 30% more examples based on feedback', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocsPredictions = []
 
-const mockDocsActivities = [
-  { id: '1', user: 'API Writer', action: 'Published', target: 'v3 API migration guide', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Docs Lead', action: 'Reviewed', target: 'SDK documentation updates', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Developer Advocate', action: 'Added', target: 'video tutorial embed', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocsActivities = []
 
-const mockDocsQuickActions = [
-  { id: '1', label: 'New Doc', icon: 'plus', action: async () => {
-    toast.loading('Creating document...')
-    try {
-      const response = await fetch('/api/docs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Untitled Document', content: '', status: 'draft' })
-      })
-      toast.dismiss()
-      if (response.ok) {
-        toast.success('Document created! Start writing')
-      } else {
-        toast.error('Failed to create document')
-      }
-    } catch {
-      toast.dismiss()
-      toast.error('Failed to create document')
-    }
-  }, variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => {
-    // Open preview in new window
-    const previewUrl = `${window.location.origin}/docs/preview`
-    window.open(previewUrl, '_blank', 'noopener,noreferrer')
-    toast.success('Preview opened in new tab')
-  }, variant: 'default' as const },
-  { id: '3', label: 'Publish', icon: 'send', action: async () => {
-    toast.loading('Publishing documentation...')
-    try {
-      const response = await fetch('/api/docs/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'published', publishedAt: new Date().toISOString() })
-      })
-      toast.dismiss()
-      if (response.ok) {
-        toast.success('Documentation published to production!')
-      } else {
-        toast.error('Publish failed')
-      }
-    } catch {
-      toast.dismiss()
-      toast.error('Publish failed')
-    }
-  }, variant: 'outline' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDocsQuickActions = []
 
 export default function DocsClient() {
-  const [docs] = useState<Doc[]>(mockDocs)
+  // MIGRATED: Batch #13 - Using database hooks instead of mock data
+  const { docs: dbDocs = [], isLoading } = useDocs({
+    project_id: undefined,
+    type: undefined,
+    status: 'published',
+    is_public: true,
+    limit: 100
+  })
+
+  const [docs] = useState<Doc[]>(dbDocs || mockDocs)
   const [spaces] = useState<DocSpace[]>(mockSpaces)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<DocCategory | 'all'>('all')

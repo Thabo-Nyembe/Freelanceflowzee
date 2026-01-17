@@ -54,7 +54,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+import { useDesktopApps } from '@/lib/hooks/use-desktop-apps'
 
 
 // Types
@@ -222,275 +223,42 @@ const initialProjectForm: ProjectFormState = {
   version: '1.0.0',
 }
 
-// Mock Data
-const mockBuilds: Build[] = [
-  {
-    id: '1',
-    version: '2.5.0',
-    buildNumber: 1250,
-    platform: 'macos',
-    architecture: 'universal',
-    channel: 'stable',
-    status: 'completed',
-    progress: 100,
-    startedAt: '2024-01-15T10:00:00Z',
-    completedAt: '2024-01-15T10:35:00Z',
-    duration: 2100,
-    size: 125000000,
-    downloadUrl: 'https://releases.example.com/v2.5.0/app-macos.dmg',
-    checksumSha256: 'a1b2c3d4e5f6...',
-    signedBy: 'Developer ID Application: Example Inc',
-    notarized: true,
-    releaseNotes: 'Major performance improvements and new features',
-    commits: 47,
-    triggeredBy: 'john.doe',
-    artifacts: [
-      { id: 'a1', name: 'App-2.5.0-universal.dmg', type: 'installer', platform: 'macos', size: 125000000, downloadUrl: '#', downloads: 15420 },
-      { id: 'a2', name: 'App-2.5.0-universal.zip', type: 'portable', platform: 'macos', size: 118000000, downloadUrl: '#', downloads: 3240 }
-    ],
-    logs: [
-      { timestamp: '2024-01-15T10:00:00Z', level: 'info', message: 'Build started', step: 'init' },
-      { timestamp: '2024-01-15T10:05:00Z', level: 'info', message: 'Dependencies installed', step: 'deps' },
-      { timestamp: '2024-01-15T10:20:00Z', level: 'info', message: 'Code compiled successfully', step: 'compile' },
-      { timestamp: '2024-01-15T10:30:00Z', level: 'info', message: 'Code signing completed', step: 'sign' },
-      { timestamp: '2024-01-15T10:35:00Z', level: 'info', message: 'Build completed successfully', step: 'done' }
-    ]
-  },
-  {
-    id: '2',
-    version: '2.5.0',
-    buildNumber: 1250,
-    platform: 'windows',
-    architecture: 'x64',
-    channel: 'stable',
-    status: 'completed',
-    progress: 100,
-    startedAt: '2024-01-15T10:00:00Z',
-    completedAt: '2024-01-15T10:28:00Z',
-    duration: 1680,
-    size: 98000000,
-    downloadUrl: 'https://releases.example.com/v2.5.0/app-win-x64.exe',
-    checksumSha256: 'f1e2d3c4b5a6...',
-    signedBy: 'Example Inc (EV Certificate)',
-    releaseNotes: 'Major performance improvements and new features',
-    commits: 47,
-    triggeredBy: 'john.doe',
-    artifacts: [
-      { id: 'a3', name: 'App-2.5.0-Setup.exe', type: 'installer', platform: 'windows', size: 98000000, downloadUrl: '#', downloads: 42150 },
-      { id: 'a4', name: 'App-2.5.0-Portable.exe', type: 'portable', platform: 'windows', size: 92000000, downloadUrl: '#', downloads: 8430 }
-    ],
-    logs: []
-  },
-  {
-    id: '3',
-    version: '2.6.0-beta.1',
-    buildNumber: 1260,
-    platform: 'linux',
-    architecture: 'x64',
-    channel: 'beta',
-    status: 'building',
-    progress: 65,
-    startedAt: '2024-01-15T14:00:00Z',
-    releaseNotes: 'New UI framework and experimental features',
-    commits: 23,
-    triggeredBy: 'ci-bot',
-    artifacts: [],
-    logs: [
-      { timestamp: '2024-01-15T14:00:00Z', level: 'info', message: 'Build started', step: 'init' },
-      { timestamp: '2024-01-15T14:02:00Z', level: 'info', message: 'Fetching dependencies...', step: 'deps' },
-      { timestamp: '2024-01-15T14:08:00Z', level: 'warn', message: 'Deprecated API usage detected', step: 'compile' }
-    ]
-  },
-  {
-    id: '4',
-    version: '2.6.0-nightly.45',
-    buildNumber: 1261,
-    platform: 'windows',
-    architecture: 'arm64',
-    channel: 'nightly',
-    status: 'failed',
-    progress: 42,
-    startedAt: '2024-01-15T02:00:00Z',
-    completedAt: '2024-01-15T02:15:00Z',
-    releaseNotes: 'Nightly build with latest changes',
-    commits: 5,
-    triggeredBy: 'scheduled',
-    artifacts: [],
-    logs: [
-      { timestamp: '2024-01-15T02:00:00Z', level: 'info', message: 'Build started', step: 'init' },
-      { timestamp: '2024-01-15T02:10:00Z', level: 'error', message: 'Compilation failed: undefined reference to symbol', step: 'compile' },
-      { timestamp: '2024-01-15T02:15:00Z', level: 'error', message: 'Build failed', step: 'done' }
-    ]
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockBuilds: Build[] = []
 
-const mockReleases: Release[] = [
-  {
-    id: 'r1',
-    version: '2.5.0',
-    channel: 'stable',
-    publishedAt: '2024-01-15T12:00:00Z',
-    releaseNotes: 'Major performance improvements and new features',
-    highlights: ['50% faster startup', 'New plugin system', 'Dark mode improvements', 'Memory usage reduced by 30%'],
-    platforms: [
-      { platform: 'windows', architecture: 'x64', downloadUrl: '#', size: 98000000, downloads: 42150, checksum: 'abc123' },
-      { platform: 'macos', architecture: 'universal', downloadUrl: '#', size: 125000000, downloads: 15420, checksum: 'def456' },
-      { platform: 'linux', architecture: 'x64', downloadUrl: '#', size: 85000000, downloads: 8230, checksum: 'ghi789' }
-    ],
-    totalDownloads: 65800,
-    isLatest: true,
-    isCritical: false
-  },
-  {
-    id: 'r2',
-    version: '2.4.2',
-    channel: 'stable',
-    publishedAt: '2024-01-08T12:00:00Z',
-    releaseNotes: 'Bug fixes and security updates',
-    highlights: ['Fixed memory leak', 'Security patch for CVE-2024-1234', 'Improved stability'],
-    platforms: [
-      { platform: 'windows', architecture: 'x64', downloadUrl: '#', size: 96000000, downloads: 125000, checksum: 'jkl012' },
-      { platform: 'macos', architecture: 'universal', downloadUrl: '#', size: 122000000, downloads: 48000, checksum: 'mno345' },
-      { platform: 'linux', architecture: 'x64', downloadUrl: '#', size: 83000000, downloads: 22000, checksum: 'pqr678' }
-    ],
-    totalDownloads: 195000,
-    isLatest: false,
-    isCritical: true,
-    minVersion: '2.3.0'
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockReleases: Release[] = []
 
-const mockCrashReports: CrashReport[] = [
-  {
-    id: 'c1',
-    version: '2.5.0',
-    platform: 'windows',
-    architecture: 'x64',
-    errorType: 'SIGSEGV',
-    errorMessage: 'Segmentation fault in render thread',
-    stackTrace: 'at RenderThread::ProcessFrame (render.cpp:1234)\nat MainLoop::Tick (main.cpp:567)',
-    occurrences: 234,
-    affectedUsers: 156,
-    firstSeen: '2024-01-15T13:00:00Z',
-    lastSeen: '2024-01-15T18:30:00Z',
-    status: 'investigating',
-    assignee: 'jane.smith'
-  },
-  {
-    id: 'c2',
-    version: '2.4.2',
-    platform: 'macos',
-    architecture: 'arm64',
-    errorType: 'EXC_BAD_ACCESS',
-    errorMessage: 'Invalid memory access in plugin loader',
-    stackTrace: 'at PluginLoader::LoadNative (plugin.mm:89)\nat PluginManager::Init (manager.cpp:234)',
-    occurrences: 89,
-    affectedUsers: 67,
-    firstSeen: '2024-01-10T09:00:00Z',
-    lastSeen: '2024-01-14T22:00:00Z',
-    status: 'fixing',
-    assignee: 'mike.dev',
-    linkedIssue: 'GH-4521'
-  },
-  {
-    id: 'c3',
-    version: '2.5.0',
-    platform: 'linux',
-    architecture: 'x64',
-    errorType: 'SIGABRT',
-    errorMessage: 'Assertion failed in database module',
-    stackTrace: 'at Database::Query (db.cpp:456)\nat DataManager::Fetch (data.cpp:123)',
-    occurrences: 12,
-    affectedUsers: 8,
-    firstSeen: '2024-01-15T16:00:00Z',
-    lastSeen: '2024-01-15T17:00:00Z',
-    status: 'new'
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockCrashReports: CrashReport[] = []
 
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockAnalytics: Analytics = {
-  dailyActiveUsers: 28450,
-  monthlyActiveUsers: 156000,
-  totalInstalls: 842000,
-  updateAdoptionRate: 78.5,
-  averageSessionDuration: 45.2,
-  crashFreeRate: 99.2,
-  platformDistribution: [
-    { platform: 'windows', users: 98500, percentage: 63.2 },
-    { platform: 'macos', users: 42000, percentage: 26.9 },
-    { platform: 'linux', users: 15500, percentage: 9.9 }
-  ],
-  versionDistribution: [
-    { version: '2.5.0', users: 122500, percentage: 78.5 },
-    { version: '2.4.2', users: 28000, percentage: 17.9 },
-    { version: '2.4.1', users: 3500, percentage: 2.2 },
-    { version: 'Other', users: 2000, percentage: 1.4 }
-  ],
-  countryDistribution: [
-    { country: 'United States', users: 48500, percentage: 31.1 },
-    { country: 'Germany', users: 18200, percentage: 11.7 },
-    { country: 'United Kingdom', users: 15600, percentage: 10.0 },
-    { country: 'France', users: 12400, percentage: 7.9 },
-    { country: 'Other', users: 61300, percentage: 39.3 }
-  ]
+  dailyActiveUsers: 0,
+  monthlyActiveUsers: 0,
+  totalInstalls: 0,
+  updateAdoptionRate: 0,
+  averageSessionDuration: 0,
+  crashFreeRate: 0,
+  platformDistribution: [],
+  versionDistribution: [],
+  countryDistribution: []
 }
 
-const mockCertificates: Certificate[] = [
-  {
-    id: 'cert1',
-    name: 'Developer ID Application',
-    type: 'codesign',
-    platform: 'macos',
-    issuer: 'Apple Worldwide Developer Relations',
-    expiresAt: '2025-06-15T00:00:00Z',
-    status: 'valid',
-    fingerprint: 'A1:B2:C3:D4:E5:F6...'
-  },
-  {
-    id: 'cert2',
-    name: 'EV Code Signing Certificate',
-    type: 'codesign',
-    platform: 'windows',
-    issuer: 'DigiCert',
-    expiresAt: '2024-03-01T00:00:00Z',
-    status: 'expiring',
-    fingerprint: 'G7:H8:I9:J0:K1:L2...'
-  },
-  {
-    id: 'cert3',
-    name: 'App Store Connect API Key',
-    type: 'notarization',
-    platform: 'macos',
-    issuer: 'Apple Inc.',
-    expiresAt: '2024-12-31T00:00:00Z',
-    status: 'valid',
-    fingerprint: 'M3:N4:O5:P6:Q7:R8...'
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockCertificates: Certificate[] = []
 
-// Enhanced Competitive Upgrade Mock Data
-const mockDesktopAppAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Build Optimization', description: 'Latest builds 23% faster with new bundler. All platforms benefiting.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'Auto-Update Stats', description: '94% of users on latest version. Update adoption excellent.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-  { id: '3', type: 'warning' as const, title: 'macOS Notarization', description: 'Apple notarization times increasing. Consider pre-submission queue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Platform' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDesktopAppAIInsights = []
 
-const mockDesktopAppCollaborators = [
-  { id: '1', name: 'Build Engineer', avatar: '/avatars/build.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '2', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'busy' as const, role: 'QA' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDesktopAppCollaborators = []
 
-const mockDesktopAppPredictions = [
-  { id: '1', title: 'Next Release', prediction: 'v2.5.0 ready for stable release', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Download Growth', prediction: '+15% downloads projected next month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDesktopAppPredictions = []
 
-const mockDesktopAppActivities = [
-  { id: '1', user: 'Build System', action: 'Build completed', target: 'v2.4.8 Windows x64', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Auto-Updater', action: 'Update pushed', target: '45,000 users', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Release Bot', action: 'Published to', target: 'Beta Channel', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDesktopAppActivities = []
 
 export default function DesktopAppClient() {
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useDeployments } from '@/lib/hooks/use-deployments'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -201,66 +202,26 @@ interface BuildPlugin {
   installCount: number
 }
 
-// Mock Data
-const mockDeployments: Deployment[] = [
-  { id: '1', name: 'Production', status: 'success', environment: 'production', branch: 'main', commit: 'a3b2c1d', commitMessage: 'feat: Add new dashboard components', author: 'Sarah Chen', authorAvatar: 'sarah', createdAt: '2024-01-15T14:30:00Z', duration: 45, previewUrl: 'https://app-a3b2c1d.vercel.app', productionUrl: 'https://freeflow.app', buildCache: true, isProtected: true },
-  { id: '2', name: 'Preview', status: 'in_progress', environment: 'preview', branch: 'feature/new-ui', commit: 'b4c3d2e', commitMessage: 'wip: Update UI components', author: 'Mike Johnson', authorAvatar: 'mike', createdAt: '2024-01-15T15:00:00Z', duration: 0, previewUrl: 'https://app-b4c3d2e.vercel.app', prNumber: 234, prTitle: 'New UI Components', buildCache: true, isProtected: false },
-  { id: '3', name: 'Staging', status: 'success', environment: 'staging', branch: 'develop', commit: 'c5d4e3f', commitMessage: 'fix: Resolve API issues', author: 'Emily Davis', authorAvatar: 'emily', createdAt: '2024-01-15T12:00:00Z', duration: 38, previewUrl: 'https://staging.freeflow.app', buildCache: true, isProtected: true },
-  { id: '4', name: 'Preview', status: 'failed', environment: 'preview', branch: 'fix/auth-bug', commit: 'd6e5f4g', commitMessage: 'fix: Auth token refresh', author: 'Alex Kim', authorAvatar: 'alex', createdAt: '2024-01-15T10:00:00Z', duration: 23, previewUrl: '', prNumber: 235, prTitle: 'Fix Auth Bug', buildCache: false, isProtected: false },
-  { id: '5', name: 'Production', status: 'success', environment: 'production', branch: 'main', commit: 'e7f6g5h', commitMessage: 'chore: Update dependencies', author: 'Sarah Chen', authorAvatar: 'sarah', createdAt: '2024-01-14T18:00:00Z', duration: 52, previewUrl: 'https://app-e7f6g5h.vercel.app', productionUrl: 'https://freeflow.app', buildCache: true, isProtected: true },
-  { id: '6', name: 'Preview', status: 'queued', environment: 'preview', branch: 'feature/payments', commit: 'f8g7h6i', commitMessage: 'feat: Add Stripe integration', author: 'Jordan Lee', authorAvatar: 'jordan', createdAt: '2024-01-15T15:15:00Z', duration: 0, previewUrl: '', prNumber: 236, prTitle: 'Stripe Integration', buildCache: false, isProtected: false }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDeployments: Deployment[] = []
 
-const mockBuildLogs: BuildLog[] = [
-  { id: '1', timestamp: '10:23:01', level: 'info', message: 'Cloning repository...', step: 'clone' },
-  { id: '2', timestamp: '10:23:03', level: 'success', message: 'Repository cloned successfully', step: 'clone' },
-  { id: '3', timestamp: '10:23:04', level: 'info', message: 'Installing dependencies...', step: 'install' },
-  { id: '4', timestamp: '10:23:15', level: 'warn', message: 'npm WARN deprecated package@1.0.0', step: 'install' },
-  { id: '5', timestamp: '10:23:25', level: 'success', message: 'Dependencies installed (1,247 packages)', step: 'install' },
-  { id: '6', timestamp: '10:23:26', level: 'info', message: 'Building application...', step: 'build' },
-  { id: '7', timestamp: '10:23:30', level: 'info', message: 'Compiling TypeScript...', step: 'build' },
-  { id: '8', timestamp: '10:23:45', level: 'info', message: 'Generating static pages (0/24)...', step: 'build' },
-  { id: '9', timestamp: '10:23:50', level: 'success', message: 'Build completed in 24s', step: 'build' },
-  { id: '10', timestamp: '10:23:51', level: 'info', message: 'Uploading build artifacts...', step: 'deploy' },
-  { id: '11', timestamp: '10:23:55', level: 'info', message: 'Deploying to edge network (12 regions)...', step: 'deploy' },
-  { id: '12', timestamp: '10:24:00', level: 'success', message: 'Deployment ready!', step: 'deploy' }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockBuildLogs: BuildLog[] = []
 
-const mockDomains: DeploymentDomain[] = [
-  { id: '1', domain: 'freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-01' },
-  { id: '2', domain: 'www.freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-01', redirectTo: 'freeflow.app' },
-  { id: '3', domain: 'staging.freeflow.app', type: 'preview', verified: true, ssl: true, createdAt: '2024-01-05' },
-  { id: '4', domain: 'api.freeflow.app', type: 'production', verified: true, ssl: true, createdAt: '2024-01-10' }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockDomains: DeploymentDomain[] = []
 
-const mockEnvVars: EnvironmentVariable[] = [
-  { id: '1', key: 'DATABASE_URL', value: '••••••••••••', environment: 'all', encrypted: true, createdAt: '2024-01-01' },
-  { id: '2', key: 'NEXT_PUBLIC_API_URL', value: 'https://api.freeflow.app', environment: 'production', encrypted: false, createdAt: '2024-01-01' },
-  { id: '3', key: 'STRIPE_SECRET_KEY', value: '••••••••••••', environment: 'production', encrypted: true, createdAt: '2024-01-10' },
-  { id: '4', key: 'REDIS_URL', value: '••••••••••••', environment: 'all', encrypted: true, createdAt: '2024-01-15' },
-  { id: '5', key: 'SENTRY_DSN', value: 'https://xxx@sentry.io/123', environment: 'all', encrypted: false, createdAt: '2024-01-15' }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockEnvVars: EnvironmentVariable[] = []
 
-const mockFunctions: ServerlessFunction[] = [
-  { id: '1', name: '/api/auth/login', runtime: 'Node.js 20', region: 'iad1', invocations: 45230, avgDuration: 124, errors: 23, memory: 256 },
-  { id: '2', name: '/api/projects', runtime: 'Node.js 20', region: 'iad1', invocations: 28450, avgDuration: 89, errors: 5, memory: 256 },
-  { id: '3', name: '/api/webhooks/stripe', runtime: 'Node.js 20', region: 'iad1', invocations: 12340, avgDuration: 234, errors: 12, memory: 512 },
-  { id: '4', name: '/api/ai/generate', runtime: 'Node.js 20', region: 'sfo1', invocations: 8920, avgDuration: 2340, errors: 45, memory: 1024 },
-  { id: '5', name: '/api/upload', runtime: 'Node.js 20', region: 'iad1', invocations: 5670, avgDuration: 567, errors: 8, memory: 512 }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockFunctions: ServerlessFunction[] = []
 
-const mockEdgeConfigs: EdgeConfig[] = [
-  { id: '1', name: 'feature-flags', itemCount: 24, reads: 125000, writes: 45, createdAt: '2024-01-01' },
-  { id: '2', name: 'rate-limits', itemCount: 8, reads: 89000, writes: 12, createdAt: '2024-01-10' },
-  { id: '3', name: 'geo-config', itemCount: 15, reads: 45000, writes: 5, createdAt: '2024-01-15' }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockEdgeConfigs: EdgeConfig[] = []
 
-const mockBlobs: StorageBlob[] = [
-  { id: '1', name: 'uploads/avatar-001.png', size: 245000, contentType: 'image/png', uploadedAt: '2024-01-15T10:00:00Z', downloadCount: 156, isPublic: true },
-  { id: '2', name: 'uploads/document.pdf', size: 1245000, contentType: 'application/pdf', uploadedAt: '2024-01-14T14:00:00Z', downloadCount: 45, isPublic: false },
-  { id: '3', name: 'assets/logo.svg', size: 12000, contentType: 'image/svg+xml', uploadedAt: '2024-01-10T09:00:00Z', downloadCount: 890, isPublic: true },
-  { id: '4', name: 'backups/db-2024-01-15.sql', size: 52400000, contentType: 'application/sql', uploadedAt: '2024-01-15T06:00:00Z', downloadCount: 2, isPublic: false }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockBlobs: StorageBlob[] = []
 
 const mockProtections: DeploymentProtection[] = [
   { id: '1', name: 'Password Protection', type: 'password', enabled: true, config: { password: '••••••' } },
@@ -274,29 +235,14 @@ const mockWebhooks: DeploymentWebhook[] = [
   { id: '3', name: 'CI/CD Trigger', url: 'https://api.internal.io/webhooks/deploy', events: ['deployment.promoted', 'deployment.rolled_back'], status: 'failed', lastTriggered: '2024-01-14 15:30', successRate: 78.0, secret: 'whsec_zzzzzz' }
 ]
 
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'GitHub', type: 'ci_cd', status: 'connected', icon: 'github', lastSync: '2024-01-16 09:00', config: { repo: 'freeflow-app/freeflow', branch: 'main' } },
-  { id: '2', name: 'Datadog', type: 'monitoring', status: 'connected', icon: 'datadog', lastSync: '2024-01-16 08:45', config: { apiKey: '••••••' } },
-  { id: '3', name: 'Slack', type: 'notification', status: 'connected', icon: 'slack', lastSync: '2024-01-16 09:15', config: { channel: '#deployments' } },
-  { id: '4', name: 'LogDNA', type: 'logging', status: 'disconnected', icon: 'logdna', lastSync: '2024-01-10 12:00', config: {} },
-  { id: '5', name: 'Sentry', type: 'monitoring', status: 'connected', icon: 'sentry', lastSync: '2024-01-16 08:30', config: { org: 'freeflow', project: 'main' } },
-  { id: '6', name: 'Amplitude', type: 'analytics', status: 'connected', icon: 'amplitude', lastSync: '2024-01-16 08:00', config: { apiKey: '••••••' } }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockIntegrations: Integration[] = []
 
-const mockTeamMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@freeflow.app', role: 'owner', avatar: 'SC', lastActive: '2024-01-16 09:23', deploymentsThisMonth: 45 },
-  { id: '2', name: 'Mike Johnson', email: 'mike@freeflow.app', role: 'admin', avatar: 'MJ', lastActive: '2024-01-16 09:15', deploymentsThisMonth: 38 },
-  { id: '3', name: 'Emily Davis', email: 'emily@freeflow.app', role: 'developer', avatar: 'ED', lastActive: '2024-01-16 08:45', deploymentsThisMonth: 32 },
-  { id: '4', name: 'Alex Kim', email: 'alex@freeflow.app', role: 'developer', avatar: 'AK', lastActive: '2024-01-15 18:30', deploymentsThisMonth: 28 },
-  { id: '5', name: 'Jordan Lee', email: 'jordan@freeflow.app', role: 'viewer', avatar: 'JL', lastActive: '2024-01-15 14:00', deploymentsThisMonth: 0 }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockTeamMembers: TeamMember[] = []
 
-const mockBuildPlugins: BuildPlugin[] = [
-  { id: '1', name: 'Lighthouse Audit', version: '2.3.1', enabled: true, description: 'Run Lighthouse performance audits on each deployment', author: 'Vercel', installCount: 125000 },
-  { id: '2', name: 'Bundle Analyzer', version: '1.5.0', enabled: true, description: 'Analyze JavaScript bundle size', author: 'Vercel', installCount: 89000 },
-  { id: '3', name: 'Image Optimizer', version: '3.0.2', enabled: true, description: 'Automatically optimize images during build', author: 'Vercel', installCount: 156000 },
-  { id: '4', name: 'Cache Warmer', version: '1.2.0', enabled: false, description: 'Pre-populate CDN cache after deployment', author: 'Community', installCount: 34000 }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockBuildPlugins: BuildPlugin[] = []
 
 // Enhanced Competitive Upgrade Mock Data
 const mockDeploymentsAIInsights = [
@@ -569,7 +515,8 @@ export default function DeploymentsClient() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [showDeleteEnvVarDialog, setShowDeleteEnvVarDialog] = useState(false)
   const [selectedEnvVar, setSelectedEnvVar] = useState<EnvVar | null>(null)
-  const [realTimeLogs, setRealTimeLogs] = useState<BuildLog[]>(mockBuildLogs)
+  // MIGRATED: Batch #13 - Using empty array instead of mock data
+  const [realTimeLogs, setRealTimeLogs] = useState<BuildLog[]>([])
   const [logStreamInterval, setLogStreamInterval] = useState<NodeJS.Timeout | null>(null)
   const [selectedFunction, setSelectedFunction] = useState<ServerlessFunction | null>(null)
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
@@ -1013,30 +960,36 @@ export default function DeploymentsClient() {
   }
 
   const filteredDeployments = useMemo(() => {
-    return mockDeployments.filter(d => {
-      const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           d.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           d.commitMessage.toLowerCase().includes(searchQuery.toLowerCase())
+    // MIGRATED: Batch #13 - Using database deployments instead of mock data
+    return (dbDeployments || []).filter(d => {
+      const name = d.deployment_name || '';
+      const branch = d.branch || '';
+      const message = d.commit_message || '';
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           message.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesEnv = environmentFilter === 'all' || d.environment === environmentFilter
       return matchesSearch && matchesEnv
     })
-  }, [searchQuery, environmentFilter])
+  }, [dbDeployments, searchQuery, environmentFilter])
 
   const stats = useMemo(() => {
-    const total = mockDeployments.length
-    const successful = mockDeployments.filter(d => d.status === 'success').length
-    const avgDuration = mockDeployments.reduce((sum, d) => sum + d.duration, 0) / total
+    // MIGRATED: Batch #13 - Using database deployments instead of mock data
+    const deployments = dbDeployments || [];
+    const total = deployments.length
+    const successful = deployments.filter(d => d.status === 'success').length
+    const avgDuration = total > 0 ? deployments.reduce((sum, d) => sum + (d.duration_seconds || 0), 0) / total : 0
     return {
       total,
       successful,
       successRate: ((successful / total) * 100).toFixed(1),
       avgDuration: avgDuration.toFixed(0),
-      totalFunctions: mockFunctions.length,
-      totalInvocations: mockFunctions.reduce((sum, f) => sum + f.invocations, 0),
-      totalDomains: mockDomains.length,
-      totalStorage: mockBlobs.reduce((sum, b) => sum + b.size, 0)
+      totalFunctions: 0,
+      totalInvocations: 0,
+      totalDomains: 0,
+      totalStorage: 0
     }
-  }, [])
+  }, [dbDeployments])
 
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
@@ -1135,7 +1088,7 @@ export default function DeploymentsClient() {
 
   const groupedLogs = useMemo(() => {
     const groups: Record<string, BuildLog[]> = {}
-    mockBuildLogs.forEach(log => {
+    (realTimeLogs || []).forEach(log => {
       if (!groups[log.step]) groups[log.step] = []
       groups[log.step].push(log)
     })

@@ -1,6 +1,9 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+import { useComponentShowcases } from '@/lib/hooks/use-component-extended'
+import { useUIComponents } from '@/lib/hooks/use-ui-components'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -124,142 +127,8 @@ type ComponentCategory = 'layout' | 'navigation' | 'forms' | 'data-display' | 'f
 type ComponentStatus = 'stable' | 'beta' | 'experimental' | 'deprecated'
 
 // Mock data
-const mockComponents: ComponentDoc[] = [
-  {
-    id: 'btn-1', name: 'Button', displayName: 'Button',
-    description: 'A versatile button component with multiple variants, sizes, and states.',
-    category: 'buttons', subcategory: 'Actions', status: 'stable', version: '2.4.0',
-    author: { name: 'Design System Team', avatar: 'DS' },
-    props: [
-      { name: 'variant', type: "'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'", required: false, defaultValue: "'primary'", description: 'Visual style variant', control: 'select', options: ['primary', 'secondary', 'outline', 'ghost', 'destructive'] },
-      { name: 'size', type: "'sm' | 'md' | 'lg' | 'icon'", required: false, defaultValue: "'md'", description: 'Button size', control: 'select', options: ['sm', 'md', 'lg', 'icon'] },
-      { name: 'disabled', type: 'boolean', required: false, defaultValue: 'false', description: 'Disabled state', control: 'boolean' },
-      { name: 'loading', type: 'boolean', required: false, defaultValue: 'false', description: 'Loading spinner', control: 'boolean' },
-      { name: 'children', type: 'ReactNode', required: true, description: 'Button content', control: 'text' },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Primary', description: 'Default primary', props: { variant: 'primary', children: 'Primary' } },
-      { id: 'v-2', name: 'Secondary', description: 'Secondary style', props: { variant: 'secondary', children: 'Secondary' } },
-      { id: 'v-3', name: 'Outline', description: 'Outlined style', props: { variant: 'outline', children: 'Outline' } },
-      { id: 'v-4', name: 'Ghost', description: 'Minimal style', props: { variant: 'ghost', children: 'Ghost' } },
-      { id: 'v-5', name: 'Destructive', description: 'Danger style', props: { variant: 'destructive', children: 'Delete' } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Basic Usage', description: 'Simple button', code: '<Button variant="primary">Click me</Button>', language: 'tsx' },
-      { id: 'e-2', title: 'With Icons', description: 'Button with icon', code: '<Button leftIcon={<Plus />}>Add Item</Button>', language: 'tsx' },
-    ],
-    accessibility: { level: 'AAA', score: 98, features: ['Keyboard navigation', 'Screen reader support', 'Focus indicators'], issues: [] },
-    metrics: { downloads: 125000, usage: 89000, stars: 1240, issues: 3, bundleSize: '4.2 KB', gzippedSize: '1.8 KB' },
-    tags: ['button', 'action', 'interactive']
-  },
-  {
-    id: 'input-1', name: 'Input', displayName: 'Text Input',
-    description: 'A flexible text input component with validation and icons.',
-    category: 'inputs', subcategory: 'Form Controls', status: 'stable', version: '3.1.0',
-    author: { name: 'Form Team', avatar: 'FT' },
-    props: [
-      { name: 'type', type: "'text' | 'email' | 'password' | 'number'", required: false, defaultValue: "'text'", description: 'Input type', control: 'select', options: ['text', 'email', 'password', 'number'] },
-      { name: 'placeholder', type: 'string', required: false, description: 'Placeholder text', control: 'text' },
-      { name: 'disabled', type: 'boolean', required: false, defaultValue: 'false', description: 'Disabled state', control: 'boolean' },
-      { name: 'error', type: 'string', required: false, description: 'Error message', control: 'text' },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Default', description: 'Default input', props: { placeholder: 'Enter text...' } },
-      { id: 'v-2', name: 'With Error', description: 'Error state', props: { error: 'Required field' } },
-      { id: 'v-3', name: 'Disabled', description: 'Disabled state', props: { disabled: true, value: 'Cannot edit' } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Basic Usage', description: 'Simple text input', code: '<Input placeholder="Enter your name" />', language: 'tsx' },
-    ],
-    accessibility: { level: 'AA', score: 92, features: ['Label association', 'Error announcements'], issues: [{ severity: 'warning', message: 'Consider aria-describedby for errors', wcag: '1.3.1' }] },
-    metrics: { downloads: 98000, usage: 76000, stars: 890, issues: 5, bundleSize: '3.1 KB', gzippedSize: '1.4 KB' },
-    tags: ['input', 'form', 'text']
-  },
-  {
-    id: 'card-1', name: 'Card', displayName: 'Card',
-    description: 'A container component for grouping related content.',
-    category: 'layout', subcategory: 'Containers', status: 'stable', version: '2.0.0',
-    author: { name: 'Layout Team', avatar: 'LT' },
-    props: [
-      { name: 'variant', type: "'default' | 'outlined' | 'elevated'", required: false, defaultValue: "'default'", description: 'Card style', control: 'select', options: ['default', 'outlined', 'elevated'] },
-      { name: 'hoverable', type: 'boolean', required: false, defaultValue: 'false', description: 'Hover effects', control: 'boolean' },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Default', description: 'Basic card', props: { children: 'Card content' } },
-      { id: 'v-2', name: 'Elevated', description: 'With shadow', props: { variant: 'elevated' } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Basic Card', description: 'Simple card', code: '<Card><CardHeader>Title</CardHeader><CardContent>Content</CardContent></Card>', language: 'tsx' },
-    ],
-    accessibility: { level: 'AA', score: 95, features: ['Semantic HTML', 'Proper heading hierarchy'], issues: [] },
-    metrics: { downloads: 145000, usage: 112000, stars: 1560, issues: 2, bundleSize: '2.8 KB', gzippedSize: '1.2 KB' },
-    tags: ['card', 'container', 'layout']
-  },
-  {
-    id: 'modal-1', name: 'Modal', displayName: 'Modal Dialog',
-    description: 'An accessible modal dialog with customizable backdrop and focus management.',
-    category: 'overlays', subcategory: 'Dialogs', status: 'stable', version: '4.2.0',
-    author: { name: 'Overlay Team', avatar: 'OT' },
-    props: [
-      { name: 'open', type: 'boolean', required: true, description: 'Control visibility', control: 'boolean' },
-      { name: 'onClose', type: '() => void', required: true, description: 'Close handler', control: 'text' },
-      { name: 'size', type: "'sm' | 'md' | 'lg' | 'xl' | 'full'", required: false, defaultValue: "'md'", description: 'Modal size', control: 'select', options: ['sm', 'md', 'lg', 'xl', 'full'] },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Default', description: 'Standard modal', props: { open: true, size: 'md' } },
-      { id: 'v-2', name: 'Large', description: 'Large modal', props: { open: true, size: 'lg' } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Basic Modal', description: 'Simple modal', code: '<Modal open={isOpen} onClose={() => setIsOpen(false)}>Content</Modal>', language: 'tsx' },
-    ],
-    accessibility: { level: 'AAA', score: 100, features: ['Focus trap', 'Escape key', 'ARIA roles', 'Screen reader announcements'], issues: [] },
-    metrics: { downloads: 87000, usage: 65000, stars: 920, issues: 1, bundleSize: '6.5 KB', gzippedSize: '2.8 KB' },
-    tags: ['modal', 'dialog', 'overlay']
-  },
-  {
-    id: 'table-1', name: 'DataTable', displayName: 'Data Table',
-    description: 'A powerful data table with sorting, filtering, and pagination.',
-    category: 'data-display', subcategory: 'Tables', status: 'beta', version: '1.5.0-beta',
-    author: { name: 'Data Team', avatar: 'DT' },
-    props: [
-      { name: 'data', type: 'T[]', required: true, description: 'Table data', control: 'text' },
-      { name: 'columns', type: 'Column<T>[]', required: true, description: 'Column definitions', control: 'text' },
-      { name: 'sortable', type: 'boolean', required: false, defaultValue: 'true', description: 'Enable sorting', control: 'boolean' },
-      { name: 'pagination', type: 'boolean', required: false, defaultValue: 'true', description: 'Enable pagination', control: 'boolean' },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Basic', description: 'Simple table', props: { sortable: false, pagination: false } },
-      { id: 'v-2', name: 'Full Featured', description: 'All features', props: { sortable: true, pagination: true } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Basic Table', description: 'Simple data table', code: '<DataTable data={users} columns={columns} />', language: 'tsx' },
-    ],
-    accessibility: { level: 'AA', score: 88, features: ['Keyboard navigation', 'Screen reader support'], issues: [{ severity: 'info', message: 'Consider row announcements', wcag: '4.1.2' }] },
-    metrics: { downloads: 45000, usage: 32000, stars: 560, issues: 12, bundleSize: '18.2 KB', gzippedSize: '6.4 KB' },
-    tags: ['table', 'data', 'grid']
-  },
-  {
-    id: 'toast-1', name: 'Toast', displayName: 'Toast Notification',
-    description: 'A lightweight notification component for brief messages.',
-    category: 'feedback', subcategory: 'Notifications', status: 'experimental', version: '0.9.0',
-    author: { name: 'Feedback Team', avatar: 'FB' },
-    props: [
-      { name: 'type', type: "'success' | 'error' | 'warning' | 'info'", required: false, defaultValue: "'info'", description: 'Toast type', control: 'select', options: ['success', 'error', 'warning', 'info'] },
-      { name: 'message', type: 'string', required: true, description: 'Toast message', control: 'text' },
-      { name: 'duration', type: 'number', required: false, defaultValue: '5000', description: 'Auto-dismiss duration', control: 'number' },
-    ],
-    variants: [
-      { id: 'v-1', name: 'Success', description: 'Success toast', props: { type: 'success', message: 'Saved!' } },
-      { id: 'v-2', name: 'Error', description: 'Error toast', props: { type: 'error', message: 'Error occurred' } },
-    ],
-    examples: [
-      { id: 'e-1', title: 'Using Toast', description: 'Show notification', code: 'toast.success("Changes saved!")', language: 'tsx' },
-    ],
-    accessibility: { level: 'A', score: 75, features: ['ARIA live regions'], issues: [{ severity: 'warning', message: 'Ensure sufficient display time', wcag: '2.2.1' }] },
-    metrics: { downloads: 23000, usage: 18000, stars: 340, issues: 8, bundleSize: '3.8 KB', gzippedSize: '1.6 KB' },
-    tags: ['toast', 'notification', 'alert']
-  }
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockComponents: ComponentDoc[] = []
 
 const categories = [
   { id: 'buttons', name: 'Buttons', icon: Box, count: 8 },
@@ -382,6 +251,10 @@ export default function ComponentLibraryClient() {
   const [showPlaygroundDialog, setShowPlaygroundDialog] = useState(false)
   const [showDocsDialog, setShowDocsDialog] = useState(false)
 
+  // MIGRATED: Batch #13 - Database hooks for component data
+  const { components: dbComponents = [], stats: componentStats } = useUIComponents(mockComponents)
+  const { data: showcaseComponents = [] } = useComponentShowcases()
+
   // Quick actions with proper dialog handlers
   const mockComponentLibQuickActions = [
     { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => setShowNewComponentDialog(true) },
@@ -391,7 +264,8 @@ export default function ComponentLibraryClient() {
   ]
 
   const filteredComponents = useMemo(() => {
-    let filtered = [...mockComponents]
+    // MIGRATED: Batch #13 - Use database components with fallback to mock
+    let filtered = [...(dbComponents.length > 0 ? dbComponents : mockComponents)]
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(c => c.name.toLowerCase().includes(query) || c.description.toLowerCase().includes(query) || c.tags.some(t => t.includes(query)))
@@ -399,7 +273,7 @@ export default function ComponentLibraryClient() {
     if (selectedCategory !== 'all') filtered = filtered.filter(c => c.category === selectedCategory)
     if (statusFilter !== 'all') filtered = filtered.filter(c => c.status === statusFilter)
     return filtered
-  }, [searchQuery, selectedCategory, statusFilter])
+  }, [searchQuery, selectedCategory, statusFilter, dbComponents])
 
   const filteredTokens = useMemo(() => {
     return mockTokens.filter(t => tokenCategory === 'all' || t.category === tokenCategory)
@@ -448,7 +322,9 @@ export default function ComponentLibraryClient() {
   }
 
   const handlePreview = (componentName: string) => {
-    const component = mockComponents.find(c => c.name === componentName || c.displayName === componentName)
+    // MIGRATED: Batch #13 - Use database components with fallback
+    const componentSource = dbComponents.length > 0 ? dbComponents : mockComponents
+    const component = componentSource.find(c => c.name === componentName || c.displayName === componentName)
     if (component) {
       setSelectedComponent(component)
       toast.success(`Previewing ${componentName}`)
@@ -458,10 +334,12 @@ export default function ComponentLibraryClient() {
   }
 
   const handleExport = (format: string = 'component') => {
+    // MIGRATED: Batch #13 - Use database components with fallback
+    const componentSource = dbComponents.length > 0 ? dbComponents : mockComponents
     const exportData = {
       exportedAt: new Date().toISOString(),
       format,
-      components: mockComponents,
+      components: componentSource,
       tokens: mockTokens,
       version: '2.5.0'
     }
@@ -629,8 +507,9 @@ export default function ComponentLibraryClient() {
   }
 
   // Key metrics for header
+  // MIGRATED: Batch #13 - Use database components count with fallback
   const keyMetrics = [
-    { label: 'Components', value: mockComponents.length * 12, icon: Puzzle, gradient: 'from-violet-500 to-purple-500' },
+    { label: 'Components', value: (dbComponents.length > 0 ? dbComponents.length : mockComponents.length) * 12, icon: Puzzle, gradient: 'from-violet-500 to-purple-500' },
     { label: 'Categories', value: categories.length, icon: LayoutGrid, gradient: 'from-purple-500 to-fuchsia-500' },
     { label: 'Design Tokens', value: mockTokens.length, icon: Paintbrush, gradient: 'from-fuchsia-500 to-pink-500' },
     { label: 'Icons', value: mockIcons.length * 20, icon: Sparkles, gradient: 'from-pink-500 to-rose-500' },
@@ -2160,7 +2039,8 @@ export default function App() {
               </div>
               <ScrollArea className="h-[400px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                  {mockComponents.map(comp => (
+                  {/* MIGRATED: Batch #13 - Use database components */}
+                  {(dbComponents.length > 0 ? dbComponents : mockComponents).map(comp => (
                     <div
                       key={comp.id}
                       className="p-4 border rounded-lg hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer transition-all"
@@ -2205,7 +2085,8 @@ export default function App() {
                         <SelectValue placeholder="Choose a component" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mockComponents.map(comp => (
+                        {/* MIGRATED: Batch #13 - Use database components */}
+                        {(dbComponents.length > 0 ? dbComponents : mockComponents).map(comp => (
                           <SelectItem key={comp.id} value={comp.id}>{comp.displayName}</SelectItem>
                         ))}
                       </SelectContent>
@@ -2308,8 +2189,9 @@ export default function App() {
                 <TabsContent value="api" className="mt-4">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
-                      <p className="text-gray-600">Full API reference for all {mockComponents.length * 12} components.</p>
-                      {mockComponents.slice(0, 3).map(comp => (
+                      {/* MIGRATED: Batch #13 - Use database components */}
+                      <p className="text-gray-600">Full API reference for all {(dbComponents.length > 0 ? dbComponents.length : mockComponents.length) * 12} components.</p>
+                      {(dbComponents.length > 0 ? dbComponents : mockComponents).slice(0, 3).map(comp => (
                         <div key={comp.id} className="p-4 border rounded-lg">
                           <h4 className="font-semibold mb-2">{comp.displayName}</h4>
                           <table className="w-full text-sm">
@@ -2339,7 +2221,8 @@ export default function App() {
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
                       <p className="text-gray-600">Interactive examples and code snippets.</p>
-                      {mockComponents.slice(0, 2).map(comp => (
+                      {/* MIGRATED: Batch #13 - Use database components */}
+                      {(dbComponents.length > 0 ? dbComponents : mockComponents).slice(0, 2).map(comp => (
                         <div key={comp.id}>
                           {comp.examples.map(ex => (
                             <div key={ex.id} className="p-4 border rounded-lg mb-4">

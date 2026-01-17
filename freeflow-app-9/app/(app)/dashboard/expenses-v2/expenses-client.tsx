@@ -117,108 +117,35 @@ interface ExpensesClientProps {
   initialExpenses: any[]
 }
 
-// Mock Data
-const mockEmployees = [
-  { id: 'e1', name: 'Sarah Johnson', email: 'sarah@company.com', avatar: '/avatars/sarah.jpg', department: 'Engineering' },
-  { id: 'e2', name: 'Mike Chen', email: 'mike@company.com', avatar: '/avatars/mike.jpg', department: 'Sales' },
-  { id: 'e3', name: 'Emily Davis', email: 'emily@company.com', avatar: '/avatars/emily.jpg', department: 'Marketing' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockEmployees = []
 
-const mockReports: ExpenseReport[] = [
-  {
-    id: 'r1', title: 'Q1 Sales Conference - NYC', status: 'pending',
-    submittedBy: mockEmployees[1], approver: mockEmployees[0],
-    lineItems: [
-      { id: 'l1', description: 'Flight to NYC', amount: 450, category: 'travel', date: '2024-01-15', merchant: 'Delta Airlines', isBillable: false, taxAmount: 0 },
-      { id: 'l2', description: 'Hotel - 3 nights', amount: 890, category: 'lodging', date: '2024-01-15', merchant: 'Marriott Times Square', isBillable: false, taxAmount: 89 },
-      { id: 'l3', description: 'Client dinner', amount: 245, category: 'meals', date: '2024-01-16', merchant: 'The Capital Grille', isBillable: true, projectCode: 'PRJ-2024-001', taxAmount: 24.5 },
-      { id: 'l4', description: 'Uber rides', amount: 78, category: 'transport', date: '2024-01-17', merchant: 'Uber', isBillable: false, taxAmount: 0 },
-    ],
-    totalAmount: 1663, currency: 'USD', paymentMethod: 'corporate_card',
-    createdAt: '2024-01-18', submittedAt: '2024-01-18',
-    policyViolations: [{ rule: 'Meal expense exceeds $200 daily limit', severity: 'warning' }],
-    attachments: 4
-  },
-  {
-    id: 'r2', title: 'Software Licenses - January', status: 'approved',
-    submittedBy: mockEmployees[0],
-    lineItems: [
-      { id: 'l5', description: 'GitHub Enterprise', amount: 1200, category: 'software', date: '2024-01-01', merchant: 'GitHub', isBillable: false, taxAmount: 0 },
-      { id: 'l6', description: 'Figma Team', amount: 45, category: 'software', date: '2024-01-01', merchant: 'Figma', isBillable: false, taxAmount: 0 },
-    ],
-    totalAmount: 1245, currency: 'USD', paymentMethod: 'corporate_card',
-    createdAt: '2024-01-05', submittedAt: '2024-01-05', approvedAt: '2024-01-06',
-    policyViolations: [], attachments: 2
-  },
-  {
-    id: 'r3', title: 'Office Supplies', status: 'reimbursed',
-    submittedBy: mockEmployees[2],
-    lineItems: [
-      { id: 'l7', description: 'Printer paper & ink', amount: 89, category: 'supplies', date: '2024-01-10', merchant: 'Staples', isBillable: false, taxAmount: 8.9 },
-      { id: 'l8', description: 'Standing desk mat', amount: 65, category: 'supplies', date: '2024-01-10', merchant: 'Amazon', isBillable: false, taxAmount: 6.5 },
-    ],
-    totalAmount: 154, currency: 'USD', paymentMethod: 'personal_card',
-    createdAt: '2024-01-12', submittedAt: '2024-01-12', approvedAt: '2024-01-13', reimbursedAt: '2024-01-15',
-    policyViolations: [], attachments: 2
-  },
-  {
-    id: 'r4', title: 'Team Building Event', status: 'draft',
-    submittedBy: mockEmployees[0],
-    lineItems: [
-      { id: 'l9', description: 'Escape room booking', amount: 320, category: 'entertainment', date: '2024-01-20', merchant: 'Escape Room NYC', isBillable: false, taxAmount: 32 },
-    ],
-    totalAmount: 320, currency: 'USD', paymentMethod: 'corporate_card',
-    createdAt: '2024-01-19',
-    policyViolations: [], attachments: 1
-  },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockReports: ExpenseReport[] = []
 
-const mockPolicies: Policy[] = [
-  { id: 'p1', name: 'Meals', category: 'meals', maxAmount: 75, requiresReceipt: true, requiresApproval: true, approvalThreshold: 50, notes: 'Per person per meal' },
-  { id: 'p2', name: 'Travel', category: 'travel', maxAmount: 1000, requiresReceipt: true, requiresApproval: true, approvalThreshold: 500, notes: 'Flights must be economy class' },
-  { id: 'p3', name: 'Lodging', category: 'lodging', maxAmount: 300, requiresReceipt: true, requiresApproval: true, approvalThreshold: 200, notes: 'Per night maximum' },
-  { id: 'p4', name: 'Software', category: 'software', maxAmount: 500, requiresReceipt: true, requiresApproval: true, approvalThreshold: 100, notes: 'Manager approval required' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockPolicies: Policy[] = []
 
-const mockMileage: MileageEntry[] = [
-  { id: 'm1', date: '2024-01-15', origin: 'Office', destination: 'Client Site A', distance: 25, rate: 0.67, purpose: 'Client meeting', status: 'approved' },
-  { id: 'm2', date: '2024-01-17', origin: 'Office', destination: 'Airport', distance: 18, rate: 0.67, purpose: 'Business travel', status: 'pending' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockMileage: MileageEntry[] = []
 
-const mockPerDiems: PerDiem[] = [
-  { id: 'pd1', location: 'New York, NY', startDate: '2024-01-15', endDate: '2024-01-18', dailyRate: 79, totalAmount: 237, meals: { breakfast: true, lunch: true, dinner: true }, status: 'pending' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockPerDiems: PerDiem[] = []
 
-// Competitive Upgrade Mock Data - Expensify/SAP Concur-level Expense Intelligence
-const mockExpensesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Policy Compliance', description: 'All expense reports comply with company policy!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '2', type: 'warning' as const, title: 'Receipt Missing', description: '5 expenses over $25 need receipts attached.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Documentation' },
-  { id: '3', type: 'info' as const, title: 'AI Analysis', description: 'Travel spending 15% under budget this quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockExpensesAIInsights = []
 
-const mockExpensesCollaborators = [
-  { id: '1', name: 'Finance Manager', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Approver', avatar: '/avatars/approver.jpg', status: 'online' as const, role: 'Approver' },
-  { id: '3', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'away' as const, role: 'Accountant' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockExpensesCollaborators = []
 
-const mockExpensesPredictions = [
-  { id: '1', title: 'Monthly Spend', prediction: 'Team expenses will reach $45K by month end', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Reimbursement', prediction: 'Average reimbursement time will drop to 3 days', confidence: 82, trend: 'down' as const, impact: 'medium' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockExpensesPredictions = []
 
-const mockExpensesActivities = [
-  { id: '1', user: 'Finance Manager', action: 'Approved', target: '12 expense reports', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Approver', action: 'Requested', target: 'additional documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Accountant', action: 'Processed', target: '$8,500 reimbursement batch', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockExpensesActivities = []
 
-const mockExpensesQuickActions = [
-  { id: '1', label: 'New Expense', icon: 'Plus', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'Scan Receipt', icon: 'Camera', action: () => {}, shortcut: 'S' },
-  { id: '3', label: 'Generate Report', icon: 'FileText', action: () => {}, shortcut: 'R' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockExpensesQuickActions = []
 
 // Quick actions will be defined inside the component to access state setters
 const getExpensesQuickActions = (

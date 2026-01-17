@@ -1,4 +1,6 @@
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+import { useState, useEffect, useCallback } from 'react'
+import { useSupabaseMutation } from './base-hooks'
+import { createClient } from '@/lib/supabase/client'
 
 export type ExportFormat = 'csv' | 'json' | 'xml' | 'pdf' | 'xlsx' | 'sql' | 'parquet' | 'avro'
 export type ExportType = 'manual' | 'scheduled' | 'automated' | 'api_triggered' | 'webhook'
@@ -69,31 +71,61 @@ export function useDataExports(filters?: {
   format?: ExportFormat | 'all'
   dataSource?: DataSource | 'all'
 }) {
-  let query = useSupabaseQuery<DataExport>('data_exports')
+  const [data, setData] = useState<DataExport[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status)
-  }
+  const refetch = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const supabase = createClient()
+      let query = supabase.from('data_exports').select('*').is('deleted_at', null)
 
-  if (filters?.format && filters.format !== 'all') {
-    query = query.eq('export_format', filters.format)
-  }
+      if (filters?.status && filters.status !== 'all') {
+        query = query.eq('status', filters.status)
+      }
 
-  if (filters?.dataSource && filters.dataSource !== 'all') {
-    query = query.eq('data_source', filters.dataSource)
-  }
+      if (filters?.format && filters.format !== 'all') {
+        query = query.eq('export_format', filters.format)
+      }
 
-  return query.order('created_at', { ascending: false })
+      if (filters?.dataSource && filters.dataSource !== 'all') {
+        query = query.eq('data_source', filters.dataSource)
+      }
+
+      const { data: result, error: queryError } = await query.order('created_at', { ascending: false })
+
+      if (queryError) throw new Error(queryError.message)
+      setData(result || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filters])
+
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  return { data, isLoading, error, refetch }
 }
 
 export function useCreateDataExport() {
-  return useSupabaseMutation<DataExport>('data_exports', 'insert')
+  return useSupabaseMutation<DataExport>({
+    table: 'data_exports'
+  })
 }
 
 export function useUpdateDataExport() {
-  return useSupabaseMutation<DataExport>('data_exports', 'update')
+  return useSupabaseMutation<DataExport>({
+    table: 'data_exports'
+  })
 }
 
 export function useDeleteDataExport() {
-  return useSupabaseMutation<DataExport>('data_exports', 'delete')
+  return useSupabaseMutation<DataExport>({
+    table: 'data_exports'
+  })
 }

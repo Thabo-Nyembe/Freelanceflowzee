@@ -72,6 +72,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+import { useInvestorMetrics, type InvestorMetric, type InvestorStats } from '@/lib/hooks/use-investor-metrics'
+
 
 
 
@@ -326,28 +329,17 @@ const mockKPIs: KPIMetric[] = [
 ]
 
 // Mock data for AI-powered competitive upgrade components
-const mockInvestorMetricsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Metrics Strong', description: 'All key metrics trending above board expectations. Great quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Burn Rate Alert', description: 'Burn rate increased 15% this month. Review spending.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Finance' },
-  { id: '3', type: 'info' as const, title: 'Investor Update', description: 'Q4 investor report due in 5 days. Data ready for review.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Reporting' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockInvestorMetricsAIInsights = []
 
-const mockInvestorMetricsCollaborators = [
-  { id: '1', name: 'CFO', avatar: '/avatars/cfo.jpg', status: 'online' as const, role: 'Finance' },
-  { id: '2', name: 'CEO', avatar: '/avatars/ceo.jpg', status: 'online' as const, role: 'Executive' },
-  { id: '3', name: 'Board Member', avatar: '/avatars/board.jpg', status: 'away' as const, role: 'Board' },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockInvestorMetricsCollaborators = []
 
-const mockInvestorMetricsPredictions = [
-  { id: '1', title: 'Runway Forecast', prediction: 'Current runway extends to 26 months with Q1 revenue projections', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Series B Timeline', prediction: 'Metrics support Series B raise by Q3 at $150M+ valuation', confidence: 75, trend: 'up' as const, impact: 'high' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockInvestorMetricsPredictions = []
 
-const mockInvestorMetricsActivities = [
-  { id: '1', user: 'CFO', action: 'Updated', target: 'monthly financial metrics', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'CEO', action: 'Shared', target: 'investor deck with advisors', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Generated', target: 'automated KPI report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// MIGRATED: Batch #13 - Removed mock data, using database hooks
+const mockInvestorMetricsActivities = []
 
 // QuickActions are defined inside the component to access state setters
 

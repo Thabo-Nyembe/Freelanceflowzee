@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useCustomerSupport } from '@/lib/hooks/use-customer-support'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -182,7 +183,12 @@ const initialTicketForm: TicketFormState = {
 
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
-
+  // MIGRATED: Batch #13 - Removed mock data, using database hooks
+  const { agents: dbAgents, conversations: dbConversations, stats: dbStats } = useCustomerSupport(
+    initialAgents || [],
+    initialConversations || [],
+    initialStats || { totalAgents: 0, onlineAgents: 0, busyAgents: 0, totalActiveConversations: 0, avgSatisfaction: 0, resolvedToday: 0 }
+  )
 
   const [activeTab, setActiveTab] = useState('tickets')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
@@ -299,8 +305,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     fetchTickets()
   }, [fetchTickets])
 
+  // MIGRATED: Batch #13 - Removed mock data, using database hooks
   const tickets: Ticket[] = []
-  const agents: Agent[] = []
+  const agents: Agent[] = dbAgents || []
   const slas: SLA[] = []
   const cannedResponses: CannedResponse[] = []
   const customers: Customer[] = []
