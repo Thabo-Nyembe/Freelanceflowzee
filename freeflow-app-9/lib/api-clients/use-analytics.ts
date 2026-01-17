@@ -3,10 +3,17 @@
  *
  * Uses TanStack Query for caching, loading states, and error handling
  * Provides dashboard metrics, revenue analytics, and predictive insights
+ *
+ * Caching Strategy:
+ * - Dashboard metrics: 2 min staleTime (analytics)
+ * - Revenue analytics: 2 min staleTime (analytics)
+ * - Performance metrics: 1 min staleTime (semi-fresh)
+ * - Predictive insights: 1 hour staleTime (computed data)
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 import { analyticsClient } from './analytics-client'
+import { STALE_TIMES, analyticsQueryOptions } from '@/lib/query-client'
 
 /**
  * Get complete dashboard metrics
@@ -27,6 +34,8 @@ export function useDashboardMetrics(
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 300000, // Refetch every 5 minutes
     ...options
   })
@@ -51,6 +60,8 @@ export function useRevenueAnalytics(
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 300000, // Refetch every 5 minutes
     ...options
   })
@@ -73,6 +84,8 @@ export function useEngagementMetrics(
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 300000, // Refetch every 5 minutes
     ...options
   })
@@ -95,6 +108,7 @@ export function usePerformanceMetrics(
 
       return response.data
     },
+    staleTime: STALE_TIMES.SEMI_FRESH,
     refetchInterval: 60000, // Refetch every minute
     ...options
   })
@@ -117,6 +131,8 @@ export function usePredictiveInsights(
 
       return response.data
     },
+    staleTime: 60 * 60 * 1000, // 1 hour staleTime for computed insights
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
     refetchInterval: 3600000, // Refetch every hour
     ...options
   })

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -230,10 +231,14 @@ export function Sidebar() {
     <div className="flex flex-col h-full kazi-bg-light dark:kazi-bg-dark border-r border-gray-200 dark:border-gray-700">
       <div className="p-6 kazi-bg-light dark:kazi-bg-dark border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-8">
-            <img src="/kazi-brand/logo.svg" 
-              alt="KAZI" 
+            <Image
+              src="/kazi-brand/logo.svg"
+              alt="KAZI"
+              width={32}
+              height={32}
               className="h-8 w-auto"
-            loading="lazy" />
+              priority
+            />
             <h1 className="text-2xl font-bold kazi-text-dark dark:kazi-text-light kazi-headline">KAZI</h1>
           </div>
       </div>

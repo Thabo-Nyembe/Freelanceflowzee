@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import {
   getTemplates,
@@ -33,6 +34,42 @@ import {
   getTemplateReviews,
   getTemplateLibraryStats
 } from '@/lib/project-templates-queries'
+
+// Cached function for featured templates (static data, 1 hour cache)
+const getCachedFeaturedTemplates = unstable_cache(
+  async (limit: number) => {
+    return getFeaturedTemplates(limit)
+  },
+  ['featured-templates'],
+  { revalidate: 3600 } // 1 hour
+)
+
+// Cached function for popular templates (static data, 30 minutes cache)
+const getCachedPopularTemplates = unstable_cache(
+  async (category: string | undefined, limit: number) => {
+    return getPopularTemplatesQuery(category as any, limit)
+  },
+  ['popular-templates'],
+  { revalidate: 1800 } // 30 minutes
+)
+
+// Cached function for template library stats (static data, 1 hour cache)
+const getCachedTemplateLibraryStats = unstable_cache(
+  async () => {
+    return getTemplateLibraryStats()
+  },
+  ['template-library-stats'],
+  { revalidate: 3600 } // 1 hour
+)
+
+// Cached function for templates by category (static data, 30 minutes cache)
+const getCachedTemplatesByCategory = unstable_cache(
+  async (category: string) => {
+    return getTemplatesByCategory(category as any)
+  },
+  ['templates-by-category'],
+  { revalidate: 1800 } // 30 minutes
+)
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,8 +102,12 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ data: result })
         }
         if (category) {
-          const result = await getTemplatesByCategory(category)
-          return NextResponse.json({ data: result })
+          const result = await getCachedTemplatesByCategory(category)
+          return NextResponse.json({ data: result }, {
+            headers: {
+              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+            },
+          })
         }
         const filters: any = {}
         if (templateType) filters.type = templateType
@@ -85,13 +126,21 @@ export async function GET(request: NextRequest) {
       }
 
       case 'featured': {
-        const result = await getFeaturedTemplates(limit)
-        return NextResponse.json({ data: result })
+        const result = await getCachedFeaturedTemplates(limit)
+        return NextResponse.json({ data: result }, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+        })
       }
 
       case 'popular': {
-        const result = await getPopularTemplatesQuery(category || undefined, limit)
-        return NextResponse.json({ data: result })
+        const result = await getCachedPopularTemplates(category || undefined, limit)
+        return NextResponse.json({ data: result }, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+        })
       }
 
       case 'user-templates': {
@@ -154,8 +203,12 @@ export async function GET(request: NextRequest) {
       }
 
       case 'stats': {
-        const result = await getTemplateLibraryStats()
-        return NextResponse.json({ data: result })
+        const result = await getCachedTemplateLibraryStats()
+        return NextResponse.json({ data: result }, {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+        })
       }
 
       default:

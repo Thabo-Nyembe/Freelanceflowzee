@@ -4,6 +4,10 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
+// Default blur placeholder for general images
+export const DEFAULT_IMAGE_BLUR_PLACEHOLDER =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAME/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBBEhABIxBQYTQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAgADEf/aAAwDAQACEQMRAD8AyRU9NL06aKjqzBUxNulkZQWBJYEA+xYfPmtaKpqa6ljqqaZopozlHXkHTWk0w5JOp//Z"
+
 interface OptimizedImageProps {
   src: string
   alt: string
@@ -37,26 +41,9 @@ export function OptimizedImage({
     onError?.()
   }
 
-  // Generate blur placeholder for better UX
-  const generateBlurDataURL = (w: number, h: number) => {
-    // Only generate blur data URL on client side
-    if (typeof window === 'undefined') {
-      return undefined
-    }
-
-    try {
-      const canvas = document.createElement('canvas')
-      canvas.width = w
-      canvas.height = h
-      const ctx = canvas.getContext('2d')
-      if (ctx) {
-        ctx.fillStyle = '#f3f4f6'
-        ctx.fillRect(0, 0, w, h)
-      }
-      return canvas.toDataURL()
-    } catch (error) {
-      return undefined
-    }
+  // Use default blur placeholder instead of generating dynamically
+  const getBlurDataURL = () => {
+    return blurDataURL || DEFAULT_IMAGE_BLUR_PLACEHOLDER
   }
 
   // Error fallback component
@@ -99,7 +86,7 @@ export function OptimizedImage({
       className
     ),
     placeholder: placeholder === 'blur' ? 'blur' as const : 'empty' as const,
-    blurDataURL: blurDataURL || (width && height ? generateBlurDataURL(width, height) : undefined),
+    blurDataURL: placeholder === 'blur' ? getBlurDataURL() : undefined,
     ...props
   }
 

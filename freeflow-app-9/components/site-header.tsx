@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { MobileNav } from '@/components/mobile-menu'
 import { PremiumThemeToggle } from '@/components/ui/premium-theme-toggle'
@@ -87,10 +88,14 @@ export function SiteHeader({ user }: SiteHeaderProps) {
           <Link href="/" className="flex items-center gap-2 relative group/logo">
             <div className="relative">
               <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-purple-500/50 to-blue-500/50 rounded-lg blur opacity-0 group-hover/logo:opacity-75 transition-opacity duration-300" />
-              <img src="/kazi-brand/logo.svg"
+              <Image
+                src="/kazi-brand/logo.svg"
                 alt="KAZI"
+                width={32}
+                height={32}
                 className="h-8 w-auto relative z-10 transition-transform duration-300 group-hover/logo:scale-110"
-              loading="lazy" />
+                priority
+              />
             </div>
             <TextShimmer className="text-xl font-bold" duration={2}>
               KAZI

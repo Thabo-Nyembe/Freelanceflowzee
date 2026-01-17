@@ -20,6 +20,7 @@ import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
 import { SessionProvider } from '@/components/providers/session-provider'
 import { RouteProgress } from '@/components/ui/route-progress'
+import { WebVitals } from '@/components/performance/web-vitals'
 import './globals.css'
 import { ErrorBoundary } from "react-error-boundary"
 
@@ -136,6 +137,7 @@ export default function RootLayout({
               </Providers>
             </SessionProvider>
             <Analytics />
+            <WebVitals sendToAnalytics={process.env.NODE_ENV === 'production'} />
           </ThemeProvider>
         </ErrorBoundary>
       </body>

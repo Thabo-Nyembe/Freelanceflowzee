@@ -1,10 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client with service role for API routes
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+// Cached function for invoice stats (user-specific, 5 minutes cache)
+const getCachedInvoiceStats = unstable_cache(
+  async () => {
+    const { data: allInvoices } = await supabase
+      .from('invoices')
+      .select('status, total_amount')
+
+    return {
+      totalInvoiced: allInvoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalPaid: allInvoices?.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalPending: allInvoices?.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalOverdue: allInvoices?.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
+      totalInvoices: allInvoices?.length || 0
+    }
+  },
+  ['invoice-stats'],
+  { revalidate: 300 } // 5 minutes
+)
 
 // Helper to get user from auth header
 async function getUserFromAuth(request: NextRequest) {
@@ -65,18 +85,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Calculate stats from all invoices (separate query for accurate stats)
-    const { data: allInvoices } = await supabase
-      .from('invoices')
-      .select('status, total_amount')
-
-    const stats = {
-      totalInvoiced: allInvoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalPaid: allInvoices?.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalPending: allInvoices?.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalOverdue: allInvoices?.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalInvoices: allInvoices?.length || 0
-    }
+    // Calculate stats from cached function for better performance
+    const stats = await getCachedInvoiceStats()
 
     return NextResponse.json({
       success: true,
@@ -84,6 +94,10 @@ export async function GET(request: NextRequest) {
         invoices: invoices || [],
         stats
       }
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
     })
   } catch (error) {
     console.error('Invoice GET error:', error)

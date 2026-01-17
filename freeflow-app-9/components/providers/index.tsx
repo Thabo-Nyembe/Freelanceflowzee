@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from '../theme-provider'
 import { Toaster } from '../ui/toaster'
 import { ThemeProvider as NextThemeProvider } from 'next-themes'
+import { createQueryClient } from '@/lib/query-client'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 
@@ -24,8 +26,10 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-  const [queryClient] = useState<any>(() => new QueryClient())
-  const [supabase] = useState<any>(() => {
+  // Create QueryClient with optimized caching configuration
+  const [queryClient] = useState(() => createQueryClient())
+
+  const [supabase] = useState(() => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -45,12 +49,15 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SupabaseContext.Provider value={supabase}>
       <QueryClientProvider client={queryClient}>
-        <NextThemeProvider attribute= "class" defaultTheme= "system" enableSystem>
+        <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemeProvider>
             {children}
             <Toaster />
           </ThemeProvider>
         </NextThemeProvider>
+        {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} position="bottom" />
+        )}
       </QueryClientProvider>
     </SupabaseContext.Provider>
   )

@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -39,10 +40,14 @@ export function MobileMenu({ items, children }: MobileMenuProps) {
       <SheetContent side="left" className="pl-1 pr-0">
         <div className="px-7">
           <div className="flex items-center gap-2">
-            <img src="/kazi-brand/logo.svg" 
-              alt="KAZI" 
+            <Image
+              src="/kazi-brand/logo.svg"
+              alt="KAZI"
+              width={24}
+              height={24}
               className="h-6 w-auto"
-            loading="lazy" />
+              priority
+            />
             <span className="font-bold">KAZI</span>
           </div>
         </div>

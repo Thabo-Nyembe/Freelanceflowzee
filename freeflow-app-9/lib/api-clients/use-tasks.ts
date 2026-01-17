@@ -3,11 +3,17 @@
  *
  * Uses TanStack Query for caching, loading states, and error handling
  * Replaces useEffect + setTimeout patterns
+ *
+ * Caching Strategy:
+ * - Tasks list: 5 min staleTime (user data)
+ * - Single task: 5 min staleTime (user data)
+ * - Task stats: 2 min staleTime (analytics)
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
 import { tasksClient, type Task, type CreateTaskData, type UpdateTaskData, type TaskFilters } from './tasks-client'
 import { toast } from 'sonner'
+import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get all tasks with pagination and filters
@@ -29,6 +35,8 @@ export function useTasks(
 
       return response.data
     },
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions,
     ...options
   })
 }
@@ -48,7 +56,9 @@ export function useTask(id: string) {
 
       return response.data
     },
-    enabled: !!id
+    enabled: !!id,
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions
   })
 }
 
@@ -69,9 +79,8 @@ export function useCreateTask() {
       return response.data
     },
     onSuccess: (task) => {
-      // Invalidate tasks list
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['task-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.tasks(queryClient)
 
       // Optimistically update cache
       queryClient.setQueryData(['task', task.id], task)
@@ -101,9 +110,8 @@ export function useUpdateTask() {
       return response.data
     },
     onSuccess: (task) => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['task-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.tasks(queryClient)
       queryClient.setQueryData(['task', task.id], task)
 
       toast.success('Task updated successfully')
@@ -130,9 +138,11 @@ export function useDeleteTask() {
 
       return id
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      queryClient.invalidateQueries({ queryKey: ['task-stats'] })
+    onSuccess: (deletedId) => {
+      // Use centralized invalidation pattern
+      invalidationPatterns.tasks(queryClient)
+      // Remove the specific task from cache
+      queryClient.removeQueries({ queryKey: ['task', deletedId] })
       toast.success('Task deleted successfully')
     },
     onError: (error: Error) => {
@@ -236,6 +246,8 @@ export function useTaskStats() {
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 60000 // Refetch every minute
   })
 }

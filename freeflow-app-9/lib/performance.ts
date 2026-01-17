@@ -1,29 +1,100 @@
-// Web Vitals tracking with correct v5 imports
+import type { Metric } from 'web-vitals'
+
+// Web Vitals metric type (using the library's type)
+export type WebVitalMetric = Metric
+
+// Report Web Vitals - Main entry point for tracking
+export function reportWebVitals() {
+  if (typeof window === 'undefined') return
+
+  import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+    // Core Web Vitals
+    onCLS(logMetric)
+    onFCP(logMetric)
+    onLCP(logMetric)
+    onTTFB(logMetric)
+    onINP(logMetric) // Interaction to Next Paint (replaces FID in v5.x)
+  })
+}
+
+// Log metric to console
+function logMetric(metric: WebVitalMetric) {
+  console.log('[Web Vital]', {
+    name: metric.name,
+    value: metric.value,
+    rating: metric.rating,
+    id: metric.id,
+  })
+}
+
+// For production, send to analytics endpoint
+export function sendToAnalytics(metric: WebVitalMetric) {
+  const body = JSON.stringify({
+    name: metric.name,
+    value: metric.value,
+    rating: metric.rating,
+    id: metric.id,
+    delta: metric.delta,
+    navigationType: metric.navigationType,
+    timestamp: Date.now(),
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+  })
+
+  // Use sendBeacon if available for reliable delivery
+  if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+    navigator.sendBeacon('/api/analytics/vitals', body)
+  } else if (typeof fetch !== 'undefined') {
+    fetch('/api/analytics/vitals', {
+      body,
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+  }
+}
+
+// Report Web Vitals with analytics sending
+export function reportWebVitalsWithAnalytics() {
+  if (typeof window === 'undefined') return
+
+  import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+    onCLS(sendToAnalytics)
+    onFCP(sendToAnalytics)
+    onLCP(sendToAnalytics)
+    onTTFB(sendToAnalytics)
+    onINP(sendToAnalytics)
+  })
+}
+
+// Web Vitals tracking with correct v5 imports (legacy function)
 export async function trackWebVitals() {
   if (typeof window === 'undefined') return
 
   try {
     const { onCLS, onINP, onFCP, onLCP, onTTFB } = await import('web-vitals')
-    
+
     // Core Web Vitals (v5.x uses INP instead of FID)
-    onCLS(sendToAnalytics)
-    onINP(sendToAnalytics) // Interaction to Next Paint (replaces FID in v5.x)
-    onLCP(sendToAnalytics)
-    
+    onCLS(sendToAnalyticsLegacy)
+    onINP(sendToAnalyticsLegacy) // Interaction to Next Paint (replaces FID in v5.x)
+    onLCP(sendToAnalyticsLegacy)
+
     // Other important metrics
-    onFCP(sendToAnalytics)
-    onTTFB(sendToAnalytics)
+    onFCP(sendToAnalyticsLegacy)
+    onTTFB(sendToAnalyticsLegacy)
   } catch (error) {
     console.warn('Failed to load web-vitals: ', error)
   }
 }
 
-function sendToAnalytics(metric: Record<string, unknown>) {
+function sendToAnalyticsLegacy(metric: WebVitalMetric) {
   // In production, send to your analytics service
   if (process.env.NODE_ENV === 'development') {
-    console.log('📊 Web Vital: ', metric.name, metric.value, metric.rating)
+    console.log('[Web Vital]', metric.name, metric.value, metric.rating)
   }
-  
+
   // Example: Send to Google Analytics
   // gtag('event', metric.name, {
   //   value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
@@ -52,10 +123,10 @@ export class PerformanceOptimizer {
       list.getEntries().forEach((entry) => {
         if (entry.entryType === 'resource') {
           const resourceEntry = entry as PerformanceResourceTiming
-          
+
           // Log slow resources in development
           if (process.env.NODE_ENV === 'development' && resourceEntry.duration > 1000) {
-            console.warn('🐌 Slow resource: ', resourceEntry.name, `${resourceEntry.duration.toFixed(2)}ms`)
+            console.warn('Slow resource:', resourceEntry.name, `${resourceEntry.duration.toFixed(2)}ms`)
           }
         }
       })
@@ -73,9 +144,9 @@ export class PerformanceOptimizer {
       list.getEntries().forEach((entry) => {
         if (entry.entryType === 'navigation') {
           const navEntry = entry as PerformanceNavigationTiming
-          
+
           if (process.env.NODE_ENV === 'development') {
-            console.log('🚀 Navigation timing: ', {
+            console.log('Navigation timing:', {
               domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
               loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
               totalTime: navEntry.loadEventEnd - navEntry.fetchStart,
@@ -96,9 +167,9 @@ export class PerformanceOptimizer {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries()
       const lastEntry = entries[entries.length - 1]
-      
+
       if (process.env.NODE_ENV === 'development') {
-        console.log('🎯 LCP element: ', lastEntry)
+        console.log('LCP element:', lastEntry)
       }
     })
 
@@ -129,9 +200,9 @@ export function preloadImage(src: string): Promise<void> {
 export async function preloadCriticalImages(images: string[]) {
   try {
     await Promise.all(images.map(preloadImage))
-    console.log('✅ Critical images preloaded')
+    console.log('Critical images preloaded')
   } catch (error) {
-    console.warn('⚠️ Failed to preload some images: ', error)
+    console.warn('Failed to preload some images:', error)
   }
 }
 
@@ -150,17 +221,17 @@ export function logBundleInfo() {
     return total
   }, 0)
 
-  console.log('📦 Estimated bundle chunks: ', totalSize)
+  console.log('Estimated bundle chunks:', totalSize)
 }
 
 // Memory usage monitoring
 export function monitorMemoryUsage() {
-  if (typeof window === 'undefined' || !('performance' in window) || !('memory' in (window.performance as any))) return
+  if (typeof window === 'undefined' || !('performance' in window) || !('memory' in (window.performance as unknown as { memory?: unknown }))) return
 
-  const memory = (window.performance as any).memory
-  
+  const memory = (window.performance as unknown as { memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory
+
   if (process.env.NODE_ENV === 'development') {
-    console.log('🧠 Memory usage: ', {
+    console.log('Memory usage:', {
       used: `${(memory.usedJSHeapSize / 1048576).toFixed(2)} MB`,
       total: `${(memory.totalJSHeapSize / 1048576).toFixed(2)} MB`,
       limit: `${(memory.jsHeapSizeLimit / 1048576).toFixed(2)} MB`,
@@ -173,21 +244,21 @@ export function initPerformanceMonitoring() {
   if (typeof window === 'undefined') return
 
   const optimizer = PerformanceOptimizer.getInstance()
-  
+
   // Start monitoring
   optimizer.monitorResources()
   optimizer.monitorNavigation()
   optimizer.monitorLCP()
-  
+
   // Track Web Vitals
   trackWebVitals()
-  
+
   // Log bundle info
   logBundleInfo()
-  
+
   // Monitor memory usage periodically
   setInterval(monitorMemoryUsage, 30000) // Every 30 seconds
-  
+
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
     optimizer.cleanup()
@@ -215,14 +286,14 @@ export function loadComponentWithPerformance<T>(
   componentName: string
 ): Promise<{ default: T }> {
   const startTime = performance.now()
-  
+
   return importFn().then((module) => {
     const loadTime = performance.now() - startTime
-    
+
     if (process.env.NODE_ENV === 'development') {
-      console.log(`⚡ Component "${componentName}" loaded in ${loadTime.toFixed(2)}ms`)
+      console.log(`Component "${componentName}" loaded in ${loadTime.toFixed(2)}ms`)
     }
-    
+
     return module
   })
-} 
+}

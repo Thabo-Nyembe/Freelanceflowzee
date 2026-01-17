@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { useCustomerSupport } from '@/lib/hooks/use-customer-support'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -24,16 +25,40 @@ import {
   Languages, Calendar, Timer
 } from 'lucide-react'
 
-// Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
+// Lazy-loaded Competitive Upgrade Components for code splitting
+import { TabContentSkeleton } from '@/components/dashboard/lazy'
 
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+const AIInsightsPanel = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const PredictiveAnalytics = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.PredictiveAnalytics })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const ActivityFeed = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.ActivityFeed })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const QuickActionsToolbar = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.QuickActionsToolbar })),
+  {
+    loading: () => <div className="animate-pulse h-12 w-full bg-muted rounded" />,
+    ssr: false
+  }
+)
 
 
 

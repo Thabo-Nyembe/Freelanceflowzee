@@ -1,8 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { useBusinessMetrics, usePlatformStats, useMarketingContent } from '@/hooks/use-dynamic-content'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { AVATAR_BLUR_PLACEHOLDER } from '@/components/ui/avatar'
 import {
   TrendingUp,
   TrendingDown,
@@ -176,10 +178,15 @@ export function CommunityTestimonials() {
               <p className="text-sm italic mb-4">{testimonial.content}</p>
               <div className="flex items-center gap-3">
                 {metadata?.avatar && (
-                  <img src={metadata.avatar}
+                  <Image
+                    src={metadata.avatar}
                     alt=""
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full object-cover"
-                  loading="lazy" />
+                    placeholder="blur"
+                    blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                  />
                 )}
                 <div>
                   <p className="font-medium text-sm">{testimonial.subtitle}</p>

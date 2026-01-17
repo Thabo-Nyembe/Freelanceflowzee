@@ -1,8 +1,10 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AVATAR_BLUR_PLACEHOLDER } from '@/components/ui/avatar'
 import {
   Users,
   Calendar,
@@ -147,10 +149,15 @@ export default function TeamHub({
                             className="h-6 w-6 rounded-full border-2 border-background overflow-hidden"
                           >
                             {user.avatar ? (
-                              <img src={user.avatar}
+                              <Image
+                                src={user.avatar}
                                 alt={user.name}
+                                width={24}
+                                height={24}
                                 className="h-full w-full object-cover"
-                              loading="lazy" />
+                                placeholder="blur"
+                                blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                              />
                             ) : (
                               <div className="h-full w-full bg-primary/10 flex items-center justify-center text-xs font-medium">
                                 {user.name[0]}

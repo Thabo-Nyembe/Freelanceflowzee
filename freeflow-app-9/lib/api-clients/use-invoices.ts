@@ -3,11 +3,17 @@
  *
  * Uses TanStack Query for caching, loading states, and error handling
  * Replaces useEffect + setTimeout patterns
+ *
+ * Caching Strategy:
+ * - Invoices list: 5 min staleTime (user data)
+ * - Single invoice: 5 min staleTime (user data)
+ * - Invoice stats: 2 min staleTime (analytics)
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
 import { invoicesClient, type Invoice, type CreateInvoiceData, type UpdateInvoiceData, type InvoiceFilters } from './invoices-client'
 import { toast } from 'sonner'
+import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get all invoices with pagination and filters
@@ -29,6 +35,8 @@ export function useInvoices(
 
       return response.data
     },
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions,
     ...options
   })
 }
@@ -48,7 +56,9 @@ export function useInvoice(id: string) {
 
       return response.data
     },
-    enabled: !!id
+    enabled: !!id,
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions
   })
 }
 
@@ -69,9 +79,8 @@ export function useCreateInvoice() {
       return response.data
     },
     onSuccess: (invoice) => {
-      // Invalidate invoices list
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      queryClient.invalidateQueries({ queryKey: ['invoice-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.invoices(queryClient)
 
       // Optimistically update cache
       queryClient.setQueryData(['invoice', invoice.id], invoice)
@@ -101,9 +110,8 @@ export function useUpdateInvoice() {
       return response.data
     },
     onSuccess: (invoice) => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      queryClient.invalidateQueries({ queryKey: ['invoice-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.invoices(queryClient)
       queryClient.setQueryData(['invoice', invoice.id], invoice)
 
       toast.success('Invoice updated successfully')
@@ -130,9 +138,11 @@ export function useDeleteInvoice() {
 
       return id
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      queryClient.invalidateQueries({ queryKey: ['invoice-stats'] })
+    onSuccess: (deletedId) => {
+      // Use centralized invalidation pattern
+      invalidationPatterns.invoices(queryClient)
+      // Remove the specific invoice from cache
+      queryClient.removeQueries({ queryKey: ['invoice', deletedId] })
       toast.success('Invoice deleted successfully')
     },
     onError: (error: Error) => {
@@ -158,8 +168,8 @@ export function useSendInvoice() {
       return response.data
     },
     onSuccess: (invoice) => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      queryClient.invalidateQueries({ queryKey: ['invoice-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.invoices(queryClient)
       queryClient.setQueryData(['invoice', invoice.id], invoice)
 
       toast.success('Invoice sent successfully')
@@ -195,9 +205,8 @@ export function useMarkInvoiceAsPaid() {
       return response.data
     },
     onSuccess: (invoice) => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      queryClient.invalidateQueries({ queryKey: ['invoice-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['client-stats'] })
+      // Use centralized invalidation pattern (also invalidates client stats and revenue)
+      invalidationPatterns.invoices(queryClient)
       queryClient.setQueryData(['invoice', invoice.id], invoice)
 
       toast.success('Invoice marked as paid')
@@ -250,6 +259,8 @@ export function useInvoiceStats() {
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 60000 // Refetch every minute
   })
 }

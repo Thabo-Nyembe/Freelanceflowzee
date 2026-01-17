@@ -3,6 +3,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
 import { useDeals } from '@/lib/hooks/use-deals'
@@ -68,17 +69,48 @@ import {
 import { EnhancedDataTable } from '@/components/ui/enhanced-data-table'
 import { createClientColumns, type ClientTableRow } from '@/lib/table-columns'
 
-// Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
+// Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
+import { TabContentSkeleton } from '@/components/dashboard/lazy'
 
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+const AIInsightsPanel = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const CollaborationIndicator = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.CollaborationIndicator })),
+  {
+    loading: () => <div className="animate-pulse h-8 w-32 bg-muted rounded" />,
+    ssr: false
+  }
+)
+
+const PredictiveAnalytics = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.PredictiveAnalytics })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const ActivityFeed = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.ActivityFeed })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const QuickActionsToolbar = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.QuickActionsToolbar })),
+  {
+    loading: () => <div className="animate-pulse h-12 w-full bg-muted rounded" />,
+    ssr: false
+  }
+)
 
 // Types
 type ClientStatus = 'lead' | 'prospect' | 'opportunity' | 'customer' | 'churned' | 'inactive'

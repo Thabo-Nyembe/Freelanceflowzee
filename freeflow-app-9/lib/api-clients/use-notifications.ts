@@ -2,6 +2,11 @@
  * Notifications React Hooks
  *
  * TanStack Query hooks for notification management and user preferences
+ *
+ * Caching Strategy:
+ * - Notifications list: 0 staleTime (real-time data)
+ * - Notification preferences: Infinity staleTime (static)
+ * - Notification stats: 30 sec staleTime
  */
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
@@ -14,6 +19,7 @@ import {
   NotificationFilters,
   NotificationStats
 } from './notifications-client'
+import { STALE_TIMES, realtimeQueryOptions, staticQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get notifications with pagination and filters
@@ -33,6 +39,8 @@ export function useNotifications(
       }
       return response.data
     },
+    staleTime: STALE_TIMES.REALTIME,
+    ...realtimeQueryOptions,
     ...options
   })
 }
@@ -54,6 +62,8 @@ export function useNotification(
       return response.data
     },
     enabled: !!id,
+    staleTime: STALE_TIMES.REALTIME,
+    ...realtimeQueryOptions,
     ...options
   })
 }
@@ -73,8 +83,8 @@ export function useCreateNotification() {
       return response.data
     },
     onSuccess: (notification) => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      queryClient.invalidateQueries({ queryKey: ['notification-stats'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.notifications(queryClient)
       queryClient.setQueryData(['notification', notification.id], notification)
 
       // Show in-app toast for new notification
@@ -324,6 +334,8 @@ export function useNotificationPreferences(
       }
       return response.data
     },
+    staleTime: STALE_TIMES.STATIC, // Preferences rarely change
+    ...staticQueryOptions,
     ...options
   })
 }
@@ -388,7 +400,8 @@ export function useNotificationStats(
       }
       return response.data
     },
-    staleTime: 30000, // Stats are fresh for 30 seconds
+    staleTime: STALE_TIMES.SEMI_FRESH, // Stats are fresh for 1 minute
+    refetchInterval: 30000, // Refetch every 30 seconds for badge updates
     ...options
   })
 }

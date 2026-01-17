@@ -10,6 +10,11 @@
  * For licensing inquiries: legal@kazi.com
  */
 
+// Bundle analyzer for optimization analysis
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
@@ -221,13 +226,56 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.in',
+      },
+      // Supabase storage CDN patterns
+      {
+        protocol: 'https',
+        hostname: 'supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Additional CDN sources for avatars and media
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+      },
+      // DiceBear avatar API
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
+      // Gravatar
+      {
+        protocol: 'https',
+        hostname: 'gravatar.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.gravatar.com',
+      },
     ],
-    formats: ['image/webp', 'image/avif'],
+    formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 60 * 60 * 24, // 24 hours cache for optimized images
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Blur placeholder data URL for avatars
+    unoptimized: false,
   },
   
   // Route rewrites - disabled AI mock redirect to use real endpoints
@@ -241,4 +289,5 @@ const nextConfig = {
   // },
 }
 
-module.exports = withPWA(nextConfig)
+// Compose configurations: Bundle Analyzer -> PWA -> Next Config
+module.exports = withBundleAnalyzer(withPWA(nextConfig))

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -56,19 +57,64 @@ import {
   Brain,
 } from 'lucide-react'
 
-// Import Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com
-import {
-  AIInsightsPanel,
-  Sparkline,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-  DataStory,
-} from '@/components/ui/competitive-upgrades'
+// Lazy-loaded Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com - Code splitting for performance
+import { TabContentSkeleton } from '@/components/dashboard/lazy'
 
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+const AIInsightsPanel = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const Sparkline = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.Sparkline })),
+  {
+    loading: () => <div className="animate-pulse h-8 w-24 bg-muted rounded" />,
+    ssr: false
+  }
+)
+
+const CollaborationIndicator = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.CollaborationIndicator })),
+  {
+    loading: () => <div className="animate-pulse h-8 w-32 bg-muted rounded" />,
+    ssr: false
+  }
+)
+
+const PredictiveAnalytics = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.PredictiveAnalytics })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const DataStory = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.DataStory })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const ActivityFeed = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.ActivityFeed })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const QuickActionsToolbar = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.QuickActionsToolbar })),
+  {
+    loading: () => <div className="animate-pulse h-12 w-full bg-muted rounded" />,
+    ssr: false
+  }
+)
 
 // ============================================================================
 // TYPES & INTERFACES - HubSpot Level Marketing Platform

@@ -92,6 +92,7 @@
     "production:check": "npm run security:audit && npm run build:production && npm run test:e2e",
     "production:deploy": "npm run production:check && npm run start:production",
     "bundle:analyze": "ANALYZE=true npm run build:production",
+    "bundle:report": "node scripts/analyze-bundle.js",
     "vitals:check": "node scripts/check-web-vitals.js",
     "seo:check": "node scripts/check-seo.js",
     "accessibility:check": "npm run test:accessibility",

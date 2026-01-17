@@ -1,16 +1,46 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
-// Import World-Class Recharts components
-import { WorldClassLineChart } from '@/components/world-class/charts/line-chart'
-import { WorldClassAreaChart } from '@/components/world-class/charts/area-chart'
-import { WorldClassBarChart } from '@/components/world-class/charts/bar-chart'
-import { WorldClassPieChart } from '@/components/world-class/charts/pie-chart'
+import { ChartSkeleton } from '@/components/dashboard/lazy'
+
+// Lazy-loaded World-Class Recharts components for code splitting
+const WorldClassLineChart = dynamic(
+  () => import('@/components/world-class/charts/line-chart').then(mod => ({ default: mod.WorldClassLineChart })),
+  {
+    loading: () => <ChartSkeleton height={256} />,
+    ssr: false
+  }
+)
+
+const WorldClassAreaChart = dynamic(
+  () => import('@/components/world-class/charts/area-chart').then(mod => ({ default: mod.WorldClassAreaChart })),
+  {
+    loading: () => <ChartSkeleton height={256} />,
+    ssr: false
+  }
+)
+
+const WorldClassBarChart = dynamic(
+  () => import('@/components/world-class/charts/bar-chart').then(mod => ({ default: mod.WorldClassBarChart })),
+  {
+    loading: () => <ChartSkeleton height={256} />,
+    ssr: false
+  }
+)
+
+const WorldClassPieChart = dynamic(
+  () => import('@/components/world-class/charts/pie-chart').then(mod => ({ default: mod.WorldClassPieChart })),
+  {
+    loading: () => <ChartSkeleton height={256} />,
+    ssr: false
+  }
+)
 // Import extended analytics hooks for real Supabase data
 import {
   useAnalyticsDailyMetrics,
@@ -51,17 +81,48 @@ import {
   FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail
 } from 'lucide-react'
 
-// Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
+// Lazy-loaded Competitive Upgrade Components for code splitting
+import { TabContentSkeleton } from '@/components/dashboard/lazy'
 
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+const AIInsightsPanel = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const CollaborationIndicator = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.CollaborationIndicator })),
+  {
+    loading: () => <div className="animate-pulse h-8 w-32 bg-muted rounded" />,
+    ssr: false
+  }
+)
+
+const PredictiveAnalytics = dynamic(
+  () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.PredictiveAnalytics })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const ActivityFeed = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.ActivityFeed })),
+  {
+    loading: () => <TabContentSkeleton />,
+    ssr: false
+  }
+)
+
+const QuickActionsToolbar = dynamic(
+  () => import('@/components/ui/competitive-upgrades-extended').then(mod => ({ default: mod.QuickActionsToolbar })),
+  {
+    loading: () => <div className="animate-pulse h-12 w-full bg-muted rounded" />,
+    ssr: false
+  }
+)
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
 // Mock data imports removed - replaced with database hooks

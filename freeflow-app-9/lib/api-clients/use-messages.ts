@@ -2,6 +2,11 @@
  * Messages/Chat React Hooks
  *
  * TanStack Query hooks for real-time messaging functionality
+ *
+ * Caching Strategy:
+ * - Conversations: 0 staleTime (real-time data)
+ * - Messages: 0 staleTime (real-time data)
+ * - Messaging stats: 30 sec staleTime
  */
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
@@ -15,6 +20,7 @@ import {
   ConversationFilters,
   MessagingStats
 } from './messages-client'
+import { STALE_TIMES, realtimeQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get all conversations with pagination and filters
@@ -34,6 +40,8 @@ export function useConversations(
       }
       return response.data
     },
+    staleTime: STALE_TIMES.REALTIME,
+    ...realtimeQueryOptions,
     ...options
   })
 }
@@ -57,6 +65,8 @@ export function useMessages(
       return response.data
     },
     enabled: !!conversationId,
+    staleTime: STALE_TIMES.REALTIME,
+    ...realtimeQueryOptions,
     ...options
   })
 }
@@ -115,9 +125,10 @@ export function useSendMessage() {
       toast.error(error.message)
     },
     onSuccess: (message) => {
+      // Use centralized invalidation pattern
+      invalidationPatterns.messages(queryClient)
       queryClient.invalidateQueries({ queryKey: ['messages', message.conversation_id] })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
-      queryClient.invalidateQueries({ queryKey: ['messaging-stats'] })
     }
   })
 }
@@ -235,6 +246,7 @@ export function useMessagingStats(
       }
       return response.data
     },
+    staleTime: STALE_TIMES.SEMI_FRESH, // 1 minute for stats
     ...options
   })
 }

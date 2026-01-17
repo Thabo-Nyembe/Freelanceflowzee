@@ -4,6 +4,11 @@
  * Production-ready API clients that replace setTimeout mock data patterns
  * with real Supabase queries using TanStack Query
  *
+ * Caching Strategy:
+ * - Static data (categories, types): staleTime: Infinity
+ * - User data (projects, tasks): staleTime: 5 minutes
+ * - Real-time data (messages, notifications): staleTime: 0
+ *
  * Usage:
  * ```tsx
  * import { useProjects, useClients, useInvoices } from '@/lib/api-clients'
@@ -17,6 +22,35 @@
  * }
  * ```
  */
+
+// Query Client Configuration
+export {
+  createQueryClient,
+  getQueryClient,
+  queryKeys,
+  STALE_TIMES,
+  CACHE_TIMES,
+  staticQueryOptions,
+  userDataQueryOptions,
+  realtimeQueryOptions,
+  analyticsQueryOptions,
+  invalidationPatterns,
+} from '@/lib/query-client'
+
+// Prefetching Utilities
+export {
+  prefetchProjects,
+  prefetchClients,
+  prefetchTasks,
+  prefetchInvoices,
+  prefetchNotifications,
+  prefetchConversations,
+  prefetchDashboardData,
+  prefetchDashboardMetrics,
+  prefetchForRoute,
+  prefetchCommonData,
+  createPrefetchHandlers,
+} from '@/lib/query-prefetch'
 
 // Base Client
 export { BaseApiClient } from './base-client'

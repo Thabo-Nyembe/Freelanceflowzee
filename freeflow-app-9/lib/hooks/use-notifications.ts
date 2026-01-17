@@ -1,8 +1,11 @@
 // Hook for Notifications management
 // Created: December 14, 2024
+// Updated: Real-time notifications with Supabase Realtime
 
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
+import { createClient } from '@/lib/supabase/client'
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'system' | 'user' | 'task' | 'message' | 'reminder' | 'alert'
 export type NotificationStatus = 'unread' | 'read' | 'dismissed' | 'archived' | 'deleted'
@@ -55,10 +58,20 @@ interface UseNotificationsOptions {
   notificationType?: NotificationType | 'all'
   priority?: NotificationPriority | 'all'
   limit?: number
+  realtime?: boolean
+  onNewNotification?: (notification: Notification) => void
 }
 
 export function useNotifications(options: UseNotificationsOptions = {}) {
-  const { status, notificationType, priority, limit } = options
+  const { status, notificationType, priority, limit, realtime = true, onNewNotification } = options
+  const [realtimeNotifications, setRealtimeNotifications] = useState<Notification[]>([])
+  const supabase = createClient()
+  const onNewNotificationRef = useRef(onNewNotification)
+
+  // Keep callback ref up to date
+  useEffect(() => {
+    onNewNotificationRef.current = onNewNotification
+  }, [onNewNotification])
 
   const filters: Record<string, any> = {}
   if (status && status !== 'all') filters.status = status
@@ -69,7 +82,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     table: 'notifications',
     filters,
     orderBy: { column: 'created_at', ascending: false },
-    realtime: true
+    realtime: realtime
   }
   if (limit !== undefined) queryOptions.limit = limit
 
@@ -80,14 +93,162 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     onSuccess: refetch
   })
 
+  // Real-time subscription for new notifications with callback support
+  useEffect(() => {
+    if (!realtime) return
+
+    const channel = supabase
+      .channel('notifications-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications' },
+        (payload) => {
+          const newNotification = payload.new as Notification
+          setRealtimeNotifications(prev => [newNotification, ...prev])
+
+          // Call the callback if provided
+          if (onNewNotificationRef.current) {
+            onNewNotificationRef.current(newNotification)
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications' },
+        (payload) => {
+          const updatedNotification = payload.new as Notification
+          setRealtimeNotifications(prev =>
+            prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+          )
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'notifications' },
+        (payload) => {
+          const deletedId = payload.old.id
+          setRealtimeNotifications(prev => prev.filter(n => n.id !== deletedId))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [realtime, supabase])
+
+  // Merge database data with realtime updates
+  const notifications = useMemo(() => {
+    if (!data) return realtimeNotifications
+
+    // Merge and deduplicate, prioritizing realtime updates
+    const merged = [...realtimeNotifications]
+    data.forEach(notification => {
+      if (!merged.find(n => n.id === notification.id)) {
+        merged.push(notification)
+      }
+    })
+
+    // Sort by created_at descending
+    return merged.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+  }, [data, realtimeNotifications])
+
+  // Calculate unread count
+  const unreadCount = useMemo(() => {
+    return notifications.filter(n => !n.is_read && n.status !== 'dismissed').length
+  }, [notifications])
+
+  // Mark single notification as read
+  const markAsRead = useCallback(async (notificationId: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({
+        is_read: true,
+        read_at: new Date().toISOString(),
+        status: 'read' as NotificationStatus
+      })
+      .eq('id', notificationId)
+
+    if (!error) {
+      setRealtimeNotifications(prev =>
+        prev.map(n => n.id === notificationId
+          ? { ...n, is_read: true, read_at: new Date().toISOString(), status: 'read' as NotificationStatus }
+          : n
+        )
+      )
+      refetch()
+    }
+    return !error
+  }, [supabase, refetch])
+
+  // Mark all notifications as read
+  const markAllAsRead = useCallback(async () => {
+    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id)
+    if (unreadIds.length === 0) return true
+
+    const { error } = await supabase
+      .from('notifications')
+      .update({
+        is_read: true,
+        read_at: new Date().toISOString(),
+        status: 'read' as NotificationStatus
+      })
+      .in('id', unreadIds)
+
+    if (!error) {
+      setRealtimeNotifications(prev =>
+        prev.map(n => ({
+          ...n,
+          is_read: true,
+          read_at: new Date().toISOString(),
+          status: 'read' as NotificationStatus
+        }))
+      )
+      refetch()
+    }
+    return !error
+  }, [supabase, notifications, refetch])
+
+  // Dismiss notification
+  const dismissNotification = useCallback(async (notificationId: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({
+        is_dismissed: true,
+        dismissed_at: new Date().toISOString(),
+        status: 'dismissed' as NotificationStatus
+      })
+      .eq('id', notificationId)
+
+    if (!error) {
+      setRealtimeNotifications(prev =>
+        prev.filter(n => n.id !== notificationId)
+      )
+      refetch()
+    }
+    return !error
+  }, [supabase, refetch])
+
+  // Clear all realtime notifications (local state only)
+  const clearRealtimeNotifications = useCallback(() => {
+    setRealtimeNotifications([])
+  }, [])
+
   return {
-    notifications: data,
+    notifications,
+    unreadCount,
     loading,
     error,
     mutating,
     createNotification: create,
     updateNotification: update,
     deleteNotification: remove,
+    markAsRead,
+    markAllAsRead,
+    dismissNotification,
+    clearRealtimeNotifications,
     refetch
   }
 }

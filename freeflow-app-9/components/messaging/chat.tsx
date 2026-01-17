@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { AVATAR_BLUR_PLACEHOLDER } from '@/components/ui/avatar'
 
 interface Message {
   id: number
@@ -152,10 +154,15 @@ const Chat = () => {
                   aria-label={`Chat with ${chat.name}`}
                 >
                   <CardContent className="p-4 flex items-center space-x-4">
-                    <img src={chat.avatar}
+                    <Image
+                      src={chat.avatar}
                       alt={chat.name}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 rounded-full"
-                    loading="lazy" />
+                      placeholder="blur"
+                      blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                    />
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <h3 className="font-semibold">{chat.name}</h3>
@@ -181,10 +188,15 @@ const Chat = () => {
         <div className="flex-1 flex flex-col">
           <div className="p-4 border-b">
             <div className="flex items-center space-x-4">
-              <img src={selectedChat.avatar}
+              <Image
+                src={selectedChat.avatar}
                 alt={selectedChat.name}
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-full"
-              loading="lazy" />
+                placeholder="blur"
+                blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+              />
               <h2 className="text-xl font-semibold">{selectedChat.name}</h2>
             </div>
           </div>

@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
-import { Avatar } from '@/components/ui/avatar'
+import { Avatar, AVATAR_BLUR_PLACEHOLDER } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Check, MessageSquare, X } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
@@ -87,10 +88,15 @@ export function CommentThread({
                   >
                     <div className="flex items-start gap-3">
                       <Avatar>
-                        <img src={comment.userAvatar || '/avatars/default.png'}
+                        <Image
+                          src={comment.userAvatar || '/avatars/default.png'}
                           alt={comment.userName}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full"
-                        loading="lazy" />
+                          placeholder="blur"
+                          blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                        />
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -104,10 +110,15 @@ export function CommentThread({
                           <div key={reply.id} className="ml-6 mt-2">
                             <div className="flex items-start gap-2">
                               <Avatar>
-                                <img src={reply.userAvatar || '/avatars/default.png'}
+                                <Image
+                                  src={reply.userAvatar || '/avatars/default.png'}
                                   alt={reply.userName}
+                                  width={24}
+                                  height={24}
                                   className="w-6 h-6 rounded-full"
-                                loading="lazy" />
+                                  placeholder="blur"
+                                  blurDataURL={AVATAR_BLUR_PLACEHOLDER}
+                                />
                               </Avatar>
                               <div>
                                 <div className="flex items-center gap-2">

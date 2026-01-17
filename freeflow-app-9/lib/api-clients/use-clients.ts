@@ -3,11 +3,17 @@
  *
  * Uses TanStack Query for caching, loading states, and error handling
  * Replaces useEffect + setTimeout patterns
+ *
+ * Caching Strategy:
+ * - Clients list: 5 min staleTime (user data)
+ * - Single client: 5 min staleTime (user data)
+ * - Client stats: 2 min staleTime (analytics)
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
 import { clientsClient, type Client, type CreateClientData, type UpdateClientData, type ClientFilters } from './clients-client'
 import { toast } from 'sonner'
+import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get all clients with pagination and filters
@@ -29,6 +35,8 @@ export function useClients(
 
       return response.data
     },
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions,
     ...options
   })
 }
@@ -48,7 +56,9 @@ export function useClient(id: string) {
 
       return response.data
     },
-    enabled: !!id
+    enabled: !!id,
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions
   })
 }
 
@@ -69,8 +79,8 @@ export function useCreateClient() {
       return response.data
     },
     onSuccess: (client) => {
-      // Invalidate clients list
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.clients(queryClient)
 
       // Optimistically update cache
       queryClient.setQueryData(['client', client.id], client)
@@ -100,8 +110,8 @@ export function useUpdateClient() {
       return response.data
     },
     onSuccess: (client) => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.clients(queryClient)
       queryClient.setQueryData(['client', client.id], client)
 
       toast.success('Client updated successfully')
@@ -128,8 +138,11 @@ export function useDeleteClient() {
 
       return id
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
+    onSuccess: (deletedId) => {
+      // Use centralized invalidation pattern
+      invalidationPatterns.clients(queryClient)
+      // Remove the specific client from cache
+      queryClient.removeQueries({ queryKey: ['client', deletedId] })
       toast.success('Client deleted successfully')
     },
     onError: (error: Error) => {
@@ -153,6 +166,8 @@ export function useClientStats() {
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 60000 // Refetch every minute
   })
 }

@@ -3,11 +3,17 @@
  *
  * Uses TanStack Query for caching, loading states, and error handling
  * Replaces useEffect + setTimeout patterns
+ *
+ * Caching Strategy:
+ * - Projects list: 5 min staleTime (user data)
+ * - Single project: 5 min staleTime (user data)
+ * - Project stats: 2 min staleTime (analytics)
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
 import { projectsClient, type Project, type CreateProjectData, type UpdateProjectData, type ProjectFilters } from './projects-client'
 import { toast } from 'sonner'
+import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 
 /**
  * Get all projects with pagination and filters
@@ -29,6 +35,8 @@ export function useProjects(
 
       return response.data
     },
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions,
     ...options
   })
 }
@@ -48,7 +56,9 @@ export function useProject(id: string) {
 
       return response.data
     },
-    enabled: !!id
+    enabled: !!id,
+    staleTime: STALE_TIMES.USER_DATA,
+    ...userDataQueryOptions
   })
 }
 
@@ -69,8 +79,8 @@ export function useCreateProject() {
       return response.data
     },
     onSuccess: (project) => {
-      // Invalidate projects list
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.projects(queryClient)
 
       // Optimistically update cache
       queryClient.setQueryData(['project', project.id], project)
@@ -100,8 +110,8 @@ export function useUpdateProject() {
       return response.data
     },
     onSuccess: (project) => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      // Use centralized invalidation pattern
+      invalidationPatterns.projects(queryClient)
       queryClient.setQueryData(['project', project.id], project)
 
       toast.success('Project updated successfully')
@@ -128,8 +138,11 @@ export function useDeleteProject() {
 
       return id
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    onSuccess: (deletedId) => {
+      // Use centralized invalidation pattern
+      invalidationPatterns.projects(queryClient)
+      // Remove the specific project from cache
+      queryClient.removeQueries({ queryKey: ['project', deletedId] })
       toast.success('Project deleted successfully')
     },
     onError: (error: Error) => {
@@ -153,6 +166,8 @@ export function useProjectStats() {
 
       return response.data
     },
+    staleTime: STALE_TIMES.ANALYTICS,
+    ...analyticsQueryOptions,
     refetchInterval: 60000 // Refetch every minute
   })
 }
