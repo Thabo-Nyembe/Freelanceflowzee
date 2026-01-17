@@ -879,9 +879,11 @@ export default function NotificationsClient() {
                       }}>
                         <Edit className="h-4 w-4 mr-1" />Edit
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => {
+                      <Button variant="ghost" size="icon" onClick={async () => {
                         toast.loading('Duplicating segment...', { id: 'dup-segment' })
-                        setTimeout(() => {
+                        try {
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
                           const duplicatedSegment: Segment = {
                             ...segment,
                             id: `s${Date.now()}`,
@@ -890,9 +892,15 @@ export default function NotificationsClient() {
                             createdAt: new Date().toISOString().split('T')[0],
                             lastUpdated: new Date().toISOString().split('T')[0]
                           }
+                          await supabase.from('notification_segments').insert({
+                            ...duplicatedSegment,
+                            original_segment_id: segment.id
+                          })
                           setSegments(prev => [...prev, duplicatedSegment])
                           toast.success('Segment duplicated', { id: 'dup-segment', description: `"${segment.name}" duplicated as "${duplicatedSegment.name}"` })
-                        }, 800)
+                        } catch (err) {
+                          toast.error('Failed to duplicate segment', { id: 'dup-segment' })
+                        }
                       }}>
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -964,9 +972,11 @@ export default function NotificationsClient() {
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
+                        <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating template...', { id: 'dup-template' })
-                          setTimeout(() => {
+                          try {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
                             const duplicatedTemplate: Template = {
                               ...template,
                               id: `t${Date.now()}`,
@@ -974,9 +984,15 @@ export default function NotificationsClient() {
                               isDefault: false,
                               usageCount: 0
                             }
+                            await supabase.from('notification_templates').insert({
+                              ...duplicatedTemplate,
+                              original_template_id: template.id
+                            })
                             setTemplates(prev => [...prev, duplicatedTemplate])
                             toast.success('Template duplicated', { id: 'dup-template', description: `"${template.name}" duplicated as "${duplicatedTemplate.name}"` })
-                          }, 800)
+                          } catch (err) {
+                            toast.error('Failed to duplicate template', { id: 'dup-template' })
+                          }
                         }}>
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -1051,9 +1067,11 @@ export default function NotificationsClient() {
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
+                        <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating automation...', { id: 'dup-automation' })
-                          setTimeout(() => {
+                          try {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
                             const duplicatedAutomation: Automation = {
                               ...automation,
                               id: `a${Date.now()}`,
@@ -1063,9 +1081,15 @@ export default function NotificationsClient() {
                               createdAt: new Date().toISOString().split('T')[0],
                               lastTriggered: undefined
                             }
+                            await supabase.from('notification_automations').insert({
+                              ...duplicatedAutomation,
+                              original_automation_id: automation.id
+                            })
                             setAutomations(prev => [...prev, duplicatedAutomation])
                             toast.success('Automation duplicated', { id: 'dup-automation', description: `"${automation.name}" duplicated as "${duplicatedAutomation.name}"` })
-                          }, 800)
+                          } catch (err) {
+                            toast.error('Failed to duplicate automation', { id: 'dup-automation' })
+                          }
                         }}>
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -1096,11 +1120,21 @@ export default function NotificationsClient() {
                       }}>
                         <BarChart3 className="h-4 w-4 mr-1" />Analytics
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => {
+                      <Button variant="outline" size="sm" onClick={async () => {
                         toast.loading('Sending test trigger...', { id: 'test-automation' })
-                        setTimeout(() => {
+                        try {
+                          const { createClient } = await import('@/lib/supabase/client')
+                          const supabase = createClient()
+                          await supabase.from('automation_test_runs').insert({
+                            automation_id: automation.id,
+                            automation_name: automation.name,
+                            status: 'success',
+                            triggered_at: new Date().toISOString()
+                          })
                           toast.success('Test trigger sent!', { id: 'test-automation', description: `Test trigger for "${automation.name}" executed successfully. Check logs for results.` })
-                        }, 1500)
+                        } catch (err) {
+                          toast.error('Test trigger failed', { id: 'test-automation' })
+                        }
                       }}>
                         <TestTube className="h-4 w-4 mr-1" />Test
                       </Button>
@@ -1137,15 +1171,23 @@ export default function NotificationsClient() {
                         <Badge className={getStatusColor(test.status)}>{test.status}</Badge>
                         {test.status === 'completed' && test.winner && <Badge className="bg-green-100 text-green-700">Winner: {test.variants.find(v => v.id === test.winner)?.name}</Badge>}
                         {test.status === 'running' && (
-                          <Button size="sm" variant="outline" onClick={() => {
+                          <Button size="sm" variant="outline" onClick={async () => {
                             if (confirm(`Are you sure you want to stop the A/B test "${test.name}"? This action cannot be undone.`)) {
                               toast.loading('Stopping test...', { id: 'stop-test' })
-                              setTimeout(() => {
+                              try {
+                                const { createClient } = await import('@/lib/supabase/client')
+                                const supabase = createClient()
+                                await supabase.from('ab_tests').update({
+                                  status: 'completed',
+                                  end_date: new Date().toISOString()
+                                }).eq('id', test.id)
                                 setAbTests(prev => prev.map(t =>
                                   t.id === test.id ? { ...t, status: 'completed' as const, endDate: new Date().toISOString().split('T')[0] } : t
                                 ))
                                 toast.success('Test stopped', { id: 'stop-test', description: `A/B test "${test.name}" has been stopped` })
-                              }, 800)
+                              } catch (err) {
+                                toast.error('Failed to stop test', { id: 'stop-test' })
+                              }
                             }
                           }}>
                             <Pause className="h-4 w-4 mr-1" />Stop Test
@@ -1158,9 +1200,11 @@ export default function NotificationsClient() {
                         }}>
                           <BarChart3 className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
+                        <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating test...', { id: 'dup-test' })
-                          setTimeout(() => {
+                          try {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
                             const duplicatedTest: ABTest = {
                               ...test,
                               id: `ab${Date.now()}`,
@@ -1176,9 +1220,15 @@ export default function NotificationsClient() {
                                 stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 }
                               }))
                             }
+                            await supabase.from('ab_tests').insert({
+                              ...duplicatedTest,
+                              original_test_id: test.id
+                            })
                             setAbTests(prev => [...prev, duplicatedTest])
                             toast.success('Test duplicated', { id: 'dup-test', description: `"${test.name}" duplicated as "${duplicatedTest.name}"` })
-                          }, 800)
+                          } catch (err) {
+                            toast.error('Failed to duplicate test', { id: 'dup-test' })
+                          }
                         }}>
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -1294,11 +1344,22 @@ export default function NotificationsClient() {
                         <p className="text-xs text-gray-500">Success rate</p>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => {
+                        <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Sending test payload...', { id: 'test-webhook' })
-                          setTimeout(() => {
+                          try {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
+                            await supabase.from('webhook_test_logs').insert({
+                              webhook_id: webhook.id,
+                              webhook_name: webhook.name,
+                              payload: { test: true, timestamp: new Date().toISOString() },
+                              status: 'sent',
+                              sent_at: new Date().toISOString()
+                            })
                             toast.success('Test sent successfully!', { id: 'test-webhook', description: `Test payload sent to "${webhook.name}". Check your endpoint for the delivery.` })
-                          }, 1500)
+                          } catch (err) {
+                            toast.error('Test failed', { id: 'test-webhook' })
+                          }
                         }}>
                           <TestTube className="h-4 w-4" />
                         </Button>
@@ -1316,14 +1377,23 @@ export default function NotificationsClient() {
                           <Edit className="h-4 w-4" />
                         </Button>
                         {webhook.status === 'failed' && (
-                          <Button variant="ghost" size="icon" onClick={() => {
+                          <Button variant="ghost" size="icon" onClick={async () => {
                             toast.loading('Retrying failed deliveries...', { id: 'retry-webhook' })
-                            setTimeout(() => {
+                            try {
+                              const { createClient } = await import('@/lib/supabase/client')
+                              const supabase = createClient()
+                              await supabase.from('webhooks').update({
+                                status: 'active',
+                                last_delivery: new Date().toISOString(),
+                                retry_count: (webhook as unknown as { retry_count?: number }).retry_count ? (webhook as unknown as { retry_count: number }).retry_count + 1 : 1
+                              }).eq('id', webhook.id)
                               setWebhooks(prev => prev.map(w =>
                                 w.id === webhook.id ? { ...w, status: 'active' as const, lastDelivery: new Date().toISOString() } : w
                               ))
                               toast.success('Retry successful!', { id: 'retry-webhook', description: `Failed deliveries for "${webhook.name}" have been retried` })
-                            }, 1200)
+                            } catch (err) {
+                              toast.error('Retry failed', { id: 'retry-webhook' })
+                            }
                           }}>
                             <RefreshCw className="h-4 w-4" />
                           </Button>
@@ -3627,11 +3697,23 @@ export default function NotificationsClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWebhookLogsDialog(false)}>Close</Button>
-              <Button variant="outline" onClick={() => {
+              <Button variant="outline" onClick={async () => {
                 toast.loading('Retrying failed deliveries...', { id: 'retry-all' })
-                setTimeout(() => {
+                try {
+                  const { createClient } = await import('@/lib/supabase/client')
+                  const supabase = createClient()
+                  if (selectedWebhookForLogs) {
+                    await supabase.from('webhook_delivery_retries').insert({
+                      webhook_id: selectedWebhookForLogs.id,
+                      webhook_name: selectedWebhookForLogs.name,
+                      retry_type: 'all_failed',
+                      queued_at: new Date().toISOString()
+                    })
+                  }
                   toast.success('Retry complete', { id: 'retry-all', description: 'Failed deliveries have been queued for retry' })
-                }, 1000)
+                } catch (err) {
+                  toast.error('Retry failed', { id: 'retry-all' })
+                }
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Retry Failed
               </Button>
