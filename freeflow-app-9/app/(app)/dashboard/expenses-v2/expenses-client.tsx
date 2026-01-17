@@ -574,16 +574,24 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
     const amount = mileageForm.distance * 0.67 // IRS rate
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          toast.success('Mileage trip added', {
-            description: `${mileageForm.distance} miles from ${mileageForm.origin} to ${mileageForm.destination} ($${amount.toFixed(2)})`
-          })
-          setShowMileageDialog(false)
-          setMileageForm({ origin: '', destination: '', distance: 0, purpose: '', date: new Date().toISOString().split('T')[0] })
-          resolve()
-        }, 1000)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('mileage_trips').insert({
+          origin: mileageForm.origin,
+          destination: mileageForm.destination,
+          distance: mileageForm.distance,
+          amount,
+          purpose: mileageForm.purpose,
+          date: mileageForm.date
+        })
+        if (error) throw error
+        toast.success('Mileage trip added', {
+          description: `${mileageForm.distance} miles from ${mileageForm.origin} to ${mileageForm.destination} ($${amount.toFixed(2)})`
+        })
+        setShowMileageDialog(false)
+        setMileageForm({ origin: '', destination: '', distance: 0, purpose: '', date: new Date().toISOString().split('T')[0] })
+      })(),
       { loading: 'Adding mileage trip...', success: 'Trip added!', error: 'Failed to add trip' }
     )
   }
@@ -598,34 +606,36 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     const dailyRate = 79 // Default GSA rate for major cities
     const total = days * dailyRate
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          toast.success('Per diem requested', {
-            description: `${days} days in ${perDiemForm.location} ($${total.toFixed(2)} total)`
-          })
-          setShowPerDiemDialog(false)
-          setPerDiemForm({ location: '', startDate: new Date().toISOString().split('T')[0], endDate: new Date().toISOString().split('T')[0], breakfast: true, lunch: true, dinner: true })
-          resolve()
-        }, 1000)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('per_diem_requests').insert({
+          location: perDiemForm.location,
+          start_date: perDiemForm.startDate,
+          end_date: perDiemForm.endDate,
+          days,
+          daily_rate: dailyRate,
+          total_amount: total,
+          breakfast: perDiemForm.breakfast,
+          lunch: perDiemForm.lunch,
+          dinner: perDiemForm.dinner,
+          status: 'pending'
+        })
+        if (error) throw error
+        toast.success('Per diem requested', {
+          description: `${days} days in ${perDiemForm.location} ($${total.toFixed(2)} total)`
+        })
+        setShowPerDiemDialog(false)
+        setPerDiemForm({ location: '', startDate: new Date().toISOString().split('T')[0], endDate: new Date().toISOString().split('T')[0], breakfast: true, lunch: true, dinner: true })
+      })(),
       { loading: 'Submitting per diem request...', success: 'Request submitted!', error: 'Failed to submit' }
     )
   }
 
   // Handler for linking card transaction
   const handleLinkCardTransaction = () => {
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, 1500)
-      }),
-      {
-        loading: 'Connecting to corporate card system...',
-        success: 'Card system ready! Select a transaction to link.',
-        error: 'Failed to connect to card system'
-      }
-    )
+    setShowConnectCardDialog(true)
+    toast.info('Card system ready! Select a transaction to link.')
   }
 
   // Handler for connecting corporate card
@@ -635,12 +645,17 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const handleSaveCardConnection = () => {
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setShowConnectCardDialog(false)
-          resolve()
-        }, 2000)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('corporate_cards').insert({
+          card_type: 'corporate',
+          status: 'connected',
+          connected_at: new Date().toISOString()
+        })
+        if (error) throw error
+        setShowConnectCardDialog(false)
+      })(),
       {
         loading: 'Connecting corporate card...',
         success: 'Corporate card connected successfully!',
@@ -658,20 +673,38 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleSaveIntegration = () => {
     if (!selectedIntegration) return
     const action = selectedIntegration.status === 'connected' ? 'configured' : 'connected'
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
+    if (selectedIntegration.status !== 'connected') {
+      // OAuth flow for new connections
+      const slug = selectedIntegration.name.toLowerCase().replace(/\s+/g, '-')
+      const oauthUrl = `/api/integrations/${slug}/oauth`
+      const popup = window.open(oauthUrl, `${selectedIntegration.name} Connection`, 'width=600,height=700')
+      if (popup) {
+        toast.info(`Complete ${selectedIntegration.name} authorization in the popup window`)
+      } else {
+        toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+      }
+      setShowIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } else {
+      toast.promise(
+        (async () => {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          const { error } = await supabase.from('integrations').update({
+            settings: { configured: true },
+            updated_at: new Date().toISOString()
+          }).eq('name', selectedIntegration.name)
+          if (error) throw error
           setShowIntegrationDialog(false)
           setSelectedIntegration(null)
-          resolve()
-        }, 2000)
-      }),
-      {
-        loading: `${selectedIntegration.status === 'connected' ? 'Saving' : 'Connecting'} ${selectedIntegration.name}...`,
-        success: `${selectedIntegration.name} ${action} successfully!`,
-        error: `Failed to ${action === 'connected' ? 'connect' : 'configure'} ${selectedIntegration.name}`
-      }
-    )
+        })(),
+        {
+          loading: `Saving ${selectedIntegration.name}...`,
+          success: `${selectedIntegration.name} ${action} successfully!`,
+          error: `Failed to configure ${selectedIntegration.name}`
+        }
+      )
+    }
   }
 
   // Handler for adding webhook
@@ -681,13 +714,19 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       return
     }
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setShowWebhookDialog(false)
-          setWebhookUrl('')
-          resolve()
-        }, 1500)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('webhooks').insert({
+          url: webhookUrl,
+          service: 'expenses',
+          events: ['expense.created', 'expense.approved', 'expense.rejected'],
+          status: 'active'
+        })
+        if (error) throw error
+        setShowWebhookDialog(false)
+        setWebhookUrl('')
+      })(),
       {
         loading: 'Validating webhook URL...',
         success: `Webhook added: ${webhookUrl}`,
@@ -704,9 +743,18 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const handleRegenerateApiKey = () => {
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(resolve, 1500)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const newKey = `exp_sk_live_${crypto.randomUUID().replace(/-/g, '')}`
+        const { error } = await supabase.from('api_keys').upsert({
+          id: 'expenses-api',
+          key: newKey,
+          service: 'expenses',
+          regenerated_at: new Date().toISOString()
+        })
+        if (error) throw error
+      })(),
       {
         loading: 'Regenerating API key...',
         success: 'New API key generated! Please update your integrations.',
@@ -717,13 +765,15 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   // Handler for danger zone actions
   const handleResetPolicies = () => {
+    if (!confirm('Are you sure you want to reset all expense policies to defaults?')) return
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setShowResetPoliciesDialog(false)
-          resolve()
-        }, 2000)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('expense_policies').delete().neq('id', '')
+        if (error) throw error
+        setShowResetPoliciesDialog(false)
+      })(),
       {
         loading: 'Resetting expense policies...',
         success: 'All expense policies have been reset to defaults',
@@ -734,13 +784,15 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const handleDeleteAllDrafts = () => {
     const draftCount = reports.filter(r => r.status === 'draft').length
+    if (!confirm(`Are you sure you want to delete ${draftCount} draft reports?`)) return
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setShowDeleteDraftsDialog(false)
-          resolve()
-        }, 2000)
-      }),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { error } = await supabase.from('expense_reports').delete().eq('status', 'draft')
+        if (error) throw error
+        setShowDeleteDraftsDialog(false)
+      })(),
       {
         loading: `Deleting ${draftCount} draft reports...`,
         success: `${draftCount} draft reports have been deleted`,
@@ -752,21 +804,25 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   // Handler for export all data
   const handleExportAllData = () => {
     toast.promise(
-      new Promise<{size: string}>((resolve) => {
-        setTimeout(() => {
-          // Create comprehensive export
-          const exportData = {
-            exportDate: new Date().toISOString(),
-            expenses: reports,
-            policies: policies,
-            mileage: mileage,
-            perDiems: perDiems,
-            settings: {
-              currency: 'USD',
-              fiscalYearStart: 'January',
-              autoApproveThreshold: 50
-            }
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: expenseReports } = await supabase.from('expense_reports').select('*')
+        const { data: expensePolicies } = await supabase.from('expense_policies').select('*')
+        const { data: mileageTrips } = await supabase.from('mileage_trips').select('*')
+        const { data: perDiemRequests } = await supabase.from('per_diem_requests').select('*')
+        const exportData = {
+          exportDate: new Date().toISOString(),
+          expenses: expenseReports || reports,
+          policies: expensePolicies || policies,
+          mileage: mileageTrips || mileage,
+          perDiems: perDiemRequests || perDiems,
+          settings: {
+            currency: 'USD',
+            fiscalYearStart: 'January',
+            autoApproveThreshold: 50
           }
+        }
           const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
           const url = URL.createObjectURL(blob)
           const link = document.createElement('a')
