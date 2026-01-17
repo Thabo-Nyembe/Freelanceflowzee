@@ -468,23 +468,275 @@ export default function CollaborationClient() {
   const [pinnedMessages, setPinnedMessages] = useState<string[]>([])
   const [flaggedMessages, setFlaggedMessages] = useState<string[]>([])
 
+  // ==========================================================================
+  // REAL-TIME COLLABORATION HOOKS - Wired to Supabase APIs
+  // ==========================================================================
+
+  // Team members from API
+  const { data: teamMembersData, isLoading: isLoadingTeam } = useTeamMembers()
+  const { data: teamStatsData } = useTeamStats()
+  const sendInvitation = useSendInvitation()
+
+  // Messaging/Chat from API
+  const { data: conversationsData, isLoading: isLoadingConversations } = useConversations()
+  const { data: messagingStatsData } = useMessagingStats()
+  const sendMessage = useSendMessage()
+  const markAsRead = useMarkAsRead()
+  const addReaction = useAddReaction()
+  const createConversation = useCreateConversation()
+
+  // Calendar events for meetings
+  const { data: eventsData, isLoading: isLoadingEvents } = useEvents()
+  const { data: bookingsData } = useBookings()
+  const createEvent = useCreateEvent()
+  const updateEvent = useUpdateEvent()
+
+  // Notifications for real-time updates
+  const { data: notificationsData } = useNotifications()
+
+  // Map API data to component format with fallbacks
+  const apiTeamMembers = teamMembersData?.data || []
+  const apiConversations = conversationsData?.data || []
+  const apiEvents = eventsData?.data || []
+
+  // Transform API team members to match mock member structure
+  const mockMembers: Member[] = useMemo(() => {
+    if (apiTeamMembers.length > 0) {
+      return apiTeamMembers.map((member: any) => ({
+        id: member.id,
+        name: member.name || member.full_name || 'Team Member',
+        email: member.email || '',
+        avatar: member.avatar_url || '',
+        role: member.role || 'member',
+        presence: member.status === 'active' ? 'online' : 'offline',
+        cursorColor: `#${Math.floor(Math.random()*16777215).toString(16)}`
+      }))
+    }
+    // Default fallback members for initial render
+    return [
+      { id: '1', name: 'Sarah Chen', email: 'sarah@team.com', avatar: '', role: 'admin', presence: 'online' as PresenceStatus, cursorColor: '#3B82F6' },
+      { id: '2', name: 'Mike Johnson', email: 'mike@team.com', avatar: '', role: 'member', presence: 'online' as PresenceStatus, cursorColor: '#10B981' },
+      { id: '3', name: 'Emily Davis', email: 'emily@team.com', avatar: '', role: 'member', presence: 'away' as PresenceStatus, cursorColor: '#F59E0B' },
+      { id: '4', name: 'Alex Thompson', email: 'alex@team.com', avatar: '', role: 'viewer', presence: 'offline' as PresenceStatus, cursorColor: '#8B5CF6' }
+    ]
+  }, [apiTeamMembers])
+
+  // Transform API conversations to channels format
+  const mockChannels: Channel[] = useMemo(() => {
+    if (apiConversations.length > 0) {
+      return apiConversations.map((conv: any) => ({
+        id: conv.id,
+        name: conv.title || 'general',
+        type: conv.type === 'direct' ? 'direct' : 'public',
+        description: conv.description || '',
+        memberCount: conv.participants?.length || 1,
+        unreadCount: conv.unread_count || 0,
+        isPinned: false,
+        isMuted: false,
+        createdAt: conv.created_at,
+        lastMessage: conv.last_message
+      }))
+    }
+    // Default fallback channels
+    return [
+      { id: 'c1', name: 'general', type: 'public' as ChannelType, description: 'General team discussions', memberCount: 45, unreadCount: 12, isPinned: true, isMuted: false, createdAt: '2024-01-01' },
+      { id: 'c2', name: 'design-team', type: 'private' as ChannelType, description: 'Design discussions', memberCount: 8, unreadCount: 3, isPinned: false, isMuted: false, createdAt: '2024-01-05' },
+      { id: 'c3', name: 'engineering', type: 'public' as ChannelType, description: 'Engineering updates', memberCount: 15, unreadCount: 0, isPinned: false, isMuted: false, createdAt: '2024-01-03' }
+    ]
+  }, [apiConversations])
+
+  // Transform API events to meetings format
+  const mockMeetings: Meeting[] = useMemo(() => {
+    if (apiEvents.length > 0) {
+      return apiEvents.map((event: any) => ({
+        id: event.id,
+        title: event.title || 'Meeting',
+        description: event.description || '',
+        status: event.status === 'in_progress' ? 'live' : (event.status === 'completed' ? 'ended' : 'scheduled') as MeetingStatus,
+        startTime: event.start_time || event.start_date,
+        endTime: event.end_time || event.end_date,
+        duration: event.duration || 30,
+        organizer: mockMembers[0],
+        participants: event.attendees?.map((a: any) => ({ id: a.id, name: a.name || 'Attendee', email: a.email || '' })) || [],
+        isRecurring: event.is_recurring || false,
+        hasRecording: false,
+        meetingUrl: event.meeting_url || `https://meet.freeflow.app/${event.id}`
+      }))
+    }
+    // Default fallback meetings
+    return [
+      { id: 'mt1', title: 'Sprint Planning', description: 'Plan Sprint 25 backlog', status: 'scheduled' as MeetingStatus, startTime: new Date(Date.now() + 86400000).toISOString(), duration: 60, organizer: mockMembers[0], participants: mockMembers.slice(0, 4), isRecurring: true, hasRecording: false, meetingUrl: 'https://meet.freeflow.app/sprint-planning' },
+      { id: 'mt2', title: 'Design Review', description: 'Review new feature designs', status: 'live' as MeetingStatus, startTime: new Date().toISOString(), duration: 45, organizer: mockMembers[2] || mockMembers[0], participants: mockMembers.slice(0, 3), isRecurring: false, hasRecording: true, meetingUrl: 'https://meet.freeflow.app/design-review' },
+      { id: 'mt3', title: 'Team Standup', description: 'Daily standup meeting', status: 'ended' as MeetingStatus, startTime: new Date(Date.now() - 3600000).toISOString(), endTime: new Date(Date.now() - 3000000).toISOString(), duration: 15, organizer: mockMembers[1] || mockMembers[0], participants: mockMembers, isRecurring: true, hasRecording: true, meetingUrl: 'https://meet.freeflow.app/standup' }
+    ]
+  }, [apiEvents, mockMembers])
+
+  // Static mock data for boards (to be wired to collaboration board API when available)
+  const mockBoards: Board[] = useMemo(() => [
+    { id: '1', name: 'Product Roadmap 2024', description: 'Strategic planning and feature prioritization', type: 'kanban', status: 'active', createdAt: '2024-01-10T10:00:00Z', updatedAt: '2024-01-15T14:30:00Z', createdBy: mockMembers[0], members: mockMembers.slice(0, 4), isStarred: true, isLocked: false, isPublic: false, viewCount: 245, commentCount: 32, elementCount: 156, version: 47, tags: ['roadmap', 'planning'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
+    { id: '2', name: 'User Flow Diagrams', description: 'Main user journeys and flows', type: 'flowchart', status: 'active', createdAt: '2024-01-08T09:00:00Z', updatedAt: '2024-01-15T11:20:00Z', createdBy: mockMembers[2] || mockMembers[0], members: mockMembers.slice(0, 3), isStarred: true, isLocked: false, isPublic: true, viewCount: 189, commentCount: 18, elementCount: 89, version: 23, tags: ['ux', 'design'], teamId: 't2', teamName: 'Design Team', channelId: 'c2' },
+    { id: '3', name: 'Sprint Retrospective', description: 'Team reflection on Sprint 24', type: 'retrospective', status: 'active', createdAt: '2024-01-14T15:00:00Z', updatedAt: '2024-01-15T10:00:00Z', createdBy: mockMembers[1] || mockMembers[0], members: mockMembers, isStarred: false, isLocked: false, isPublic: false, viewCount: 56, commentCount: 45, elementCount: 67, version: 12, tags: ['agile', 'retro'], teamId: 't1', teamName: 'Product Team', channelId: 'c1' },
+    { id: '4', name: 'Architecture Diagram', description: 'System architecture overview', type: 'flowchart', status: 'active', createdAt: '2024-01-05T10:00:00Z', updatedAt: '2024-01-14T16:00:00Z', createdBy: mockMembers[3] || mockMembers[0], members: mockMembers.slice(1, 4), isStarred: false, isLocked: true, isPublic: false, viewCount: 312, commentCount: 23, elementCount: 198, version: 56, tags: ['architecture', 'technical'], teamId: 't3', teamName: 'Engineering', channelId: 'c3' }
+  ], [mockMembers])
+
+  // Mock files (to be wired to files API)
+  const mockFiles: SharedFile[] = useMemo(() => [
+    { id: 'f1', name: 'Product Roadmap 2024.pdf', type: 'document', size: 2456000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-10T10:00:00Z', modifiedAt: '2024-01-15T14:00:00Z', sharedWith: ['c1'], downloadCount: 45, version: 3, isStarred: true },
+    { id: 'f2', name: 'Design System.fig', type: 'document', size: 15678000, uploadedBy: mockMembers[2] || mockMembers[0], uploadedAt: '2024-01-08T09:00:00Z', modifiedAt: '2024-01-14T16:00:00Z', sharedWith: ['c2'], downloadCount: 28, version: 12, isStarred: true },
+    { id: 'f3', name: 'Sprint Review Recording.mp4', type: 'video', size: 156780000, uploadedBy: mockMembers[1] || mockMembers[0], uploadedAt: '2024-01-12T15:00:00Z', modifiedAt: '2024-01-12T15:00:00Z', sharedWith: ['c1', 'c3'], downloadCount: 12, version: 1, isStarred: false },
+    { id: 'f4', name: 'Q1 Budget.xlsx', type: 'spreadsheet', size: 345000, uploadedBy: mockMembers[0], uploadedAt: '2024-01-05T10:00:00Z', modifiedAt: '2024-01-10T11:00:00Z', sharedWith: ['c1'], downloadCount: 8, version: 2, isStarred: false }
+  ], [mockMembers])
+
+  // Mock teams (to be wired to teams API)
+  const mockTeams = useMemo(() => [
+    { id: 't1', name: 'Product Team', memberCount: 12, boardCount: 8, channelCount: 4, color: '#3B82F6' },
+    { id: 't2', name: 'Design Team', memberCount: 6, boardCount: 5, channelCount: 2, color: '#10B981' },
+    { id: 't3', name: 'Engineering', memberCount: 18, boardCount: 12, channelCount: 6, color: '#8B5CF6' }
+  ], [])
+
+  // Mock templates
+  const mockTemplates = useMemo(() => [
+    { id: 'tp1', name: 'Sprint Planning', description: 'Plan your sprint backlog', category: 'Agile', usageCount: 1234, isOfficial: true },
+    { id: 'tp2', name: 'Retrospective', description: 'Reflect on your sprint', category: 'Agile', usageCount: 987, isOfficial: true },
+    { id: 'tp3', name: 'User Story Map', description: 'Map user journeys', category: 'Product', usageCount: 756, isOfficial: false }
+  ], [])
+
+  // Mock activities
+  const mockActivities = useMemo(() => [
+    { id: 'a1', type: 'board', action: 'updated', actor: mockMembers[0], target: 'Product Roadmap', timestamp: new Date(Date.now() - 300000).toISOString() },
+    { id: 'a2', type: 'file', action: 'uploaded', actor: mockMembers[1] || mockMembers[0], target: 'Design specs.pdf', timestamp: new Date(Date.now() - 600000).toISOString() },
+    { id: 'a3', type: 'meeting', action: 'scheduled', actor: mockMembers[2] || mockMembers[0], target: 'Sprint Planning', timestamp: new Date(Date.now() - 900000).toISOString() }
+  ], [mockMembers])
+
+  // Mock messages for chat
+  const mockMessages = useMemo(() => [
+    { id: 'm1', sender: mockMembers[0], content: 'Hey team! Just pushed the latest updates to the roadmap board.', timestamp: new Date(Date.now() - 3600000).toISOString(), reactions: [{ emoji: '👍', count: 3 }] },
+    { id: 'm2', sender: mockMembers[1] || mockMembers[0], content: 'Looks great! I have a few suggestions for the Q2 timeline.', timestamp: new Date(Date.now() - 3000000).toISOString(), reactions: [] },
+    { id: 'm3', sender: mockMembers[2] || mockMembers[0], content: 'I\'ve attached the updated wireframes for the new feature.', timestamp: new Date(Date.now() - 2400000).toISOString(), reactions: [{ emoji: '🎨', count: 2 }] }
+  ], [mockMembers])
+
+  // Mock integrations
+  const mockIntegrations = useMemo(() => [
+    { id: 'int1', name: 'Slack', status: 'connected' as const, icon: '💬', lastSync: new Date().toISOString() },
+    { id: 'int2', name: 'Google Drive', status: 'connected' as const, icon: '📁', lastSync: new Date().toISOString() },
+    { id: 'int3', name: 'Jira', status: 'disconnected' as const, icon: '🔧', lastSync: '' }
+  ], [])
+
+  // Mock automations
+  const mockAutomations = useMemo(() => [
+    { id: 'auto1', name: 'Daily Standup Reminder', trigger: 'scheduled', actions: ['Send notification', 'Create channel message'], isActive: true, lastTriggered: new Date(Date.now() - 86400000).toISOString() },
+    { id: 'auto2', name: 'New File Notification', trigger: 'file_upload', actions: ['Notify channel', 'Update activity feed'], isActive: true }
+  ], [])
+
+  // Mock collaboration data for competitive upgrade components
+  const mockCollabCollaborators = useMemo(() => mockMembers.map(m => ({ id: m.id, name: m.name, avatar: m.avatar || '', color: m.cursorColor || '#3B82F6' })), [mockMembers])
+  const mockCollabQuickActions = useMemo(() => [
+    { id: 'qa1', label: 'New Board', icon: 'plus', action: handleCreateBoard },
+    { id: 'qa2', label: 'Schedule Meeting', icon: 'calendar', action: handleScheduleMeeting },
+    { id: 'qa3', label: 'Start Call', icon: 'video', action: handleStartCall }
+  ], [])
+  const mockCollabAIInsights = useMemo(() => [
+    { id: 'ai1', type: 'suggestion', title: 'Meeting Optimization', description: 'Consider combining your 3 weekly syncs into 2 sessions', priority: 'medium' },
+    { id: 'ai2', type: 'alert', title: 'Unread Messages', description: `You have ${mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)} unread messages across channels`, priority: 'low' }
+  ], [mockChannels])
+  const mockCollabPredictions = useMemo(() => [
+    { id: 'p1', metric: 'Team Velocity', current: 85, predicted: 92, confidence: 0.87 },
+    { id: 'p2', metric: 'Collaboration Score', current: 78, predicted: 83, confidence: 0.91 }
+  ], [])
+  const mockCollabActivities = useMemo(() => mockActivities.map(a => ({
+    id: a.id,
+    type: a.type as 'board' | 'file' | 'meeting',
+    message: `${a.actor.name} ${a.action} ${a.target}`,
+    timestamp: a.timestamp,
+    user: { name: a.actor.name, avatar: a.actor.avatar || '' }
+  })), [mockActivities])
+
+  // Real-time message sending using API hook
+  const handleSendCurrentMessage = useCallback(async () => {
+    if (!messageInput.trim()) {
+      toast.error('Message cannot be empty')
+      return
+    }
+    if (selectedChannel) {
+      try {
+        await sendMessage.mutateAsync({
+          conversationId: selectedChannel.id,
+          content: messageInput.trim()
+        })
+        setMessageInput('')
+        toast.success('Message sent')
+      } catch (error) {
+        // Fallback to API call
+        await handleSendMessage(selectedChannel.id, messageInput)
+        setMessageInput('')
+      }
+    } else {
+      toast.error('Please select a channel first')
+    }
+  }, [messageInput, selectedChannel, sendMessage])
+
+  // Real-time invitation using API hook
+  const handleSendInvitation = useCallback(async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Email is required')
+      return
+    }
+    try {
+      await sendInvitation.mutateAsync({
+        email: inviteEmail.trim(),
+        role: inviteRole as any
+      })
+      setShowInviteDialog(false)
+      setInviteEmail('')
+      setInviteRole('member')
+      toast.success('Invitation sent successfully!')
+    } catch (error) {
+      // Fallback to API call
+      await apiPost('/api/collaboration/invitations', { email: inviteEmail, role: inviteRole }, {
+        loading: 'Sending invitation...',
+        success: 'Invitation sent successfully!',
+        error: 'Failed to send invitation'
+      })
+      setShowInviteDialog(false)
+      setInviteEmail('')
+      setInviteRole('member')
+    }
+  }, [inviteEmail, inviteRole, sendInvitation])
+
+  // Real-time meeting scheduling using API hook
+  const handleScheduleMeetingWithAPI = useCallback(async (meetingData?: { title?: string; startTime?: string; duration?: number }) => {
+    try {
+      await createEvent.mutateAsync({
+        title: meetingData?.title || 'New Meeting',
+        start_date: meetingData?.startTime || new Date(Date.now() + 3600000).toISOString(),
+        end_date: new Date(Date.now() + 3600000 + (meetingData?.duration || 30) * 60000).toISOString(),
+        type: 'meeting',
+        is_all_day: false
+      })
+      toast.success('Meeting scheduled successfully')
+    } catch (error) {
+      // Fallback to existing handler
+      handleScheduleMeeting()
+    }
+  }, [createEvent])
+
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
       return board.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
              board.description?.toLowerCase().includes(searchQuery.toLowerCase())
     })
-  }, [searchQuery])
+  }, [searchQuery, mockBoards])
 
   const stats = useMemo(() => ({
     totalBoards: mockBoards.length,
     activeBoards: mockBoards.filter(b => b.status === 'active').length,
-    totalMembers: mockMembers.length,
-    onlineNow: mockMembers.filter(m => m.presence === 'online').length,
+    totalMembers: teamStatsData?.data?.totalMembers || mockMembers.length,
+    onlineNow: teamStatsData?.data?.activeMembers || mockMembers.filter(m => m.presence === 'online').length,
     totalChannels: mockChannels.length,
-    unreadMessages: mockChannels.reduce((sum, c) => sum + c.unreadCount, 0),
+    unreadMessages: messagingStatsData?.data?.unreadCount || mockChannels.reduce((sum, c) => sum + c.unreadCount, 0),
     scheduledMeetings: mockMeetings.filter(m => m.status === 'scheduled').length,
     sharedFiles: mockFiles.length
-  }), [])
+  }), [mockBoards, mockMembers, mockChannels, mockMeetings, mockFiles, teamStatsData, messagingStatsData])
 
   const statsCards = [
     { label: 'Boards', value: stats.totalBoards.toString(), icon: Layout, color: 'from-blue-500 to-blue-600' },

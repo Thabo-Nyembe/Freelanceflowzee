@@ -1,9 +1,22 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { useConversations } from '@/lib/hooks/use-conversations'
+
+// Real-time API hooks for messaging
+import {
+  useConversations as useApiConversations,
+  useMessagingStats,
+  useSendMessage,
+  useMarkAsRead as useMarkAsReadApi,
+  useAddReaction as useAddReactionApi,
+  useCreateConversation,
+  useNotifications,
+  useTeamMembers
+} from '@/lib/api-clients'
+
 // Types used throughout - commented to avoid unused import errors
 // import type { Chat, ChatMessage } from '@/lib/hooks/use-conversations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -287,6 +300,79 @@ export default function MessagesClient() {
     setTyping,
     searchMessages
   } = useConversations({ enableRealtime: true })
+
+  // ==========================================================================
+  // NEW API HOOKS - Enhanced messaging with TanStack Query
+  // ==========================================================================
+
+  // Messaging stats for real-time metrics
+  const { data: messagingStatsData } = useMessagingStats()
+  const sendMessageApi = useSendMessage()
+  const markAsReadApi = useMarkAsReadApi()
+  const addReactionApi = useAddReactionApi()
+  const createConversationApi = useCreateConversation()
+
+  // Team members for mentions and user lookup
+  const { data: teamMembersData } = useTeamMembers()
+
+  // Notifications for real-time alerts
+  const { data: notificationsData } = useNotifications()
+
+  // Enhanced stats combining API data with local data
+  const enhancedStats = useMemo(() => ({
+    totalUnread: messagingStatsData?.data?.unreadCount ?? totalUnread,
+    totalConversations: messagingStatsData?.data?.totalConversations ?? supabaseChats?.length ?? 0,
+    directMessages: directChats?.length ?? 0,
+    groupChats: groupChats?.length ?? 0,
+    channels: supabaseChannels?.length ?? mockChannels.length,
+    unreadNotifications: notificationsData?.data?.filter((n: any) => !n.is_read).length ?? 0
+  }), [messagingStatsData, totalUnread, supabaseChats, directChats, groupChats, supabaseChannels, notificationsData])
+
+  // Enhanced send message with API fallback
+  const handleSendMessageEnhanced = useCallback(async (content: string, channelId?: string) => {
+    const targetChannelId = channelId || selectedChannel?.id
+    if (!content.trim() || !targetChannelId) {
+      toast.error('Message cannot be empty')
+      return
+    }
+
+    try {
+      // Try API hook first
+      await sendMessageApi.mutateAsync({
+        conversationId: targetChannelId,
+        content: content.trim()
+      })
+      setMessageInput('')
+    } catch (error) {
+      // Fallback to existing sendChatMessage
+      try {
+        await sendChatMessage(content.trim())
+        setMessageInput('')
+      } catch (fallbackError) {
+        toast.error('Failed to send message')
+      }
+    }
+  }, [selectedChannel, sendMessageApi, sendChatMessage])
+
+  // Enhanced create conversation with API hook
+  const handleCreateConversationEnhanced = useCallback(async (participants: string[], type: 'direct' | 'group' | 'channel', title?: string) => {
+    try {
+      await createConversationApi.mutateAsync({
+        participantIds: participants,
+        type,
+        title
+      })
+      toast.success('Conversation created')
+    } catch (error) {
+      // Fallback to existing createChat
+      try {
+        await createChat(participants, type === 'group', title)
+        toast.success('Conversation created')
+      } catch (fallbackError) {
+        toast.error('Failed to create conversation')
+      }
+    }
+  }, [createConversationApi, createChat])
 
   // Settings
   const [settings, setSettings] = useState({

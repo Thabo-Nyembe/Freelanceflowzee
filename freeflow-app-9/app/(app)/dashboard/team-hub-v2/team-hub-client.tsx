@@ -2,6 +2,23 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+
+// Real-time team collaboration API hooks
+import {
+  useTeamMembers,
+  useTeamStats,
+  useCreateTeamMember,
+  useUpdateTeamMember,
+  useDeleteTeamMember,
+  useSendInvitation,
+  useTeamInvitations,
+  useConversations,
+  useMessagingStats,
+  useSendMessage,
+  useNotifications,
+  useEvents,
+  useCreateEvent
+} from '@/lib/api-clients'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
