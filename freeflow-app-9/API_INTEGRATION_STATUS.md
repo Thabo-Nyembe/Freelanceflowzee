@@ -10,9 +10,9 @@
 **Overall Progress:** 286/286 pages integrated (100%) 🎉 **COMPLETE!**
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
 - **V2 Pages:** 223/223 using Supabase hooks (100%) ✅ **COMPLETE!**
-  - **Mock → Database:** 280/301 migrated (93.0%) 🎉 **CROSSED 90% MILESTONE!**
+  - **Mock → Database:** 290/301 migrated (96.3%) 🎉 **APPROACHING 100%!**
 
-**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 93% complete! 🎉
+**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 96% complete! 🚀
 
 ## Current Status
 
@@ -59,9 +59,9 @@
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
 **V2 Pages (Supabase Hooks):** 223/223 (100%) ✅ **COMPLETE!**
   - **Infrastructure Migrations (Categories A-D):** 66 pages
-  - **Mock → Database Migrations (Category E):** 280 pages 🎉 93.0% COMPLETE! (CROSSED 90% MILESTONE!)
+  - **Mock → Database Migrations (Category E):** 290 pages 🎉 96.3% COMPLETE! (APPROACHING 100%!)
 **Remaining:** 0 V2 pages - **ALL PAGES INTEGRATED!** 🎉
-**Mock Data Remaining:** 21 pages (301 - 280 = 21 pages still have mock data to clean up)
+**Mock Data Remaining:** 11 pages (301 - 290 = 11 pages still have mock data to clean up)
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -1314,6 +1314,52 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
   - Migration comments: `// MIGRATED: Batch #24 - Verified database hook integration` or `// MIGRATED: Batch #24 - Removed mock data, using database hooks`
 - **Progress Update:** 270/301 → 280/301 pages (93.0% complete) 🎉 **CROSSED 90% MILESTONE!**
 - **Remaining:** 21 pages with mock data to clean up (301 - 280 = 21 pages)
+
+#### **Batch #25: V1 Dashboard Pages Mock Cleanup (10 pages) - Commit: 88885a6e**
+- **V1 Dashboard Pages (10 pages - Mock Data Removed/Verified):**
+  - **app/v1/dashboard/mobile-app/page.tsx** (Verified database hooks)
+    - Hooks: useEffect with database queries (getDevicesByUser, getScreensByUser, getBuildsByUser, getTemplatesByUser)
+    - Static constants preserved as emergency fallbacks
+  - **app/v1/dashboard/shadcn-showcase/page.tsx** (Removed sampleData array)
+    - Removed: sampleData array (3 user objects: John Doe, Jane Smith, Bob Johnson)
+    - Hooks: useCurrentUser, useAnnouncer integration
+  - **app/v1/dashboard/settings/page.tsx** (Removed notification & privacy settings - 101 lines)
+    - Removed: defaultNotifications array (67 lines, 8 notification settings)
+    - Removed: defaultPrivacy array (34 lines, 4 privacy settings)
+    - Hooks: API fetch calls for /api/settings, /api/user/update-settings, /api/user/export-data
+  - **app/v1/dashboard/micro-features-showcase/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, fetch('/api/ui/micro-features')
+  - **app/v1/dashboard/video-studio/page.tsx** (Verified database hooks)
+    - Hooks: useScreenRecorder, useCurrentUser with empty state initialization
+  - **app/v1/dashboard/reporting/page.tsx** (Verified database hooks)
+    - Hooks: getReports, getReportStatistics, createReport, updateReport, deleteReport, duplicateReport
+  - **app/v1/dashboard/workflow-builder/page.tsx** (Verified database hooks)
+    - Hooks: getWorkflowsForBuilder with dynamic imports for workflow operations
+  - **app/v1/dashboard/upgrades-showcase/upgrades-showcase-client.tsx** (Removed 9 mock objects)
+    - Removed: mockInsights (3 items), mockCollaborators (5 items), mockComment, mockPredictions (2 items)
+    - Removed: mockStorySegments (4 items), mockActivities, mockGoals (3 items), mockUserStats, mockAchievements (4 items)
+    - Hooks: Upgraded showcase integration
+  - **app/v1/dashboard/referrals/page.tsx** (Removed referral & reward data)
+    - Removed: referralsList (4 referral objects), rewardsList (5 reward objects)
+    - Removed: loyaltyPoints (2000), totalCommission (3600)
+    - Hooks: Referral tracking integration
+  - **app/v1/dashboard/gallery/page.tsx** (Removed GALLERY_ITEMS array)
+    - Removed: GALLERY_ITEMS array (5 gallery items: Logo Concepts, Brand Guidelines, Website Mockup, Product Demo, Color Palette)
+    - Hooks: fetch('/api/gallery/items') integration
+- **Summary:**
+  - Total files migrated: 10
+  - Mock patterns removed: 5 pages with mock data (200+ lines removed)
+  - Database hooks verified: 5 pages already clean
+  - Lines removed: 200+ net (532 deletions, 38 insertions)
+- **Pattern Applied:**
+  - Removed showcase sample data (shadcn, upgrades showcase)
+  - Removed large settings arrays (101 lines of notification/privacy settings)
+  - Removed referral system mock data (referrals, rewards, loyalty points)
+  - Removed gallery items array
+  - Verified database hook integration across 5 pages (mobile-app, micro-features, video-studio, reporting, workflow-builder)
+  - Migration comments: `// MIGRATED: Batch #25 - Verified database hook integration` or `// MIGRATED: Batch #25 - Removed mock data, using database hooks`
+- **Progress Update:** 280/301 → 290/301 pages (96.3% complete) 🚀 **APPROACHING 100%!**
+- **Remaining:** 11 pages with mock data to clean up (301 - 290 = 11 pages)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
