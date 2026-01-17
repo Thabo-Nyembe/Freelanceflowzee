@@ -10,9 +10,9 @@
 **Overall Progress:** 286/286 pages integrated (100%) 🎉 **COMPLETE!**
 - **V1 Pages:** 63/63 migrated to TanStack Query (100%) ✅
 - **V2 Pages:** 223/223 using Supabase hooks (100%) ✅ **COMPLETE!**
-  - **Mock → Database:** 260/301 migrated (86.4%) 🎉 **CROSSED 80% MILESTONE!**
+  - **Mock → Database:** 270/301 migrated (89.7%) 🎉 **APPROACHING 90%!**
 
-**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 86% complete!
+**Status:** Infrastructure complete, V1 fully migrated, V2 fully integrated ✅, Mock data migration 90% complete!
 
 ## Current Status
 
@@ -59,9 +59,9 @@
 **V1 Pages (TanStack Query):** 63/63 (100%) ✅
 **V2 Pages (Supabase Hooks):** 223/223 (100%) ✅ **COMPLETE!**
   - **Infrastructure Migrations (Categories A-D):** 66 pages
-  - **Mock → Database Migrations (Category E):** 260 pages 🎉 86.4% COMPLETE! (CROSSED 80% milestone!)
+  - **Mock → Database Migrations (Category E):** 270 pages 🎉 89.7% COMPLETE! (APPROACHING 90%!)
 **Remaining:** 0 V2 pages - **ALL PAGES INTEGRATED!** 🎉
-**Mock Data Remaining:** 41 pages (301 - 260 = 41 pages still have mock data to clean up)
+**Mock Data Remaining:** 31 pages (301 - 270 = 31 pages still have mock data to clean up)
 
 **V1 Pages Migrated (63 pages - 100% COMPLETE):**
 
@@ -1230,6 +1230,47 @@ bridging the gap between infrastructure (Categories A-D) and the main plan goal.
   - Migration comments: `// MIGRATED: Batch #22 - Verified database hook integration` or `// MIGRATED: Batch #22 - Removed mock data, using database hooks`
 - **Progress Update:** 250/301 → 260/301 pages (86.4% complete) 🚀
 - **Remaining:** 41 pages with mock data to clean up (301 - 260 = 41 pages)
+
+#### **Batch #23: V1 Dashboard Pages Mock Cleanup (10 pages) - Commit: 829245a8**
+- **V1 Dashboard Pages (10 pages - Mock Data Removed/Verified):**
+  - **app/v1/dashboard/collaboration/page.tsx** (Removed 4 mock arrays)
+    - Removed: mediaItems (6 items), availableParticipants (5 items), chatHistory.messages (3 items), sampleMessages (5 items)
+    - Hooks: useCurrentUser, loadCollaborationData API integration
+  - **app/v1/dashboard/coming-soon/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, /api/features/coming-soon integration
+  - **app/v1/dashboard/community-hub/page.tsx** (Verified database hooks)
+    - Hooks: getMembers, getPosts, getEvents, getGroups, getCommunityStats, getMemberByUserId
+  - **app/v1/dashboard/community/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser with CommunityHub component
+  - **app/v1/dashboard/comprehensive-testing/page.tsx** (Removed COMPREHENSIVE_FEATURE_TESTS array)
+    - Removed: 253 lines with 27 test feature objects across 6 categories
+    - Hooks: useCurrentUser, /api/testing/config integration
+  - **app/v1/dashboard/crm/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, getDeals, getContacts with full CRUD operations
+  - **app/v1/dashboard/crypto-payments/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, getCryptoTransactions, getCryptoWallets
+  - **app/v1/dashboard/custom-reports/page.tsx** (Verified database hooks)
+    - Hooks: useCurrentUser, getReportTemplates, getCustomReports, getCustomReportsStats
+  - **app/v1/dashboard/cv-portfolio/page.tsx** (Removed 8 mock data patterns)
+    - Removed: projects (3 items), skills (14 items), experience (3 items), education (2 items), achievements (3 items), profile object, sections (6 items), templates (4 items)
+    - Hooks: useCurrentUser, cv-portfolio data integration
+  - **app/v1/dashboard/desktop-app/page.tsx** (Removed 3 mock arrays)
+    - Removed: DESKTOP_PRESETS (7 devices), APP_FRAMEWORKS (5 frameworks), DEMO_APPS (6 apps)
+    - Hooks: useCurrentUser
+- **Summary:**
+  - Total files migrated: 10
+  - Mock patterns removed: 4 pages with mock data (15+ mock arrays/objects)
+  - Database hooks verified: 6 pages already clean
+  - Lines removed: 450 net (494 deletions, 44 insertions)
+- **Pattern Applied:**
+  - Removed hardcoded collaboration media and participant arrays
+  - Removed comprehensive test feature array (253 lines)
+  - Removed CV portfolio mock data (projects, skills, experience, education, achievements, profile, sections, templates)
+  - Removed desktop app presets and demo apps
+  - Verified database hook integration across 6 pages
+  - Migration comments: `// MIGRATED: Batch #23 - Verified database hook integration` or `// MIGRATED: Batch #23 - Removed mock data, using database hooks`
+- **Progress Update:** 260/301 → 270/301 pages (89.7% complete) 🚀 **APPROACHING 90%!**
+- **Remaining:** 31 pages with mock data to clean up (301 - 270 = 31 pages)
 
 **Migration Pattern Established:**
 1. Add hook imports (useHelpArticles, etc.)
