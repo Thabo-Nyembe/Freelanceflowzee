@@ -67,6 +67,26 @@ import {
 // World-class file upload with drag & drop
 import { AdvancedFileUpload, type UploadedFile } from '@/components/world-class/file-upload/advanced-file-upload'
 
+// Production-ready API hooks for file management
+import {
+  useFiles,
+  useFile,
+  useUploadFile,
+  useUploadFiles,
+  useUpdateFile,
+  useDeleteFile,
+  usePermanentlyDeleteFile,
+  useStarFile,
+  useFolders,
+  useCreateFolder,
+  useStorageStats,
+  useDownloadFile,
+  useMoveFile,
+  type FileItem as ApiFileItem,
+  type Folder as ApiFolder,
+  type StorageStats as ApiStorageStats
+} from '@/lib/api-clients'
+
 
 
 
@@ -293,13 +313,85 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   const [filterType, setFilterType] = useState<FileType | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('storage')
 
-  // Data State
-  const [files, setFiles] = useState<FileItem[]>([])
-  const [folders, setFolders] = useState<FolderItem[]>([])
+  // Local state for shared links and activities (still fetched directly)
   const [sharedLinks, setSharedLinks] = useState<SharedLink[]>([])
   const [activities, setActivities] = useState<FileActivity[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+
+  // ==================== API HOOKS ====================
+  // Files - using production-ready TanStack Query hooks
+  const {
+    data: filesData,
+    isLoading: filesLoading,
+    error: filesError,
+    refetch: refetchFiles
+  } = useFiles(1, 100, { folder_id: currentFolderId || undefined, status: 'active' })
+
+  // Folders - using production-ready TanStack Query hooks
+  const {
+    data: foldersData,
+    isLoading: foldersLoading,
+    error: foldersError,
+    refetch: refetchFolders
+  } = useFolders()
+
+  // Storage Stats - using production-ready TanStack Query hooks
+  const {
+    data: storageStatsData,
+    isLoading: storageStatsLoading,
+    refetch: refetchStorageStats
+  } = useStorageStats()
+
+  // Mutations
+  const uploadFileMutation = useUploadFile()
+  const uploadFilesMutation = useUploadFiles()
+  const deleteFileMutation = useDeleteFile()
+  const permanentlyDeleteFileMutation = usePermanentlyDeleteFile()
+  const starFileMutation = useStarFile()
+  const moveFileMutation = useMoveFile()
+  const updateFileMutation = useUpdateFile()
+  const createFolderMutation = useCreateFolder()
+  const downloadFileMutation = useDownloadFile()
+
+  // Transform API data to local format
+  const files: FileItem[] = useMemo(() => {
+    if (!filesData?.data) return []
+    return filesData.data.map((f: ApiFileItem) => ({
+      id: f.id,
+      name: f.original_name || f.filename,
+      type: (f.file_type || 'other') as FileType,
+      size: f.size || 0,
+      path: f.url || '/',
+      parentId: f.folder_id || null,
+      createdAt: f.created_at,
+      modifiedAt: f.updated_at,
+      owner: 'You',
+      status: 'synced' as FileStatus,
+      isStarred: f.is_starred || false,
+      isShared: f.is_shared || false,
+      extension: f.extension,
+      version: f.version || 1
+    }))
+  }, [filesData])
+
+  const folders: FolderItem[] = useMemo(() => {
+    if (!foldersData) return []
+    return foldersData.map((f: ApiFolder) => ({
+      id: f.id,
+      name: f.name,
+      parentId: f.parent_id || null,
+      path: f.path || '/',
+      itemCount: f.file_count || 0,
+      size: f.total_size || 0,
+      createdAt: f.created_at,
+      modifiedAt: f.updated_at,
+      color: f.color || 'blue',
+      isShared: f.is_shared || false
+    }))
+  }, [foldersData])
+
+  // Combine loading and error states
+  const loading = filesLoading || foldersLoading
+  const error = filesError?.message || foldersError?.message || null
 
   // Form State
   const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
@@ -353,22 +445,16 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
     return activityMap[activity] || 'modified'
   }
 
-  // Fetch files, folders, shared links, and activities
+  // Fetch shared links and activities (files/folders now use API hooks)
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setError('Not authenticated')
-        return
-      }
+      if (!user) return
 
-      const [filesRes, foldersRes, sharesRes, activitiesRes] = await Promise.all([
-        supabase.from('files').select('*').eq('user_id', user.id).eq('status', 'active').order('updated_at', { ascending: false }),
-        supabase.from('folders').select('*').eq('user_id', user.id).order('name'),
+      // Fetch shares and activities (not covered by main API hooks)
+      const [sharesRes, activitiesRes] = await Promise.all([
         supabase.from('file_shares').select(`
           id,
           file_id,
@@ -394,47 +480,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
         `).eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
       ])
 
-      if (filesRes.error) {
-        console.error('Error fetching files:', filesRes.error)
-      } else if (filesRes.data) {
-        setFiles(filesRes.data.map((f: DbFile) => ({
-          id: f.id,
-          name: f.name,
-          type: f.type as FileType,
-          size: f.size,
-          path: f.url || '/',
-          parentId: f.folder_id,
-          createdAt: f.created_at,
-          modifiedAt: f.updated_at,
-          owner: 'You',
-          status: (f.status || 'synced') as FileStatus,
-          isStarred: f.is_starred,
-          isShared: f.is_shared,
-          extension: f.extension,
-          version: f.version
-        })))
-      }
-
-      if (foldersRes.error) {
-        console.error('Error fetching folders:', foldersRes.error)
-      } else if (foldersRes.data) {
-        setFolders(foldersRes.data.map((f: DbFolder) => ({
-          id: f.id,
-          name: f.name,
-          parentId: f.parent_id,
-          path: f.path,
-          itemCount: f.file_count,
-          size: f.total_size,
-          createdAt: f.created_at,
-          modifiedAt: f.updated_at,
-          color: f.color || 'blue',
-          isShared: f.is_shared
-        })))
-      }
-
-      if (sharesRes.error) {
-        console.error('Error fetching shares:', sharesRes.error)
-      } else if (sharesRes.data) {
+      if (sharesRes.data) {
         setSharedLinks(sharesRes.data.map((s: DbFileShare) => ({
           id: s.id,
           fileId: s.file_id,
@@ -443,14 +489,12 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
           createdAt: s.created_at,
           expiresAt: s.expires_at || undefined,
           viewCount: s.access_count,
-          downloadCount: 0, // Not tracked in current schema
-          isPasswordProtected: false // Not tracked in current schema
+          downloadCount: 0,
+          isPasswordProtected: false
         })))
       }
 
-      if (activitiesRes.error) {
-        console.error('Error fetching activities:', activitiesRes.error)
-      } else if (activitiesRes.data) {
+      if (activitiesRes.data) {
         setActivities(activitiesRes.data.map((a: DbFileActivity) => ({
           id: a.id,
           fileId: a.file_id,
@@ -461,12 +505,19 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
         })))
       }
     } catch (err) {
-      console.error('Error fetching data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch data')
-    } finally {
-      setLoading(false)
+      console.error('Error fetching shared links/activities:', err)
     }
   }, [])
+
+  // Refetch all data (combines API hook refetch with manual fetch)
+  const refetchAllData = useCallback(async () => {
+    await Promise.all([
+      refetchFiles(),
+      refetchFolders(),
+      refetchStorageStats(),
+      fetchData()
+    ])
+  }, [refetchFiles, refetchFolders, refetchStorageStats, fetchData])
 
   useEffect(() => {
     fetchData()
@@ -512,17 +563,33 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
     }
   }, [currentFolderId, fetchData])
 
-  // Stats
-  const stats: StorageStats = useMemo(() => ({
-    totalSpace: 15 * 1024 * 1024 * 1024, // 15 GB
-    usedSpace: files.reduce((sum, f) => sum + f.size, 0) + folders.reduce((sum, f) => sum + f.size, 0),
-    fileCount: files.length,
-    folderCount: folders.length,
-    sharedFiles: files.filter(f => f.isShared).length,
-    starredFiles: files.filter(f => f.isStarred).length,
-    recentFiles: files.filter(f => new Date(f.modifiedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
-    trashedFiles: 0
-  }), [files, folders])
+  // Stats - using API storage stats with local fallback
+  const stats: StorageStats = useMemo(() => {
+    // Use API storage stats if available
+    if (storageStatsData) {
+      return {
+        totalSpace: storageStatsData.total_space || 15 * 1024 * 1024 * 1024,
+        usedSpace: storageStatsData.used_space || 0,
+        fileCount: storageStatsData.file_count || files.length,
+        folderCount: storageStatsData.folder_count || folders.length,
+        sharedFiles: storageStatsData.shared_files || files.filter(f => f.isShared).length,
+        starredFiles: storageStatsData.starred_files || files.filter(f => f.isStarred).length,
+        recentFiles: storageStatsData.recent_files || files.filter(f => new Date(f.modifiedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+        trashedFiles: storageStatsData.trashed_files || 0
+      }
+    }
+    // Fallback to computed stats
+    return {
+      totalSpace: 15 * 1024 * 1024 * 1024, // 15 GB default
+      usedSpace: files.reduce((sum, f) => sum + f.size, 0) + folders.reduce((sum, f) => sum + f.size, 0),
+      fileCount: files.length,
+      folderCount: folders.length,
+      sharedFiles: files.filter(f => f.isShared).length,
+      starredFiles: files.filter(f => f.isStarred).length,
+      recentFiles: files.filter(f => new Date(f.modifiedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+      trashedFiles: 0
+    }
+  }, [files, folders, storageStatsData])
 
   // Filtered and sorted files
   const filteredFiles = useMemo(() => {
@@ -567,7 +634,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
     return crumbs
   }, [folders, currentFolderId])
 
-  // CRUD Handlers
+  // CRUD Handlers - Using production-ready API mutations
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) {
       toast.error('Please enter a folder name')
@@ -575,58 +642,41 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
       const parentPath = currentFolderId
         ? folders.find(f => f.id === currentFolderId)?.path || '/'
         : '/'
 
-      const { error } = await supabase.from('folders').insert({
-        user_id: user.id,
-        parent_id: currentFolderId,
+      await createFolderMutation.mutateAsync({
         name: newFolderName.trim(),
+        parent_id: currentFolderId || undefined,
         path: `${parentPath}/${newFolderName.trim()}`,
         color: newFolderColor
       })
 
-      if (error) throw error
-      toast.success(`Folder "${newFolderName.trim()}" has been created`)
       setNewFolderName('')
       setShowCreateFolderDialog(false)
-      fetchData()
+      fetchData() // Refresh activities
     } catch (error) {
-      toast.error('Failed to create folder')
+      // Error handled by mutation
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDeleteFile = async (fileId: string, fileName: string) => {
+  const handleDeleteFile = async (fileId: string, _fileName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
-      if (error) throw error
-      toast.success(`"${fileName}" moved to trash`)
-      fetchData()
+      await deleteFileMutation.mutateAsync(fileId)
+      fetchData() // Refresh activities
     } catch (error) {
-      toast.error('Failed to delete file')
+      // Error handled by mutation
     }
   }
 
   const handleToggleStar = async (fileId: string, currentlyStarred: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error } = await supabase.from('files').update({ is_starred: !currentlyStarred }).eq('id', fileId)
-      if (error) throw error
-      toast.success(currentlyStarred ? 'Removed from starred' : 'Added to starred')
-      fetchData()
+      await starFileMutation.mutateAsync({ id: fileId, isStarred: !currentlyStarred })
     } catch (error) {
-      toast.error('Failed to update star status')
+      // Error handled by mutation
     }
   }
 
@@ -645,9 +695,10 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
       })
       if (error) throw error
 
-      await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
+      // Update file to mark as shared using mutation
+      await updateFileMutation.mutateAsync({ id: fileId, updates: { is_shared: true } })
       toast.success(`"${fileName}" has been shared`)
-      fetchData()
+      fetchData() // Refresh shared links
     } catch (error) {
       toast.error('Failed to share file')
     }
@@ -661,124 +712,61 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
       if (error) throw error
       toast.success(`Folder "${folderName}" has been deleted`)
       if (currentFolderId === folderId) setCurrentFolderId(null)
-      fetchData()
+      refetchFolders()
     } catch (error) {
       toast.error('Failed to delete folder')
     }
   }
 
-  // Move file handler
-  const handleMoveFile = async (fileId: string, targetFolderId: string | null, fileName: string) => {
+  // Move file handler - using API mutation
+  const handleMoveFile = async (fileId: string, targetFolderId: string | null, _fileName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { error } = await supabase.from('files').update({
-        folder_id: targetFolderId,
-        updated_at: new Date().toISOString()
-      }).eq('id', fileId)
-
-      if (error) throw error
-
-      // Log the activity
-      await supabase.from('file_activities').insert({
-        file_id: fileId,
-        user_id: user.id,
-        activity: 'move',
-        description: `File moved to ${targetFolderId ? folders.find(f => f.id === targetFolderId)?.name || 'folder' : 'root'}`
-      })
-
-      toast.success(`"${fileName}" has been moved`)
-      fetchData()
+      await moveFileMutation.mutateAsync({ fileId, folderId: targetFolderId })
+      fetchData() // Refresh activities
     } catch (error) {
-      toast.error('Failed to move file')
+      // Error handled by mutation
     }
   }
 
-  // Rename file handler
+  // Rename file handler - using API mutation
   const handleRenameFile = async (fileId: string, newName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { error } = await supabase.from('files').update({
-        name: newName,
-        updated_at: new Date().toISOString()
-      }).eq('id', fileId)
-
-      if (error) throw error
-
-      // Log the activity
-      await supabase.from('file_activities').insert({
-        file_id: fileId,
-        user_id: user.id,
-        activity: 'rename',
-        description: `File renamed to ${newName}`
-      })
-
+      await updateFileMutation.mutateAsync({ id: fileId, updates: { original_name: newName } })
       toast.success(`File renamed to "${newName}"`)
-      fetchData()
+      fetchData() // Refresh activities
     } catch (error) {
-      toast.error('Failed to rename file')
+      // Error handled by mutation
     }
   }
 
-  // File upload handler
+  // File upload handler - using API mutation
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = event.target.files
     if (!uploadedFiles || uploadedFiles.length === 0) return
 
     try {
       toast.loading('Uploading files...')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
 
-      for (const file of Array.from(uploadedFiles)) {
-        // Upload to Supabase Storage
-        const filePath = `${user.id}/${currentFolderId || 'root'}/${Date.now()}_${file.name}`
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('files')
-          .upload(filePath, file)
+      // Prepare upload data for multiple files
+      const uploads = Array.from(uploadedFiles).map(file => ({
+        file,
+        folder_id: currentFolderId || undefined
+      }))
 
-        if (uploadError) throw uploadError
-
-        // Get file extension and type
-        const extension = file.name.split('.').pop() || ''
-        const fileType = file.type.startsWith('image/') ? 'image' :
-                        file.type.startsWith('video/') ? 'video' :
-                        file.type.startsWith('audio/') ? 'audio' :
-                        file.type.includes('pdf') || file.type.includes('document') ? 'document' :
-                        file.type.includes('spreadsheet') || file.type.includes('excel') ? 'spreadsheet' :
-                        file.type.includes('presentation') || file.type.includes('powerpoint') ? 'presentation' :
-                        file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other'
-
-        // Create file record in database
-        const { error: dbError } = await supabase.from('files').insert({
-          user_id: user.id,
-          folder_id: currentFolderId,
-          name: file.name,
-          type: fileType,
-          extension,
-          size: file.size,
-          url: uploadData?.path || filePath,
-          status: 'active'
-        })
-
-        if (dbError) throw dbError
+      if (uploads.length === 1) {
+        // Single file upload
+        await uploadFileMutation.mutateAsync(uploads[0])
+      } else {
+        // Multiple file upload
+        await uploadFilesMutation.mutateAsync(uploads)
       }
 
       toast.dismiss()
-      toast.success('Files uploaded successfully')
-      fetchData()
+      fetchData() // Refresh activities
+
     } catch (error) {
       toast.dismiss()
-      toast.error('Upload failed')
+      // Error handled by mutation
     }
 
     // Reset file input
@@ -787,34 +775,15 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
     }
   }
 
-  // File download handler
+  // File download handler - using API mutation
   const handleDownloadFile = async (file: FileItem) => {
     try {
       toast.loading('Preparing download...')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data, error } = await supabase.storage
-        .from('files')
-        .download(file.path || `${file.id}/${file.name}`)
-
-      if (error) throw error
-
-      // Create download link
-      const url = URL.createObjectURL(data)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = file.name
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
+      await downloadFileMutation.mutateAsync(file.id)
       toast.dismiss()
-      toast.success('Download complete')
     } catch (error) {
       toast.dismiss()
-      console.error('Download error:', error)
-      toast.error(`Failed to download "${file.name}". The file may not exist or you may not have permission to access it.`)
+      // Error handled by mutation
     }
   }
 
@@ -849,7 +818,7 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   const quickActions = [
     { id: '1', label: 'Upload Files', icon: Upload, action: () => fileInputRef.current?.click(), variant: 'primary' as const },
     { id: '2', label: 'New Folder', icon: FolderPlus, action: () => setShowCreateFolderDialog(true), variant: 'secondary' as const },
-    { id: '3', label: 'Refresh', icon: RefreshCw, action: () => fetchData(), variant: 'ghost' as const },
+    { id: '3', label: 'Refresh', icon: RefreshCw, action: () => refetchAllData(), variant: 'ghost' as const },
   ]
 
   // Show loading state

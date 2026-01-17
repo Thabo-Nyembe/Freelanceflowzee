@@ -54,6 +54,20 @@ import {
   useAnalyticsRevenue,
   useAnalyticsConversionFunnels,
 } from '@/lib/hooks/use-analytics-extended'
+
+// Production-ready API hooks for analytics
+import {
+  useDashboardMetrics,
+  useRevenueAnalytics,
+  useEngagementMetrics,
+  usePerformanceMetrics,
+  usePredictiveInsights,
+  type DashboardMetrics,
+  type RevenueMetrics,
+  type EngagementMetrics as ApiEngagementMetrics,
+  type PerformanceMetrics as ApiPerformanceMetrics,
+  type PredictiveInsights
+} from '@/lib/api-clients'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -291,6 +305,86 @@ export default function AnalyticsClient() {
   const { data: analyticsEvents, isLoading: eventsLoading, refresh: refreshEvents } = useAnalyticsEvents(userId || undefined)
   const { data: revenueData, isLoading: revenueLoading, refresh: refreshRevenue } = useAnalyticsRevenue(userId || undefined)
   const { data: conversionFunnelsDb, isLoading: funnelsLoading, refresh: refreshFunnels } = useAnalyticsConversionFunnels(userId || undefined)
+
+  // ==================== PRODUCTION-READY API HOOKS ====================
+  // Calculate date range based on timeRange state
+  const dateRangeParams = useMemo(() => {
+    const now = new Date()
+    let startDate: Date
+
+    if (timeRange === 'custom' && customDateRange.start && customDateRange.end) {
+      return {
+        startDate: customDateRange.start,
+        endDate: customDateRange.end
+      }
+    }
+
+    switch (timeRange) {
+      case '7d': startDate = new Date(now.setDate(now.getDate() - 7)); break
+      case '14d': startDate = new Date(now.setDate(now.getDate() - 14)); break
+      case '30d': startDate = new Date(now.setDate(now.getDate() - 30)); break
+      case '90d': startDate = new Date(now.setDate(now.getDate() - 90)); break
+      case '1y': startDate = new Date(now.setFullYear(now.getFullYear() - 1)); break
+      default: startDate = new Date(now.setDate(now.getDate() - 30))
+    }
+
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0]
+    }
+  }, [timeRange, customDateRange])
+
+  // Dashboard Metrics - using production-ready TanStack Query hooks
+  const {
+    data: apiDashboardMetrics,
+    isLoading: apiDashboardMetricsLoading,
+    error: apiDashboardMetricsError,
+    refetch: refetchApiDashboardMetrics
+  } = useDashboardMetrics(dateRangeParams.startDate, dateRangeParams.endDate)
+
+  // Revenue Analytics - using production-ready TanStack Query hooks
+  const {
+    data: apiRevenueAnalytics,
+    isLoading: apiRevenueAnalyticsLoading,
+    error: apiRevenueAnalyticsError,
+    refetch: refetchApiRevenueAnalytics
+  } = useRevenueAnalytics(dateRangeParams.startDate, dateRangeParams.endDate)
+
+  // Engagement Metrics - using production-ready TanStack Query hooks
+  const {
+    data: apiEngagementMetrics,
+    isLoading: apiEngagementMetricsLoading,
+    error: apiEngagementMetricsError,
+    refetch: refetchApiEngagementMetrics
+  } = useEngagementMetrics()
+
+  // Performance Metrics - using production-ready TanStack Query hooks
+  const {
+    data: apiPerformanceMetrics,
+    isLoading: apiPerformanceMetricsLoading,
+    error: apiPerformanceMetricsError,
+    refetch: refetchApiPerformanceMetrics
+  } = usePerformanceMetrics()
+
+  // Predictive Insights - using production-ready TanStack Query hooks
+  const {
+    data: apiPredictiveInsights,
+    isLoading: apiPredictiveInsightsLoading,
+    error: apiPredictiveInsightsError,
+    refetch: refetchApiPredictiveInsights
+  } = usePredictiveInsights()
+
+  // Refetch all API data
+  const refetchAllApiData = useCallback(async () => {
+    await Promise.all([
+      refetchApiDashboardMetrics(),
+      refetchApiRevenueAnalytics(),
+      refetchApiEngagementMetrics(),
+      refetchApiPerformanceMetrics(),
+      refetchApiPredictiveInsights()
+    ])
+    toast.success('Analytics data refreshed')
+  }, [refetchApiDashboardMetrics, refetchApiRevenueAnalytics, refetchApiEngagementMetrics, refetchApiPerformanceMetrics, refetchApiPredictiveInsights])
 
   // Form state for creating funnel
   const [funnelForm, setFunnelForm] = useState({
@@ -546,28 +640,117 @@ export default function AnalyticsClient() {
     }
   }, [timeRange, customDateRange.start, customDateRange.end])
 
-  // Compute real metrics from Supabase data
+  // Compute real metrics from API hooks and Supabase data
   const computedMetrics = useMemo((): AnalyticsMetric[] => {
-    // If we have dashboard metrics from Supabase, transform them
-    if (dashboardMetricsData.length > 0) {
-      return dashboardMetricsData.map((metric: any) => ({
-        id: metric.id,
-        name: metric.name,
-        value: parseFloat(metric.value) || 0,
-        previousValue: parseFloat(metric.previous_value) || 0,
-        changePercent: parseFloat(metric.change_percent) || 0,
-        category: metric.category || 'General',
-        type: metric.unit === 'currency' ? 'currency' : metric.unit === '%' ? 'percentage' : 'count',
-        status: metric.trend === 'up' ? 'up' : metric.trend === 'down' ? 'down' : 'stable',
-        alertThreshold: metric.target ? parseFloat(metric.target) : undefined,
-        isAlertTriggered: metric.target ? parseFloat(metric.target) > parseFloat(metric.target) : false,
-      }))
+    const realMetrics: AnalyticsMetric[] = []
+
+    // Priority 1: Use production-ready API dashboard metrics if available
+    if (apiDashboardMetrics) {
+      // Revenue metrics from API
+      if (apiDashboardMetrics.revenue) {
+        realMetrics.push({
+          id: 'api-revenue',
+          name: 'Total Revenue',
+          value: apiDashboardMetrics.revenue.total || 0,
+          previousValue: apiDashboardMetrics.revenue.previous_total || 0,
+          changePercent: apiDashboardMetrics.revenue.change_percentage || 0,
+          category: 'Revenue',
+          type: 'currency',
+          status: (apiDashboardMetrics.revenue.change_percentage || 0) >= 0 ? 'up' : 'down',
+        })
+      }
+
+      // Projects metrics from API
+      if (apiDashboardMetrics.projects) {
+        realMetrics.push({
+          id: 'api-active-projects',
+          name: 'Active Projects',
+          value: apiDashboardMetrics.projects.active || 0,
+          previousValue: apiDashboardMetrics.projects.total || 0,
+          changePercent: apiDashboardMetrics.projects.completion_rate || 0,
+          category: 'Projects',
+          type: 'count',
+          status: 'up',
+        })
+      }
+
+      // Clients metrics from API
+      if (apiDashboardMetrics.clients) {
+        realMetrics.push({
+          id: 'api-active-clients',
+          name: 'Active Clients',
+          value: apiDashboardMetrics.clients.active || 0,
+          previousValue: apiDashboardMetrics.clients.total || 0,
+          changePercent: ((apiDashboardMetrics.clients.new_this_month || 0) / Math.max(apiDashboardMetrics.clients.total || 1, 1)) * 100,
+          category: 'Clients',
+          type: 'count',
+          status: 'up',
+        })
+      }
+
+      // Tasks metrics from API
+      if (apiDashboardMetrics.tasks) {
+        realMetrics.push({
+          id: 'api-tasks-completed',
+          name: 'Tasks Completed',
+          value: apiDashboardMetrics.tasks.completed || 0,
+          previousValue: apiDashboardMetrics.tasks.total || 0,
+          changePercent: apiDashboardMetrics.tasks.completion_rate || 0,
+          category: 'Tasks',
+          type: 'count',
+          status: 'up',
+        })
+      }
     }
 
-    // If we have user analytics data, create metrics from it
-    if (userAnalyticsData) {
-      const realMetrics: AnalyticsMetric[] = [
+    // Priority 2: Use API engagement metrics if available
+    if (apiEngagementMetrics) {
+      realMetrics.push(
         {
+          id: 'api-sessions',
+          name: 'Total Sessions',
+          value: apiEngagementMetrics.total_sessions || 0,
+          previousValue: apiEngagementMetrics.previous_sessions || 0,
+          changePercent: apiEngagementMetrics.sessions_change || 0,
+          category: 'Engagement',
+          type: 'count',
+          status: (apiEngagementMetrics.sessions_change || 0) >= 0 ? 'up' : 'down',
+        },
+        {
+          id: 'api-avg-session',
+          name: 'Avg Session Duration',
+          value: apiEngagementMetrics.avg_session_duration || 0,
+          previousValue: apiEngagementMetrics.previous_avg_session_duration || 0,
+          changePercent: apiEngagementMetrics.duration_change || 0,
+          category: 'Engagement',
+          type: 'duration',
+          status: (apiEngagementMetrics.duration_change || 0) >= 0 ? 'up' : 'down',
+        }
+      )
+    }
+
+    // Priority 3: If we have dashboard metrics from direct Supabase query, add them
+    if (dashboardMetricsData.length > 0 && realMetrics.length === 0) {
+      dashboardMetricsData.forEach((metric: any) => {
+        realMetrics.push({
+          id: metric.id,
+          name: metric.name,
+          value: parseFloat(metric.value) || 0,
+          previousValue: parseFloat(metric.previous_value) || 0,
+          changePercent: parseFloat(metric.change_percent) || 0,
+          category: metric.category || 'General',
+          type: metric.unit === 'currency' ? 'currency' : metric.unit === '%' ? 'percentage' : 'count',
+          status: metric.trend === 'up' ? 'up' : metric.trend === 'down' ? 'down' : 'stable',
+          alertThreshold: metric.target ? parseFloat(metric.target) : undefined,
+          isAlertTriggered: metric.target ? parseFloat(metric.target) > parseFloat(metric.target) : false,
+        })
+      })
+    }
+
+    // Priority 4: If we have user analytics data, add those metrics
+    if (userAnalyticsData && realMetrics.length < 4) {
+      if (!realMetrics.find(m => m.id.includes('sessions'))) {
+        realMetrics.push({
           id: 'sessions',
           name: 'Total Sessions',
           value: userAnalyticsData.total_sessions || 0,
@@ -576,8 +759,10 @@ export default function AnalyticsClient() {
           category: 'Engagement',
           type: 'count',
           status: 'up',
-        },
-        {
+        })
+      }
+      if (!realMetrics.find(m => m.id.includes('pageviews'))) {
+        realMetrics.push({
           id: 'pageviews',
           name: 'Page Views',
           value: userAnalyticsData.total_pageviews || 0,
@@ -586,77 +771,44 @@ export default function AnalyticsClient() {
           category: 'Engagement',
           type: 'count',
           status: 'up',
-        },
-        {
-          id: 'session-duration',
-          name: 'Avg Session Duration',
-          value: userAnalyticsData.avg_session_duration || 0,
-          previousValue: Math.floor((userAnalyticsData.avg_session_duration || 0) * 0.95),
-          changePercent: 5.3,
-          category: 'Engagement',
-          type: 'duration',
-          status: 'up',
-        },
-        {
-          id: 'bounce-rate',
-          name: 'Bounce Rate',
-          value: parseFloat(userAnalyticsData.bounce_rate) || 0,
-          previousValue: parseFloat(userAnalyticsData.bounce_rate) * 1.1 || 0,
-          changePercent: -10,
-          category: 'Engagement',
-          type: 'percentage',
-          status: 'down',
-        },
-      ]
-
-      // Add platform metrics if available
-      if (platformMetricsDb.length > 0) {
-        const latestPlatform = platformMetricsDb[0]
-        realMetrics.push(
-          {
-            id: 'active-users',
-            name: 'Active Users',
-            value: latestPlatform.active_users || 0,
-            previousValue: Math.floor((latestPlatform.active_users || 0) * 0.9),
-            changePercent: 11.1,
-            category: 'Users',
-            type: 'count',
-            status: 'up',
-          },
-          {
-            id: 'new-users',
-            name: 'New Users',
-            value: latestPlatform.new_users || 0,
-            previousValue: Math.floor((latestPlatform.new_users || 0) * 0.85),
-            changePercent: 17.6,
-            category: 'Users',
-            type: 'count',
-            status: 'up',
-          }
-        )
+        })
       }
+    }
 
-      // Add revenue data if available
-      if (revenueData.length > 0) {
-        const totalRevenue = revenueData.reduce((sum: number, r: any) => sum + (parseFloat(r.amount) || 0), 0)
+    // Add platform metrics if available
+    if (platformMetricsDb && platformMetricsDb.length > 0) {
+      const latestPlatform = platformMetricsDb[0]
+      if (!realMetrics.find(m => m.id.includes('active-users'))) {
         realMetrics.push({
-          id: 'revenue',
-          name: 'Total Revenue',
-          value: totalRevenue,
-          previousValue: totalRevenue * 0.8,
-          changePercent: 25,
-          category: 'Revenue',
-          type: 'currency',
+          id: 'active-users',
+          name: 'Active Users',
+          value: latestPlatform.active_users || 0,
+          previousValue: Math.floor((latestPlatform.active_users || 0) * 0.9),
+          changePercent: 11.1,
+          category: 'Users',
+          type: 'count',
           status: 'up',
         })
       }
-
-      return realMetrics
     }
 
-    // Return empty array when no data available
-    return []
-  }, [dashboardMetricsData, userAnalyticsData, platformMetricsDb, revenueData])
+    // Add revenue data from extended hooks if not already present
+    if (revenueData && revenueData.length > 0 && !realMetrics.find(m => m.id.includes('revenue'))) {
+      const totalRevenue = revenueData.reduce((sum: number, r: any) => sum + (parseFloat(r.amount) || 0), 0)
+      realMetrics.push({
+        id: 'revenue',
+        name: 'Total Revenue',
+        value: totalRevenue,
+        previousValue: totalRevenue * 0.8,
+        changePercent: 25,
+        category: 'Revenue',
+        type: 'currency',
+        status: 'up',
+      })
+    }
+
+    return realMetrics
+  }, [apiDashboardMetrics, apiEngagementMetrics, dashboardMetricsData, userAnalyticsData, platformMetricsDb, revenueData])
 
   // Filter metrics based on search
   const filteredMetrics = useMemo(() => {
