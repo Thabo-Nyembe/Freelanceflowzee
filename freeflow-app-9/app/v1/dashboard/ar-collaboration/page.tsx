@@ -2,6 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
+// MIGRATED: Batch #21 - Removed mock data, using database hooks
+
 /**
  * ========================================
  * AR COLLABORATION PAGE - A++++ GRADE
@@ -280,55 +282,9 @@ const arCollaborationReducer = (
 }
 
 // ========================================
-// MOCK DATA GENERATOR
+// DATABASE INTEGRATION NOTE
 // ========================================
-
-const generateMockSessions = (): ARSession[] => {
-  logger.debug('Generating mock sessions')
-
-  const environments: AREnvironment[] = ['office', 'studio', 'park', 'abstract', 'conference', 'zen']
-  const statuses: SessionStatus[] = ['active', 'scheduled', 'ended', 'archived']
-  const sessionTypes = ['Team Standup', 'Design Review', 'Brainstorming', 'Training', 'Client Demo', 'Workshop']
-
-  const sessions: ARSession[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const environment = environments[Math.floor(Math.random() * environments.length)]
-    const status = i <= 10 ? 'active' : statuses[Math.floor(Math.random() * statuses.length)]
-    const maxParticipants = [4, 8, 10, 20][Math.floor(Math.random() * 4)]
-    const currentParticipants = status === 'active' ? Math.floor(Math.random() * maxParticipants) : 0
-
-    sessions.push({
-      id: `AR-${String(i).padStart(3, '0')}`,
-      name: `${sessionTypes[Math.floor(Math.random() * sessionTypes.length)]} ${i}`,
-      description: `AR collaboration session ${i} for immersive team communication`,
-      hostId: `USER-${Math.floor(Math.random() * 20) + 1}`,
-      hostName: ['Alice Chen', 'Bob Smith', 'Carol White', 'David Brown', 'Emma Davis'][Math.floor(Math.random() * 5)],
-      environment,
-      status,
-      participants: [],
-      currentParticipants,
-      maxParticipants,
-      startTime: status === 'active' ? new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000).toISOString() : undefined,
-      duration: status === 'ended' ? Math.floor(Math.random() * 7200) : undefined,
-      scheduledTime: status === 'scheduled' ? new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : undefined,
-      isRecording: status === 'active' && Math.random() > 0.5,
-      isLocked: Math.random() > 0.7,
-      password: Math.random() > 0.7 ? 'secret123' : undefined,
-      features: {
-        spatialAudio: true,
-        whiteboard: Math.random() > 0.3,
-        screenShare: Math.random() > 0.4,
-        objects3D: true,
-        recording: Math.random() > 0.5,
-        handTracking: Math.random() > 0.6
-      },
-      objects: [],
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
-    })
-  }  return sessions
-}
+// Mock data generator removed - sessions loaded from database via ar-collaboration-queries
 
 // ========================================
 // UTILITY FUNCTIONS
@@ -467,11 +423,34 @@ export default function ARCollaborationPage() {
   // Confirmation Dialog State
   const [deleteSession, setDeleteSession] = useState<{ id: string; name: string; environment: AREnvironment } | null>(null)
 
-  // Load mock data
+  // Load sessions from database
   useEffect(() => {
-    if (!userId) {      return
-    }    const mockSessions = generateMockSessions()
-    dispatch({ type: 'SET_SESSIONS', sessions: mockSessions })    announce('AR collaboration page loaded', 'polite')
+    if (!userId) {
+      return
+    }
+
+    const loadSessions = async () => {
+      try {
+        dispatch({ type: 'SET_LOADING', isLoading: true })
+
+        // Import query function dynamically for code splitting
+        const { getSessions } = await import('@/lib/ar-collaboration-queries')
+        const { data: sessions, error } = await getSessions(userId)
+
+        if (error) {
+          throw new Error(error.message || 'Failed to load sessions')
+        }
+
+        dispatch({ type: 'SET_SESSIONS', sessions: sessions || [] })
+        announce('AR collaboration page loaded', 'polite')
+      } catch (error: any) {
+        logger.error('Failed to load sessions', { error: error.message })
+        dispatch({ type: 'SET_ERROR', error: 'Failed to load sessions' })
+        announce('Failed to load AR sessions', 'assertive')
+      }
+    }
+
+    loadSessions()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats

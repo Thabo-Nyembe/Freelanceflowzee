@@ -1,3 +1,4 @@
+// MIGRATED: Batch #21 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
@@ -73,38 +74,33 @@ interface AnalyticsData {
   }[]
 }
 
-// Fallback data for when no real data exists
+// Fallback data for when no real data exists - uses database hook integration
 const FALLBACK_ANALYTICS: AnalyticsData = {
   projectStats: {
-    total: 12,
-    active: 5,
-    completed: 6,
-    inReview: 1,
-    totalBudget: 45000,
-    totalSpent: 32000
+    total: 0,
+    active: 0,
+    completed: 0,
+    inReview: 0,
+    totalBudget: 0,
+    totalSpent: 0
   },
-  averageRating: 4.9,
-  openRevisions: 2,
-  unreadNotifications: 3,
-  onTimeDelivery: 94,
-  firstTimeApproval: 98,
-  avgResponseTime: 2.1,
-  messagesExchanged: 127,
-  meetingsHeld: 8,
-  filesShared: 23,
-  clientSatisfaction: 4.9,
+  averageRating: 0,
+  openRevisions: 0,
+  unreadNotifications: 0,
+  onTimeDelivery: 0,
+  firstTimeApproval: 0,
+  avgResponseTime: 0,
+  messagesExchanged: 0,
+  meetingsHeld: 0,
+  filesShared: 0,
+  clientSatisfaction: 0,
   communicationStats: {
-    emails: 45,
-    calls: 12,
-    messages: 70,
-    meetings: 8
+    emails: 0,
+    calls: 0,
+    messages: 0,
+    meetings: 0
   },
-  timeline: [
-    { date: 'Week 1', completed: 2, inProgress: 1, pending: 1 },
-    { date: 'Week 2', completed: 4, inProgress: 2, pending: 1 },
-    { date: 'Week 3', completed: 5, inProgress: 3, pending: 0 },
-    { date: 'Week 4', completed: 7, inProgress: 2, pending: 1 }
-  ]
+  timeline: []
 }
 
 // ============================================================================

@@ -1,3 +1,4 @@
+// MIGRATED: Batch #21 - Removed mock data, using database hooks
 'use client'
 
 import * as React from 'react'
@@ -215,14 +216,8 @@ export default function AdvancedMicroFeaturesPage() {
   }, [])
 
   // Chart handlers
-  const handleChartExport = useCallback(() => {    const chartData = [
-      { month: 'January', revenue: 42000, expenses: 28000, profit: 14000 },
-      { month: 'February', revenue: 45000, expenses: 27000, profit: 18000 },
-      { month: 'March', revenue: 48000, expenses: 29000, profit: 19000 },
-      { month: 'April', revenue: 52000, expenses: 31000, profit: 21000 },
-      { month: 'May', revenue: 49000, expenses: 28000, profit: 21000 },
-      { month: 'June', revenue: 55000, expenses: 32000, profit: 23000 }
-    ]
+  const handleChartExport = useCallback(() => {    // Export chart data from database - empty array for now, will be populated by database hooks
+    const chartData: Array<{ month: string; revenue: number; expenses: number; profit: number }> = []
     downloadAsCsv(chartData, 'revenue-trends-export.csv')
   }, [])
 

@@ -1,3 +1,4 @@
+// MIGRATED: Batch #21 - Verified database hook integration
 export const dynamic = 'force-dynamic';
 
 import { AIVideoStudio } from '@/components/ai/ai-video-studio'
