@@ -7,8 +7,12 @@ import {
   RefreshCw, Users, CreditCard, Mail, Eye, Edit,
   Trash2, Copy, ArrowUpRight, ArrowDownRight, Sparkles,
   Globe, Percent, Receipt, Bell, Settings, Zap, FileSpreadsheet, Share2,
-  Webhook, AlertOctagon, Sliders
+  Webhook, AlertOctagon, Sliders, List, Table2
 } from 'lucide-react'
+
+// World-class TanStack Table integration
+import { EnhancedDataTable } from '@/components/ui/enhanced-data-table'
+import { createInvoiceColumns, type InvoiceTableRow } from '@/lib/table-columns'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -129,6 +133,7 @@ const mockInvoicesActivities = [
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, _setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
   const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
@@ -874,6 +879,26 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                 <Button variant="outline" size="icon" onClick={() => setShowFilterModal(true)}>
                   <Filter className="h-4 w-4" />
                 </Button>
+                <div className="flex border rounded-lg overflow-hidden">
+                  <Button
+                    variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('list')}
+                    title="List View"
+                    className="rounded-none"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                    size="icon"
+                    onClick={() => setViewMode('table')}
+                    title="Table View (TanStack)"
+                    className="rounded-none"
+                  >
+                    <Table2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -922,130 +947,199 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
-                {filteredInvoices.map(invoice => (
-                  <Card key={invoice.id} className="hover:shadow-md transition-all">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        {/* Checkbox */}
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300"
-                          checked={selectedInvoices.includes(invoice.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedInvoices(prev => [...prev, invoice.id])
-                            } else {
-                              setSelectedInvoices(prev => prev.filter(id => id !== invoice.id))
-                            }
-                          }}
-                        />
+              <>
+                {/* Table View */}
+                {viewMode === 'table' && (
+                  <EnhancedDataTable
+                    columns={createInvoiceColumns({
+                      onView: (invoice) => {
+                        window.open(`/dashboard/invoices/${invoice.id}`, '_blank')
+                      },
+                      onEdit: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) {
+                          setEditingInvoice(fullInvoice)
+                          setShowEditModal(true)
+                        }
+                      },
+                      onDelete: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) {
+                          setDeletingInvoice(fullInvoice)
+                          setShowDeleteConfirm(true)
+                        }
+                      },
+                      onSend: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) handleSendInvoice(fullInvoice)
+                      },
+                      onDownload: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) handleDownloadInvoice(fullInvoice)
+                      },
+                      onDuplicate: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) handleDuplicateInvoice(fullInvoice)
+                      },
+                      onMarkPaid: (invoice) => {
+                        const fullInvoice = filteredInvoices.find(i => i.id === invoice.id)
+                        if (fullInvoice) handleMarkAsPaid(fullInvoice)
+                      },
+                    })}
+                    data={filteredInvoices.map((invoice): InvoiceTableRow => ({
+                      id: invoice.id,
+                      invoice_number: invoice.invoice_number,
+                      title: invoice.title,
+                      client_name: invoice.client_name,
+                      client_email: invoice.client_email,
+                      status: invoice.status,
+                      currency: invoice.currency,
+                      total_amount: invoice.total_amount,
+                      amount_paid: invoice.amount_paid,
+                      amount_due: invoice.amount_due,
+                      issue_date: invoice.issue_date,
+                      due_date: invoice.due_date,
+                      paid_date: invoice.paid_date,
+                      is_recurring: invoice.is_recurring || false,
+                    }))}
+                    title="All Invoices"
+                    description="Manage invoices with sorting, filtering, and bulk actions"
+                    searchKey="client_name"
+                    isLoading={loading}
+                    onRowClick={(row) => {
+                      window.open(`/dashboard/invoices/${row.id}`, '_blank')
+                    }}
+                  />
+                )}
 
-                        {/* Invoice Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={getStatusColor(invoice.status)}>
-                              {invoice.status === 'paid' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                              {invoice.status === 'overdue' && <AlertCircle className="h-3 w-3 mr-1" />}
-                              {invoice.status === 'sent' && <Send className="h-3 w-3 mr-1" />}
-                              {invoice.status}
-                            </Badge>
-                            {invoice.recurring && (
-                              <Badge variant="outline" className="text-blue-600">
-                                <RefreshCw className="h-3 w-3 mr-1" />
-                                Recurring
-                              </Badge>
-                            )}
+                {/* List View */}
+                {viewMode === 'list' && (
+                  <div className="space-y-3">
+                    {filteredInvoices.map(invoice => (
+                      <Card key={invoice.id} className="hover:shadow-md transition-all">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            {/* Checkbox */}
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300"
+                              checked={selectedInvoices.includes(invoice.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedInvoices(prev => [...prev, invoice.id])
+                                } else {
+                                  setSelectedInvoices(prev => prev.filter(id => id !== invoice.id))
+                                }
+                              }}
+                            />
+
+                            {/* Invoice Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge className={getStatusColor(invoice.status)}>
+                                  {invoice.status === 'paid' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                                  {invoice.status === 'overdue' && <AlertCircle className="h-3 w-3 mr-1" />}
+                                  {invoice.status === 'sent' && <Send className="h-3 w-3 mr-1" />}
+                                  {invoice.status}
+                                </Badge>
+                                {invoice.recurring && (
+                                  <Badge variant="outline" className="text-blue-600">
+                                    <RefreshCw className="h-3 w-3 mr-1" />
+                                    Recurring
+                                  </Badge>
+                                )}
+                              </div>
+                              <h3 className="font-semibold truncate">{invoice.title || 'Untitled Invoice'}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span>#{invoice.invoice_number}</span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {invoice.client_name || 'No client'}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  Due {new Date(invoice.due_date).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Amount */}
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-emerald-600">
+                                {getCurrencySymbol(invoice.currency)}{invoice.total_amount.toLocaleString()}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{invoice.currency}</p>
+                            </div>
+
+                            {/* Actions */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => window.open(`/dashboard/invoices/${invoice.id}`, '_blank')}>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  setEditingInvoice(invoice)
+                                  setShowEditModal(true)
+                                }}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleSendInvoice(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
+                                  <Send className="h-4 w-4 mr-2" />
+                                  Send
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDownloadInvoice(invoice)}>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDuplicateInvoice(invoice)}>
+                                  <Copy className="h-4 w-4 mr-2" />
+                                  Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    const invoiceUrl = `${window.location.origin}/invoices/${invoice.id}`
+                                    navigator.clipboard.writeText(invoiceUrl)
+                                    toast.success('Invoice link copied to clipboard')
+                                  }}>
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share Link
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleSendReminder(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'draft'}>
+                                  <Bell className="h-4 w-4 mr-2" />
+                                  Send Reminder
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Mark as Paid
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleVoidInvoice(invoice)} disabled={invoice.status === 'cancelled' || invoice.status === 'paid'}>
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Void Invoice
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600" onClick={() => {
+                                  setDeletingInvoice(invoice)
+                                  setShowDeleteConfirm(true)
+                                }}>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                          <h3 className="font-semibold truncate">{invoice.title || 'Untitled Invoice'}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>#{invoice.invoice_number}</span>
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {invoice.client_name || 'No client'}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              Due {new Date(invoice.due_date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Amount */}
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-emerald-600">
-                            {getCurrencySymbol(invoice.currency)}{invoice.total_amount.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{invoice.currency}</p>
-                        </div>
-
-                        {/* Actions */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => window.open(`/dashboard/invoices/${invoice.id}`, '_blank')}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setEditingInvoice(invoice)
-                              setShowEditModal(true)
-                            }}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleSendInvoice(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
-                              <Send className="h-4 w-4 mr-2" />
-                              Send
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDownloadInvoice(invoice)}>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicateInvoice(invoice)}>
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                                const invoiceUrl = `${window.location.origin}/invoices/${invoice.id}`
-                                navigator.clipboard.writeText(invoiceUrl)
-                                toast.success('Invoice link copied to clipboard')
-                              }}>
-                              <Share2 className="h-4 w-4 mr-2" />
-                              Share Link
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleSendReminder(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'draft'}>
-                              <Bell className="h-4 w-4 mr-2" />
-                              Send Reminder
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
-                              <CheckCircle2 className="h-4 w-4 mr-2" />
-                              Mark as Paid
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleVoidInvoice(invoice)} disabled={invoice.status === 'cancelled' || invoice.status === 'paid'}>
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Void Invoice
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600" onClick={() => {
-                              setDeletingInvoice(invoice)
-                              setShowDeleteConfirm(true)
-                            }}>
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 

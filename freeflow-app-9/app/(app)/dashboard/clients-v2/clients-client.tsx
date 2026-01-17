@@ -49,6 +49,7 @@ import {
   Handshake,
   LayoutGrid,
   List,
+  Table2,
   AlertCircle,
   PhoneCall,
   Video,
@@ -62,6 +63,10 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react'
+
+// World-class TanStack Table integration
+import { EnhancedDataTable } from '@/components/ui/enhanced-data-table'
+import { createClientColumns, type ClientTableRow } from '@/lib/table-columns'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -431,7 +436,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ClientStatus | 'all'>('all')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('list')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -1230,6 +1235,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('list')}
+                      title="Card View"
                     >
                       <List className="w-4 h-4" />
                     </Button>
@@ -1237,88 +1243,147 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('grid')}
+                      title="Grid View"
                     >
                       <LayoutGrid className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('table')}
+                      title="Table View (TanStack)"
+                    >
+                      <Table2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Client List */}
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
-              {filteredClients.map((client) => (
-                <Card
-                  key={client.id}
-                  className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => setSelectedClient(client)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                          {client.company.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+            {/* Client List - Table View (TanStack Table) */}
+            {viewMode === 'table' && (
+              <EnhancedDataTable
+                columns={createClientColumns({
+                  onView: (client) => {
+                    const fullClient = filteredClients.find(c => c.id === client.id)
+                    if (fullClient) setSelectedClient(fullClient)
+                  },
+                  onEdit: (client) => {
+                    const fullClient = filteredClients.find(c => c.id === client.id)
+                    if (fullClient) openEditDialog(fullClient)
+                  },
+                  onDelete: (client) => confirmDeleteClient(client.id),
+                  onEmail: (client) => {
+                    const fullClient = filteredClients.find(c => c.id === client.id)
+                    if (fullClient) handleSendMessage(fullClient)
+                  },
+                  onCall: (client) => {
+                    const fullClient = filteredClients.find(c => c.id === client.id)
+                    if (fullClient) handleCallClient(fullClient)
+                  },
+                })}
+                data={filteredClients.map((client): ClientTableRow => ({
+                  id: client.id,
+                  company: client.company,
+                  name: client.primaryContact.name,
+                  email: client.primaryContact.email,
+                  phone: client.primaryContact.phone,
+                  industry: client.industry,
+                  status: client.status,
+                  revenue: client.revenue,
+                  projects: client.projects,
+                  health_score: client.health_score,
+                  tier: client.tier,
+                  lastActivity: client.lastActivity,
+                  createdAt: client.createdAt,
+                }))}
+                title="All Clients"
+                description="Manage your client relationships with sorting, filtering, and bulk actions"
+                searchKey="company"
+                isLoading={clientsLoading}
+                onRowClick={(row) => {
+                  const fullClient = filteredClients.find(c => c.id === row.id)
+                  if (fullClient) setSelectedClient(fullClient)
+                }}
+              />
+            )}
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">{client.company}</h3>
-                          <Badge className={getTierColor(client.tier)}>{client.tier}</Badge>
-                          <Badge className={getStatusColor(client.status)}>{client.status}</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{client.industry}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="w-3 h-3" />
-                            {formatCurrency(client.revenue)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Briefcase className="w-3 h-3" />
-                            {client.projects} projects
-                          </span>
-                          {client.health_score > 0 && (
-                            <span className={`flex items-center gap-1 ${getHealthColor(client.health_score)}`}>
-                              <Activity className="w-3 h-3" />
-                              {client.health_score}%
+            {/* Client List - Card/Grid View */}
+            {viewMode !== 'table' && (
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
+                {filteredClients.map((client) => (
+                  <Card
+                    key={client.id}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => setSelectedClient(client)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="w-12 h-12">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                            {client.company.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900 dark:text-white truncate">{client.company}</h3>
+                            <Badge className={getTierColor(client.tier)}>{client.tier}</Badge>
+                            <Badge className={getStatusColor(client.status)}>{client.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{client.industry}</p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="w-3 h-3" />
+                              {formatCurrency(client.revenue)}
                             </span>
+                            <span className="flex items-center gap-1">
+                              <Briefcase className="w-3 h-3" />
+                              {client.projects} projects
+                            </span>
+                            {client.health_score > 0 && (
+                              <span className={`flex items-center gap-1 ${getHealthColor(client.health_score)}`}>
+                                <Activity className="w-3 h-3" />
+                                {client.health_score}%
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-3">
+                            <Avatar className="w-6 h-6">
+                              <AvatarFallback className="text-xs">{client.primaryContact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-gray-500">{client.primaryContact.name}</span>
+                            <span className="text-xs text-gray-400">|</span>
+                            <span className="text-xs text-gray-500">{client.primaryContact.title}</span>
+                          </div>
+
+                          {client.deals.length > 0 && (
+                            <div className="mt-3 p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-amber-800 dark:text-amber-400">{client.deals[0].name}</span>
+                                <span className="font-medium text-amber-900 dark:text-amber-300">{formatCurrency(client.deals[0].value)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge className={getStageColor(client.deals[0].stage)}>{client.deals[0].stage.replace('_', ' ')}</Badge>
+                                <span className="text-xs text-gray-500">{client.deals[0].probability}% probability</span>
+                              </div>
+                            </div>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 mt-3">
-                          <Avatar className="w-6 h-6">
-                            <AvatarFallback className="text-xs">{client.primaryContact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs text-gray-500">{client.primaryContact.name}</span>
-                          <span className="text-xs text-gray-400">|</span>
-                          <span className="text-xs text-gray-500">{client.primaryContact.title}</span>
+                        <div className="flex flex-col items-end gap-2">
+                          <Button variant="ghost" size="sm" aria-label="More options">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                          <span className="text-xs text-gray-500">{formatRelativeTime(client.lastActivity)}</span>
                         </div>
-
-                        {client.deals.length > 0 && (
-                          <div className="mt-3 p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-amber-800 dark:text-amber-400">{client.deals[0].name}</span>
-                              <span className="font-medium text-amber-900 dark:text-amber-300">{formatCurrency(client.deals[0].value)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge className={getStageColor(client.deals[0].stage)}>{client.deals[0].stage.replace('_', ' ')}</Badge>
-                              <span className="text-xs text-gray-500">{client.deals[0].probability}% probability</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
-
-                      <div className="flex flex-col items-end gap-2">
-                        <Button variant="ghost" size="sm" aria-label="More options">
-                  <MoreVertical className="w-4 h-4" />
-                        </Button>
-                        <span className="text-xs text-gray-500">{formatRelativeTime(client.lastActivity)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Pipeline Tab */}

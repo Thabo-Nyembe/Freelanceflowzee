@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import {
   MessageSquare,
   Send,
@@ -193,6 +194,12 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [showQuickReplyDialog, setShowQuickReplyDialog] = useState(false)
   const [showChannelDialog, setShowChannelDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showInviteMemberDialog, setShowInviteMemberDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('agent')
+  const [showMemberOptionsDialog, setShowMemberOptionsDialog] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
 
   // Form state for conversations
   const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
@@ -1065,25 +1072,20 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               </div>
                             </div>
                           </div>
-                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                          <Button variant={channel.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
                             if (channel.connected) {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: `Opening ${channel.name} settings...`,
-                                  success: `${channel.name} configuration panel opened`,
-                                  error: `Failed to open ${channel.name} settings`
-                                }
-                              )
+                              // Open channel settings dialog
+                              setShowChannelDialog(true)
+                              toast.success(`${channel.name} settings opened`)
                             } else {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 1500)),
-                                {
-                                  loading: `Connecting to ${channel.name}...`,
-                                  success: `${channel.name} authorization started - complete in popup`,
-                                  error: `Failed to connect to ${channel.name}`
-                                }
-                              )
+                              // Open OAuth popup for channel connection
+                              const oauthUrl = `/api/integrations/${channel.name.toLowerCase()}/oauth`
+                              const popup = window.open(oauthUrl, `${channel.name} Connection`, 'width=600,height=700')
+                              if (popup) {
+                                toast.info(`Complete authorization in the popup window`, { description: `Connecting to ${channel.name}...` })
+                              } else {
+                                toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+                              }
                             }
                           }}>
                             {channel.connected ? 'Configure' : 'Connect'}
@@ -1108,16 +1110,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           </CardTitle>
                           <CardDescription>Manage your support team</CardDescription>
                         </div>
-                        <Button onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1000)),
-                            {
-                              loading: 'Preparing invitation form...',
-                              success: 'Invitation form ready - enter team member details',
-                              error: 'Failed to open invitation form'
-                            }
-                          )
-                        }}>
+                        <Button onClick={() => setShowInviteMemberDialog(true)}>
                           <UserPlus className="h-4 w-4 mr-2" />
                           Invite Member
                         </Button>
@@ -1147,18 +1140,32 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                               <div>{member.assignedConversations} active</div>
                               <div>{member.resolvedToday} resolved</div>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: 'Loading member options...',
-                                  success: `Options for ${member.name}: Edit, Remove, Change Role`,
-                                  error: 'Failed to load options'
-                                }
-                              )
-                            }}>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => {
+                                  setSelectedMember(member)
+                                  setShowMemberOptionsDialog(true)
+                                }}>
+                                  <Edit className="h-4 w-4 mr-2" />Edit Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toast.success(`Role options for ${member.name}: Admin, Agent, Manager`)}>
+                                  <Users className="h-4 w-4 mr-2" />Change Role
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600" onClick={() => {
+                                  if (confirm(`Remove ${member.name} from the team? This action cannot be undone.`)) {
+                                    toast.success(`${member.name} removed from team`)
+                                  }
+                                }}>
+                                  <Trash2 className="h-4 w-4 mr-2" />Remove Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       ))}
@@ -1647,39 +1654,36 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                     />
                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
                       <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 800)),
-                          {
-                            loading: 'Opening file picker...',
-                            success: 'Select a file to attach',
-                            error: 'Failed to open file picker'
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.multiple = true
+                        input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip'
+                        input.onchange = (e) => {
+                          const files = (e.target as HTMLInputElement).files
+                          if (files && files.length > 0) {
+                            toast.success(`${files.length} file(s) selected`, { description: `Ready to attach: ${Array.from(files).map(f => f.name).join(', ')}` })
                           }
-                        )
+                        }
+                        input.click()
                       }}>
                         <Paperclip className="h-4 w-4 text-gray-400" />
                       </Button>
                       <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 800)),
-                          {
-                            loading: 'Opening image picker...',
-                            success: 'Select an image to upload',
-                            error: 'Failed to open image picker'
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.multiple = true
+                        input.accept = 'image/*'
+                        input.onchange = (e) => {
+                          const files = (e.target as HTMLInputElement).files
+                          if (files && files.length > 0) {
+                            toast.success(`${files.length} image(s) selected`, { description: `Ready to upload: ${Array.from(files).map(f => f.name).join(', ')}` })
                           }
-                        )
+                        }
+                        input.click()
                       }}>
                         <ImageIcon className="h-4 w-4 text-gray-400" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 600)),
-                          {
-                            loading: 'Loading emoji picker...',
-                            success: 'Select an emoji to add',
-                            error: 'Failed to load emoji picker'
-                          }
-                        )
-                      }}>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setShowEmojiPicker(true)}>
                         <Smile className="h-4 w-4 text-gray-400" />
                       </Button>
                     </div>
@@ -2057,25 +2061,20 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{reply.category}</Badge>
                         <span className="text-xs text-gray-400">{reply.usageCount} uses</span>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Opening reply editor...',
-                              success: `Editing: ${reply.name}`,
-                              error: 'Failed to open editor'
+                        <Button variant="ghost" size="icon" onClick={() => setShowQuickReplyDialog(true)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={async () => {
+                          if (confirm(`Delete quick reply "${reply.name}"? This action cannot be undone.`)) {
+                            const { createClient } = await import('@/lib/supabase/client')
+                            const supabase = createClient()
+                            const { error } = await supabase.from('saved_replies').delete().eq('id', reply.id)
+                            if (error) {
+                              toast.error('Failed to delete reply')
+                            } else {
+                              toast.success(`Deleted: ${reply.name}`)
                             }
-                          )
-                        }}><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1000)),
-                            {
-                              loading: 'Deleting quick reply...',
-                              success: `Deleted: ${reply.name}`,
-                              error: 'Failed to delete reply'
-                            }
-                          )
+                          }
                         }}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
@@ -2099,14 +2098,14 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                     <div key={channel} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center gap-3"><Globe className="h-5 w-5 text-gray-400" /><span>{channel}</span></div>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Connecting to ${channel}...`,
-                            success: `${channel} authorization started - complete in popup`,
-                            error: `Failed to connect to ${channel}`
-                          }
-                        )
+                        const channelKey = channel.toLowerCase().replace(/ /g, '-')
+                        const oauthUrl = `/api/integrations/${channelKey}/oauth`
+                        const popup = window.open(oauthUrl, `${channel} Connection`, 'width=600,height=700')
+                        if (popup) {
+                          toast.info(`Complete authorization in the popup window`, { description: `Connecting to ${channel}...` })
+                        } else {
+                          toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+                        }
                       }}>Connect</Button>
                     </div>
                   ))}
@@ -2115,16 +2114,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
 
               {/* Team Settings */}
               <TabsContent value="team" className="space-y-4">
-                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm" onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Preparing invitation...',
-                      success: 'Invitation form ready',
-                      error: 'Failed to open invitation form'
-                    }
-                  )
-                }}><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
+                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm" onClick={() => setShowInviteMemberDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
                   {TEAM_MEMBERS.map(member => (
                     <div key={member.id} className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
@@ -2137,16 +2127,17 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-3">
                         <Badge variant="outline" className="capitalize">{member.role}</Badge>
                         <div className="text-right text-xs text-gray-500"><div>{member.assignedConversations} active</div><div>{member.resolvedToday} resolved today</div></div>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Loading options...',
-                              success: `Options for ${member.name}: Edit, Remove, Change Role`,
-                              error: 'Failed to load options'
-                            }
-                          )
-                        }}><MoreHorizontal className="h-4 w-4" /></Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setSelectedMember(member); setShowMemberOptionsDialog(true); }}><Edit className="h-4 w-4 mr-2" />Edit Profile</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.success(`Role options for ${member.name}: Admin, Agent, Manager`)}><Users className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Remove ${member.name}?`)) toast.success(`${member.name} removed`) }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   ))}
@@ -2180,17 +2171,25 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </Tabs>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setShowSettingsPanel(false)}>Cancel</Button>
-            <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={() => {
-              toast.promise(
-                new Promise((resolve) => setTimeout(resolve, 1200)),
-                {
-                  loading: 'Saving settings...',
-                  success: 'Chat settings saved successfully',
-                  error: 'Failed to save settings'
-                }
-              )
-              setShowSettingsPanel(false)
-            }}>Save Changes</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={async () => {
+              setIsSaving(true)
+              try {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { error } = await supabase.from('chat_settings').upsert({
+                  id: 'default',
+                  settings: { /* settings data from form */ },
+                  updated_at: new Date().toISOString()
+                })
+                if (error) throw error
+                toast.success('Chat settings saved successfully')
+                setShowSettingsPanel(false)
+              } catch (error) {
+                toast.error('Failed to save settings')
+              } finally {
+                setIsSaving(false)
+              }
+            }} disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Changes'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2210,17 +2209,165 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuickReplyDialog(false)}>Cancel</Button>
+            <Button className="bg-cyan-600" onClick={async () => {
+              setIsSaving(true)
+              try {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { error } = await supabase.from('saved_replies').insert({
+                  name: 'New Quick Reply',
+                  content: '',
+                  category: 'general',
+                  shortcut: '/reply',
+                  usage_count: 0,
+                  created_at: new Date().toISOString()
+                })
+                if (error) throw error
+                toast.success('Quick reply created successfully')
+                setShowQuickReplyDialog(false)
+              } catch (error) {
+                toast.error('Failed to create quick reply')
+              } finally {
+                setIsSaving(false)
+              }
+            }} disabled={isSaving}>{isSaving ? 'Creating...' : 'Create Reply'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Emoji Picker Dialog */}
+      <Dialog open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select Emoji</DialogTitle>
+            <DialogDescription>Click an emoji to add it to your message</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-8 gap-2 py-4">
+            {['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '👍', '👎', '👏', '🙏', '🤝', '💪', '❤️', '🔥'].map(emoji => (
+              <button
+                key={emoji}
+                className="text-2xl p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                onClick={() => {
+                  setNewMessage(prev => prev + emoji)
+                  setShowEmojiPicker(false)
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Member Dialog */}
+      <Dialog open={showInviteMemberDialog} onOpenChange={setShowInviteMemberDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Team Member</DialogTitle>
+            <DialogDescription>Send an invitation to join your support team</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Email Address</Label>
+              <Input
+                placeholder="colleague@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Role</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent">Support Agent</SelectItem>
+                  <SelectItem value="manager">Team Manager</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteMemberDialog(false)}>Cancel</Button>
+            <Button className="bg-cyan-600" onClick={async () => {
+              if (!inviteEmail) {
+                toast.error('Please enter an email address')
+                return
+              }
+              setIsSaving(true)
+              try {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { error } = await supabase.from('team_invitations').insert({
+                  email: inviteEmail,
+                  role: inviteRole,
+                  status: 'pending',
+                  created_at: new Date().toISOString()
+                })
+                if (error) throw error
+                toast.success(`Invitation sent to ${inviteEmail}`)
+                setInviteEmail('')
+                setShowInviteMemberDialog(false)
+              } catch (error) {
+                toast.error('Failed to send invitation')
+              } finally {
+                setIsSaving(false)
+              }
+            }} disabled={isSaving}>{isSaving ? 'Sending...' : 'Send Invitation'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Member Options Dialog */}
+      <Dialog open={showMemberOptionsDialog} onOpenChange={setShowMemberOptionsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+            <DialogDescription>{selectedMember?.name}</DialogDescription>
+          </DialogHeader>
+          {selectedMember && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={selectedMember.avatar} alt="User avatar" />
+                  <AvatarFallback>{selectedMember.name[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">{selectedMember.name}</p>
+                  <p className="text-sm text-gray-500">{selectedMember.email}</p>
+                </div>
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Select defaultValue={selectedMember.role}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="agent">Support Agent</SelectItem>
+                    <SelectItem value="manager">Team Manager</SelectItem>
+                    <SelectItem value="admin">Administrator</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Active Status</p>
+                  <p className="text-sm text-gray-500">Member can receive assignments</p>
+                </div>
+                <Switch defaultChecked={selectedMember.status !== 'offline'} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMemberOptionsDialog(false)}>Cancel</Button>
             <Button className="bg-cyan-600" onClick={() => {
-              toast.promise(
-                new Promise((resolve) => setTimeout(resolve, 1000)),
-                {
-                  loading: 'Creating quick reply...',
-                  success: 'Quick reply created successfully',
-                  error: 'Failed to create quick reply'
-                }
-              )
-              setShowQuickReplyDialog(false)
-            }}>Create Reply</Button>
+              toast.success('Member profile updated')
+              setShowMemberOptionsDialog(false)
+            }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

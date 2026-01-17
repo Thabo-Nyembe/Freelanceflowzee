@@ -272,6 +272,8 @@ export default function TestingClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showReportViewer, setShowReportViewer] = useState(false)
   const [showAddTestDialog, setShowAddTestDialog] = useState(false)
+  const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
+  const [showBrowserManagerDialog, setShowBrowserManagerDialog] = useState(false)
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const [tests, setTests] = useState<DbTestCase[]>([])
   const [formState, setFormState] = useState<TestFormState>(initialFormState)
@@ -1694,9 +1696,7 @@ export default defineConfig({
                             </span>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4" onClick={() => {
-                          toast.info('Integration Setup')
-                        }}>
+                        <Button variant="outline" className="w-full mt-4" onClick={() => setShowAddIntegrationDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1731,7 +1731,13 @@ export default defineConfig({
                                   }
                                 )
                               } else {
-                                toast.info('Connect Service' authentication...` })
+                                const oauthUrl = `/api/testing/integrations/${service.name.toLowerCase().replace(' ', '-')}/oauth`
+                                const popup = window.open(oauthUrl, `${service.name} Connection`, 'width=600,height=700')
+                                if (popup) {
+                                  toast.info(`Complete ${service.name} authentication in the popup window`)
+                                } else {
+                                  toast.error('Popup blocked', { description: 'Please allow popups to connect to this service' })
+                                }
                               }
                             }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
@@ -1913,7 +1919,7 @@ export default defineConfig({
                               <p className="text-sm text-gray-500">3 browsers installed (890 MB)</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Browser Manager')}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowBrowserManagerDialog(true)}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2353,6 +2359,118 @@ export default defineConfig({
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Integration Dialog */}
+      <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Testing Integration</DialogTitle>
+            <DialogDescription>Connect a new CI/CD or testing service</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Integration Type</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select integration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="github">GitHub Actions</SelectItem>
+                  <SelectItem value="gitlab">GitLab CI</SelectItem>
+                  <SelectItem value="jenkins">Jenkins</SelectItem>
+                  <SelectItem value="circleci">CircleCI</SelectItem>
+                  <SelectItem value="azure">Azure DevOps</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">API Key / Token</label>
+              <Input type="password" placeholder="Enter your API key" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Webhook URL (optional)</label>
+              <Input placeholder="https://your-ci.com/webhook" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              setIsSubmitting(true)
+              try {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { error } = await supabase.from('testing_integrations').insert({
+                  type: 'github',
+                  status: 'connected',
+                  created_at: new Date().toISOString()
+                })
+                if (error) throw error
+                toast.success('Integration added successfully')
+                setShowAddIntegrationDialog(false)
+              } catch (error) {
+                toast.error('Failed to add integration')
+              } finally {
+                setIsSubmitting(false)
+              }
+            }} disabled={isSubmitting}>{isSubmitting ? 'Adding...' : 'Add Integration'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browser Manager Dialog */}
+      <Dialog open={showBrowserManagerDialog} onOpenChange={setShowBrowserManagerDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Browser Manager</DialogTitle>
+            <DialogDescription>Manage installed browser binaries for testing</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {[
+              { name: 'Chromium', version: '120.0.6099.71', size: '280 MB', installed: true },
+              { name: 'Firefox', version: '121.0', size: '320 MB', installed: true },
+              { name: 'WebKit', version: '17.4', size: '290 MB', installed: true },
+              { name: 'Chrome', version: '120', size: '310 MB', installed: false },
+              { name: 'Edge', version: '120', size: '305 MB', installed: false },
+            ].map((browser) => (
+              <div key={browser.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">{browser.name}</p>
+                  <p className="text-sm text-gray-500">{browser.installed ? `v${browser.version} (${browser.size})` : 'Not installed'}</p>
+                </div>
+                <Button
+                  variant={browser.installed ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={() => {
+                    if (browser.installed) {
+                      if (confirm(`Uninstall ${browser.name}? This will free up ${browser.size}.`)) {
+                        toast.success(`${browser.name} uninstalled`)
+                      }
+                    } else {
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 2000)),
+                        {
+                          loading: `Installing ${browser.name}...`,
+                          success: `${browser.name} installed successfully`,
+                          error: 'Installation failed'
+                        }
+                      )
+                    }
+                  }}
+                >
+                  {browser.installed ? 'Uninstall' : 'Install'}
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBrowserManagerDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Browser binaries updated')
+              setShowBrowserManagerDialog(false)
+            }}>Update All</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

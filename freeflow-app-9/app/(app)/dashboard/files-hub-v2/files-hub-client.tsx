@@ -60,8 +60,12 @@ import {
   Smartphone,
   Monitor,
   AlertOctagon,
-  ShieldCheck
+  ShieldCheck,
+  CloudUpload
 } from 'lucide-react'
+
+// World-class file upload with drag & drop
+import { AdvancedFileUpload, type UploadedFile } from '@/components/world-class/file-upload/advanced-file-upload'
 
 
 
@@ -329,6 +333,47 @@ export default function FilesHubClient() {
   const [showRevokeAllLinksDialog, setShowRevokeAllLinksDialog] = useState(false)
   const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
   const [showDisableFilesHubDialog, setShowDisableFilesHubDialog] = useState(false)
+
+  // Advanced upload dialog state (world-class drag & drop component)
+  const [showAdvancedUpload, setShowAdvancedUpload] = useState(false)
+
+  // Handle advanced upload completion
+  const handleAdvancedUploadComplete = useCallback(async (uploadedFiles: UploadedFile[]) => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create file records in database for each uploaded file
+      for (const file of uploadedFiles) {
+        const extension = file.name.split('.').pop() || ''
+        const fileType = file.type.startsWith('image/') ? 'image' :
+                        file.type.startsWith('video/') ? 'video' :
+                        file.type.startsWith('audio/') ? 'audio' :
+                        file.type.includes('pdf') || file.type.includes('document') ? 'document' :
+                        file.type.includes('spreadsheet') || file.type.includes('excel') ? 'spreadsheet' :
+                        file.type.includes('presentation') || file.type.includes('powerpoint') ? 'presentation' :
+                        file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other'
+
+        await supabase.from('files').insert({
+          user_id: user.id,
+          folder_id: currentFolderId,
+          name: file.name,
+          type: fileType,
+          extension,
+          size: file.size,
+          url: file.url,
+          status: 'active'
+        })
+      }
+
+      setShowAdvancedUpload(false)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to save uploaded files')
+    }
+  }, [currentFolderId, fetchData])
 
   // Fetch files, folders, shared links, and activities
   const fetchData = useCallback(async () => {
@@ -899,9 +944,13 @@ export default function FilesHubClient() {
                 className="hidden"
                 accept="*/*"
               />
-              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => fileInputRef.current?.click()}>
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="w-4 h-4 mr-2" />
-                Upload Files
+                Quick Upload
+              </Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => setShowAdvancedUpload(true)}>
+                <CloudUpload className="w-4 h-4 mr-2" />
+                Advanced Upload
               </Button>
             </>
           </div>
@@ -2990,6 +3039,39 @@ export default function FilesHubClient() {
                 setShowDisableFilesHubDialog(false)
               }} variant="destructive">
                 Disable Files Hub
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced File Upload Dialog - World-class drag & drop component */}
+        <Dialog open={showAdvancedUpload} onOpenChange={setShowAdvancedUpload}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CloudUpload className="w-5 h-5 text-cyan-500" />
+                Advanced File Upload
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <AdvancedFileUpload
+                bucket="files"
+                path={currentFolderId || 'root'}
+                maxFiles={20}
+                maxSizeMB={100}
+                showPreview={true}
+                onUploadComplete={handleAdvancedUploadComplete}
+                onUploadError={(error) => toast.error(`Upload failed: ${error.message}`)}
+              />
+              <div className="mt-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
+                <p className="text-sm text-cyan-800 dark:text-cyan-200">
+                  <strong>Pro tip:</strong> Drag & drop multiple files or click to browse. Supports images, videos, documents, and more.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAdvancedUpload(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

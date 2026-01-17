@@ -61,8 +61,12 @@ import {
   Activity,
   Zap,
   Shield,
-  RotateCcw
+  RotateCcw,
+  CloudUpload
 } from 'lucide-react'
+
+// World-class file upload with drag & drop
+import { AdvancedFileUpload, type UploadedFile } from '@/components/world-class/file-upload/advanced-file-upload'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -496,6 +500,7 @@ export default function CloudStorageClient() {
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [showMoveDialog, setShowMoveDialog] = useState(false)
+  const [showAdvancedUpload, setShowAdvancedUpload] = useState(false)
 
   // Form states
   const [newFolderName, setNewFolderName] = useState('')
@@ -696,6 +701,68 @@ export default function CloudStorageClient() {
       setIsUploading(false)
       setUploadProgress(0)
       if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  // Handle advanced upload completion (world-class drag & drop component)
+  const handleAdvancedUploadComplete = async (uploadedFiles: UploadedFile[]) => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication Required', { description: 'Please sign in to upload files' })
+        return
+      }
+
+      // Create file records in database for each uploaded file
+      for (const file of uploadedFiles) {
+        const fileExt = file.name.split('.').pop() || ''
+        const isImage = file.type.startsWith('image/')
+        const isVideo = file.type.startsWith('video/')
+        const isAudio = file.type.startsWith('audio/')
+        const isDocument = file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')
+
+        await addFile({
+          file_name: file.name,
+          original_name: file.name,
+          file_path: file.url,
+          file_size: file.size,
+          file_type: fileExt,
+          mime_type: file.type,
+          extension: fileExt,
+          storage_provider: 'supabase',
+          storage_bucket: 'cloud-storage',
+          access_level: 'private',
+          public_url: file.url,
+          is_shared: false,
+          can_view: true,
+          can_download: true,
+          can_edit: true,
+          can_delete: true,
+          version: 1,
+          is_latest_version: true,
+          is_image: isImage,
+          is_video: isVideo,
+          is_audio: isAudio,
+          is_document: isDocument,
+          processing_status: 'completed',
+          download_count: 0,
+          view_count: 0,
+          is_backed_up: false,
+          is_encrypted: false,
+          status: 'active',
+          is_deleted: false,
+          is_scanned: false,
+          folder: currentPath.join('/')
+        })
+      }
+
+      setShowAdvancedUpload(false)
+      toast.success('Upload Complete', { description: `${uploadedFiles.length} file(s) uploaded successfully` })
+      refetch()
+    } catch (error: any) {
+      toast.error('Upload Error', { description: error.message || 'Failed to save uploaded files' })
     }
   }
 
@@ -1334,9 +1401,13 @@ export default function CloudStorageClient() {
             <Button variant="outline" size="icon" onClick={handleFilter} aria-label="Filter">
                   <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white" onClick={handleUploadFile}>
+            <Button variant="outline" onClick={handleUploadFile}>
               <Upload className="w-4 h-4 mr-2" />
-              Upload
+              Quick Upload
+            </Button>
+            <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white" onClick={() => setShowAdvancedUpload(true)}>
+              <CloudUpload className="w-4 h-4 mr-2" />
+              Advanced Upload
             </Button>
           </div>
         </div>
@@ -2779,6 +2850,42 @@ export default function CloudStorageClient() {
           <p className="text-xs text-gray-500 mt-1">{Math.round(uploadProgress)}% complete</p>
         </div>
       )}
+
+      {/* Advanced File Upload Dialog - World-class drag & drop component */}
+      <Dialog open={showAdvancedUpload} onOpenChange={setShowAdvancedUpload}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CloudUpload className="w-5 h-5 text-sky-500" />
+              Advanced File Upload
+            </DialogTitle>
+            <DialogDescription>
+              Drag & drop files or click to browse. Supports multiple files with progress tracking.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <AdvancedFileUpload
+              bucket="cloud-storage"
+              path={currentPath.join('/') || 'root'}
+              maxFiles={20}
+              maxSizeMB={100}
+              showPreview={true}
+              onUploadComplete={handleAdvancedUploadComplete}
+              onUploadError={(error) => toast.error(`Upload failed: ${error.message}`)}
+            />
+            <div className="mt-4 p-3 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-lg">
+              <p className="text-sm text-sky-800 dark:text-sky-200">
+                <strong>Pro tip:</strong> Drag & drop multiple files at once. Supports images, videos, documents, archives, and more.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAdvancedUpload(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

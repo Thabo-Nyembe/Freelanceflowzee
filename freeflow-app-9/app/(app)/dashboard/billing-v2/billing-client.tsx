@@ -46,6 +46,9 @@ import { useActivePricingPlans } from '@/lib/hooks/use-pricing-extended'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 import { toast } from 'sonner'
 
+// World-class guest payment component
+import GuestPaymentModal from '@/components/payments/guest-payment-modal'
+
 interface Subscription {
   id: string
   customer_id: string
@@ -206,6 +209,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null)
   const [showAuditLogModal, setShowAuditLogModal] = useState(false)
   const [showSecretKey, setShowSecretKey] = useState(false)
+
+  // Guest payment modal state
+  const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false)
+  const [selectedPlanForGuestPayment, setSelectedPlanForGuestPayment] = useState<{
+    name: string
+    amount: number
+    description: string
+  } | null>(null)
 
   // Settings state - payment methods
   const [paymentSettings, setPaymentSettings] = useState({
@@ -526,6 +537,52 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
       default:
         toast.info(`Insight action: ${insight.title}`)
     }
+  }, [])
+
+  // Handler for guest payment completion
+  const handleGuestPaymentSuccess = useCallback(async (paymentResult: {
+    paymentIntentId: string
+    email: string
+    amount: number
+  }) => {
+    try {
+      // Create a payment record in the database
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      await supabase.from('payments').insert({
+        payment_intent_id: paymentResult.paymentIntentId,
+        email: paymentResult.email,
+        amount: paymentResult.amount,
+        currency: 'usd',
+        status: 'succeeded',
+        payment_type: 'guest_payment',
+        description: selectedPlanForGuestPayment?.name || 'Guest Payment',
+        metadata: {
+          plan_name: selectedPlanForGuestPayment?.name,
+          payment_method: 'stripe'
+        },
+        created_at: new Date().toISOString()
+      })
+
+      toast.success(`Payment of ${formatCurrency(paymentResult.amount)} received!`)
+      setShowGuestPaymentModal(false)
+      setSelectedPlanForGuestPayment(null)
+      refreshAllBillingData()
+    } catch (error) {
+      console.error('Failed to record payment:', error)
+      toast.error('Payment succeeded but failed to record. Please contact support.')
+    }
+  }, [selectedPlanForGuestPayment, refreshAllBillingData])
+
+  // Handler to open guest payment modal for a plan
+  const handleOpenGuestPayment = useCallback((plan: PricingPlan) => {
+    setSelectedPlanForGuestPayment({
+      name: plan.name,
+      amount: plan.amount,
+      description: plan.description || `${plan.name} - ${plan.interval}ly subscription`
+    })
+    setShowGuestPaymentModal(true)
   }, [])
 
   // Invoice dialog state
@@ -1238,9 +1295,23 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
                 <CardContent className="space-y-4">
                   {pricingPlans.filter(p => p.amount > 0).map(plan => (
                     <div key={plan.id} className="space-y-2">
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between items-center text-sm">
                         <span className="font-medium text-gray-900 dark:text-white">{plan.name}</span>
-                        <span className="text-gray-500">{plan.subscribers} subscribers • {formatCurrency(plan.amount * plan.subscribers)}/mo</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-500">{plan.subscribers} subscribers • {formatCurrency(plan.amount * plan.subscribers)}/mo</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 text-green-600 hover:bg-green-500/20"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleOpenGuestPayment(plan)
+                            }}
+                          >
+                            <CreditCard className="w-3 h-3 mr-1" />
+                            Pay as Guest
+                          </Button>
+                        </div>
                       </div>
                       <Progress value={(plan.subscribers / 250) * 100} className="h-2" />
                     </div>
@@ -3143,6 +3214,24 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Guest Payment Modal - World-class Stripe integration */}
+      {selectedPlanForGuestPayment && (
+        <GuestPaymentModal
+          isOpen={showGuestPaymentModal}
+          onClose={() => {
+            setShowGuestPaymentModal(false)
+            setSelectedPlanForGuestPayment(null)
+          }}
+          amount={selectedPlanForGuestPayment.amount}
+          productName={selectedPlanForGuestPayment.name}
+          productDescription={selectedPlanForGuestPayment.description}
+          onPaymentSuccess={handleGuestPaymentSuccess}
+          currency="usd"
+          allowApplePay={paymentSettings.appleGooglePay}
+          allowGooglePay={paymentSettings.appleGooglePay}
+        />
       )}
     </div>
   )

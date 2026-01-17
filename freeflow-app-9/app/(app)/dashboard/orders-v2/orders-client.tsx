@@ -58,8 +58,14 @@ import {
   Bell,
   Sliders,
   Terminal,
-  Shield
+  Shield,
+  List,
+  Table2
 } from 'lucide-react'
+
+// World-class TanStack Table integration
+import { EnhancedDataTable } from '@/components/ui/enhanced-data-table'
+import { createOrderColumns, type OrderTableRow } from '@/lib/table-columns'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -773,6 +779,7 @@ export default function OrdersClient() {
   const [activeTab, setActiveTab] = useState('orders')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
+  const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
@@ -1068,76 +1075,164 @@ export default function OrdersClient() {
                         </Button>
                       ))}
                     </div>
+                    <div className="flex border rounded-lg overflow-hidden ml-2">
+                      <Button
+                        variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('list')}
+                        title="List View"
+                        className="rounded-none"
+                      >
+                        <List className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setViewMode('table')}
+                        title="Table View (TanStack)"
+                        className="rounded-none"
+                      >
+                        <Table2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="divide-y">
-                  {filteredOrders.map(order => (
-                    <div
-                      key={order.id}
-                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={order.customer_avatar} alt="User avatar" />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-sm">
-                            {order.customer_name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {order.order_number}
-                            </span>
-                            <Badge className={getOrderStatusColor(order.status)}>
-                              {getOrderStatusIcon(order.status)}
-                              <span className="ml-1">{order.status}</span>
-                            </Badge>
-                            <Badge className={getPaymentStatusColor(order.payment_status)}>
-                              {order.payment_status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {order.customer_name} • {order.items.length} item{order.items.length > 1 ? 's' : ''}
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(order.created_at).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {order.shipping_address.city}, {order.shipping_address.state}
-                            </span>
-                            {order.tracking_number && (
-                              <span className="flex items-center gap-1">
-                                <Truck className="w-3 h-3" />
-                                {order.carrier}
+                {/* Table View */}
+                {viewMode === 'table' && (
+                  <div className="p-4">
+                    <EnhancedDataTable
+                      columns={createOrderColumns({
+                        onView: (order) => {
+                          const fullOrder = filteredOrders.find(o => o.id === order.id)
+                          if (fullOrder) setSelectedOrder(fullOrder)
+                        },
+                        onEdit: (order) => {
+                          toast.info('Edit Order', { description: `Editing order ${order.order_number}` })
+                        },
+                        onFulfill: async (order) => {
+                          toast.promise(fulfillOrderAPI(order.id), {
+                            loading: `Fulfilling order ${order.order_number}...`,
+                            success: `Order ${order.order_number} fulfilled`,
+                            error: 'Failed to fulfill order'
+                          })
+                        },
+                        onShip: async (order) => {
+                          toast.promise(bulkShipOrdersAPI([order.id]), {
+                            loading: `Shipping order ${order.order_number}...`,
+                            success: `Order ${order.order_number} shipped`,
+                            error: 'Failed to ship order'
+                          })
+                        },
+                        onCancel: async (order) => {
+                          toast.promise(cancelOrderAPI(order.id), {
+                            loading: `Cancelling order ${order.order_number}...`,
+                            success: `Order ${order.order_number} cancelled`,
+                            error: 'Failed to cancel order'
+                          })
+                        },
+                        onRefund: async (order) => {
+                          toast.info('Refund Order', { description: `Processing refund for order ${order.order_number}` })
+                        },
+                      })}
+                      data={filteredOrders.map((order): OrderTableRow => ({
+                        id: order.id,
+                        order_number: order.order_number,
+                        customer_name: order.customer_name,
+                        customer_email: order.customer_email,
+                        status: order.status,
+                        payment_status: order.payment_status,
+                        fulfillment_status: order.fulfillment_status,
+                        total: order.total,
+                        currency: order.currency,
+                        items_count: order.items.length,
+                        shipping_method: order.shipping_method,
+                        tracking_number: order.tracking_number,
+                        created_at: order.created_at,
+                        shipped_at: order.shipped_at,
+                        delivered_at: order.delivered_at,
+                      }))}
+                      title="All Orders"
+                      description="Manage orders with sorting, filtering, and bulk actions"
+                      searchKey="order_number"
+                      onRowClick={(row) => {
+                        const fullOrder = filteredOrders.find(o => o.id === row.id)
+                        if (fullOrder) setSelectedOrder(fullOrder)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* List View */}
+                {viewMode === 'list' && (
+                  <div className="divide-y">
+                    {filteredOrders.map(order => (
+                      <div
+                        key={order.id}
+                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        <div className="flex items-start gap-4">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={order.customer_avatar} alt="User avatar" />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-sm">
+                              {order.customer_name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-gray-900 dark:text-white">
+                                {order.order_number}
                               </span>
+                              <Badge className={getOrderStatusColor(order.status)}>
+                                {getOrderStatusIcon(order.status)}
+                                <span className="ml-1">{order.status}</span>
+                              </Badge>
+                              <Badge className={getPaymentStatusColor(order.payment_status)}>
+                                {order.payment_status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              {order.customer_name} • {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(order.created_at).toLocaleDateString()}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {order.shipping_address.city}, {order.shipping_address.state}
+                              </span>
+                              {order.tracking_number && (
+                                <span className="flex items-center gap-1">
+                                  <Truck className="w-3 h-3" />
+                                  {order.carrier}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-gray-900 dark:text-white">
+                              {formatCurrency(order.total)}
+                            </p>
+                            <p className="text-xs text-gray-500">{order.source}</p>
+                            {order.tags.length > 0 && (
+                              <div className="flex justify-end gap-1 mt-1">
+                                {order.tags.map(tag => (
+                                  <Badge key={tag} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
                             )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-gray-900 dark:text-white">
-                            {formatCurrency(order.total)}
-                          </p>
-                          <p className="text-xs text-gray-500">{order.source}</p>
-                          {order.tags.length > 0 && (
-                            <div className="flex justify-end gap-1 mt-1">
-                              {order.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

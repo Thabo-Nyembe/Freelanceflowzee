@@ -78,6 +78,9 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
 
+// World-class guest payment component
+import GuestPaymentModal from '@/components/payments/guest-payment-modal'
+
 // ============================================================================
 // TYPE DEFINITIONS - QuickBooks Level Invoicing
 // ============================================================================
@@ -385,6 +388,10 @@ export default function InvoicingClient() {
   const [showViewClientInvoicesDialog, setShowViewClientInvoicesDialog] = useState(false)
   const [showCreateClientInvoiceDialog, setShowCreateClientInvoiceDialog] = useState(false)
   const [selectedGateway, setSelectedGateway] = useState<string | null>(null)
+
+  // Guest payment modal state
+  const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false)
+  const [selectedInvoiceForGuestPayment, setSelectedInvoiceForGuestPayment] = useState<Invoice | null>(null)
 
   // Supabase client
 
@@ -725,6 +732,55 @@ export default function InvoicingClient() {
     }
   }
 
+  // Handler for guest payment modal
+  const handleOpenGuestPayment = (invoice: Invoice) => {
+    setSelectedInvoiceForGuestPayment(invoice)
+    setShowGuestPaymentModal(true)
+  }
+
+  const handleGuestPaymentSuccess = async (paymentResult: {
+    paymentIntentId: string
+    email: string
+    amount: number
+  }) => {
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      // Record the payment in the database
+      await supabase.from('payments').insert({
+        invoice_id: selectedInvoiceForGuestPayment?.id,
+        payment_intent_id: paymentResult.paymentIntentId,
+        email: paymentResult.email,
+        amount: paymentResult.amount,
+        currency: selectedInvoiceForGuestPayment?.currency?.toLowerCase() || 'usd',
+        status: 'succeeded',
+        payment_type: 'guest_invoice_payment',
+        metadata: {
+          invoice_number: selectedInvoiceForGuestPayment?.invoiceNumber,
+          client_name: selectedInvoiceForGuestPayment?.client?.name
+        },
+        created_at: new Date().toISOString()
+      })
+
+      // Update invoice status to paid
+      if (selectedInvoiceForGuestPayment) {
+        await updateInvoice(selectedInvoiceForGuestPayment.id, {
+          status: 'paid' as InvoiceStatus,
+          paidDate: new Date().toISOString().split('T')[0]
+        })
+      }
+
+      toast.success(`Payment of ${formatCurrency(paymentResult.amount)} received for invoice ${selectedInvoiceForGuestPayment?.invoiceNumber}!`)
+      setShowGuestPaymentModal(false)
+      setSelectedInvoiceForGuestPayment(null)
+      fetchInvoices()
+    } catch (error) {
+      console.error('Failed to record payment:', error)
+      toast.error('Payment succeeded but failed to record. Please contact support.')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -1022,6 +1078,20 @@ export default function InvoicingClient() {
                           <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedInvoice(invoice); setShowMoreOptionsDialog(true); }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
+                          {['sent', 'viewed', 'pending', 'partial', 'overdue'].includes(invoice.status) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 text-green-600 hover:bg-green-500/20"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleOpenGuestPayment(invoice)
+                              }}
+                            >
+                              <CreditCard className="w-3 h-3 mr-1" />
+                              Pay
+                            </Button>
+                          )}
                         </div>
                       </div>
 
@@ -4150,6 +4220,24 @@ export default function InvoicingClient() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Guest Payment Modal - World-class Stripe integration */}
+      {selectedInvoiceForGuestPayment && (
+        <GuestPaymentModal
+          isOpen={showGuestPaymentModal}
+          onClose={() => {
+            setShowGuestPaymentModal(false)
+            setSelectedInvoiceForGuestPayment(null)
+          }}
+          amount={selectedInvoiceForGuestPayment.amountDue || selectedInvoiceForGuestPayment.total}
+          productName={`Invoice #${selectedInvoiceForGuestPayment.invoiceNumber}`}
+          productDescription={`Payment for invoice ${selectedInvoiceForGuestPayment.invoiceNumber} - ${selectedInvoiceForGuestPayment.client?.name || 'Client'}`}
+          onPaymentSuccess={handleGuestPaymentSuccess}
+          currency={selectedInvoiceForGuestPayment.currency?.toLowerCase() || 'usd'}
+          allowApplePay={true}
+          allowGooglePay={true}
+        />
+      )}
     </div>
   )
 }
