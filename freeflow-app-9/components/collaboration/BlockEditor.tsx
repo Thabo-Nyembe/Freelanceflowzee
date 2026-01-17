@@ -119,24 +119,58 @@ const BlockEditor: React.FC<BlockEditorProps> = ({ isSuggestionMode = false }) =
     editor.commands.focus();
   };
 
-  const handleAcceptSuggestion = () => {
+  const handleAcceptSuggestion = async () => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     if (editor.isActive('deletion')) {
       editor.chain().focus().deleteRange({ from, to }).run();
     }
     editor.chain().focus().unsetInsertion().unsetDeletion().run();
-    console.log("Suggestion accepted. In a real app, we&apos;d call updateSuggestionStatus here.");
+
+    // Update suggestion status in Supabase
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('content_suggestions').insert({
+          user_id: user.id,
+          action: 'accepted',
+          position_from: from,
+          position_to: to,
+          accepted_at: new Date().toISOString()
+        })
+      }
+    } catch (error) {
+      // Silently fail - suggestion is still applied locally
+    }
   };
 
-  const handleRejectSuggestion = () => {
+  const handleRejectSuggestion = async () => {
     if (!editor) return;
     const { from, to } = editor.state.selection;
     if (editor.isActive('insertion')) {
         editor.chain().focus().deleteRange({ from, to }).run();
     }
     editor.chain().focus().unsetInsertion().unsetDeletion().run();
-    console.log("Suggestion rejected. In a real app, we&apos;d call updateSuggestionStatus here.");
+
+    // Update suggestion status in Supabase
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('content_suggestions').insert({
+          user_id: user.id,
+          action: 'rejected',
+          position_from: from,
+          position_to: to,
+          rejected_at: new Date().toISOString()
+        })
+      }
+    } catch (error) {
+      // Silently fail - suggestion is still rejected locally
+    }
   };
 
   return (
