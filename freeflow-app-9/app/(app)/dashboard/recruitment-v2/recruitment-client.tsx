@@ -1088,9 +1088,19 @@ export default function RecruitmentClient() {
     }
   }
 
-  const handleScheduleInterview = (candidateName: string) => {
+  const handleScheduleInterview = async (candidateName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        await supabase.from('activity_log').insert({
+          action: 'interview_scheduled',
+          entity_type: 'candidate',
+          entity_name: candidateName,
+          created_at: new Date().toISOString()
+        })
+        return { scheduled: true }
+      })(),
       {
         loading: `Opening scheduler for ${candidateName}...`,
         success: 'Interview scheduler opened',
@@ -1126,9 +1136,17 @@ export default function RecruitmentClient() {
     }
   }
 
-  const handleViewOffer = (candidateName: string) => {
+  const handleViewOffer = async (candidateName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data } = await supabase.from('job_offers')
+          .select('*')
+          .eq('candidate_name', candidateName)
+          .single()
+        return { offer: data }
+      })(),
       {
         loading: `Opening offer details for ${candidateName}...`,
         success: 'Offer details loaded',
@@ -1137,9 +1155,19 @@ export default function RecruitmentClient() {
     )
   }
 
-  const handleEditOffer = (candidateName: string) => {
+  const handleEditOffer = async (candidateName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        await supabase.from('activity_log').insert({
+          action: 'offer_edit_started',
+          entity_type: 'job_offer',
+          entity_name: candidateName,
+          created_at: new Date().toISOString()
+        })
+        return { editing: true }
+      })(),
       {
         loading: `Opening offer editor for ${candidateName}...`,
         success: 'Offer editor opened',
@@ -1148,9 +1176,17 @@ export default function RecruitmentClient() {
     )
   }
 
-  const handleSendOffer = (candidateName: string) => {
+  const handleSendOffer = async (candidateName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        await supabase.from('job_offers').update({
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        }).eq('candidate_name', candidateName)
+        return { sent: true }
+      })(),
       {
         loading: `Sending offer to ${candidateName}...`,
         success: `Offer sent to ${candidateName}`,
@@ -1159,9 +1195,16 @@ export default function RecruitmentClient() {
     )
   }
 
-  const handleFilterTalentPool = () => {
+  const handleFilterTalentPool = async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data } = await supabase.from('recruitment_filter_presets')
+          .select('*')
+          .order('name')
+        return { presets: data }
+      })(),
       {
         loading: 'Opening filter options...',
         success: 'Filter options loaded',
@@ -1170,9 +1213,18 @@ export default function RecruitmentClient() {
     )
   }
 
-  const handleImportCandidates = () => {
+  const handleImportCandidates = async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        await supabase.from('activity_log').insert({
+          action: 'import_dialog_opened',
+          entity_type: 'candidates',
+          created_at: new Date().toISOString()
+        })
+        return { dialogReady: true }
+      })(),
       {
         loading: 'Opening import dialog...',
         success: 'Import dialog opened',
@@ -1189,9 +1241,20 @@ export default function RecruitmentClient() {
     }
   }
 
-  const handleMatchJobs = (candidateName: string) => {
+  const handleMatchJobs = async (candidateName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      (async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: candidate } = await supabase.from('candidates')
+          .select('skills')
+          .eq('name', candidateName)
+          .single()
+        const { data: jobs } = await supabase.from('job_postings')
+          .select('*')
+          .eq('status', 'active')
+        return { matches: jobs, candidateSkills: candidate?.skills }
+      })(),
       {
         loading: `Finding matching jobs for ${candidateName}...`,
         success: 'Matching jobs found',
@@ -1449,12 +1512,23 @@ export default function RecruitmentClient() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => {
+                          <Button variant="ghost" size="sm" onClick={async (e) => {
                             e.stopPropagation()
                             toast.loading('Opening job editor...', { id: 'job-edit' })
-                            setTimeout(() => {
+                            try {
+                              const { createClient } = await import('@/lib/supabase/client')
+                              const supabase = createClient()
+                              await supabase.from('activity_log').insert({
+                                action: 'job_edit_started',
+                                entity_type: 'job_posting',
+                                entity_id: job.id,
+                                entity_name: job.title,
+                                created_at: new Date().toISOString()
+                              })
                               toast.success(`Editing job: ${job.title}`, { id: 'job-edit' })
-                            }, 500)
+                            } catch {
+                              toast.error('Failed to open editor', { id: 'job-edit' })
+                            }
                           }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
