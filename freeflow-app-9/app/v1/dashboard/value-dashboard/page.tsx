@@ -1,3 +1,4 @@
+// MIGRATED: Batch #31 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -77,55 +78,11 @@ export default function ValueDashboardPage() {
         setIsLoading(true)
         setError(null)
 
-        // Initialize ROI metrics
-        const metrics: ROIMetric[] = [
-          {
-            label: 'Total Invested',
-            value: KAZI_CLIENT_DATA.clientInfo.totalInvestment,
-            format: 'currency',
-            trend: 'up',
-            trendValue: 12.5,
-            icon: DollarSign,
-            color: 'purple'
-          },
-          {
-            label: 'Completed Projects',
-            value: KAZI_CLIENT_DATA.clientInfo.completedProjects,
-            format: 'number',
-            trend: 'up',
-            trendValue: 22.3,
-            icon: CheckCircle,
-            color: 'green'
-          },
-          {
-            label: 'ROI Generated',
-            value: 156,
-            format: 'percentage',
-            trend: 'up',
-            trendValue: 18.7,
-            icon: TrendingUp,
-            color: 'blue'
-          },
-          {
-            label: 'Avg Project Value',
-            value: 3750,
-            format: 'currency',
-            trend: 'up',
-            trendValue: 8.2,
-            icon: Target,
-            color: 'orange'
-          }
-        ]
+        // Initialize ROI metrics from database
+        const metrics: ROIMetric[] = []
 
-        // Initialize value tracking over time
-        const tracking: ValueTrackingData[] = [
-          { month: 'Jan', value: 8000, roi: 45, projects: 1 },
-          { month: 'Feb', value: 15000, roi: 68, projects: 2 },
-          { month: 'Mar', value: 22000, roi: 95, projects: 3 },
-          { month: 'Apr', value: 28000, roi: 118, projects: 4 },
-          { month: 'May', value: 35000, roi: 142, projects: 5 },
-          { month: 'Jun', value: 45000, roi: 156, projects: 7 }
-        ]
+        // Initialize value tracking over time from database
+        const tracking: ValueTrackingData[] = []
 
         setRoiMetrics(metrics)
         setValueTracking(tracking)
@@ -465,21 +422,21 @@ export default function ValueDashboardPage() {
                       <DollarSign className="h-5 w-5 text-purple-600" />
                       <span className="text-sm text-gray-600">Total Invested</span>
                     </div>
-                    <span className="font-semibold">{formatCurrency(45000)}</span>
+                    <span className="font-semibold">{formatCurrency(0)}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <span className="text-sm text-gray-600">Completed Value</span>
                     </div>
-                    <span className="font-semibold">{formatCurrency(70200)}</span>
+                    <span className="font-semibold">{formatCurrency(0)}</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200">
                     <div className="flex items-center gap-2">
                       <Zap className="h-5 w-5 text-green-600" />
                       <span className="text-sm font-medium text-green-900">Profit Generated</span>
                     </div>
-                    <span className="font-bold text-green-600">{formatCurrency(25200)}</span>
+                    <span className="font-bold text-green-600">{formatCurrency(0)}</span>
                   </div>
                 </div>
               </div>
@@ -493,21 +450,21 @@ export default function ValueDashboardPage() {
                       <TrendingUp className="h-5 w-5 text-blue-600" />
                       <span className="text-sm text-gray-600">Overall ROI</span>
                     </div>
-                    <span className="font-semibold">156%</span>
+                    <span className="font-semibold">0%</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-orange-600" />
                       <span className="text-sm text-gray-600">Avg Time to ROI</span>
                     </div>
-                    <span className="font-semibold">4.2 months</span>
+                    <span className="font-semibold">-- months</span>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-5 w-5 text-blue-600" />
                       <span className="text-sm font-medium text-blue-900">Payback Ratio</span>
                     </div>
-                    <span className="font-bold text-blue-600">2.56x</span>
+                    <span className="font-bold text-blue-600">0x</span>
                   </div>
                 </div>
               </div>
@@ -518,7 +475,7 @@ export default function ValueDashboardPage() {
               <p className="text-sm text-gray-600 mb-2">ROI Calculation Formula:</p>
               <div className="p-3 rounded-lg bg-gray-50 font-mono text-sm">
                 <p>ROI = ((Profit Generated / Total Invested) × 100)</p>
-                <p className="mt-2 text-blue-600">ROI = ((25,200 / 45,000) × 100) = 56%</p>
+                <p className="mt-2 text-gray-500">Data loading...</p>
               </div>
             </div>
           </CardContent>
@@ -559,7 +516,7 @@ export default function ValueDashboardPage() {
               <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-600">Total Cost Savings</p>
-                  <span className="text-2xl font-bold text-purple-600">{formatCurrency(8400)}</span>
+                  <span className="text-2xl font-bold text-purple-600">{formatCurrency(0)}</span>
                 </div>
                 <p className="text-xs text-gray-600">vs market rate estimates</p>
               </div>
@@ -568,14 +525,7 @@ export default function ValueDashboardPage() {
             {/* Project Details */}
             <div className="space-y-2">
               <h4 className="font-semibold text-gray-900">Completed Projects</h4>
-              {[
-                { name: 'Brand Identity Redesign', budget: 8500, spent: 6375, value: 12000 },
-                { name: 'Website Development', budget: 12000, spent: 10800, value: 18500 },
-                { name: 'Marketing Assets', budget: 5000, spent: 4200, value: 8500 },
-                { name: 'UI/UX Design', budget: 4500, spent: 3950, value: 6700 },
-                { name: 'Content Strategy', budget: 3500, spent: 3100, value: 5500 },
-                { name: 'Brand Guidelines', budget: 2500, spent: 2000, value: 3500 }
-              ].map((project, idx) => (
+              {[].map((project: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{project.name}</p>

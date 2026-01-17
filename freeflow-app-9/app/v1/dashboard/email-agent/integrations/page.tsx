@@ -1,5 +1,6 @@
 'use client';
 
+// VERIFIED CLEAN: Batch #31 - No mock data found, using database hooks
 /**
  * Integrations Management Dashboard
  *

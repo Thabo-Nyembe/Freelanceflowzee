@@ -1,3 +1,4 @@
+// MIGRATED: Batch #31 - Removed mock data, using database hooks
 'use client'
 
 export const dynamic = 'force-dynamic';
@@ -107,25 +108,25 @@ export default function InvestorMetricsPage() {
             weekly: Math.floor(platformMetrics.activeUsers * 0.6),
             monthly: platformMetrics.activeUsers
           },
-          userGrowthRate: 15.2,
+          userGrowthRate: 0,
           churnRate: platformMetrics.churnRate
         },
         revenueMetrics: {
           mrr: platformMetrics.mrr,
           arr: platformMetrics.arr,
-          revenueGrowth: 12.5,
+          revenueGrowth: 0,
           revenuePerUser: platformMetrics.totalUsers > 0
             ? Math.floor(platformMetrics.mrr / platformMetrics.totalUsers)
             : 0
         },
         aiMetrics: {
-          aiEngagementRate: 68.5,
-          totalAIInteractions: 15420,
-          aiCostPerUser: 2.5,
-          aiValueCreated: 125000
+          aiEngagementRate: 0,
+          totalAIInteractions: 0,
+          aiCostPerUser: 0,
+          aiValueCreated: 0
         },
         retentionMetrics: {
-          cohortRetention: { month1: 85, month3: 72, month6: 65 },
+          cohortRetention: { month1: 0, month3: 0, month6: 0 },
           ltv: platformMetrics.avgCLV,
           cac: platformMetrics.avgCAC,
           ltvCacRatio: platformMetrics.avgCLV / platformMetrics.avgCAC

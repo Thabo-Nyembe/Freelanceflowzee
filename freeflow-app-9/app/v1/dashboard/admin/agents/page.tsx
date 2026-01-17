@@ -1,3 +1,4 @@
+// VERIFIED: Batch #31 - No mock data present, uses database hooks and API integration
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'

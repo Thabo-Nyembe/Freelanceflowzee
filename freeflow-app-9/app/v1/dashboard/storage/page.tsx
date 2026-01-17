@@ -1,3 +1,4 @@
+// MIGRATED: Batch #31 - Removed mock data, using database hooks
 'use client'
 
 export const dynamic = 'force-dynamic';
@@ -206,62 +207,6 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
     default:
       return state
   }
-}
-
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const generateMockStorageFiles = (): StorageFile[] => {
-  logger.debug('Generating mock storage files')
-
-  const providers: StorageProvider[] = ['aws', 'google', 'azure', 'dropbox', 'local']
-  const types: FileType[] = ['document', 'image', 'video', 'audio', 'archive', 'code']
-  const statuses: FileStatus[] = ['synced', 'syncing', 'error', 'offline']
-
-  const fileNames = [
-    'Project Proposal.pdf', 'Annual Report 2024.docx', 'Budget Spreadsheet.xlsx',
-    'Team Photo.jpg', 'Product Banner.png', 'Logo Design.svg',
-    'Marketing Video.mp4', 'Tutorial Screencast.mov', 'Demo Recording.webm',
-    'Podcast Episode 1.mp3', 'Background Music.wav', 'Interview Audio.flac',
-    'Project Archive.zip', 'Backup Files.tar.gz', 'Source Code.7z',
-    'Main Application.js', 'API Server.py', 'Database Schema.sql',
-    'Meeting Notes.txt', 'README.md', 'Configuration.json',
-    'Presentation Slides.pptx', 'Invoice Template.pdf', 'Contract Draft.docx',
-    'Product Mockup.fig', 'UI Designs.sketch', 'Brand Guidelines.pdf',
-    'Client Feedback.csv', 'Sales Data.xlsx', 'Analytics Report.pdf',
-    'Website Backup.zip', 'App Source Code.tar', 'Build Artifacts.zip',
-    'Training Materials.pdf', 'Onboarding Guide.docx', 'Company Handbook.pdf',
-    'Profile Picture.jpg', 'Cover Image.png', 'Thumbnail.webp',
-    'Promotional Video.mp4', 'Tutorial Series.mov', 'Webinar Recording.mp4',
-    'Intro Music.mp3', 'Sound Effects.wav', 'Voice Over.m4a'
-  ]
-
-  const files: StorageFile[] = fileNames.map((name, index) => {
-    const type = types[Math.floor(Math.random() * types.length)]
-    const extension = name.split('.').pop() || 'file'
-
-    return {
-      id: `SF-${String(index + 1).padStart(3, '0')}`,
-      name,
-      type,
-      size: Math.floor(Math.random() * 100000000) + 10000, // 10KB - 100MB
-      provider: providers[Math.floor(Math.random() * providers.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      path: `/storage/${providers[Math.floor(Math.random() * providers.length)]}/${name}`,
-      extension,
-      uploadedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      modifiedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      sharedWith: Math.random() > 0.7 ? ['user@example.com', 'team@example.com'] : [],
-      isPublic: Math.random() > 0.8,
-      downloadCount: Math.floor(Math.random() * 500),
-      tags: ['work', 'important', 'project'].slice(0, Math.floor(Math.random() * 3) + 1),
-      version: Math.floor(Math.random() * 5) + 1
-    }
-  })
-
-  logger.info('Generated mock storage files', { count: files.length })
-  return files
 }
 
 // ============================================================================

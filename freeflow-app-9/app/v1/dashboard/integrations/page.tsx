@@ -1,5 +1,7 @@
 'use client';
 
+// MIGRATED: Batch #31 - Verified clean (no mock data, using database hooks)
+
 /**
  * Integrations Management Dashboard
  *

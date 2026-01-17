@@ -1,3 +1,4 @@
+// VERIFIED: Batch #31 - No mock data found, already using database hooks
 'use client'
 
 export const dynamic = 'force-dynamic';

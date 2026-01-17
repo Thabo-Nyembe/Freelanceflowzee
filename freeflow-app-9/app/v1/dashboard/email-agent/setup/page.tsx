@@ -1,5 +1,7 @@
 'use client';
 
+// MIGRATED: Batch #31 - Removed mock data, using database hooks
+
 /**
  * Business Automation Agent - Easy Setup Wizard
  *
@@ -99,14 +101,7 @@ export default function BusinessAutomationAgentSetup() {
     email: { provider: 'gmail' },
     ai: { provider: 'openai' },
   });
-  const [integrations, setIntegrations] = useState<Integration[]>([
-    { id: 'email', name: 'Email', type: 'email', provider: 'Gmail', status: 'not_configured', required: true },
-    { id: 'ai', name: 'AI Provider', type: 'ai', provider: 'OpenAI', status: 'not_configured', required: true },
-    { id: 'calendar', name: 'Calendar', type: 'calendar', provider: 'Google Calendar', status: 'not_configured', required: false },
-    { id: 'payment', name: 'Payments', type: 'payment', provider: 'Stripe', status: 'not_configured', required: false },
-    { id: 'sms', name: 'SMS/WhatsApp', type: 'sms', provider: 'Twilio', status: 'not_configured', required: false },
-    { id: 'crm', name: 'CRM', type: 'crm', provider: 'HubSpot', status: 'not_configured', required: false },
-  ]);
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
 
   const steps: SetupStep[] = ['welcome', 'email', 'ai', 'calendar', 'payments', 'sms', 'crm', 'review', 'complete'];
   const currentStepIndex = steps.indexOf(currentStep);
