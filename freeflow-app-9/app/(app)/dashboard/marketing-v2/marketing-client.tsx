@@ -1,8 +1,12 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
+// MIGRATED: Real database hooks instead of mock data
+import { useMarketingCampaigns, MarketingCampaign } from '@/lib/hooks/use-marketing'
+import { useCampaigns, Campaign as DBCampaign } from '@/lib/hooks/use-campaigns'
+import { useLeads as useLeadsExtended } from '@/lib/hooks/use-leads-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -917,6 +921,66 @@ const getScoreColor = (score: number) => {
 // ============================================================================
 
 export default function MarketingClient() {
+  // MIGRATED: Real database hooks
+  const { campaigns: dbCampaigns, loading: campaignsLoading, fetchCampaigns } = useMarketingCampaigns()
+  const { leads: dbLeads, isLoading: leadsLoading } = useLeadsExtended({ limit: 100 })
+
+  // Transform database data to local types (fallback to mock for display)
+  const campaigns: Campaign[] = useMemo(() => {
+    if (dbCampaigns && dbCampaigns.length > 0) {
+      return dbCampaigns.map(c => ({
+        id: c.id,
+        name: c.name,
+        description: c.description || '',
+        type: (c.channel as CampaignType) || 'email',
+        status: c.status as CampaignStatus,
+        startDate: c.start_date || '',
+        endDate: c.end_date || '',
+        budget: c.budget,
+        spent: c.spent,
+        reach: c.reach,
+        impressions: c.impressions,
+        clicks: c.clicks,
+        conversions: c.conversions,
+        revenue: c.roi ? c.budget * (c.roi / 100) : 0,
+        roi: c.roi || 0,
+        owner: 'Marketing Team',
+        ownerAvatar: '',
+        channels: c.content_ids || [],
+        tags: c.tags || []
+      }))
+    }
+    return mockCampaigns // Fallback to mock for demo
+  }, [dbCampaigns])
+
+  const leads: Lead[] = useMemo(() => {
+    if (dbLeads && dbLeads.length > 0) {
+      return dbLeads.map((l: any) => ({
+        id: l.id,
+        name: l.name || l.first_name ? `${l.first_name || ''} ${l.last_name || ''}`.trim() : 'Unknown',
+        email: l.email || '',
+        phone: l.phone || '',
+        company: l.company || l.company_name || '',
+        title: l.title || l.job_title || '',
+        location: l.location || '',
+        status: (l.status as LeadStatus) || 'new',
+        source: (l.lead_sources?.name || l.source || 'website') as LeadSource,
+        score: l.score || l.lead_score || 0,
+        value: l.value || l.estimated_value || 0,
+        assignedTo: l.assigned_to || l.owner_id || 'Unassigned',
+        assignedAvatar: '',
+        lastActivity: l.last_activity_at || l.updated_at || '',
+        activities: l.activity_count || 0,
+        emails: l.emails_sent || 0,
+        calls: l.calls_made || 0,
+        meetings: l.meetings_held || 0,
+        createdAt: l.created_at || '',
+        tags: l.tags || []
+      }))
+    }
+    return mockLeads // Fallback to mock for demo
+  }, [dbLeads])
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -1000,16 +1064,16 @@ export default function MarketingClient() {
     steps: '5'
   })
 
-  // Computed stats
+  // Computed stats - MIGRATED to use real data
   const stats = useMemo(() => {
-    const activeCampaigns = mockCampaigns.filter(c => c.status === 'active').length
-    const totalBudget = mockCampaigns.reduce((sum, c) => sum + c.budget, 0)
-    const totalSpent = mockCampaigns.reduce((sum, c) => sum + c.spent, 0)
-    const totalRevenue = mockCampaigns.reduce((sum, c) => sum + c.revenue, 0)
-    const avgRoi = mockCampaigns.filter(c => c.roi > 0).reduce((sum, c, _, arr) => sum + c.roi / arr.length, 0)
-    const totalConversions = mockCampaigns.reduce((sum, c) => sum + c.conversions, 0)
-    const qualifiedLeads = mockLeads.filter(l => l.status === 'qualified' || l.status === 'proposal').length
-    const totalLeadValue = mockLeads.reduce((sum, l) => sum + l.value, 0)
+    const activeCampaigns = campaigns.filter(c => c.status === 'active').length
+    const totalBudget = campaigns.reduce((sum, c) => sum + c.budget, 0)
+    const totalSpent = campaigns.reduce((sum, c) => sum + c.spent, 0)
+    const totalRevenue = campaigns.reduce((sum, c) => sum + c.revenue, 0)
+    const avgRoi = campaigns.filter(c => c.roi > 0).reduce((sum, c, _, arr) => sum + c.roi / arr.length, 0)
+    const totalConversions = campaigns.reduce((sum, c) => sum + c.conversions, 0)
+    const qualifiedLeads = leads.filter(l => l.status === 'qualified' || l.status === 'proposal').length
+    const totalLeadValue = leads.reduce((sum, l) => sum + l.value, 0)
 
     return {
       activeCampaigns,
@@ -1021,27 +1085,27 @@ export default function MarketingClient() {
       qualifiedLeads,
       totalLeadValue
     }
-  }, [])
+  }, [campaigns, leads])
 
-  // Filtered data
+  // Filtered data - MIGRATED to use real data
   const filteredCampaigns = useMemo(() => {
-    return mockCampaigns.filter(campaign => {
+    return campaigns.filter(campaign => {
       const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = campaignFilter === 'all' || campaign.status === campaignFilter
       return matchesSearch && matchesFilter
     })
-  }, [searchQuery, campaignFilter])
+  }, [campaigns, searchQuery, campaignFilter])
 
   const filteredLeads = useMemo(() => {
-    return mockLeads.filter(lead => {
+    return leads.filter(lead => {
       const matchesSearch = lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         lead.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
         lead.email.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = leadFilter === 'all' || lead.status === leadFilter
       return matchesSearch && matchesFilter
     })
-  }, [searchQuery, leadFilter])
+  }, [leads, searchQuery, leadFilter])
 
   // Handlers - Real functionality
   const handleCreateCampaign = () => {
