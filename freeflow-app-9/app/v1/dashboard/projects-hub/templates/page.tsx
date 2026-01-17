@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
@@ -110,99 +111,6 @@ export default function ProjectTemplatesPage() {
     featured: false
   })
 
-  // Default mock templates (fallback)
-  const defaultTemplates: Template[] = [
-    {
-      id: 1,
-      title: 'Brand Identity Package',
-      description: 'Complete brand identity project with logo, colors, typography, and brand guidelines',
-      category: 'branding',
-      thumbnail: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop',
-      tags: ['logo', 'branding', 'identity', 'guidelines'],
-      featured: true,
-      downloads: 1250,
-      likes: 324,
-      duration: '2-3 weeks',
-      difficulty: 'Intermediate',
-      author: 'KAZI Team',
-      price: 'Free',
-      rating: 4.8,
-      tasks: 15,
-      includes: ['Logo design', 'Color palette', 'Typography', 'Brand guidelines', 'Business cards']
-    },
-    {
-      id: 2,
-      title: 'E-commerce Website',
-      description: 'Full-stack e-commerce platform with product catalog, shopping cart, and payment integration',
-      category: 'web',
-      thumbnail: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=300&h=200&fit=crop',
-      tags: ['web', 'ecommerce', 'shopping', 'payment'],
-      featured: true,
-      downloads: 892,
-      likes: 256,
-      duration: '4-6 weeks',
-      difficulty: 'Advanced',
-      author: 'KAZI Team',
-      price: 'Free',
-      rating: 4.9,
-      tasks: 25,
-      includes: ['Product catalog', 'Shopping cart', 'Payment system', 'User accounts', 'Admin panel']
-    },
-    {
-      id: 3,
-      title: 'Mobile App Design',
-      description: 'Complete mobile app design process from wireframes to high-fidelity prototypes',
-      category: 'mobile',
-      thumbnail: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=200&fit=crop',
-      tags: ['mobile', 'app', 'ui', 'ux'],
-      featured: false,
-      downloads: 675,
-      likes: 189,
-      duration: '3-4 weeks',
-      difficulty: 'Intermediate',
-      author: 'Design Pro',
-      price: 'Free',
-      rating: 4.6,
-      tasks: 18,
-      includes: ['Wireframes', 'UI design', 'Prototyping', 'User testing', 'Design system']
-    },
-    {
-      id: 4,
-      title: 'Social Media Campaign',
-      description: 'Complete social media marketing campaign with content calendar and visual assets',
-      category: 'marketing',
-      thumbnail: 'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=300&h=200&fit=crop',
-      tags: ['social', 'marketing', 'content', 'campaign'],
-      featured: false,
-      downloads: 543,
-      likes: 147,
-      duration: '1-2 weeks',
-      difficulty: 'Beginner',
-      author: 'Marketing Expert',
-      price: 'Free',
-      rating: 4.4,
-      tasks: 12,
-      includes: ['Content calendar', 'Visual assets', 'Copy templates', 'Analytics setup', 'Engagement strategy']
-    },
-    {
-      id: 5,
-      title: 'Video Production',
-      description: 'Complete video production workflow from concept to final delivery',
-      category: 'video',
-      thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=300&h=200&fit=crop',
-      tags: ['video', 'production', 'editing', 'motion'],
-      featured: true,
-      downloads: 789,
-      likes: 234,
-      duration: '3-5 weeks',
-      difficulty: 'Advanced',
-      author: 'Video Pro',
-      price: 'Free',
-      rating: 4.7,
-      tasks: 20,
-      includes: ['Concept development', 'Storyboarding', 'Filming', 'Editing', 'Post-production']
-    }
-  ]
 
   // A+++ LOAD TEMPLATES DATA
   useEffect(() => {
@@ -236,16 +144,16 @@ export default function ProjectTemplatesPage() {
           }))
           setTemplates(dbTemplates)
         } else {
-          // Use default templates
-          setTemplates(defaultTemplates)
+          // No templates available from database
+          setTemplates([])
         }
 
         setIsLoading(false)
         announce('Project templates loaded successfully', 'polite')
       } catch (err) {
         console.error('Failed to load templates:', err)
-        // Fallback to default templates
-        setTemplates(defaultTemplates)
+        // Initialize with empty array
+        setTemplates([])
         setIsLoading(false)
         announce('Project templates loaded', 'polite')
       }

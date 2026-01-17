@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
@@ -104,14 +105,7 @@ export default function ProjectImportPage() {
   const [importProgress, setImportProgress] = useState(0)
 
   // DEFAULT DATA (fallback when no database records)
-  const defaultImportSources: ImportSource[] = [
-    { id: 'figma', name: 'Figma', icon: '🎨', description: 'Import designs and prototypes from Figma', connected: false },
-    { id: 'google-drive', name: 'Google Drive', icon: '📁', description: 'Import files from Google Drive', connected: false },
-    { id: 'dropbox', name: 'Dropbox', icon: '📦', description: 'Import files from Dropbox', connected: false },
-    { id: 'onedrive', name: 'OneDrive', icon: '☁️', description: 'Import files from Microsoft OneDrive', connected: false },
-    { id: 'github', name: 'GitHub', icon: '🐙', description: 'Import code repositories from GitHub', connected: false },
-    { id: 'trello', name: 'Trello', icon: '📋', description: 'Import boards and cards from Trello', connected: false }
-  ]
+  const defaultImportSources: ImportSource[] = []
 
   // A+++ LOAD IMPORT PAGE DATA FROM DATABASE
   useEffect(() => {

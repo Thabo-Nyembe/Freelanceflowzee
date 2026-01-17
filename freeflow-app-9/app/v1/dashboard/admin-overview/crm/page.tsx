@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -96,7 +97,7 @@ export default function CRMPage() {
     const wonDeals = deals.filter(d => d.stage === 'won').length
     const winRate = dealCount > 0 ? Math.round((wonDeals / dealCount) * 100) : 0
     const averageDealSize = dealCount > 0 ? totalValue / dealCount : 0
-    const averageCycleTime = 30 // Placeholder - would need date tracking
+    const averageCycleTime = 0
 
     return { totalValue, dealCount, winRate, averageDealSize, averageCycleTime }
   }, [deals])
@@ -161,16 +162,16 @@ export default function CRMPage() {
       const { createDeal, getDeals } = await import('@/lib/admin-overview-queries')
 
       const dealData = {
-        company_name: 'New Business Opportunity',
-        deal_value: 50000,
+        company_name: '',
+        deal_value: 0,
         stage: 'lead' as const,
         priority: 'warm' as const,
-        probability: 10
+        probability: 0
       }
 
       const result = await createDeal(userId, dealData)
 
-      toast.success(`Deal "${dealData.company_name}" has been created successfully`)
+      toast.success('Deal has been created successfully')
       logger.info('Deal added', { success: true, result })
       announce('Deal added successfully', 'polite')
 
@@ -282,17 +283,17 @@ export default function CRMPage() {
       const { createContact, getContacts } = await import('@/lib/admin-overview-queries')
 
       const contactData = {
-        first_name: 'New',
-        last_name: 'Contact',
-        email: 'new@contact.com',
-        phone: '+1 (555) 000-0000',
-        company: 'Company Name',
-        position: 'Position'
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        company: '',
+        position: ''
       }
 
       const result = await createContact(userId, contactData)
 
-      toast.success(`${contactData.first_name} ${contactData.last_name} has been added to your contact list`)
+      toast.success('Contact has been added to your contact list')
       logger.info('Contact added', { success: true, result })
       announce('Contact added successfully', 'polite')
 

@@ -1,3 +1,4 @@
+// VERIFIED: Batch #29 - No mock data found, already using database hooks (admin-marketing-queries)
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'

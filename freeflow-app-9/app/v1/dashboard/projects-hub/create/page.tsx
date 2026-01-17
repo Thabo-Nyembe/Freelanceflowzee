@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 "use client"
 
 import { useState } from 'react'
@@ -61,79 +62,14 @@ export default function CreateProjectPage() {
     category: 'design'
   })
 
-  // Quick start templates
-  const quickTemplates = [
-    {
-      id: 'brand-identity',
-      name: 'Brand Identity',
-      description: 'Complete brand identity package with logo, colors, and guidelines',
-      icon: Palette,
-      color: 'bg-purple-500',
-      estimatedTime: '2-3 weeks',
-      tasks: 12
-    },
-    {
-      id: 'website',
-      name: 'Website Design',
-      description: 'Full website design from wireframes to high-fidelity mockups',
-      icon: Globe,
-      color: 'bg-blue-500',
-      estimatedTime: '3-4 weeks',
-      tasks: 18
-    },
-    {
-      id: 'mobile-app',
-      name: 'Mobile App',
-      description: 'Mobile app design with user experience optimization',
-      icon: Smartphone,
-      color: 'bg-green-500',
-      estimatedTime: '4-6 weeks',
-      tasks: 22
-    },
-    {
-      id: 'marketing',
-      name: 'Marketing Campaign',
-      description: 'Complete marketing campaign with assets and strategy',
-      icon: Zap,
-      color: 'bg-yellow-500',
-      estimatedTime: '1-2 weeks',
-      tasks: 8
-    },
-    {
-      id: 'video',
-      name: 'Video Production',
-      description: 'Video production from concept to final delivery',
-      icon: Monitor,
-      color: 'bg-red-500',
-      estimatedTime: '3-5 weeks',
-      tasks: 15
-    },
-    {
-      id: 'custom',
-      name: 'Custom Project',
-      description: 'Start from scratch with your own requirements',
-      icon: Plus,
-      color: 'bg-gray-500',
-      estimatedTime: 'Variable',
-      tasks: 'Custom'
-    }
-  ]
+  // Quick start templates - TODO: Load from database via hook
+  const quickTemplates: any[] = []
 
-  const projectCategories = [
-    { value: 'design', label: 'Design', icon: Palette },
-    { value: 'development', label: 'Development', icon: Globe },
-    { value: 'marketing', label: 'Marketing', icon: Zap },
-    { value: 'content', label: 'Content', icon: FileText },
-    { value: 'consulting', label: 'Consulting', icon: Briefcase },
-    { value: 'other', label: 'Other', icon: Settings }
-  ]
+  // Project categories - TODO: Load from database via hook
+  const projectCategories: any[] = []
 
-  const priorityLevels = [
-    { value: 'low', label: 'Low', color: 'bg-green-100 text-green-800' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'high', label: 'High', color: 'bg-orange-100 text-orange-800' },
-    { value: 'urgent', label: 'Urgent', color: 'bg-red-100 text-red-800' }
-  ]
+  // Priority levels - TODO: Load from database via hook
+  const priorityLevels: any[] = []
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))

@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Verified clean, no mock data present, using database hooks
 'use client'
 
 import React, { useState, useEffect } from 'react'

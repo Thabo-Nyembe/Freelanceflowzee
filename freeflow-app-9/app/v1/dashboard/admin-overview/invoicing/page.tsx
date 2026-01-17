@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -190,8 +191,8 @@ export default function InvoicingPage() {
 
       const newInvoice = await createInvoice(userId, {
         invoice_number: invoiceNumber,
-        client_name: 'New Client',
-        client_email: 'client@company.com',
+        client_name: '',
+        client_email: '',
         amount_total: 0,
         amount_paid: 0,
         amount_due: 0,
@@ -235,8 +236,8 @@ export default function InvoicingPage() {
 
       const { updateInvoice } = await import('@/lib/admin-overview-queries')
       await updateInvoice(invoiceId, {
-        amount_total: 50000,
-        notes: 'Updated invoice terms'
+        amount_total: 0,
+        notes: ''
       })
 
       logger.info('Invoice edited', { success: true, invoiceId })

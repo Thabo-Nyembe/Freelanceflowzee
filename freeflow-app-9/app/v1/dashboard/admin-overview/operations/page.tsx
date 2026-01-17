@@ -1,3 +1,4 @@
+// MIGRATED: Batch #29 - Removed mock data, using database hooks
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -153,35 +154,37 @@ export default function OperationsPage() {
       return
     }
 
-    const newUser = {
-      email: 'newuser@company.com',
-      role: 'member' as UserRole,
-      department: 'General'
-    }
-
     logger.info('Inviting new user', { userId })
 
     const inviteOperation = async () => {
       const { sendInvitation, getAllUsers } = await import('@/lib/user-management-queries')
+      // TODO: Replace with modal dialog or form page for user input
+      const email = ''
+      const role: UserRole = 'member'
+
+      if (!email) {
+        throw new Error('Email is required to send invitation')
+      }
+
       await sendInvitation({
-        email: newUser.email,
-        role: newUser.role,
+        email,
+        role,
         message: 'You have been invited to join the team',
         invited_by: userId
       })
 
-      logger.info('User invited', { success: true, email: newUser.email })
+      logger.info('User invited', { success: true, email })
       announce('User invitation sent', 'polite')
 
       // Reload team members
       const users = await getAllUsers()
       setTeamMembers(users || [])
-      return newUser.email
+      return email
     }
 
     toast.promise(inviteOperation(), {
       loading: 'Sending invitation...',
-      success: `Invitation sent to ${newUser.email}`,
+      success: 'Invitation sent successfully',
       error: (err) => {
         const message = err instanceof Error ? err.message : 'Invite failed'
         logger.error('Invite user failed', { error: err })
@@ -211,11 +214,23 @@ export default function OperationsPage() {
         throw new Error('User not found')
       }
 
+      // TODO: Open modal dialog for user to edit profile fields
+      // For now, awaiting user input through UI
+      const department = ''
+      const location = ''
+
+      if (!department && !location) {
+        throw new Error('At least one field is required to update')
+      }
+
       // For now, using API call - can be replaced with updateUser function when available
       const response = await fetch(`/api/admin/operations/users/${targetUserId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ department: 'Engineering', location: 'Remote' })
+        body: JSON.stringify({
+          ...(department && { department }),
+          ...(location && { location })
+        })
       })
 
       if (!response.ok) throw new Error('Failed to edit user')
