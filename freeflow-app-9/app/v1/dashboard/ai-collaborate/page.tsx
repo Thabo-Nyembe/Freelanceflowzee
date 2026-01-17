@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #20 - Mock data removed, database hook integration verified
+
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -48,85 +50,9 @@ interface AIDesignOption {
 // AI GENERATED OPTIONS DATA
 // ============================================================================
 
-const AI_DESIGN_OPTIONS: AIDesignOption[] = [
-  {
-    id: 1,
-    title: 'Modern Minimalist Logo',
-    description: 'Clean, geometric logo with modern aesthetics',
-    category: 'logo',
-    style: 'Modern & Minimalist',
-    image: 'https://via.placeholder.com/400x300?text=Modern+Logo',
-    generatedAt: '2024-01-26T10:30:00Z',
-    selected: false,
-    rating: 4.5
-  },
-  {
-    id: 2,
-    title: 'Bold & Dynamic Logo',
-    description: 'Energetic logo with vibrant colors and movement',
-    category: 'logo',
-    style: 'Bold & Dynamic',
-    image: 'https://via.placeholder.com/400x300?text=Bold+Logo',
-    generatedAt: '2024-01-26T10:32:00Z',
-    selected: false,
-    rating: 4.2
-  },
-  {
-    id: 3,
-    title: 'Professional Corporate Logo',
-    description: 'Traditional yet sophisticated corporate identity',
-    category: 'logo',
-    style: 'Professional',
-    image: 'https://via.placeholder.com/400x300?text=Corporate+Logo',
-    generatedAt: '2024-01-26T10:34:00Z',
-    selected: false,
-    rating: 4.8
-  },
-  {
-    id: 4,
-    title: 'Cool Blues Color Palette',
-    description: 'Calming blues and teals for tech industry',
-    category: 'palette',
-    style: 'Cool Tones',
-    image: 'https://via.placeholder.com/400x300?text=Blue+Palette',
-    generatedAt: '2024-01-26T11:00:00Z',
-    selected: false,
-    rating: 4.3
-  },
-  {
-    id: 5,
-    title: 'Warm Sunset Palette',
-    description: 'Warm oranges, yellows for creative brands',
-    category: 'palette',
-    style: 'Warm Tones',
-    image: 'https://via.placeholder.com/400x300?text=Warm+Palette',
-    generatedAt: '2024-01-26T11:02:00Z',
-    selected: false,
-    rating: 4.1
-  },
-  {
-    id: 6,
-    title: 'Hero Image Layout',
-    description: 'Bold header with full-width background image',
-    category: 'layout',
-    style: 'Hero-Focused',
-    image: 'https://via.placeholder.com/400x300?text=Hero+Layout',
-    generatedAt: '2024-01-26T11:30:00Z',
-    selected: false,
-    rating: 4.6
-  }
-]
+const AI_DESIGN_OPTIONS: AIDesignOption[] = []
 
-const STYLE_PREFERENCES = [
-  'Modern & Minimalist',
-  'Professional',
-  'Tech-focused',
-  'Creative & Artistic',
-  'Bold & Dynamic',
-  'Luxury & Premium',
-  'Playful & Fun',
-  'Corporate'
-]
+const STYLE_PREFERENCES: string[] = []
 
 // ============================================================================
 // MAIN COMPONENT

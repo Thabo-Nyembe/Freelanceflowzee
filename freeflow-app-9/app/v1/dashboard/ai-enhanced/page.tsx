@@ -1,5 +1,7 @@
 'use client'
 
+// MIGRATED: Batch #20 - Verified database hook integration
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -211,97 +213,6 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
   }
 }
 
-// ============================================================================
-// MOCK DATA GENERATOR
-// ============================================================================
-
-function generateMockAITools(): AITool[] {
-  logger.debug('Generating mock AI tools data')
-
-  const types: AIToolType[] = ['text', 'image', 'audio', 'video', 'code', 'data', 'assistant', 'automation']
-  const categories: AIToolCategory[] = ['content', 'design', 'development', 'analytics', 'productivity', 'creative']
-  const statuses: AIToolStatus[] = ['active', 'active', 'active', 'inactive', 'training']
-  const pricingTiers: PricingTier[] = ['free', 'basic', 'pro', 'enterprise']
-  const performanceLevels: PerformanceLevel[] = ['excellent', 'good', 'fair']
-
-  const toolTemplates = [
-    { name: 'Content Writer Pro', type: 'text', category: 'content', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Image Generator Ultra', type: 'image', category: 'design', model: 'DALL-E 3', provider: 'OpenAI' },
-    { name: 'Code Assistant', type: 'code', category: 'development', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Data Analyzer', type: 'data', category: 'analytics', model: 'Claude 3.5', provider: 'Anthropic' },
-    { name: 'Voice Synthesizer', type: 'audio', category: 'creative', model: 'ElevenLabs', provider: 'ElevenLabs' },
-    { name: 'Video Editor AI', type: 'video', category: 'creative', model: 'Runway Gen-2', provider: 'Runway' },
-    { name: 'Smart Assistant', type: 'assistant', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Workflow Automator', type: 'automation', category: 'productivity', model: 'Custom', provider: 'Internal' },
-    { name: 'SEO Optimizer', type: 'text', category: 'content', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Brand Designer', type: 'image', category: 'design', model: 'Midjourney', provider: 'Midjourney' },
-    { name: 'Bug Detector', type: 'code', category: 'development', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Sentiment Analyzer', type: 'data', category: 'analytics', model: 'BERT', provider: 'Google' },
-    { name: 'Podcast Creator', type: 'audio', category: 'creative', model: 'Whisper', provider: 'OpenAI' },
-    { name: 'Subtitle Generator', type: 'video', category: 'content', model: 'Whisper', provider: 'OpenAI' },
-    { name: 'Meeting Summarizer', type: 'assistant', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Email Responder', type: 'automation', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Blog Post Writer', type: 'text', category: 'content', model: 'Claude 3.5', provider: 'Anthropic' },
-    { name: 'Logo Creator', type: 'image', category: 'design', model: 'Stable Diffusion', provider: 'Stability AI' },
-    { name: 'API Generator', type: 'code', category: 'development', model: 'Codex', provider: 'OpenAI' },
-    { name: 'Trend Forecaster', type: 'data', category: 'analytics', model: 'Prophet', provider: 'Facebook' },
-    { name: 'Music Composer', type: 'audio', category: 'creative', model: 'Jukebox', provider: 'OpenAI' },
-    { name: 'Animation Studio', type: 'video', category: 'creative', model: 'Stable Diffusion Video', provider: 'Stability AI' },
-    { name: 'Research Assistant', type: 'assistant', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Task Scheduler', type: 'automation', category: 'productivity', model: 'Custom', provider: 'Internal' },
-    { name: 'Social Media Manager', type: 'text', category: 'content', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Photo Enhancer', type: 'image', category: 'design', model: 'Topaz Labs', provider: 'Topaz' },
-    { name: 'Code Reviewer', type: 'code', category: 'development', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Customer Insights', type: 'data', category: 'analytics', model: 'Custom ML', provider: 'Internal' },
-    { name: 'Voiceover Generator', type: 'audio', category: 'creative', model: 'Play.ht', provider: 'Play.ht' },
-    { name: 'Video Summarizer', type: 'video', category: 'content', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Project Planner', type: 'assistant', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Report Generator', type: 'automation', category: 'productivity', model: 'GPT-4o', provider: 'OpenAI' },
-    { name: 'Copywriter AI', type: 'text', category: 'content', model: 'Jasper', provider: 'Jasper' },
-    { name: 'UI Designer', type: 'image', category: 'design', model: 'Uizard', provider: 'Uizard' },
-    { name: 'Test Generator', type: 'code', category: 'development', model: 'GitHub Copilot', provider: 'GitHub' },
-    { name: 'Performance Monitor', type: 'data', category: 'analytics', model: 'Custom', provider: 'Internal' },
-    { name: 'Sound Effects Creator', type: 'audio', category: 'creative', model: 'AudioCraft', provider: 'Meta' },
-    { name: 'Thumbnail Maker', type: 'video', category: 'design', model: 'DALL-E 3', provider: 'OpenAI' },
-    { name: 'Brainstorm Partner', type: 'assistant', category: 'productivity', model: 'Claude 3.5', provider: 'Anthropic' },
-    { name: 'Invoice Processor', type: 'automation', category: 'productivity', model: 'Custom OCR', provider: 'Internal' }
-  ]
-
-  const tools: AITool[] = toolTemplates.map((template, index) => {
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
-    const randomPricing = pricingTiers[Math.floor(Math.random() * pricingTiers.length)]
-    const randomPerformance = performanceLevels[Math.floor(Math.random() * performanceLevels.length)]
-
-    return {
-      id: `AI-${String(index + 1).padStart(3, '0')}`,
-      name: template.name,
-      type: template.type as AIToolType,
-      category: template.category as AIToolCategory,
-      description: `Advanced AI-powered ${template.type} tool for ${template.category} tasks using ${template.model}`,
-      model: template.model,
-      provider: template.provider,
-      status: randomStatus,
-      pricingTier: randomPricing,
-      performance: randomPerformance,
-      usageCount: Math.floor(Math.random() * 10000) + 100,
-      successRate: 0.85 + Math.random() * 0.14,
-      avgResponseTime: Math.random() * 3 + 0.5,
-      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-      lastUsed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      features: [
-        'Real-time processing',
-        'Batch operations',
-        'API integration',
-        'Custom templates',
-        'Version control'
-      ].slice(0, Math.floor(Math.random() * 3) + 2),
-      tags: ['AI', 'ML', 'Automated', 'Enterprise', 'Cloud'].slice(0, Math.floor(Math.random() * 3) + 1),
-      isPopular: Math.random() > 0.7,
-      isFavorite: Math.random() > 0.8,
-      version: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`
-    }
-  })  return tools
-}
 
 // ============================================================================
 // HELPER FUNCTIONS

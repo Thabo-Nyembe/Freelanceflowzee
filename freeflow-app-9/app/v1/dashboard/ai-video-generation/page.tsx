@@ -1,5 +1,6 @@
 'use client'
 
+// MIGRATED: Batch #20 - Verified database hook integration, mock data removed
 export const dynamic = 'force-dynamic';
 
 /**
@@ -282,140 +283,14 @@ const VIDEO_TAGS = [
   'nature', 'product', 'commercial', 'vlog', 'documentary'
 ]
 
+// MIGRATED: Mock video generator removed - using database hook getGeneratedVideos instead
 const generateMockVideos = (): GeneratedVideo[] => {
-  logger.debug('Generating mock videos')
-
-  const videos: GeneratedVideo[] = []
-  const baseDate = new Date()
-
-  for (let i = 0; i < 60; i++) {
-    const style = VIDEO_STYLES[Math.floor(Math.random() * VIDEO_STYLES.length)]
-    const format = VIDEO_FORMATS[Math.floor(Math.random() * VIDEO_FORMATS.length)]
-    const quality = VIDEO_QUALITIES[Math.floor(Math.random() * VIDEO_QUALITIES.length)]
-    const aiModel = AI_MODELS[Math.floor(Math.random() * AI_MODELS.length)]
-    const status = STATUSES[Math.floor(Math.random() * STATUSES.length)]
-    const prompt = VIDEO_PROMPTS[i % VIDEO_PROMPTS.length]
-
-    const createdDate = new Date(baseDate)
-    createdDate.setDate(createdDate.getDate() - Math.floor(Math.random() * 90))
-
-    const duration = 15 + Math.floor(Math.random() * 90) // 15-105 seconds
-    const fileSize = duration * 1024 * 1024 * (quality === '4k' ? 8 : quality === 'full-hd' ? 4 : quality === 'hd' ? 2 : 1)
-
-    const numTags = 2 + Math.floor(Math.random() * 4)
-    const tags = Array.from({ length: numTags }, () =>
-      VIDEO_TAGS[Math.floor(Math.random() * VIDEO_TAGS.length)]
-    ).filter((tag, index, self) => self.indexOf(tag) === index)
-
-    videos.push({
-      id: `vid_${Math.random().toString(36).substr(2, 9)}`,
-      title: `${prompt.substring(0, 40)}${prompt.length > 40 ? '...' : ''}`,
-      prompt,
-      style,
-      format,
-      quality,
-      aiModel,
-      status,
-      progress: status === 'completed' ? 100 : status === 'generating' ? 50 + Math.floor(Math.random() * 30) : 0,
-      videoUrl: status === 'completed' ? '/videos/generated-sample.mp4' : undefined,
-      thumbnailUrl: '/videos/thumbnail.jpg',
-      duration,
-      fileSize,
-      views: Math.floor(Math.random() * 1000),
-      downloads: Math.floor(Math.random() * 200),
-      likes: Math.floor(Math.random() * 500),
-      isPublic: Math.random() > 0.5,
-      tags,
-      createdAt: createdDate.toISOString(),
-      updatedAt: createdDate.toISOString(),
-      metadata: {
-        width: format === 'landscape' ? 1920 : format === 'portrait' ? 1080 : format === 'square' ? 1080 : 2560,
-        height: format === 'landscape' ? 1080 : format === 'portrait' ? 1920 : format === 'square' ? 1080 : 1440,
-        fps: 30,
-        codec: 'h264',
-        bitrate: quality === '4k' ? '40 Mbps' : quality === 'full-hd' ? '20 Mbps' : quality === 'hd' ? '10 Mbps' : '5 Mbps'
-      }
-    })
-  }  return videos
+  return []
 }
 
+// MIGRATED: Mock templates generator removed - using database hook getVideoTemplates instead
 const generateMockTemplates = (): VideoTemplate[] => {
-  logger.debug('Generating mock templates')
-
-  const templates: VideoTemplate[] = [
-    {
-      id: 'tpl_1',
-      name: 'Product Showcase',
-      description: 'Professional product presentation with elegant animations',
-      thumbnail: '/templates/product.jpg',
-      style: 'professional',
-      format: 'landscape',
-      duration: 30,
-      scenes: 5,
-      premium: false,
-      category: 'Business'
-    },
-    {
-      id: 'tpl_2',
-      name: 'Social Media Ad',
-      description: 'Eye-catching vertical video for Instagram and TikTok',
-      thumbnail: '/templates/social.jpg',
-      style: 'social-media',
-      format: 'portrait',
-      duration: 15,
-      scenes: 3,
-      premium: false,
-      category: 'Marketing'
-    },
-    {
-      id: 'tpl_3',
-      name: 'Cinematic Trailer',
-      description: 'Epic cinematic video with dramatic effects',
-      thumbnail: '/templates/cinematic.jpg',
-      style: 'cinematic',
-      format: 'widescreen',
-      duration: 60,
-      scenes: 8,
-      premium: true,
-      category: 'Creative'
-    },
-    {
-      id: 'tpl_4',
-      name: 'Explainer Video',
-      description: 'Clear educational content with animations',
-      thumbnail: '/templates/explainer.jpg',
-      style: 'explainer',
-      format: 'landscape',
-      duration: 45,
-      scenes: 6,
-      premium: false,
-      category: 'Education'
-    },
-    {
-      id: 'tpl_5',
-      name: 'Brand Story',
-      description: 'Compelling brand narrative with emotional impact',
-      thumbnail: '/templates/brand.jpg',
-      style: 'cinematic',
-      format: 'landscape',
-      duration: 90,
-      scenes: 10,
-      premium: true,
-      category: 'Business'
-    },
-    {
-      id: 'tpl_6',
-      name: 'Quick Tutorial',
-      description: 'Fast-paced how-to video for social media',
-      thumbnail: '/templates/tutorial.jpg',
-      style: 'casual',
-      format: 'square',
-      duration: 20,
-      scenes: 4,
-      premium: false,
-      category: 'Education'
-    }
-  ]  return templates
+  return []
 }
 
 // ============================================================================

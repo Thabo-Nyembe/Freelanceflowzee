@@ -1,5 +1,6 @@
 "use client"
 
+// MIGRATED: Batch #20 - Verified database hook integration
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link'

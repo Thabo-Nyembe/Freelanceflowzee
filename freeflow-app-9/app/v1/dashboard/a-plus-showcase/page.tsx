@@ -1,5 +1,6 @@
 'use client'
 
+// MIGRATED: Batch #20 - Removed mock data generation, replaced with database hook integration
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
@@ -207,62 +208,11 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
 // ============================================================================
 // ============================================================================
 
+// MIGRATED: Batch #20 - Mock data removed, database hook integration in place
 function generateMockComponents(): ComponentShowcase[] {
   logger.debug('Generating mock components')
-
-  const categories: ComponentCategory[] = ['ui', 'layout', 'animation', 'data-display', 'navigation', 'feedback', 'forms', 'utilities']
-  const difficulties: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert']
-  const languages: CodeLanguage[] = ['typescript', 'tsx', 'jsx', 'javascript']
-
-  const componentNames = [
-    'Gradient Button', 'Glass Card', 'Animated Modal', 'Data Table', 'Navbar Component',
-    'Toast Notification', 'Input Field', 'Custom Hook', 'Hero Section', 'Grid Layout',
-    'Loading Spinner', 'Dropdown Menu', 'Breadcrumb', 'Alert Box', 'Form Validator',
-    'Sidebar Navigation', 'Tabs Component', 'Tooltip', 'Badge', 'Avatar',
-    'Progress Bar', 'Carousel', 'Accordion', 'Pagination', 'Search Bar',
-    'Toggle Switch', 'Radio Group', 'Checkbox Group', 'Date Picker', 'Time Picker',
-    'Color Picker', 'File Upload', 'Image Gallery', 'Video Player', 'Audio Player',
-    'Chart Component', 'Graph Visualizer', 'Map Integration', 'Calendar', 'Scheduler',
-    'Rich Text Editor', 'Code Editor', 'Markdown Renderer', 'PDF Viewer', 'QR Generator',
-    'Barcode Scanner', 'Signature Pad', 'Drawing Canvas', 'Drag and Drop', 'Sortable List',
-    'Tree View', 'Timeline', 'Stepper', 'Rating', 'Star Rating',
-    'Like Button', 'Share Button', 'Comment Box', 'Chat Widget', 'Notification Center'
-  ]
-
-  const authors = ['Sarah Johnson', 'Michael Chen', 'Emma Davis', 'Alex Rodriguez', 'David Kim']
-
-  const components: ComponentShowcase[] = componentNames.map((name, index) => {
-    const category = categories[index % categories.length]
-    const difficulty = difficulties[index % difficulties.length]
-    const language = languages[index % languages.length]
-
-    return {
-      id: `COMP-${String(index + 1).padStart(3, '0')}`,
-      name,
-      description: `Professional ${name} component with customizable props and modern design`,
-      category,
-      difficulty,
-      code: `// ${name} Component\nimport React from 'react'\n\nexport function ${name.replace(/\s+/g, '')}() {\n  return (\n    <div className="component">\n      {/* Component implementation */}\n    </div>\n  )\n}`,
-      preview: `https://picsum.photos/seed/${index}/600/400`,
-      language,
-      tags: [
-        category,
-        difficulty,
-        ['modern', 'responsive', 'accessible', 'customizable', 'animated'][Math.floor(Math.random() * 5)],
-        ['dark-mode', 'theme-support', 'mobile-friendly', 'interactive'][Math.floor(Math.random() * 4)]
-      ],
-      popularity: Math.floor(Math.random() * 10000) + 100,
-      examples: Math.floor(Math.random() * 20) + 1,
-      downloads: Math.floor(Math.random() * 50000) + 1000,
-      isFavorite: Math.random() > 0.8,
-      isPremium: Math.random() > 0.7,
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      author: authors[index % authors.length],
-      version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
-      dependencies: ['react', 'typescript', 'tailwindcss'].slice(0, Math.floor(Math.random() * 3) + 1)
-    }
-  })  return components
+  // Mock data generation removed - components should be fetched from database
+  return []
 }
 
 // ============================================================================
