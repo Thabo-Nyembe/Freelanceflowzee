@@ -707,7 +707,16 @@ export default function SalesClient() {
         a.click()
         URL.revokeObjectURL(url)
 
-        setTimeout(() => resolve(`Exported ${deals.length} deals`), 600)
+        // Log export activity
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        await supabase.from('activity_log').insert({
+          action: 'sales_data_exported',
+          entity_type: 'deals',
+          metadata: { count: deals.length },
+          created_at: new Date().toISOString()
+        })
+        resolve(`Exported ${deals.length} deals`)
       } catch (error) {
         reject(new Error('Could not export sales data'))
       }
@@ -841,9 +850,16 @@ export default function SalesClient() {
       return
     }
     setIsSubmitting(true)
-    const connectPromise = new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 1500)
-    })
+    const connectPromise = (async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.from('crm_integrations').upsert({
+        name: 'hubspot',
+        email: hubSpotEmail,
+        status: 'connected',
+        connected_at: new Date().toISOString()
+      }, { onConflict: 'name' })
+    })()
     toast.promise(connectPromise, {
       loading: 'Connecting to HubSpot...',
       success: () => {
@@ -860,13 +876,17 @@ export default function SalesClient() {
   // API key regeneration handler
   const handleRegenerateApiKey = async () => {
     setIsSubmitting(true)
-    const regeneratePromise = new Promise<string>((resolve) => {
-      setTimeout(() => {
-        const newKey = 'sk_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-        setApiKey(newKey)
-        resolve(newKey)
-      }, 1000)
-    })
+    const regeneratePromise = (async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const newKey = 'sk_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+      await supabase.from('crm_api_keys').update({
+        key_value: newKey,
+        regenerated_at: new Date().toISOString()
+      }).eq('type', 'sales')
+      setApiKey(newKey)
+      return newKey
+    })()
     toast.promise(regeneratePromise, {
       loading: 'Regenerating API key...',
       success: (key) => {
@@ -881,21 +901,19 @@ export default function SalesClient() {
   // Clear all pipeline deals handler
   const handleClearAllPipeline = async () => {
     setIsSubmitting(true)
-    const clearPromise = new Promise<number>((resolve) => {
-      setTimeout(async () => {
-        // Delete all real deals from the database
-        let deletedCount = 0
-        for (const deal of deals) {
-          try {
-            await deleteDeal(deal.id)
-            deletedCount++
-          } catch (e) {
-            // Continue deleting other deals
-          }
+    const clearPromise = (async () => {
+      // Delete all real deals from the database
+      let deletedCount = 0
+      for (const deal of deals) {
+        try {
+          await deleteDeal(deal.id)
+          deletedCount++
+        } catch (e) {
+          // Continue deleting other deals
         }
-        resolve(deletedCount + mockOpportunities.length)
-      }, 1500)
-    })
+      }
+      return deletedCount + mockOpportunities.length
+    })()
     toast.promise(clearPromise, {
       loading: 'Clearing all pipeline deals...',
       success: (count) => {
@@ -909,22 +927,27 @@ export default function SalesClient() {
   // CRM reset handler
   const handleResetCRM = async () => {
     setIsSubmitting(true)
-    const resetPromise = new Promise<void>((resolve) => {
-      setTimeout(async () => {
-        // Clear all deals
-        for (const deal of deals) {
-          try {
-            await deleteDeal(deal.id)
-          } catch (e) {
-            // Continue
-          }
+    const resetPromise = (async () => {
+      // Clear all deals
+      for (const deal of deals) {
+        try {
+          await deleteDeal(deal.id)
+        } catch (e) {
+          // Continue
         }
-        // Reset all settings to defaults
-        setApiKey('sk_live_xxxxxxxxxxxx')
-        setWebhookConfig({ url: '', events: ['deal.created', 'deal.won'] })
-        resolve()
-      }, 2000)
-    })
+      }
+      // Reset all settings to defaults via Supabase
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.from('crm_settings').update({
+        api_key: 'sk_live_xxxxxxxxxxxx',
+        webhook_url: '',
+        webhook_events: ['deal.created', 'deal.won'],
+        reset_at: new Date().toISOString()
+      }).eq('type', 'sales')
+      setApiKey('sk_live_xxxxxxxxxxxx')
+      setWebhookConfig({ url: '', events: ['deal.created', 'deal.won'] })
+    })()
     toast.promise(resetPromise, {
       loading: 'Resetting CRM... This may take a moment.',
       success: () => {
@@ -957,9 +980,18 @@ export default function SalesClient() {
     if (!selectedQuote) return
 
     setIsSubmitting(true)
-    const sendPromise = new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 1500)
-    })
+    const quoteNum = selectedQuote.quoteNumber
+    const recipientEmail = quoteRecipientEmail
+    const sendPromise = (async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      await supabase.from('quote_sends').insert({
+        quote_number: quoteNum,
+        recipient_email: recipientEmail,
+        message: quoteMessage,
+        sent_at: new Date().toISOString()
+      })
+    })()
     toast.promise(sendPromise, {
       loading: 'Sending quote to customer...',
       success: () => {
@@ -967,20 +999,19 @@ export default function SalesClient() {
         setShowSendQuoteDialog(false)
         setQuoteRecipientEmail('')
         setQuoteMessage('')
-        return `Quote ${selectedQuote.quoteNumber} has been sent to ${quoteRecipientEmail}`
+        return `Quote ${quoteNum} has been sent to ${recipientEmail}`
       },
       error: 'Failed to send quote'
     })
   }
 
   // PDF download handler
-  const handleDownloadQuotePDF = () => {
+  const handleDownloadQuotePDF = async () => {
     if (!selectedQuote) return
 
-    const downloadPromise = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        // Create PDF content (simplified text representation)
-        const pdfContent = `
+    const downloadPromise = (async () => {
+      // Create PDF content (simplified text representation)
+      const pdfContent = `
 QUOTE: ${selectedQuote.quoteNumber}
 =====================================
 
@@ -1001,20 +1032,18 @@ Tax: ${formatCurrency(selectedQuote.tax)}
 TOTAL: ${formatCurrency(selectedQuote.total)}
 
 Generated on: ${new Date().toLocaleString()}
-        `.trim()
+      `.trim()
 
-        const blob = new Blob([pdfContent], { type: 'text/plain' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `${selectedQuote.quoteNumber}.txt`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-        resolve()
-      }, 800)
-    })
+      const blob = new Blob([pdfContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${selectedQuote.quoteNumber}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    })()
     toast.promise(downloadPromise, {
       loading: 'Generating PDF...',
       success: `Quote ${selectedQuote?.quoteNumber} downloaded successfully`,
