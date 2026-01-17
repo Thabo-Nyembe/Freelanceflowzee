@@ -1,11 +1,23 @@
 // Clients V2 - Salesforce Level CRM Platform
 // Comprehensive client relationship management with pipeline, deals, and activities
+// Wired to production TanStack Query hooks from @/lib/api-clients
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useClients } from '@/lib/hooks/use-clients'
+// Production-ready API hooks with TanStack Query
+import {
+  useClients,
+  useCreateClient,
+  useUpdateClient,
+  useDeleteClient,
+  useClientStats,
+  useRecordContact,
+  useUpdateClientFinancials,
+  type Client as ApiClient,
+  type ClientFilters
+} from '@/lib/api-clients'
 import { useDeals } from '@/lib/hooks/use-deals'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -404,8 +416,36 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     bcc: ''
   })
 
-  // Database integration - use real clients hook
-  const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
+  // =================================================================
+  // Production API Integration - TanStack Query hooks from @/lib/api-clients
+  // =================================================================
+
+  // Pagination state
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(50)
+
+  // Clients Query - fetches clients with caching and auto-revalidation
+  const { data: clientsData, isLoading: clientsLoading, error: clientsError, refetch: refetchClients } = useClients(
+    page,
+    pageSize,
+    statusFilter !== 'all' ? { status: [statusFilter === 'customer' ? 'active' : statusFilter] as any } : undefined
+  )
+
+  // Client Stats Query - dashboard metrics
+  const { data: clientStatsData, isLoading: statsLoading } = useClientStats()
+
+  // Mutations with optimistic updates
+  const createClientMutation = useCreateClient()
+  const updateClientMutation = useUpdateClient()
+  const deleteClientMutation = useDeleteClient()
+  const recordContactMutation = useRecordContact()
+  const updateFinancialsMutation = useUpdateClientFinancials()
+
+  // Extract clients array from paginated response
+  const dbClients = useMemo(() => {
+    if (!clientsData?.data) return []
+    return clientsData.data as ApiClient[]
+  }, [clientsData])
 
   // Deals module integration
   const { createDeal, updateDeal, deals: dbDeals, loading: dealsLoading } = useDeals()
@@ -415,6 +455,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [tasks, setTasks] = useState<Task[]>([])
   const [activitiesLoading, setActivitiesLoading] = useState(false)
   const [tasksLoading, setTasksLoading] = useState(false)
+
+  // Contact history tracking state
+  const [contactHistory, setContactHistory] = useState<Record<string, { type: string; date: string; notes: string }[]>>({})
+  const [showContactHistoryDialog, setShowContactHistoryDialog] = useState(false)
+  const [contactHistoryClient, setContactHistoryClient] = useState<Client | null>(null)
 
   // Fetch activities from API
   const fetchActivities = async () => {
@@ -521,15 +566,14 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     status: 'active' as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
   })
 
-  // Fetch clients on mount
-  // Fetch all data on mount
+  // Fetch activities and tasks on mount
+  // TanStack Query handles client fetching automatically
   useEffect(() => {
-    fetchClients()
     fetchActivities()
     fetchTasks()
-  }, [fetchClients])
+  }, [])
 
-  // Handle creating a new client
+  // Handle creating a new client - uses TanStack Query mutation
   const handleCreateClient = async () => {
     if (!newClientForm.company || !newClientForm.contactName || !newClientForm.email) {
       toast.error('Please fill in company name, contact name, and email')
@@ -537,15 +581,15 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
     setIsSubmitting(true)
     try {
-      await createClient({
+      await createClientMutation.mutateAsync({
         name: newClientForm.contactName,
         email: newClientForm.email,
-        phone: newClientForm.phone || null,
+        phone: newClientForm.phone || undefined,
         company: newClientForm.company,
-        website: newClientForm.website || null,
+        website: newClientForm.website || undefined,
         industry: newClientForm.industry,
-        status: newClientForm.status
-      } as any)
+        status: newClientForm.status === 'prospect' ? 'lead' : newClientForm.status as any
+      })
       setShowAddDialog(false)
       setNewClientForm({
         company: '',
@@ -564,7 +608,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  // Handle editing a client
+  // Handle editing a client - uses TanStack Query mutation
   const handleEditClient = async () => {
     if (!editClientForm.id || !editClientForm.company || !editClientForm.contactName || !editClientForm.email) {
       toast.error('Please fill in all required fields')
@@ -572,15 +616,18 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
     setIsSubmitting(true)
     try {
-      await updateClient(editClientForm.id, {
-        name: editClientForm.contactName,
-        email: editClientForm.email,
-        phone: editClientForm.phone || null,
-        company: editClientForm.company,
-        website: editClientForm.website || null,
-        industry: editClientForm.industry,
-        status: editClientForm.status
-      } as any)
+      await updateClientMutation.mutateAsync({
+        id: editClientForm.id,
+        updates: {
+          name: editClientForm.contactName,
+          email: editClientForm.email,
+          phone: editClientForm.phone || undefined,
+          company: editClientForm.company,
+          website: editClientForm.website || undefined,
+          industry: editClientForm.industry,
+          status: editClientForm.status === 'prospect' ? 'lead' : editClientForm.status as any
+        }
+      })
       setShowEditDialog(false)
       setSelectedClient(null)
       setEditClientForm({
@@ -631,12 +678,12 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     setShowEditDialog(true)
   }
 
-  // Handle deleting a client
+  // Handle deleting a client - uses TanStack Query mutation
   const handleDeleteClient = async () => {
     if (!clientToDelete) return
     setIsSubmitting(true)
     try {
-      await deleteClient(clientToDelete)
+      await deleteClientMutation.mutateAsync(clientToDelete)
       setShowDeleteConfirm(false)
       setClientToDelete(null)
       setSelectedClient(null)
@@ -647,17 +694,64 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  // Handle archiving a client
+  // Handle archiving a client - uses update mutation to set status to 'archived'
   const handleArchiveClient = async (clientId: string) => {
     setIsSubmitting(true)
     try {
-      await archiveClient(clientId)
+      await updateClientMutation.mutateAsync({
+        id: clientId,
+        updates: { status: 'archived' }
+      })
+      toast.success('Client archived successfully')
       setSelectedClient(null)
     } catch (error) {
       console.error('Failed to archive client:', error)
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // =================================================================
+  // CRM Features: Contact History & Communication Tracking
+  // =================================================================
+
+  // Record contact with a client - tracks last interaction
+  const handleRecordContact = async (clientId: string, contactType: 'call' | 'email' | 'meeting' | 'note') => {
+    try {
+      await recordContactMutation.mutateAsync(clientId)
+      // Add to local contact history
+      setContactHistory(prev => ({
+        ...prev,
+        [clientId]: [
+          { type: contactType, date: new Date().toISOString(), notes: '' },
+          ...(prev[clientId] || [])
+        ].slice(0, 50) // Keep last 50 interactions
+      }))
+      toast.success(`${contactType.charAt(0).toUpperCase() + contactType.slice(1)} recorded`)
+    } catch (error) {
+      console.error('Failed to record contact:', error)
+    }
+  }
+
+  // Update client financial metrics
+  const handleUpdateFinancials = async (clientId: string, metrics: {
+    lifetime_value?: number
+    total_projects?: number
+    total_invoices?: number
+    outstanding_balance?: number
+  }) => {
+    try {
+      await updateFinancialsMutation.mutateAsync({ clientId, metrics })
+      toast.success('Financial metrics updated')
+    } catch (error) {
+      console.error('Failed to update financials:', error)
+    }
+  }
+
+  // View contact history for a client
+  const handleViewContactHistory = (client: Client) => {
+    setContactHistoryClient(client)
+    setShowContactHistoryDialog(true)
   }
 
   // Confirm delete dialog
@@ -1043,12 +1137,55 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       label: 'Refresh Data',
       icon: 'refresh-cw',
       action: () => {
-        fetchClients()
+        refetchClients()
         toast.success('Client data refreshed')
       },
       variant: 'outline' as const
     },
   ]
+
+  // =================================================================
+  // Client Health Score Visualization Helper
+  // =================================================================
+  const getHealthScoreData = (score: number) => {
+    if (score >= 80) return { label: 'Excellent', color: 'text-green-600', bgColor: 'bg-green-100', progressColor: 'bg-green-500' }
+    if (score >= 60) return { label: 'Good', color: 'text-blue-600', bgColor: 'bg-blue-100', progressColor: 'bg-blue-500' }
+    if (score >= 40) return { label: 'At Risk', color: 'text-yellow-600', bgColor: 'bg-yellow-100', progressColor: 'bg-yellow-500' }
+    return { label: 'Critical', color: 'text-red-600', bgColor: 'bg-red-100', progressColor: 'bg-red-500' }
+  }
+
+  // Calculate client health score based on multiple factors
+  const calculateClientHealthScore = (client: Client) => {
+    let score = 50 // Base score
+
+    // Activity recency (max 20 points)
+    const lastActivityDate = new Date(client.lastActivity)
+    const daysSinceLastActivity = Math.floor((Date.now() - lastActivityDate.getTime()) / (1000 * 60 * 60 * 24))
+    if (daysSinceLastActivity < 7) score += 20
+    else if (daysSinceLastActivity < 14) score += 15
+    else if (daysSinceLastActivity < 30) score += 10
+    else if (daysSinceLastActivity < 60) score += 5
+
+    // Revenue contribution (max 15 points)
+    if (client.revenue > 100000) score += 15
+    else if (client.revenue > 50000) score += 12
+    else if (client.revenue > 10000) score += 8
+    else if (client.revenue > 0) score += 4
+
+    // Project engagement (max 10 points)
+    if (client.projects > 5) score += 10
+    else if (client.projects > 2) score += 7
+    else if (client.projects > 0) score += 4
+
+    // NPS score contribution (max 5 points)
+    if (client.nps !== undefined && client.nps !== null) {
+      if (client.nps >= 9) score += 5
+      else if (client.nps >= 7) score += 3
+      else if (client.nps >= 5) score += 1
+    }
+
+    return Math.min(100, Math.max(0, score))
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
