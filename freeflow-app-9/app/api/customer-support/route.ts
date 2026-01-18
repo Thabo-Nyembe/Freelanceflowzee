@@ -712,7 +712,7 @@ async function handleAddCustomer(
 
     if (error) {
       // If clients table doesn't exist, return success anyway
-      console.log('Note: clients table may not exist, returning success')
+      // Note: clients table may not be set up, gracefully handling
     }
 
     return NextResponse.json({

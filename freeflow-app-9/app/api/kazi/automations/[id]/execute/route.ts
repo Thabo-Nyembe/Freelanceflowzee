@@ -1,30 +1,33 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('KaziAutomations')
 
 // Action executor functions
 const actionExecutors: Record<string, (config: Record<string, unknown>, context: Record<string, unknown>) => Promise<{ success: boolean; output?: unknown; error?: string }>> = {
   'email': async (config, context) => {
     // In production, integrate with email service (Resend, SendGrid, etc.)
-    console.log('Sending email:', config)
+    logger.info('Sending email', { to: config.to || context.user_email, subject: config.subject })
     return { success: true, output: { sent: true, to: config.to || context.user_email } }
   },
   'notification': async (config) => {
     // In production, create notification in database
-    console.log('Creating notification:', config)
+    logger.info('Creating notification', { message: config.message })
     return { success: true, output: { notified: true, message: config.message } }
   },
   'create-task': async (config) => {
     // In production, create task in database
-    console.log('Creating task:', config)
+    logger.info('Creating task', { title: config.title })
     return { success: true, output: { task_created: true, title: config.title } }
   },
   'update-record': async (config) => {
-    console.log('Updating record:', config)
+    logger.info('Updating record', { table: config.table, id: config.id })
     return { success: true, output: { updated: true } }
   },
   'api-call': async (config) => {
     // In production, make actual API call
-    console.log('Making API call:', config)
+    logger.info('Making API call', { url: config.url, method: config.method })
     return { success: true, output: { response: 'OK' } }
   },
   'delay': async (config) => {
@@ -64,31 +67,31 @@ const actionExecutors: Record<string, (config: Record<string, unknown>, context:
     return { success: result, output: { condition_met: result } }
   },
   'slack-message': async (config) => {
-    console.log('Sending Slack message:', config)
+    logger.info('Sending Slack message', { channel: config.channel })
     return { success: true, output: { sent: true, channel: config.channel } }
   },
   'discord-message': async (config) => {
-    console.log('Sending Discord message:', config)
+    logger.info('Sending Discord message', { channel: config.channel })
     return { success: true, output: { sent: true } }
   },
   'send-sms': async (config) => {
-    console.log('Sending SMS:', config)
+    logger.info('Sending SMS', { to: config.to })
     return { success: true, output: { sent: true } }
   },
   'send-invoice': async (config) => {
-    console.log('Sending invoice:', config)
+    logger.info('Sending invoice', { invoiceId: config.invoice_id })
     return { success: true, output: { invoice_sent: true } }
   },
   'create-project': async (config) => {
-    console.log('Creating project:', config)
+    logger.info('Creating project', { name: config.name })
     return { success: true, output: { project_created: true } }
   },
   'create-event': async (config) => {
-    console.log('Creating event:', config)
+    logger.info('Creating event', { title: config.title })
     return { success: true, output: { event_created: true } }
   },
   'update-status': async (config) => {
-    console.log('Updating status:', config)
+    logger.info('Updating status', { newStatus: config.status })
     return { success: true, output: { status_updated: true, new_status: config.status } }
   }
 }

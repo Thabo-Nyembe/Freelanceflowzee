@@ -1,26 +1,29 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('KaziWorkflows')
 
 // Action executor functions
 const actionExecutors: Record<string, (config: Record<string, unknown>, context: Record<string, unknown>) => Promise<{ success: boolean; output?: unknown; error?: string }>> = {
   'email': async (config, context) => {
-    console.log('Sending email:', config)
+    logger.info('Sending email', { to: config.to || context.user_email, subject: config.subject })
     return { success: true, output: { sent: true, to: config.to || context.user_email } }
   },
   'notification': async (config) => {
-    console.log('Creating notification:', config)
+    logger.info('Creating notification', { message: config.message })
     return { success: true, output: { notified: true, message: config.message } }
   },
   'create-task': async (config) => {
-    console.log('Creating task:', config)
+    logger.info('Creating task', { title: config.title })
     return { success: true, output: { task_created: true, title: config.title } }
   },
   'update-record': async (config) => {
-    console.log('Updating record:', config)
+    logger.info('Updating record', { table: config.table, id: config.id })
     return { success: true, output: { updated: true } }
   },
   'api-call': async (config) => {
-    console.log('Making API call:', config)
+    logger.info('Making API call', { url: config.url, method: config.method })
     return { success: true, output: { response: 'OK' } }
   },
   'delay': async (config) => {
