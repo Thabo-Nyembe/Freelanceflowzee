@@ -8,6 +8,9 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Conversations')
 
 // ============================================================================
 // TYPES
@@ -258,7 +261,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       setChats(chatsWithCounts)
     } catch (err) {
-      console.error('Error fetching chats:', err)
+      logger.error('Error fetching chats', { error: err })
       setChatsError(err instanceof Error ? err : new Error('Failed to fetch chats'))
     } finally {
       setChatsLoading(false)
@@ -317,7 +320,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       setMessages(messagesWithSenders)
     } catch (err) {
-      console.error('Error fetching messages:', err)
+      logger.error('Error fetching messages', { error: err })
       setMessagesError(err instanceof Error ? err : new Error('Failed to fetch messages'))
     } finally {
       setMessagesLoading(false)
@@ -418,7 +421,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       return { success: true, message: newMessage }
     } catch (err) {
-      console.error('Error sending message:', err)
+      logger.error('Error sending message', { error: err })
       toast.error('Failed to send message')
       return { success: false, error: err instanceof Error ? err.message : 'Failed to send message' }
     } finally {
@@ -455,7 +458,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
       toast.success('Message edited')
       return { success: true }
     } catch (err) {
-      console.error('Error editing message:', err)
+      logger.error('Error editing message', { error: err })
       toast.error('Failed to edit message')
       return { success: false, error: err instanceof Error ? err.message : 'Failed to edit message' }
     }
@@ -486,7 +489,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
       toast.success('Message deleted')
       return { success: true }
     } catch (err) {
-      console.error('Error deleting message:', err)
+      logger.error('Error deleting message', { error: err })
       toast.error('Failed to delete message')
       return { success: false, error: err instanceof Error ? err.message : 'Failed to delete message' }
     }
@@ -516,7 +519,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       return { success: true }
     } catch (err) {
-      console.error('Error marking as read:', err)
+      logger.error('Error marking as read', { error: err })
       return { success: false, error: err instanceof Error ? err.message : 'Failed to mark as read' }
     }
   }, [supabase, currentUserId])
@@ -548,7 +551,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       return { success: true }
     } catch (err) {
-      console.error('Error adding reaction:', err)
+      logger.error('Error adding reaction', { error: err })
       return { success: false, error: err instanceof Error ? err.message : 'Failed to add reaction' }
     }
   }, [supabase, currentUserId])
@@ -581,7 +584,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       return { success: true }
     } catch (err) {
-      console.error('Error removing reaction:', err)
+      logger.error('Error removing reaction', { error: err })
       return { success: false, error: err instanceof Error ? err.message : 'Failed to remove reaction' }
     }
   }, [supabase, currentUserId])
@@ -614,7 +617,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
       toast.success(pin ? 'Message pinned' : 'Message unpinned')
       return { success: true }
     } catch (err) {
-      console.error('Error pinning message:', err)
+      logger.error('Error pinning message', { error: err })
       return { success: false, error: err instanceof Error ? err.message : 'Failed to pin message' }
     }
   }, [supabase, currentUserId])
@@ -676,7 +679,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
       toast.success('Chat created')
       return { success: true, chat: chatWithDefaults }
     } catch (err) {
-      console.error('Error creating chat:', err)
+      logger.error('Error creating chat', { error: err })
       toast.error('Failed to create chat')
       return { success: false, error: err instanceof Error ? err.message : 'Failed to create chat' }
     }
@@ -704,7 +707,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
           .eq('user_id', currentUserId)
       }
     } catch (err) {
-      console.error('Error setting typing indicator:', err)
+      logger.error('Error setting typing indicator', { error: err })
     }
   }, [supabase, currentChat, currentUserId])
 
@@ -727,7 +730,7 @@ export function useConversations(options: UseConversationsOptions = {}) {
 
       return searchResults || []
     } catch (err) {
-      console.error('Error searching messages:', err)
+      logger.error('Error searching messages', { error: err })
       return []
     }
   }, [supabase, currentUserId])

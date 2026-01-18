@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Employees')
 
 // ============================================================================
 // TYPES
@@ -200,7 +203,7 @@ export function useEmployees(options: UseEmployeesOptions = {}) {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch employees')
       setError(error)
-      console.error('Error fetching employees:', error)
+      logger.error('Error fetching employees', { error })
     } finally {
       setLoading(false)
     }
@@ -382,7 +385,7 @@ export function useCreateEmployee() {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to create employee')
       setError(error)
-      console.error('Error creating employee:', error)
+      logger.error('Error creating employee', { error })
       return null
     } finally {
       setLoading(false)
@@ -433,7 +436,7 @@ export function useUpdateEmployee() {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to update employee')
       setError(error)
-      console.error('Error updating employee:', error)
+      logger.error('Error updating employee', { error })
       return null
     } finally {
       setLoading(false)
@@ -477,7 +480,7 @@ export function useDeleteEmployee() {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to delete employee')
       setError(error)
-      console.error('Error deleting employee:', error)
+      logger.error('Error deleting employee', { error })
       return false
     } finally {
       setLoading(false)
@@ -535,7 +538,7 @@ export function useToggleEmployeeStatus() {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to toggle employee status')
       setError(error)
-      console.error('Error toggling status:', error)
+      logger.error('Error toggling employee status', { error })
       return null
     } finally {
       setLoading(false)
@@ -586,7 +589,7 @@ export function useEmployee(employeeId?: string) {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch employee')
       setError(error)
-      console.error('Error fetching employee:', error)
+      logger.error('Error fetching employee', { error })
     } finally {
       setLoading(false)
     }

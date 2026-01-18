@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Bookings')
 
 export type BookingType = 'appointment' | 'reservation' | 'session' | 'class' | 'event' | 'rental' | 'service' | 'consultation' | 'custom'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show' | 'rescheduled' | 'waitlisted'
@@ -131,7 +134,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch bookings')
       setError(error)
-      console.error('Error fetching bookings:', error)
+      logger.error('Error fetching bookings', { error })
     } finally {
       setLoading(false)
     }
@@ -221,7 +224,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
       return data as Booking
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to create booking')
-      console.error('Error creating booking:', error)
+      logger.error('Error creating booking', { error })
       throw error
     }
   }, [supabase, limit])
@@ -255,7 +258,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
       return data as Booking
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to update booking')
-      console.error('Error updating booking:', error)
+      logger.error('Error updating booking', { error })
       throw error
     }
   }, [supabase])
@@ -278,7 +281,7 @@ export function useBookings(options: UseBookingsOptions = {}) {
       return true
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to delete booking')
-      console.error('Error deleting booking:', error)
+      logger.error('Error deleting booking', { error })
       throw error
     }
   }, [supabase])
