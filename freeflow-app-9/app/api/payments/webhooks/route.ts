@@ -380,6 +380,13 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
   console.log('❌ Invoice payment failed:', invoice.id)
 
   try {
+    // Get invoice with user info for email
+    const { data: invoiceData, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*, users(email, name)')
+      .eq('stripe_invoice_id', invoice.id)
+      .single()
+
     const { error } = await supabase
       .from('invoices')
       .update({
@@ -392,7 +399,28 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
       console.error('Error updating failed invoice:', error)
     }
 
-    // TODO: Send email notification to user about failed payment
+    // Send email notification to user about failed payment
+    const userEmail = invoiceData?.users?.email || invoice.customer_email
+    if (process.env.RESEND_API_KEY && userEmail) {
+      try {
+        const { Resend } = await import('resend')
+        const resend = new Resend(process.env.RESEND_API_KEY)
+
+        await resend.emails.send({
+          from: 'KAZI Billing <billing@kazi.app>',
+          to: userEmail,
+          subject: 'Payment Failed - Action Required',
+          html: `
+            <h1>Payment Failed</h1>
+            <p>We were unable to process your payment for invoice ${invoice.id}.</p>
+            <p>Please update your payment method or try again.</p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/billing">Update Payment Method</a></p>
+          `
+        })
+      } catch {
+        // Email optional
+      }
+    }
   } catch (error) {
     console.error('Error in handleInvoicePaymentFailed:', error)
   }

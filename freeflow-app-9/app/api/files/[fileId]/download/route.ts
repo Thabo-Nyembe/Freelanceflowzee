@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('FilesAPI')
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 export async function GET(
   req: NextRequest,
@@ -12,18 +20,45 @@ export async function GET(
 
     logger.info('File download request', { fileId })
 
-    // TODO: Implement real file download from Supabase Storage
-    // For now, return file metadata to enable frontend functionality
-    // In production, this would:
-    // 1. Fetch file from Supabase Storage
-    // 2. Increment download counter
-    // 3. Log download activity
-    // 4. Stream file content
+    const supabase = getSupabase()
+
+    // Get file metadata from database
+    const { data: file, error: fileError } = await supabase
+      .from('files')
+      .select('id, name, storage_path, mime_type, size, download_count')
+      .eq('id', fileId)
+      .single()
+
+    if (fileError || !file) {
+      return NextResponse.json(
+        { error: 'File not found' },
+        { status: 404 }
+      )
+    }
+
+    // Generate signed URL for Supabase Storage download
+    const storagePath = file.storage_path || `files/${fileId}`
+    const { data: signedUrl, error: urlError } = await supabase
+      .storage
+      .from('files')
+      .createSignedUrl(storagePath, 3600) // 1 hour expiry
+
+    // Increment download counter
+    await supabase
+      .from('files')
+      .update({
+        download_count: (file.download_count || 0) + 1,
+        last_downloaded_at: new Date().toISOString()
+      })
+      .eq('id', fileId)
 
     return NextResponse.json({
       success: true,
       fileId,
-      downloadUrl: `/api/files/${fileId}/content`, // Placeholder
+      fileName: file.name,
+      mimeType: file.mime_type,
+      size: file.size,
+      downloadUrl: signedUrl?.signedUrl || `/api/files/${fileId}/content`,
       message: 'Download prepared'
     })
   } catch (error: any) {

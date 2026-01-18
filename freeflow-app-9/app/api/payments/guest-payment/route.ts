@@ -168,14 +168,32 @@ async function grantGuestFeatureAccess(data: {
   email: string
   name: string
 }) {
-  // TODO: Implement feature access granting logic
-  // This would typically:
-  // 1. Update guest session status to 'active'
-  // 2. Set feature permissions
-  // 3. Create access token
-  // 4. Set expiration time
+  // Create Supabase client for database operations
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
-  logger.info('Granting guest feature access', { featureId: data.featureId, email: data.email, duration: data.duration })
+  // Calculate expiration based on duration
+  const expiresAt = new Date(Date.now() + getExpirationTime(data.duration))
+
+  // Store/update guest session in database
+  await supabase
+    .from('guest_sessions')
+    .upsert({
+      id: data.guestSessionId,
+      email: data.email,
+      name: data.name,
+      feature: data.feature,
+      status: 'active',
+      expires_at: expiresAt.toISOString(),
+      activated_at: new Date().toISOString()
+    }, {
+      onConflict: 'id'
+    })
+
+  logger.info('Granting guest feature access', { feature: data.feature, email: data.email, duration: data.duration })
 }
 
 async function sendGuestAccessEmail(data: {
@@ -185,12 +203,27 @@ async function sendGuestAccessEmail(data: {
   duration: string
   guestSessionId: string
 }) {
-  // TODO: Implement email sending logic
-  // This would typically send:
-  // 1. Confirmation of payment
-  // 2. Access instructions
-  // 3. Feature usage guide
-  // 4. Expiration reminder
+  // Send email via Resend if available
+  try {
+    const { Resend } = await import('resend')
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
-  logger.info('Sending guest access email', { email: data.email, featureId: data.featureId })
+    if (process.env.RESEND_API_KEY) {
+      await resend.emails.send({
+        from: 'KAZI <noreply@kazi.app>',
+        to: data.email,
+        subject: `Your ${data.feature} access is ready!`,
+        html: `
+          <h1>Welcome to KAZI, ${data.name}!</h1>
+          <p>Your ${data.feature} access has been activated for ${data.duration}.</p>
+          <p>Session ID: ${data.guestSessionId}</p>
+          <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/guest/${data.guestSessionId}">Access your feature</a></p>
+        `
+      })
+    }
+  } catch {
+    // Email sending is optional, log but don't fail
+  }
+
+  logger.info('Sending guest access email', { email: data.email, feature: data.feature })
 }

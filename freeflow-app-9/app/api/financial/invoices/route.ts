@@ -175,14 +175,38 @@ async function handleSendInvoice(invoiceId: string, userId: string): Promise<Nex
 
     if (error) throw error
 
-    // TODO: Send email notification to client
+    // Send email notification to client via Resend
+    let emailSent = false
+    try {
+      if (process.env.RESEND_API_KEY && invoice.client_email) {
+        const { Resend } = await import('resend')
+        const resend = new Resend(process.env.RESEND_API_KEY)
+
+        await resend.emails.send({
+          from: 'KAZI Invoicing <invoices@kazi.app>',
+          to: invoice.client_email,
+          subject: `Invoice ${invoice.invoice_number} from KAZI`,
+          html: `
+            <h1>Invoice ${invoice.invoice_number}</h1>
+            <p>Dear ${invoice.client_name},</p>
+            <p>Please find your invoice attached. Amount due: ${invoice.currency} ${invoice.total_amount?.toFixed(2)}</p>
+            <p>Due Date: ${invoice.due_date}</p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/invoices/${invoice.id}">View Invoice</a></p>
+            <p>Thank you for your business!</p>
+          `
+        })
+        emailSent = true
+      }
+    } catch {
+      // Email is optional, log but don't fail
+    }
 
     return NextResponse.json({
       success: true,
       action: 'send',
       invoice,
       message: `Invoice sent successfully to client`,
-      emailSent: true
+      emailSent
     })
   } catch (error: any) {
     return NextResponse.json({

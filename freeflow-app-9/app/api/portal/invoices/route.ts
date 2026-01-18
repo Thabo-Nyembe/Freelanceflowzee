@@ -304,9 +304,33 @@ export async function POST(request: NextRequest) {
             metadata: { invoice_id: invoice.id }
           })
 
-        // TODO: Send email notification
+        // Send email notification to client
+        let emailSent = false
+        const clientEmail = invoice.portal_clients?.email
+        if (process.env.RESEND_API_KEY && clientEmail) {
+          try {
+            const { Resend } = await import('resend')
+            const resend = new Resend(process.env.RESEND_API_KEY)
 
-        return NextResponse.json({ invoice, sent: true })
+            await resend.emails.send({
+              from: 'KAZI Portal <portal@kazi.app>',
+              to: clientEmail,
+              subject: `Invoice ${invoice.invoice_number} - Action Required`,
+              html: `
+                <h1>Invoice ${invoice.invoice_number}</h1>
+                <p>Dear ${invoice.portal_clients?.name || 'Valued Client'},</p>
+                <p>A new invoice has been issued. Amount due: ${invoice.currency || 'USD'} ${invoice.total?.toFixed(2)}</p>
+                <p>Due Date: ${invoice.due_date}</p>
+                <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/portal/invoices/${invoice.id}">View & Pay Invoice</a></p>
+              `
+            })
+            emailSent = true
+          } catch {
+            // Email optional
+          }
+        }
+
+        return NextResponse.json({ invoice, sent: true, emailSent })
       }
 
       case 'record_payment': {
