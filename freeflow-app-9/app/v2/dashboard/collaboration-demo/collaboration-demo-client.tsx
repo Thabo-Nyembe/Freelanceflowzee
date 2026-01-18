@@ -80,6 +80,8 @@ import { useWebSocket } from '@/hooks/use-websocket'
 import { VideoCall } from '@/components/collaboration/video-call'
 import { CollaborationPanel } from '@/components/collaboration/collaboration-panel'
 import { RemoteCursors } from '@/components/collaboration/remote-cursors'
+import { YjsCollaborationProvider, CollaborationStatusBar } from '@/components/collaboration/yjs-collaboration-provider'
+import { CollaborativeEditor } from '@/components/collaboration/collaborative-editor'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -100,7 +102,8 @@ import {
   Trash2,
   Undo,
   Redo,
-  Palette
+  Palette,
+  FileText
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
@@ -126,7 +129,7 @@ export default function CollaborationDemoClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [activeMode, setActiveMode] = useState<'document' | 'video' | 'whiteboard'>('document')
+  const [activeMode, setActiveMode] = useState<'document' | 'yjs' | 'video' | 'whiteboard'>('yjs')
   const [showVideoCall, setShowVideoCall] = useState(false)
   const [showCollabPanel, setShowCollabPanel] = useState(true)
   const [documentContent, setDocumentContent] = useState(`# Welcome to KAZI Collaboration Demo
@@ -457,10 +460,14 @@ Try moving your cursor around to see it synchronized across all connected users!
           <div className="max-w-5xl mx-auto space-y-6">
             {/* Mode selector */}
             <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as any)}>
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="yjs">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Yjs Editor
+                </TabsTrigger>
                 <TabsTrigger value="document">
                   <Pencil className="w-4 h-4 mr-2" />
-                  Document
+                  WebSocket Doc
                 </TabsTrigger>
                 <TabsTrigger value="whiteboard">
                   <Presentation className="w-4 h-4 mr-2" />
@@ -472,12 +479,82 @@ Try moving your cursor around to see it synchronized across all connected users!
                 </TabsTrigger>
               </TabsList>
 
+              <TabsContent value="yjs" className="mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Yjs CRDT Collaborative Editor
+                      <Badge className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                        New!
+                      </Badge>
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      World-class real-time collaboration using Yjs CRDT with TipTap editor, Supabase sync, and offline persistence.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <YjsCollaborationProvider
+                      documentId={DEMO_ROOM_ID}
+                      documentType="document"
+                      currentUser={CURRENT_USER}
+                      tableName="collaboration_documents"
+                      enableOffline={true}
+                      enableAwareness={true}
+                      showNotifications={true}
+                    >
+                      <div className="space-y-4">
+                        <CollaborationStatusBar />
+                        <CollaborativeEditor
+                          fragmentName="demo-document"
+                          placeholder="Start typing... your changes sync in real-time using Yjs CRDT!"
+                          showToolbar={true}
+                          showBubbleMenu={true}
+                          editable={true}
+                        />
+                      </div>
+                    </YjsCollaborationProvider>
+
+                    {/* Feature highlights */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 rounded-lg">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-purple-600" />
+                          Yjs CRDT
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          Conflict-free replicated data type for seamless merging
+                        </p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-lg">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-600" />
+                          Offline Support
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          IndexedDB persistence - keep working without connection
+                        </p>
+                      </div>
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 rounded-lg">
+                        <h4 className="font-medium mb-2 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                          Live Cursors
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          See where collaborators are typing in real-time
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               <TabsContent value="document" className="mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Pencil className="w-5 h-5" />
-                      Real-time Document Editing
+                      WebSocket Document (Legacy)
                     </CardTitle>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                       This document is synchronized in real-time. Changes you make will appear instantly for all connected users.

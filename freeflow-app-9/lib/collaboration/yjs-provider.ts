@@ -3,16 +3,14 @@
  *
  * World-class real-time collaboration using:
  * - Yjs CRDT for conflict-free editing
- * - Supabase Realtime for sync
+ * - Supabase Realtime channels for sync
  * - IndexedDB for offline persistence
  * - Awareness protocol for presence
  */
 
 import * as Y from 'yjs'
 import { IndexeddbPersistence } from 'y-indexeddb'
-import { SupabaseProvider } from 'y-supabase'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { Awareness } from 'y-protocols/awareness'
+import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness'
 
 // ============================================================================
 // Types
@@ -84,17 +82,49 @@ function generateUserColor(userId: string): string {
 }
 
 // ============================================================================
+// Utility Functions
+// ============================================================================
+
+function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(uint8Array).toString('base64')
+  }
+  let binary = ''
+  const len = uint8Array.byteLength
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(uint8Array[i])
+  }
+  return btoa(binary)
+}
+
+function base64ToUint8Array(base64: string): Uint8Array {
+  if (typeof Buffer !== 'undefined') {
+    return new Uint8Array(Buffer.from(base64, 'base64'))
+  }
+  const binary = atob(base64)
+  const len = binary.length
+  const bytes = new Uint8Array(len)
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return bytes
+}
+
+// ============================================================================
 // Yjs Collaboration Provider Class
 // ============================================================================
 
 export class YjsCollaborationProvider {
   private doc: Y.Doc
-  private supabaseProvider: SupabaseProvider | null = null
+  private channel: any = null
+  private supabase: any = null
   private indexeddbProvider: IndexeddbPersistence | null = null
   private awareness: Awareness | null = null
   private config: YjsCollaborationConfig
   private state: CollaborationProviderState
   private listeners: Map<string, Set<(...args: any[]) => void>> = new Map()
+  private updateHandler: ((update: Uint8Array, origin: any) => void) | null = null
+  private resyncIntervalId: ReturnType<typeof setInterval> | null = null
 
   constructor(config: YjsCollaborationConfig) {
     this.config = {
@@ -124,8 +154,8 @@ export class YjsCollaborationProvider {
       await this.setupOfflinePersistence()
     }
 
-    // Setup Supabase sync
-    await this.setupSupabaseSync()
+    // Setup Supabase Realtime sync
+    await this.setupSupabaseRealtimeSync()
 
     // Setup awareness if enabled
     if (this.config.enableAwareness) {
@@ -147,7 +177,7 @@ export class YjsCollaborationProvider {
     }
   }
 
-  private async setupSupabaseSync(): Promise<void> {
+  private async setupSupabaseRealtimeSync(): Promise<void> {
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -156,68 +186,139 @@ export class YjsCollaborationProvider {
         throw new Error('Supabase credentials not configured')
       }
 
-      const supabase = createSupabaseClient(supabaseUrl, supabaseKey)
+      // Dynamic import to avoid SSR issues
+      const { createClient } = await import('@supabase/supabase-js')
+      this.supabase = createClient(supabaseUrl, supabaseKey)
 
-      this.supabaseProvider = new SupabaseProvider(this.doc, supabase, {
-        channel: this.config.documentId,
-        id: this.config.documentId,
-        tableName: this.config.tableName!,
-        columnName: this.config.columnName!,
-        resyncInterval: this.config.resyncInterval
+      // Create a realtime channel for this document
+      const channelName = `yjs:${this.config.documentId}`
+      this.channel = this.supabase.channel(channelName, {
+        config: {
+          broadcast: { self: false }
+        }
       })
 
-      // Event handlers
-      this.supabaseProvider.on('connect', () => {
-        this.state.isConnected = true
-        this.emit('connect')
-        this.config.onConnect?.()
+      // Handle document updates from other clients
+      this.channel.on('broadcast', { event: 'yjs-update' }, (payload: { payload: { update: string } }) => {
+        try {
+          const update = base64ToUint8Array(payload.payload.update)
+          Y.applyUpdate(this.doc, update, 'remote')
+        } catch (error) {
+          console.error('Error applying remote update:', error)
+        }
       })
 
-      this.supabaseProvider.on('disconnect', () => {
-        this.state.isConnected = false
-        this.emit('disconnect')
-        this.config.onDisconnect?.()
+      // Handle awareness updates
+      this.channel.on('broadcast', { event: 'awareness-update' }, (payload: { payload: { update: string } }) => {
+        try {
+          if (this.awareness) {
+            const update = base64ToUint8Array(payload.payload.update)
+            applyAwarenessUpdate(this.awareness, update, 'remote')
+          }
+        } catch (error) {
+          console.error('Error applying awareness update:', error)
+        }
       })
 
-      this.supabaseProvider.on('synced', (synced: boolean) => {
-        this.state.isSynced = synced
-        this.emit('sync', synced)
-        this.config.onSync?.(synced)
+      // Handle sync requests
+      this.channel.on('broadcast', { event: 'sync-request' }, () => {
+        this.broadcastFullState()
       })
 
-      this.supabaseProvider.on('error', (error: Error) => {
-        this.emit('error', error)
-        this.config.onError?.(error)
+      // Handle full state broadcasts
+      this.channel.on('broadcast', { event: 'sync-state' }, (payload: { payload: { state: string } }) => {
+        try {
+          const state = base64ToUint8Array(payload.payload.state)
+          Y.applyUpdate(this.doc, state, 'remote')
+          this.state.isSynced = true
+          this.emit('sync', true)
+          this.config.onSync?.(true)
+        } catch (error) {
+          console.error('Error applying sync state:', error)
+        }
       })
 
-      this.supabaseProvider.on('save', (version: number) => {
-        this.state.documentVersion = version
-        this.emit('save', version)
+      // Subscribe to the channel
+      this.channel.subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          this.state.isConnected = true
+          this.emit('connect')
+          this.config.onConnect?.()
+
+          // Request sync from other clients
+          this.channel.send({
+            type: 'broadcast',
+            event: 'sync-request',
+            payload: {}
+          })
+
+          // Broadcast our current state
+          setTimeout(() => this.broadcastFullState(), 500)
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          this.state.isConnected = false
+          this.emit('disconnect')
+          this.config.onDisconnect?.()
+        }
       })
 
-      // Get awareness from provider if available
-      if ((this.supabaseProvider as any).awareness) {
-        this.awareness = (this.supabaseProvider as any).awareness
+      // Listen for local document updates and broadcast them
+      this.updateHandler = (update: Uint8Array, origin: any) => {
+        if (origin !== 'remote' && this.state.isConnected && this.channel) {
+          this.channel.send({
+            type: 'broadcast',
+            event: 'yjs-update',
+            payload: { update: uint8ArrayToBase64(update) }
+          })
+        }
+      }
+      this.doc.on('update', this.updateHandler)
+
+      // Setup periodic resync if configured
+      if (this.config.resyncInterval) {
+        this.resyncIntervalId = setInterval(() => {
+          if (this.state.isConnected) {
+            this.broadcastFullState()
+          }
+        }, this.config.resyncInterval)
       }
 
     } catch (error) {
-      console.error('Failed to setup Supabase sync:', error)
+      console.error('Failed to setup Supabase Realtime sync:', error)
+      this.state.isOffline = true
       this.config.onError?.(error as Error)
     }
   }
 
+  private broadcastFullState(): void {
+    if (!this.channel || !this.state.isConnected) return
+
+    const state = Y.encodeStateAsUpdate(this.doc)
+    this.channel.send({
+      type: 'broadcast',
+      event: 'sync-state',
+      payload: { state: uint8ArrayToBase64(state) }
+    })
+  }
+
   private setupAwareness(): void {
-    if (!this.awareness) {
-      this.awareness = new Awareness(this.doc)
-    }
+    this.awareness = new Awareness(this.doc)
 
-    this.awareness.on('change', ({ added, updated, removed }: {
-      added: number[]
-      updated: number[]
-      removed: number[]
-    }) => {
+    // Broadcast awareness updates
+    this.awareness.on('update', ({ added, updated, removed }: { added: number[], updated: number[], removed: number[] }) => {
+      const changedClients = added.concat(updated).concat(removed)
+
+      // Broadcast awareness to other clients
+      if (this.channel && this.state.isConnected && changedClients.length > 0) {
+        const update = encodeAwarenessUpdate(this.awareness!, changedClients)
+        this.channel.send({
+          type: 'broadcast',
+          event: 'awareness-update',
+          payload: { update: uint8ArrayToBase64(update) }
+        })
+      }
+
+      // Update local state
       const states = new Map<number, UserAwarenessState>()
-
       this.awareness!.getStates().forEach((state, clientId) => {
         if (state.user) {
           states.set(clientId, state as UserAwarenessState)
@@ -437,9 +538,22 @@ export class YjsCollaborationProvider {
   destroy(): void {
     this.clearLocalState()
 
-    if (this.supabaseProvider) {
-      this.supabaseProvider.destroy()
-      this.supabaseProvider = null
+    // Clear resync interval
+    if (this.resyncIntervalId) {
+      clearInterval(this.resyncIntervalId)
+      this.resyncIntervalId = null
+    }
+
+    // Remove document update handler
+    if (this.updateHandler) {
+      this.doc.off('update', this.updateHandler)
+      this.updateHandler = null
+    }
+
+    // Unsubscribe from channel
+    if (this.channel) {
+      this.channel.unsubscribe()
+      this.channel = null
     }
 
     if (this.indexeddbProvider) {
