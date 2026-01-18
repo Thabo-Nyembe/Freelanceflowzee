@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+// Supabase hooks for real data
+import { useMilestones as useSupabaseMilestones, useMilestoneMutations, Milestone as SupabaseMilestone } from '@/lib/hooks/use-milestones'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -658,7 +660,23 @@ const initialFormState: MilestoneFormState = {
 }
 
 export default function MilestonesClient() {
+  // Supabase hooks for real milestone data
+  const {
+    milestones: supabaseMilestones,
+    stats: supabaseStats,
+    isLoading: hookLoading,
+    error: hookError,
+    refetch: refetchMilestones
+  } = useSupabaseMilestones()
 
+  const {
+    createMilestone: createSupabaseMilestone,
+    updateMilestone: updateSupabaseMilestone,
+    deleteMilestone: deleteSupabaseMilestone,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useMilestoneMutations()
 
   // Core state
   const [activeTab, setActiveTab] = useState('milestones')
@@ -690,6 +708,106 @@ export default function MilestonesClient() {
     { id: '2', label: 'View Timeline', icon: 'calendar', action: () => setShowTimelineDialog(true), variant: 'default' as const },
     { id: '3', label: 'Export Report', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
   ]
+
+  // Map Supabase milestones to local Milestone format with mock fallback
+  const activeMilestones: Milestone[] = useMemo(() => {
+    // Use Supabase hook data if available
+    if (supabaseMilestones && supabaseMilestones.length > 0) {
+      return supabaseMilestones.map((m: SupabaseMilestone) => ({
+        id: m.id,
+        name: m.name || 'Untitled Milestone',
+        description: m.description || '',
+        status: (m.status || 'not_started') as MilestoneStatus,
+        type: (m.type || 'project') as MilestoneType,
+        priority: (m.priority || 'medium') as Priority,
+        health: (m.status === 'at-risk' ? 'at_risk' : m.status === 'completed' ? 'on_track' : 'on_track') as HealthScore,
+        project_id: m.id,
+        project_name: m.team_name || 'Project',
+        owner: {
+          id: m.user_id,
+          name: m.owner_name || 'Unassigned',
+          avatar: '/avatars/default.jpg',
+          role: 'Owner',
+          email: m.owner_email || '',
+          workload: 0,
+          tasks_assigned: m.deliverables || 0,
+          tasks_completed: m.completed_deliverables || 0
+        },
+        team: [],
+        start_date: m.created_at || new Date().toISOString(),
+        due_date: m.due_date || new Date().toISOString(),
+        completed_date: m.status === 'completed' ? m.updated_at : undefined,
+        progress: m.progress || 0,
+        deliverables: [],
+        dependencies_in: [],
+        dependencies_out: [],
+        status_updates: [],
+        risks: [],
+        budget: {
+          total: m.budget || 0,
+          spent: m.spent || 0,
+          forecast: m.budget || 0,
+          currency: m.currency || 'USD',
+          items: []
+        },
+        tags: m.tags || [],
+        watchers: 0,
+        comments: 0,
+        is_critical_path: m.priority === 'critical',
+        created_at: m.created_at,
+        updated_at: m.updated_at
+      }))
+    }
+    // Fall back to manual fetch data
+    if (dbMilestones && dbMilestones.length > 0) {
+      return dbMilestones.map((m: DbMilestone) => ({
+        id: m.id,
+        name: m.name || 'Untitled Milestone',
+        description: m.description || '',
+        status: (m.status || 'not_started') as MilestoneStatus,
+        type: (m.type || 'project') as MilestoneType,
+        priority: (m.priority || 'medium') as Priority,
+        health: (m.status === 'at-risk' ? 'at_risk' : m.status === 'completed' ? 'on_track' : 'on_track') as HealthScore,
+        project_id: m.id,
+        project_name: m.team_name || 'Project',
+        owner: {
+          id: m.user_id,
+          name: m.owner_name || 'Unassigned',
+          avatar: '/avatars/default.jpg',
+          role: 'Owner',
+          email: m.owner_email || '',
+          workload: 0,
+          tasks_assigned: m.deliverables || 0,
+          tasks_completed: m.completed_deliverables || 0
+        },
+        team: [],
+        start_date: m.created_at || new Date().toISOString(),
+        due_date: m.due_date || new Date().toISOString(),
+        completed_date: m.status === 'completed' ? m.updated_at : undefined,
+        progress: m.progress || 0,
+        deliverables: [],
+        dependencies_in: [],
+        dependencies_out: [],
+        status_updates: [],
+        risks: [],
+        budget: {
+          total: m.budget || 0,
+          spent: m.spent || 0,
+          forecast: m.budget || 0,
+          currency: m.currency || 'USD',
+          items: []
+        },
+        tags: [],
+        watchers: 0,
+        comments: 0,
+        is_critical_path: m.priority === 'critical',
+        created_at: m.created_at,
+        updated_at: m.updated_at
+      }))
+    }
+    // Fall back to mock data
+    return mockMilestones
+  }, [supabaseMilestones, dbMilestones])
 
   // Fetch milestones from Supabase
   const fetchMilestones = useCallback(async () => {
@@ -883,46 +1001,56 @@ export default function MilestonesClient() {
     toast.success('Report exported successfully')
   }
 
-  // Sync/Refresh data
+  // Sync/Refresh data - uses both Supabase hook refetch and manual fetch
   const handleSync = async () => {
     setLoading(true)
-    await fetchMilestones()
-    toast.success('Data synced')
+    try {
+      await Promise.all([
+        fetchMilestones(),
+        refetchMilestones()
+      ])
+      toast.success('Data synced')
+    } catch (error) {
+      toast.error('Failed to sync data')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Calculate stats
+  // Calculate stats from activeMilestones (Supabase data with mock fallback)
   const stats = useMemo(() => {
-    const total = mockMilestones.length
-    const completed = mockMilestones.filter(m => m.status === 'completed').length
-    const inProgress = mockMilestones.filter(m => m.status === 'in_progress').length
-    const atRisk = mockMilestones.filter(m => m.health === 'at_risk' || m.health === 'off_track').length
-    const onTrack = mockMilestones.filter(m => m.health === 'on_track').length
-    const criticalPath = mockMilestones.filter(m => m.is_critical_path).length
-    const totalBudget = mockMilestones.reduce((sum, m) => sum + m.budget.total, 0)
-    const spentBudget = mockMilestones.reduce((sum, m) => sum + m.budget.spent, 0)
-    const avgProgress = mockMilestones.reduce((sum, m) => sum + m.progress, 0) / total
-    const totalDeliverables = mockMilestones.reduce((sum, m) => sum + m.deliverables.length, 0)
-    const completedDeliverables = mockMilestones.reduce((sum, m) =>
-      sum + m.deliverables.filter(d => d.status === 'approved').length, 0)
-    const totalRisks = mockMilestones.reduce((sum, m) => sum + m.risks.length, 0)
-    const upcomingDeadlines = mockMilestones.filter(m => {
+    const data = activeMilestones
+    const total = data.length || 1 // Prevent division by zero
+    const completed = data.filter(m => m.status === 'completed').length
+    const inProgress = data.filter(m => m.status === 'in_progress').length
+    const atRisk = data.filter(m => m.health === 'at_risk' || m.health === 'off_track').length
+    const onTrack = data.filter(m => m.health === 'on_track').length
+    const criticalPath = data.filter(m => m.is_critical_path).length
+    const totalBudget = data.reduce((sum, m) => sum + (m.budget?.total || 0), 0) || 1
+    const spentBudget = data.reduce((sum, m) => sum + (m.budget?.spent || 0), 0)
+    const avgProgress = data.reduce((sum, m) => sum + m.progress, 0) / total
+    const totalDeliverables = data.reduce((sum, m) => sum + (m.deliverables?.length || 0), 0) || 1
+    const completedDeliverables = data.reduce((sum, m) =>
+      sum + (m.deliverables?.filter(d => d.status === 'approved').length || 0), 0)
+    const totalRisks = data.reduce((sum, m) => sum + (m.risks?.length || 0), 0)
+    const upcomingDeadlines = data.filter(m => {
       const days = getDaysRemaining(m.due_date)
       return days > 0 && days <= 14
     }).length
 
     return {
-      total, completed, inProgress, atRisk, onTrack, criticalPath,
+      total: data.length, completed, inProgress, atRisk, onTrack, criticalPath,
       totalBudget, spentBudget, avgProgress, totalDeliverables,
       completedDeliverables, totalRisks, upcomingDeadlines,
       completionRate: Math.round((completed / total) * 100),
       budgetUtilization: Math.round((spentBudget / totalBudget) * 100),
       deliverableRate: Math.round((completedDeliverables / totalDeliverables) * 100),
     }
-  }, [])
+  }, [activeMilestones])
 
-  // Filter milestones
+  // Filter milestones from activeMilestones (Supabase data with mock fallback)
   const filteredMilestones = useMemo(() => {
-    return mockMilestones.filter(milestone => {
+    return activeMilestones.filter(milestone => {
       const matchesSearch = searchQuery === '' ||
         milestone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         milestone.project_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -930,16 +1058,17 @@ export default function MilestonesClient() {
       const matchesPriority = priorityFilter === 'all' || milestone.priority === priorityFilter
       return matchesSearch && matchesStatus && matchesPriority
     })
-  }, [searchQuery, statusFilter, priorityFilter])
+  }, [activeMilestones, searchQuery, statusFilter, priorityFilter])
 
-  // Get all dependencies for visualization
+  // Get all dependencies for visualization from activeMilestones
   const allDependencies = useMemo(() => {
     const deps: Dependency[] = []
-    mockMilestones.forEach(m => {
-      deps.push(...m.dependencies_in, ...m.dependencies_out)
+    activeMilestones.forEach(m => {
+      if (m.dependencies_in) deps.push(...m.dependencies_in)
+      if (m.dependencies_out) deps.push(...m.dependencies_out)
     })
     return [...new Map(deps.map(d => [d.id, d])).values()]
-  }, [])
+  }, [activeMilestones])
 
   // Additional handlers (available for future use)
   const _handleAddDependency = (_milestoneId: string) => {

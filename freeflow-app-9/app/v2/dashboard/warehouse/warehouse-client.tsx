@@ -61,6 +61,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+// Supabase hooks for real warehouse data
+import { useWarehouses, useWarehouseZones, type Warehouse as DBWarehouse, type WarehouseZone as DBWarehouseZone } from '@/lib/hooks/use-warehouse'
+import { useStockLevels, type StockLevel } from '@/lib/hooks/use-stock'
+
 
 
 
@@ -528,17 +532,85 @@ export default function WarehouseClient() {
     notes: ''
   })
 
-  // Stats calculations
+  // Supabase hooks for real warehouse data
+  const { warehouses: dbWarehouses, stats: warehouseStats, isLoading: isLoadingWarehouses } = useWarehouses()
+  const { stockLevels: dbStockLevels, stats: stockStats, isLoading: isLoadingStock } = useStockLevels()
+
+  // Map stock levels to InventoryItem format for display
+  const activeInventory: InventoryItem[] = useMemo(() => {
+    if (dbStockLevels && dbStockLevels.length > 0) {
+      return dbStockLevels.map((sl: StockLevel) => {
+        const status: InventoryStatus = sl.quantity_available <= 0 ? 'out_of_stock'
+          : sl.quantity_available <= sl.reorder_point ? 'low_stock' : 'in_stock'
+        return {
+          id: sl.id,
+          sku: sl.sku || `SKU-${sl.id.substring(0, 8)}`,
+          name: sl.product_name,
+          description: `Stock level for ${sl.product_name}`,
+          category: sl.category || 'General',
+          quantity_on_hand: sl.quantity_on_hand || 0,
+          quantity_available: sl.quantity_available || 0,
+          quantity_reserved: (sl.quantity_on_hand || 0) - (sl.quantity_available || 0),
+          quantity_incoming: 0,
+          reorder_point: sl.reorder_point || 0,
+          reorder_quantity: sl.reorder_quantity || 0,
+          unit_cost: sl.unit_cost || 0,
+          bin_location: sl.location || 'Unassigned',
+          zone: sl.warehouse_id ? `Zone ${sl.warehouse_id.substring(0, 4)}` : 'Default Zone',
+          lot_number: sl.batch_number || '',
+          expiry_date: sl.expiry_date || null,
+          last_counted: sl.last_count_date || sl.updated_at,
+          status,
+          weight_kg: 0,
+          dimensions: { l: 0, w: 0, h: 0 },
+          is_serialized: false,
+          requires_cold_storage: false,
+          is_hazmat: false
+        } as InventoryItem
+      })
+    }
+    return mockInventory
+  }, [dbStockLevels])
+
+  // Map warehouses to zones format
+  const activeZones: Zone[] = useMemo(() => {
+    if (dbWarehouses && dbWarehouses.length > 0) {
+      return dbWarehouses.map((w: DBWarehouse) => ({
+        id: w.id,
+        name: w.warehouse_name,
+        code: w.warehouse_code,
+        type: (w.warehouse_type || 'storage') as ZoneType,
+        capacity_units: w.capacity_sqm || 0,
+        used_units: Math.round((w.capacity_sqm || 0) * (w.utilization_percent / 100)),
+        bin_count: w.zone_count || 0,
+        temperature_min: null,
+        temperature_max: null,
+        is_active: w.status === 'active',
+        last_activity: w.updated_at
+      })) as Zone[]
+    }
+    return mockZones
+  }, [dbWarehouses])
+
+  // Stats calculations - use real data when available
   const stats = useMemo(() => {
-    const totalItems = mockInventory.length
-    const lowStockItems = mockInventory.filter(i => i.status === 'low_stock').length
-    const outOfStockItems = mockInventory.filter(i => i.status === 'out_of_stock').length
-    const totalValue = mockInventory.reduce((sum, i) => sum + (i.quantity_on_hand * i.unit_cost), 0)
+    const useRealInventory = dbStockLevels && dbStockLevels.length > 0
+    const inventoryData = useRealInventory ? activeInventory : mockInventory
+
+    const totalItems = inventoryData.length
+    const lowStockItems = inventoryData.filter(i => i.status === 'low_stock').length
+    const outOfStockItems = inventoryData.filter(i => i.status === 'out_of_stock').length
+    const totalValue = inventoryData.reduce((sum, i) => sum + (i.quantity_on_hand * i.unit_cost), 0)
     const pendingInbound = mockInboundShipments.filter(s => s.status !== 'completed').length
     const pendingOutbound = mockOutboundOrders.filter(o => o.status !== 'shipped').length
     const activeTasks = mockTasks.filter(t => t.status === 'in_progress').length
     const pendingTasks = mockTasks.filter(t => t.status === 'pending').length
-    const avgZoneUtilization = mockZones.reduce((sum, z) => sum + (z.used_units / z.capacity_units * 100), 0) / mockZones.length
+
+    // Use real zone data when available
+    const zonesData = dbWarehouses && dbWarehouses.length > 0 ? activeZones : mockZones
+    const avgZoneUtilization = zonesData.length > 0
+      ? zonesData.reduce((sum, z) => sum + (z.capacity_units > 0 ? (z.used_units / z.capacity_units * 100) : 0), 0) / zonesData.length
+      : 0
 
     return {
       totalItems,
@@ -551,11 +623,11 @@ export default function WarehouseClient() {
       pendingTasks,
       avgZoneUtilization: avgZoneUtilization.toFixed(1)
     }
-  }, [])
+  }, [dbStockLevels, activeInventory, dbWarehouses, activeZones])
 
-  // Filter functions
+  // Filter functions - use real inventory when available
   const filteredInventory = useMemo(() => {
-    return mockInventory.filter(item => {
+    return activeInventory.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.bin_location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -563,7 +635,7 @@ export default function WarehouseClient() {
       const matchesZone = zoneFilter === 'all' || item.zone === zoneFilter
       return matchesSearch && matchesStatus && matchesZone
     })
-  }, [searchQuery, inventoryFilter, zoneFilter])
+  }, [activeInventory, searchQuery, inventoryFilter, zoneFilter])
 
   const filteredTasks = useMemo(() => {
     return mockTasks.filter(task => {

@@ -455,8 +455,40 @@ export default function TeamHubClient() {
     inviteMember
   } = useTeamHub()
 
-  // UI State
-  const [members] = useState<TeamMember[]>(mockMembers)
+  // Map hook members to TeamMember format with mock fallback
+  const displayMembers = useMemo(() => {
+    if (hookMembers && hookMembers.length > 0) {
+      return hookMembers.map((m: any) => ({
+        id: m.id || '',
+        name: m.name || 'Unknown',
+        displayName: m.display_name || m.name || 'Unknown',
+        email: m.email || '',
+        avatar: m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.name}`,
+        role: (m.role || 'member') as MemberRole,
+        jobTitle: m.job_title || m.role || 'Team Member',
+        department: m.department || 'General',
+        status: (m.status || 'offline') as MemberStatus,
+        statusMessage: m.status_message || '',
+        statusEmoji: m.status_emoji || '',
+        statusExpiry: m.status_expiry || null,
+        timezone: m.timezone || 'UTC',
+        localTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: m.timezone || 'UTC' }),
+        joinedAt: m.created_at || new Date().toISOString(),
+        lastActive: m.last_active || m.updated_at || new Date().toISOString(),
+        tasksCompleted: m.tasks_completed || 0,
+        projectsCount: m.projects_count || 0,
+        performanceScore: m.performance_score || m.rating || 0,
+        isLead: m.is_lead || m.role === 'admin' || m.role === 'owner',
+        phone: m.phone || '',
+        slackConnect: m.slack_connect || false,
+        customFields: m.custom_fields || []
+      })) as TeamMember[]
+    }
+    return mockMembers
+  }, [hookMembers])
+
+  // UI State - use displayMembers instead of static mock
+  const members = displayMembers
   const [channels] = useState<Channel[]>(mockChannels)
   const [messages] = useState<Message[]>(mockMessages)
   const [activities] = useState<Activity[]>(mockActivities)

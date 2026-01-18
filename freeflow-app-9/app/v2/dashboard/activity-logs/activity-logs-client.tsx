@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
-  type ActivityLog
+  type ActivityLog,
+  useActivityLogs
 } from '@/lib/hooks/use-activity-logs'
 import {
   Activity,
@@ -394,6 +395,9 @@ const mockLogsActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
+  // Supabase hook for real data
+  const { logs: dbLogs, isLoading: hookLoading, refetch } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
   const [levelFilter, setLevelFilter] = useState<LogLevel | 'all'>('all')
@@ -425,8 +429,41 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [timeRange, setTimeRange] = useState('1h')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Map Supabase ActivityLog to LogEntry format with mock fallback
+  const activeLogs: LogEntry[] = useMemo(() => {
+    if (dbLogs && dbLogs.length > 0) {
+      return dbLogs.map((log: ActivityLog) => ({
+        id: log.id,
+        timestamp: log.created_at,
+        level: (log.status === 'failed' ? 'error' : log.status === 'pending' ? 'warn' : 'info') as LogLevel,
+        source: (log.category === 'api' ? 'api' : log.category === 'user' ? 'web' : log.category === 'file' ? 'worker' : 'api') as LogSource,
+        service: log.resource_type || 'app-service',
+        host: 'prod-app-01',
+        message: `${log.action}: ${log.resource_name || log.activity_type}`,
+        traceId: log.activity_code || null,
+        spanId: null,
+        userId: log.user_id,
+        userName: log.user_name,
+        userEmail: log.user_email,
+        sessionId: null,
+        requestId: log.activity_code,
+        method: log.activity_type === 'create' ? 'POST' : log.activity_type === 'update' ? 'PUT' : log.activity_type === 'delete' ? 'DELETE' : 'GET',
+        path: log.resource_type ? `/api/${log.resource_type.toLowerCase()}` : null,
+        statusCode: log.status === 'success' ? 200 : log.status === 'failed' ? 500 : 202,
+        duration: log.duration || 0,
+        ip: log.ip_address,
+        userAgent: log.user_agent,
+        country: null,
+        tags: [log.category, log.activity_type, log.status].filter(Boolean),
+        attributes: log.metadata || {},
+        stackTrace: null
+      })) as LogEntry[]
+    }
+    return mockLogs
+  }, [dbLogs])
+
   const filteredLogs = useMemo(() => {
-    return mockLogs.filter(log => {
+    return activeLogs.filter(log => {
       const matchesSearch = log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (log.traceId && log.traceId.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -434,7 +471,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
       const matchesSource = sourceFilter === 'all' || log.source === sourceFilter
       return matchesSearch && matchesLevel && matchesSource
     })
-  }, [searchQuery, levelFilter, sourceFilter])
+  }, [activeLogs, searchQuery, levelFilter, sourceFilter])
 
   const getLevelColor = (level: LogLevel) => {
     switch (level) {

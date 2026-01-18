@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useApiKeys, getKeyStatusColor, getKeyTypeColor, formatRequests } from '@/lib/hooks/use-api-keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -885,6 +886,26 @@ const mockApiKeysQuickActions = [
 // ============================================================================
 
 export default function ApiKeysClient() {
+  // Supabase hook for real data
+  const {
+    keys: apiKeysFromDb,
+    stats: apiKeyStats,
+    isLoading: apiKeysLoading,
+    error: apiKeysError,
+    fetchKeys,
+    createKey,
+    updateKey,
+    revokeKey,
+    activateKey,
+    deactivateKey,
+    deleteKey
+  } = useApiKeys()
+
+  // Fetch keys on mount
+  useEffect(() => {
+    fetchKeys()
+  }, [fetchKeys])
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKey, setSelectedKey] = useState<ApiKey | null>(null)
@@ -934,13 +955,14 @@ export default function ApiKeysClient() {
   const [newWebhookName, setNewWebhookName] = useState('')
   const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([])
 
-  // Dashboard stats
+  // Dashboard stats - uses real data from Supabase with mock fallback
+  const activeApiKeys = apiKeysFromDb.length > 0 ? apiKeysFromDb : mockApiKeys
   const stats = useMemo(() => ({
-    totalKeys: mockApiKeys.length,
-    activeKeys: mockApiKeys.filter(k => k.status === 'active').length,
-    totalRequests: mockApiKeys.reduce((sum, k) => sum + k.total_requests, 0),
-    requestsToday: mockApiKeys.reduce((sum, k) => sum + k.requests_today, 0),
-    expiringSoon: mockApiKeys.filter(k => {
+    totalKeys: apiKeyStats.total || activeApiKeys.length,
+    activeKeys: apiKeyStats.active || activeApiKeys.filter(k => k.status === 'active').length,
+    totalRequests: apiKeyStats.totalRequests || activeApiKeys.reduce((sum, k) => sum + (k.total_requests || 0), 0),
+    requestsToday: apiKeyStats.requestsToday || activeApiKeys.reduce((sum, k) => sum + (k.requests_today || 0), 0),
+    expiringSoon: apiKeyStats.expiringSoon || activeApiKeys.filter(k => {
       if (!k.expires_at) return false
       const days = Math.ceil((new Date(k.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       return days > 0 && days <= 30
@@ -948,16 +970,16 @@ export default function ApiKeysClient() {
     totalApps: mockApplications.length,
     totalWebhooks: mockWebhooks.length,
     failingWebhooks: mockWebhooks.filter(w => w.status === 'failing').length
-  }), [])
+  }), [apiKeyStats, activeApiKeys])
 
-  // Filtered data
+  // Filtered data - uses real data with mock fallback
   const filteredKeys = useMemo(() => {
-    return mockApiKeys.filter(key =>
+    return activeApiKeys.filter(key =>
       key.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       key.key_prefix.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      key.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      (key.tags && key.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
     )
-  }, [searchQuery])
+  }, [searchQuery, activeApiKeys])
 
   const filteredApps = useMemo(() => {
     return mockApplications.filter(app =>
@@ -973,13 +995,71 @@ export default function ApiKeysClient() {
     )
   }, [searchQuery])
 
-  // Handlers
-  const handleCreateApiKey = () => {
-    toast.info('Create API Key')
+  // Handlers - Wired to Supabase hooks
+  const handleCreateApiKey = async () => {
+    try {
+      const result = await createKey({
+        name: newKeyName || 'New API Key',
+        key_type: newKeyType as any,
+        environment: newKeyEnvironment as any,
+        scopes: newKeyScopes,
+        expires_at: expiryDays ? new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString() : undefined
+      })
+      toast.success('API Key created successfully', {
+        description: `Key prefix: ${result.key_prefix}`
+      })
+      setGenerateKeyDialogOpen(false)
+      setNewKeyName('')
+    } catch (error) {
+      toast.error('Failed to create API key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
-  const handleRevokeKey = (keyName: string) => {
-    toast.success('Key revoked: ' + keyName + ' has been revoked')
+  const handleRevokeKey = async (keyId: string, keyName: string) => {
+    try {
+      await revokeKey(keyId, 'User requested revocation')
+      toast.success('Key revoked: ' + keyName + ' has been revoked')
+      setRevokeKeyDialogOpen(false)
+    } catch (error) {
+      toast.error('Failed to revoke key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  const handleActivateKey = async (keyId: string, keyName: string) => {
+    try {
+      await activateKey(keyId)
+      toast.success('Key activated: ' + keyName + ' is now active')
+    } catch (error) {
+      toast.error('Failed to activate key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  const handleDeactivateKey = async (keyId: string, keyName: string) => {
+    try {
+      await deactivateKey(keyId)
+      toast.success('Key deactivated: ' + keyName + ' is now inactive')
+    } catch (error) {
+      toast.error('Failed to deactivate key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  const handleDeleteKey = async (keyId: string, keyName: string) => {
+    try {
+      await deleteKey(keyId)
+      toast.success('Key deleted: ' + keyName + ' has been deleted')
+    } catch (error) {
+      toast.error('Failed to delete key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   const handleRegenerateKey = (keyName: string) => {

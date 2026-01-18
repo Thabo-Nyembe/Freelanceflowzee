@@ -719,68 +719,78 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     )
   }
 
-  // MIGRATED: Batch #10 - Removed mock data, using database hooks
-  // Stats
+  // Stats - use real hook data
   const stats = useMemo(() => {
-    const opportunities = [] // Use database hook data instead
-    const forecasts = [] // Use database hook data instead
-    const tasks = [] // Use database hook data instead
-    const campaigns = [] // Use database hook data instead
-    const contacts = [] // Use database hook data instead
-    const accounts = [] // Use database hook data instead
+    const dealsData = deals || []
+    const campaignsData = campaigns || []
+    const customersData = dbCustomers || []
 
-    const totalPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
-    const weightedPipeline = (opportunities || []).filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
-    const closedWon = (opportunities || []).filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
-    const totalQuota = (forecasts || []).reduce((sum, f) => sum + f.quotaAmount, 0)
-    const openTasks = (tasks || []).filter(t => t.status !== 'completed').length
-    const activeCampaigns = (campaigns || []).filter(c => c.status === 'active').length
+    const totalPipeline = dealsData.filter((o: any) => o.status !== 'won' && o.status !== 'lost').reduce((sum: number, o: any) => sum + (o.value || 0), 0)
+    const weightedPipeline = dealsData.filter((o: any) => o.status !== 'won' && o.status !== 'lost').reduce((sum: number, o: any) => sum + ((o.value || 0) * (o.probability || 50) / 100), 0)
+    const closedWon = dealsData.filter((o: any) => o.status === 'won').reduce((sum: number, o: any) => sum + (o.value || 0), 0)
+    const activeCampaigns = campaignsData.filter((c: any) => c.status === 'running' || c.status === 'active').length
 
     return {
-      totalContacts: (contacts || []).length,
-      totalAccounts: (accounts || []).length,
-      totalOpportunities: (opportunities || []).length,
+      totalContacts: customersData.length,
+      totalAccounts: customersData.filter((c: any) => c.customer_type === 'business').length,
+      totalOpportunities: dealsData.length,
       totalPipeline,
       weightedPipeline,
       closedWon,
-      winRate: (opportunities || []).filter(o => o.isClosed).length > 0
-        ? ((opportunities || []).filter(o => o.isWon).length / (opportunities || []).filter(o => o.isClosed).length * 100)
+      winRate: dealsData.filter((o: any) => o.status === 'won' || o.status === 'lost').length > 0
+        ? (dealsData.filter((o: any) => o.status === 'won').length / dealsData.filter((o: any) => o.status === 'won' || o.status === 'lost').length * 100)
         : 0,
-      avgDealSize: (opportunities || []).length > 0 ? totalPipeline / (opportunities || []).filter(o => !o.isClosed).length : 0,
-      quotaAttainment: totalQuota > 0 ? (closedWon / totalQuota * 100) : 0,
-      openTasks,
+      avgDealSize: dealsData.length > 0 ? totalPipeline / Math.max(dealsData.filter((o: any) => o.status !== 'won' && o.status !== 'lost').length, 1) : 0,
+      quotaAttainment: 0,
+      openTasks: 0,
       activeCampaigns,
-      avgLeadScore: (contacts || []).length > 0 ? (contacts || []).reduce((sum, c) => sum + c.leadScore, 0) / (contacts || []).length : 0
+      avgLeadScore: customersData.length > 0 ? customersData.reduce((sum: number, c: any) => sum + (c.health_score || 50), 0) / customersData.length : 0
     }
-  }, [])
+  }, [deals, campaigns, dbCustomers])
 
-  // MIGRATED: Batch #10 - Removed mock data, using database hooks
-  // Filtered opportunities by stage
+  // Filtered opportunities by stage - use real deals data
   const filteredOpportunities = useMemo(() => {
-    const opportunities = [] // Use database hook data instead
-    const accounts = [] // Use database hook data instead
+    const dealsData = deals || []
+    const customersData = dbCustomers || []
 
-    return (opportunities || []).filter(opp => {
-      if (stageFilter !== 'all' && opp.stage !== stageFilter) return false
+    return dealsData.filter((opp: any) => {
+      if (stageFilter !== 'all' && opp.stage_id !== stageFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const account = (accounts || []).find(a => a.id === opp.accountId)
-        if (!opp.name.toLowerCase().includes(query) && !account?.name.toLowerCase().includes(query)) return false
+        const customer = customersData.find((c: any) => c.id === opp.customer_id)
+        if (!opp.title?.toLowerCase().includes(query) && !customer?.name?.toLowerCase().includes(query)) return false
       }
       return true
     })
-  }, [stageFilter, searchQuery])
+  }, [deals, dbCustomers, stageFilter, searchQuery])
 
-  // MIGRATED: Batch #10 - Removed mock data, using database hooks
-  // Pipeline grouped by stage
+  // Pipeline grouped by stage - use real deals data
   const pipelineByStage = useMemo(() => {
-    const opportunities = [] // Use database hook data instead
+    const dealsData = deals || []
     const grouped: Record<DealStage, Opportunity[]> = { 'lead': [], 'qualified': [], 'proposal': [], 'negotiation': [], 'closed-won': [], 'closed-lost': [] }
-    ;(opportunities || []).filter(o => !o.isClosed).forEach(opp => {
-      grouped[opp.stage].push(opp)
+    dealsData.forEach((deal: any) => {
+      // Map deal status to stage
+      const stage: DealStage = deal.status === 'won' ? 'closed-won' :
+                               deal.status === 'lost' ? 'closed-lost' :
+                               deal.stage_id || 'lead'
+      if (grouped[stage]) {
+        grouped[stage].push({
+          id: deal.id,
+          name: deal.title || 'Untitled Deal',
+          accountId: deal.customer_id,
+          amount: deal.value || 0,
+          stage: stage,
+          probability: deal.probability || 50,
+          expectedCloseDate: deal.expected_close_date || new Date().toISOString(),
+          ownerId: deal.owner_id,
+          createdAt: deal.created_at,
+          isClosed: deal.status === 'won' || deal.status === 'lost',
+          isWon: deal.status === 'won'
+        } as Opportunity)
+      }
     })
     return grouped
-  }, [])
+  }, [deals])
 
   const statCards = [
     { label: 'Total Pipeline', value: formatCurrency(stats.totalPipeline), icon: DollarSign, color: 'from-violet-500 to-purple-600', change: '+12%' },

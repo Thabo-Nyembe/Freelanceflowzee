@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useStockLevels, useStockMovements, type StockLevel, type StockMovement as DBStockMovement } from '@/lib/hooks/use-stock'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -335,18 +336,87 @@ const formatDate = (dateString: string) => {
 
 export default function StockClient() {
   const [activeTab, setActiveTab] = useState('inventory')
-  const [products] = useState<Product[]>([])
-  const [movements] = useState<StockMovement[]>([])
+
+  // Supabase hooks for real data
+  const { stockLevels: dbStockLevels, stats: stockStats, isLoading: isLoadingStock } = useStockLevels()
+  const { movements: dbMovements, stats: movementStats, isLoading: isLoadingMovements } = useStockMovements()
+
+  // Map stock levels to Product format
+  const products: Product[] = useMemo(() => {
+    if (dbStockLevels && dbStockLevels.length > 0) {
+      return dbStockLevels.map((sl: StockLevel) => {
+        const status: StockStatus = sl.quantity_available <= 0 ? 'out_of_stock'
+          : sl.quantity_available <= sl.reorder_point ? 'low_stock'
+          : 'in_stock'
+        return {
+          id: sl.id,
+          sku: sl.sku || `SKU-${sl.id.substring(0, 8)}`,
+          name: sl.product_name,
+          description: '',
+          category: 'finished_goods' as ProductCategory,
+          brand: undefined,
+          supplier: { id: 's1', name: 'Default Supplier', email: '', phone: '', leadTime: 14, minOrderQuantity: 10, rating: 4.5 },
+          unitCost: sl.unit_cost || 0,
+          sellingPrice: (sl.unit_cost || 0) * 1.3,
+          margin: 30,
+          quantity: sl.quantity_on_hand || 0,
+          reservedQuantity: sl.quantity_reserved || 0,
+          availableQuantity: sl.quantity_available || 0,
+          reorderPoint: sl.reorder_point || 10,
+          reorderQuantity: sl.reorder_quantity || 25,
+          leadTimeDays: 14,
+          status,
+          locations: sl.warehouse_id ? [{
+            warehouseId: sl.warehouse_id,
+            warehouseName: 'Main Warehouse',
+            zone: sl.location_code || 'A',
+            bin: '01',
+            quantity: sl.quantity_on_hand || 0,
+            reservedQuantity: sl.quantity_reserved || 0
+          }] : [],
+          batchTracking: !!sl.batch_number,
+          serialTracking: false,
+          barcode: sl.sku,
+          createdAt: sl.created_at
+        } as Product
+      })
+    }
+    return []
+  }, [dbStockLevels])
+
+  // Map stock movements
+  const movements: StockMovement[] = useMemo(() => {
+    if (dbMovements && dbMovements.length > 0) {
+      return dbMovements.map((m: DBStockMovement) => ({
+        id: m.id,
+        reference: m.movement_number,
+        type: (m.movement_type || 'inbound') as MovementType,
+        productId: m.id,
+        productName: m.product_name,
+        sku: m.sku || '',
+        quantity: m.quantity || 0,
+        fromWarehouse: m.from_location,
+        toWarehouse: m.to_location,
+        status: (m.status || 'completed') as MovementStatus,
+        initiatedBy: m.operator_name || 'System',
+        createdAt: m.movement_date,
+        completedAt: m.completed_at,
+        notes: m.notes
+      })) as StockMovement[]
+    }
+    return []
+  }, [dbMovements])
+
   const [warehouses] = useState<Warehouse[]>([])
   const [alerts] = useState<Alert[]>([])
   const [stockCounts] = useState<StockCount[]>([])
   const [analytics] = useState<Analytics>({
-    totalProducts: 0,
-    totalValue: 0,
+    totalProducts: stockStats?.totalProducts || 0,
+    totalValue: stockStats?.totalValue || 0,
     avgTurnoverRate: 0,
-    totalMovements: 0,
-    lowStockCount: 0,
-    outOfStockCount: 0,
+    totalMovements: movementStats?.total || 0,
+    lowStockCount: stockStats?.lowStockCount || 0,
+    outOfStockCount: stockStats?.outOfStockCount || 0,
     pendingOrders: 0,
     warehouses: 0,
     topMovers: [],

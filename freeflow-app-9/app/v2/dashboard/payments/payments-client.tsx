@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -49,6 +49,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
+import { usePayments, usePaymentMethods, usePaymentsRealtime } from '@/lib/hooks/use-payments-extended'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 
 const logger = createFeatureLogger('ClientZonePayments')
 
@@ -293,10 +295,38 @@ export default function PaymentsClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
+  // Supabase hooks for real data
+  const { data: dbPayments = [], total: totalPayments, isLoading: paymentsLoading, refresh: refreshPayments } = usePayments(userId || undefined)
+  const { data: dbPaymentMethods = [], isLoading: methodsLoading, refresh: refreshMethods } = usePaymentMethods(userId || undefined)
+  const { payments: realtimePayments } = usePaymentsRealtime(userId || undefined)
+
+  // Supabase mutation hook for CRUD
+  const paymentMutation = useSupabaseMutation({
+    table: 'payments',
+    onSuccess: () => refreshPayments()
+  })
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([])
+
+  // Map Supabase payment data to local format (with mock fallback)
+  const activePayments = useMemo(() => {
+    const supabasePayments = realtimePayments.length > 0 ? realtimePayments : dbPayments
+    if (supabasePayments && supabasePayments.length > 0) {
+      return supabasePayments.map((p: any) => ({
+        id: p.id,
+        date: p.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+        milestone: p.description || p.reference_number || 'Payment',
+        amount: p.amount || 0,
+        type: p.payment_type || 'hold',
+        status: p.status || 'pending',
+        transactionId: p.transaction_id || p.reference_number || `TXN-${p.id?.slice(0, 8) || Date.now()}`
+      }))
+    }
+    return PAYMENT_HISTORY
+  }, [dbPayments, realtimePayments])
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null)
 
   // Release payment dialog state
@@ -358,8 +388,8 @@ export default function PaymentsClient() {
     setShowRecordPaymentDialog
   )
 
-  // Record new payment handler
-  const handleRecordPayment = async () => {
+  // Record new payment handler - using Supabase mutation
+  const handleRecordPayment = useCallback(async () => {
     if (!newPaymentData.milestone.trim() || !newPaymentData.amount) {
       toast.error('Please fill in all required fields')
       return
@@ -372,25 +402,19 @@ export default function PaymentsClient() {
     }
 
     try {
-      const response = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          milestone: newPaymentData.milestone.trim(),
-          amount: amount,
-          type: newPaymentData.type,
-          notes: newPaymentData.notes.trim(),
-          timestamp: new Date().toISOString()
-        })
+      // Use Supabase mutation for real database insert
+      const result = await paymentMutation.create({
+        user_id: userId,
+        description: newPaymentData.milestone.trim(),
+        amount: amount,
+        payment_type: newPaymentData.type,
+        notes: newPaymentData.notes.trim(),
+        status: 'pending',
+        reference_number: `TXN-${Date.now()}`,
+        currency: 'USD'
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to record payment')
-      }
-
-      const data = await response.json()
-
-      // Add to payment history
+      // Also add to local state for immediate UI update (will be replaced by real-time)
       const newPayment: PaymentHistory = {
         id: paymentHistory.length + 1,
         date: new Date().toISOString().split('T')[0],
@@ -398,7 +422,7 @@ export default function PaymentsClient() {
         amount: amount,
         type: newPaymentData.type,
         status: 'pending',
-        transactionId: data.transactionId || `TXN-${Date.now()}`
+        transactionId: result?.reference_number || `TXN-${Date.now()}`
       }
 
       setPaymentHistory([newPayment, ...paymentHistory])
@@ -411,7 +435,7 @@ export default function PaymentsClient() {
       logger.error('Failed to record payment', { error })
       toast.error('Failed to record payment')
     }
-  }
+  }, [newPaymentData, paymentHistory, paymentMutation, userId])
 
   // Handle Process Refund
   const handleProcessRefund = (payment: PaymentHistory) => {
@@ -617,17 +641,17 @@ export default function PaymentsClient() {
     }
   }
 
-  // Handle Refresh Payments
-  const handleRefreshPayments = async () => {
+  // Handle Refresh Payments - using Supabase hooks
+  const handleRefreshPayments = useCallback(async () => {
     try {
       setIsLoading(true)
-      // Fetch payments data from API
-      const res = await fetch('/api/invoices?type=payments')
-      if (!res.ok) throw new Error('Failed to fetch payments')
-      const data = await res.json()
+      // Refresh data from Supabase hooks
+      await refreshPayments()
+      await refreshMethods()
 
-      setMilestones(data.milestones || MILESTONES)
-      setPaymentHistory(data.history || PAYMENT_HISTORY)
+      // Use the activePayments from hook (real data or mock fallback)
+      setPaymentHistory(activePayments)
+      setMilestones(MILESTONES) // Milestones can stay as mock for now
       setIsLoading(false)
 
       toast.success('Payments refreshed')
@@ -637,7 +661,7 @@ export default function PaymentsClient() {
       logger.error('Failed to refresh payments', { error })
       toast.error('Failed to refresh payments')
     }
-  }
+  }, [refreshPayments, refreshMethods, activePayments, announce])
 
   // Handle Search
   const handleSearch = (query: string) => {
@@ -680,32 +704,17 @@ export default function PaymentsClient() {
     toast.info("Transaction: " + payment.transactionId + " of " + formatCurrency(payment.amount) + " on " + new Date(payment.date).toLocaleDateString())
   }
 
-  // Load Payments Data
+  // Load Payments Data - Synced with Supabase hooks
   useEffect(() => {
-    const loadPaymentsData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        // Load payments from API
-        const response = await fetch('/api/client-zone/payments')
-        if (!response.ok) throw new Error('Failed to load payments')
-
-        setMilestones(MILESTONES)
-        setPaymentHistory(PAYMENT_HISTORY)
-        setIsLoading(false)
-        announce('Payments loaded successfully', 'polite')
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to load payments'
-        setError(errorMsg)
-        setIsLoading(false)
-        announce('Error loading payments', 'assertive')
-        logger.error('Failed to load payments', { error: err })
-      }
+    // When Supabase hooks finish loading, update local state
+    if (!paymentsLoading && !methodsLoading) {
+      // Use real data from Supabase hooks (with mock fallback via activePayments)
+      setPaymentHistory(activePayments)
+      setMilestones(MILESTONES) // Milestones can stay as mock for now
+      setIsLoading(false)
+      announce('Payments loaded successfully', 'polite')
     }
-
-    loadPaymentsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [paymentsLoading, methodsLoading, activePayments, announce])
 
   // Calculate totals
   const totals = {

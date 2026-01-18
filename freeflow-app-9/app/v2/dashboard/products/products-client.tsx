@@ -385,29 +385,71 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowQuickAnalytics(true), variant: 'outline' as const },
   ]
 
-  const { data: products } = useProducts({
+  const { data: products, isLoading: hookLoading } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
     searchQuery: searchQuery || undefined
   })
-  const { stats } = useProductStats()
+  const { stats: hookStats } = useProductStats()
 
-  // Calculate stats from mock data
-  const totalRevenue = mockProducts.reduce((sum, p) => sum + p.revenue, 0)
-  const totalMRR = mockProducts.reduce((sum, p) => sum + p.mrr, 0)
-  const totalSubscribers = mockProducts.reduce((sum, p) => sum + p.subscribers, 0)
-  const activeProducts = mockProducts.filter(p => p.status === 'active').length
-  const avgConversion = mockProducts.reduce((sum, p) => sum + p.conversionRate, 0) / mockProducts.length
-  const avgChurn = mockProducts.filter(p => p.mrr > 0).reduce((sum, p) => sum + p.churnRate, 0) / mockProducts.filter(p => p.mrr > 0).length
+  // Map Supabase products to StripeProduct format with mock fallback
+  const activeProducts: StripeProduct[] = useMemo(() => {
+    if (products && products.length > 0) {
+      return products.map((p: Product) => ({
+        id: p.id,
+        name: p.product_name || 'Untitled Product',
+        description: p.description || '',
+        images: p.images || [],
+        status: (p.status || 'active') as ProductStatus,
+        prices: [{
+          id: `price_${p.id}`,
+          productId: p.id,
+          nickname: 'Default',
+          unitAmount: Math.round((p.price || 0) * 100), // Convert to cents
+          currency: p.currency || 'usd',
+          type: p.billing_cycle === 'one_time' ? 'one_time' as PricingType : 'recurring' as PricingType,
+          billingInterval: (p.billing_cycle === 'monthly' ? 'month' : p.billing_cycle === 'yearly' ? 'year' : 'month') as BillingInterval,
+          intervalCount: 1,
+          taxBehavior: 'exclusive' as const,
+          active: true,
+          metadata: {}
+        }],
+        category: p.category || 'subscription',
+        metadata: p.metadata || {},
+        features: p.features || [],
+        taxCode: null,
+        shippable: false,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at,
+        revenue: p.total_revenue || 0,
+        subscribers: p.active_users || 0,
+        mrr: p.billing_cycle !== 'one_time' ? Math.round((p.total_revenue || 0) / 12) : 0,
+        churnRate: 0,
+        conversionRate: 0,
+        averageOrderValue: p.price || 0
+      })) as StripeProduct[]
+    }
+    return mockProducts
+  }, [products])
+
+  // Calculate stats from activeProducts (Supabase data with mock fallback)
+  const totalRevenue = activeProducts.reduce((sum, p) => sum + p.revenue, 0)
+  const totalMRR = activeProducts.reduce((sum, p) => sum + p.mrr, 0)
+  const totalSubscribers = activeProducts.reduce((sum, p) => sum + p.subscribers, 0)
+  const activeProductCount = activeProducts.filter(p => p.status === 'active').length
+  const avgConversion = activeProducts.length > 0 ? activeProducts.reduce((sum, p) => sum + p.conversionRate, 0) / activeProducts.length : 0
+  const avgChurn = activeProducts.filter(p => p.mrr > 0).length > 0
+    ? activeProducts.filter(p => p.mrr > 0).reduce((sum, p) => sum + p.churnRate, 0) / activeProducts.filter(p => p.mrr > 0).length
+    : 0
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return activeProducts.filter(product => {
       const matchesStatus = selectedCategory === 'all' || product.status === selectedCategory
       const matchesSearch = !searchQuery ||
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase())
       return matchesStatus && matchesSearch
     })
-  }, [selectedCategory, searchQuery])
+  }, [activeProducts, selectedCategory, searchQuery])
 
   const formatCurrency = (amount: number, currency = 'usd') => {
     return new Intl.NumberFormat('en-US', {
@@ -797,11 +839,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-2xl font-bold">{activeProducts.flatMap(p => p.prices).length}</div>
                       <div className="text-sm text-green-100">Prices</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</div>
+                      <div className="text-2xl font-bold">{activeProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</div>
                       <div className="text-sm text-green-100">Recurring</div>
                     </div>
                     <div className="text-center">
@@ -825,7 +867,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 <Card>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockProducts.flatMap(product =>
+                      {activeProducts.flatMap(product =>
                         product.prices.map(price => ({ ...price, productName: product.name }))
                       ).map((price) => (
                         <div key={price.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
@@ -891,19 +933,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Total Prices</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).length}</span>
+                        <span className="font-semibold">{activeProducts.flatMap(p => p.prices).length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Recurring</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</span>
+                        <span className="font-semibold">{activeProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">One-time</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'one_time').length}</span>
+                        <span className="font-semibold">{activeProducts.flatMap(p => p.prices).filter(p => p.type === 'one_time').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Active</span>
-                        <span className="font-semibold text-green-600">{mockProducts.flatMap(p => p.prices).filter(p => p.active).length}</span>
+                        <span className="font-semibold text-green-600">{activeProducts.flatMap(p => p.prices).filter(p => p.active).length}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1192,8 +1234,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockProducts.sort((a, b) => b.revenue - a.revenue).map((product, idx) => {
-                        const maxRevenue = Math.max(...mockProducts.map(p => p.revenue))
+                      {activeProducts.sort((a, b) => b.revenue - a.revenue).map((product, idx) => {
+                        const maxRevenue = Math.max(...activeProducts.map(p => p.revenue))
                         const percent = (product.revenue / maxRevenue) * 100
                         return (
                           <div key={product.id} className="space-y-2">
@@ -1222,7 +1264,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockProducts.filter(p => p.mrr > 0).map((product) => (
+                        {activeProducts.filter(p => p.mrr > 0).map((product) => (
                           <div key={product.id} className="flex items-center justify-between">
                             <span className="text-sm">{product.name}</span>
                             <span className="font-semibold">{formatCurrency(product.mrr * 100)}</span>
@@ -1238,7 +1280,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockProducts.filter(p => p.churnRate > 0).map((product) => (
+                        {activeProducts.filter(p => p.churnRate > 0).map((product) => (
                           <div key={product.id} className="flex items-center justify-between">
                             <span className="text-sm">{product.name}</span>
                             <span className={`font-semibold ${product.churnRate > 3 ? 'text-red-500' : 'text-green-500'}`}>
@@ -1334,7 +1376,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <div className="text-sm text-violet-100">Products</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-3xl font-bold">{activeProducts.flatMap(p => p.prices).length}</div>
                       <div className="text-sm text-violet-100">Prices</div>
                     </div>
                     <div className="text-center">
@@ -2110,7 +2152,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   onChange={(e) => setQuickPricingProduct(e.target.value)}
                 >
                   <option value="">Choose a product...</option>
-                  {mockProducts.map((product) => (
+                  {activeProducts.map((product) => (
                     <option key={product.id} value={product.id}>
                       {product.name} - Current: {formatPrice(product.prices[0]?.unitAmount || 0)}
                     </option>
@@ -2122,7 +2164,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="text-sm font-medium text-blue-700 dark:text-blue-400">Current Pricing</div>
                     <div className="mt-2 space-y-1">
-                      {mockProducts.find(p => p.id === quickPricingProduct)?.prices.map((price) => (
+                      {activeProducts.find(p => p.id === quickPricingProduct)?.prices.map((price) => (
                         <div key={price.id} className="flex items-center justify-between text-sm">
                           <span>{price.nickname}</span>
                           <span className="font-semibold">
@@ -2194,7 +2236,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 className="flex-1 bg-green-600 hover:bg-green-700"
                 disabled={!quickPricingProduct || !quickNewPrice}
                 onClick={() => {
-                  const productName = mockProducts.find(p => p.id === quickPricingProduct)?.name
+                  const productName = activeProducts.find(p => p.id === quickPricingProduct)?.name
                   toast.success("Pricing updated successfully: price of $" + quickNewPrice + " set for " + productName)
                   setShowQuickUpdatePricing(false)
                   setQuickPricingProduct('')
@@ -2247,8 +2289,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Top Performing Products</h4>
                 <div className="space-y-2">
-                  {mockProducts.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((product, idx) => {
-                    const maxRevenue = Math.max(...mockProducts.map(p => p.revenue))
+                  {activeProducts.sort((a, b) => b.revenue - a.revenue).slice(0, 3).map((product, idx) => {
+                    const maxRevenue = Math.max(...activeProducts.map(p => p.revenue))
                     const percent = (product.revenue / maxRevenue) * 100
                     return (
                       <div key={product.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">

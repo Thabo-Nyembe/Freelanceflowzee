@@ -37,6 +37,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+// Supabase hooks for real marketplace data
+import { useMarketplaceApps, useFeaturedApps, type MarketplaceApp } from '@/lib/hooks/use-marketplace'
+
 // Types
 type ProductStatus = 'active' | 'draft' | 'archived' | 'out_of_stock' | 'pending_review'
 type VendorStatus = 'active' | 'pending' | 'suspended' | 'verified' | 'featured'
@@ -406,6 +409,87 @@ export default function MarketplaceClient() {
   const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()
   const { data: dbCoupons, refresh: refreshCoupons } = useCoupons()
 
+  // Supabase hooks for real marketplace data
+  const { apps: dbMarketplaceApps, loading: loadingApps } = useMarketplaceApps({ status: 'published' })
+  const { featuredApps: dbFeaturedApps } = useFeaturedApps()
+
+  // Map database marketplace apps to Product format
+  const activeProducts: Product[] = useMemo(() => {
+    if (dbMarketplaceApps && dbMarketplaceApps.length > 0) {
+      return dbMarketplaceApps.map((app: MarketplaceApp) => {
+        // Create a default vendor object
+        const defaultVendor: Vendor = {
+          id: app.user_id,
+          name: app.developer_name || 'Unknown Developer',
+          description: '',
+          website: app.developer_website || '',
+          email: app.developer_email || '',
+          status: app.developer_verified ? 'verified' : 'active',
+          productCount: 1,
+          totalSales: 0,
+          totalRevenue: 0,
+          rating: app.average_rating,
+          reviewCount: app.total_reviews,
+          isVerified: app.developer_verified,
+          isPartner: false,
+          partnerLevel: undefined,
+          joinedAt: app.created_at,
+          location: '',
+          categories: [app.category]
+        }
+
+        const statusMap: Record<string, ProductStatus> = {
+          'published': 'active',
+          'pending': 'pending_review',
+          'rejected': 'archived',
+          'suspended': 'archived',
+          'archived': 'archived',
+          'approved': 'active'
+        }
+
+        const pricingMap: Record<string, PricingModel> = {
+          'free': 'free',
+          'freemium': 'freemium',
+          'paid': 'one_time',
+          'subscription': 'subscription',
+          'usage_based': 'usage_based'
+        }
+
+        return {
+          id: app.id,
+          name: app.app_name,
+          description: app.description || '',
+          shortDescription: app.short_description || '',
+          vendor: defaultVendor,
+          category: app.category as Category,
+          subcategory: app.subcategory || '',
+          price: app.price || 0,
+          pricingModel: pricingMap[app.pricing_model] || 'free',
+          status: statusMap[app.status] || 'active',
+          images: app.screenshots || [],
+          rating: app.average_rating,
+          reviewCount: app.total_reviews,
+          downloads: app.total_downloads,
+          installs: app.total_installs,
+          activeInstalls: app.total_installs,
+          isFeatured: app.is_featured,
+          isVerified: app.is_verified,
+          isBestseller: app.total_downloads > 1000,
+          isNew: new Date(app.created_at).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
+          tags: app.tags || [],
+          createdAt: app.created_at,
+          updatedAt: app.updated_at,
+          version: app.version || '1.0.0',
+          compatibility: [],
+          features: [],
+          requirements: app.permissions || [],
+          changelog: []
+        } as Product
+      })
+    }
+    return mockProducts
+  }, [dbMarketplaceApps])
+
   // Form state for marketplace coupon
   const [marketplaceCouponForm, setMarketplaceCouponForm] = useState({
     code: '',
@@ -608,8 +692,9 @@ export default function MarketplaceClient() {
     }))
   }
 
+  // Use real products when available, fallback to mock
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return activeProducts.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -617,18 +702,19 @@ export default function MarketplaceClient() {
       const matchesPricing = selectedPricing === 'all' || product.pricingModel === selectedPricing
       return matchesSearch && matchesCategory && matchesPricing && product.status === 'active'
     })
-  }, [searchQuery, selectedCategory, selectedPricing])
+  }, [activeProducts, searchQuery, selectedCategory, selectedPricing])
 
+  // Stats - use real data when available
   const stats = useMemo(() => ({
-    totalProducts: mockProducts.length,
+    totalProducts: activeProducts.length,
     totalVendors: mockVendors.length,
-    totalDownloads: mockProducts.reduce((sum, p) => sum + p.downloads, 0),
-    totalInstalls: mockProducts.reduce((sum, p) => sum + p.activeInstalls, 0),
-    avgRating: (mockProducts.reduce((sum, p) => sum + p.rating, 0) / mockProducts.length).toFixed(1),
+    totalDownloads: activeProducts.reduce((sum, p) => sum + p.downloads, 0),
+    totalInstalls: activeProducts.reduce((sum, p) => sum + p.activeInstalls, 0),
+    avgRating: activeProducts.length > 0 ? (activeProducts.reduce((sum, p) => sum + p.rating, 0) / activeProducts.length).toFixed(1) : '0',
     totalRevenue: mockVendors.reduce((sum, v) => sum + v.totalRevenue, 0),
     totalReviews: mockReviews.length,
     pendingOrders: mockOrders.filter(o => o.status === 'pending' || o.status === 'processing').length
-  }), [])
+  }), [activeProducts])
 
   const statsCards = [
     { label: 'Total Apps', value: stats.totalProducts.toString(), icon: Package, color: 'from-violet-500 to-violet-600', trend: '+12%' },
@@ -815,7 +901,7 @@ export default function MarketplaceClient() {
                 </div>
                 <div className="flex items-center gap-8">
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{mockProducts.length}</div>
+                    <div className="text-3xl font-bold">{activeProducts.length}</div>
                     <p className="text-violet-200 text-sm">Total Apps</p>
                   </div>
                   <div className="text-center">
@@ -865,7 +951,7 @@ export default function MarketplaceClient() {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 overflow-x-auto pb-2">
-                  {mockProducts.slice(0, 5).map((product, idx) => (
+                  {activeProducts.slice(0, 5).map((product, idx) => (
                     <div key={product.id} className="flex-shrink-0 w-48 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg font-bold text-violet-600">#{idx + 1}</span>
@@ -1000,7 +1086,7 @@ export default function MarketplaceClient() {
                     <span className="text-white">4.9 (2,847 reviews)</span>
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-white text-violet-600 hover:bg-violet-50" onClick={() => { setInstallProduct(mockProducts[0]); setShowInstallDialog(true) }}><Download className="h-4 w-4 mr-2" />Install Now</Button>
+                    <Button className="bg-white text-violet-600 hover:bg-violet-50" onClick={() => { setInstallProduct(activeProducts[0]); setShowInstallDialog(true) }}><Download className="h-4 w-4 mr-2" />Install Now</Button>
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => setShowLearnMoreDialog(true)}>Learn More</Button>
                   </div>
                 </div>
@@ -1029,7 +1115,7 @@ export default function MarketplaceClient() {
 
             {/* Featured Apps Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockProducts.filter(p => p.isFeatured).map(product => (
+              {activeProducts.filter(p => p.isFeatured).map(product => (
                 <Card key={product.id} className="border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow">
                   <CardContent className="p-0">
                     <div className="bg-gradient-to-br from-violet-500 to-purple-600 h-40 flex items-center justify-center"><Package className="h-20 w-20 text-white/30" /></div>
@@ -1086,7 +1172,7 @@ export default function MarketplaceClient() {
                     </div>
                     <div className="flex gap-3">
                       <Button onClick={() => setShowVisitStoreDialog(true)}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
-                      <Button variant="outline" onClick={() => { setContactProduct(mockProducts[0]); setShowContactDialog(true) }}><Mail className="h-4 w-4 mr-2" />Contact</Button>
+                      <Button variant="outline" onClick={() => { setContactProduct(activeProducts[0]); setShowContactDialog(true) }}><Mail className="h-4 w-4 mr-2" />Contact</Button>
                       <Button variant="outline" onClick={() => setShowFollowDialog(true)}><Heart className="h-4 w-4 mr-2" />Follow</Button>
                     </div>
                   </div>
@@ -1711,7 +1797,7 @@ export default function MarketplaceClient() {
                 <CardHeader><CardTitle>Top Performing Apps</CardTitle></CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockProducts.slice(0, 5).map((product, i) => (
+                    {activeProducts.slice(0, 5).map((product, i) => (
                       <div key={product.id} className="flex items-center gap-3">
                         <span className="w-6 text-sm font-medium text-gray-500">{i + 1}</span>
                         <div className="flex-1"><p className="font-medium">{product.name}</p><p className="text-xs text-gray-500">{product.vendor.name}</p></div>
@@ -2196,7 +2282,7 @@ export default function MarketplaceClient() {
               <div><Label>Description</Label><Textarea placeholder="Describe what's included..." className="mt-1" /></div>
               <div><Label>Select Products</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mt-2">
-                  {mockProducts.slice(0, 4).map(p => <div key={p.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm">{p.name}</span></div>)}
+                  {activeProducts.slice(0, 4).map(p => <div key={p.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm">{p.name}</span></div>)}
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
@@ -2400,7 +2486,7 @@ export default function MarketplaceClient() {
                   <p className="text-sm text-gray-400">Browse apps and click the heart icon to save them here</p>
                 </div>
               ) : (
-                mockProducts.filter(p => wishlist.includes(p.id)).map(product => (
+                activeProducts.filter(p => wishlist.includes(p.id)).map(product => (
                   <div key={product.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="w-12 h-12 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
                       <Package className="w-6 h-6 text-violet-300" />
@@ -2506,7 +2592,7 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLearnMoreDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowLearnMoreDialog(false); setInstallProduct(mockProducts[0]); setShowInstallDialog(true) }}>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowLearnMoreDialog(false); setInstallProduct(activeProducts[0]); setShowInstallDialog(true) }}>
                 <Download className="h-4 w-4 mr-2" />Start Free Trial
               </Button>
             </DialogFooter>
@@ -2840,7 +2926,7 @@ export default function MarketplaceClient() {
                   generatedAt: new Date().toISOString(),
                   summary: { totalOrders: mockOrders.length, totalRevenue: mockOrders.reduce((sum, o) => sum + o.amount, 0), avgOrderValue: mockOrders.reduce((sum, o) => sum + o.amount, 0) / mockOrders.length },
                   orders: mockOrders,
-                  products: mockProducts.slice(0, 10)
+                  products: activeProducts.slice(0, 10)
                 }
                 const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
                 const url = URL.createObjectURL(blob)
@@ -2901,7 +2987,7 @@ export default function MarketplaceClient() {
                   <SelectTrigger className="mt-1"><SelectValue placeholder="All products" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Products</SelectItem>
-                    {mockProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    {activeProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -3304,7 +3390,7 @@ export default function MarketplaceClient() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {mockProducts.filter(p => p.vendor.id === selectedVendorForStore.id || mockVendors.indexOf(selectedVendorForStore) < 2).slice(0, 4).map(product => (
+                  {activeProducts.filter(p => p.vendor.id === selectedVendorForStore.id || mockVendors.indexOf(selectedVendorForStore) < 2).slice(0, 4).map(product => (
                     <div key={product.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                       <div className="w-full h-24 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center mb-3">
                         <Package className="h-8 w-8 text-violet-300" />

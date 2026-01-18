@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useBuilds, useBuildPipelines } from '@/lib/hooks/use-builds'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -777,6 +778,23 @@ const mockBuildsActivities = [
 // ============================================================================
 
 export default function BuildsClient() {
+  // Supabase hooks for real data
+  const { builds: dbBuilds, loading: buildsLoading, refetch: refetchBuilds } = useBuilds()
+  const { pipelines: dbPipelines, loading: pipelinesLoading } = useBuildPipelines()
+
+  // Use real data with mock fallback
+  const activeBuilds = dbBuilds && dbBuilds.length > 0 ? dbBuilds.map(b => ({
+    ...b,
+    id: b.id,
+    name: b.commit_message || `Build #${b.build_number}`,
+    status: b.status as BuildStatus,
+    total_duration_seconds: b.duration_seconds,
+    coverage_percentage: b.coverage_percentage,
+    repository: 'main',
+    commit_hash: b.commit_hash || '',
+    author: { name: b.author_name || 'Unknown', avatar: b.author_name?.charAt(0) || 'U' }
+  })) : mockBuilds
+
   const [activeTab, setActiveTab] = useState('builds')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BuildStatus | 'all'>('all')
@@ -862,27 +880,28 @@ export default function BuildsClient() {
     { id: '3', label: 'Logs', icon: 'file-text', action: () => setShowLogsDialog(true), variant: 'outline' as const },
   ]
 
-  // Filtered data
+  // Filtered data - uses real data with mock fallback
   const filteredBuilds = useMemo(() => {
-    return mockBuilds.filter(build => {
+    return activeBuilds.filter((build: any) => {
       const matchesSearch =
-        build.workflow_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.commit_message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.author_name.toLowerCase().includes(searchQuery.toLowerCase())
+        (build.workflow_name || build.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (build.branch || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (build.commit_message || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (build.author_name || build.author?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || build.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, activeBuilds])
 
-  // Stats calculations
+  // Stats calculations - uses real data with mock fallback
   const stats = useMemo(() => {
-    const total = mockBuilds.length
-    const success = mockBuilds.filter(b => b.status === 'success').length
-    const failed = mockBuilds.filter(b => b.status === 'failed').length
-    const running = mockBuilds.filter(b => b.status === 'running').length
-    const avgDuration = mockBuilds.reduce((acc, b) => acc + b.total_duration_seconds, 0) / total
-    const avgCoverage = mockBuilds.filter(b => b.coverage_percentage > 0).reduce((acc, b) => acc + b.coverage_percentage, 0) / mockBuilds.filter(b => b.coverage_percentage > 0).length
+    const total = activeBuilds.length
+    const success = activeBuilds.filter((b: any) => b.status === 'success').length
+    const failed = activeBuilds.filter((b: any) => b.status === 'failed').length
+    const running = activeBuilds.filter((b: any) => b.status === 'running').length
+    const avgDuration = activeBuilds.reduce((acc: number, b: any) => acc + (b.total_duration_seconds || b.duration_seconds || 0), 0) / (total || 1)
+    const buildsWithCoverage = activeBuilds.filter((b: any) => (b.coverage_percentage || 0) > 0)
+    const avgCoverage = buildsWithCoverage.length > 0 ? buildsWithCoverage.reduce((acc: number, b: any) => acc + (b.coverage_percentage || 0), 0) / buildsWithCoverage.length : 0
     const totalArtifacts = mockArtifacts.length
     const activeRunners = mockRunners.filter(r => r.status !== 'offline').length
 
@@ -1017,11 +1036,11 @@ export default function BuildsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBuilds.length}</p>
+                    <p className="text-3xl font-bold">{activeBuilds.length}</p>
                     <p className="text-emerald-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBuilds.filter(b => b.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{activeBuilds.filter((b: any) => b.status === 'success').length}</p>
                     <p className="text-emerald-200 text-sm">Passed</p>
                   </div>
                   <div className="text-center">
@@ -2068,7 +2087,7 @@ export default function BuildsClient() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Select Build</label>
                 <select className="w-full p-2 border rounded-lg bg-background">
-                  {mockBuilds.slice(0, 5).map(build => (
+                  {activeBuilds.slice(0, 5).map((build: any) => (
                     <option key={build.id} value={build.id}>
                       #{build.build_number} - {build.workflow_name} ({build.status})
                     </option>
@@ -2115,7 +2134,7 @@ export default function BuildsClient() {
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-3">
                 <select className="flex-1 p-2 border rounded-lg bg-background text-sm">
-                  {mockBuilds.slice(0, 5).map(build => (
+                  {activeBuilds.slice(0, 5).map((build: any) => (
                     <option key={build.id} value={build.id}>
                       #{build.build_number} - {build.workflow_name}
                     </option>
@@ -2799,7 +2818,7 @@ export default function BuildsClient() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Build</label>
                 <select className="w-full p-2 border rounded-lg bg-background">
-                  {mockBuilds.filter(b => b.status === 'success').slice(0, 5).map(build => (
+                  {activeBuilds.filter((b: any) => b.status === 'success').slice(0, 5).map((build: any) => (
                     <option key={build.id} value={build.id}>#{build.build_number} - {build.workflow_name}</option>
                   ))}
                 </select>
@@ -3013,7 +3032,7 @@ export default function BuildsClient() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-4 max-h-[400px] overflow-auto">
-              {mockBuilds.filter(b => b.status === 'success').slice(0, 5).map((build, i) => (
+              {activeBuilds.filter((b: any) => b.status === 'success').slice(0, 5).map((build: any, i: number) => (
                 <div key={build.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="flex items-center gap-2">

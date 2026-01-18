@@ -472,12 +472,17 @@ export default function SprintsClient() {
     isCompletingTask,
   } = useSprintMutations()
 
-  // Calculate stats - combine mock data with real DB data
+  // Calculate stats - use real DB data when available, fallback to mock
   const stats = useMemo(() => {
     // Use real DB stats if available, otherwise fall back to mock
     const useDbData = dbSprints.length > 0
 
     if (useDbData) {
+      // Calculate story points and blocked tasks from dbSprints
+      const totalStoryPoints = dbSprints.reduce((sum: number, s: any) => sum + (s.committed || 0), 0)
+      const completedPoints = dbSprints.reduce((sum: number, s: any) => sum + (s.burned || 0), 0)
+      const blockedTasks = dbSprints.reduce((sum: number, s: any) => sum + (s.blocked_tasks || 0), 0)
+
       return {
         total: dbStats.total,
         active: dbStats.active,
@@ -485,11 +490,11 @@ export default function SprintsClient() {
         completed: dbStats.completed,
         avgVelocity: Math.round(dbStats.avgVelocity),
         completionRate: Math.round(dbStats.completionRate),
-        totalStoryPoints: mockSprints.reduce((sum, s) => sum + s.total_story_points, 0),
-        completedPoints: mockSprints.reduce((sum, s) => sum + s.completed_story_points, 0),
+        totalStoryPoints,
+        completedPoints,
         totalTasks: dbStats.totalTasks,
         completedTasks: dbStats.completedTasks,
-        blockedTasks: mockSprints.reduce((sum, s) => sum + s.blocked_tasks, 0),
+        blockedTasks,
         backlogItems: backlogTasks.length,
       }
     }
@@ -512,21 +517,57 @@ export default function SprintsClient() {
       totalStoryPoints, completedPoints, totalTasks, completedTasks, blockedTasks,
       backlogItems: backlogTasks.length,
     }
-  }, [dbSprints, dbStats])
+  }, [dbSprints, dbStats, backlogTasks.length])
 
-  // Filter sprints
+  // Map dbSprints to Sprint type for display, with mock fallback
+  const activeSprints: Sprint[] = useMemo(() => {
+    if (dbSprints && dbSprints.length > 0) {
+      return dbSprints.map((s: any) => ({
+        id: s.id,
+        key: s.sprint_code || `SPR-${s.id.substring(0, 4)}`,
+        name: s.name || 'Untitled Sprint',
+        goal: s.goal || '',
+        status: s.status || 'planning',
+        start_date: s.start_date,
+        end_date: s.end_date,
+        duration_days: s.start_date && s.end_date
+          ? Math.ceil((new Date(s.end_date).getTime() - new Date(s.start_date).getTime()) / (1000 * 60 * 60 * 24))
+          : 14,
+        days_remaining: s.days_remaining || 0,
+        team_id: 't1',
+        team_name: s.team_name || 'Team',
+        scrum_master: mockTeamMembers[0],
+        product_owner: mockTeamMembers[1],
+        daily_standup_time: '10:00 AM',
+        total_tasks: s.total_tasks || 0,
+        completed_tasks: s.completed_tasks || 0,
+        in_progress_tasks: s.in_progress_tasks || 0,
+        blocked_tasks: s.blocked_tasks || 0,
+        total_story_points: s.committed || 0,
+        completed_story_points: s.burned || 0,
+        completion_rate: s.total_tasks > 0 ? Math.round((s.completed_tasks / s.total_tasks) * 100) : 0,
+        velocity: s.velocity || 0,
+        velocity_trend: 'stable' as const,
+        tasks: [],
+        retrospective: s.retrospective ? { went_well: [s.retrospective], improvements: [], action_items: [] } : { went_well: [], improvements: [], action_items: [] }
+      })) as Sprint[]
+    }
+    return mockSprints
+  }, [dbSprints])
+
+  // Filter sprints from activeSprints (Supabase data with mock fallback)
   const filteredSprints = useMemo(() => {
-    return mockSprints.filter(sprint => {
+    return activeSprints.filter(sprint => {
       const matchesSearch = searchQuery === '' ||
         sprint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         sprint.key.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || sprint.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [activeSprints, searchQuery, statusFilter])
 
-  // Get active sprint
-  const activeSprint = mockSprints.find(s => s.status === 'active')
+  // Get active sprint from activeSprints
+  const activeSprint = activeSprints.find(s => s.status === 'active')
 
   // Group tasks by status for board view
   const tasksByStatus = useMemo(() => {
@@ -596,10 +637,12 @@ export default function SprintsClient() {
       return
     }
 
-    // Use first planning sprint or active sprint if no sprint selected
+    // Use first planning sprint or active sprint if no sprint selected (prefer db data)
     const targetSprintId = selectedSprintForStory ||
-      mockSprints.find(s => s.status === 'planning')?.id ||
-      mockSprints.find(s => s.status === 'active')?.id
+      dbSprints.find(s => s.status === 'planning')?.id ||
+      dbSprints.find(s => s.status === 'active')?.id ||
+      activeSprints.find(s => s.status === 'planning')?.id ||
+      activeSprints.find(s => s.status === 'active')?.id
 
     if (!targetSprintId) {
       toast.error('No Sprint Available')
@@ -637,8 +680,8 @@ export default function SprintsClient() {
       return
     }
 
-    const sprint = mockSprints.find(s => s.id === sprintToStart) ||
-                   dbSprints.find(s => s.id === sprintToStart)
+    const sprint = dbSprints.find(s => s.id === sprintToStart) ||
+                   activeSprints.find(s => s.id === sprintToStart)
     const sprintName = sprint?.name || 'Sprint'
 
     try {
@@ -1485,12 +1528,7 @@ export default function SprintsClient() {
                             <SelectValue placeholder="Add to Sprint" />
                           </SelectTrigger>
                           <SelectContent>
-                            {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
-                              <SelectItem key={sprint.id} value={sprint.id}>
-                                {sprint.name}
-                              </SelectItem>
-                            ))}
-                            {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                            {activeSprints.filter(s => s.status !== 'completed').map((sprint) => (
                               <SelectItem key={sprint.id} value={sprint.id}>
                                 {sprint.name}
                               </SelectItem>
@@ -2675,12 +2713,7 @@ export default function SprintsClient() {
                     <SelectValue placeholder="Select a sprint" />
                   </SelectTrigger>
                   <SelectContent>
-                    {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
-                      <SelectItem key={sprint.id} value={sprint.id}>
-                        {sprint.name}
-                      </SelectItem>
-                    ))}
-                    {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                    {activeSprints.filter(s => s.status !== 'completed').map((sprint) => (
                       <SelectItem key={sprint.id} value={sprint.id}>
                         {sprint.name}
                       </SelectItem>
@@ -2840,18 +2873,11 @@ export default function SprintsClient() {
                     <SelectValue placeholder="Select sprint..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockSprints
+                    {activeSprints
                       .filter(s => s.status === 'planning' || s.status === 'active')
                       .map(sprint => (
                         <SelectItem key={sprint.id} value={sprint.id}>
                           {sprint.name} ({sprint.status})
-                        </SelectItem>
-                      ))}
-                    {dbSprints
-                      .filter(s => s.status === 'planning' || s.status === 'active')
-                      .map(sprint => (
-                        <SelectItem key={sprint.id} value={sprint.id}>
-                          {sprint.name} ({sprint.status}) - DB
                         </SelectItem>
                       ))}
                   </SelectContent>
@@ -2961,18 +2987,11 @@ export default function SprintsClient() {
                     <SelectValue placeholder="Choose a sprint..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockSprints
+                    {activeSprints
                       .filter(s => s.status === 'planning')
                       .map(sprint => (
                         <SelectItem key={sprint.id} value={sprint.id}>
                           {sprint.name} ({sprint.key})
-                        </SelectItem>
-                      ))}
-                    {dbSprints
-                      .filter(s => s.status === 'planning')
-                      .map(sprint => (
-                        <SelectItem key={sprint.id} value={sprint.id}>
-                          {sprint.name} ({sprint.sprint_code}) - DB
                         </SelectItem>
                       ))}
                   </SelectContent>

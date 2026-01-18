@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -43,6 +43,9 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+
+// Supabase Hooks
+import { useProjects, Project as SupabaseProject } from '@/lib/hooks/use-projects'
 
 // CLIENT ZONE UTILITIES
 import {
@@ -96,11 +99,47 @@ export default function ProjectsClient() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
+  // Supabase hook for real data
+  const {
+    projects: dbProjects,
+    stats: projectStats,
+    isLoading: projectsLoading,
+    error: projectsError,
+    fetchProjects: refetchProjects,
+    createProject: createDbProject,
+    updateProject: updateDbProject,
+    archiveProject: archiveDbProject,
+    deleteProject: deleteDbProject
+  } = useProjects()
+
   // STATE MANAGEMENT
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({})
+
+  // Map Supabase projects to local format (with mock fallback)
+  const activeProjects = useMemo(() => {
+    if (dbProjects && dbProjects.length > 0) {
+      return dbProjects.map((p: SupabaseProject) => ({
+        id: parseInt(p.id) || 0,
+        name: p.name || 'Untitled Project',
+        description: p.description || '',
+        client: 'Client', // Default since not in hook
+        startDate: p.start_date || new Date().toISOString(),
+        dueDate: p.end_date || new Date().toISOString(),
+        status: p.status || 'planning',
+        progress: p.progress || 0,
+        budget: p.budget || 0,
+        spent: p.spent || 0,
+        milestones: [],
+        deliverables: [],
+        team: p.team_members || [],
+        tags: p.tags || []
+      })) as Project[]
+    }
+    return projects
+  }, [dbProjects, projects])
 
   // V2 Enhanced State
   const [searchQuery, setSearchQuery] = useState('')
@@ -128,29 +167,54 @@ export default function ProjectsClient() {
   const [sharePermission, setSharePermission] = useState<string>('view')
 
   // ============================================================================
-  // DATA FETCHING
+  // DATA FETCHING - Synced with Supabase hooks
   // ============================================================================
 
   useEffect(() => {
-    fetchProjects()
-  }, [])
+    // Fetch projects from Supabase on mount
+    refetchProjects()
+  }, [refetchProjects])
 
-  const fetchProjects = async () => {
+  // Sync loading state with Supabase hook
+  useEffect(() => {
+    if (!projectsLoading) {
+      setIsLoading(false)
+      if (activeProjects.length > 0) {
+        setProjects(activeProjects)
+      }
+    }
+  }, [projectsLoading, activeProjects])
+
+  // Legacy fetch function for backward compatibility - now uses Supabase
+  const fetchProjects = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
-      const response = await fetch('/api/client-zone/projects', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
 
-      if (!response.ok) throw new Error('Failed to fetch projects: ' + response.statusText)
+      // Use Supabase hook to refresh data
+      await refetchProjects()
 
-      const data = await response.json()
-      if (data.success) {
-        setProjects(data.projects || [])
-      } else {
-        throw new Error(data.error || 'Failed to load projects')
+      // If no data from Supabase, fall back to API
+      if (dbProjects.length === 0) {
+        const response = await fetch('/api/client-zone/projects', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) throw new Error('Failed to fetch projects: ' + response.statusText)
+
+        const data = await response.json()
+          if (data.success) {
+            setProjects(data.projects || [])
+          } else {
+            throw new Error(data.error || 'Failed to load projects')
+          }
+        }
+      }
+
+      // Update local state with Supabase data
+      if (activeProjects.length > 0) {
+        setProjects(activeProjects)
       }
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to load projects'
@@ -160,7 +224,7 @@ export default function ProjectsClient() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [refetchProjects, dbProjects.length, activeProjects])
 
   // ============================================================================
   // FILTERED & COMPUTED DATA
@@ -179,15 +243,31 @@ export default function ProjectsClient() {
     })
   }, [projects, searchQuery, statusFilter, activeTab])
 
-  const projectStats = useMemo(() => ({
-    total: projects.length,
-    active: projects.filter(p => ['in-progress', 'review'].includes(p.status)).length,
-    completed: projects.filter(p => p.status === 'completed').length,
-    pending: projects.filter(p => p.status === 'pending').length,
-    totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
-    totalSpent: projects.reduce((sum, p) => sum + (p.spent || 0), 0),
-    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0,
-  }), [projects])
+  // Use Supabase stats if available, fallback to computed local stats
+  const computedStats = useMemo(() => {
+    // Prefer Supabase hook stats if they have data
+    if (projectStats && projectStats.total > 0) {
+      return {
+        total: projectStats.total,
+        active: projectStats.active,
+        completed: projectStats.completed,
+        pending: projectStats.onHold || 0,
+        totalBudget: projectStats.totalBudget,
+        totalSpent: projectStats.totalSpent,
+        avgProgress: projectStats.avgProgress || 0,
+      }
+    }
+    // Fallback to local computation
+    return {
+      total: projects.length,
+      active: projects.filter(p => ['in-progress', 'review', 'active'].includes(p.status)).length,
+      completed: projects.filter(p => p.status === 'completed').length,
+      pending: projects.filter(p => ['pending', 'on_hold'].includes(p.status)).length,
+      totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
+      totalSpent: projects.reduce((sum, p) => sum + (p.spent || 0), 0),
+      avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0,
+    }
+  }, [projects, projectStats])
 
   // ============================================================================
   // HANDLERS
@@ -702,7 +782,7 @@ export default function ProjectsClient() {
                   <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{projectStats.total}</p>
+                  <p className="text-2xl font-bold">{computedStats.total}</p>
                   <p className="text-xs text-gray-500">Total</p>
                 </div>
               </div>
@@ -715,7 +795,7 @@ export default function ProjectsClient() {
                   <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{projectStats.active}</p>
+                  <p className="text-2xl font-bold">{computedStats.active}</p>
                   <p className="text-xs text-gray-500">Active</p>
                 </div>
               </div>
@@ -728,7 +808,7 @@ export default function ProjectsClient() {
                   <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{projectStats.completed}</p>
+                  <p className="text-2xl font-bold">{computedStats.completed}</p>
                   <p className="text-xs text-gray-500">Completed</p>
                 </div>
               </div>
@@ -741,7 +821,7 @@ export default function ProjectsClient() {
                   <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{projectStats.avgProgress}%</p>
+                  <p className="text-2xl font-bold">{computedStats.avgProgress}%</p>
                   <p className="text-xs text-gray-500">Avg Progress</p>
                 </div>
               </div>
@@ -754,7 +834,7 @@ export default function ProjectsClient() {
                   <Target className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{formatCurrency(projectStats.totalBudget)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(computedStats.totalBudget)}</p>
                   <p className="text-xs text-gray-500">Total Budget</p>
                 </div>
               </div>
@@ -767,7 +847,7 @@ export default function ProjectsClient() {
                   <BarChart3 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{formatCurrency(projectStats.totalSpent)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(computedStats.totalSpent)}</p>
                   <p className="text-xs text-gray-500">Spent</p>
                 </div>
               </div>

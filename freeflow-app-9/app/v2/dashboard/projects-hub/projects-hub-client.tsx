@@ -785,7 +785,7 @@ export default function ProjectsHubClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{allProjects.length}</p>
                     <p className="text-violet-200 text-sm">Projects</p>
                   </div>
                 </div>
@@ -1016,8 +1016,8 @@ export default function ProjectsHubClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {statusColumns.map(col => {
-                      const count = mockProjects.filter(p => p.status === col.id).length
-                      const percentage = (count / mockProjects.length) * 100
+                      const count = allProjects.filter(p => p.status === col.id).length
+                      const percentage = allProjects.length > 0 ? (count / allProjects.length) * 100 : 0
                       return (
                         <div key={col.id}>
                           <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${col.color}`} /><span className="text-sm">{col.label}</span></div><span className="text-sm font-medium">{count}</span></div>
@@ -2002,7 +2002,7 @@ export default function ProjectsHubClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockProjects.length}</div>
+                            <div className="text-2xl font-bold">{allProjects.length}</div>
                             <div className="text-sm text-gray-500">Projects</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">

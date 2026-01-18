@@ -725,18 +725,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const stats = useMemo(() => {
     const allClients = [...filteredClients]
     const customers = allClients.filter(c => c.status === 'customer')
-    const dbClientCount = dbClients.length
+    // Use combined filteredClients data for all stats
+    const allDealsFromClients = allClients.flatMap(c => c.deals || [])
+    const openDealsList = allDealsFromClients.filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost')
     return {
-      totalClients: mockClients.length + dbClientCount,
+      totalClients: allClients.length,
       totalCustomers: customers.length,
       totalRevenue: allClients.reduce((sum, c) => sum + (c.revenue || 0), 0),
       totalLTV: allClients.reduce((sum, c) => sum + (c.lifetime_value || 0), 0),
       avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.health_score || 0), 0) / customers.length : 0,
-      pipelineValue: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').reduce((sum, d) => sum + (d.value * d.probability / 100), 0),
-      openDeals: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').length,
+      pipelineValue: openDealsList.reduce((sum, d) => sum + ((d.value || 0) * (d.probability || 0) / 100), 0),
+      openDeals: openDealsList.length,
       pendingTasks: mockTasks.filter(t => !t.completed).length
     }
-  }, [filteredClients, dbClients])
+  }, [filteredClients])
 
   // Pipeline stages for kanban
   const pipelineStages: { stage: DealStage; label: string; color: string }[] = [
@@ -747,7 +749,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     { stage: 'closed_won', label: 'Won', color: 'green' },
   ]
 
-  const allDeals = mockClients.flatMap(c => c.deals.map(d => ({ ...d, clientName: c.name, clientId: c.id })))
+  // Use filteredClients (combined db + mock) for deals aggregation
+  const allDeals = useMemo(() =>
+    filteredClients.flatMap(c => (c.deals || []).map(d => ({ ...d, clientName: c.name, clientId: c.id })))
+  , [filteredClients])
 
   // Handlers
   const handleExportClients = () => {
@@ -776,7 +781,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     toast.success('Export completed - clients exported to CSV')
   }
 
-  const handleCreateDeal = (client: typeof mockClients[0]) => {
+  const handleCreateDeal = (client: Client) => {
     setSelectedClient(client)
     setDealForm({
       title: `Deal with ${client.company}`,
@@ -819,7 +824,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  const handleSendMessage = (client: typeof mockClients[0]) => {
+  const handleSendMessage = (client: Client) => {
     // Open email client with pre-filled recipient
     if (client.primaryContact.email) {
       window.open(`mailto:${client.primaryContact.email}?subject=Hello from FreeFlow`)
@@ -829,7 +834,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  const handleScheduleMeeting = (client: typeof mockClients[0]) => {
+  const handleScheduleMeeting = (client: Client) => {
     setSelectedClient(client)
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -890,7 +895,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
-  const handleCallClient = (client: typeof mockClients[0]) => {
+  const handleCallClient = (client: Client) => {
     if (client.primaryContact.phone) {
       window.open(`tel:${client.primaryContact.phone}`)
       toast.success('Initiating call')
@@ -1282,7 +1287,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-4">
                     {mockActivities.map(activity => {
-                      const client = mockClients.find(c => c.id === activity.clientId)
+                      const client = filteredClients.find(c => c.id === activity.clientId)
                       return (
                         <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -1339,7 +1344,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {mockTasks.filter(t => !t.completed).map(task => {
-                const client = mockClients.find(c => c.id === task.clientId)
+                const client = filteredClients.find(c => c.id === task.clientId)
                 const isOverdue = new Date(task.dueDate) < new Date()
                 return (
                   <Card key={task.id} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
@@ -1393,7 +1398,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {['platinum', 'gold', 'silver', 'bronze'].map(tier => {
-                      const tierClients = mockClients.filter(c => c.tier === tier as any)
+                      const tierClients = filteredClients.filter(c => c.tier === tier as any)
                       const tierRevenue = tierClients.reduce((sum, c) => sum + c.revenue, 0)
                       return (
                         <div key={tier} className="space-y-1">
@@ -1416,7 +1421,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <CardContent>
                   <div className="space-y-3">
                     {(['customer', 'opportunity', 'prospect', 'lead', 'churned'] as const).map(status => {
-                      const count = mockClients.filter(c => c.status === status).length
+                      const count = filteredClients.filter(c => c.status === status).length
                       return (
                         <div key={status} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -1436,9 +1441,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {Array.from(new Set(mockClients.map(c => c.industry))).map(industry => {
-                      const count = mockClients.filter(c => c.industry === industry).length
-                      const revenue = mockClients.filter(c => c.industry === industry).reduce((sum, c) => sum + c.revenue, 0)
+                    {Array.from(new Set(filteredClients.map(c => c.industry))).map(industry => {
+                      const count = filteredClients.filter(c => c.industry === industry).length
+                      const revenue = filteredClients.filter(c => c.industry === industry).reduce((sum, c) => sum + c.revenue, 0)
                       return (
                         <div key={industry} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div>

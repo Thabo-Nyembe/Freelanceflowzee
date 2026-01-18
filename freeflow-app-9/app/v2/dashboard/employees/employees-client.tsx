@@ -354,6 +354,34 @@ export default function EmployeesClient() {
   const { mutate: updateEmployee, loading: updating } = useUpdateEmployee()
   const { mutate: deleteEmployee, loading: deleting } = useDeleteEmployee()
 
+  // Map database employees to component format with mock fallback
+  const activeEmployees: Employee[] = useMemo(() => {
+    if (dbEmployees && dbEmployees.length > 0) {
+      return dbEmployees.map((emp: DBEmployee) => ({
+        id: emp.id,
+        name: emp.employee_name || emp.email?.split('@')[0] || 'Unknown',
+        email: emp.email || '',
+        phone: emp.phone || undefined,
+        position: emp.position || emp.job_title || 'Team Member',
+        department: emp.department || 'General',
+        level: 'IC',
+        manager: undefined,
+        managerId: undefined,
+        status: (emp.status === 'active' ? 'active' : emp.status === 'on_leave' ? 'on_leave' : emp.status === 'onboarding' ? 'onboarding' : 'active') as EmployeeStatus,
+        hireDate: emp.start_date || emp.created_at || new Date().toISOString(),
+        location: 'Remote',
+        avatar: emp.avatar_url || undefined,
+        salary: emp.salary || 75000,
+        equity: emp.equity || 0,
+        performanceScore: emp.performance_score || 85,
+        projectsCount: emp.projects_count || 3,
+        directReports: emp.direct_reports || 0,
+        skills: emp.skills || ['Communication', 'Teamwork']
+      })) as Employee[]
+    }
+    return mockEmployees
+  }, [dbEmployees])
+
   // Edit dialog state
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -592,7 +620,7 @@ export default function EmployeesClient() {
     try {
       // Create CSV data from employees
       const headers = ['Name', 'Email', 'Department', 'Position', 'Status', 'Hire Date']
-      const csvData = mockEmployees.map(emp =>
+      const csvData = activeEmployees.map(emp =>
         [emp.name, emp.email, emp.department, emp.position, emp.status, emp.hireDate].join(',')
       )
       const csvContent = [headers.join(','), ...csvData].join('\n')
@@ -646,7 +674,7 @@ export default function EmployeesClient() {
     toast.loading('Generating compensation report...', { id: 'report-gen' })
     try {
       // Generate compensation report data
-      const reportData = mockEmployees.map(emp => ({
+      const reportData = activeEmployees.map(emp => ({
         name: emp.name,
         department: emp.department,
         position: emp.position,
@@ -757,7 +785,7 @@ export default function EmployeesClient() {
     toast.loading('Exporting all HR data...', { id: 'full-export' })
     try {
       const fullExport = {
-        employees: mockEmployees,
+        employees: activeEmployees,
         documents: mockDocuments,
         reviews: mockReviews,
         timeOffRequests: mockTimeOffRequests,
@@ -809,7 +837,7 @@ export default function EmployeesClient() {
       const complianceReport = {
         type: 'GDPR Compliance',
         generatedAt: new Date().toISOString(),
-        employeeCount: mockEmployees.length,
+        employeeCount: activeEmployees.length,
         documentsAudited: mockDocuments.length,
         complianceStatus: 'Compliant'
       }
@@ -982,25 +1010,30 @@ export default function EmployeesClient() {
   }
 
   const filteredEmployees = useMemo(() => {
-    return mockEmployees.filter(emp => {
+    return activeEmployees.filter(emp => {
       const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            emp.email.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesDept = departmentFilter === 'all' || emp.department.toLowerCase() === departmentFilter.toLowerCase()
       return matchesSearch && matchesDept
     })
-  }, [searchQuery, departmentFilter])
+  }, [searchQuery, departmentFilter, activeEmployees])
 
-  const stats = useMemo(() => ({
-    total: mockEmployees.length,
-    active: mockEmployees.filter(e => e.status === 'active').length,
-    onboarding: mockEmployees.filter(e => e.status === 'onboarding').length,
-    avgPerformance: (mockEmployees.filter(e => e.performanceScore > 0).reduce((sum, e) => sum + e.performanceScore, 0) / mockEmployees.filter(e => e.performanceScore > 0).length).toFixed(0),
-    pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
-    pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
-    totalPayroll: mockEmployees.reduce((sum, e) => sum + e.salary, 0),
-    avgTenure: '2.3'
-  }), [])
+  const stats = useMemo(() => {
+    const withPerformance = activeEmployees.filter(e => e.performanceScore > 0)
+    return {
+      total: activeEmployees.length,
+      active: activeEmployees.filter(e => e.status === 'active').length,
+      onboarding: activeEmployees.filter(e => e.status === 'onboarding').length,
+      avgPerformance: withPerformance.length > 0
+        ? (withPerformance.reduce((sum, e) => sum + e.performanceScore, 0) / withPerformance.length).toFixed(0)
+        : '0',
+      pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
+      pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
+      totalPayroll: activeEmployees.reduce((sum, e) => sum + e.salary, 0),
+      avgTenure: '2.3'
+    }
+  }, [activeEmployees])
 
   const statsCards = [
     { label: 'Total Employees', value: stats.total.toString(), icon: Users, color: 'from-blue-500 to-blue-600', trend: '+3' },
@@ -1136,7 +1169,7 @@ export default function EmployeesClient() {
                     <p className="text-blue-200 text-sm">Employees</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEmployees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{activeEmployees.filter(e => e.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1526,11 +1559,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">${(activeEmployees.reduce((sum, e) => sum + e.salary, 0) / 1000000).toFixed(1)}M</p>
                     <p className="text-purple-200 text-sm">Total Payroll</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p>
+                    <p className="text-3xl font-bold">${activeEmployees.length > 0 ? (activeEmployees.reduce((sum, e) => sum + e.salary, 0) / activeEmployees.length / 1000).toFixed(0) : 0}K</p>
                     <p className="text-purple-200 text-sm">Avg Salary</p>
                   </div>
                 </div>
@@ -1552,8 +1585,8 @@ export default function EmployeesClient() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(stats.totalPayroll / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Annual Payroll</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(mockEmployees.reduce((sum, e) => sum + e.salary, 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg Salary</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${(activeEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${activeEmployees.length > 0 ? (activeEmployees.reduce((sum, e) => sum + e.salary, 0) / activeEmployees.length / 1000).toFixed(0) : 0}K</p><p className="text-sm text-gray-500">Avg Salary</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">92%</p><p className="text-sm text-gray-500">Market Competitive</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
@@ -1562,7 +1595,7 @@ export default function EmployeesClient() {
                     <table className="w-full">
                       <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Level</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Base Salary</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equity</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Comp</th></tr></thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                        {mockEmployees.map(emp => (
+                        {activeEmployees.map(emp => (
                           <tr key={emp.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="px-4 py-4"><div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{emp.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><div><p className="font-medium">{emp.name}</p><p className="text-xs text-gray-500">{emp.position}</p></div></div></td>
                             <td className="px-4 py-4"><Badge variant="outline">{emp.level}</Badge></td>
@@ -1620,11 +1653,11 @@ export default function EmployeesClient() {
                   <CardHeader><CardTitle>Equity Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity Pool</p></div>
-                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">${(mockEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / mockEmployees.length / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Avg per Employee</p></div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">${(activeEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / 1000).toFixed(0)}K</p><p className="text-sm text-gray-500">Total Equity Pool</p></div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">${activeEmployees.length > 0 ? (activeEmployees.reduce((sum, e) => sum + (e.equity || 0), 0) / activeEmployees.length / 1000).toFixed(0) : 0}K</p><p className="text-sm text-gray-500">Avg per Employee</p></div>
                     </div>
                     <div className="space-y-3">
-                      {mockEmployees.filter(e => e.equity).map(emp => (
+                      {activeEmployees.filter(e => e.equity).map(emp => (
                         <div key={emp.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded">
                           <div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{emp.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="font-medium">{emp.name}</span></div>
                           <span className="font-bold text-green-600">${(emp.equity || 0).toLocaleString()}</span>
@@ -2390,7 +2423,7 @@ export default function EmployeesClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockEmployees.length}</div>
+                            <div className="text-2xl font-bold">{activeEmployees.length}</div>
                             <div className="text-sm text-gray-500">Employees</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -2588,7 +2621,7 @@ export default function EmployeesClient() {
         <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Create New Goal</DialogTitle><DialogDescription>Set an OKR or performance goal for an employee</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{mockEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{activeEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Goal Title</Label><Input placeholder="Lead Q1 Feature Development" className="mt-1" /></div>
               <div><Label>Description</Label><Input placeholder="Describe the goal..." className="mt-1" /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="performance">Performance</SelectItem><SelectItem value="development">Development</SelectItem><SelectItem value="team">Team</SelectItem><SelectItem value="company">Company</SelectItem></SelectContent></Select></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
@@ -2623,9 +2656,9 @@ export default function EmployeesClient() {
         <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
           <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Start Performance Review</DialogTitle><DialogDescription>Begin a performance review cycle for an employee</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{mockEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Employee</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select employee" /></SelectTrigger><SelectContent>{activeEmployees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div><Label>Review Period</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select period" /></SelectTrigger><SelectContent><SelectItem value="q1">Q1 2024</SelectItem><SelectItem value="q2">Q2 2024</SelectItem><SelectItem value="annual">Annual 2024</SelectItem></SelectContent></Select></div>
-              <div><Label>Reviewer</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select reviewer" /></SelectTrigger><SelectContent>{mockEmployees.filter(e => e.directReports > 0).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Reviewer</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select reviewer" /></SelectTrigger><SelectContent>{activeEmployees.filter(e => e.directReports > 0).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>
@@ -2821,7 +2854,7 @@ export default function EmployeesClient() {
                     <SelectValue placeholder="Select employee" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockEmployees.map(e => (
+                    {activeEmployees.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3111,7 +3144,7 @@ export default function EmployeesClient() {
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="font-medium">Data to export:</p>
                 <ul className="text-sm text-gray-500 mt-2 space-y-1">
-                  <li>- {mockEmployees.length} Employee records</li>
+                  <li>- {activeEmployees.length} Employee records</li>
                   <li>- {mockDocuments.length} Documents</li>
                   <li>- {mockReviews.length} Performance reviews</li>
                   <li>- {mockTimeOffRequests.length} Time off requests</li>
@@ -3372,7 +3405,7 @@ export default function EmployeesClient() {
                         <SelectValue placeholder="Select manager" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mockEmployees.filter(e => e.directReports > 0).map(e => (
+                        {activeEmployees.filter(e => e.directReports > 0).map(e => (
                           <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
                         ))}
                       </SelectContent>

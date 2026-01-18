@@ -536,29 +536,61 @@ export default function BackupsClient() {
     { id: '3', label: 'Verify', icon: 'check', action: () => setShowVerifyBackupsDialog(true), variant: 'outline' as const },
   ]
 
-  // Filter jobs
+  // Map Supabase backups to BackupJob format with mock fallback
+  const activeJobs: BackupJob[] = useMemo(() => {
+    if (backups && backups.length > 0) {
+      return backups.map((b) => ({
+        id: b.id,
+        name: b.name,
+        description: b.description || '',
+        type: (b.type === 'full' ? 'full' : b.type === 'incremental' ? 'incremental' : b.type === 'differential' ? 'differential' : b.type === 'snapshot' ? 'snapshot' : 'full') as BackupType,
+        status: (b.status === 'completed' ? 'completed' : b.status === 'in-progress' ? 'running' : b.status === 'failed' ? 'failed' : b.status === 'scheduled' ? 'scheduled' : 'pending') as BackupStatus,
+        source: b.storage_path || 'Database',
+        destination: b.storage_bucket || 'Backup Vault',
+        storageType: (b.storage_location === 'aws-s3' ? 's3' : b.storage_location === 'google-cloud' ? 'gcs' : b.storage_location === 'azure' ? 'azure' : 'local') as StorageType,
+        frequency: b.frequency || 'daily',
+        lastRun: b.last_run_at || b.created_at,
+        nextRun: b.next_run_at || new Date(Date.now() + 86400000).toISOString(),
+        duration: b.duration_seconds || 0,
+        sizeBytes: b.size_bytes || 0,
+        filesCount: b.files_count || 0,
+        progress: b.status === 'completed' ? 100 : b.status === 'in-progress' ? 50 : 0,
+        retentionDays: b.retention_days || 30,
+        encrypted: b.encrypted || false,
+        compressed: b.compressed || false,
+        verified: b.verified || false,
+        successRate: b.success_rate || 0,
+        restorePoints: 1,
+        tags: b.tags || [],
+        schedule: { enabled: b.frequency !== 'on-demand', time: '00:00', timezone: 'UTC' }
+      })) as BackupJob[]
+    }
+    return mockJobs
+  }, [backups])
+
+  // Filter jobs - use activeJobs (real data with mock fallback)
   const filteredJobs = useMemo(() => {
-    return mockJobs.filter(job => {
+    return activeJobs.filter(job => {
       const matchesSearch = job.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            job.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = selectedStatus === 'all' || job.status === selectedStatus
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, selectedStatus])
+  }, [activeJobs, searchQuery, selectedStatus])
 
-  // Compute stats
+  // Compute stats - use activeJobs (real data with mock fallback)
   const stats = useMemo(() => {
-    const total = mockJobs.length
-    const completed = mockJobs.filter(j => j.status === 'completed').length
-    const running = mockJobs.filter(j => j.status === 'running').length
-    const failed = mockJobs.filter(j => j.status === 'failed').length
-    const totalSize = mockJobs.reduce((sum, j) => sum + j.sizeBytes, 0)
-    const avgSuccess = mockJobs.reduce((sum, j) => sum + j.successRate, 0) / total
-    const totalRestorePoints = mockJobs.reduce((sum, j) => sum + j.restorePoints, 0)
+    const total = activeJobs.length
+    const completed = activeJobs.filter(j => j.status === 'completed').length
+    const running = activeJobs.filter(j => j.status === 'running').length
+    const failed = activeJobs.filter(j => j.status === 'failed').length
+    const totalSize = activeJobs.reduce((sum, j) => sum + j.sizeBytes, 0)
+    const avgSuccess = total > 0 ? activeJobs.reduce((sum, j) => sum + j.successRate, 0) / total : 0
+    const totalRestorePoints = activeJobs.reduce((sum, j) => sum + j.restorePoints, 0)
     const vaultCount = mockVaults.length
     const legalHoldCount = mockRecoveryPoints.filter(rp => rp.legalHold).length
     return { total, completed, running, failed, totalSize, avgSuccess, totalRestorePoints, vaultCount, legalHoldCount }
-  }, [])
+  }, [activeJobs])
 
   const statsCards = [
     { label: 'Total Jobs', value: stats.total.toString(), change: '+3', icon: Database, color: 'from-blue-500 to-blue-600' },
@@ -1114,7 +1146,7 @@ export default function BackupsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockJobs.slice(0, 4).map(job => (
+                    {activeJobs.slice(0, 4).map(job => (
                       <div
                         key={job.id}
                         className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -2219,7 +2251,7 @@ export default function BackupsClient() {
                   <SelectTrigger><SelectValue placeholder="Choose backups to verify" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Backups</SelectItem>
-                    {mockJobs.map(job => (
+                    {activeJobs.map(job => (
                       <SelectItem key={job.id} value={job.id}>{job.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2617,7 +2649,7 @@ export default function BackupsClient() {
                 <Select>
                   <SelectTrigger><SelectValue placeholder="Choose backup job" /></SelectTrigger>
                   <SelectContent>
-                    {mockJobs.filter(j => j.status === 'completed').map(job => (
+                    {activeJobs.filter(j => j.status === 'completed').map(job => (
                       <SelectItem key={job.id} value={job.id}>{job.name}</SelectItem>
                     ))}
                   </SelectContent>

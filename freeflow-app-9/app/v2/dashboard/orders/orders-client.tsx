@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useOrders, type Order as DBOrder } from '@/lib/hooks/use-orders'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -679,9 +680,52 @@ export default function OrdersClient() {
     notes: ''
   })
 
-  // Filtered orders
+  // Database integration
+  const { data: dbOrders, loading: ordersLoading, refetch } = useOrders({
+    status: statusFilter === 'all' ? undefined : statusFilter as any,
+    searchQuery: searchQuery || undefined
+  })
+
+  // Map database orders to component format with mock fallback
+  const activeOrders: Order[] = useMemo(() => {
+    if (dbOrders && dbOrders.length > 0) {
+      return dbOrders.map((order: DBOrder) => ({
+        id: order.id,
+        order_number: order.order_number,
+        customer_name: order.customer_name || 'Unknown Customer',
+        customer_email: order.customer_email || '',
+        customer_phone: order.customer_phone || '',
+        shipping_address: order.shipping_address || {},
+        billing_address: order.billing_address || {},
+        items: [], // Items would need separate query
+        subtotal: order.subtotal || 0,
+        shipping: order.shipping_cost || 0,
+        tax: order.tax_amount || 0,
+        discount: order.discount_amount || 0,
+        total: order.total_amount || 0,
+        currency: order.currency || 'USD',
+        status: order.status,
+        payment_status: (order.payment_status === 'paid' ? 'paid' : order.payment_status === 'failed' ? 'failed' : 'pending') as PaymentStatus,
+        payment_method: (order.payment_method || 'credit_card') as PaymentMethod,
+        fulfillment_status: 'unfulfilled' as FulfillmentStatus,
+        tracking_number: order.tracking_number || undefined,
+        carrier: order.carrier || undefined,
+        estimated_delivery: order.estimated_delivery || undefined,
+        actual_delivery: order.actual_delivery || undefined,
+        source: 'web',
+        notes: order.notes || undefined,
+        internal_notes: order.internal_notes || undefined,
+        tags: [],
+        created_at: order.created_at,
+        updated_at: order.updated_at
+      })) as Order[]
+    }
+    return mockOrders
+  }, [dbOrders])
+
+  // Filtered orders - uses activeOrders which maps db data with mock fallback
   const filteredOrders = useMemo(() => {
-    return mockOrders.filter(order => {
+    return activeOrders.filter(order => {
       const matchesSearch =
         order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -689,17 +733,18 @@ export default function OrdersClient() {
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, activeOrders])
 
-  // Stats calculations
+  // Stats calculations - uses activeOrders with db data fallback to mock
   const stats = useMemo(() => {
-    const totalOrders = mockOrders.length
-    const totalRevenue = mockOrders.filter(o => o.payment_status === 'paid').reduce((acc, o) => acc + o.total, 0)
-    const pendingOrders = mockOrders.filter(o => o.status === 'pending').length
-    const processingOrders = mockOrders.filter(o => o.status === 'processing').length
-    const shippedOrders = mockOrders.filter(o => o.status === 'shipped').length
-    const deliveredOrders = mockOrders.filter(o => o.status === 'delivered').length
-    const avgOrderValue = totalRevenue / mockOrders.filter(o => o.payment_status === 'paid').length
+    const totalOrders = activeOrders.length
+    const paidOrders = activeOrders.filter(o => o.payment_status === 'paid')
+    const totalRevenue = paidOrders.reduce((acc, o) => acc + o.total, 0)
+    const pendingOrders = activeOrders.filter(o => o.status === 'pending').length
+    const processingOrders = activeOrders.filter(o => o.status === 'processing').length
+    const shippedOrders = activeOrders.filter(o => o.status === 'shipped').length
+    const deliveredOrders = activeOrders.filter(o => o.status === 'delivered').length
+    const avgOrderValue = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0
     const pendingReturns = mockReturns.filter(r => r.status === 'requested').length
 
     return {
@@ -712,7 +757,7 @@ export default function OrdersClient() {
       avgOrderValue,
       pendingReturns
     }
-  }, [])
+  }, [activeOrders])
 
   // Handlers with real dialog workflows
   const handleCreateOrder = () => {

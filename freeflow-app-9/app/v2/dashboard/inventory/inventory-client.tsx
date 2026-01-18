@@ -514,15 +514,48 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     }
   }
 
+  // Map dbInventory to Product format with mock fallback
+  const activeProducts: Product[] = useMemo(() => {
+    if (dbInventory && dbInventory.length > 0) {
+      return dbInventory.map((item: InventoryItem) => ({
+        id: item.id,
+        title: item.product_name || 'Untitled Product',
+        description: `${item.category || 'General'} - ${item.brand || 'Unbranded'}`,
+        vendor: item.supplier_name || item.manufacturer || 'Unknown Vendor',
+        productType: item.category || 'General',
+        tags: [item.category, item.subcategory, item.brand].filter(Boolean) as string[],
+        status: item.is_active ? 'active' : 'archived',
+        variants: [{
+          id: `v_${item.id}`,
+          sku: item.sku || `SKU-${item.id.substring(0, 8)}`,
+          barcode: item.barcode || null,
+          option1: item.category || null,
+          option2: item.subcategory || null,
+          option3: null,
+          price: item.selling_price || item.unit_price || 0,
+          costPrice: item.cost_price || 0,
+          quantity: item.quantity || 0,
+          weight: item.weight_kg || 0,
+          weightUnit: 'kg' as const
+        }],
+        images: [],
+        totalInventory: item.quantity || 0,
+        createdAt: item.created_at || new Date().toISOString(),
+        updatedAt: item.updated_at || new Date().toISOString()
+      })) as Product[]
+    }
+    return mockProducts
+  }, [dbInventory])
+
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return activeProducts.filter(product => {
       const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.variants.some(v => v.sku.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || product.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [activeProducts, searchQuery, statusFilter])
 
   const toggleProductExpanded = (productId: string) => {
     const newExpanded = new Set(expandedProducts)
@@ -1060,7 +1093,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Total SKUs</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockProducts.length}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeProducts.length}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">

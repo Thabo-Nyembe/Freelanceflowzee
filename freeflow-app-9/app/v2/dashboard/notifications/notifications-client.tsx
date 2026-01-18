@@ -320,9 +320,31 @@ export default function NotificationsClient() {
     scheduled: false
   })
 
-  // Filter notifications
+  // Map Supabase notifications to local format with mock fallback
+  const activeNotifications = useMemo(() => {
+    if (dbNotifications && dbNotifications.length > 0) {
+      return dbNotifications.map((n: any) => ({
+        id: n.id || '',
+        type: (n.type || 'system') as NotificationType,
+        title: n.title || 'Notification',
+        message: n.message || n.content || '',
+        timestamp: n.created_at || new Date().toISOString(),
+        status: (n.status || 'unread') as NotificationStatus,
+        priority: (n.priority || 'medium') as NotificationPriority,
+        channel: n.channel || 'in-app',
+        isStarred: n.is_starred || false,
+        isArchived: n.is_archived || false,
+        sender: n.sender || { name: 'System', avatar: '' },
+        link: n.link || '',
+        actions: n.actions || []
+      })) as Notification[]
+    }
+    return mockNotifications
+  }, [dbNotifications])
+
+  // Filter notifications - use activeNotifications instead of mockNotifications
   const filteredNotifications = useMemo(() => {
-    return mockNotifications.filter(n => {
+    return activeNotifications.filter(n => {
       if (statusFilter !== 'all' && n.status !== statusFilter) return false
       if (channelFilter !== 'all' && n.channel !== channelFilter) return false
       if (searchQuery) {
@@ -331,25 +353,25 @@ export default function NotificationsClient() {
       }
       return true
     })
-  }, [statusFilter, channelFilter, searchQuery])
+  }, [activeNotifications, statusFilter, channelFilter, searchQuery])
 
-  // Calculate stats
+  // Calculate stats - use activeNotifications (Supabase data with mock fallback)
   const stats = useMemo(() => {
     const totalSent = mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
     const totalDelivered = mockCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
     const totalOpened = mockCampaigns.reduce((sum, c) => sum + c.stats.opened, 0)
     const totalClicked = mockCampaigns.reduce((sum, c) => sum + c.stats.clicked, 0)
     return {
-      totalNotifications: mockNotifications.length,
-      unread: mockNotifications.filter(n => n.status === 'unread').length,
-      starred: mockNotifications.filter(n => n.isStarred).length,
+      totalNotifications: activeNotifications.length,
+      unread: activeNotifications.filter(n => n.status === 'unread').length,
+      starred: activeNotifications.filter(n => n.isStarred).length,
       totalSent,
       deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) : '0',
       openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(1) : '0',
       clickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
       activeAutomations: mockAutomations.filter(a => a.status === 'active').length
     }
-  }, [])
+  }, [activeNotifications])
 
   const statsCards = [
     { label: 'Total', value: stats.totalNotifications.toString(), icon: Bell, color: 'from-violet-500 to-purple-600' },

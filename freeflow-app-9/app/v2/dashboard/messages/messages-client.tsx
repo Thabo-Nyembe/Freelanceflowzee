@@ -292,6 +292,31 @@ export default function MessagesClient() {
   const [filterChannel, setFilterChannel] = useState<string>('all')
   const [sidebarThemeColor, setSidebarThemeColor] = useState('#4a154b')
 
+  // Map Supabase messages to local format with mock fallback
+  const activeMessages = useMemo(() => {
+    if (supabaseMessages && supabaseMessages.length > 0) {
+      return supabaseMessages.map((m: any) => ({
+        id: m.id || '',
+        content: m.content || '',
+        senderId: m.sender_id || m.user_id || '',
+        senderName: m.sender_name || 'Unknown',
+        senderAvatar: m.sender_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.sender_name}`,
+        channelId: m.channel_id || m.conversation_id || 'general',
+        timestamp: m.created_at || new Date().toISOString(),
+        status: (m.status || 'sent') as MessageStatus,
+        reactions: m.reactions || [],
+        replies: m.replies || [],
+        replyCount: m.reply_count || 0,
+        isPinned: m.is_pinned || false,
+        isEdited: m.is_edited || false,
+        attachments: m.attachments || [],
+        mentions: m.mentions || [],
+        parentId: m.parent_id || undefined
+      })) as Message[]
+    }
+    return mockMessages
+  }, [supabaseMessages])
+
   // Reply and Forward Dialog states
   const [showReplyDialog, setShowReplyDialog] = useState(false)
   const [showForwardDialog, setShowForwardDialog] = useState(false)
@@ -334,7 +359,9 @@ export default function MessagesClient() {
 
   // Stats
   const stats = useMemo(() => {
-    const totalMessages = mockMessages.length * 150
+    // Use activeMessages for real data, with mock fallback multipliers for demo
+    const realMessageCount = activeMessages.length
+    const totalMessages = realMessageCount > 0 ? realMessageCount : mockMessages.length * 150
     const totalChannels = mockChannels.length
     const unreadMessages = mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
     const activeThreads = mockThreads.filter(t => t.isUnread).length
@@ -343,7 +370,7 @@ export default function MessagesClient() {
     const onlineMembers = mockUsers.filter(u => u.status === 'online').length
     const mentions = mockMentions.filter(m => !m.isRead).length
     return { totalMessages, totalChannels, unreadMessages, activeThreads, totalFiles, totalCalls, onlineMembers, mentions }
-  }, [])
+  }, [activeMessages])
 
   const filteredChannels = useMemo(() => {
     let channels = mockChannels
@@ -355,8 +382,9 @@ export default function MessagesClient() {
 
   const channelMessages = useMemo(() => {
     if (!selectedChannel) return []
-    return mockMessages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
-  }, [selectedChannel])
+    // Use activeMessages (Supabase data with mock fallback) instead of mockMessages
+    return activeMessages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
+  }, [selectedChannel, activeMessages])
 
   const publicChannels = filteredChannels.filter(c => c.type === 'public')
   const privateChannels = filteredChannels.filter(c => c.type === 'private')
