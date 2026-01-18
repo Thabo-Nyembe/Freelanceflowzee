@@ -24,6 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { toast } from 'sonner'
 import { format, formatDistanceToNow, isBefore, isToday, addDays } from 'date-fns'
 import { useTasks, type Task, type TaskStatus, type TaskPriority, type TaskCategory } from '@/lib/hooks/use-tasks'
+import { useTeam, type TeamMember } from '@/lib/hooks/use-team'
 import {
   CheckCircle2,
   Circle,
@@ -102,10 +103,7 @@ const SORT_OPTIONS = [
   { value: 'updated_at', label: 'Recently Updated' }
 ]
 
-// Team members - to be fetched from real API endpoint /api/team/members
-// Using hook-based data fetching pattern for team members
-const TEAM_MEMBERS: Array<{ id: string; name: string; email: string; avatar_url: string | null }> = []
-// TODO: Replace with useTeamMembers() hook when available
+// Team members - fetched via useTeam hook in component
 
 // ============================================================================
 // LOADING SKELETON
@@ -363,7 +361,7 @@ function TaskCard({
                     Unassigned
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {TEAM_MEMBERS.map((member) => (
+                  {teamMembers.map((member) => (
                     <DropdownMenuItem
                       key={member.id}
                       onClick={() => onAssign(task.id, member.id)}
@@ -584,7 +582,7 @@ function TaskCard({
                 <User className="h-4 w-4 mr-2 text-muted-foreground" />
                 Unassigned
               </DropdownMenuItem>
-              {TEAM_MEMBERS.map((member) => (
+              {teamMembers.map((member) => (
                 <DropdownMenuItem
                   key={member.id}
                   onClick={() => onAssign(task.id, member.id)}
@@ -880,6 +878,14 @@ export function TasksClient() {
     bulkDeleteTasks
   } = useTasks({ enableRealtime: true })
 
+  // Team members for task assignment
+  const { members: teamMembers, loading: teamLoading, fetchMembers } = useTeam()
+
+  // Fetch team members on mount
+  React.useEffect(() => {
+    fetchMembers()
+  }, [fetchMembers])
+
   // Local state
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -1109,7 +1115,7 @@ export function TasksClient() {
   const handleAssignTask = useCallback(async (taskId: string, assigneeId: string | null) => {
     const result = await assignTask(taskId, assigneeId)
     if (result.success) {
-      const member = assigneeId ? TEAM_MEMBERS.find(m => m.id === assigneeId) : null
+      const member = assigneeId ? teamMembers.find(m => m.id === assigneeId) : null
       toast.success(member ? `Assigned to ${member.name}` : 'Task unassigned')
     } else {
       toast.error(result.error || 'Failed to assign task')

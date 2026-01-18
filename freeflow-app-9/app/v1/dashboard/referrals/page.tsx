@@ -30,6 +30,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
+import { useMyReferrals, useMyRewards, useReferralStats, useUserReferralCode } from '@/lib/hooks/use-referrals-extended'
 
 const logger = createFeatureLogger('ReferralLoyaltySystem')
 
@@ -67,47 +68,52 @@ export default function ReferralsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [isLoading, setIsLoading] = useState(true)
+  // Fetch referral data using database hooks
+  const { referrals: dbReferrals, isLoading: referralsLoading } = useMyReferrals(userId)
+  const { rewards: dbRewards, isLoading: rewardsLoading } = useMyRewards(userId)
+  const { stats, isLoading: statsLoading, refresh: refreshStats } = useReferralStats(userId)
+  const { code: userCode, isLoading: codeLoading } = useUserReferralCode(userId)
+
+  const isLoading = referralsLoading || rewardsLoading || statsLoading || codeLoading || userLoading
   const [error, setError] = useState<string | null>(null)
-  const [referralCode, setReferralCode] = useState('KAZI-ACME-45K')
-  const [referralLink, setReferralLink] = useState('')
   const [copiedToClipboard, setCopiedToClipboard] = useState(false)
 
-  // REFERRAL DATA
-  const [referrals, setReferrals] = useState<Referral[]>([])
-  const [rewards, setRewards] = useState<Reward[]>([])
-  const [loyaltyPoints, setLoyaltyPoints] = useState(0)
-  const [totalCommission, setTotalCommission] = useState(0)
+  // Transform database referrals to component format
+  const referrals: Referral[] = (dbReferrals || []).map((r: any) => ({
+    id: r.id,
+    name: r.referred?.full_name || r.referred?.email || 'Unknown',
+    email: r.referred?.email || '',
+    avatar: r.referred?.avatar_url || '',
+    referralDate: r.created_at,
+    status: r.status === 'completed' ? 'earned' : r.status,
+    projectsCompleted: r.referral_rewards?.length || 0,
+    commissionEarned: r.referral_rewards?.reduce((sum: number, rw: any) => sum + (rw.amount || 0), 0) || 0
+  }))
 
+  // Transform database rewards to component format
+  const rewards: Reward[] = (dbRewards || []).map((r: any) => ({
+    id: r.id,
+    title: r.reward_type || 'Reward',
+    description: r.description || 'Referral reward',
+    points: r.amount || 0,
+    earned: r.status === 'claimed',
+    earnedDate: r.claimed_at,
+    icon: Gift,
+    color: 'bg-purple-500'
+  }))
+
+  // Get computed values from stats
+  const referralCode = userCode?.code || 'KAZI-ACME-45K'
+  const referralLink = `https://kazi.app/signup?ref=${referralCode}`
+  const loyaltyPoints = stats?.totalEarned || 0
+  const totalCommission = stats?.totalEarned || 0
+
+  // Announce when data loads
   useEffect(() => {
-    const loadReferralData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        // Initialize referral code and link
-        const code = 'KAZI-ACME-45K'
-        const link = `https://kazi.app/signup?ref=${code}`
-        setReferralCode(code)
-        setReferralLink(link)
-
-        // TODO: Replace with actual database hooks
-        setReferrals([])
-        setRewards([])
-        setLoyaltyPoints(0)
-        setTotalCommission(0)
-
-        setIsLoading(false)
-        announce('Referral system loaded successfully', 'polite')      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load referral data')
-        setIsLoading(false)
-        announce('Error loading referral system', 'assertive')
-        logger.error('Failed to load referral data', { error: err })
-      }
+    if (!isLoading && !error) {
+      announce('Referral system loaded successfully', 'polite')
     }
-
-    loadReferralData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoading, error, announce])
 
   // ============================================================================
   // HANDLER 1: COPY REFERRAL CODE
@@ -117,7 +123,8 @@ export default function ReferralsPage() {
     toast.promise(
       (async () => {
         await navigator.clipboard.writeText(referralCode)
-        setCopiedToClipboard(true)        setTimeout(() => {
+        setCopiedToClipboard(true)
+        setTimeout(() => {
           setCopiedToClipboard(false)
         }, 2000)
       })(),
@@ -136,7 +143,8 @@ export default function ReferralsPage() {
   const handleCopyReferralLink = () => {
     toast.promise(
       (async () => {
-        await navigator.clipboard.writeText(referralLink)      })(),
+        await navigator.clipboard.writeText(referralLink)
+      })(),
       {
         loading: 'Copying referral link...',
         success: 'Referral link copied - Ready to share with your network',
@@ -151,7 +159,8 @@ export default function ReferralsPage() {
 
   const handleShareReferral = async (platform: 'email' | 'whatsapp' | 'twitter' | 'linkedin') => {
     try {
-      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`      let shareUrl = ''
+      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`
+      let shareUrl = ''
 
       switch (platform) {
         case 'email':
@@ -185,7 +194,8 @@ export default function ReferralsPage() {
   // ============================================================================
 
   const handleViewReferralDetails = (referralId: number) => {
-    const referral = referrals.find(r => r.id === referralId)    toast.info(`Loading details for ${referral?.name}...`)
+    const referral = referrals.find(r => r.id === referralId)
+    toast.info(`Loading details for ${referral?.name}...`)
   }
 
   // ============================================================================
@@ -194,7 +204,8 @@ export default function ReferralsPage() {
 
   const handleClaimReward = async (rewardId: number) => {
     try {
-      const reward = rewards.find(r => r.id === rewardId)      const response = await fetch('/api/loyalty/claim-reward', {
+      const reward = rewards.find(r => r.id === rewardId)
+      const response = await fetch('/api/loyalty/claim-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,11 +221,11 @@ export default function ReferralsPage() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success('Reward claimed!' loyalty points`
-        })
+      if (result.success) {
+        toast.success(`Reward claimed! +${reward?.points || 0} loyalty points`)
 
-        // Update local state
-        setLoyaltyPoints(prev => prev + (reward?.points || 0))
+        // Refresh stats from database
+        refreshStats()
       }
     } catch (error: any) {
       logger.error('Failed to claim reward', { error, rewardId })
@@ -229,10 +240,10 @@ export default function ReferralsPage() {
   const handleRedeemPoints = async (points: number) => {
     try {
       if (loyaltyPoints < points) {
-        toast.error('Insufficient points' more points`
-        })
+        toast.error(`Insufficient points. You need ${points - loyaltyPoints} more points.`)
         return
-      }      const response = await fetch('/api/loyalty/redeem-points', {
+      }
+      const response = await fetch('/api/loyalty/redeem-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -249,10 +260,11 @@ export default function ReferralsPage() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success('Points redeemed!' points converted to account credit`
-        })
+      if (result.success) {
+        toast.success(`Points redeemed! ${points} points converted to account credit`)
 
-        setLoyaltyPoints(prev => prev - points)
+        // Refresh stats from database
+        refreshStats()
       }
     } catch (error: any) {
       logger.error('Failed to redeem points', { error, points })

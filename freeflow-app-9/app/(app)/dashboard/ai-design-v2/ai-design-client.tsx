@@ -207,6 +207,8 @@ export default function AIDesignClient() {
   const [showGenerateDialog, setShowGenerateDialog] = useState(false)
   const [showUpscaleDialog, setShowUpscaleDialog] = useState(false)
   const [showStyleEditor, setShowStyleEditor] = useState(false)
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
   // Generation form state
   const [prompt, setPrompt] = useState('')
@@ -504,11 +506,11 @@ export default function AIDesignClient() {
                 {stats.totalCredits - stats.creditsUsed} credits left
               </span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => toast.info('Generation History')}>
+            <Button variant="outline" size="sm" onClick={() => setShowHistoryDialog(true)}>
               <History className="w-4 h-4 mr-2" />
               History
             </Button>
-            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => toast.info('Upgrade Plan')}>
+            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => setShowUpgradeDialog(true)}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -1975,6 +1977,139 @@ export default function AIDesignClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* History Dialog */}
+        <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-fuchsia-500" />
+                Generation History
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {promptHistory.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No generation history yet</p>
+                  <p className="text-sm">Your prompt history will appear here</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {promptHistory.map((item) => (
+                    <Card key={item.id} className="hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => {
+                      setPrompt(item.prompt)
+                      setSelectedStyle(item.style)
+                      setShowHistoryDialog(false)
+                      toast.success('Prompt loaded from history')
+                    }}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.prompt}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="outline" className={getStyleColor(item.style)}>
+                                {item.style.replace('_', ' ')}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {item.resultCount} results
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(item.usedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={(e) => {
+                            e.stopPropagation()
+                            setPromptHistory(prev => prev.map(p =>
+                              p.id === item.id ? { ...p, isFavorite: !p.isFavorite } : p
+                            ))
+                          }}>
+                            <Star className={`w-4 h-4 ${item.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Dialog */}
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                Upgrade Your Plan
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pro Plan */}
+                <Card className="relative border-2 border-fuchsia-500">
+                  <div className="absolute -top-3 left-4">
+                    <Badge className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+                      Most Popular
+                    </Badge>
+                  </div>
+                  <CardContent className="p-6 pt-8">
+                    <h3 className="text-lg font-bold">Pro</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">$29</span>
+                      <span className="text-muted-foreground">/month</span>
+                    </div>
+                    <ul className="mt-4 space-y-2 text-sm">
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> 500 credits/month</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> All AI models</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Priority processing</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> HD upscaling</li>
+                    </ul>
+                    <Button className="w-full mt-6 bg-gradient-to-r from-fuchsia-500 to-purple-600" onClick={() => {
+                      toast.promise(
+                        fetch('/api/billing/upgrade', { method: 'POST', body: JSON.stringify({ plan: 'pro' }) }).then(r => r.json()),
+                        { loading: 'Redirecting to checkout...', success: 'Opening checkout page', error: 'Please try again' }
+                      )
+                    }}>
+                      Upgrade to Pro
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Enterprise Plan */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-bold">Enterprise</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold">$99</span>
+                      <span className="text-muted-foreground">/month</span>
+                    </div>
+                    <ul className="mt-4 space-y-2 text-sm">
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Unlimited credits</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> All Pro features</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> API access</li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Dedicated support</li>
+                    </ul>
+                    <Button variant="outline" className="w-full mt-6" onClick={() => {
+                      toast.promise(
+                        fetch('/api/billing/upgrade', { method: 'POST', body: JSON.stringify({ plan: 'enterprise' }) }).then(r => r.json()),
+                        { loading: 'Redirecting to checkout...', success: 'Opening checkout page', error: 'Please try again' }
+                      )
+                    }}>
+                      Contact Sales
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground">
+                All plans include a 14-day money-back guarantee. Cancel anytime.
+              </p>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

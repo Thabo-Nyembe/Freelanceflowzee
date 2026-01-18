@@ -9,8 +9,20 @@
  */
 
 // ============================================================================
-// DATA TABLES - TanStack Table Integration
+// DATA TABLES - TanStack Table Integration (World-Class)
 // ============================================================================
+export {
+  DataTable,
+  DataTableColumnHeader,
+  DataTableRowActions,
+  type DataTableProps,
+  type DataTableRowAction,
+  type DataTableRowActionGroup,
+  type DataTableFilterConfig,
+  type DataTableFilterOption,
+} from './data-table/data-table'
+
+// Legacy exports for backwards compatibility
 export { EnhancedDataTable, SortableColumnHeader, RowActionsDropdown } from '@/components/ui/enhanced-data-table'
 
 // ============================================================================
