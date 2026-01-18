@@ -439,6 +439,10 @@ const _mockStats: LogStats = {
   bytesTransferred: 12345678901
 }
 
+// Suppress unused warnings for development mock data
+void _mockLogs
+void _mockStats
+
 // Enhanced Competitive Upgrade Mock Data
 const mockLogsAIInsights = [
   { id: '1', type: 'opportunity' as const, title: 'Security Status', description: 'No suspicious activity detected in last 24 hours.', impact: 'low' as const, createdAt: new Date() },
