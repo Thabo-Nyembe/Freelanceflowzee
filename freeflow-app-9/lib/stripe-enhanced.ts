@@ -1,4 +1,7 @@
 import Stripe from 'stripe'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Stripe')
 
 // Initialize Stripe with enhanced configuration
 export const stripe = new Stripe(
@@ -80,7 +83,7 @@ export async function createAdvancedPaymentIntent(params: {
       currency: paymentIntent.currency,
     }
   } catch (error) {
-    console.error('Enhanced payment intent creation failed: ', error);
+    logger.error('Enhanced payment intent creation failed', { error, projectId })
     throw new Error('Failed to create payment intent')
   }
 }
@@ -93,7 +96,7 @@ export async function processWebhookEvent(signature: string, rawBody: string, en
   try {
     const event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret)
 
-    console.log(`Processing webhook event: ${event.type}`)
+    logger.info('Processing webhook event', { eventType: event.type, eventId: event.id })
 
     switch (event.type) {
       case 'payment_intent.succeeded':
@@ -117,12 +120,12 @@ export async function processWebhookEvent(signature: string, rawBody: string, en
         break
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+        logger.debug('Unhandled webhook event type', { eventType: event.type })
     }
 
     return { received: true, processed: event.type }
   } catch (error) {
-    console.error('Webhook processing error: ', error);
+    logger.error('Webhook processing error', { error })
     throw error
   }
 }
@@ -130,8 +133,8 @@ export async function processWebhookEvent(signature: string, rawBody: string, en
 // Payment success handler
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const { projectId } = paymentIntent.metadata
-  
-  console.log(`✅ Payment succeeded for project: ${projectId}`);
+
+  logger.info('Payment succeeded', { projectId, paymentIntentId: paymentIntent.id })
   
   // Here you would typically:
   // 1. Update database with payment status
@@ -152,8 +155,8 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 // Payment failure handler
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   const { projectId } = paymentIntent.metadata
-  
-  console.log(`❌ Payment failed for project: ${projectId}`);
+
+  logger.warn('Payment failed', { projectId, paymentIntentId: paymentIntent.id, error: paymentIntent.last_payment_error?.message })
   
   // Handle payment failure
   await updateProjectAccess(projectId, {
@@ -166,7 +169,7 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 // Subscription creation handler
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log(`🎉 New subscription created: ${subscription.id}`);
+  logger.info('Subscription created', { subscriptionId: subscription.id, customerId: subscription.customer })
   
   // Handle new subscription
   await createSubscriptionRecord({
@@ -181,7 +184,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
 // Subscription update handler
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log(`📝 Subscription updated: ${subscription.id}`);
+  logger.info('Subscription updated', { subscriptionId: subscription.id, status: subscription.status })
   
   // Handle subscription updates
   await updateSubscriptionRecord(subscription.id, {
@@ -193,7 +196,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 // Invoice payment success handler
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log(`💰 Invoice payment succeeded: ${invoice.id}`);
+  logger.info('Invoice payment succeeded', { invoiceId: invoice.id, amount: invoice.amount_paid })
   
   // Handle successful invoice payment
   await processInvoicePayment({
@@ -238,7 +241,7 @@ export async function createEnhancedCustomer(params: {
 
     return customer
   } catch (error) {
-    console.error('Enhanced customer creation failed: ', error);
+    logger.error('Enhanced customer creation failed', { error, email: params.email })
     throw error
   }
 }
@@ -263,7 +266,7 @@ export async function createSubscription(params: {
 
     return subscription
   } catch (error) {
-    console.error('Subscription creation failed: ', error);
+    logger.error('Subscription creation failed', { error, customerId: params.customerId, priceId: params.priceId })
     throw error
   }
 }
@@ -274,7 +277,7 @@ export async function getPaymentStatus(paymentIntentId: string) {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
     return { status: paymentIntent.status, charge: paymentIntent.latest_charge }
   } catch (error) {
-    console.error('Payment status retrieval failed: ', error);
+    logger.error('Payment status retrieval failed', { error, paymentIntentId })
     throw error
   }
 }
@@ -296,29 +299,29 @@ export async function createRefund(params: {
 
     return refund
   } catch (error) {
-    console.error('Refund creation failed: ', error);
+    logger.error('Refund creation failed', { error, paymentIntentId: params.paymentIntentId })
     throw error
   }
 }
 
 // Mock database operations (replace with actual database calls)
 async function updateProjectAccess(projectId: string, data: Record<string, unknown>) {
-  console.log(`Updating project access for ${projectId}:`, data);
+  logger.debug('Updating project access', { projectId, ...data })
   // Implement actual database update
 }
 
 async function createSubscriptionRecord(data: Record<string, unknown>) {
-  console.log('Creating subscription record: ', data);
+  logger.debug('Creating subscription record', data)
   // Implement actual database insert
 }
 
 async function updateSubscriptionRecord(subscriptionId: string, data: Record<string, unknown>) {
-  console.log(`Updating subscription ${subscriptionId}:`, data);
+  logger.debug('Updating subscription record', { subscriptionId, ...data })
   // Implement actual database update
 }
 
 async function processInvoicePayment(data: Record<string, unknown>) {
-  console.log('Processing invoice payment: ', data);
+  logger.debug('Processing invoice payment', data)
   // Implement actual invoice processing
 }
 

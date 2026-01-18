@@ -1,5 +1,9 @@
 'use client'
 
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('SecurityService')
+
 // Enhanced Security System for FreeflowZee
 class SecurityService {
   private isInitialized: boolean = false
@@ -24,9 +28,9 @@ class SecurityService {
       await this.startThreatMonitoring()
       await this.scheduleSecurityScans()
       this.isInitialized = true
-      console.log('🔒 Enhanced security system initialized')
+      logger.info('Enhanced security system initialized')
     } catch (error) {
-      console.error('❌ Security initialization failed: ', error)
+      logger.error('Security initialization failed', { error })
     }
   }
 
@@ -366,17 +370,17 @@ class SecurityService {
 
   private async loadSecurityRules(): Promise<void> {
     // Load security rules from configuration
-    console.log('Loading security rules...')
+    logger.debug('Loading security rules')
   }
 
   private async startThreatMonitoring(): Promise<void> {
     // Start real-time threat monitoring
-    console.log('Starting threat monitoring...')
+    logger.debug('Starting threat monitoring')
   }
 
   private async scheduleSecurityScans(): Promise<void> {
     // Schedule periodic security scans
-    console.log('Scheduling security scans...')
+    logger.debug('Scheduling security scans')
   }
 
   // Threat detection methods
@@ -501,7 +505,7 @@ class SecurityService {
   }
 
   private async executeSecurityAction(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Executing security action for event: ', event.type)
+    logger.info('Executing security action', { eventType: event.type })
   }
 
   // Compliance methods
@@ -560,29 +564,29 @@ class VulnerabilityScanner {
 
 class SecurityLogger {
   async logThreat(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Logging threat assessment: ', assessment.threatLevel)
+    logger.warn('Threat detected', { threatLevel: assessment.threatLevel, threats: assessment.threats.length })
   }
 
   async logVulnerabilityReport(report: VulnerabilityReport): Promise<void> {
-    console.log('Logging vulnerability report: ', report.scanId)
+    logger.info('Vulnerability report generated', { scanId: report.scanId })
   }
 
   async logAccess(request: AccessRequest, validation: AccessValidation): Promise<void> {
-    console.log('Logging access: ', request.resource, validation.granted)
+    logger.debug('Access logged', { resource: request.resource, granted: validation.granted })
   }
 }
 
 class SecurityAlertSystem {
   async sendAlert(assessment: ThreatAssessment, request: SecurityRequest): Promise<void> {
-    console.log('Sending security alert: ', assessment.threatLevel)
+    logger.warn('Security alert sent', { threatLevel: assessment.threatLevel })
   }
 
   async sendAccessAlert(request: AccessRequest, pattern: AccessPattern): Promise<void> {
-    console.log('Sending access alert for suspicious pattern')
+    logger.warn('Access alert for suspicious pattern', { resource: request.resource })
   }
 
   async sendSecurityAlert(event: SecurityEvent, analysis: SecurityEventAnalysis): Promise<void> {
-    console.log('Sending security event alert: ', event.type)
+    logger.warn('Security event alert', { eventType: event.type })
   }
 }
 

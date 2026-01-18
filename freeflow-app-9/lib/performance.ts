@@ -1,4 +1,7 @@
 import type { Metric } from 'web-vitals'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Performance')
 
 // Web Vitals metric type (using the library's type)
 export type WebVitalMetric = Metric
@@ -19,7 +22,7 @@ export function reportWebVitals() {
 
 // Log metric to console
 function logMetric(metric: WebVitalMetric) {
-  console.log('[Web Vital]', {
+  logger.debug('Web Vital', {
     name: metric.name,
     value: metric.value,
     rating: metric.rating,
@@ -85,14 +88,14 @@ export async function trackWebVitals() {
     onFCP(sendToAnalyticsLegacy)
     onTTFB(sendToAnalyticsLegacy)
   } catch (error) {
-    console.warn('Failed to load web-vitals: ', error)
+    logger.warn('Failed to load web-vitals', { error })
   }
 }
 
 function sendToAnalyticsLegacy(metric: WebVitalMetric) {
   // In production, send to your analytics service
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Web Vital]', metric.name, metric.value, metric.rating)
+    logger.debug('Web Vital (Legacy)', { name: metric.name, value: metric.value, rating: metric.rating })
   }
 
   // Example: Send to Google Analytics
@@ -126,7 +129,7 @@ export class PerformanceOptimizer {
 
           // Log slow resources in development
           if (process.env.NODE_ENV === 'development' && resourceEntry.duration > 1000) {
-            console.warn('Slow resource:', resourceEntry.name, `${resourceEntry.duration.toFixed(2)}ms`)
+            logger.warn('Slow resource detected', { name: resourceEntry.name, duration: resourceEntry.duration })
           }
         }
       })
@@ -146,7 +149,7 @@ export class PerformanceOptimizer {
           const navEntry = entry as PerformanceNavigationTiming
 
           if (process.env.NODE_ENV === 'development') {
-            console.log('Navigation timing:', {
+            logger.debug('Navigation timing', {
               domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
               loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
               totalTime: navEntry.loadEventEnd - navEntry.fetchStart,
@@ -169,7 +172,7 @@ export class PerformanceOptimizer {
       const lastEntry = entries[entries.length - 1]
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('LCP element:', lastEntry)
+        logger.debug('LCP element', { entry: lastEntry })
       }
     })
 
@@ -200,9 +203,9 @@ export function preloadImage(src: string): Promise<void> {
 export async function preloadCriticalImages(images: string[]) {
   try {
     await Promise.all(images.map(preloadImage))
-    console.log('Critical images preloaded')
+    logger.debug('Critical images preloaded', { count: images.length })
   } catch (error) {
-    console.warn('Failed to preload some images:', error)
+    logger.warn('Failed to preload some images', { error })
   }
 }
 
@@ -221,7 +224,7 @@ export function logBundleInfo() {
     return total
   }, 0)
 
-  console.log('Estimated bundle chunks:', totalSize)
+  logger.debug('Estimated bundle chunks', { count: totalSize })
 }
 
 // Memory usage monitoring
@@ -231,10 +234,10 @@ export function monitorMemoryUsage() {
   const memory = (window.performance as unknown as { memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('Memory usage:', {
-      used: `${(memory.usedJSHeapSize / 1048576).toFixed(2)} MB`,
-      total: `${(memory.totalJSHeapSize / 1048576).toFixed(2)} MB`,
-      limit: `${(memory.jsHeapSizeLimit / 1048576).toFixed(2)} MB`,
+    logger.debug('Memory usage', {
+      usedMB: (memory.usedJSHeapSize / 1048576).toFixed(2),
+      totalMB: (memory.totalJSHeapSize / 1048576).toFixed(2),
+      limitMB: (memory.jsHeapSizeLimit / 1048576).toFixed(2),
     })
   }
 }
@@ -291,7 +294,7 @@ export function loadComponentWithPerformance<T>(
     const loadTime = performance.now() - startTime
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Component "${componentName}" loaded in ${loadTime.toFixed(2)}ms`)
+      logger.debug('Component loaded', { name: componentName, loadTimeMs: loadTime.toFixed(2) })
     }
 
     return module
