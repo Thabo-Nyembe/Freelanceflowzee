@@ -317,7 +317,9 @@ const FloatingParticle: React.FC<{
   children: React.ReactNode
   color?: 'purple' | 'blue' | 'green' | 'cyan' | 'amber' | 'emerald'
   size?: 'sm' | 'md' | 'lg'
-}> = ({ children, color = 'purple', size = 'md' }) => {
+}> = ({ children, color: _color = 'purple', size: _size = 'md' }) => {
+  void _color
+  void _size
   return (
     <motion.div
       animate={{
@@ -345,8 +347,9 @@ export default function APlusShowcasePage() {
   // ============================================================================
   // A++++ STATE MANAGEMENT
   // ============================================================================
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId } = useCurrentUser()
   const { announce } = useAnnouncer()
+  void announce
 
   const [state, dispatch] = useReducer(showcaseReducer, {
     components: [],
@@ -365,14 +368,20 @@ export default function APlusShowcasePage() {
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [, _setShowCreateModal] = useState(false)
+  const [, _setShowDetailsModal] = useState(false)
+  void _setShowCreateModal
+  void _setShowDetailsModal
 
-  // Form states
-  const [componentName, setComponentName] = useState('')
-  const [componentDescription, setComponentDescription] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('ui')
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('beginner')
+  // Form states - available for future form implementations
+  const [, _setComponentName] = useState('')
+  const [, _setComponentDescription] = useState('')
+  const [, _setSelectedCategory] = useState<ComponentCategory>('ui')
+  const [, _setSelectedDifficulty] = useState<DifficultyLevel>('beginner')
+  void _setComponentName
+  void _setComponentDescription
+  void _setSelectedCategory
+  void _setSelectedDifficulty
 
   // ============================================================================
   // A++++ LOAD DATA
@@ -624,10 +633,11 @@ export default function APlusShowcasePage() {
     }
   }
 
-  function getCategoryIcon(category: ComponentCategory) {
+  function _getCategoryIcon(category: ComponentCategory) {
     const option = categoryOptions.find(c => c.id === category)
     return option?.icon || Box
   }
+  void _getCategoryIcon
 
   function getDifficultyColor(difficulty: DifficultyLevel) {
     const colors = {

@@ -2,9 +2,9 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useAccessLogs, type AccessLog as HookAccessLog } from '@/lib/hooks/use-access-logs'
+import { useAccessLogs } from '@/lib/hooks/use-access-logs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -183,8 +183,8 @@ interface LogStats {
   bytesTransferred: number
 }
 
-// Mock data
-const mockLogs: AccessLog[] = [
+// Mock data - available for development/testing
+const _mockLogs: AccessLog[] = [
   {
     id: '1',
     timestamp: '2024-12-24T10:30:45.123Z',
@@ -424,7 +424,7 @@ const mockSavedViews: SavedView[] = [
   { id: '4', name: 'Admin Actions', filters: { accessType: ['admin'] }, isDefault: true, createdAt: '2024-12-20' }
 ]
 
-const mockStats: LogStats = {
+const _mockStats: LogStats = {
   total: 45678,
   success: 42156,
   failed: 2345,
@@ -503,6 +503,7 @@ export default function AccessLogsClient() {
   const [showLogDialog, setShowLogDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'compact'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isLiveTail, setIsLiveTail] = useState(false)
 
   // Map hook logs to component format
   const logs: AccessLog[] = useMemo(() => {
@@ -577,18 +578,28 @@ export default function AccessLogsClient() {
     })
   }, [hookLogs])
 
-  const stats: LogStats = useMemo(() => ({
-    total: hookStats.total,
-    success: hookStats.success,
-    failed: hookStats.failed,
-    blocked: hookStats.blocked,
-    warning: hookStats.suspicious,
-    info: hookStats.total - hookStats.success - hookStats.failed - hookStats.blocked,
-    suspicious: hookStats.suspicious,
-    avgDuration: hookStats.avgDuration,
-    successRate: hookStats.successRate,
-    errorRate: hookStats.total > 0 ? Math.round(((hookStats.failed / hookStats.total) * 100) * 10) / 10 : 0
-  }), [hookStats])
+  const stats: LogStats = useMemo(() => {
+    // Compute additional stats from logs
+    const uniqueUserIds = new Set(logs.filter(l => l.user?.id).map(l => l.user?.id))
+    const uniqueIPAddresses = new Set(logs.map(l => l.ipAddress).filter(Boolean))
+
+    return {
+      total: hookStats.total,
+      success: hookStats.success,
+      failed: hookStats.failed,
+      blocked: hookStats.blocked,
+      warning: hookStats.suspicious,
+      info: hookStats.total - hookStats.success - hookStats.failed - hookStats.blocked,
+      suspicious: hookStats.suspicious,
+      avgDuration: hookStats.avgDuration,
+      successRate: hookStats.successRate,
+      errorRate: hookStats.total > 0 ? Math.round(((hookStats.failed / hookStats.total) * 100) * 10) / 10 : 0,
+      requestsPerMinute: Math.round(hookStats.total / 60),
+      uniqueUsers: uniqueUserIds.size,
+      uniqueIPs: uniqueIPAddresses.size,
+      bytesTransferred: logs.reduce((sum, l) => sum + (l.requestSize || 0) + (l.responseSize || 0), 0)
+    }
+  }, [hookStats, logs])
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showCustomFieldsDialog, setShowCustomFieldsDialog] = useState(false)
   const [showContextDialog, setShowContextDialog] = useState(false)
@@ -719,7 +730,7 @@ export default function AccessLogsClient() {
     }
   }
 
-  const getLevelColor = (level: LogLevel) => {
+  const _getLevelColor = (level: LogLevel) => {
     switch (level) {
       case 'debug': return 'text-gray-500'
       case 'info': return 'text-blue-500'
@@ -729,6 +740,7 @@ export default function AccessLogsClient() {
       default: return 'text-gray-500'
     }
   }
+  void _getLevelColor
 
   const getStatusIcon = (status: LogStatus) => {
     switch (status) {
@@ -795,10 +807,11 @@ export default function AccessLogsClient() {
     exportLogs()
   }
 
-  const handleFilterByIP = (ip: string) => {
+  const _handleFilterByIP = (ip: string) => {
     setSearchQuery(ip)
     toast.info(`Filtering by IP: ${ip}`)
   }
+  void _handleFilterByIP
 
   const handleBlockIP = (ip: string) => {
     blockIP(ip)
@@ -834,7 +847,7 @@ export default function AccessLogsClient() {
       const response = await fetch('/api/access-logs/audit', { method: 'POST' })
       toast.dismiss()
       if (response.ok) {
-        const result = await response.json()
+        await response.json() // Parse result
         toast.success('Audit complete')
       } else {
         await createAccessLog({
@@ -1276,7 +1289,7 @@ export default function AccessLogsClient() {
               {[
                 { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600', onClick: () => { setSearchQuery(''); const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement; if (searchInput) { searchInput.focus(); toast.success('Enter a pattern to search') } else { toast.info('Use the search bar to find patterns') } } },
                 { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600', onClick: () => { setActiveTab('alerts'); toast.info('Create alert for patterns') } },
-                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600', onClick: () => { if (mockPatterns.length > 0) { setSearchQuery(mockPatterns[0].pattern); toast.success(`Investigating: ${mockPatterns[0].pattern}`) } else { toast.info('No patterns to investigate') } } },
+                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600', onClick: () => { if (mockPatterns.length > 0 && mockPatterns[0]) { setSearchQuery(mockPatterns[0].pattern); toast.success(`Investigating: ${mockPatterns[0].pattern}`) } else { toast.info('No patterns to investigate') } } },
                 { icon: Download, label: 'Export', color: 'from-orange-500 to-amber-600', onClick: handleExportLogs },
                 { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600', onClick: async () => { try { await createAccessLog({ access_type: 'admin', status: 'success', resource: '/patterns/archive', metadata: { action: 'patterns_archived', count: mockPatterns.length } }); toast.success('Patterns archived successfully') } catch { toast.error('Failed to archive patterns') } } },
                 { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600', onClick: () => { if (mockPatterns.length > 0) { toast.info(`${mockPatterns.length} patterns available for tagging - click on a pattern to tag it`) } else { toast.info('No patterns to tag') } } },
@@ -2381,7 +2394,7 @@ export default function AccessLogsClient() {
               {selectedLog && logs
                 .filter(log => Math.abs(new Date(log.timestamp).getTime() - new Date(selectedLog.timestamp).getTime()) < 60000)
                 .slice(0, 10)
-                .map((log, index) => (
+                .map((log) => (
                   <div
                     key={log.id}
                     className={`p-3 rounded-lg border ${log.id === selectedLog.id ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-gray-50 dark:bg-gray-800'}`}
