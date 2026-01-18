@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { use3DModels, use3DModelMutations, type ThreeDModel, formatFileSize, formatPolygonCount } from '@/lib/hooks/use-3d-models'
 import {
   Box,
   Layers,
@@ -157,10 +158,9 @@ interface SceneObject {
 }
 
 // MIGRATED: Batch #16 - Removed mock data, using database hooks
+// FIXED: Integrated use3DModels hook for production data
 
-// Database hook placeholders for models, materials, textures, and render jobs
-// TODO: Integrate with use3DModeling hook for production data
-const mockModels: Model3D[] = []
+const mockModels: Model3D[] = [] // Kept as fallback
 const mockMaterials: Material[] = []
 const mockTextures: Texture[] = []
 const mockRenderJobs: RenderJob[] = []
@@ -264,8 +264,30 @@ export default function ThreeDModelingClient() {
   const [undoStack, setUndoStack] = useState<string[]>(['Initial state'])
   const [redoStack, setRedoStack] = useState<string[]>([])
 
+  // Database hooks integration - FIXED: Replaced TODO with real hooks
+  const { models: dbModels, stats: dbStats, isLoading, refetch } = use3DModels([], {
+    status: statusFilter !== 'all' ? statusFilter : undefined
+  })
+  const { createModel, updateModel, deleteModel } = use3DModelMutations()
+
+  // Map database models to UI format
+  const models: Model3D[] = useMemo(() => dbModels.map((dbModel): Model3D => ({
+    id: dbModel.id,
+    name: dbModel.title,
+    polygons: dbModel.polygon_count,
+    vertices: dbModel.vertex_count,
+    textures: dbModel.texture_count,
+    materials: dbModel.material_count,
+    size: formatFileSize(dbModel.file_size),
+    format: dbModel.file_format as any,
+    status: dbModel.status as any,
+    thumbnail: dbModel.thumbnail_url || '/api/placeholder/200/150',
+    created: new Date(dbModel.created_at).toLocaleDateString(),
+    modified: new Date(dbModel.updated_at).toLocaleDateString()
+  })), [dbModels])
+
   // Quick actions with proper dialog triggers
-  const mock3DQuickActions = [
+  const quickActions = [
     { id: '1', label: 'New Model', icon: 'plus', action: () => setShowNewModelDialog(true), variant: 'default' as const },
     { id: '2', label: 'Render', icon: 'play', action: () => setShowStartRenderDialog(true), variant: 'default' as const },
     { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
@@ -1815,7 +1837,7 @@ export default function ThreeDModelingClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mock3DQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

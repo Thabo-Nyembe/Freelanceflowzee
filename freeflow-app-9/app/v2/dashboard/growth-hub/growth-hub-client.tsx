@@ -700,7 +700,7 @@ export default function GrowthHubClient() {
       setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
       setShowCreateExperimentModal(false)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create experiment')
     } finally { setIsLoading(false) }
   }
@@ -712,7 +712,7 @@ export default function GrowthHubClient() {
       if (error) throw error
       toast.success("Experiment started - " + expName + " is now running")
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to start experiment')
     } finally { setIsLoading(false) }
   }
@@ -724,7 +724,7 @@ export default function GrowthHubClient() {
       if (error) throw error
       toast.info("Experiment stopped - " + expName + " has been paused")
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to stop experiment')
     } finally { setIsLoading(false) }
   }
@@ -737,7 +737,7 @@ export default function GrowthHubClient() {
       toast.success("Experiment deleted - " + expName + " has been removed")
       setSelectedExperiment(null)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete experiment')
     } finally { setIsLoading(false) }
   }
@@ -765,7 +765,7 @@ export default function GrowthHubClient() {
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnelModal(false)
       refreshFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create funnel')
     } finally { setIsLoading(false) }
   }
@@ -778,7 +778,7 @@ export default function GrowthHubClient() {
       toast.success("Funnel deleted - " + funnelName + " has been removed")
       setSelectedFunnel(null)
       refreshFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete funnel')
     } finally { setIsLoading(false) }
   }
@@ -803,7 +803,7 @@ export default function GrowthHubClient() {
       setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
       setShowCreateCohortModal(false)
       refreshCohorts()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create cohort')
     } finally { setIsLoading(false) }
   }
@@ -816,7 +816,7 @@ export default function GrowthHubClient() {
       toast.success("Cohort deleted - " + cohortName + " has been removed")
       setSelectedCohort(null)
       refreshCohorts()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete cohort')
     } finally { setIsLoading(false) }
   }
@@ -871,7 +871,7 @@ export default function GrowthHubClient() {
       toast.success("Report exported successfully as " + formatLabels[exportReportForm.format])
       setShowExportReportDialog(false)
       setExportReportForm({ reportType: 'conversion', format: 'csv', dateRange: 'last30', includeCharts: true })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -901,7 +901,7 @@ export default function GrowthHubClient() {
       toast.success("Dashboard created - " + dashboardForm.name + " has been created with " + (dashboardForm.widgets.length || 0) + " widgets")
       setShowCreateDashboardDialog(false)
       setDashboardForm({ name: '', description: '', widgets: [] })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create dashboard')
     } finally {
       setIsLoading(false)
@@ -929,7 +929,7 @@ export default function GrowthHubClient() {
       setShowGoalDialog(false)
       setGoalForm({ name: '', metric: '', targetValue: '', targetDate: '' })
       refreshGoals()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create goal')
     } finally {
       setIsLoading(false)
@@ -960,7 +960,7 @@ export default function GrowthHubClient() {
       toast.success("Path analysis created - " + pathAnalysisForm.name + " is now tracking user journeys from " + pathAnalysisForm.startEvent)
       setShowPathAnalysisDialog(false)
       setPathAnalysisForm({ name: '', startEvent: '', endEvent: '', maxSteps: '10' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create path analysis')
     } finally {
       setIsLoading(false)
@@ -991,7 +991,7 @@ export default function GrowthHubClient() {
       toast.success("Integration configured - settings have been updated")
       setShowConfigureIntegrationDialog(false)
       setSelectedIntegration(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to configure integration')
     } finally {
       setIsLoading(false)
@@ -1020,7 +1020,7 @@ export default function GrowthHubClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.success('Data exported successfully')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -1041,7 +1041,7 @@ export default function GrowthHubClient() {
       toast.success('All data cleared')
       setShowClearDataDialog(false)
       handleRefreshData()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to clear data')
     } finally {
       setIsLoading(false)
@@ -1061,7 +1061,7 @@ export default function GrowthHubClient() {
 
       toast.success('Settings reset')
       setShowResetDefaultsDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to reset settings')
     } finally {
       setIsLoading(false)

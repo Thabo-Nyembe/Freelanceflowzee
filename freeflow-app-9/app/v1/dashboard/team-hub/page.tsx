@@ -42,6 +42,7 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useTrainingMutations } from '@/lib/hooks/use-training'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -116,6 +117,7 @@ export default function TeamHubPage() {
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
   const router = useRouter()
+  const { createProgram, isCreating: isCreatingProgram } = useTrainingMutations()
 
   const [selectedMember, setSelectedMember] = useState<TeamMemberUI | null>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
@@ -164,6 +166,15 @@ export default function TeamHubPage() {
   const [taskNameValue, setTaskNameValue] = useState('')
   const [recognitionForm, setRecognitionForm] = useState({ memberId: '', award: '', reason: '' })
   const [taskForm, setTaskForm] = useState({ memberId: '', title: '', priority: 'medium', dueDate: '' })
+  const [trainingForm, setTrainingForm] = useState({
+    programName: '',
+    description: '',
+    programType: 'workshop',
+    department: '',
+    startDate: '',
+    duration: '1'
+  })
+  const [isSchedulingTraining, setIsSchedulingTraining] = useState(false)
 
   // COMPUTED TEAM STATS - Updated dynamically from Supabase data
   const teamStats = {
@@ -1693,10 +1704,104 @@ export default function TeamHubPage() {
                 </div>
               ))}
             </div>
-            <Button className="w-full" variant="outline" onClick={() => {
-              toast.success('Training Schedule - Training module coming soon')
-            }}>
-              Schedule Training Session
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Program Name</Label>
+                <Input
+                  value={trainingForm.programName}
+                  onChange={(e) => setTrainingForm(prev => ({ ...prev, programName: e.target.value }))}
+                  placeholder="e.g., Leadership Workshop"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={trainingForm.description}
+                  onChange={(e) => setTrainingForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Training objectives and overview..."
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <select
+                    className="w-full p-2 rounded border bg-background"
+                    value={trainingForm.programType}
+                    onChange={(e) => setTrainingForm(prev => ({ ...prev, programType: e.target.value }))}
+                  >
+                    <option value="workshop">Workshop</option>
+                    <option value="course">Course</option>
+                    <option value="webinar">Webinar</option>
+                    <option value="certification">Certification</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <select
+                    className="w-full p-2 rounded border bg-background"
+                    value={trainingForm.department}
+                    onChange={(e) => setTrainingForm(prev => ({ ...prev, department: e.target.value }))}
+                  >
+                    <option value="">All Departments</option>
+                    {departments.map(dept => (
+                      <option key={dept.name} value={dept.name}>{dept.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input
+                    type="date"
+                    value={trainingForm.startDate}
+                    onChange={(e) => setTrainingForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Duration (days)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={trainingForm.duration}
+                    onChange={(e) => setTrainingForm(prev => ({ ...prev, duration: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <Button
+              className="w-full"
+              onClick={async () => {
+                if (!trainingForm.programName || !trainingForm.startDate) {
+                  toast.error('Please fill in program name and start date')
+                  return
+                }
+                setIsSchedulingTraining(true)
+                try {
+                  await createProgram({
+                    program_name: trainingForm.programName,
+                    description: trainingForm.description,
+                    program_type: trainingForm.programType,
+                    start_date: trainingForm.startDate,
+                    duration_days: parseInt(trainingForm.duration) || 1,
+                    status: 'scheduled',
+                    max_capacity: teamStats.totalMembers,
+                    format: 'in-person'
+                  })
+                  toast.success('Training session scheduled successfully!')
+                  setTrainingForm({ programName: '', description: '', programType: 'workshop', department: '', startDate: '', duration: '1' })
+                  setShowTrainingDialog(false)
+                  announce('Training session scheduled', 'polite')
+                } catch (err) {
+                  toast.error('Failed to schedule training. Please try again.')
+                } finally {
+                  setIsSchedulingTraining(false)
+                }
+              }}
+              disabled={isSchedulingTraining || isCreatingProgram}
+            >
+              {isSchedulingTraining || isCreatingProgram ? 'Scheduling...' : 'Schedule Training Session'}
             </Button>
           </div>
           <DialogFooter>

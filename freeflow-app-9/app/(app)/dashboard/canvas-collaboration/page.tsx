@@ -502,10 +502,10 @@ export default function CanvasCollaboration() {
       setShowCreateCanvasDialog(false)
       setNewCanvasSize('1920x1080')
       setNewCanvasName('')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to create canvas', { error: err })
       toast.error('Failed to create canvas', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }

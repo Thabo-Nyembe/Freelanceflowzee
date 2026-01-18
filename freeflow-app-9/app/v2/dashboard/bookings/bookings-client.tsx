@@ -2458,7 +2458,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     setShowBlockTimeDialog(false)
                     setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to Block Time')
                   }
                 }}

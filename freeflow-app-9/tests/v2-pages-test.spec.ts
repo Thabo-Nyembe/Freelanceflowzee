@@ -145,7 +145,7 @@ test.describe('V2 Pages Screenshots Batch', () => {
         })
 
         console.log(`✓ ${pageName}: ${response?.status()}${hasError ? ' (has error text)' : ''}`)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(`✗ ${pageName}: ${err.message}`)
         results.push({ page: pageName, status: 0, hasError: true })
       }

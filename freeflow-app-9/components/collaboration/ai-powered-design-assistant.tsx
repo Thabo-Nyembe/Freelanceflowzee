@@ -134,52 +134,50 @@ interface AIDesignAssistantProps {
   className?: string
 }
 
-// Mock AI Analysis Data (in production, this would come from AI service)
-const mockAnalysis: AIAnalysis = {
-  id: 'analysis_1',
-  type: 'design',
-  score: 87,
-  insights: ['Color contrast meets WCAG AA standards', 'Typography hierarchy is well-established', 'Layout follows grid system principles', 'User flow is intuitive and clear'],
-  improvements: ['Consider reducing cognitive load in navigation', 'Add more whitespace around CTAs', 'Optimize mobile touch targets', 'Improve loading state indicators'],
-  strengths: ['Strong visual hierarchy', 'Consistent brand application', 'Responsive design implementation', 'Accessible color choices'],
-  timestamp: new Date().toISOString()
-}
-
-const mockSuggestions: AISuggestion[] = [
-  {
-    id: 'sug_1',
-    title: 'Improve Button Contrast',
-    description: 'Primary buttons need higher contrast for better accessibility',
-    type: 'color',
-    priority: 'high',
-    impact: 'Improved accessibility and conversion rates',
-    implementation: 'Change button background from #3B82F6 to #1E40AF',
-    examples: ['Before: 3.1:1 contrast', 'After: 4.7:1 contrast'],
-    confidence: 92
-  },
-  {
-    id: 'sug_2',
-    title: 'Optimize Mobile Spacing',
-    description: 'Increase touch target sizes for mobile interactions',
-    type: 'layout',
-    priority: 'medium',
-    impact: 'Better mobile user experience',
-    implementation: 'Increase button height from 40px to 48px on mobile',
-    examples: ['Current: 40px height', 'Recommended: 48px+ height'],
-    confidence: 89
-  },
-  {
-    id: 'sug_3',
-    title: 'Typography Scale Adjustment',
-    description: 'Refine heading hierarchy for better readability',
-    type: 'typography',
-    priority: 'low',
-    impact: 'Enhanced content scanability',
-    implementation: 'Increase h2 size from 1.5rem to 1.75rem',
-    examples: ['Current scale', 'Optimized scale'],
-    confidence: 78
+// Convert API response to component types
+function convertAnalysisResponse(apiResponse: {
+  id?: string
+  type: string
+  score: number
+  scores: { accessibility: number; performance: number; responsiveness: number; usability: number }
+  recommendations: string[]
+  timestamp: string
+}): { analysis: AIAnalysis; suggestions: AISuggestion[] } {
+  const analysis: AIAnalysis = {
+    id: apiResponse.id || `analysis_${Date.now()}`,
+    type: apiResponse.type,
+    score: apiResponse.score,
+    insights: [
+      `Accessibility score: ${apiResponse.scores.accessibility}%`,
+      `Performance score: ${apiResponse.scores.performance}%`,
+      `Responsiveness score: ${apiResponse.scores.responsiveness}%`,
+      `Usability score: ${apiResponse.scores.usability}%`
+    ],
+    improvements: apiResponse.recommendations,
+    strengths: apiResponse.score >= 80
+      ? ['Good overall design quality', 'Meets baseline standards']
+      : ['Foundation is solid', 'Improvements identified'],
+    timestamp: apiResponse.timestamp
   }
-]
+
+  // Generate suggestions from recommendations
+  const priorityMap = ['high', 'medium', 'low'] as const
+  const typeMap = ['accessibility', 'performance', 'layout', 'typography', 'color'] as const
+
+  const suggestions: AISuggestion[] = apiResponse.recommendations.map((rec, index) => ({
+    id: `sug_${Date.now()}_${index}`,
+    title: rec.split('.')[0] || rec.substring(0, 50),
+    description: rec,
+    type: typeMap[index % typeMap.length],
+    priority: priorityMap[Math.min(index, priorityMap.length - 1)],
+    impact: 'Improves overall design quality',
+    implementation: rec,
+    examples: [`Before: Current state`, `After: Optimized`],
+    confidence: Math.max(70, 95 - (index * 5))
+  }))
+
+  return { analysis, suggestions }
+}
 
 export function AIDesignAssistant({
   projectId,
@@ -199,19 +197,57 @@ export function AIDesignAssistant({
     confidence: 0,
   })
 
-  // Simulate AI Analysis
+  // Run AI Analysis via API
   const runAnalysis = useCallback(async (mode: AIAssistantState['analysisMode']) => {
     dispatch({ type: 'START_ANALYSIS', mode })
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      dispatch({ 
-        type: 'COMPLETE_ANALYSIS', 
-        analysis: { ...mockAnalysis, type: mode },
-        suggestions: mockSuggestions 
+
+    try {
+      const response = await fetch('/api/ai/design-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: mode,
+          designDescription: currentFile?.url
+            ? `Analyzing ${currentFile.type} file: ${currentFile.url}`
+            : `General ${mode} analysis for project`,
+          projectId
+        })
       })
-    }, 2000)
-  }, [])
+
+      if (!response.ok) {
+        throw new Error('Analysis failed')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.analysis) {
+        const { analysis, suggestions } = convertAnalysisResponse(data.analysis)
+        dispatch({
+          type: 'COMPLETE_ANALYSIS',
+          analysis,
+          suggestions
+        })
+      } else {
+        throw new Error(data.error || 'Analysis failed')
+      }
+    } catch (error) {
+      console.error('AI Analysis error:', error)
+      // Dispatch empty analysis on error
+      dispatch({
+        type: 'COMPLETE_ANALYSIS',
+        analysis: {
+          id: `error_${Date.now()}`,
+          type: mode,
+          score: 0,
+          insights: ['Analysis failed - please try again'],
+          improvements: [],
+          strengths: [],
+          timestamp: new Date().toISOString()
+        },
+        suggestions: []
+      })
+    }
+  }, [projectId, currentFile])
 
   // Send message to AI
   const sendMessage = useCallback(async () => {
@@ -225,22 +261,63 @@ export function AIDesignAssistant({
     }
 
     dispatch({ type: 'ADD_MESSAGE', message: userMessage })
+    dispatch({ type: 'SET_USER_INPUT', input: '' })
     dispatch({ type: 'START_GENERATING' })
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: AIMessage = {
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: state.userInput,
+          taskType: 'design',
+          systemPrompt: `You are an expert design assistant helping with ${state.analysisMode} analysis.
+            Current analysis context: ${state.currentAnalysis ? `Score: ${state.currentAnalysis.score}, Type: ${state.currentAnalysis.type}` : 'No analysis yet'}.
+            Provide specific, actionable design suggestions.`
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success && data.response) {
+        // Convert API suggestions to component format
+        const suggestions: AISuggestion[] = (data.response.suggestions || []).slice(0, 2).map((s: string, i: number) => ({
+          id: `chat_sug_${Date.now()}_${i}`,
+          title: s.substring(0, 40),
+          description: s,
+          type: state.analysisMode,
+          priority: i === 0 ? 'high' : 'medium',
+          impact: 'Based on your question',
+          implementation: s,
+          examples: [],
+          confidence: 85 - (i * 10)
+        }))
+
+        const aiResponse: AIMessage = {
+          id: `msg_${Date.now() + 1}`,
+          role: 'assistant',
+          content: data.response.content,
+          timestamp: new Date().toISOString(),
+          suggestions
+        }
+
+        dispatch({ type: 'ADD_MESSAGE', message: aiResponse })
+      } else {
+        throw new Error(data.error || 'Chat failed')
+      }
+    } catch (error) {
+      console.error('AI Chat error:', error)
+      const errorResponse: AIMessage = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
-        content: `Based on your question about "${state.userInput}", I recommend focusing on the design principles we&apos;ve identified. Here are some specific suggestions:`,
-        timestamp: new Date().toISOString(),
-        suggestions: mockSuggestions.slice(0, 2)
+        content: 'I apologize, but I encountered an error. Please try again.',
+        timestamp: new Date().toISOString()
       }
-      
-      dispatch({ type: 'ADD_MESSAGE', message: aiResponse })
+      dispatch({ type: 'ADD_MESSAGE', message: errorResponse })
+    } finally {
       dispatch({ type: 'STOP_GENERATING' })
-    }, 1500)
-  }, [state.userInput])
+    }
+  }, [state.userInput, state.analysisMode, state.currentAnalysis])
 
   const analysisOptions = [
     { key: 'design', label: 'Overall Design', icon: Palette },

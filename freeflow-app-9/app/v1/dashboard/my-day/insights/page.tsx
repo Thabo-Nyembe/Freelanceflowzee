@@ -20,9 +20,36 @@ import {
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useSystemInsights, type SystemInsight } from '@/lib/hooks/use-system-insights'
 
 // MY DAY UTILITIES
 import { type AIInsight } from '@/lib/my-day-utils'
+
+// Map SystemInsight to AIInsight
+function mapSystemInsightToAIInsight(insight: SystemInsight): AIInsight {
+  // Map insight_type or category to AIInsight type
+  const typeMap: Record<string, AIInsight['type']> = {
+    productivity: 'productivity',
+    schedule: 'schedule',
+    health: 'health',
+    optimization: 'optimization',
+    recommendation: 'optimization',
+    trend: 'productivity',
+    pattern: 'productivity',
+    opportunity: 'optimization',
+    alert: 'schedule',
+    risk: 'health'
+  }
+
+  return {
+    id: insight.id,
+    type: typeMap[insight.category?.toLowerCase()] || typeMap[insight.insight_type] || 'optimization',
+    title: insight.title,
+    description: insight.description || '',
+    actionable: ['recommendation', 'opportunity', 'alert'].includes(insight.insight_type),
+    priority: insight.priority === 'urgent' ? 'high' : insight.priority
+  }
+}
 
 const logger = createFeatureLogger('MyDay-Insights')
 
@@ -44,7 +71,15 @@ export default function InsightsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [insights, setInsights] = useState<AIInsight[]>([])
+  // Fetch insights from database using system insights hook
+  const { data: systemInsights, isLoading: insightsLoading, refetch: refetchInsights } = useSystemInsights({
+    status: 'new',
+    limit: 50
+  })
+
+  // Map system insights to AI insights
+  const insights: AIInsight[] = (systemInsights || []).map(mapSystemInsightToAIInsight)
+
   const [appliedInsights, setAppliedInsights] = useState<Set<string>>(new Set())
   const [dismissedInsights, setDismissedInsights] = useState<Set<string>>(new Set())
   const [filterType, setFilterType] = useState<string>('all')
@@ -71,22 +106,25 @@ export default function InsightsPage() {
     announce('Insight dismissed', 'polite')
   }, [announce])
 
-  // Refresh insights
+  // Refresh insights from database
   const handleRefreshInsights = useCallback(async () => {
     setIsRefreshing(true)
 
-    // Generate fresh insights from database
-    // TODO: Replace with actual database hook
-    const newInsights: AIInsight[] = []
-    setInsights(newInsights)
-    setAppliedInsights(new Set())
-    setDismissedInsights(new Set())
+    try {
+      await refetchInsights()
+      setAppliedInsights(new Set())
+      setDismissedInsights(new Set())
 
-    toast.success('Insights Refreshed', { description: `${newInsights.length} new recommendations generated` })
-    logger.info('Insights refreshed', { count: newInsights.length })
-    announce('Insights refreshed', 'polite')
-    setIsRefreshing(false)
-  }, [announce])
+      toast.success('Insights Refreshed', { description: `${insights.length} recommendations loaded from database` })
+      logger.info('Insights refreshed', { count: insights.length })
+      announce('Insights refreshed', 'polite')
+    } catch (error) {
+      toast.error('Failed to refresh insights')
+      logger.error('Insights refresh failed', { error })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [refetchInsights, insights.length, announce])
 
   // Export insights
   const handleExportInsights = useCallback(() => {

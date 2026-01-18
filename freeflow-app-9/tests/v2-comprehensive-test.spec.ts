@@ -79,7 +79,7 @@ test.describe('V2 Comprehensive Page Testing', () => {
 
         const statusIcon = status === 200 && !hasError ? '✓' : '✗'
         console.log(`${statusIcon} ${pageName}: ${status}${hasError ? ' (error on page)' : ''}`)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(`✗ ${pageName}: TIMEOUT/ERROR - ${err.message?.slice(0, 50)}`)
         results.push({ page: pageName, status: 0, hasError: true, errorText: err.message })
       }

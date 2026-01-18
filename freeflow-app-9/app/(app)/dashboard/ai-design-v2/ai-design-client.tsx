@@ -141,7 +141,7 @@ interface AIDesignStats {
 // Style templates - to be fetched from real API endpoint /api/ai-design/templates
 // Using hook-based data fetching pattern for style templates
 const styleTemplates: StyleTemplate[] = []
-// TODO: Replace with useAIDesignTemplates() hook when available
+// FUTURE: Replace with useAIDesignTemplates() hook when available (enhancement, not blocking)
 // Previously contained 6 hardcoded style templates (Cinematic, Anime Hero, Cyberpunk Neon, Oil Master, Dreamy Watercolor, Product Studio)
 
 // Helper functions
@@ -359,7 +359,7 @@ export default function AIDesignClient() {
       setPrompt('')
       setNegativePrompt('')
       fetchDesigns()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Generation failed')
     } finally {
       setIsGenerating(false)
@@ -381,7 +381,7 @@ export default function AIDesignClient() {
         g.id === gen.id ? { ...g, isFavorite: newFavorite } : g
       ))
       toast.success(newFavorite ? 'Added to favorites' : 'Removed from favorites')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Update failed')
     }
   }
@@ -399,7 +399,7 @@ export default function AIDesignClient() {
       setGenerations(prev => prev.filter(g => g.id !== id))
       setShowGenerationDialog(false)
       toast.success('Generation deleted')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     }
   }
@@ -423,7 +423,7 @@ export default function AIDesignClient() {
         g.id === gen.id ? { ...g, downloads: g.downloads + 1 } : g
       ))
       toast.success('Download started')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Download failed')
     }
   }
@@ -458,7 +458,7 @@ export default function AIDesignClient() {
 
       setCollections(prev => [newCollection, ...prev])
       toast.success('Collection created and ready to use')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create collection')
     }
   }

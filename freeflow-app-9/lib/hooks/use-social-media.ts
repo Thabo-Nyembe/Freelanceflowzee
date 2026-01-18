@@ -122,8 +122,9 @@ export function useSocialPosts() {
 
       if (error) throw error
       setPosts(data || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
       toast({ title: 'Error', description: 'Failed to fetch posts', variant: 'destructive' })
     } finally {
       setLoading(false)
@@ -145,8 +146,8 @@ export function useSocialPosts() {
       setPosts(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Post created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to create post', variant: 'destructive' })
       throw err
     }
   }
@@ -164,8 +165,8 @@ export function useSocialPosts() {
       setPosts(prev => prev.map(p => p.id === id ? data : p))
       toast({ title: 'Success', description: 'Post updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to update post', variant: 'destructive' })
       throw err
     }
   }
@@ -180,8 +181,8 @@ export function useSocialPosts() {
       if (error) throw error
       setPosts(prev => prev.filter(p => p.id !== id))
       toast({ title: 'Success', description: 'Post deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to delete post', variant: 'destructive' })
       throw err
     }
   }
@@ -289,8 +290,8 @@ export function useSocialAccounts() {
       setAccounts(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Account connected' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to connect account', variant: 'destructive' })
       throw err
     }
   }
@@ -305,8 +306,8 @@ export function useSocialAccounts() {
       if (error) throw error
       setAccounts(prev => prev.filter(a => a.id !== id))
       toast({ title: 'Success', description: 'Account disconnected' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to disconnect account', variant: 'destructive' })
       throw err
     }
   }

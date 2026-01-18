@@ -88,7 +88,7 @@ export function useDeals(filters: DealFilters = {}) {
 
       if (fetchError) throw fetchError
       setDeals(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       console.error('Failed to fetch deals:', err)
     } finally {
@@ -126,8 +126,8 @@ export function useDeals(filters: DealFilters = {}) {
       setDeals(prev => [data, ...prev])
       toast.success('Deal created', { description: `${data.title} added to pipeline` })
       return data
-    } catch (err: any) {
-      toast.error('Failed to create deal', { description: err.message })
+    } catch (err: unknown) {
+      toast.error('Failed to create deal', { description: err instanceof Error ? err.message : 'Operation failed' })
       throw err
     }
   }
@@ -153,8 +153,8 @@ export function useDeals(filters: DealFilters = {}) {
       setDeals(prev => prev.map(d => d.id === id ? data : d))
       toast.success('Deal updated')
       return data
-    } catch (err: any) {
-      toast.error('Failed to update deal', { description: err.message })
+    } catch (err: unknown) {
+      toast.error('Failed to update deal', { description: err instanceof Error ? err.message : 'Operation failed' })
       throw err
     }
   }
@@ -183,8 +183,8 @@ export function useDeals(filters: DealFilters = {}) {
       if (error) throw error
       setDeals(prev => prev.filter(d => d.id !== id))
       toast.success('Deal deleted')
-    } catch (err: any) {
-      toast.error('Failed to delete deal', { description: err.message })
+    } catch (err: unknown) {
+      toast.error('Failed to delete deal', { description: err instanceof Error ? err.message : 'Operation failed' })
       throw err
     }
   }

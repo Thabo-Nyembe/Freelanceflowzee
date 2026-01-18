@@ -204,11 +204,10 @@ export default function ProjectsClient() {
         if (!response.ok) throw new Error('Failed to fetch projects: ' + response.statusText)
 
         const data = await response.json()
-          if (data.success) {
-            setProjects(data.projects || [])
-          } else {
-            throw new Error(data.error || 'Failed to load projects')
-          }
+        if (data.success) {
+          setProjects(data.projects || [])
+        } else {
+          throw new Error(data.error || 'Failed to load projects')
         }
       }
 
@@ -216,8 +215,8 @@ export default function ProjectsClient() {
       if (activeProjects.length > 0) {
         setProjects(activeProjects)
       }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to load projects'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load projects'
       setError(errorMessage)
       logger.error('Failed to fetch projects', { error: err })
       toast.error('Failed to load projects')
@@ -309,7 +308,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to submit revision')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Revision failed', { error: err })
       toast.error('Failed to submit revision')
     } finally {
@@ -339,7 +338,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to approve')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Approval failed', { error: err })
       toast.error('Failed to approve')
     } finally {
@@ -375,7 +374,7 @@ export default function ProjectsClient() {
       window.URL.revokeObjectURL(url)
 
       toast.success('Files downloaded for "' + project.name + '"')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Download failed')
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }))
@@ -424,7 +423,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to create project')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Create project failed', { error: err })
       toast.error('Failed to create project')
     } finally {
@@ -459,7 +458,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to delete project')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Delete project failed', { error: err })
       toast.error('Failed to delete project')
     } finally {
@@ -492,7 +491,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to archive project')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Archive project failed', { error: err })
       toast.error('Failed to archive project')
     } finally {
@@ -528,7 +527,7 @@ export default function ProjectsClient() {
       window.URL.revokeObjectURL(url)
 
       toast.success('Project data exported')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Export failed', { error: err })
       toast.error('Failed to export data')
     }
@@ -565,7 +564,7 @@ export default function ProjectsClient() {
       } else {
         throw new Error(result.error || 'Failed to duplicate project')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Duplicate project failed', { error: err })
       toast.error('Failed to duplicate project')
     } finally {
@@ -593,7 +592,7 @@ export default function ProjectsClient() {
 
       window.open(calendarUrl, '_blank')
       toast.success('Calendar opened')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to open calendar')
     }
   }
@@ -653,7 +652,7 @@ export default function ProjectsClient() {
         } else {
           throw new Error(result.error || 'Failed to share project')
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('Share project failed', { error: err })
         toast.error('Failed to share project')
       } finally {

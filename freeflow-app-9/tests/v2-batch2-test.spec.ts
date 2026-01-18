@@ -76,7 +76,7 @@ test.describe('V2 Batch 2 Testing (50 more pages)', () => {
 
         const statusIcon = status === 200 && !hasBuildError ? '✓' : '✗'
         console.log(`${statusIcon} ${pageName}: ${status}${hasBuildError ? ' (BUILD ERROR)' : ''}`)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(`✗ ${pageName}: TIMEOUT/ERROR - ${err.message?.slice(0, 50)}`)
         results.push({ page: pageName, status: 0, hasError: true, errorText: err.message })
       }

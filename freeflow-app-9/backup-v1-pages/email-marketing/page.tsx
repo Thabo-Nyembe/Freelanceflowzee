@@ -191,7 +191,7 @@ export default function EmailMarketingPage() {
       ))
 
       announce(`Campaign ${campaign.name} sent successfully`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
       logger.error('Send campaign error', { error: err.message })
@@ -272,7 +272,7 @@ export default function EmailMarketingPage() {
       setCampaigns(prev => [data, ...prev])
 
       announce(`Campaign duplicated as ${newCampaignName}`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
       logger.error('Duplicate campaign error', { error: err.message })
@@ -330,7 +330,7 @@ export default function EmailMarketingPage() {
       })
       announce('Subscriber added successfully', 'polite')
       setIsSubscriberFormOpen(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to add subscriber', { error: err })
       toast.error('Failed to add subscriber')
       announce('Failed to add subscriber', 'assertive')
@@ -493,7 +493,7 @@ export default function EmailMarketingPage() {
       const templatesResult = await getEmailTemplates(userId)
       setTemplates(templatesResult.data || [])
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Create template error', { error: err.message })
       toast.error('Failed to create template')
       announce('Failed to create template', 'assertive')

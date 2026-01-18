@@ -93,7 +93,7 @@ export function useSecurityAudits() {
 
       if (error) throw error
       setAudits(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch audits', variant: 'destructive' })
     } finally {
@@ -116,8 +116,8 @@ export function useSecurityAudits() {
       setAudits(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Audit scheduled successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -135,8 +135,8 @@ export function useSecurityAudits() {
       setAudits(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Audit updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -151,8 +151,8 @@ export function useSecurityAudits() {
       if (error) throw error
       setAudits(prev => prev.filter(a => a.id !== id))
       toast({ title: 'Success', description: 'Audit deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -280,8 +280,8 @@ export function useAuditFindings(auditId: string) {
       setFindings(prev => [...prev, data])
       toast({ title: 'Success', description: 'Finding added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -299,8 +299,8 @@ export function useAuditFindings(auditId: string) {
       setFindings(prev => prev.map(f => f.id === id ? data : f))
       toast({ title: 'Success', description: 'Finding updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

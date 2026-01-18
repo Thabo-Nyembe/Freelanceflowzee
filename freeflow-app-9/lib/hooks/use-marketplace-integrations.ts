@@ -119,7 +119,7 @@ export function useMarketplaceIntegrations(initialIntegrations: MarketplaceInteg
 
       if (insertError) throw insertError
       return result
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -137,7 +137,7 @@ export function useMarketplaceIntegrations(initialIntegrations: MarketplaceInteg
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -152,7 +152,7 @@ export function useMarketplaceIntegrations(initialIntegrations: MarketplaceInteg
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

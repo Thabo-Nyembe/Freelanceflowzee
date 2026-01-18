@@ -471,7 +471,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating role')
     } finally {
       setIsLoading(false)
@@ -500,7 +500,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success(`Permission assigned`, { description: `${permission} added to ${roleName}` })
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error assigning permission')
     } finally {
       setIsLoading(false)
@@ -526,7 +526,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success(`Permission revoked`, { description: `${permission} removed from ${roleName}` })
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error revoking permission')
     } finally {
       setIsLoading(false)
@@ -543,7 +543,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`Role deleted`, { description: `${roleName} has been deleted` })
       setSelectedRole(null)
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error deleting role')
     } finally {
       setIsLoading(false)
@@ -563,7 +563,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Export complete')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -582,7 +582,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
       toast.success(`Audit complete`, { description: `Found ${unusedRoles.length} unused roles and ${expiredAssignments.length} expired assignments` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Audit failed')
     } finally {
       setIsLoading(false)
@@ -602,7 +602,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`User invited`, { description: `Invitation sent to ${newUser.email}` })
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating user')
     } finally {
       setIsLoading(false)
@@ -622,7 +622,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`Group created`, { description: `${newGroup.name} has been created` })
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating group')
     } finally {
       setIsLoading(false)
@@ -647,7 +647,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('User assigned')
       refetchAssignments?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error assigning user')
     } finally {
       setIsLoading(false)

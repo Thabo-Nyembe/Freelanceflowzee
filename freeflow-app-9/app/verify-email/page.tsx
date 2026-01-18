@@ -62,7 +62,7 @@ function VerifyEmailContent() {
           // No valid token, show waiting state
           setStatus('waiting')
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Email verification error:', err)
         setError(err.message || 'Failed to verify email')
         setStatus('error')

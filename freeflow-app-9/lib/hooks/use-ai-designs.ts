@@ -182,7 +182,7 @@ export function useAIDesigns(initialDesigns: AIDesign[] = [], options: UseAIDesi
 
   const updateDesign = useCallback(async (
     designId: string,
-    updates: Partial<Pick<AIDesign, 'title' | 'is_public' | 'tags' | 'status'>>
+    updates: Partial<Pick<AIDesign, 'title' | 'is_public' | 'is_featured' | 'tags' | 'status'>>
   ) => {
     const { error } = await supabase
       .from('ai_designs')
@@ -194,6 +194,24 @@ export function useAIDesigns(initialDesigns: AIDesign[] = [], options: UseAIDesi
       d.id === designId ? { ...d, ...updates } : d
     ))
   }, [supabase])
+
+  // Toggle favorite status (using is_featured field)
+  const toggleFavorite = useCallback(async (designId: string) => {
+    const design = designs.find(d => d.id === designId)
+    if (!design) return
+
+    const newValue = !design.is_featured
+    const { error } = await supabase
+      .from('ai_designs')
+      .update({ is_featured: newValue, updated_at: new Date().toISOString() })
+      .eq('id', designId)
+
+    if (error) throw error
+    setDesigns(prev => prev.map(d =>
+      d.id === designId ? { ...d, is_featured: newValue } : d
+    ))
+    return newValue
+  }, [supabase, designs])
 
   const likeDesign = useCallback(async (designId: string) => {
     const design = designs.find(d => d.id === designId)
@@ -233,8 +251,12 @@ export function useAIDesigns(initialDesigns: AIDesign[] = [], options: UseAIDesi
     setDesigns(prev => prev.filter(d => d.id !== designId))
   }, [supabase])
 
+  // Get favorites (designs marked as featured)
+  const favorites = designs.filter(d => d.is_featured)
+
   return {
     designs,
+    favorites,
     stats,
     isLoading,
     isGenerating,
@@ -242,6 +264,7 @@ export function useAIDesigns(initialDesigns: AIDesign[] = [], options: UseAIDesi
     fetchDesigns,
     createDesign,
     updateDesign,
+    toggleFavorite,
     likeDesign,
     incrementViews,
     deleteDesign

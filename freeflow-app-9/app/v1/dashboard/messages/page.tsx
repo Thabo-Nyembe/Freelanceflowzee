@@ -157,11 +157,51 @@ export default function MessagesPageMigrated() {
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
+    input.accept = 'image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar'
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        // TODO: Integrate with useUploadFile hook from Files API client
-        logger.info('Files selected', { count: files.length })
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { toast } = await import('sonner')
+
+        toast.promise(
+          (async () => {
+            const uploadedFiles: Array<{ name: string; url: string; type: string; size: number }> = []
+
+            for (const file of Array.from(files)) {
+              const filePath = `message-attachments/${Date.now()}-${file.name}`
+              const { error: uploadError } = await supabase.storage
+                .from('attachments')
+                .upload(filePath, file)
+
+              if (uploadError) {
+                logger.error('File upload failed', { file: file.name, error: uploadError.message })
+                throw new Error(`Failed to upload ${file.name}`)
+              }
+
+              const { data: { publicUrl } } = supabase.storage
+                .from('attachments')
+                .getPublicUrl(filePath)
+
+              uploadedFiles.push({
+                name: file.name,
+                url: publicUrl,
+                type: file.type,
+                size: file.size
+              })
+
+              logger.info('File uploaded successfully', { file: file.name, url: publicUrl })
+            }
+
+            return uploadedFiles
+          })(),
+          {
+            loading: `Uploading ${files.length} file(s)...`,
+            success: (uploaded) => `Successfully uploaded ${uploaded.length} file(s)`,
+            error: (err) => err.message || 'Upload failed'
+          }
+        )
       }
     }
     input.click()

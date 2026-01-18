@@ -672,8 +672,8 @@ export default function PluginsClient() {
         performance_score: plugin.performanceScore
       })
       toast.success('Plugin Installed', { description: `"${plugin.name}" has been installed successfully!` })
-    } catch (err: any) {
-      toast.error('Installation Failed', { description: err.message || 'Failed to install plugin' })
+    } catch (err: unknown) {
+      toast.error('Installation Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to install plugin' })
     } finally {
       setInstalling(null)
       setShowInstallDialog(false)
@@ -713,8 +713,8 @@ export default function PluginsClient() {
         repository_url: '',
         documentation_url: ''
       })
-    } catch (err: any) {
-      toast.error('Creation Failed', { description: err.message || 'Failed to create plugin' })
+    } catch (err: unknown) {
+      toast.error('Creation Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to create plugin' })
     }
   }
 
@@ -723,8 +723,8 @@ export default function PluginsClient() {
     try {
       await deletePlugin(pluginId)
       toast.success('Plugin Uninstalled', { description: `"${pluginName}" has been removed` })
-    } catch (err: any) {
-      toast.error('Uninstall Failed', { description: err.message || 'Failed to uninstall plugin' })
+    } catch (err: unknown) {
+      toast.error('Uninstall Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to uninstall plugin' })
     }
   }
 
@@ -744,8 +744,8 @@ export default function PluginsClient() {
     try {
       await activatePlugin(pluginId)
       toast.success('Plugin Enabled', { description: `"${pluginName}" is now active` })
-    } catch (err: any) {
-      toast.error('Activation Failed', { description: err.message || 'Failed to activate plugin' })
+    } catch (err: unknown) {
+      toast.error('Activation Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to activate plugin' })
     }
   }
 
@@ -753,8 +753,8 @@ export default function PluginsClient() {
     try {
       await deactivatePlugin(pluginId)
       toast.info('Plugin Disabled', { description: `"${pluginName}" has been deactivated` })
-    } catch (err: any) {
-      toast.error('Deactivation Failed', { description: err.message || 'Failed to deactivate plugin' })
+    } catch (err: unknown) {
+      toast.error('Deactivation Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to deactivate plugin' })
     }
   }
 
@@ -762,8 +762,8 @@ export default function PluginsClient() {
     try {
       await updatePluginVersion(pluginId, newVersion)
       toast.success('Plugin Updated', { description: `"${pluginName}" has been updated to v${newVersion}` })
-    } catch (err: any) {
-      toast.error('Update Failed', { description: err.message || 'Failed to update plugin' })
+    } catch (err: unknown) {
+      toast.error('Update Failed', { description: err instanceof Error ? err.message : 'Operation failed' || 'Failed to update plugin' })
     }
   }
 

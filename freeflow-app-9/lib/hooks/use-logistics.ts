@@ -141,7 +141,7 @@ export function useLogisticsRoutes() {
 
       if (error) throw error
       setRoutes(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch routes', variant: 'destructive' })
     } finally {
@@ -164,8 +164,8 @@ export function useLogisticsRoutes() {
       setRoutes(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Route created successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -183,8 +183,8 @@ export function useLogisticsRoutes() {
       setRoutes(prev => prev.map(r => r.id === id ? data : r))
       toast({ title: 'Success', description: 'Route updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -199,8 +199,8 @@ export function useLogisticsRoutes() {
       if (error) throw error
       setRoutes(prev => prev.filter(r => r.id !== id))
       toast({ title: 'Success', description: 'Route deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -351,8 +351,8 @@ export function useRouteStops(routeId: string) {
       setStops(prev => [...prev, data].sort((a, b) => a.stop_number - b.stop_number))
       toast({ title: 'Success', description: 'Stop added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -370,8 +370,8 @@ export function useRouteStops(routeId: string) {
       setStops(prev => prev.map(s => s.id === id ? data : s))
       toast({ title: 'Success', description: 'Stop updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -483,8 +483,8 @@ export function useFleetVehicles() {
       setVehicles(prev => [...prev, data])
       toast({ title: 'Success', description: 'Vehicle added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -502,8 +502,8 @@ export function useFleetVehicles() {
       setVehicles(prev => prev.map(v => v.id === id ? data : v))
       toast({ title: 'Success', description: 'Vehicle updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -518,8 +518,8 @@ export function useFleetVehicles() {
       if (error) throw error
       setVehicles(prev => prev.filter(v => v.id !== id))
       toast({ title: 'Success', description: 'Vehicle removed' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

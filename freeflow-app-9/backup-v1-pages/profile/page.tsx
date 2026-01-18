@@ -251,10 +251,10 @@ export default function ProfilePage() {
 
       setShowAddSkillDialog(false)
       setNewSkillName('')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to add skill', { error: err })
       toast.error('Failed to add skill', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }
@@ -296,10 +296,10 @@ export default function ProfilePage() {
         description: `${removeSkill} - Successfully removed from your profile`
       })
       setRemoveSkill(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to remove skill', { error: err })
       toast.error('Failed to remove skill', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }

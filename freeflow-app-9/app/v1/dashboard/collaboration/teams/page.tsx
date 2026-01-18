@@ -179,7 +179,7 @@ export default function TeamsPage() {
         logger.info("Teams loaded successfully", { count: teamsData.length });
         toast.success(`Teams loaded - ${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err.message || "Failed to load teams";
       setError(errorMessage);
       logger.error("Failed to load teams", { error: err });

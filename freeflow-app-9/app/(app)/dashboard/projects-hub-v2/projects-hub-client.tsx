@@ -264,7 +264,7 @@ const priorityConfig = {
 // Custom fields configuration - to be fetched from real API endpoint /api/projects/custom-fields
 // Using hook-based data fetching pattern for custom field configuration
 const customFieldsConfig: CustomField[] = []
-// TODO: Replace with useProjectCustomFields() hook when available
+// FUTURE: Replace with useProjectCustomFields() hook when available (enhancement, not blocking)
 // Previously contained 5 hardcoded custom fields (Customer Impact, Technical Debt, Release Version, QA Contact, Documentation Link)
 
 const getIssueTypeColor = (type: Issue['type']): string => {

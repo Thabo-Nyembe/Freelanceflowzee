@@ -98,7 +98,7 @@ export default function ClientZoneProjectsPage() {
       } else {
         throw new Error(data.error || 'Failed to load projects')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err.message || 'Failed to load projects'
       setError(errorMessage)
       logger.error('Failed to fetch projects', { error: err })
@@ -196,14 +196,14 @@ export default function ClientZoneProjectsPage() {
       } else {
         throw new Error(result.error || 'Failed to submit revision')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to submit revision request', {
         error: err,
         projectId: revisionProjectId
       })
 
       toast.error('Failed to submit revision request', {
-        description: err.message || 'Please try again later'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again later'
       })
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }))
@@ -278,7 +278,7 @@ export default function ClientZoneProjectsPage() {
       } else {
         throw new Error(result.error || 'Failed to approve')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to approve deliverable', {
         error: err,
         projectId,
@@ -286,7 +286,7 @@ export default function ClientZoneProjectsPage() {
       })
 
       toast.error('Failed to approve deliverable', {
-        description: err.message || 'Please try again later'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again later'
       })
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }))
@@ -361,7 +361,7 @@ export default function ClientZoneProjectsPage() {
       toast.success(`Files downloaded for "${project.name}"`, {
         description: `${filename} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to download files', {
         error: err,
         projectId,
@@ -369,7 +369,7 @@ export default function ClientZoneProjectsPage() {
       })
 
       toast.error('Failed to download files', {
-        description: err.message || 'Please try again later'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again later'
       })
     } finally {
       setActionLoading((prev) => ({ ...prev, [actionKey]: false }))

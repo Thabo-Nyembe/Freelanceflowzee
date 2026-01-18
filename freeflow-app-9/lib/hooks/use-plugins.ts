@@ -94,7 +94,7 @@ export function usePlugins(initialPlugins: Plugin[] = [], initialStats?: PluginS
       if (fetchError) throw fetchError
       setPlugins(data || [])
       calculateStats(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setLoading(false)
@@ -149,7 +149,7 @@ export function usePlugins(initialPlugins: Plugin[] = [], initialStats?: PluginS
 
       if (insertError) throw insertError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -167,7 +167,7 @@ export function usePlugins(initialPlugins: Plugin[] = [], initialStats?: PluginS
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -182,7 +182,7 @@ export function usePlugins(initialPlugins: Plugin[] = [], initialStats?: PluginS
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

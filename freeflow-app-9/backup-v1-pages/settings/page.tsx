@@ -223,10 +223,10 @@ export default function ProfilePage() {
         description: `Replaced with initials: ${profile.firstName[0]}${profile.lastName[0]}`
       })
       announce('Profile photo removed', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to remove photo', { error: err })
       toast.error('Failed to remove photo', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     } finally {
       setShowRemovePhotoDialog(false)

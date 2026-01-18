@@ -479,7 +479,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating role')
     } finally {
       setIsLoading(false)
@@ -508,7 +508,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success(`Permission assigned: "${permission}" added to ${roleName}`)
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error assigning permission')
     } finally {
       setIsLoading(false)
@@ -534,7 +534,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success(`Permission revoked: "${permission}" removed from ${roleName}`)
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error revoking permission')
     } finally {
       setIsLoading(false)
@@ -551,7 +551,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`Role deleted: "${roleName}" has been deleted`)
       setSelectedRole(null)
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error deleting role')
     } finally {
       setIsLoading(false)
@@ -571,7 +571,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Export complete')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -590,7 +590,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
       toast.success(`Audit complete: unused roles and ${expiredAssignments.length} expired assignments`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Audit failed')
     } finally {
       setIsLoading(false)
@@ -611,7 +611,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`User ${newUser.email} has been invited`)
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating user')
     } finally {
       setIsLoading(false)
@@ -632,7 +632,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success(`Group created: "${newGroup.name}" has been created`)
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating group')
     } finally {
       setIsLoading(false)
@@ -658,7 +658,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('User assigned')
       refetchAssignments?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error assigning user')
     } finally {
       setIsLoading(false)
@@ -677,7 +677,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Audit logs exported')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -696,7 +696,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       })
       if (error) throw error
       toast.success('Token regenerated', { description: 'New SCIM token has been generated. Copy it now - it won\'t be shown again.' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to regenerate token')
     } finally {
       setIsLoading(false)
@@ -711,7 +711,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('Permissions reset')
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Reset failed')
     } finally {
       setIsLoading(false)
@@ -725,7 +725,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { error } = await supabase.from('user_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       if (error) throw error
       toast.success('Sessions revoked', { description: 'All active user sessions have been invalidated' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to revoke sessions')
     } finally {
       setIsLoading(false)
@@ -739,7 +739,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { error } = await supabase.from('api_keys').update({ revoked_at: new Date().toISOString() }).is('revoked_at', null)
       if (error) throw error
       toast.success('API keys deleted', { description: 'All API keys have been revoked' })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete API keys')
     } finally {
       setIsLoading(false)
@@ -760,7 +760,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Data exported')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -773,7 +773,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) throw error
       toast.success(`Password reset sent to ${email}`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to send reset')
     } finally {
       setIsLoading(false)
@@ -787,7 +787,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const { error } = await supabase.from('users').update({ status: 'locked', locked_at: new Date().toISOString() }).eq('id', userId)
       if (error) throw error
       toast.success('Account locked', { description: `${userName}'s account has been locked` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to lock account')
     } finally {
       setIsLoading(false)
@@ -831,7 +831,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success('Policy created', { description: `${newPolicy.name} has been created successfully` })
       setShowCreatePolicy(false)
       setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating policy')
     } finally {
       setIsLoading(false)
@@ -851,7 +851,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('Application added', { description: `${appName} has been added to your organization` })
       setShowApplicationCatalog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error adding application')
     } finally {
       setIsLoading(false)
@@ -900,7 +900,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.success('Webhook created', { description: `Webhook endpoint configured for ${newWebhook.events.length} events` })
       setShowWebhookConfig(false)
       setNewWebhook({ url: '', events: [] })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating webhook')
     } finally {
       setIsLoading(false)
@@ -925,7 +925,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         toast.success('Configuration saved', { description: `${directoryName} configuration updated` })
       }
       setShowDirectoryConfig(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(`Error ${action}ing directory`)
     } finally {
       setIsLoading(false)
@@ -950,7 +950,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         toast.success('Configuration saved', { description: `${systemName} configuration updated` })
       }
       setShowHRSystemConfig(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(`Error ${action}ing HR system`)
     } finally {
       setIsLoading(false)
@@ -974,7 +974,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       setShowUserEditor(false)
       setEditingUser(null)
       setSelectedUser(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error updating user')
     } finally {
       setIsLoading(false)
@@ -995,7 +995,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('Members added', { description: `${userIds.length} member(s) added to ${selectedGroup.name}` })
       setShowMemberSelector(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error adding members')
     } finally {
       setIsLoading(false)
@@ -1017,7 +1017,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       setShowGroupEditor(false)
       setEditingGroup(null)
       setSelectedGroup(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error updating group')
     } finally {
       setIsLoading(false)
@@ -1038,7 +1038,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       if (error) throw error
       toast.success('Users assigned', { description: `${userIds.length} user(s) assigned to ${selectedRole.displayName}` })
       setShowUserAssignment(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error assigning users')
     } finally {
       setIsLoading(false)
@@ -1063,7 +1063,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       setEditingRole(null)
       setSelectedRole(null)
       refetchRoles?.()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error updating role')
     } finally {
       setIsLoading(false)

@@ -870,7 +870,7 @@ export default function PluginsClient() {
         performance_score: plugin.performanceScore
       })
       toast.success("Plugin Installed: " + plugin.name + " has been installed successfully!")
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Installation Failed')
     } finally {
       setInstalling(null)
@@ -911,7 +911,7 @@ export default function PluginsClient() {
         repository_url: '',
         documentation_url: ''
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Creation Failed')
     }
   }
@@ -921,7 +921,7 @@ export default function PluginsClient() {
     try {
       await deletePlugin(pluginId)
       toast.success('Plugin Uninstalled - ' + pluginName + ' has been removed')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Uninstall Failed')
     }
   }
@@ -935,7 +935,7 @@ export default function PluginsClient() {
     try {
       await activatePlugin(pluginId)
       toast.success('Plugin Enabled - ' + pluginName + ' is now active')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Activation Failed')
     }
   }
@@ -944,7 +944,7 @@ export default function PluginsClient() {
     try {
       await deactivatePlugin(pluginId)
       toast.info('Plugin Disabled - ' + pluginName + ' has been deactivated')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Deactivation Failed')
     }
   }
@@ -953,7 +953,7 @@ export default function PluginsClient() {
     try {
       await updatePluginVersion(pluginId, newVersion)
       toast.success("Plugin Updated - " + pluginName + " has been updated to v" + newVersion)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Update Failed')
     }
   }

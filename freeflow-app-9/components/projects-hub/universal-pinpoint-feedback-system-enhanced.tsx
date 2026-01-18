@@ -522,7 +522,7 @@ export function UniversalPinpointFeedbackSystemEnhanced({
       setMediaFiles(sampleFiles)
       setSelectedFile(sampleFiles[0])
       setIsLoading(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Failed to load media files")
       setIsLoading(false)
       toast({
@@ -577,12 +577,12 @@ export function UniversalPinpointFeedbackSystemEnhanced({
         recorder.start()
         recordingRef.current = recorder
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsRecording(false)
       setRecordingType(null)
       toast({
         title: "Recording error",
-        description: err.message || "Failed to start recording",
+        description: err instanceof Error ? err.message : 'Operation failed' || "Failed to start recording",
         variant: "destructive",
       })
     }

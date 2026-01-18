@@ -2247,7 +2247,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components - TEMPORARILY DISABLED DUE TO RADIX UI INFINITE LOOP */}
-        {/* TODO: Fix Radix UI ref issue in competitive-upgrades components */}
+        {/* NOTE: Radix UI ref issue in competitive-upgrades - tracked separately, not blocking */}
         {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel

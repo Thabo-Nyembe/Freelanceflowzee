@@ -51,6 +51,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const logger = createFeatureLogger('admin-operations')
 
@@ -70,6 +82,12 @@ export default function OperationsPage() {
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [activityData, setActivityData] = useState<any[]>([])
   const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null)
+
+  // Dialog states for invite and edit
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'member' as UserRole })
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editForm, setEditForm] = useState({ userId: '', name: '', department: '', location: '' })
 
   // Filtered members
   const filteredMembers = useMemo(() => {
@@ -146,40 +164,44 @@ export default function OperationsPage() {
     loadOperations()
   }, [userId, announce])
 
-  // Button 1: Invite User
-  const handleInviteUser = async () => {
+  // Button 1: Invite User - Opens dialog
+  const handleInviteUser = () => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to invite users' })
       announce('Authentication required', 'assertive')
       return
     }
+    setInviteForm({ email: '', role: 'member' })
+    setInviteDialogOpen(true)
+  }
 
-    logger.info('Inviting new user', { userId })
+  // Submit invite form
+  const handleInviteSubmit = async () => {
+    if (!inviteForm.email) {
+      toast.error('Email is required')
+      return
+    }
+
+    logger.info('Inviting new user', { userId, email: inviteForm.email })
 
     const inviteOperation = async () => {
       const { sendInvitation, getAllUsers } = await import('@/lib/user-management-queries')
-      // TODO: Replace with modal dialog or form page for user input
-      const email = ''
-      const role: UserRole = 'member'
-
-      if (!email) {
-        throw new Error('Email is required to send invitation')
-      }
 
       await sendInvitation({
-        email,
-        role,
+        email: inviteForm.email,
+        role: inviteForm.role,
         message: 'You have been invited to join the team',
-        invited_by: userId
+        invited_by: userId!
       })
 
-      logger.info('User invited', { success: true, email })
+      logger.info('User invited', { success: true, email: inviteForm.email })
       announce('User invitation sent', 'polite')
 
       // Reload team members
       const users = await getAllUsers()
       setTeamMembers(users || [])
-      return email
+      setInviteDialogOpen(false)
+      return inviteForm.email
     }
 
     toast.promise(inviteOperation(), {
@@ -194,7 +216,7 @@ export default function OperationsPage() {
     })
   }
 
-  // Button 2: Edit User
+  // Button 2: Edit User - Opens dialog
   const handleEditUser = async (targetUserId: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to edit users' })
@@ -203,10 +225,7 @@ export default function OperationsPage() {
     }
 
     try {
-      logger.info('Editing user', { targetUserId })
-
-      // Note: Using getUserById and updating profile
-      // Future: Create updateUser function in user-management-queries
+      logger.info('Loading user for edit', { targetUserId })
       const { getUserById } = await import('@/lib/user-management-queries')
       const user = await getUserById(targetUserId)
 
@@ -214,43 +233,60 @@ export default function OperationsPage() {
         throw new Error('User not found')
       }
 
-      // TODO: Open modal dialog for user to edit profile fields
-      // For now, awaiting user input through UI
-      const department = ''
-      const location = ''
+      // Open dialog with user data
+      setEditForm({
+        userId: targetUserId,
+        name: user.name || '',
+        department: user.department || '',
+        location: user.location || ''
+      })
+      setEditDialogOpen(true)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load user'
+      toast.error('Load Failed', { description: message })
+      logger.error('Load user failed', { error })
+    }
+  }
 
-      if (!department && !location) {
-        throw new Error('At least one field is required to update')
-      }
+  // Submit edit form
+  const handleEditSubmit = async () => {
+    if (!editForm.department && !editForm.location) {
+      toast.error('At least one field is required')
+      return
+    }
 
-      // For now, using API call - can be replaced with updateUser function when available
-      const response = await fetch(`/api/admin/operations/users/${targetUserId}`, {
+    const editOperation = async () => {
+      const response = await fetch(`/api/admin/operations/users/${editForm.userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...(department && { department }),
-          ...(location && { location })
+          ...(editForm.department && { department: editForm.department }),
+          ...(editForm.location && { location: editForm.location })
         })
       })
 
       if (!response.ok) throw new Error('Failed to edit user')
 
-      toast.success('User Updated', {
-        description: 'User information has been updated successfully'
-      })
-      logger.info('User edited', { success: true, targetUserId })
+      logger.info('User edited', { success: true, targetUserId: editForm.userId })
       announce('User updated successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
       setTeamMembers(users || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit user failed', { error })
-      announce('Failed to edit user', 'assertive')
+      setEditDialogOpen(false)
     }
+
+    toast.promise(editOperation(), {
+      loading: 'Updating user...',
+      success: 'User updated successfully',
+      error: (err) => {
+        const message = err instanceof Error ? err.message : 'Edit failed'
+        logger.error('Edit user failed', { error: err })
+        announce('Failed to edit user', 'assertive')
+        return message
+      }
+    })
   }
 
   // Button 3: Delete User
@@ -890,6 +926,108 @@ export default function OperationsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Invite User Dialog */}
+      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Invite New Team Member</DialogTitle>
+            <DialogDescription>
+              Send an invitation email to add a new member to your team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="invite-email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="user@example.com"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="invite-role" className="text-right">
+                Role
+              </Label>
+              <Select
+                value={inviteForm.role}
+                onValueChange={(value: UserRole) => setInviteForm(prev => ({ ...prev, role: value }))}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInviteSubmit}>
+              <Mail className="w-4 h-4 mr-2" />
+              Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Team Member</DialogTitle>
+            <DialogDescription>
+              Update information for {editForm.name || 'this team member'}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-department" className="text-right">
+                Department
+              </Label>
+              <Input
+                id="edit-department"
+                placeholder="e.g., Engineering"
+                value={editForm.department}
+                onChange={(e) => setEditForm(prev => ({ ...prev, department: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-location" className="text-right">
+                Location
+              </Label>
+              <Input
+                id="edit-location"
+                placeholder="e.g., New York, NY"
+                value={editForm.location}
+                onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSubmit}>
+              <Edit className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -68,7 +68,7 @@ export function useFiles(folderId?: string | null, initialFiles: FileItem[] = []
 
       if (error) throw error
       setFiles(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setIsLoading(false)

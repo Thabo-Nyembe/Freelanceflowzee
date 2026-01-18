@@ -121,7 +121,7 @@ export function useSEOKeywords() {
 
       if (error) throw error
       setKeywords(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch keywords', variant: 'destructive' })
     } finally {
@@ -144,8 +144,8 @@ export function useSEOKeywords() {
       setKeywords(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Keyword added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -163,8 +163,8 @@ export function useSEOKeywords() {
       setKeywords(prev => prev.map(k => k.id === id ? data : k))
       toast({ title: 'Success', description: 'Keyword updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -179,8 +179,8 @@ export function useSEOKeywords() {
       if (error) throw error
       setKeywords(prev => prev.filter(k => k.id !== id))
       toast({ title: 'Success', description: 'Keyword removed' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -278,8 +278,8 @@ export function useSEOBacklinks() {
       setBacklinks(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Backlink added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -296,8 +296,8 @@ export function useSEOBacklinks() {
       if (error) throw error
       setBacklinks(prev => prev.map(b => b.id === id ? data : b))
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -358,8 +358,8 @@ export function useSEOPages() {
       setPages(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Page added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -376,8 +376,8 @@ export function useSEOPages() {
       if (error) throw error
       setPages(prev => prev.map(p => p.id === id ? data : p))
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

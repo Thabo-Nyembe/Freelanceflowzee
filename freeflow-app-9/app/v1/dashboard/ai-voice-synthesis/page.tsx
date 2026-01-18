@@ -143,7 +143,7 @@ export default function AIVoiceSynthesisPage() {
 
         setIsPageLoading(false)
         announce('AI voice synthesis loaded successfully', 'polite')
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI voice synthesis'
         logger.error('Exception loading AI Voice Synthesis data', { error: errorMessage })
         setError(errorMessage)

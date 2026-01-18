@@ -2439,7 +2439,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     setWorkflowFormTrigger('webhook')
                     setShowNewWorkflowDialog(false)
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to create workflow')
                   } finally {
                     setIsCreatingWorkflow(false)
@@ -2572,7 +2572,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     if (!response.ok) throw new Error(result.error || 'Failed to refresh history')
                     toast.success('History refreshed successfully')
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to refresh history')
                   } finally {
                     setIsRefreshingHistory(false)
@@ -2730,7 +2730,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                       const generatedKey = result.data?.apiKey || `n8n_api_${Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')}`
                       setNewApiKey(generatedKey)
                       toast.success('API Key Regenerated')
-                    } catch (err: any) {
+                    } catch (err: unknown) {
                       toast.error('Failed to regenerate API key')
                     } finally {
                       setIsRegeneratingKey(false)
@@ -2824,7 +2824,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     if (!response.ok) throw new Error(result.error || 'Failed to rotate key')
                     toast.success('Encryption Key Rotated')
                     setShowEncryptionKeyDialog(false)
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to rotate encryption key')
                   } finally {
                     setIsRotatingKey(false)
@@ -2904,7 +2904,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     toast.success('History Cleared')
                     setShowClearHistoryDialog(false)
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to clear history')
                   } finally {
                     setIsDeletingHistory(false)
@@ -2985,7 +2985,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     toast.success('Credentials Reset')
                     setShowResetCredentialsDialog(false)
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to reset credentials')
                   } finally {
                     setIsResettingCredentials(false)
@@ -3069,7 +3069,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     toast.success('Workflows Deleted')
                     setShowDeleteWorkflowsDialog(false)
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to delete workflows')
                   } finally {
                     setIsDeletingWorkflows(false)
@@ -3164,7 +3164,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     setFactoryResetConfirmText('')
                     setShowFactoryResetDialog(false)
                     refetch()
-                  } catch (err: any) {
+                  } catch (err: unknown) {
                     toast.error('Failed to perform factory reset')
                   } finally {
                     setIsFactoryResetting(false)

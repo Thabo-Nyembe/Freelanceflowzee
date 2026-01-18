@@ -642,7 +642,7 @@ export default function IntegrationsPage() {
 
       toast.success('Integrations refreshed')
       announce('Integrations refreshed successfully', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Refresh failed', { error: err.message })
       toast.error('Failed to refresh integrations')
     } finally {
@@ -679,7 +679,7 @@ export default function IntegrationsPage() {
 
       toast.success('Logs exported', { description: 'CSV file downloaded' })
       announce('Logs exported successfully', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Export failed', { error: err.message })
       toast.error('Failed to export logs')
     }
@@ -786,10 +786,10 @@ export default function IntegrationsPage() {
         description: `New key: ${result.newKey.substring(0, 20)}... (stored in database)`
       })
       announce('API key regenerated', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Key regeneration failed', { error: err.message, userId })
       toast.error('Failed to regenerate API key', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }

@@ -57,8 +57,8 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
 
       if (error) throw error
       setTasks(data || [])
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch tasks')
     } finally {
       setIsLoading(false)
     }

@@ -849,7 +849,7 @@ export default function AnalyticsClient() {
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnel(false)
       fetchFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating funnel')
     } finally {
       setIsLoading(false)
@@ -868,7 +868,7 @@ export default function AnalyticsClient() {
       if (error) throw error
       toast.success('Funnel deleted')
       fetchFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error deleting funnel')
     } finally {
       setIsLoading(false)
@@ -906,7 +906,7 @@ export default function AnalyticsClient() {
       setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
       setShowCreateReport(false)
       fetchReports()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating report')
     } finally {
       setIsLoading(false)
@@ -925,7 +925,7 @@ export default function AnalyticsClient() {
       if (error) throw error
       toast.success(`Report "${reportName}" is being generated`)
       fetchReports()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error running report')
     } finally {
       setIsLoading(false)
@@ -944,7 +944,7 @@ export default function AnalyticsClient() {
       if (error) throw error
       toast.success('Report deleted')
       fetchReports()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error deleting report')
     } finally {
       setIsLoading(false)
@@ -980,7 +980,7 @@ export default function AnalyticsClient() {
       setDashboardForm({ name: '', description: '', is_default: false })
       setShowCreateDashboard(false)
       fetchDashboards()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating dashboard')
     } finally {
       setIsLoading(false)
@@ -999,7 +999,7 @@ export default function AnalyticsClient() {
       if (error) throw error
       toast.success('Dashboard deleted')
       fetchDashboards()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error deleting dashboard')
     } finally {
       setIsLoading(false)
@@ -1035,7 +1035,7 @@ export default function AnalyticsClient() {
       if (error) throw error
       toast.success(`Dashboard "${dashboardName}" has been duplicated`)
       fetchDashboards()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error duplicating dashboard')
     } finally {
       setIsLoading(false)
@@ -1377,7 +1377,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
         })
       if (error) throw error
       toast.success(`Alert created for metric "${alertConfig.metric_name}"`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating alert')
     } finally {
       setIsLoading(false)

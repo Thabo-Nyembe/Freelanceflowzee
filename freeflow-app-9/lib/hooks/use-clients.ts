@@ -50,7 +50,7 @@ export function useClients(initialClients: Client[] = []) {
 
       if (error) throw error
       setClients(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       console.error('Failed to fetch clients:', err)
     } finally {
@@ -83,7 +83,7 @@ export function useClients(initialClients: Client[] = []) {
       setClients(prev => [data, ...prev])
       toast.success('Client created successfully')
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to create client')
       throw err
     }
@@ -102,7 +102,7 @@ export function useClients(initialClients: Client[] = []) {
       setClients(prev => prev.map(c => c.id === id ? data : c))
       toast.success('Client updated successfully')
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to update client')
       throw err
     }
@@ -128,7 +128,7 @@ export function useClients(initialClients: Client[] = []) {
       if (error) throw error
       setClients(prev => prev.filter(c => c.id !== id))
       toast.success('Client deleted')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to delete client')
       throw err
     }

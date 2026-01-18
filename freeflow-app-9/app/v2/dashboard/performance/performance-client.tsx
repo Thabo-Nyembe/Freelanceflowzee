@@ -389,7 +389,7 @@ export default function PerformanceClient() {
       setShowRunDialog(false)
       toast.success('Performance audit completed!')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to run performance audit')
     } finally {
       setIsRunning(false)
@@ -444,7 +444,7 @@ export default function PerformanceClient() {
       URL.revokeObjectURL(url)
 
       toast.success('Report exported successfully!')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to export report')
     } finally {
       setIsExporting(false)
@@ -462,7 +462,7 @@ export default function PerformanceClient() {
 
       // In production, this would create a scheduled job
       toast.success('Test scheduled successfully!')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to schedule test')
     }
   }
@@ -514,7 +514,7 @@ export default function PerformanceClient() {
       setBudgetForm({ name: '', metric: 'script', target: 300, unit: 'KB', category: 'performance' })
       toast.success('Performance budget added!')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to add budget')
     }
   }
@@ -533,7 +533,7 @@ export default function PerformanceClient() {
 
       toast.success('Budget removed')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to remove budget')
     }
   }
@@ -556,7 +556,7 @@ export default function PerformanceClient() {
 
       toast.success('Alert resolved')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to resolve alert')
     }
   }
@@ -581,7 +581,7 @@ export default function PerformanceClient() {
 
       toast.success('History deleted')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to delete history')
     }
   }
@@ -606,7 +606,7 @@ export default function PerformanceClient() {
 
       toast.success('Budgets reset')
       // Hooks will auto-refresh via real-time subscription
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Failed to reset budgets')
     }
   }

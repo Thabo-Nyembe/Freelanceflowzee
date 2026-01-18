@@ -55,7 +55,7 @@ export function useEscrow(initialDeposits: EscrowDeposit[] = []) {
 
       if (error) throw error
       setDeposits(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setIsLoading(false)

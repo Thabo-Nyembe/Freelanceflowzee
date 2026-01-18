@@ -89,7 +89,7 @@ export default function ClientKnowledgeBase() {
         // Navigate to video player page
         window.location.href = `/dashboard/video-player?video=${video.id}&title=${encodeURIComponent(video.title)}`
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open video', { error: err.message })
       toast.error('Failed to open video tutorial')
     }
@@ -106,7 +106,7 @@ export default function ClientKnowledgeBase() {
         // Fallback: open support contact form
         window.location.href = '/support?chat=true'
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open live chat', { error: err.message })
       toast.error('Failed to open live chat. Please try our support page.')
     }
@@ -117,7 +117,7 @@ export default function ClientKnowledgeBase() {
 
       // Navigate to support ticket page
       window.location.href = '/support?action=new-ticket'
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open ticket form', { error: err.message })
       toast.error('Failed to open support form')
     }
@@ -128,7 +128,7 @@ export default function ClientKnowledgeBase() {
 
       // Navigate to community forum
       window.location.href = '/dashboard/collaboration/workspace'
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open forum', { error: err.message })
       toast.error('Failed to open community forum')
     }
@@ -149,7 +149,7 @@ export default function ClientKnowledgeBase() {
 
       // Navigate to article page
       window.location.href = `/dashboard/client-zone/knowledge-base/article/${article.id}`
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open article', { error: err.message })
       toast.error('Failed to open article')
     }
@@ -164,7 +164,7 @@ export default function ClientKnowledgeBase() {
       // await submitArticleFeedback(articleId, userId, 'helpful')
 
       toast.success('Thank you for your feedback!')
-    } catch (err: any) {
+    } catch (err: unknown) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('knowledge-base')
       const { toast } = await import('sonner')
@@ -182,7 +182,7 @@ export default function ClientKnowledgeBase() {
 
       // Update search results
       setSearchQuery(query)
-    } catch (err: any) {
+    } catch (err: unknown) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('knowledge-base')
       logger.error('Search failed', { error: err.message })

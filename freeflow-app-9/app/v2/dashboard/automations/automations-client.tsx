@@ -2452,9 +2452,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                          toast.info('Connection settings - Feature coming soon')
-                        }}>
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenConnectionSettings(connection)}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -2870,9 +2868,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Connection settings - Feature coming soon')
-                              }}>
+                              <Button variant="ghost" size="sm" onClick={() => handleOpenConnectionSettings(connection)}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>

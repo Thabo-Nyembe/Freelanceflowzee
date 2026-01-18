@@ -172,7 +172,7 @@ export function useMobileApp(
 
       if (insertError) throw insertError
       return result
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -190,7 +190,7 @@ export function useMobileApp(
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -205,7 +205,7 @@ export function useMobileApp(
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -225,7 +225,7 @@ export function useMobileApp(
 
       if (insertError) throw insertError
       return result
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -243,7 +243,7 @@ export function useMobileApp(
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

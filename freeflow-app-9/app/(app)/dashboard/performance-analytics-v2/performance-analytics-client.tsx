@@ -394,6 +394,16 @@ export default function PerformanceAnalyticsClient() {
   const [showManageKeysDialog, setShowManageKeysDialog] = useState(false)
   const [showAcknowledgeAlertDialog, setShowAcknowledgeAlertDialog] = useState(false)
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null)
+  const [showAddMetricDialog, setShowAddMetricDialog] = useState(false)
+  const [customMetricForm, setCustomMetricForm] = useState({
+    name: '',
+    description: '',
+    type: 'counter',
+    unit: '',
+    aggregation: 'sum',
+    tags: ''
+  })
+  const [isCreatingMetric, setIsCreatingMetric] = useState(false)
 
   // New alert form state
   const [newAlertName, setNewAlertName] = useState('')
@@ -838,9 +848,37 @@ export default function PerformanceAnalyticsClient() {
 
   // Handle add metric
   const handleAddMetric = () => {
-    toast.info('Add metric', {
-      description: 'Custom metric configuration coming soon'
-    })
+    setShowAddMetricDialog(true)
+  }
+
+  // Handle create custom metric
+  const handleCreateCustomMetric = async () => {
+    if (!customMetricForm.name) {
+      toast.error('Please enter a metric name')
+      return
+    }
+    setIsCreatingMetric(true)
+    try {
+      const { error } = await supabase.from('performance_metrics').insert({
+        metric_name: customMetricForm.name,
+        description: customMetricForm.description,
+        metric_type: customMetricForm.type,
+        unit: customMetricForm.unit || null,
+        aggregation: customMetricForm.aggregation,
+        tags: customMetricForm.tags ? customMetricForm.tags.split(',').map(t => t.trim()) : [],
+        value: 0,
+        status: 'active'
+      })
+      if (error) throw error
+      toast.success('Custom metric created successfully!')
+      setCustomMetricForm({ name: '', description: '', type: 'counter', unit: '', aggregation: 'sum', tags: '' })
+      setShowAddMetricDialog(false)
+      refetchApiPerformance?.()
+    } catch (err) {
+      toast.error('Failed to create metric. Please try again.')
+    } finally {
+      setIsCreatingMetric(false)
+    }
   }
 
   // Handle export metrics
@@ -2605,6 +2643,127 @@ export default function PerformanceAnalyticsClient() {
                   <>
                     <Download className="w-4 h-4 mr-2" />
                     Export Data
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Custom Metric Dialog */}
+        <Dialog open={showAddMetricDialog} onOpenChange={setShowAddMetricDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" />
+                Create Custom Metric
+              </DialogTitle>
+              <DialogDescription>
+                Define a new custom metric for your performance monitoring
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="metric-name">Metric Name *</Label>
+                <Input
+                  id="metric-name"
+                  placeholder="e.g., api_response_time"
+                  value={customMetricForm.name}
+                  onChange={(e) => setCustomMetricForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="metric-description">Description</Label>
+                <Input
+                  id="metric-description"
+                  placeholder="Brief description of what this metric measures"
+                  value={customMetricForm.description}
+                  onChange={(e) => setCustomMetricForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Metric Type</Label>
+                  <Select
+                    value={customMetricForm.type}
+                    onValueChange={(value) => setCustomMetricForm(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="counter">Counter</SelectItem>
+                      <SelectItem value="gauge">Gauge</SelectItem>
+                      <SelectItem value="histogram">Histogram</SelectItem>
+                      <SelectItem value="summary">Summary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Aggregation</Label>
+                  <Select
+                    value={customMetricForm.aggregation}
+                    onValueChange={(value) => setCustomMetricForm(prev => ({ ...prev, aggregation: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sum">Sum</SelectItem>
+                      <SelectItem value="avg">Average</SelectItem>
+                      <SelectItem value="min">Minimum</SelectItem>
+                      <SelectItem value="max">Maximum</SelectItem>
+                      <SelectItem value="p50">P50</SelectItem>
+                      <SelectItem value="p95">P95</SelectItem>
+                      <SelectItem value="p99">P99</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="metric-unit">Unit (optional)</Label>
+                <Input
+                  id="metric-unit"
+                  placeholder="e.g., ms, bytes, count, %"
+                  value={customMetricForm.unit}
+                  onChange={(e) => setCustomMetricForm(prev => ({ ...prev, unit: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="metric-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="metric-tags"
+                  placeholder="e.g., environment:production, service:api"
+                  value={customMetricForm.tags}
+                  onChange={(e) => setCustomMetricForm(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                <p><strong>Tip:</strong> Use descriptive names following the convention: <code>service_action_unit</code></p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddMetricDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleCreateCustomMetric}
+                disabled={isCreatingMetric || !customMetricForm.name}
+              >
+                {isCreatingMetric ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Metric
                   </>
                 )}
               </Button>

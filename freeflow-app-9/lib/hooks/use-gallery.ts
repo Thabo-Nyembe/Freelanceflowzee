@@ -70,7 +70,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
 
       if (error) throw error
       setItems(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setIsLoading(false)

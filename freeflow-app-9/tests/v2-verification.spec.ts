@@ -97,7 +97,7 @@ test.describe('V2 Fixed Pages Verification', () => {
         } else {
           console.log(`  ✗ ${pageName}: ${status}`)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(`  ✗ ${pageName}: ERROR - ${err.message?.slice(0, 50)}`)
       }
     }

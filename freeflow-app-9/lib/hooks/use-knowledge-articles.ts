@@ -95,7 +95,7 @@ export function useKnowledgeArticles(initialArticles: KnowledgeArticle[] = [], i
       if (fetchError) throw fetchError
       setArticles(data || [])
       calculateStats(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setLoading(false)
@@ -150,7 +150,7 @@ export function useKnowledgeArticles(initialArticles: KnowledgeArticle[] = [], i
 
       if (insertError) throw insertError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -168,7 +168,7 @@ export function useKnowledgeArticles(initialArticles: KnowledgeArticle[] = [], i
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -183,7 +183,7 @@ export function useKnowledgeArticles(initialArticles: KnowledgeArticle[] = [], i
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

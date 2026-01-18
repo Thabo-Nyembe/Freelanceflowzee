@@ -989,7 +989,7 @@ export default function ReportsPage() {
           dispatch({ type: 'DELETE_SELECTED_REPORTS' })
           announce(`${selectedCount} reports deleted`, 'polite')
           resolve()
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.error('Bulk delete failed', { error: err.message })
           reject(err)
         }
@@ -1028,7 +1028,7 @@ export default function ReportsPage() {
           error: 'Failed to open editor'
         }
       )
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open editor', { error: err.message })
     }
   }

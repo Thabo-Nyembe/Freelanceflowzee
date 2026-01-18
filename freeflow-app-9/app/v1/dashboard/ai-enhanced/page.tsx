@@ -360,7 +360,7 @@ export default function AIEnhancedPage() {
         toast.success(`AI Enhanced loaded - ${uiTools.length} AI tools available`)
 
         setIsLoading(false)
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('Failed to load AI Enhanced tools', { error: err.message })
         setError(err instanceof Error ? err.message : 'Failed to load AI Enhanced tools')
         setIsLoading(false)

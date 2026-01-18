@@ -89,7 +89,7 @@ export function useRoles() {
 
       if (error) throw error
       setRoles(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch roles', variant: 'destructive' })
     } finally {
@@ -113,8 +113,8 @@ export function useRoles() {
       setRoles(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Role created successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -134,8 +134,8 @@ export function useRoles() {
       setRoles(prev => prev.map(r => r.id === id ? data : r))
       toast({ title: 'Success', description: 'Role updated successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -151,8 +151,8 @@ export function useRoles() {
       if (error) throw error
       setRoles(prev => prev.filter(r => r.id !== id))
       toast({ title: 'Success', description: 'Role deleted successfully' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -171,8 +171,8 @@ export function useRoles() {
       setRoles(prev => prev.map(r => r.id === id ? data : r))
       toast({ title: 'Success', description: 'Role activated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -191,8 +191,8 @@ export function useRoles() {
       setRoles(prev => prev.map(r => r.id === id ? data : r))
       toast({ title: 'Success', description: 'Role deactivated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -221,8 +221,8 @@ export function useRoles() {
       })))
       toast({ title: 'Success', description: 'Default role updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -258,8 +258,8 @@ export function useRoles() {
       setRoles(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Role cloned successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -279,8 +279,8 @@ export function useRoles() {
       setRoles(prev => prev.map(r => r.id === id ? data : r))
       toast({ title: 'Success', description: 'Permissions updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -385,8 +385,8 @@ export function useRoleAssignments(roleId: string) {
       setAssignments(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Role assigned successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -410,8 +410,8 @@ export function useRoleAssignments(roleId: string) {
       setAssignments(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Role revoked' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -434,8 +434,8 @@ export function useRoleAssignments(roleId: string) {
       setAssignments(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Assignment reactivated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -451,8 +451,8 @@ export function useRoleAssignments(roleId: string) {
       if (error) throw error
       setAssignments(prev => prev.filter(a => a.id !== id))
       toast({ title: 'Success', description: 'Assignment deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -541,8 +541,8 @@ export function useRolePermissions() {
       setPermissions(prev => [...prev, data])
       toast({ title: 'Success', description: 'Permission created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -560,8 +560,8 @@ export function useRolePermissions() {
       if (error) throw error
       setPermissions(prev => prev.map(p => p.id === id ? data : p))
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -577,8 +577,8 @@ export function useRolePermissions() {
       if (error) throw error
       setPermissions(prev => prev.filter(p => p.id !== id))
       toast({ title: 'Success', description: 'Permission deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

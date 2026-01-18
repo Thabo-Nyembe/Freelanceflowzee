@@ -921,11 +921,11 @@ export default function MessagesPage() {
         description: isPinned ? `${chat?.name} removed from pinned list` : `${chat?.name} moved to top`
       })
       logger.info('Pin status persisted to database', { chatId, isPinned: !isPinned })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert optimistic update
       dispatch({ type: 'TOGGLE_PIN_CHAT', chatId })
       logger.error('Failed to toggle pin', { error: err, chatId })
-      toast.error('Failed to update pin status', { description: err.message })
+      toast.error('Failed to update pin status', { description: err instanceof Error ? err.message : 'Operation failed' })
     }
   }
 
@@ -954,11 +954,11 @@ export default function MessagesPage() {
         description: isMuted ? `Notifications on for ${chat?.name}` : `Notifications off for ${chat?.name}`
       })
       logger.info('Mute status persisted to database', { chatId, isMuted: !isMuted })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert optimistic update
       dispatch({ type: 'TOGGLE_MUTE_CHAT', chatId })
       logger.error('Failed to toggle mute', { error: err, chatId })
-      toast.error('Failed to update mute status', { description: err.message })
+      toast.error('Failed to update mute status', { description: err instanceof Error ? err.message : 'Operation failed' })
     }
   }
 
@@ -987,11 +987,11 @@ export default function MessagesPage() {
         description: isArchived ? `${chat?.name} returned to active chats` : `${chat?.name} moved to archive`
       })
       logger.info('Archive status persisted to database', { chatId, isArchived: !isArchived })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert optimistic update
       dispatch({ type: 'ARCHIVE_CHAT', chatId })
       logger.error('Failed to toggle archive', { error: err, chatId })
-      toast.error('Failed to update archive status', { description: err.message })
+      toast.error('Failed to update archive status', { description: err instanceof Error ? err.message : 'Operation failed' })
     }
   }
 
@@ -1039,10 +1039,10 @@ export default function MessagesPage() {
       toast.success('Chat deleted', {
         description: `Conversation with ${chat?.name} permanently removed`
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to delete chat', { error: err })
       toast.error('Failed to delete chat', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     } finally {
       setShowDeleteChatDialog(false)
@@ -1083,7 +1083,7 @@ export default function MessagesPage() {
       toast.success('Marked as read', {
         description: `${previousUnread} messages in ${chat?.name}`
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert optimistic update
       dispatch({
         type: 'UPDATE_CHAT',
@@ -1091,7 +1091,7 @@ export default function MessagesPage() {
         updates: { unread: previousUnread }
       })
       logger.error('Failed to mark messages as read', { error: err, chatId })
-      toast.error('Failed to mark as read', { description: err.message })
+      toast.error('Failed to mark as read', { description: err instanceof Error ? err.message : 'Operation failed' })
     }
   }
 
@@ -1251,7 +1251,7 @@ export default function MessagesPage() {
 
       logger.info('Reaction persisted to database', { messageId, emoji, userId })
       toast.success(`${emoji} Reaction added`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert optimistic update
       dispatch({
         type: 'UPDATE_MESSAGE',
@@ -1259,7 +1259,7 @@ export default function MessagesPage() {
         updates: { reactions: [] }
       })
       logger.error('Failed to add reaction', { error: err, messageId, emoji })
-      toast.error('Failed to add reaction', { description: err.message })
+      toast.error('Failed to add reaction', { description: err instanceof Error ? err.message : 'Operation failed' })
     }
   }
 

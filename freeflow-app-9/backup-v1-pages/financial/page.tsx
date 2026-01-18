@@ -263,7 +263,7 @@ export default function FinancialOverviewPage() {
         date: new Date().toISOString().split('T')[0]
       })
       setIsAddTransactionOpen(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to add transaction', { error: err })
       toast.error('Failed to add transaction')
       announce('Failed to add transaction', 'assertive')

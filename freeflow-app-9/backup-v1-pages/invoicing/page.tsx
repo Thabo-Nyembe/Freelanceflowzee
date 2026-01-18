@@ -219,7 +219,7 @@ export default function InvoicingPage() {
       toast.success('Invoices exported', {
         description: `${filteredInvoices.length} invoices in CSV format`
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('CSV export error', { error: err.message, userId })
       toast.error('Failed to export invoices')
     }
@@ -347,7 +347,7 @@ export default function InvoicingPage() {
       })
 
       announce(`Invoice ${invoice.invoiceNumber} sent successfully`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to send invoice', {
         invoiceId: invoice.id,
         error: err.message
@@ -403,7 +403,7 @@ export default function InvoicingPage() {
       ))
 
       announce(`Invoice ${invoice.invoiceNumber} marked as paid`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Mark paid error', { error: err.message })
       toast.error('Failed to mark as paid')
     }
@@ -494,7 +494,7 @@ export default function InvoicingPage() {
       })
 
       announce(`Payment reminder sent for invoice ${invoice.invoiceNumber}`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to send reminder', {
         invoiceId: invoice.id,
         error: err.message
@@ -551,7 +551,7 @@ export default function InvoicingPage() {
       })
 
       announce(`Invoice ${invoice.invoiceNumber} PDF downloaded successfully`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('PDF generation failed', {
         invoiceId: invoice.id,
         error: err.message
@@ -622,7 +622,7 @@ export default function InvoicingPage() {
 
       // Reload data to show new invoice
       window.location.reload()
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Duplicate invoice error', { error: err.message })
       toast.error('Failed to duplicate invoice')
     }

@@ -415,7 +415,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       setNewFormTitle('')
       setNewFormDescription('')
       setShowCreateDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error')
     } finally {
       setIsSubmitting(false)
@@ -426,7 +426,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     try {
       await updateForm(form.id, { status: 'active' as FormStatus })
       toast.success("Form Published - " + form.title + " is now live")
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error')
     }
   }
@@ -439,7 +439,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       const { id, created_at, updated_at, deleted_at, ...rest } = form
       await createForm({ ...rest, user_id: user.id, title: `${form.title} (Copy)`, status: 'draft' as FormStatus })
       toast.success("Form Duplicated - " + form.title + " copy created")
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error')
     }
   }
@@ -449,7 +449,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       await deleteForm(form.id)
       toast.success("Form Deleted - form has been deleted")
       setSelectedForm(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error')
     }
   }
@@ -502,7 +502,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
       toast.success('Export Complete')
       setShowExportDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export Failed')
     } finally {
       setIsExporting(false)

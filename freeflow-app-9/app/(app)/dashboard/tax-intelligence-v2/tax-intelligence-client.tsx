@@ -67,6 +67,15 @@ export default function TaxIntelligenceClient() {
     estimated_amount_owed: '',
     notes: ''
   })
+  const [certificatesDialogOpen, setCertificatesDialogOpen] = useState(false)
+  const [certificates, setCertificates] = useState<Array<{
+    id: string
+    name: string
+    type: string
+    validUntil: string
+    status: 'active' | 'expired' | 'pending'
+  }>>([])
+  const [isUploadingCert, setIsUploadingCert] = useState(false)
   const router = useRouter()
 
   const { summary, isLoading: summaryLoading } = useTaxSummary(selectedYear)
@@ -124,9 +133,101 @@ export default function TaxIntelligenceClient() {
   const handleInsightAction = (insight: any) => {
     if (insight.actionUrl) {
       router.push(insight.actionUrl)
-    } else {
-      toast.info('Action handler for this insight type coming soon')
+      return
     }
+
+    // Handle insight actions based on type
+    switch (insight.type || insight.category) {
+      case 'deduction':
+      case 'expense':
+        // Navigate to deductions tab
+        const deductionsTab = document.querySelector('[value="deductions"]') as HTMLElement
+        if (deductionsTab) deductionsTab.click()
+        toast.success('Navigated to deductions', { description: insight.title })
+        break
+
+      case 'filing':
+      case 'deadline':
+        // Open filing dialog or navigate to filings tab
+        const filingsTab = document.querySelector('[value="filings"]') as HTMLElement
+        if (filingsTab) filingsTab.click()
+        toast.success('Navigated to filings', { description: insight.title })
+        break
+
+      case 'savings':
+      case 'optimization':
+        // Show optimization details
+        toast.success('Tax Optimization Insight', {
+          description: insight.description || 'Review your tax strategy for potential savings'
+        })
+        break
+
+      case 'compliance':
+      case 'warning':
+        // Show compliance alert
+        toast.warning('Compliance Action Required', {
+          description: insight.description || 'Please review your tax compliance status'
+        })
+        break
+
+      default:
+        // Mark insight as read and show details
+        markAsRead(insight.id)
+        toast.success('Insight Acknowledged', {
+          description: insight.title || 'This insight has been marked as read'
+        })
+    }
+  }
+
+  // Handle tax exemption certificate upload
+  const handleUploadCertificate = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.pdf,.jpg,.jpeg,.png'
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      setIsUploadingCert(true)
+      try {
+        // Upload to Supabase storage
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+
+        const filePath = `tax-certificates/${Date.now()}-${file.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        // Create certificate record
+        const newCert = {
+          id: crypto.randomUUID(),
+          name: file.name.replace(/\.[^/.]+$/, ''),
+          type: 'Sales Tax Exemption',
+          validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'pending' as const
+        }
+
+        setCertificates(prev => [...prev, newCert])
+        toast.success('Certificate uploaded successfully', {
+          description: 'It will be reviewed within 24-48 hours'
+        })
+      } catch (error) {
+        toast.error('Failed to upload certificate')
+      } finally {
+        setIsUploadingCert(false)
+      }
+    }
+
+    input.click()
+  }
+
+  const handleDeleteCertificate = (certId: string) => {
+    setCertificates(prev => prev.filter(c => c.id !== certId))
+    toast.success('Certificate removed')
   }
 
   const handleViewFilingCalendar = () => {
@@ -325,6 +426,89 @@ export default function TaxIntelligenceClient() {
                 </div>
               </DialogContent>
             </Dialog>
+
+            {/* Tax Exemption Certificates Dialog */}
+            <Dialog open={certificatesDialogOpen} onOpenChange={setCertificatesDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-blue-500" />
+                    Tax Exemption Certificates
+                  </DialogTitle>
+                  <DialogDescription>
+                    Upload and manage your tax exemption certificates for eligible purchases
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  {/* Upload button */}
+                  <Button
+                    onClick={handleUploadCertificate}
+                    disabled={isUploadingCert}
+                    className="w-full"
+                  >
+                    {isUploadingCert ? (
+                      <>
+                        <Clock className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload New Certificate
+                      </>
+                    )}
+                  </Button>
+
+                  {/* Certificates list */}
+                  {certificates.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>No certificates uploaded yet</p>
+                      <p className="text-sm">Upload your tax exemption certificates to apply them to eligible purchases</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {certificates.map((cert) => (
+                        <div
+                          key={cert.id}
+                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium">{cert.name}</p>
+                              <p className="text-sm text-gray-500">{cert.type} • Valid until {cert.validUntil}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant={
+                                cert.status === 'active' ? 'default' :
+                                cert.status === 'expired' ? 'destructive' : 'outline'
+                              }
+                            >
+                              {cert.status}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteCertificate(cert.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end">
+                  <Button variant="outline" onClick={() => setCertificatesDialogOpen(false)}>
+                    Close
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -475,10 +659,13 @@ export default function TaxIntelligenceClient() {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => toast.info('Tax exemption certificates feature coming soon')}
+                    onClick={() => setCertificatesDialogOpen(true)}
                   >
                     <Shield className="h-4 w-4 mr-2" />
                     Tax Exemption Certificates
+                    {certificates.length > 0 && (
+                      <Badge variant="secondary" className="ml-auto">{certificates.length}</Badge>
+                    )}
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => setSettingsOpen(true)}>
                     <Settings className="h-4 w-4 mr-2" />

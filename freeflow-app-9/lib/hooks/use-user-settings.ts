@@ -65,7 +65,7 @@ export function useUserSettings(initialSettings: UserSettings | null = null) {
       } else {
         setSettings(data)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setIsLoading(false)

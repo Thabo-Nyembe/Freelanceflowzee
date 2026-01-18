@@ -96,7 +96,7 @@ export function useHelpArticles() {
 
       if (error) throw error
       setArticles(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch articles', variant: 'destructive' })
     } finally {
@@ -120,8 +120,8 @@ export function useHelpArticles() {
       setArticles(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Article created successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -140,8 +140,8 @@ export function useHelpArticles() {
       setArticles(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Article updated successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -157,8 +157,8 @@ export function useHelpArticles() {
       if (error) throw error
       setArticles(prev => prev.filter(a => a.id !== id))
       toast({ title: 'Success', description: 'Article deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -180,8 +180,8 @@ export function useHelpArticles() {
       setArticles(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Article published' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -200,8 +200,8 @@ export function useHelpArticles() {
       setArticles(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Article unpublished' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -220,8 +220,8 @@ export function useHelpArticles() {
       setArticles(prev => prev.map(a => a.id === id ? data : a))
       toast({ title: 'Success', description: 'Article archived' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -346,8 +346,8 @@ export function useHelpCategories() {
       setCategories(prev => [...prev, data])
       toast({ title: 'Success', description: 'Category created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -365,8 +365,8 @@ export function useHelpCategories() {
       setCategories(prev => prev.map(c => c.id === id ? data : c))
       toast({ title: 'Success', description: 'Category updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -381,8 +381,8 @@ export function useHelpCategories() {
       if (error) throw error
       setCategories(prev => prev.filter(c => c.id !== id))
       toast({ title: 'Success', description: 'Category deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -463,8 +463,8 @@ export function useArticleFeedback(articleId: string) {
       setFeedback(prev => [data, ...prev])
       toast({ title: 'Thank you!', description: 'Your feedback has been submitted' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

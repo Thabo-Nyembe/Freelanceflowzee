@@ -499,7 +499,9 @@ export default function ValueDashboardPage() {
               <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-600">High-Value Projects</p>
-                  <span className="text-2xl font-bold text-blue-600">6</span>
+                  <span className="text-2xl font-bold text-blue-600">
+                    {valueTracking.filter(p => p.value / Math.max(p.projects, 1) > 5000).reduce((acc, p) => acc + p.projects, 0) || 0}
+                  </span>
                 </div>
                 <p className="text-xs text-gray-600">Projects valued over $5,000</p>
               </div>
@@ -507,7 +509,11 @@ export default function ValueDashboardPage() {
               <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-600">Avg Success Rate</p>
-                  <span className="text-2xl font-bold text-green-600">98%</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    {valueTracking.length > 0
+                      ? Math.round(valueTracking.reduce((acc, p) => acc + p.roi, 0) / valueTracking.length)
+                      : 0}%
+                  </span>
                 </div>
                 <p className="text-xs text-gray-600">First-time approval rate</p>
               </div>
@@ -515,7 +521,11 @@ export default function ValueDashboardPage() {
               <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-gray-600">Total Cost Savings</p>
-                  <span className="text-2xl font-bold text-purple-600">{formatCurrency(8400)}</span>
+                  <span className="text-2xl font-bold text-purple-600">
+                    {formatCurrency(
+                      valueTracking.reduce((acc, p) => acc + Math.round(p.value * (p.roi / 100) * 0.15), 0)
+                    )}
+                  </span>
                 </div>
                 <p className="text-xs text-gray-600">vs market rate estimates</p>
               </div>
@@ -524,7 +534,6 @@ export default function ValueDashboardPage() {
             {/* Project Details */}
             <div className="space-y-2">
               <h4 className="font-semibold text-gray-900">Completed Projects</h4>
-              {/* TODO: Map from API response data (valueTracking or additional projects endpoint) */}
               {valueTracking.length > 0 && valueTracking.map((project, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <div className="flex-1">

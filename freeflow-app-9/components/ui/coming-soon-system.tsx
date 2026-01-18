@@ -24,8 +24,19 @@ interface ComingSoonFeature {
   benefits: string[]
 }
 
+/**
+ * Coming Soon Features - Accurate Feature Status
+ *
+ * FIXED: P1 - Updated to show realistic progress and dates
+ *
+ * Status Guide:
+ * - progress: 100 = Available
+ * - progress: 80-99 = Beta/Testing
+ * - progress: 50-79 = In Development
+ * - progress: 0-49 = Planned
+ */
 const COMING_SOON_FEATURES: ComingSoonFeature[] = [
-  // AI Features (True coming soon - not implemented yet)
+  // AI Features - Most available, some in beta
   {
     id: 'ai-video-generation',
     title: 'AI Video Generation',
@@ -33,7 +44,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Video,
     category: 'ai',
     priority: 'high',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['AI', 'Video', 'Generation', 'Automation'],
     benefits: ['Save 80% time on video creation', 'Professional quality output', 'Multiple format support']
@@ -45,7 +56,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Code,
     category: 'ai',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['AI', 'Development', 'Code', 'Productivity'],
     benefits: ['Faster development', 'Fewer bugs', 'Smart suggestions']
@@ -57,13 +68,13 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Brain,
     category: 'ai',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['AI', 'Voice', 'Synthesis', 'Multilingual'],
     benefits: ['Natural voice generation', 'Multiple languages', 'Custom voice cloning']
   },
 
-  // Advanced Collaboration Features (Not in current implementation)
+  // Advanced Collaboration Features - Some in development
   {
     id: 'voice-collaboration',
     title: 'Voice Collaboration',
@@ -71,8 +82,8 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Headphones,
     category: 'collaboration',
     priority: 'medium',
-    estimatedDate: 'Available Now',
-    progress: 100,
+    estimatedDate: 'Q2 2026',
+    progress: 65,
     tags: ['Voice', 'Audio', 'Communication', 'Spatial'],
     benefits: ['Crystal clear audio', 'Spatial positioning', 'Background noise removal']
   },
@@ -83,8 +94,8 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Globe,
     category: 'collaboration',
     priority: 'low',
-    estimatedDate: 'Available Now',
-    progress: 100,
+    estimatedDate: 'Q4 2026',
+    progress: 25,
     tags: ['AR', 'Immersive', 'Collaboration', 'Innovation'],
     benefits: ['Immersive meetings', 'Spatial interaction', 'Future-ready technology']
   },
@@ -95,13 +106,13 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Globe,
     category: 'collaboration',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Translation', 'Global', 'Real-time', 'Communication'],
     benefits: ['Break language barriers', 'Global team support', 'Instant translation']
   },
 
-  // Advanced Productivity Features
+  // Advanced Productivity Features - Most available
   {
     id: 'mobile-app',
     title: 'Native Mobile App',
@@ -109,7 +120,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Smartphone,
     category: 'productivity',
     priority: 'high',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Mobile', 'Native', 'Offline', 'Sync'],
     benefits: ['Work anywhere', 'Offline capability', 'Native performance']
@@ -121,7 +132,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Monitor,
     category: 'productivity',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Desktop', 'Native', 'Cross-platform', 'Performance'],
     benefits: ['Better performance', 'Offline access', 'System integration']
@@ -133,13 +144,13 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: ExternalLink,
     category: 'productivity',
     priority: 'low',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Browser', 'Extension', 'Integration', 'Quick Access'],
     benefits: ['Quick access', 'Web integration', 'Seamless workflow']
   },
 
-  // Advanced Creative Features
+  // Advanced Creative Features - Mixed status
   {
     id: 'audio-studio',
     title: 'Audio Studio',
@@ -147,7 +158,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Music,
     category: 'creative',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Audio', 'Editing', 'Studio', 'AI'],
     benefits: ['Professional audio tools', 'AI noise reduction', 'Multi-track editing']
@@ -159,8 +170,8 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Monitor,
     category: 'creative',
     priority: 'low',
-    estimatedDate: 'Available Now',
-    progress: 100,
+    estimatedDate: 'Q3 2026',
+    progress: 45,
     tags: ['3D', 'Modeling', 'Rendering', 'Professional'],
     benefits: ['3D asset creation', 'Professional rendering', 'Export capabilities']
   },
@@ -171,13 +182,13 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Zap,
     category: 'creative',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Motion', 'Graphics', 'Animation', 'Professional'],
     benefits: ['Professional animations', 'Motion templates', 'Export flexibility']
   },
 
-  // Business Features
+  // Business Features - Mixed status
   {
     id: 'crypto-payments',
     title: 'Cryptocurrency Payments',
@@ -185,8 +196,8 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Wallet,
     category: 'business',
     priority: 'medium',
-    estimatedDate: 'Available Now',
-    progress: 100,
+    estimatedDate: 'Beta',
+    progress: 85,
     tags: ['Crypto', 'Payments', 'Blockchain', 'Finance'],
     benefits: ['Global payments', 'Lower fees', 'Instant settlement']
   },
@@ -197,7 +208,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Palette,
     category: 'business',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['White Label', 'Branding', 'Enterprise', 'Customization'],
     benefits: ['Custom branding', 'Enterprise solution', 'Revenue sharing']
@@ -209,13 +220,13 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Star,
     category: 'business',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Marketplace', 'Plugins', 'Integrations', 'Ecosystem'],
     benefits: ['Extend functionality', 'Third-party integrations', 'Monetization opportunities']
   },
 
-  // Advanced Analytics (Beyond current implementation)
+  // Advanced Analytics - Available
   {
     id: 'ml-insights',
     title: 'Machine Learning Insights',
@@ -223,7 +234,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: Brain,
     category: 'analytics',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['ML', 'Insights', 'Predictive', 'Analytics'],
     benefits: ['Predictive insights', 'Business intelligence', 'Data-driven decisions']
@@ -235,7 +246,7 @@ const COMING_SOON_FEATURES: ComingSoonFeature[] = [
     icon: BarChart3,
     category: 'analytics',
     priority: 'medium',
-    estimatedDate: 'Available Now',
+    estimatedDate: 'Available',
     progress: 100,
     tags: ['Reports', 'Custom', 'Builder', 'Analytics'],
     benefits: ['Custom reporting', 'Visual builder', 'Export options']

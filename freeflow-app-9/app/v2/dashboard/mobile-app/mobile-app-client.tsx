@@ -340,7 +340,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Build created`, { description: `Version ${buildForm.version} is being processed` })
       setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
       setShowCreateBuildModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create build')
     } finally { setIsLoading(false) }
   }
@@ -351,7 +351,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
       if (error) throw error
       toast.success(`Submitted to store`, { description: `Build submitted for review` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
@@ -372,7 +372,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Build deleted`, { description: `Version ${buildVersion} has been removed` })
       setSelectedBuild(null)
       setShowBuildDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -394,7 +394,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Reply sent`, { description: `Response posted successfully` })
       setResponseText('')
       setShowReviewDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Reply failed')
     } finally { setIsLoading(false) }
   }
@@ -410,7 +410,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       })
       if (error) throw error
       toast.info('Review reported')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Report failed')
     } finally { setIsLoading(false) }
   }
@@ -434,7 +434,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Campaign created`, { description: `"${campaignForm.title}" is ready to schedule` })
       setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
       setShowCreateCampaignModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create campaign')
     } finally { setIsLoading(false) }
   }
@@ -445,7 +445,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
       if (error) throw error
       toast.success(`Campaign sent`, { description: `"${campaignTitle}" has been sent` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Send failed')
     } finally { setIsLoading(false) }
   }
@@ -456,7 +456,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
       if (error) throw error
       toast.success(`Campaign deleted`, { description: `"${campaignTitle}" has been removed` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -480,7 +480,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Product created`, { description: `"${iapForm.name}" is pending approval` })
       setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
       setShowCreateIapModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create product')
     } finally { setIsLoading(false) }
   }
@@ -491,7 +491,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
       if (error) throw error
       toast.success(`Product deleted`, { description: `"${iapName}" has been removed` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -506,7 +506,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       }, { onConflict: 'user_id,section' })
       if (error) throw error
       toast.success(`Settings saved`, { description: `${section} settings have been updated` })
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Save failed')
     } finally { setIsLoading(false) }
   }
@@ -544,7 +544,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success('Campaign updated', { description: campaignForm.title + ' has been saved' })
       setShowEditCampaignDialog(false)
       setSelectedCampaign(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Update failed')
     } finally { setIsLoading(false) }
   }
@@ -578,7 +578,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success('Product updated', { description: iapForm.name + ' has been saved' })
       setShowEditIapDialog(false)
       setSelectedIap(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Update failed')
     } finally { setIsLoading(false) }
   }
@@ -615,7 +615,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       }, { onConflict: 'user_id,section' })
       if (error) throw error
       toast.success('API key regenerated')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to regenerate')
     } finally { setIsLoading(false) }
   }
@@ -677,7 +677,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`${selectedCiCd.name} ${selectedCiCd.connected ? 'configured' : 'connected'}`)
       setShowCiCdConfigDialog(false)
       setSelectedCiCd(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Action failed')
     } finally { setIsLoading(false) }
   }
@@ -700,7 +700,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       if (error) throw error
       toast.success('Group created', { description: groupName + ' is ready for testers' })
       setShowCreateTesterGroupDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create group')
     } finally { setIsLoading(false) }
   }
@@ -770,7 +770,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       if (error) throw error
       toast.success('App removed from store')
       setShowRemoveAppDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to remove')
     } finally { setIsLoading(false) }
   }
@@ -783,7 +783,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       if (error) throw error
       toast.success('App deleted')
       setShowDeleteAppDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -806,7 +806,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       if (error) throw error
       toast.success(`Released!`, { description: `Version ${selectedBuild.version} is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
       setShowBuildDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Release failed')
     } finally { setIsLoading(false) }
   }
@@ -839,7 +839,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       if (error) throw error
       toast.success('App name updated', { description: 'Name changed to ' + newName })
       setShowEditAppNameDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Update failed')
     } finally { setIsLoading(false) }
   }

@@ -434,7 +434,7 @@ export default function LogsClient() {
       if (error) throw error
       toast.success('Log created')
       fetchSystemLogs()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating log')
     } finally {
       setIsLoading(false)
@@ -454,7 +454,7 @@ export default function LogsClient() {
       if (error) throw error
       toast.success(`${logIds.length} logs have been archived`)
       fetchSystemLogs()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error archiving logs')
     } finally {
       setIsLoading(false)
@@ -476,7 +476,7 @@ export default function LogsClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       toast.success('Export complete')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Export failed')
     } finally {
       setIsLoading(false)
@@ -496,7 +496,7 @@ export default function LogsClient() {
       if (error) throw error
       toast.success('Logs cleared')
       fetchSystemLogs()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error clearing logs')
     } finally {
       setIsLoading(false)
@@ -528,7 +528,7 @@ export default function LogsClient() {
         notifications: ''
       })
       setShowAlertDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating alert')
     } finally {
       setIsLoading(false)
@@ -550,7 +550,7 @@ export default function LogsClient() {
       toast.success(`Stream created: "${streamForm.name}" is now active`)
       setStreamForm({ name: '', query: '', color: 'blue' })
       setShowStreamDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating stream')
     } finally {
       setIsLoading(false)
@@ -572,7 +572,7 @@ export default function LogsClient() {
       toast.success(`Pipeline created: "${pipelineForm.name}" has been configured`)
       setPipelineForm({ name: '', filter: '', sample_rate: 100, processors: [] })
       setShowPipelineDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating pipeline')
     } finally {
       setIsLoading(false)
@@ -602,7 +602,7 @@ export default function LogsClient() {
         rehydration_enabled: true
       })
       setShowArchiveDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating archive')
     } finally {
       setIsLoading(false)
@@ -624,7 +624,7 @@ export default function LogsClient() {
       toast.success(`Sensitive data rule created: "${sensitiveRuleForm.name}" will ${sensitiveRuleForm.action} matching data`)
       setSensitiveRuleForm({ name: '', pattern: '', type: 'custom', action: 'redact' })
       setShowSensitiveDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error creating rule')
     } finally {
       setIsLoading(false)
@@ -642,7 +642,7 @@ export default function LogsClient() {
       toast.success(`View saved has been saved${savedViewForm.is_shared ? ' and shared' : ''}`)
       setSavedViewForm({ name: '', query: '', is_default: false, is_shared: false })
       setShowSaveViewDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Error saving view')
     } finally {
       setIsLoading(false)

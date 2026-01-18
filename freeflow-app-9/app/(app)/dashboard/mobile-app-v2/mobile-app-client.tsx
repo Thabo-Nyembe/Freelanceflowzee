@@ -346,7 +346,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Build created: v${buildForm.version} is being processed`)
       setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
       setShowCreateBuildModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create build')
     } finally { setIsLoading(false) }
   }
@@ -357,7 +357,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
       if (error) throw error
       toast.success(`Submitted to store for review`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
@@ -395,7 +395,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Build deleted has been removed`)
       setSelectedBuild(null)
       setShowBuildDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -417,7 +417,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Reply sent`)
       setResponseText('')
       setShowReviewDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Reply failed')
     } finally { setIsLoading(false) }
   }
@@ -433,7 +433,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       })
       if (error) throw error
       toast.info('Review reported')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Report failed')
     } finally { setIsLoading(false) }
   }
@@ -457,7 +457,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Campaign created: is ready to schedule`)
       setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
       setShowCreateCampaignModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create campaign')
     } finally { setIsLoading(false) }
   }
@@ -468,7 +468,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
       if (error) throw error
       toast.success(`Campaign sent: "${campaignTitle}" has been sent`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Send failed')
     } finally { setIsLoading(false) }
   }
@@ -479,7 +479,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
       if (error) throw error
       toast.success(`Campaign deleted: "${campaignTitle}" has been removed`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -503,7 +503,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Product created: "${iapForm.name}" is pending approval`)
       setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
       setShowCreateIapModal(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create product')
     } finally { setIsLoading(false) }
   }
@@ -514,7 +514,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
       if (error) throw error
       toast.success(`Product deleted: "${iapName}" has been removed`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
   }
@@ -529,7 +529,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       }, { onConflict: 'user_id,section' })
       if (error) throw error
       toast.success(`Settings saved: ${section} settings have been updated`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Save failed')
     } finally { setIsLoading(false) }
   }
@@ -568,7 +568,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success(`Build Queued: ${queueBuildForm.platform} build v${queueBuildForm.version} has been queued for processing`)
       setQueueBuildForm({ version: '', platform: 'ios', buildType: 'debug', branch: 'main' })
       setShowQueueBuildDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to queue build')
     } finally { setIsLoading(false) }
   }
@@ -590,7 +590,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
       toast.success('Submitted for Review')
       setSubmitReviewForm({ buildId: '', releaseNotes: '', targetAudience: 'all' })
       setShowSubmitReviewDialog(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }

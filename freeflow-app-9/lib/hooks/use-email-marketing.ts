@@ -135,7 +135,7 @@ export function useEmailCampaigns() {
 
       if (error) throw error
       setCampaigns(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch campaigns', variant: 'destructive' })
     } finally {
@@ -158,8 +158,8 @@ export function useEmailCampaigns() {
       setCampaigns(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Campaign created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -177,8 +177,8 @@ export function useEmailCampaigns() {
       setCampaigns(prev => prev.map(c => c.id === id ? data : c))
       toast({ title: 'Success', description: 'Campaign updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -193,8 +193,8 @@ export function useEmailCampaigns() {
       if (error) throw error
       setCampaigns(prev => prev.filter(c => c.id !== id))
       toast({ title: 'Success', description: 'Campaign deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -306,8 +306,8 @@ export function useEmailSubscribers() {
       setSubscribers(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Subscriber added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -325,8 +325,8 @@ export function useEmailSubscribers() {
       setSubscribers(prev => prev.map(s => s.id === id ? data : s))
       toast({ title: 'Success', description: 'Subscriber unsubscribed' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -380,8 +380,8 @@ export function useEmailLists() {
       setLists(prev => [data, ...prev])
       toast({ title: 'Success', description: 'List created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -435,8 +435,8 @@ export function useEmailTemplates() {
       setTemplates(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Template created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

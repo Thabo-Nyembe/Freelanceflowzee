@@ -105,7 +105,7 @@ export function useSalesDeals() {
 
       if (error) throw error
       setDeals(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch deals', variant: 'destructive' })
     } finally {
@@ -128,8 +128,8 @@ export function useSalesDeals() {
       setDeals(prev => [data, ...prev])
       toast({ title: 'Success', description: 'Deal created successfully' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -147,8 +147,8 @@ export function useSalesDeals() {
       setDeals(prev => prev.map(d => d.id === id ? data : d))
       toast({ title: 'Success', description: 'Deal updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -163,8 +163,8 @@ export function useSalesDeals() {
       if (error) throw error
       setDeals(prev => prev.filter(d => d.id !== id))
       toast({ title: 'Success', description: 'Deal deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -215,8 +215,8 @@ export function useSalesDeals() {
 
       toast({ title: 'Success', description: 'Activity logged' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -354,8 +354,8 @@ export function usePipelineStages() {
       setStages(prev => [...prev, data].sort((a, b) => a.stage_order - b.stage_order))
       toast({ title: 'Success', description: 'Stage created' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

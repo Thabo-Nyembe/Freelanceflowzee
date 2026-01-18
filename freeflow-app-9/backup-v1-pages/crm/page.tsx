@@ -242,7 +242,7 @@ export default function CRMPage() {
       })
       announce('Contact created successfully', 'polite')
       setIsContactFormOpen(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Contact creation failed', { error: err })
       toast.error('Failed to create contact')
       announce('Failed to create contact', 'assertive')

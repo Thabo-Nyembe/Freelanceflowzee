@@ -519,7 +519,7 @@ export default function AiEnhancedClient() {
         })
 
         setIsLoading(false)
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('Failed to load AI Enhanced tools', { error: err.message })
         setError(err instanceof Error ? err.message : 'Failed to load AI Enhanced tools')
         setIsLoading(false)

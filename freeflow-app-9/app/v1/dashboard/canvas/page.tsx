@@ -605,10 +605,10 @@ export default function CanvasPage() {
         description: `${newCanvas.name} - ${template?.name || newCanvas.template} - ${size.width}x${size.height}px - v${newCanvas.version}`
       })
       announce('New canvas created', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Canvas creation failed', { error: err.message || err })
       toast.error('Failed to create canvas', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }
@@ -755,10 +755,10 @@ export default function CanvasPage() {
           description: `${canvas.name} (Copy) - ${canvas.template} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers`
         })
         announce('Canvas duplicated', 'polite')
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('Failed to duplicate canvas', { error: err.message, canvasId })
         toast.error('Failed to duplicate canvas', {
-          description: err.message || 'Please try again'
+          description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
         })
       }
     }
@@ -790,10 +790,10 @@ export default function CanvasPage() {
 
         toast.success(newStarredState ? 'Added to favorites' : 'Removed from favorites')
         announce(newStarredState ? 'Added to favorites' : 'Removed from favorites', 'polite')
-      } catch (err: any) {
+      } catch (err: unknown) {
         logger.error('Failed to toggle star', { error: err.message, canvasId })
         toast.error('Failed to update favorites', {
-          description: err.message || 'Please try again'
+          description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
         })
       }
     }
@@ -905,10 +905,10 @@ export default function CanvasPage() {
         description: `${state.selectedCanvas.name} - Shared with ${shareEmail} as ${shareRole} - ${updatedCanvas.collaborators.length} total collaborators`
       })
       announce('Canvas shared with collaborator', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to share canvas', { error: err.message, canvasId: state.selectedCanvas.id })
       toast.error('Failed to share canvas', {
-        description: err.message || 'Please try again'
+        description: err instanceof Error ? err.message : 'Operation failed' || 'Please try again'
       })
     }
   }

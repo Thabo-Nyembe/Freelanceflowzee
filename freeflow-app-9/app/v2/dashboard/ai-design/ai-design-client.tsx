@@ -400,6 +400,7 @@ export default function AIDesignClient() {
   // Database integration via hook
   const {
     designs: dbDesigns,
+    favorites: dbFavorites,
     stats: dbStats,
     isLoading: isLoadingDesigns,
     isGenerating: isGeneratingHook,
@@ -407,6 +408,7 @@ export default function AIDesignClient() {
     fetchDesigns,
     createDesign,
     updateDesign,
+    toggleFavorite,
     likeDesign,
     incrementViews,
     deleteDesign
@@ -550,7 +552,7 @@ export default function AIDesignClient() {
       } else {
         toast.error('Failed to start generation')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Generation error:', err)
       toast.error(err.message || 'Generation failed')
     } finally {
@@ -558,10 +560,19 @@ export default function AIDesignClient() {
     }
   }
 
-  // Toggle favorite (client-side only - DB doesn't have is_favorite field)
+  // Toggle favorite - uses is_featured field in database
   const handleToggleFavorite = async (gen: Generation) => {
-    // Note: ai_designs table doesn't have is_favorite, using is_public as proxy for now
-    toast.info('Favorites feature coming soon')
+    try {
+      const newValue = await toggleFavorite(gen.id)
+      // Update local state to reflect the change
+      setGenerations(prev => prev.map(g =>
+        g.id === gen.id ? { ...g, isFavorite: newValue ?? !g.isFavorite } : g
+      ))
+      toast.success(newValue ? 'Added to favorites' : 'Removed from favorites')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update favorite'
+      toast.error(errorMessage)
+    }
   }
 
   // Delete generation
@@ -570,7 +581,7 @@ export default function AIDesignClient() {
       await deleteDesign(id)
       setShowGenerationDialog(false)
       toast.success('Design deleted successfully')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Delete error:', err)
       toast.error(err.message || 'Failed to delete design')
     }
@@ -593,7 +604,7 @@ export default function AIDesignClient() {
       document.body.removeChild(link)
 
       toast.success('Download started')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Download error:', err)
       toast.error('Download failed')
     }
@@ -625,7 +636,7 @@ export default function AIDesignClient() {
 
       setCollections(prev => [newCollection, ...prev])
       toast.success('Collection created')
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create collection')
     }
   }

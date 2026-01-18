@@ -157,7 +157,7 @@ export default function GuestPaymentModal({
       if (onSuccess) {
         onSuccess(guestSessionId)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'Payment failed. Please try again.')
       setStep('payment')
     } finally {

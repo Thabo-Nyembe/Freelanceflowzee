@@ -378,6 +378,23 @@ export default function ContentClient() {
     fallback: 'en-US'
   })
 
+  // Field builder/editor state
+  const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false)
+  const [editingField, setEditingField] = useState<ContentField | null>(null)
+  const [contentTypes, setContentTypes] = useState<ContentTypeModel[]>(mockContentTypes)
+  const [fieldForm, setFieldForm] = useState<ContentField>({
+    id: '',
+    name: '',
+    apiId: '',
+    type: 'text',
+    required: false,
+    unique: false,
+    localized: false,
+    validation: {},
+    defaultValue: '',
+    helpText: ''
+  })
+
   // Use the content hook
   const {
     content: contentData,
@@ -500,7 +517,7 @@ export default function ContentClient() {
     const scheduledEntries = entries.filter(e => e.status === 'scheduled').length
     const totalAssets = assets.length
     const totalAssetSize = assets.reduce((sum, a) => sum + a.size, 0)
-    const contentTypes = mockContentTypes.length
+    const contentTypesCount = contentTypes.length
     const locales = mockLocales.length
     const webhooksActive = webhooks.filter(w => w.isActive).length
     const totalViews = entries.reduce((sum, e) => sum + (e.view_count || 0), 0)
@@ -512,12 +529,12 @@ export default function ContentClient() {
       scheduledEntries,
       totalAssets,
       totalAssetSize,
-      contentTypes,
+      contentTypes: contentTypesCount,
       locales,
       webhooksActive,
       totalViews
     }
-  }, [contentData, assets, webhooks])
+  }, [contentData, assets, webhooks, contentTypes])
 
   // Filtered entries
   const filteredEntries = useMemo(() => {
@@ -1008,6 +1025,116 @@ export default function ContentClient() {
     setIsConfigureTypeDialogOpen(true)
   }
 
+  // Field builder - open dialog for new field
+  const handleOpenFieldBuilder = () => {
+    setEditingField(null)
+    setFieldForm({
+      id: `f${Date.now()}`,
+      name: '',
+      apiId: '',
+      type: 'text',
+      required: false,
+      unique: false,
+      localized: false,
+      validation: {},
+      defaultValue: '',
+      helpText: ''
+    })
+    setIsFieldDialogOpen(true)
+  }
+
+  // Field editor - open dialog for existing field
+  const handleOpenFieldEditor = (field: ContentField) => {
+    setEditingField(field)
+    setFieldForm({ ...field })
+    setIsFieldDialogOpen(true)
+  }
+
+  // Save field (create or update)
+  const handleSaveField = async () => {
+    if (!fieldForm.name.trim()) {
+      toast.error('Field name is required')
+      return
+    }
+    if (!fieldForm.apiId.trim()) {
+      toast.error('API ID is required')
+      return
+    }
+    if (!selectedContentType) {
+      toast.error('No content type selected')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Update the content type's fields array
+      const updatedContentTypes = contentTypes.map(ct => {
+        if (ct.id !== selectedContentType.id) return ct
+
+        let updatedFields: ContentField[]
+        if (editingField) {
+          // Update existing field
+          updatedFields = ct.fields.map(f =>
+            f.id === editingField.id ? fieldForm : f
+          )
+        } else {
+          // Add new field
+          updatedFields = [...ct.fields, fieldForm]
+        }
+
+        return { ...ct, fields: updatedFields, lastModified: new Date().toISOString() }
+      })
+
+      setContentTypes(updatedContentTypes)
+
+      // Update selected content type to reflect changes
+      const updatedSelected = updatedContentTypes.find(ct => ct.id === selectedContentType.id)
+      if (updatedSelected) {
+        setSelectedContentType(updatedSelected)
+      }
+
+      toast.success(editingField ? 'Field updated successfully' : 'Field added successfully')
+      setIsFieldDialogOpen(false)
+      setEditingField(null)
+    } catch (error) {
+      toast.error('Failed to save field')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete field
+  const handleDeleteField = async (fieldId: string) => {
+    if (!selectedContentType) return
+
+    const updatedContentTypes = contentTypes.map(ct => {
+      if (ct.id !== selectedContentType.id) return ct
+      return {
+        ...ct,
+        fields: ct.fields.filter(f => f.id !== fieldId),
+        lastModified: new Date().toISOString()
+      }
+    })
+
+    setContentTypes(updatedContentTypes)
+
+    const updatedSelected = updatedContentTypes.find(ct => ct.id === selectedContentType.id)
+    if (updatedSelected) {
+      setSelectedContentType(updatedSelected)
+    }
+
+    toast.success('Field deleted')
+  }
+
+  // Auto-generate API ID from name
+  const handleFieldNameChange = (name: string) => {
+    setFieldForm(prev => ({
+      ...prev,
+      name,
+      apiId: prev.apiId || name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+    }))
+  }
+
   // Add locale handler
   const handleAddLocale = async () => {
     if (!localeForm.code.trim() || !localeForm.name.trim()) {
@@ -1172,7 +1299,7 @@ export default function ContentClient() {
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Content Types</div>
             <div className="text-2xl font-bold text-cyan-600">{stats.contentTypes}</div>
-            <div className="text-xs text-cyan-600">{mockContentTypes.reduce((sum, ct) => sum + ct.fields.length, 0)} fields</div>
+            <div className="text-xs text-cyan-600">{contentTypes.reduce((sum, ct) => sum + ct.fields.length, 0)} fields</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Locales</div>
@@ -1433,7 +1560,7 @@ export default function ContentClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockContentTypes.map(ct => (
+              {contentTypes.map(ct => (
                 <div key={ct.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
@@ -2259,9 +2386,7 @@ export default function ContentClient() {
                 <div className="border-t dark:border-gray-700 pt-4">
                   <div className="flex items-center justify-between mb-3">
                     <Label>Fields ({selectedContentType.fields.length})</Label>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      toast.info('Field builder coming soon')
-                    }}>
+                    <Button variant="outline" size="sm" onClick={handleOpenFieldBuilder}>
                       <Plus className="w-4 h-4 mr-1" />
                       Add Field
                     </Button>
@@ -2275,11 +2400,14 @@ export default function ContentClient() {
                           {field.required && <Badge variant="outline" className="text-xs">Required</Badge>}
                           {field.localized && <Badge variant="outline" className="text-xs"><GlobeIcon className="w-3 h-3 mr-1" />i18n</Badge>}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                          toast.info('Field editor coming soon')
-                        }}>
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenFieldEditor(field)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => handleDeleteField(field.id)}>
+                            <TrashIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -2330,6 +2458,110 @@ export default function ContentClient() {
                 onClick={() => {
                   setSelectedContentType(null)
                   setIsConfigureTypeDialogOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Field Builder/Editor Dialog */}
+      <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingField ? 'Edit Field' : 'Add New Field'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Field Name *</Label>
+                <Input
+                  value={fieldForm.name}
+                  onChange={(e) => handleFieldNameChange(e.target.value)}
+                  placeholder="e.g., Author Name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>API ID *</Label>
+                <Input
+                  value={fieldForm.apiId}
+                  onChange={(e) => setFieldForm(prev => ({ ...prev, apiId: e.target.value }))}
+                  placeholder="e.g., author_name"
+                  className="mt-1 font-mono text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Field Type</Label>
+              <Select
+                value={fieldForm.type}
+                onValueChange={(v) => setFieldForm(prev => ({ ...prev, type: v as ContentField['type'] }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="richtext">Rich Text</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="boolean">Boolean</SelectItem>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="media">Media</SelectItem>
+                  <SelectItem value="reference">Reference</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="enum">Enum</SelectItem>
+                  <SelectItem value="location">Location</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Help Text</Label>
+              <Input
+                value={fieldForm.helpText}
+                onChange={(e) => setFieldForm(prev => ({ ...prev, helpText: e.target.value }))}
+                placeholder="Describe what this field is for..."
+                className="mt-1"
+              />
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Switch
+                  checked={fieldForm.required}
+                  onCheckedChange={(v) => setFieldForm(prev => ({ ...prev, required: v }))}
+                />
+                <span className="text-sm">Required</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Switch
+                  checked={fieldForm.unique}
+                  onCheckedChange={(v) => setFieldForm(prev => ({ ...prev, unique: v }))}
+                />
+                <span className="text-sm">Unique</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <Switch
+                  checked={fieldForm.localized}
+                  onCheckedChange={(v) => setFieldForm(prev => ({ ...prev, localized: v }))}
+                />
+                <span className="text-sm">Localized</span>
+              </label>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                onClick={handleSaveField}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : editingField ? 'Update Field' : 'Add Field'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsFieldDialogOpen(false)
+                  setEditingField(null)
                 }}
               >
                 Cancel

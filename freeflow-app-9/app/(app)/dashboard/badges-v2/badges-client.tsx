@@ -675,15 +675,52 @@ export function BadgesClient() {
           mimeType = 'text/csv'
           break
         case 'pdf':
-          // For PDF, we'll create a simple text representation
-          // In production, you'd use a library like jsPDF
-          const pdfContent = exportData.map(item =>
-            `Badge: ${item.badge_name}\nCategory: ${item.category}\nRarity: ${item.rarity}\nXP: ${item.xp_value}\nAwarded: ${item.awarded_at}\nSkills: ${item.skills}\n---`
-          ).join('\n\n')
-          data = pdfContent
-          filename = 'badges-export.txt'
-          mimeType = 'text/plain'
-          toast.info('PDF export coming soon! Downloading as text file.')
+          // Generate real PDF using jsPDF
+          const { default: jsPDF } = await import('jspdf')
+          const { default: autoTable } = await import('jspdf-autotable')
+
+          const doc = new jsPDF()
+
+          // Add title
+          doc.setFontSize(20)
+          doc.setTextColor(79, 70, 229) // Indigo color
+          doc.text('My Badges & Achievements', 14, 22)
+
+          // Add subtitle
+          doc.setFontSize(10)
+          doc.setTextColor(107, 114, 128) // Gray color
+          doc.text(`Exported on ${new Date().toLocaleDateString()}`, 14, 30)
+
+          // Add summary
+          const totalXP = exportData.reduce((sum, item) => sum + item.xp_value, 0)
+          doc.setFontSize(12)
+          doc.setTextColor(0, 0, 0)
+          doc.text(`Total Badges: ${exportData.length}  |  Total XP: ${totalXP}`, 14, 40)
+
+          // Add table using autoTable
+          autoTable(doc, {
+            startY: 50,
+            head: [['Badge Name', 'Category', 'Rarity', 'XP', 'Awarded Date', 'Skills']],
+            body: exportData.map(item => [
+              item.badge_name,
+              item.category,
+              item.rarity,
+              item.xp_value.toString(),
+              new Date(item.awarded_at).toLocaleDateString(),
+              item.skills.substring(0, 30) + (item.skills.length > 30 ? '...' : '')
+            ]),
+            theme: 'grid',
+            headStyles: { fillColor: [79, 70, 229], textColor: 255 },
+            alternateRowStyles: { fillColor: [245, 245, 255] },
+            styles: { fontSize: 9, cellPadding: 3 }
+          })
+
+          // Save PDF
+          doc.save('badges-export.pdf')
+          setExportDialogOpen(false)
+          toast.success('PDF exported successfully!')
+          setIsLoading(false)
+          return
           break
         default:
           throw new Error('Invalid export format')

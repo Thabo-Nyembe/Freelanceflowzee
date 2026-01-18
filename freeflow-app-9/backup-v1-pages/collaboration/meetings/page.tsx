@@ -218,7 +218,7 @@ export default function MeetingsPage() {
       });
       toast.success(`${transformedMeetings.length} meetings loaded`);
       announce(`${transformedMeetings.length} meetings loaded successfully`, "polite");
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err.message || "Failed to fetch meetings";
       setError(errorMessage);
       logger.error("Failed to fetch meetings data", { error: err, userId });

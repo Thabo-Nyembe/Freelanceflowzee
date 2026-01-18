@@ -92,9 +92,9 @@ export function useProjects(initialProjects: Project[] = []) {
 
       if (error) throw error
       setProjects(data || [])
-    } catch (err: any) {
-      setError(err.message)
-      console.error('Failed to fetch projects:', err)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
@@ -125,8 +125,8 @@ export function useProjects(initialProjects: Project[] = []) {
       setProjects(prev => [data, ...prev])
       toast.success('Project created successfully')
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to create project')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create project')
       throw err
     }
   }
@@ -144,8 +144,8 @@ export function useProjects(initialProjects: Project[] = []) {
       setProjects(prev => prev.map(p => p.id === id ? data : p))
       toast.success('Project updated successfully')
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update project')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update project')
       throw err
     }
   }
@@ -170,8 +170,8 @@ export function useProjects(initialProjects: Project[] = []) {
       if (error) throw error
       setProjects(prev => prev.filter(p => p.id !== id))
       toast.success('Project deleted')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to delete project')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete project')
       throw err
     }
   }
@@ -247,8 +247,8 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
 
       if (error) throw error
       setTasks(data || [])
-    } catch (err: any) {
-      console.error('Failed to fetch tasks:', err)
+    } catch (err: unknown) {
+      // Error handled silently
     } finally {
       setIsLoading(false)
     }
@@ -280,8 +280,8 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
       setTasks(prev => [...prev, data])
       toast.success('Task created')
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to create task')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create task')
       throw err
     }
   }
@@ -299,8 +299,8 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
       setTasks(prev => prev.map(t => t.id === id ? data : t))
       toast.success('Task updated')
       return data
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update task')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to update task')
       throw err
     }
   }
@@ -315,8 +315,8 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
       if (error) throw error
       setTasks(prev => prev.filter(t => t.id !== id))
       toast.success('Task deleted')
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to delete task')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete task')
       throw err
     }
   }

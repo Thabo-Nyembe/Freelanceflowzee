@@ -934,7 +934,7 @@ export default function ReportsPage() {
         description: 'CSV file downloaded successfully'
       })
       announce('Financial data exported successfully', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Export failed', { error: err.message })
       toast.error('Failed to export data')
     }
@@ -965,7 +965,7 @@ export default function ReportsPage() {
         description: 'Reports removed successfully'
       })
       announce(`${state.selectedReports.length} reports deleted`, 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Bulk delete failed', { error: err.message })
       toast.error('Failed to delete reports')
     }
@@ -985,7 +985,7 @@ export default function ReportsPage() {
       toast.info('Opening report editor', {
         description: `Editing ${report.name}`
       })
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Failed to open editor', { error: err.message })
     }
   }
@@ -1029,7 +1029,7 @@ export default function ReportsPage() {
       announce('Report shared successfully', 'polite')
       setIsShareModalOpen(false)
       setShareReport(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Share failed', { error: err.message })
       toast.error('Failed to share report')
     } finally {
@@ -1058,7 +1058,7 @@ export default function ReportsPage() {
         description: `Created copy of "${report.name}"`
       })
       announce('Report duplicated successfully', 'polite')
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Duplication failed', { error: err.message })
       toast.error('Failed to duplicate report')
     }

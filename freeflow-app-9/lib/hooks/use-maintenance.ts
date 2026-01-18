@@ -90,7 +90,7 @@ export function useMaintenance() {
 
       if (error) throw error
       setWindows(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       toast({ title: 'Error', description: 'Failed to fetch maintenance windows', variant: 'destructive' })
     } finally {
@@ -116,8 +116,8 @@ export function useMaintenance() {
       ))
       toast({ title: 'Success', description: 'Maintenance window scheduled' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -136,8 +136,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Maintenance window updated' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -153,8 +153,8 @@ export function useMaintenance() {
       if (error) throw error
       setWindows(prev => prev.filter(w => w.id !== id))
       toast({ title: 'Success', description: 'Maintenance window deleted' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -176,8 +176,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Maintenance started' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -200,8 +200,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Maintenance completed' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -220,8 +220,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Maintenance cancelled' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -244,8 +244,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Maintenance rescheduled' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -267,8 +267,8 @@ export function useMaintenance() {
       setWindows(prev => prev.map(w => w.id === id ? data : w))
       toast({ title: 'Success', description: 'Notifications sent' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -374,8 +374,8 @@ export function useMaintenanceTasks(windowId: string) {
       setTasks(prev => [...prev, data].sort((a, b) => a.task_order - b.task_order))
       toast({ title: 'Success', description: 'Task added' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -393,8 +393,8 @@ export function useMaintenanceTasks(windowId: string) {
       if (error) throw error
       setTasks(prev => prev.map(t => t.id === id ? data : t))
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -418,8 +418,8 @@ export function useMaintenanceTasks(windowId: string) {
       setTasks(prev => prev.map(t => t.id === id ? data : t))
       toast({ title: 'Success', description: 'Task completed' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }
@@ -435,8 +435,8 @@ export function useMaintenanceTasks(windowId: string) {
       if (error) throw error
       setTasks(prev => prev.filter(t => t.id !== id))
       toast({ title: 'Success', description: 'Task removed' })
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } catch (err: unknown) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Operation failed', variant: 'destructive' })
       throw err
     }
   }

@@ -91,7 +91,7 @@ export function useExtensions(initialExtensions: Extension[] = [], initialStats?
       if (fetchError) throw fetchError
       setExtensions(data || [])
       calculateStats(data || [])
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
     } finally {
       setLoading(false)
@@ -146,7 +146,7 @@ export function useExtensions(initialExtensions: Extension[] = [], initialStats?
 
       if (insertError) throw insertError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -164,7 +164,7 @@ export function useExtensions(initialExtensions: Extension[] = [], initialStats?
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -179,7 +179,7 @@ export function useExtensions(initialExtensions: Extension[] = [], initialStats?
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

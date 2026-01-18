@@ -118,7 +118,7 @@ export function useThirdPartyIntegrations(initialIntegrations: ThirdPartyIntegra
 
       if (insertError) throw insertError
       return result
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -136,7 +136,7 @@ export function useThirdPartyIntegrations(initialIntegrations: ThirdPartyIntegra
 
       if (updateError) throw updateError
       return data
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }
@@ -151,7 +151,7 @@ export function useThirdPartyIntegrations(initialIntegrations: ThirdPartyIntegra
         .eq('id', id)
 
       if (deleteError) throw deleteError
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message)
       throw err
     }

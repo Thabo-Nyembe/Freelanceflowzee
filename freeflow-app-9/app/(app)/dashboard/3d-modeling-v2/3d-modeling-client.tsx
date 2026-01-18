@@ -481,7 +481,7 @@ export default function ThreeDModelingClient() {
   }, [])
 
   // Quick actions with real functionality
-  const mock3DQuickActions = [
+  const quickActions = [
     { id: '1', label: 'New Model', icon: 'plus', action: handleCreateModel, variant: 'default' as const },
     { id: '2', label: 'Render', icon: 'play', action: handleStartRender, variant: 'default' as const },
     { id: '3', label: 'Export', icon: 'download', action: handleExportModels, variant: 'outline' as const },
@@ -1900,7 +1900,7 @@ export default function ThreeDModelingClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mock3DQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

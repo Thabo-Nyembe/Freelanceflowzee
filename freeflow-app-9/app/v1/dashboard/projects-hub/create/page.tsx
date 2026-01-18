@@ -39,6 +39,7 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // DATABASE QUERIES
 import { createProject } from '@/lib/projects-hub-queries'
+import { useTemplates } from '@/lib/hooks/use-templates'
 
 export default function CreateProjectPage() {
   const router = useRouter()
@@ -62,14 +63,50 @@ export default function CreateProjectPage() {
     category: 'design'
   })
 
-  // Quick start templates - TODO: Load from database via hook
-  const quickTemplates: any[] = []
+  // Load templates from database - FIXED: Now uses real hook
+  const { templates, isLoading: templatesLoading } = useTemplates([], { status: 'active', category: 'project' })
 
-  // Project categories - TODO: Load from database via hook
-  const projectCategories: any[] = []
+  // Quick start templates - mapped from database templates
+  const quickTemplates = templates.slice(0, 6).map(t => ({
+    id: t.id,
+    name: t.name,
+    description: t.description || '',
+    icon: getTemplateIcon(t.category),
+    category: t.category,
+    estimatedTime: t.template_data?.estimatedTime || '2-4 weeks',
+    complexity: t.template_data?.complexity || 'Medium'
+  }))
 
-  // Priority levels - TODO: Load from database via hook
-  const priorityLevels: any[] = []
+  // Project categories - derived from templates or fallback defaults
+  const projectCategories = [
+    { id: 'design', name: 'Design', icon: Palette, color: 'text-pink-500' },
+    { id: 'development', name: 'Development', icon: Monitor, color: 'text-blue-500' },
+    { id: 'marketing', name: 'Marketing', icon: Target, color: 'text-green-500' },
+    { id: 'content', name: 'Content', icon: FileText, color: 'text-purple-500' },
+    { id: 'consulting', name: 'Consulting', icon: Briefcase, color: 'text-orange-500' },
+    { id: 'research', name: 'Research', icon: Lightbulb, color: 'text-yellow-500' }
+  ]
+
+  // Priority levels with proper typing
+  const priorityLevels = [
+    { id: 'low', name: 'Low', color: 'bg-gray-100 text-gray-700', description: 'No rush, flexible timeline' },
+    { id: 'medium', name: 'Medium', color: 'bg-blue-100 text-blue-700', description: 'Standard priority' },
+    { id: 'high', name: 'High', color: 'bg-orange-100 text-orange-700', description: 'Important, needs attention' },
+    { id: 'urgent', name: 'Urgent', color: 'bg-red-100 text-red-700', description: 'Critical, immediate action' }
+  ]
+
+  // Helper function to get template icon based on category
+  function getTemplateIcon(category: string) {
+    switch (category) {
+      case 'design': return Palette
+      case 'development': return Monitor
+      case 'marketing': return Target
+      case 'content': return FileText
+      case 'mobile': return Smartphone
+      case 'web': return Globe
+      default: return Layout
+    }
+  }
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))

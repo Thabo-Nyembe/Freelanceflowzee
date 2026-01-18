@@ -674,7 +674,7 @@ export default function GrowthHubClient() {
       setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
       setShowCreateExperimentModal(false)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create experiment')
     } finally { setIsLoading(false) }
   }
@@ -686,7 +686,7 @@ export default function GrowthHubClient() {
       if (error) throw error
       toast.success(`Experiment started: is now running`)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to start experiment')
     } finally { setIsLoading(false) }
   }
@@ -698,7 +698,7 @@ export default function GrowthHubClient() {
       if (error) throw error
       toast.info(`Experiment stopped: has been paused`)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to stop experiment')
     } finally { setIsLoading(false) }
   }
@@ -711,7 +711,7 @@ export default function GrowthHubClient() {
       toast.success(`Experiment deleted: has been removed`)
       setSelectedExperiment(null)
       refreshExperiments()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete experiment')
     } finally { setIsLoading(false) }
   }
@@ -778,7 +778,7 @@ export default function GrowthHubClient() {
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnelModal(false)
       refreshFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create funnel')
     } finally { setIsLoading(false) }
   }
@@ -791,7 +791,7 @@ export default function GrowthHubClient() {
       toast.success(`Funnel "${funnelName}" has been removed`)
       setSelectedFunnel(null)
       refreshFunnels()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete funnel')
     } finally { setIsLoading(false) }
   }
@@ -816,7 +816,7 @@ export default function GrowthHubClient() {
       setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
       setShowCreateCohortModal(false)
       refreshCohorts()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to create cohort')
     } finally { setIsLoading(false) }
   }
@@ -829,7 +829,7 @@ export default function GrowthHubClient() {
       toast.success(`Cohort "${cohortName}" has been removed`)
       setSelectedCohort(null)
       refreshCohorts()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Failed to delete cohort')
     } finally { setIsLoading(false) }
   }

@@ -214,7 +214,7 @@ Best regards,
     recurring: { enabled: false, frequency: 'monthly' as 'weekly' | 'monthly' | 'quarterly' | 'yearly', endDate: '' },
   })
 
-  const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, mutating } = useInvoices({ status: statusFilter, limit: 100 })
+  const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, mutating, refetch } = useInvoices({ status: statusFilter, limit: 100 })
   const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
 
   // Calculate comprehensive stats
@@ -2968,7 +2968,7 @@ Best regards,
                     <Switch />
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); try { toast.loading("Syncing...", { id: "sync-progress" }); await new Promise(r => setTimeout(r, 2000)); setIsSyncing(false); toast.success("Sync complete", { id: "sync-progress" }); } catch (error) { setIsSyncing(false); toast.error("Sync failed", { id: "sync-progress" }); } }}>
+                <Button variant="outline" className="w-full" disabled={isSyncing || loading} onClick={async () => { setIsSyncing(true); try { toast.loading("Syncing invoices...", { id: "sync-progress" }); await refetch(); toast.success("Invoices synced successfully", { id: "sync-progress" }); } catch (err) { toast.error(err instanceof Error ? err.message : "Sync failed", { id: "sync-progress" }); } finally { setIsSyncing(false); } }}>
                   <RefreshCw className={"h-4 w-4 mr-2 " + (isSyncing ? "animate-spin" : "")} />
                   {isSyncing ? 'Syncing...' : 'Sync Now'}
                 </Button>
