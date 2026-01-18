@@ -743,19 +743,7 @@ const getStatusColor = (status: KeyStatus): string => {
   return colors[status]
 }
 
-const getKeyTypeColor = (type: KeyType): string => {
-  const colors: Record<KeyType, string> = {
-    api: 'bg-blue-100 text-blue-800',
-    webhook: 'bg-purple-100 text-purple-800',
-    oauth: 'bg-green-100 text-green-800',
-    jwt: 'bg-orange-100 text-orange-800',
-    service: 'bg-indigo-100 text-indigo-800',
-    machine_to_machine: 'bg-cyan-100 text-cyan-800',
-    spa: 'bg-pink-100 text-pink-800',
-    native: 'bg-teal-100 text-teal-800'
-  }
-  return colors[type]
-}
+// getKeyTypeColor is imported from useApiKeys hook
 
 const getEnvironmentColor = (env: Environment): string => {
   const colors: Record<Environment, string> = {
