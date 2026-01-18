@@ -51,10 +51,13 @@ export function RouteGuard({
           return
         }
 
-        // Default auth check (placeholder - implement with your auth system)
+        // Default auth check using Supabase
         if (requireAuth) {
-          // TODO: Replace with actual auth check
-          const isAuthenticated = true // Replace with real check
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          const isAuthenticated = !!user
+
           setIsAuthorized(isAuthenticated)
 
           if (!isAuthenticated) {
@@ -63,10 +66,14 @@ export function RouteGuard({
           }
         }
 
-        // Role check (placeholder)
+        // Role check using Supabase user metadata
         if (requiredRole) {
-          // TODO: Replace with actual role check
-          const hasRole = true // Replace with real check
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          const userRole = user?.user_metadata?.role || user?.app_metadata?.role || 'user'
+          const hasRole = userRole === requiredRole || userRole === 'admin'
+
           setIsAuthorized(hasRole)
 
           if (!hasRole) {
