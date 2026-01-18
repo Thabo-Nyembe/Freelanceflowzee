@@ -265,7 +265,7 @@ const getFilesQuickActions = (
     icon: 'Settings',
     shortcut: 'S',
     action: async () => {
-      router.push('/v2/settings')
+      router.push('/dashboard/settings-v2')
     }
   },
 ]

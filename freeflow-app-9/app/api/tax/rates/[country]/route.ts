@@ -10,11 +10,11 @@ import { createClient } from '@/lib/supabase/server'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { country: string } }
+  { params }: { params: Promise<{ country: string }> }
 ) {
   try {
     const supabase = await createClient()
-    const { country } = params
+    const { country } = await params
     const { searchParams } = new URL(request.url)
     const state = searchParams.get('state')
     const taxType = searchParams.get('type')

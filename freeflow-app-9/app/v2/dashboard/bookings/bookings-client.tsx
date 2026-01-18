@@ -1531,11 +1531,11 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
           {[
             { icon: Plus, label: 'New Booking', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setShowNewBooking(true) },
             { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setView('calendar') } },
-            { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { window.location.href = '/v2/dashboard/clients' } },
+            { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { window.location.href = '/dashboard/clients-v2' } },
             { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { window.open('https://meet.google.com/new', '_blank'); toast.success('Video Meeting') } },
-            { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/v2/dashboard/billing' } },
+            { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/dashboard/billing-v2' } },
             { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setShowSettings(true); setSettingsTab('notifications') } },
-            { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { window.location.href = '/v2/dashboard/analytics' } },
+            { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { window.location.href = '/dashboard/analytics-v2' } },
             { icon: Settings, label: 'Settings', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowSettings(true) },
           ].map((action, idx) => (
             <Button
@@ -1919,7 +1919,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: Check, label: 'Confirm All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (confirm('Confirm all pending bookings?')) { handleConfirmAllPending() } } },
                 { icon: Mail, label: 'Email All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleSendAllReminders() },
                 { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleExportBookings('list') },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/v2/dashboard/analytics' } },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/dashboard/reports-v2' } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowSettings(true) },
               ].map((action, idx) => (
                 <Button

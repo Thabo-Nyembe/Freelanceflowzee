@@ -284,7 +284,7 @@ const getPaymentsQuickActions = (
     icon: 'Settings',
     shortcut: 'S',
     action: async () => {
-      router.push('/v2/dashboard/settings?tab=payments')
+      router.push('/dashboard/settings-v2?tab=payments')
     }
   },
 ]
