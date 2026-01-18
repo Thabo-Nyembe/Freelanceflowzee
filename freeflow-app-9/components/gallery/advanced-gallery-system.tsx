@@ -244,8 +244,8 @@ export function AdvancedGallerySystem() {
     ))
 
     // Trigger actual download
-    console.log(`Downloading: ${item.name}`)
-    // In real app: window.open(item.url, '_blank')
+    toast.success(`Downloading: ${item.name}`)
+    window.open(item.url, '_blank')
   }
 
   return (

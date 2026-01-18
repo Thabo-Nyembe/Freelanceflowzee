@@ -105,9 +105,8 @@ export function ProjectIntelligence() {
           clientType: projectData.clientType,
           scope: projectData.scope
         })
-      } catch (aiError) {
+      } catch {
         // Fall back to demo mode if AI fails (browser environment)
-        console.log('AI API unavailable, using demo mode')
         result = generateDemoInsights()
         toast.info('Demo Mode', {
           description: 'Using intelligent estimates. AI analysis requires server-side processing.'
@@ -142,8 +141,8 @@ export function ProjectIntelligence() {
             }))
             await bulkCreateInsights(insightsToSave)
           }
-        } catch (dbError) {
-          console.log('Database save skipped (demo mode)')
+        } catch {
+          // Database save skipped in demo mode
         }
       }
 

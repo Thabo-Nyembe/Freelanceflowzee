@@ -63,11 +63,11 @@ export function VideoStatusMonitor({
     enabled: autoStart,
     pollingInterval: 2000,
     maxPollingDuration: 600000, // 10 minutes
-    onStatusChange: (newStatus) => {
-      console.log('Status changed:', newStatus);
+    onStatusChange: () => {
+      // Status change handled by UI
     },
-    onProcessingComplete: (video) => {
-      console.log('Processing complete:', video);
+    onProcessingComplete: () => {
+      // Processing complete handled by UI
     },
     onError: (error) => {
       console.error('Video status error:', error);

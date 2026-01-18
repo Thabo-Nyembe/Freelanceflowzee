@@ -3245,9 +3245,18 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span className="text-sm">Mailchimp</span>
-                  <Button size="sm" variant="outline" onClick={() => {
-                    toast.info('Redirecting to Mailchimp OAuth...')
-                    setTimeout(() => toast.success('Mailchimp connected successfully!'), 1500)
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    toast.promise(
+                      fetch('/api/integrations/mailchimp/auth').then(r => {
+                        if (r.ok) window.location.href = '/api/integrations/mailchimp/oauth'
+                        return r
+                      }),
+                      {
+                        loading: 'Connecting to Mailchimp...',
+                        success: 'Redirecting to Mailchimp...',
+                        error: 'Failed to connect to Mailchimp'
+                      }
+                    )
                   }}>Connect</Button>
                 </div>
               </div>

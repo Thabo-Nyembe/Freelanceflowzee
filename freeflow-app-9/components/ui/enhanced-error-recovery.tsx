@@ -654,8 +654,12 @@ export class EnhancedErrorBoundary extends React.Component<
             this.setState({ hasError: false, error: undefined, errorInfo: undefined })
           }}
           onReport={(error) => {
-            console.log('Reporting error:', error)
-            // Implement error reporting logic
+            // Send error to monitoring service
+            fetch('/api/errors', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ error: error.message, timestamp: new Date().toISOString() })
+            }).catch(() => { /* Silent fail for error reporting */ })
           }}
         />
       )

@@ -86,9 +86,8 @@ export function PricingIntelligence() {
           market: userData.market,
           currentRate: currentRate
         })
-      } catch (aiError) {
+      } catch {
         // Fall back to demo mode if AI fails (browser environment)
-        console.log('AI API unavailable, using demo pricing')
         result = generateDemoPricing()
         toast.info('Demo Mode', {
           description: 'Using intelligent estimates. AI pricing requires server-side processing.'

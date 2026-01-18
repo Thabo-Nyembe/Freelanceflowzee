@@ -1004,7 +1004,6 @@ export function SidebarEnhanced() {
   }, [pathname, categories])
 
   const saveConfiguration = (newCategories: SidebarCategory[]) => {
-    console.log('💾 Saving navigation configuration:', newCategories)
     setCategories(newCategories)
     localStorage.setItem('kazi-navigation-config', JSON.stringify(newCategories))
 
@@ -1076,7 +1075,6 @@ export function SidebarEnhanced() {
   }
 
   const resetToDefault = () => {
-    console.log('🔄 Resetting navigation to defaults')
     setCategories(DEFAULT_CATEGORIES)
     localStorage.setItem('kazi-navigation-config', JSON.stringify(DEFAULT_CATEGORIES))
     setActivePreset('default')
@@ -1141,7 +1139,6 @@ export function SidebarEnhanced() {
   }
 
   const toggleCategoryVisibility = (categoryId: string) => {
-    console.log('👁️ Toggling category visibility:', categoryId)
     const newCategories = categories.map(cat =>
       cat.id === categoryId ? { ...cat, visible: !cat.visible } : cat
     )
@@ -1149,7 +1146,6 @@ export function SidebarEnhanced() {
   }
 
   const toggleSubcategoryVisibility = (categoryId: string, subcategoryId: string) => {
-    console.log('👁️ Toggling subcategory visibility:', categoryId, subcategoryId)
     const newCategories = categories.map(cat => {
       if (cat.id === categoryId) {
         return {
@@ -1168,7 +1164,6 @@ export function SidebarEnhanced() {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      console.log('🔄 Reordering subcategories:', active.id, '→', over.id)
       const newCategories = categories.map(cat => {
         if (cat.id === categoryId) {
           const oldIndex = cat.subcategories.findIndex(sub => sub.id === active.id)

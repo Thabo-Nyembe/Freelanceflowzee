@@ -96,7 +96,7 @@ export default function AgentDashboard() {
   }
 
   const handleAgentAction = async (agent: string, action: string) => {
-    console.log(`${action} ${agent} agent`)
+    toast.info(`${action} ${agent} agent`)
     // In real implementation, this would call the agent API
     await loadAgentStatuses()
   }

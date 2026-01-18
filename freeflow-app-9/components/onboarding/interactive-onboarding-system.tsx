@@ -369,8 +369,8 @@ export default function InteractiveOnboardingSystem({
         element.style.borderRadius = '8px'
         element.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    } catch (error) {
-      console.log('Element not found:', selector)
+    } catch {
+      // Element not found - continue gracefully
     }
   }
 

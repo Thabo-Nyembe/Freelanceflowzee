@@ -218,8 +218,6 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleFileDelete = async (fileId: string) => {
-    console.log('🗑️ DELETE FILE:', fileId)
-
     if (!confirm('⚠️ Move this file to trash?\n\nYou can restore it within 30 days.')) {
       return
     }
@@ -261,8 +259,6 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleFileShare = async (fileId: string) => {
-    console.log('🔗 SHARE FILE:', fileId)
-
     try {
       const response = await fetch('/api/files', {
         method: 'POST',
@@ -449,7 +445,6 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleCreateFolder = async () => {
-    console.log('📁 CREATE FOLDER')
     const folderName = prompt('Enter folder name:', 'New Folder')
     if (!folderName || !folderName.trim()) {
       return
@@ -508,7 +503,6 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleExportFileList = (format: 'csv' | 'json') => {
-    console.log('💾 EXPORT FILE LIST - Format:', format.toUpperCase())
     const data = files.map(f => ({
       name: f.name,
       type: f.type,

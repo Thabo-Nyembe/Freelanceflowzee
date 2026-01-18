@@ -301,7 +301,6 @@ export function VideoAIPanel({
           const status = aiSystem.current.getOperationStatus(operationId);
           if (status === AIOperationStatus.COMPLETED) {
             // In a real implementation, this would trigger a refresh of the AI data
-            console.log('AI processing completed');
             setIsProcessing(false);
             setProcessingProgress(100);
           }
@@ -387,7 +386,7 @@ export function VideoAIPanel({
             },
             webhook: `/api/webhooks/ai-processing/${videoId}`,
             onProgress: (progress) => {
-              console.log(`${operationType} progress: ${progress}%`);
+              setProcessingProgress(progress)
             }
           }
         );

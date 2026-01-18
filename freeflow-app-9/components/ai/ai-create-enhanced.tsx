@@ -290,7 +290,6 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
         maxTokens: maxTokens[0],
         autoSave
       }))
-      console.log('💾 Saved to localStorage:', history.length, 'generations')
     } catch (error) {
       console.error('Failed to save to localStorage:', error)
       toast.error('Failed to save data locally')
@@ -313,7 +312,6 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
           })
         })
         setHistory(parsedHistory)
-        console.log('✅ Loaded history:', parsedHistory.length, 'generations')
       }
 
       if (savedTemplates) {
@@ -322,7 +320,6 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
           tpl.createdAt = new Date(tpl.createdAt)
         })
         setCustomTemplates(parsedTemplates)
-        console.log('✅ Loaded templates:', parsedTemplates.length, 'custom templates')
       }
 
       if (savedSettings) {
@@ -331,7 +328,6 @@ export function AICreateEnhanced({ onSaveKeys }: AICreateEnhancedProps) {
         setTemperature([settings.temperature || 0.7])
         setMaxTokens([settings.maxTokens || 1000])
         setAutoSave(settings.autoSave !== false)
-        console.log('✅ Loaded settings')
       }
     } catch (error) {
       console.error('Failed to load from localStorage:', error)

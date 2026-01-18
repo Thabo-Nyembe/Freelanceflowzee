@@ -246,7 +246,9 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
 
   const handleConnect = (memberId: string) => {
     onMemberConnect?.(memberId)
-    console.log('Connecting with member:', memberId)
+    toast.success('Connection request sent', {
+      description: 'They will be notified of your request'
+    })
   }
 
   return (

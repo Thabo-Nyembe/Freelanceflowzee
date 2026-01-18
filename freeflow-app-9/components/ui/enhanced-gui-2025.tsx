@@ -608,8 +608,10 @@ export function MicroInteractionButton({
     }
 
     if (sound && (feedback === 'audio' || feedback === 'all')) {
-      // Audio feedback would be implemented here
-      console.log('Audio feedback triggered')
+      // Audio feedback - play a subtle click sound
+      const audio = new Audio('/sounds/click.mp3')
+      audio.volume = 0.1
+      audio.play().catch(() => { /* Audio not available */ })
     }
   }
 

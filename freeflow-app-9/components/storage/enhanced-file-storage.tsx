@@ -470,9 +470,13 @@ export function EnhancedFileStorage({
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    // Handle file upload logic here
-    console.log(e.dataTransfer.files)
-  }, [/* add dependencies */])
+    const droppedFiles = Array.from(e.dataTransfer.files)
+    if (droppedFiles.length > 0) {
+      toast.success(`${droppedFiles.length} file(s) ready for upload`, {
+        description: droppedFiles.map(f => f.name).slice(0, 3).join(', ')
+      })
+    }
+  }, [])
 
   return (
     <div className={`bg-gray-50/50 rounded-2xl overflow-hidden border border-gray-200/50 shadow-sm ${className}`}>
