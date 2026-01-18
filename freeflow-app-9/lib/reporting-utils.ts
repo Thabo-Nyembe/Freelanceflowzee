@@ -271,6 +271,38 @@ export function generateMockReportData(type: ReportType): any {
 }
 
 export function exportReport(report: Report, format: ExportFormat): void {
-  console.log(`Exporting report "${report.name}" as ${format}`)
-  // In a real app, this would trigger actual export functionality
+  const filename = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}`
+
+  if (format === 'json') {
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  } else if (format === 'csv') {
+    // Extract data from report sections for CSV
+    const sections = report.sections || []
+    const csvRows: string[] = [`Report: ${report.name}`, `Generated: ${report.generatedAt}`, '']
+
+    sections.forEach(section => {
+      csvRows.push(section.title)
+      if (section.data && Array.isArray(section.data)) {
+        section.data.forEach((item: any) => {
+          csvRows.push(Object.values(item).join(','))
+        })
+      }
+      csvRows.push('')
+    })
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  // PDF and Excel export would require additional libraries
 }

@@ -99,16 +99,47 @@ export async function GET(request: NextRequest) {
 
     const tokens = await tokenResponse.json();
 
-    // TODO: Save tokens to database via /api/integrations/save
-    // For now, tokens are logged but not persisted
-    logger.info('Outlook OAuth successful', {
+    logger.info('Outlook OAuth successful, saving tokens', {
       hasAccessToken: !!tokens.access_token,
       hasRefreshToken: !!tokens.refresh_token,
       expiresIn: tokens.expires_in
     });
 
+    // Get user email from Microsoft Graph
+    const userInfoResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
+      headers: { 'Authorization': `Bearer ${tokens.access_token}` }
+    });
+    const userInfo = userInfoResponse.ok ? await userInfoResponse.json() : { mail: 'unknown' };
+    const userEmail = userInfo.mail || userInfo.userPrincipalName || 'unknown';
+
+    // Save tokens to database via internal API call
+    const saveResponse = await fetch(`${baseUrl}/api/integrations/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'email',
+        config: {
+          provider: 'outlook',
+          email: userEmail,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          expires_in: tokens.expires_in,
+          token_type: tokens.token_type,
+          connected_at: new Date().toISOString(),
+        },
+      }),
+    });
+
+    if (!saveResponse.ok) {
+      const saveError = await saveResponse.json().catch(() => ({ error: 'Failed to save credentials' }));
+      logger.error('Failed to save Outlook credentials', { error: saveError });
+      // Continue anyway - tokens are valid, just not persisted
+    } else {
+      logger.info('Outlook credentials saved successfully');
+    }
+
     return NextResponse.redirect(
-      `${baseUrl}/dashboard/email-agent/setup?outlook=success`
+      `${baseUrl}/dashboard/email-agent/setup?outlook=success&email=${encodeURIComponent(userEmail)}`
     );
   } catch (error: any) {
     logger.error('Outlook OAuth failed', {

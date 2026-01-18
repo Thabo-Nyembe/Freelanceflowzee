@@ -688,7 +688,7 @@ async function analyzeSentiment(text: string): Promise<'positive' | 'neutral' | 
 async function generateChapters(
   transcription: TranscriptionSegment[]
 ): Promise<VideoChapter[]> {
-  if (!openai || transcription.length === 0) {
+  if (!getOpenAI() || transcription.length === 0) {
     return [];
   }
 
@@ -956,13 +956,13 @@ async function processVideo(jobId: string): Promise<void> {
     // Choose transcription provider
     let transcriptionResult;
     let provider = options.preferredProvider || 'assemblyai';
-    
+
     // Try preferred provider first
-    if (provider === 'assemblyai' && assemblyai) {
+    if (provider === 'assemblyai' && getAssemblyAI()) {
       transcriptionResult = await transcribeWithAssemblyAI(videoUrl, options);
-    } else if (provider === 'deepgram' && deepgram) {
+    } else if (provider === 'deepgram' && getDeepgram()) {
       transcriptionResult = await transcribeWithDeepgram(videoUrl, options);
-    } else if (provider === 'openai' && openai) {
+    } else if (provider === 'openai' && getOpenAI()) {
       // For OpenAI we need the actual file
       // In a real implementation, we would download the file or use a stream
       // This is a placeholder
@@ -975,17 +975,17 @@ async function processVideo(jobId: string): Promise<void> {
     
     // If primary provider failed, try fallbacks
     if (!transcriptionResult || transcriptionResult.error) {
-      if (provider !== 'assemblyai' && assemblyai) {
+      if (provider !== 'assemblyai' && getAssemblyAI()) {
         transcriptionResult = await transcribeWithAssemblyAI(videoUrl, options);
         provider = 'assemblyai';
-      } else if (provider !== 'deepgram' && deepgram) {
+      } else if (provider !== 'deepgram' && getDeepgram()) {
         transcriptionResult = await transcribeWithDeepgram(videoUrl, options);
         provider = 'deepgram';
-      } else if (provider !== 'openai' && openai) {
+      } else if (provider !== 'openai' && getOpenAI()) {
         const response = await fetch(videoUrl);
         const blob = await response.blob();
         const file = new File([blob], 'video.mp4', { type: 'video/mp4' });
-        
+
         transcriptionResult = await transcribeWithOpenAI(file, options);
         provider = 'openai';
       }

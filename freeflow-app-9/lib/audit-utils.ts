@@ -171,8 +171,37 @@ export function filterLogs(
 }
 
 export function exportAuditLogs(logs: AuditLog[], format: 'csv' | 'json' | 'pdf'): void {
-  console.log(`Exporting ${logs.length} logs as ${format}`)
-  // In a real app, this would trigger actual export functionality
+  if (format === 'json') {
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  } else if (format === 'csv') {
+    const headers = ['ID', 'Timestamp', 'Action', 'User', 'Entity', 'Changes', 'IP Address']
+    const csvContent = [
+      headers.join(','),
+      ...logs.map(log => [
+        log.id,
+        log.timestamp,
+        log.action,
+        log.userName,
+        log.entityName || '',
+        JSON.stringify(log.changes || {}).replace(/,/g, ';'),
+        log.ipAddress || ''
+      ].join(','))
+    ].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  // PDF export would require a library like jsPDF
 }
 
 export function getLogsByTimeRange(

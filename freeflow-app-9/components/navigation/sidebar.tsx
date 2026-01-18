@@ -195,14 +195,12 @@ export function Sidebar() {
   const pathname = usePathname()
 
   const handleLogout = () => {
-    console.log('Logout function called');
     // Clear authentication token from localStorage
     localStorage.removeItem('kazi-auth')
     localStorage.removeItem('kazi-user')
     localStorage.removeItem('auth-token')
     localStorage.removeItem('user-data')
     localStorage.removeItem('session-data')
-    console.log('LocalStorage cleared, redirecting...');
     // Redirect to homepage
     window.location.href = '/'
   }
@@ -211,9 +209,7 @@ export function Sidebar() {
   useEffect(() => {
     const logoutBtn = document.querySelector('[data-testid="logout"]');
     if (logoutBtn) {
-      console.log('Adding logout event listener');
       const handleClick = () => {
-        console.log('Logout clicked via event listener');
         localStorage.removeItem('kazi-auth');
         localStorage.removeItem('kazi-user');
         localStorage.removeItem('auth-token');
@@ -221,7 +217,7 @@ export function Sidebar() {
         localStorage.removeItem('session-data');
         window.location.href = '/';
       };
-      
+
       logoutBtn.addEventListener('click', handleClick);
       return () => logoutBtn.removeEventListener('click', handleClick);
     }

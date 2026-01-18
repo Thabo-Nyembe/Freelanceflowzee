@@ -99,16 +99,46 @@ export async function GET(request: NextRequest) {
 
     const tokens = await tokenResponse.json();
 
-    // TODO: Save tokens to database via /api/integrations/save
-    // For now, tokens are logged but not persisted
-    logger.info('Gmail OAuth successful', {
+    logger.info('Gmail OAuth successful, saving tokens', {
       hasAccessToken: !!tokens.access_token,
       hasRefreshToken: !!tokens.refresh_token,
       expiresIn: tokens.expires_in
     });
 
+    // Get user email from Google
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { 'Authorization': `Bearer ${tokens.access_token}` }
+    });
+    const userInfo = userInfoResponse.ok ? await userInfoResponse.json() : { email: 'unknown' };
+
+    // Save tokens to database via internal API call
+    const saveResponse = await fetch(`${baseUrl}/api/integrations/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'email',
+        config: {
+          provider: 'gmail',
+          email: userInfo.email,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          expires_in: tokens.expires_in,
+          token_type: tokens.token_type,
+          connected_at: new Date().toISOString(),
+        },
+      }),
+    });
+
+    if (!saveResponse.ok) {
+      const saveError = await saveResponse.json().catch(() => ({ error: 'Failed to save credentials' }));
+      logger.error('Failed to save Gmail credentials', { error: saveError });
+      // Continue anyway - tokens are valid, just not persisted
+    } else {
+      logger.info('Gmail credentials saved successfully');
+    }
+
     return NextResponse.redirect(
-      `${baseUrl}/dashboard/email-agent/setup?gmail=success`
+      `${baseUrl}/dashboard/email-agent/setup?gmail=success&email=${encodeURIComponent(userInfo.email || '')}`
     );
   } catch (error: any) {
     logger.error('Gmail OAuth failed', {

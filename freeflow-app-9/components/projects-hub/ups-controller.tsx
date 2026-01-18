@@ -616,9 +616,34 @@ export const UPSController: React.FC<UPSControllerProps> = ({
                 )}
 
                 <TabsContent value="analytics" className="h-full">
-                  <div className="p-6">
+                  <div className="p-6 space-y-6">
                     <h2 className="text-2xl font-bold mb-4">Analytics Dashboard</h2>
-                    <p className="text-muted-foreground">Analytics features coming soon...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm text-muted-foreground">Total Comments</p>
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{comments.length}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                        <p className="text-sm text-muted-foreground">Resolved</p>
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{comments.filter(c => c.resolved).length}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                        <p className="text-sm text-muted-foreground">Pending</p>
+                        <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{comments.filter(c => !c.resolved).length}</p>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg border">
+                      <h3 className="font-semibold mb-2">Recent Activity</h3>
+                      <div className="space-y-2">
+                        {comments.slice(0, 5).map((comment, idx) => (
+                          <div key={comment.id || idx} className="text-sm text-muted-foreground flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-blue-500" />
+                            <span>Comment {comment.resolved ? 'resolved' : 'added'}</span>
+                            <span className="text-xs">• {new Date(comment.timestamp || Date.now()).toLocaleDateString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -633,9 +658,38 @@ export const UPSController: React.FC<UPSControllerProps> = ({
                 )}
 
                 <TabsContent value="settings" className="h-full">
-                  <div className="p-6">
+                  <div className="p-6 space-y-6">
                     <h2 className="text-2xl font-bold mb-4">UPS Settings</h2>
-                    <p className="text-muted-foreground">Settings panel coming soon...</p>
+                    <div className="space-y-4 max-w-md">
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Show Resolved Comments</p>
+                          <p className="text-sm text-muted-foreground">Display resolved comments in the list</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Real-time Updates</p>
+                          <p className="text-sm text-muted-foreground">Enable live sync for comments</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Email Notifications</p>
+                          <p className="text-sm text-muted-foreground">Receive email for new comments</p>
+                        </div>
+                        <input type="checkbox" className="h-5 w-5 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Compact View</p>
+                          <p className="text-sm text-muted-foreground">Show less details in comment cards</p>
+                        </div>
+                        <input type="checkbox" className="h-5 w-5 rounded" />
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -675,9 +729,22 @@ export const UPSController: React.FC<UPSControllerProps> = ({
                 )}
 
                 {ui.activeView === 'analytics' && (
-                  <div className="p-6">
+                  <div className="p-6 space-y-6">
                     <h2 className="text-2xl font-bold mb-4">Analytics Dashboard</h2>
-                    <p className="text-muted-foreground">Analytics features coming soon...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm text-muted-foreground">Total Comments</p>
+                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{comments.length}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                        <p className="text-sm text-muted-foreground">Resolved</p>
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">{comments.filter(c => c.resolved).length}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                        <p className="text-sm text-muted-foreground">Pending</p>
+                        <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{comments.filter(c => !c.resolved).length}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -690,9 +757,24 @@ export const UPSController: React.FC<UPSControllerProps> = ({
                 )}
 
                 {ui.activeView === 'settings' && (
-                  <div className="p-6">
+                  <div className="p-6 space-y-6">
                     <h2 className="text-2xl font-bold mb-4">UPS Settings</h2>
-                    <p className="text-muted-foreground">Settings panel coming soon...</p>
+                    <div className="space-y-4 max-w-md">
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Show Resolved Comments</p>
+                          <p className="text-sm text-muted-foreground">Display resolved comments in the list</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                      </div>
+                      <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Real-time Updates</p>
+                          <p className="text-sm text-muted-foreground">Enable live sync for comments</p>
+                        </div>
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

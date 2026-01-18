@@ -255,7 +255,9 @@ export default function EscrowClient() {
       icon: 'BarChart3',
       shortcut: 'R',
       action: () => {
-        toast.success('Reports feature coming soon')
+        // Open reports in new tab or navigate to reports section
+        window.open('/dashboard/reports-v2?type=escrow', '_blank')
+        toast.success('Opening escrow reports')
       }
     },
   ], [])

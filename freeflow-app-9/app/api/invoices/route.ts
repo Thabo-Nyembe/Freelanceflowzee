@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Invoices')
 
 // Initialize Supabase client with service role for API routes
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
     const { data: invoices, error } = await query
 
     if (error) {
-      console.error('Supabase query error:', error)
+      logger.error('Supabase query error', { error })
       return NextResponse.json(
         { success: false, error: 'Failed to fetch invoices' },
         { status: 500 }
@@ -100,7 +103,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Invoice GET error:', error)
+    logger.error('Invoice GET error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to fetch invoices' },
       { status: 500 }
@@ -167,7 +170,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Create invoice error:', error)
+          logger.error('Create invoice error', { error })
           return NextResponse.json(
             { success: false, error: 'Failed to create invoice' },
             { status: 500 }
@@ -201,7 +204,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Update status error:', error)
+          logger.error('Update status error', { error })
           return NextResponse.json(
             { success: false, error: 'Invoice not found or update failed' },
             { status: 404 }
@@ -241,11 +244,11 @@ export async function POST(request: NextRequest) {
           .eq('id', invoiceId)
 
         if (updateError) {
-          console.error('Send invoice error:', updateError)
+          logger.error('Send invoice error', { error: updateError })
         }
 
         // In production, integrate with email service here
-        console.log(`Sending invoice ${invoice.invoice_number} to ${email || invoice.client_email}`)
+        logger.info('Sending invoice', { invoiceNumber: invoice.invoice_number, email: email || invoice.client_email })
 
         return NextResponse.json({
           success: true,
@@ -291,7 +294,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Mark paid error:', error)
+          logger.error('Mark paid error', { error })
           return NextResponse.json(
             { success: false, error: 'Failed to mark invoice as paid' },
             { status: 500 }
@@ -341,7 +344,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Add payment error:', error)
+          logger.error('Add payment error', { error })
           return NextResponse.json(
             { success: false, error: 'Failed to add payment' },
             { status: 500 }
@@ -394,7 +397,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (createError) {
-          console.error('Duplicate invoice error:', createError)
+          logger.error('Duplicate invoice error', { error: createError })
           return NextResponse.json(
             { success: false, error: 'Failed to duplicate invoice' },
             { status: 500 }
@@ -433,7 +436,7 @@ export async function POST(request: NextRequest) {
           .eq('id', invoiceId)
 
         if (updateError) {
-          console.error('Send reminder error:', updateError)
+          logger.error('Send reminder error', { error: updateError })
           return NextResponse.json(
             { success: false, error: 'Failed to update reminder count' },
             { status: 500 }
@@ -441,7 +444,7 @@ export async function POST(request: NextRequest) {
         }
 
         // In production, integrate with email service here
-        console.log(`Sending reminder for invoice ${invoice.invoice_number} to ${invoice.client_email}`)
+        logger.info('Sending reminder', { invoiceNumber: invoice.invoice_number, email: invoice.client_email })
 
         return NextResponse.json({
           success: true,
@@ -457,7 +460,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Invoice POST error:', error)
+    logger.error('Invoice POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process invoice action' },
       { status: 500 }
@@ -527,7 +530,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Invoice PUT error:', error)
+      logger.error('Invoice PUT error', { error })
       return NextResponse.json(
         { success: false, error: 'Invoice not found or update failed' },
         { status: 404 }
@@ -540,7 +543,7 @@ export async function PUT(request: NextRequest) {
       message: `Invoice ${updatedInvoice.invoice_number} updated successfully`
     })
   } catch (error) {
-    console.error('Invoice PUT error:', error)
+    logger.error('Invoice PUT error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to update invoice' },
       { status: 500 }
@@ -581,7 +584,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id)
 
     if (error) {
-      console.error('Invoice DELETE error:', error)
+      logger.error('Invoice DELETE error', { error })
       return NextResponse.json(
         { success: false, error: 'Failed to delete invoice' },
         { status: 500 }
@@ -594,7 +597,7 @@ export async function DELETE(request: NextRequest) {
       message: `Invoice ${invoice.invoice_number} deleted successfully`
     })
   } catch (error) {
-    console.error('Invoice DELETE error:', error)
+    logger.error('Invoice DELETE error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to delete invoice' },
       { status: 500 }
