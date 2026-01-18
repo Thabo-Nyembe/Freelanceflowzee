@@ -113,10 +113,12 @@ export function ImageViewer({
         onClick={handleImageClick}
         data-testid="image-viewer"
       >
-        <img src={src} 
+        <img
+          src={src}
           alt={alt}
           className="w-full h-full object-contain"
-          onError={(e) = loading="lazy"> {
+          loading="lazy"
+          onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none'
             const placeholder = (e.target as HTMLImageElement).nextElementSibling as HTMLElement
             if (placeholder) placeholder.style.display = 'flex'

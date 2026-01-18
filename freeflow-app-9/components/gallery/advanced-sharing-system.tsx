@@ -404,7 +404,7 @@ export function AdvancedGallerySharingSystem({
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative aspect-square overflow-hidden">
-                <img src={item.thumbnailUrl} alt={item.name} onClick={() = loading="lazy"> _setLightboxItem(item)} />
+                <img src={item.thumbnailUrl} alt={item.name} loading="lazy" onClick={() => _setLightboxItem(item)} />
                 
                 {/* Overlay controls */}
                 <div className="absolute inset-0 flex items-center justify-between">
@@ -498,7 +498,7 @@ export function AdvancedGallerySharingSystem({
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id}>
               <div>
-                <img src={item.thumbnailUrl} alt={item.name} onClick={() = loading="lazy"> _setLightboxItem(item)} />
+                <img src={item.thumbnailUrl} alt={item.name} loading="lazy" onClick={() => _setLightboxItem(item)} />
                 
                 <div>
                   <h3>{item.name}</h3>

@@ -753,7 +753,7 @@ export default function CodeRepositoryClient() {
 
   const handleDownloadSource = () => {
     if (selectedRepo) {
-      toast.success('Download started!'.zip is downloading` })
+      toast.success('Download started!', { description: 'Zip is downloading' })
     }
   }
 
@@ -780,7 +780,7 @@ export default function CodeRepositoryClient() {
 
   const handleAddReviewer = () => {
     if (selectedPR) {
-      toast.success('Reviewer added!'` })
+      toast.success('Reviewer added!')
       setAddReviewerDialogOpen(false)
     }
   }
@@ -792,7 +792,7 @@ export default function CodeRepositoryClient() {
         reviewers: p.reviewers.map(r => ({ ...r, status: 'approved' as const }))
       } : p
     ))
-    toast.success('PR approved!'` })
+    toast.success('PR approved!')
   }
 
   const handleRequestChanges = (pr: PullRequest) => {
@@ -802,7 +802,7 @@ export default function CodeRepositoryClient() {
         reviewers: p.reviewers.map(r => ({ ...r, status: 'changes_requested' as const }))
       } : p
     ))
-    toast.success('Changes requested'` })
+    toast.success('Changes requested')
   }
 
   const handleClosePR = (pr: PullRequest) => {
@@ -814,7 +814,7 @@ export default function CodeRepositoryClient() {
 
   const handleRevertCommit = (commit: Commit) => {
     if (confirm(`Are you sure you want to revert commit ${commit.hash.substring(0, 7)}? This will create a new commit that undoes the changes.`)) {
-      toast.success('Commit reverted!'` })
+      toast.success('Commit reverted!')
     }
   }
 
@@ -1245,7 +1245,7 @@ export default function CodeRepositoryClient() {
                           className="p-0 h-auto text-lg font-semibold"
                           onClick={() => {
                             setSelectedPR(pr)
-                            toast.info('PR Details': ${pr.title}` })
+                            toast.info('PR Details', { description: pr.title })
                           }}
                         >
                           {pr.title}

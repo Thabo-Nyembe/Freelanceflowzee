@@ -103,10 +103,12 @@ const MessageItem: React.FC<MessageItemProps> = ({
     if (isImage) {
       return (
         <div className="mt-2">
-          <img src={attachment.url}
+          <img
+            src={attachment.url}
             alt={attachment.name}
             className="max-w-sm max-h-64 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={() = loading="lazy"> window.open(attachment.url, '_blank')}
+            loading="lazy"
+            onClick={() => window.open(attachment.url, '_blank')}
           />
         </div>
       )
